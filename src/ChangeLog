@@ -1,0 +1,10 @@
+2015-07-16 John Matty <jcmatty@sei.cmu.edu>
+	* Everything: Initial prototyping.
+2015-09-30 Scott McMillan <smcmillan@sei.cmu.edu>
+	* Alpha release of GraphBLAS API (WIP)
+	* Alpha release of graph algorithms suite
+	* Alpha release of GPU backend built on Cusp and Thrust (and a proof
+	  of concept release of a simple, naive sequential backend for CPU)
+2016-02-14
+	* Version 0.1 released; CUSP and sequential backends (except for
+	  support of "views" like TransposeView, NegateView, "extended" views).

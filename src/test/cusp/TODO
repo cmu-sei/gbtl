@@ -1,0 +1,1 @@
+Tests should be named test_<test_name>, because this is the format required to automatically run tests.
