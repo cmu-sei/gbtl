@@ -24,16 +24,18 @@ snapshot of the development branch instead
 
 ## Building
 
-Since the code is heavily templated, it is a header only library.  However,
-compiling the demo programs and unit tests can be done as follows.
-
 Currently, there are two different GraphBLAS backends implemented: A CPU
 backend, which is named sequential, and a GPU backend, which is implemented on
 top of CUSP, called cusp_gpu.
 
+Since the code is heavily templated, it is a header only library.  However,
+to compile the demo programs and unit tests first cd to the src directory.
+
+$ cd src
+
 ### Autotools configuration
 
-The first step is to configure the initial build system using autotools.  To do
+Configure the initial build system using autotools.  To do
 this, run:
 
 $ ./autogen.sh
