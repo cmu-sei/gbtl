@@ -65,12 +65,12 @@ namespace graphblas
                          static_cast<typename MatrixT::ScalarType>(1))
     {
         //init identity:
-        MatrixT diag(mat_size, mat_size);
-        diag.set_zero(zero);
+        MatrixT id(mat_size, mat_size);
+        id.set_zero(zero);
         //populate diagnals:
         std::vector<IndexType> x_indices, y_indices;
         std::vector<typename MatrixT::ScalarType> v;
-        //unfortunately need to actually populate the ``zeros'' here:
+
         for (graphblas::IndexType ix = 0; ix < mat_size; ++ix) {
             for (graphblas::IndexType j = 0; j < mat_size; ++j) {
                 x_indices.push_back(ix);
@@ -84,10 +84,52 @@ namespace graphblas
             }
         }
 
-        graphblas::buildmatrix(diag, x_indices.begin(),
+        graphblas::buildmatrix(id, x_indices.begin(),
                                y_indices.begin(), v.begin(),
                                mat_size*mat_size);
-        return diag;
+        return id;
+    }
+
+    /**
+     * @brief Construct and retrun an identity matrix of the given size.
+     * @TODO:
+     * TEMPORARY FIX: sequential, which uses the function above, REQUIRES
+     * dense matrix.
+     *
+     * This method is for a true sparse matrix impl.
+     *
+     * @param[in] mat_size The size of the identiy matrix to construct.
+     * @param[in] zero     The value of the structural zero.
+     * @param[in] one      The value to put on the diagonal.
+     */
+    template<typename MatrixT>
+    MatrixT identity_sparse(graphblas::IndexType          mat_size,
+                     typename MatrixT::ScalarType  zero =
+                         static_cast<typename MatrixT::ScalarType>(0),
+                     typename MatrixT::ScalarType  one =
+                         static_cast<typename MatrixT::ScalarType>(1))
+    {
+        //init identity:
+        MatrixT id(mat_size, mat_size);
+        id.set_zero(zero);
+        //populate diagnals:
+        std::vector<IndexType> x_indices, y_indices;
+        std::vector<typename MatrixT::ScalarType> v;
+
+        for (graphblas::IndexType ix = 0; ix < mat_size; ++ix) {
+            for (graphblas::IndexType j = 0; j < mat_size; ++j) {
+                if (ix==j){
+                    x_indices.push_back(ix);
+                    y_indices.push_back(j);
+                    v.push_back(one);
+                }
+            }
+        }
+
+        graphblas::buildmatrix(id, x_indices.begin(),
+                               y_indices.begin(), v.begin(),
+                               mat_size*mat_size);
+        return id;
     }
 
 

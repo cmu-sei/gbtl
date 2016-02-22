@@ -35,7 +35,7 @@ namespace graphblas
     public:
         typedef typename MatrixT::ScalarType ScalarType;
         //WARNING: this breaks the sequential backend where this class is used.
-        graphblas::backend::Matrix<ScalarType> m_mat;
+        ColumnExtendedView <MatrixT> &m_mat;
 
         // CONSTRUCTORS
         /**
@@ -49,7 +49,7 @@ namespace graphblas
             m_row_index(row_index),
             m_matrix(matrix),
             m_num_rows(num_rows),
-            m_mat(num_rows, 1, 0)
+            m_mat(*this)
         {
             IndexType nr;
             m_matrix.get_shape(nr, m_num_cols);

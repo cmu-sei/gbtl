@@ -597,7 +597,7 @@ namespace backend{
                  graphblas::PlusMonoid<typename AMatrixT::ScalarType>,
              typename AccumT =
                  graphblas::math::Assign<typename AMatrixT::ScalarType> >
-    inline void maskedRowReduce(AMatrixT const &a,
+    inline void rowReduceMasked(AMatrixT const &a,
                            CMatrixT       &c, 
                            MMatrixT       &mask,
                            MonoidT         sum     = MonoidT(),
@@ -638,7 +638,7 @@ namespace backend{
                  graphblas::PlusMonoid<typename AMatrixT::ScalarType>,
              typename AccumT =
                  graphblas::math::Assign<typename AMatrixT::ScalarType> >
-    inline void maskedColReduce(AMatrixT const &a,
+    inline void colReduceMasked(AMatrixT const &a,
                            CMatrixT       &c, 
                            MMatrixT       &mask,
                            MonoidT         sum    = MonoidT(),

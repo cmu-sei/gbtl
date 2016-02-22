@@ -367,14 +367,12 @@ namespace algorithms
         using T = typename MatrixT::ScalarType;
         graphblas::IndexType num_nodes, cols, depth;
         graph.get_shape(num_nodes, cols);
-
         if (num_nodes != cols)
         {
             throw graphblas::DimensionException();
         }
 
         MatrixT bc_mat(1, num_nodes);
-
         for (graphblas::IndexType i = 0; i < num_nodes; ++i)
         {
             depth = 0;
@@ -455,11 +453,13 @@ namespace algorithms
                 }
 
                 graphblas::ewisemult(weights,
-                                     graphblas::TransposeView<MatrixT>(temp),
+                                     //graphblas::TransposeView<MatrixT>(temp),
+                                     graphblas::transpose(temp),
                                      weights);
 
                 graphblas::ewiseadd(update,
-                                    graphblas::TransposeView<MatrixT>(weights),
+                                    //graphblas::TransposeView<MatrixT>(weights),
+                                    graphblas::transpose(weights),
                                     update);
                 depth = depth - 1;
             }

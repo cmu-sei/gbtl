@@ -22,6 +22,8 @@
 
 namespace graphblas
 {
+namespace backend
+{
     //************************************************************************
     // Generalized Negate/complement
     template <typename SemiringT>
@@ -52,16 +54,10 @@ namespace graphblas
     public:
         typedef typename MatrixT::ScalarType ScalarType;
 
-        //WARNING: this breaks everything in sequential that uses this class
-        //only here for compilation passes
-        //TODO: needs fixing
-        backend::Matrix<ScalarType> m_mat;
-
         // CONSTRUCTORS
 
         NegateView(MatrixT const &matrix):
-            m_matrix(matrix),
-            m_mat(1,1,0)
+            m_matrix(matrix)
         {
             /// @todo assert that matrix and semiring zero() are the same?
         }
@@ -74,8 +70,7 @@ namespace graphblas
          * @todo Is this const correct?
          */
         NegateView(NegateView<MatrixT, SemiringT> const &rhs)
-            : m_matrix(rhs.m_matrix),
-              m_mat(1,1,0)
+            : m_matrix(rhs.m_matrix)
         {
         }
 
@@ -256,6 +251,12 @@ namespace graphblas
         //}
 
 
+        void print_info(std::ostream &os) const
+        {
+            os << "Backend NegateView of:" << std::endl;
+            m_matrix.print_info(os);
+        }
+
         friend std::ostream&
         operator<<(std::ostream                         &os,
                    NegateView<MatrixT, SemiringT> const &mat)
@@ -295,6 +296,7 @@ namespace graphblas
         MatrixT const &m_matrix;
     };
 
+} // backend
 } // graphblas
 
 #endif // GB_SEQUENTIAL_NEGATE_VIEW_HPP

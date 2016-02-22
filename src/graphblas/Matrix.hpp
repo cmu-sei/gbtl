@@ -20,6 +20,7 @@
 #include <graphblas/detail/param_unpack.hpp>
 #include <graphblas/operations.hpp>
 #include <graphblas/utility.hpp>
+#include <graphblas/View.hpp>
 
 // Include matrix definitions from the appropriate backend.
 #define __GB_SYSTEM_MATRIX_HEADER <graphblas/system/__GB_SYSTEM_ROOT/Matrix.hpp>
@@ -33,13 +34,15 @@ namespace graphblas
     template<typename ScalarT, typename... TagsT>
     class Matrix
     {
-    private:
-        typename detail::matrix_generator::result<ScalarT, detail::SparsenessCategoryTag,
-            detail::DirectednessCategoryTag, TagsT... , detail::NullTag, detail::NullTag >::type m_mat;
     public:
         typedef ScalarT ScalarType;
-        typedef typename detail::matrix_generator::result<ScalarT, detail::SparsenessCategoryTag,
-            detail::DirectednessCategoryTag, TagsT... , detail::NullTag, detail::NullTag >::type type;
+        typedef typename detail::matrix_generator::result<
+            ScalarT,
+            detail::SparsenessCategoryTag,
+            detail::DirectednessCategoryTag,
+            TagsT... ,
+            detail::NullTag,
+            detail::NullTag >::type BackendType;
 
         /**
          * @brief Construct an empty matrix with the specified shape.
@@ -85,15 +88,6 @@ namespace graphblas
         {
         }
 
-        /**
-         * @brief Default constructor.
-         *
-         */
-        Matrix() : m_mat()
-        {
-        }
-
-
         ~Matrix() { }
 
         /**
@@ -132,12 +126,6 @@ namespace graphblas
             m_mat = rhs;
             return *this;
         }
-
-        type & getBackendMatrix()
-        {
-            return this->m_mat;
-        }
-
 
         // version 1 of getshape
         void get_shape(IndexType &num_rows, IndexType &num_cols) const
@@ -195,6 +183,9 @@ namespace graphblas
             mat.print_info(os);
             return os;
         }
+
+    private:
+        BackendType m_mat;
 
         template<typename AMatrixT,
                  typename BMatrixT,
@@ -405,25 +396,13 @@ namespace graphblas
                                 AccumT       accum);
 
     template<typename MatrixT,
-             typename V1,
-             typename V2,
-             typename V3,
              typename AccumT >
     friend inline void buildmatrix(MatrixT              &m,
-                            V1 const &i,
-                            V2 const &j,
-                            V3 const &v,
+                            IndexArrayType const &i,
+                            IndexArrayType const &j,
+                            std::vector<typename MatrixT::ScalarType> const &v,
                             AccumT                accum );
 
-        /*
-        template<typename MatrixT,
-                 typename AccumT >
-        friend inline void buildmatrix(MatrixT              &m,
-                                IndexArrayType const &i,
-                                IndexArrayType const &j,
-                                std::vector<typename MatrixT::ScalarType> const &v,
-                                AccumT                accum);
-                                */
 
         template<typename AMatrixT, typename BMatrixT>
         friend void index_of(AMatrixT const  &A,
@@ -436,17 +415,12 @@ namespace graphblas
         template<typename MatrixT>
         friend void row_index_of(MatrixT &mat);
 
-
-
-
-
-
     template<typename AMatrixT,
              typename CMatrixT,
              typename MMatrixT,
              typename MonoidT,
              typename AccumT >
-    friend inline void maskedRowReduce(AMatrixT const &a,
+    friend inline void rowReduceMasked(AMatrixT const &a,
                            CMatrixT       &c, // vector?
                            MMatrixT       &mask,
                            MonoidT         sum,
@@ -457,7 +431,7 @@ namespace graphblas
              typename MMatrixT,
              typename MonoidT,
              typename AccumT >
-    friend inline void maskedColReduce(AMatrixT const &a,
+    friend inline void colReduceMasked(AMatrixT const &a,
                            CMatrixT       &c, // vector?
                            MMatrixT       &mask,
                            MonoidT         sum,

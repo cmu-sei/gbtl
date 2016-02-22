@@ -266,7 +266,7 @@ BOOST_AUTO_TEST_CASE(masked_col_reduce_test_default_accum)
     Matrix<double, DirectedMatrixTag> answer(1, 4);
     buildmatrix(answer, i_answer, j_answer, v_answer);
 
-    maskedColReduce(A, C, mask);
+    colReduceMasked(A, C, mask);
 
     BOOST_CHECK_EQUAL(C, answer);
 }
@@ -301,7 +301,7 @@ BOOST_AUTO_TEST_CASE(masked_row_reduce_test_default_accum)
     Matrix<double, DirectedMatrixTag> answer(4, 1);
     buildmatrix(answer, i_answer, j_answer, v_answer);
 
-    maskedRowReduce(A, C, mask);
+    rowReduceMasked(A, C, mask);
 
     BOOST_CHECK_EQUAL(C, answer);
 }

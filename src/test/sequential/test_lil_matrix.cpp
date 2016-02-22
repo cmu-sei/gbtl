@@ -267,7 +267,7 @@ BOOST_AUTO_TEST_CASE(lil_test_transpose_view)
     graphblas::IndexType M, N;
     m1.get_shape(M, N);
 
-    graphblas::TransposeView<graphblas::LilMatrix<double> > mT(m1);
+    graphblas::backend::TransposeView<graphblas::LilMatrix<double> > mT(m1);
 
     graphblas::IndexType m, n;
     mT.get_shape(m, n);

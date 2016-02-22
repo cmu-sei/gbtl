@@ -69,7 +69,6 @@ namespace algorithms
         // Set the roots parents to themselves.
         parent_list = wavefronts;
         graphblas::col_index_of(parent_list);
-
         while (wavefronts.get_nnz() > 0)
         {
             // convert all stored values to their column index

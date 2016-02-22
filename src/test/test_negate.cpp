@@ -57,8 +57,8 @@ BOOST_AUTO_TEST_CASE(test_negateview_square)
     Matrix<double, DirectedMatrixTag> answer(3, 3);
     buildmatrix(answer, i_mA, j_mA, v_answer);
 
-    auto result = NegateView<Matrix<double, DirectedMatrixTag>,
-                             graphblas::ArithmeticSemiring<double> >(mA);
+    auto result = negate(mA); //NegateView<Matrix<double, DirectedMatrixTag>,
+                              //graphblas::ArithmeticSemiring<double> >(mA);
 
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -94,8 +94,8 @@ BOOST_AUTO_TEST_CASE(test_negateview_nonsquare)
     Matrix<double, DirectedMatrixTag> answer(3, 4, 0);
     buildmatrix(answer, i_mA, j_mA, v_answer);
 
-    auto result = NegateView<Matrix<double, DirectedMatrixTag>,
-                             graphblas::ArithmeticSemiring<double> >(mA);
+    auto result = negate(mA); //NegateView<Matrix<double, DirectedMatrixTag>,
+                              //graphblas::ArithmeticSemiring<double> >(mA);
 
     BOOST_CHECK_EQUAL(result, answer);
 }

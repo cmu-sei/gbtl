@@ -245,7 +245,7 @@ BOOST_AUTO_TEST_CASE(csr_test_transpose_view)
     graphblas::IndexType M, N;
     m1.get_shape(M, N);
 
-    graphblas::TransposeView<graphblas::CsrMatrix<double> > mT(m1);
+    graphblas::backend::TransposeView<graphblas::CsrMatrix<double> > mT(m1);
 
     graphblas::IndexType m, n;
     mT.get_shape(m, n);

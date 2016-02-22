@@ -23,6 +23,7 @@
 
 #include <graphblas/accum.hpp>
 #include <graphblas/algebra.hpp>
+#include <graphblas/View.hpp>
 
 #include <graphblas/detail/config.hpp>
 
@@ -547,13 +548,13 @@ namespace graphblas
                  graphblas::PlusMonoid<typename AMatrixT::ScalarType>,
              typename AccumT =
                  graphblas::math::Assign<typename AMatrixT::ScalarType> >
-    inline void maskedRowReduce(AMatrixT const &a,
+    inline void rowReduceMasked(AMatrixT const &a,
                            CMatrixT       &c, // vector?
                            MMatrixT       &mask,
                            MonoidT         sum     = MonoidT(),
                            AccumT          accum = AccumT())
     {
-        backend::maskedRowReduce(a.m_mat, c.m_mat, mask, sum, accum);
+        backend::rowReduceMasked(a.m_mat, c.m_mat, mask, sum, accum);
     }
 
     /**
@@ -581,13 +582,13 @@ namespace graphblas
                  graphblas::PlusMonoid<typename AMatrixT::ScalarType>,
              typename AccumT =
                  graphblas::math::Assign<typename AMatrixT::ScalarType> >
-    inline void maskedColReduce(AMatrixT const &a,
+    inline void colReduceMasked(AMatrixT const &a,
                            CMatrixT       &c, // vector?
                            MMatrixT       &mask,
                            MonoidT         sum     = MonoidT(),
                            AccumT          accum = AccumT())
     {
-        backend::maskedColReduce(a.m_mat, c.m_mat, mask, sum, accum);
+        backend::colReduceMasked(a.m_mat, c.m_mat, mask, sum, accum);
     }
 
     /**
@@ -601,7 +602,7 @@ namespace graphblas
         MatrixT const   &a,
         SemiringT const &s = SemiringT())
     {
-        backend::negate(a.m_mat, s);
+        return NegateView<MatrixT, SemiringT>(backend::negate(a.m_mat, s));
     }
 
     /**
@@ -635,7 +636,7 @@ namespace graphblas
     template<typename AMatrixT>
     inline TransposeView<AMatrixT> transpose(AMatrixT const &a)
     {
-        backend::transpose(a.m_mat);
+        return TransposeView<AMatrixT>(backend::transpose(a.m_mat));
     }
 
     /**
@@ -754,7 +755,6 @@ namespace graphblas
      * @throw DimensionException  If an element of i or j index outisde the
      *                            size of m.
      */
-    /*
     template<typename MatrixT,
              typename AccumT =
                  graphblas::math::Assign<typename MatrixT::ScalarType> >
@@ -764,22 +764,7 @@ namespace graphblas
                             std::vector<typename MatrixT::ScalarType> const &v,
                             AccumT                accum = AccumT())
     {
-        backend::buildmatrix(m.m_mat, i, j, v, accum);
-    }
-    */
-    template<typename MatrixT,
-             typename V1,
-             typename V2,
-             typename V3,
-             typename AccumT =
-                 graphblas::math::Assign<typename MatrixT::ScalarType> >
-    inline void buildmatrix(MatrixT              &m,
-                            V1 const &i,
-                            V2 const &j,
-                            V3 const &v,
-                            AccumT                accum = AccumT())
-    {
-        backend::buildmatrix(m.m_mat, i.begin(), j.begin(), v.begin(), i.size(), accum);
+        backend::buildmatrix(m.m_mat, i.begin(), j.begin(), v.begin(), v.size(), accum);
     }
 } // graphblas
 
