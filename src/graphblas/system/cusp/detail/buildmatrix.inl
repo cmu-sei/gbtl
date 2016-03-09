@@ -122,7 +122,7 @@ namespace backend
             return;
         }
         else if (m.num_entries < temp.num_entries) {
-            m.resize(temp.num_entries);
+            m.resize(m.num_rows, m.num_cols, temp.num_entries);
         }
 
         detail::merge(temp, m, accum);

@@ -119,5 +119,35 @@ namespace backend
 
         detail::merge(temp2, c, accum);
     }
+
+    template<typename AMatrixT,
+             typename CMatrixT,
+             typename MMatrixT,
+             typename MonoidT =
+                 graphblas::PlusMonoid<typename AMatrixT::ScalarType>,
+             typename AccumT =
+                 graphblas::math::Assign<typename AMatrixT::ScalarType> >
+    inline void rowReduceMasked(AMatrixT const &a,
+                           CMatrixT       &c, // vector?
+                           MMatrixT       &mask,
+                           MonoidT         sum     = MonoidT(),
+                           AccumT          accum = AccumT())
+    {
+    }
+
+    template<typename AMatrixT,
+             typename CMatrixT,
+             typename MMatrixT,
+             typename MonoidT =
+                 graphblas::PlusMonoid<typename AMatrixT::ScalarType>,
+             typename AccumT =
+                 graphblas::math::Assign<typename AMatrixT::ScalarType> >
+    inline void colReduceMasked(AMatrixT const &a,
+                           CMatrixT       &c, // vector?
+                           MMatrixT       &mask,
+                           MonoidT         sum     = MonoidT(),
+                           AccumT          accum = AccumT())
+    {
+    }
 }
 } // graphblas
