@@ -33,6 +33,7 @@
 #include <graphblas/utility.hpp>
 
 #include <graphblas/operations.hpp>
+#include <graphblas/Vector.hpp>
 
 #define __GB_SYSTEM_HEADER <graphblas/system/__GB_SYSTEM_ROOT/__GB_SYSTEM_ROOT.hpp>
 #include __GB_SYSTEM_HEADER

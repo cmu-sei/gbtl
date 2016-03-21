@@ -17,15 +17,14 @@
 
 #include <cstddef>
 #include <graphblas/detail/config.hpp>
-#include <graphblas/detail/param_unpack.hpp>
 #include <graphblas/operations.hpp>
 #include <graphblas/utility.hpp>
 #include <graphblas/View.hpp>
 
-// Include matrix definitions from the appropriate backend.
-#define __GB_SYSTEm_vecRIX_HEADER <graphblas/system/__GB_SYSTEM_ROOT/Vector.hpp>
-#include __GB_SYSTEm_vecRIX_HEADER
-#undef __GB_SYSTEm_vecRIX_HEADER
+// Include vector definitions from the appropriate backend.
+#define __GB_SYSTEM_VECTOR_HEADER <graphblas/system/__GB_SYSTEM_ROOT/Vector.hpp>
+#include __GB_SYSTEM_VECTOR_HEADER
+#undef __GB_SYSTEM_VECTOR_HEADER
 
 namespace graphblas
 {
