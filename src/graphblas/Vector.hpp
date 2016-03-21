@@ -35,7 +35,7 @@ namespace graphblas
     {
     public:
         typedef ScalarT ScalarType;
-        typedef graphblas::backend::Vector BackendType;
+        typedef graphblas::backend::Vector<ScalarT> BackendType;
 
         //@brief calls backend constructor
         template <typename T>
@@ -46,7 +46,7 @@ namespace graphblas
 
         //@brief calls backend constructor
         template <typename T1, typename T2>
-        Vector(T1 &t1, T2 &t2)
+        Vector(const T1 &t1, const T2 &t2)
             : m_vec(t1, t2)
         {
         }
