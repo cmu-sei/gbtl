@@ -18,8 +18,11 @@
 #define GB_CUSP_NEGATE_VIEW_HPP
 
 #include <graphblas/system/cusp/ColumnView.hpp>
+#include <graphblas/system/cusp/Matrix.hpp>
 
 namespace graphblas
+{
+namespace backend
 {
     //************************************************************************
     // Generalized Negate/complement
@@ -248,6 +251,12 @@ namespace graphblas
         //}
 
 
+        void print_info(std::ostream &os) const
+        {
+            os << "Backend NegateView of:" << std::endl;
+            m_matrix.print_info(os);
+        }
+
         friend std::ostream&
         operator<<(std::ostream                         &os,
                    NegateView<MatrixT, SemiringT> const &mat)
@@ -287,6 +296,18 @@ namespace graphblas
         MatrixT const &m_matrix;
     };
 
+    //TODO:not implemented
+    template<typename MatrixT,
+             typename SemiringT =
+                 graphblas::ArithmeticSemiring<typename MatrixT::ScalarType> >
+    inline NegateView<MatrixT, SemiringT> negate(
+        MatrixT const   &a,
+        SemiringT const &s = SemiringT())
+    {
+        return NegateView<MatrixT, SemiringT>(a);
+    }
+
+} // backend
 } // graphblas
 
-#endif // GB_SEQUENTIAL_NEGATE_VIEW_HPP
+#endif
