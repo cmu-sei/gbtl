@@ -247,7 +247,10 @@ namespace graphblas
                     BMatrixT const &b,
                     CVectorT       &c,
                     SemiringT       s     = SemiringT(),
-                    AccumT          accum = AccumT());
+                    AccumT          accum = AccumT())
+    {
+        backend::vxm(a.m_vec, b.m_mat, c.m_vec, s, accum);
+    }
 
     /**
      * @brief Perform matrix-column vector multiply.
@@ -282,7 +285,7 @@ namespace graphblas
                     SemiringT       s     = SemiringT(),
                     AccumT          accum = AccumT())
     {
-        backend::mxv(a.m_mat, b.m_mat, c.m_mat, s, accum);
+        backend::mxv(a.m_mat, b.m_vec, c.m_vec, s, accum);
     }
 
     /**
