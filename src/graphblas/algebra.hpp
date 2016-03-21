@@ -824,6 +824,9 @@ namespace graphblas
         typedef typename SemiringT::ScalarType ScalarType;
         typedef typename SemiringT::ScalarType result_type;
 
+        typedef typename SemiringT::ScalarType first_argument_type;
+        typedef typename SemiringT::ScalarType second_argument_type;
+
         AdditiveMonoidFromSemiring() : sr() {}
         AdditiveMonoidFromSemiring(SemiringT const &sr) : sr(sr) {}
 
@@ -850,6 +853,9 @@ namespace graphblas
     public:
         typedef typename SemiringT::ScalarType ScalarType;
         typedef typename SemiringT::ScalarType result_type;
+
+        typedef typename SemiringT::ScalarType first_argument_type;
+        typedef typename SemiringT::ScalarType second_argument_type;
 
         MultiplicativeMonoidFromSemiring() : sr() {}
         MultiplicativeMonoidFromSemiring(SemiringT const &sr) : sr(sr) {}
