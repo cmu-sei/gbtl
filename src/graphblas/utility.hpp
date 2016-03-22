@@ -22,6 +22,40 @@
 
 namespace graphblas
 {
+    template <typename AMatrixT,
+              typename BMatrixT >
+    void same_dimension_check(AMatrixT const &a,
+                              BMatrixT const &b)
+    {
+        if (a.num_rows!=b.num_rows ||
+            a.num_cols!=b.num_cols)
+        {
+            throw graphblas::DimensionException();
+        }
+    }
+
+    template <typename AMatrixT,
+              typename BMatrixT >
+    void multiply_dimension_check(AMatrixT const &a,
+                                  BMatrixT const &b)
+    {
+        if (a.num_rows!=b.num_cols)
+        {
+            throw graphblas::DimensionException();
+        }
+    }
+                              
+    template <typename AVectorT,
+              typename SizeT >
+    void vector_multiply_dimension_check(AVectorT const &a,
+                                         SizeT const &b)
+    {
+        //a is a vector with a method called "size()"
+        if (a.size()!=b)
+        {
+            throw graphblas::DimensionException();
+        }
+    }
 
     /** @note This file contains interfaces that have some use in certain
      *        situations, but their future in GraphBLAS is uncertain.
