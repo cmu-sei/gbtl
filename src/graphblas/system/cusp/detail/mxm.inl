@@ -53,5 +53,92 @@ namespace backend
         // merge the results
         //detail::merge(tmp_matrix, c, accum);
     }
+
+    //TODO: implement these methods in future iterations
+    template<typename AMatrixT,
+             typename BMatrixT,
+             typename CMatrixT,
+             typename MMatrixT,
+             typename SemiringT =
+                    graphblas::ArithmeticSemiring<typename AMatrixT::ScalarType>,
+             typename AccumT =
+                    graphblas::math::Assign<typename AMatrixT::ScalarType> >
+    inline void mxmMasked(AMatrixT const &a,
+                          BMatrixT const &b,
+                          CMatrixT       &c,
+                          MMatrixT const &m,
+                          SemiringT       s = SemiringT(),
+                          AccumT          accum = AccumT())
+    {
+    }
+
+    template<typename AMatrixT,
+             typename BMatrixT,
+             typename CMatrixT,
+             typename MMatrixT,
+             typename SemiringT =
+                 graphblas::ArithmeticSemiring<typename AMatrixT::ScalarType>,
+             typename AccumT =
+                 graphblas::math::Assign<typename AMatrixT::ScalarType> >
+    inline void mxmMaskedV2(AMatrixT const &a,
+                            BMatrixT const &b,
+                            CMatrixT       &c,
+                            MMatrixT       &m,
+                            SemiringT       s = SemiringT(),
+                            AccumT          accum = AccumT())
+    {
+    }
+
+    //if sparse vectors are needed, use mxm
+
+    template<typename AVectorT,
+             typename BMatrixT,
+             typename CVectorT,
+             typename SemiringT =
+                 graphblas::ArithmeticSemiring<typename AVectorT::ScalarType>,
+             typename AccumT =
+                 graphblas::math::Assign<typename AVectorT::ScalarType> >
+    inline void vxm(AVectorT const &a,
+                    BMatrixT const &b,
+                    CVectorT       &c,
+                    SemiringT       s     = SemiringT(),
+                    AccumT          accum = AccumT())
+    {
+        typedef typename AVectorT::ScalarType ScalarType;
+        cusp::constant_array<ScalarType> zeros(a.size(), 0);
+        //transpose B:
+        BMatrixT temp(b);
+        thrust::swap(temp.row_indices, temp.column_indices);
+        temp.sort_by_row_and_column();
+
+        ::cusp::generalized_spmv(temp, a, zeros,
+                         c,
+                         make_multiplicative_monoid_from_semiring(s),
+                         make_additive_monoid_from_semiring(s));
+    }
+
+    template<typename AMatrixT,
+             typename BVectorT,
+             typename CVectorT,
+             typename SemiringT =
+                 graphblas::ArithmeticSemiring<typename AMatrixT::ScalarType>,
+             typename AccumT =
+                 graphblas::math::Assign<typename AMatrixT::ScalarType> >
+    inline void mxv(AMatrixT const &a,
+                    BVectorT const &b,
+                    CVectorT       &c,
+                    SemiringT       s     = SemiringT(),
+                    AccumT          accum = AccumT())
+    {
+        typedef typename AMatrixT::ScalarType ScalarType;
+        cusp::constant_array<ScalarType> zeros(b.size(), 0);
+
+        AMatrixT temp(a);
+
+        ::cusp::generalized_spmv(temp, b, zeros,
+                         c,
+                         make_multiplicative_monoid_from_semiring(s),
+                         make_additive_monoid_from_semiring(s));
+    }
 }
 } // graphblas

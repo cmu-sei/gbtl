@@ -24,6 +24,7 @@
 #include <graphblas/accum.hpp>
 #include <graphblas/algebra.hpp>
 #include <graphblas/View.hpp>
+#include <graphblas/utility.hpp>
 
 #include <graphblas/detail/config.hpp>
 
@@ -75,6 +76,7 @@ namespace graphblas
                          MonoidT         monoid = MonoidT(),
                          AccumT          accum = AccumT())
     {
+        same_dimension_check(a,b);
         backend::ewiseadd(a.m_mat, b.m_mat, c.m_mat, monoid, accum);
     }
 
@@ -113,6 +115,7 @@ namespace graphblas
                           MonoidT         monoid = MonoidT(),
                           AccumT          accum = AccumT())
     {
+        same_dimension_check(a,b);
         backend::ewisemult(a.m_mat, b.m_mat, c.m_mat, monoid, accum);
     }
 
@@ -148,6 +151,7 @@ namespace graphblas
                     SemiringT       s     = SemiringT(),
                     AccumT          accum = AccumT())
     {
+        multiply_dimension_check(a,b);
         backend::mxm(a.m_mat, b.m_mat, c.m_mat, s, accum);
     }
 
@@ -180,6 +184,7 @@ namespace graphblas
                           SemiringT       s = SemiringT(),
                           AccumT          accum = AccumT())
     {
+        multiply_dimension_check(a,b);
         backend::mxmMasked(a.m_mat, b.m_mat, c.m_mat, m.m_mat, s, accum);
     }
 
@@ -213,6 +218,7 @@ namespace graphblas
                             SemiringT       s = SemiringT(),
                             AccumT          accum = AccumT())
     {
+        multiply_dimension_check(a,b);
         backend::mxmMasked(a.m_mat, b.m_mat, c.m_mat, m.m_mat, s, accum);
     }
 
@@ -247,7 +253,11 @@ namespace graphblas
                     BMatrixT const &b,
                     CVectorT       &c,
                     SemiringT       s     = SemiringT(),
-                    AccumT          accum = AccumT());
+                    AccumT          accum = AccumT())
+    {
+        vector_multiply_dimension_check(a, b.get_shape().first);
+        backend::vxm(a.m_vec, b.m_mat, c.m_vec, s, accum);
+    }
 
     /**
      * @brief Perform matrix-column vector multiply.
@@ -282,7 +292,8 @@ namespace graphblas
                     SemiringT       s     = SemiringT(),
                     AccumT          accum = AccumT())
     {
-        backend::mxv(a.m_mat, b.m_mat, c.m_mat, s, accum);
+        vector_multiply_dimension_check(b, a.get_shape().second);
+        backend::mxv(a.m_mat, b.m_vec, c.m_vec, s, accum);
     }
 
     /**
@@ -392,6 +403,8 @@ namespace graphblas
                        CMatrixT          &c,
                        AccumT             accum = AccumT())
     {
+        //backends need to handle dimension checks here due to different
+        //memory space possibilities
         backend::assign(a.m_mat, i, j, c.m_mat, accum);
     }
 
@@ -428,6 +441,8 @@ namespace graphblas
                        CMatrixT             &c,
                        AccumT                accum = AccumT())
     {
+        //backends need to handle dimension checks here due to different
+        //memory space possibilities
         backend::assign(a.m_mat, i, j, c.m_mat, accum);
     }
 
@@ -457,6 +472,7 @@ namespace graphblas
                       UnaryFunctionT  f,
                       AccumT          accum = AccumT())
     {
+        same_dimension_check(a,c);
         backend::apply(a.m_mat, c.m_mat, f, accum);
     }
 
@@ -488,6 +504,9 @@ namespace graphblas
                            MonoidT         m     = MonoidT(),
                            AccumT          accum = AccumT())
     {
+        if (a.get_shape().first != c.get_shape().first || c.get_shape().second != 1){
+            throw graphblas::DimensionException();
+        }
         backend::row_reduce(a.m_mat, c.m_mat, m, accum);
     }
 
@@ -519,6 +538,9 @@ namespace graphblas
                            MonoidT         m     = MonoidT(),
                            AccumT          accum = AccumT())
     {
+        if (a.get_shape().first != c.get_shape().first || c.get_shape().first != 1){
+            throw graphblas::DimensionException();
+        }
         backend::col_reduce(a.m_mat, c.m_mat, m, accum);
     }
 
@@ -554,6 +576,9 @@ namespace graphblas
                            MonoidT         sum     = MonoidT(),
                            AccumT          accum = AccumT())
     {
+        if (a.get_shape().first != c.get_shape().first || c.get_shape().second != 1){
+            throw graphblas::DimensionException();
+        }
         backend::rowReduceMasked(a.m_mat, c.m_mat, mask, sum, accum);
     }
 
@@ -588,6 +613,9 @@ namespace graphblas
                            MonoidT         sum     = MonoidT(),
                            AccumT          accum = AccumT())
     {
+        if (a.get_shape().first != c.get_shape().first || c.get_shape().first != 1){
+            throw graphblas::DimensionException();
+        }
         backend::colReduceMasked(a.m_mat, c.m_mat, mask, sum, accum);
     }
 
@@ -626,6 +654,8 @@ namespace graphblas
     inline void transpose(AMatrixT const &a,
                           CMatrixT       &c)
     {
+        multiply_dimension_check(a,c);
+        multiply_dimension_check(c,a);
         backend::transpose(a.m_mat, c.m_mat);
     }
 
@@ -732,6 +762,9 @@ namespace graphblas
                             IndexType    n,
                             AccumT       accum = AccumT())
     {
+        if (*(i+n) == 0 || *(j+n) == 0 || *(v+n) == 0){
+            throw graphblas::DimensionException();
+        }
         backend::buildmatrix(m.m_mat, i, j, v, n, accum);
     }
     /**
