@@ -29,7 +29,6 @@ namespace backend
             inline bool operator() (const thrust::tuple<IndexType, IndexType> &a,
                                     const thrust::tuple<IndexType, IndexType> &b)
             {
-                //TODO: check if this works
                 return thrust::get<0>(a) < thrust::get<0>(b);
             }
         };
@@ -111,74 +110,7 @@ namespace backend
         IndexType len_i = v_i.size();
         IndexType len_j = v_j.size();
 
-        /// @todo
-        // assert that the dimension assigning from are correct
-        // if ((len_i != m_A) || (len_j != n_A))
-        // {
-        //     throw DimensionException();
-        // }
-
         assign(a, v_i.begin(), v_j.begin(), c, accum);
     }
-
-
-#if 0
-        template<typename VectorI,
-                 typename VectorJ,
-                 typename IteratorType,
-                 typename ValueType = typename VectorI::value_type,
-                 typename Accum=graphblas::math::Assign<typename VectorI::value_type> >
-        inline void assign_vector_helper(
-            VectorI &v_src,
-            VectorI &v_ind,
-            IteratorType v_val_iter,
-            VectorJ &v_out,
-            Accum          accum=Accum())
-        {
-            v_out = VectorJ(v_src);
-            typedef typename VectorJ::iterator OutputIterator;
-            typedef typename VectorI::iterator IndexIterator;
-            thrust::permutation_iterator<OutputIterator, IndexIterator> iter(v_out.begin(), v_ind.begin());
-            thrust::transform(
-                iter,
-                iter+thrust::distance(v_ind.begin(), v_ind.end()),
-                v_val_iter,
-                iter,
-                accum);
-        }
-
-        template<typename VectorI,
-                 typename VectorJ,
-                 typename ValueType,
-                 typename Accum>
-        inline void assign(
-            VectorI &v_src,
-            VectorI &v_ind,
-            VectorI &v_val,
-            VectorJ &v_out,
-            Accum    accum)
-        {
-            if (v_val.size() != v_ind.size())
-            {
-                return;
-            }
-            assign_vector_helper(v_src, v_ind, v_val.begin(), v_out, accum);
-        }
-
-        template<typename VectorI,
-                 typename VectorJ,
-                 typename ValueType,
-                 typename Accum>
-        inline void assign(
-            VectorI                           &v_src,
-            VectorI                           &v_ind,
-            const typename VectorI::value_type value,
-            VectorJ                           &v_out,
-            Accum                              accum)
-        {
-            thrust::constant_iterator<ValueType> tempValues(value);
-            assign_vector_helper(v_src, v_ind, tempValues, v_out, accum);
-        }
-#endif
 }
 }//end graphblas

@@ -641,9 +641,9 @@ namespace graphblas
      * @param[in]  a  The matrix to flip
      * @param[out] c  The matrix to assign the result to.
      *
-     * @todo This does not work if a and c are the same matrix (and if it
-     *       did, the matrix would have to be square due to the immutability
-     *       of matrix dimensions.
+     * @brief This does not work if a and c are the same matrix (and if it
+     *        did, the matrix would have to be square due to the immutability
+     *       of matrix dimensions)
      * @todo Should this support the Accum operations
      *
      * @throw DimensionException  If the columns of a != rows of c, or
@@ -744,7 +744,9 @@ namespace graphblas
      *                     Accum to "add" to destination, or Assign to
      *                     "replace" the destimation.
      *
-     * @todo Need to add a parameter (functor?) to handle duplicate locations
+     * @brief Need to add a parameter (functor?) to handle duplicate locations
+     * (handled in cusp backend)
+     *
      *
      * @throw DimensionException  If an element of i or j index outisde the
      *                            size of m.
