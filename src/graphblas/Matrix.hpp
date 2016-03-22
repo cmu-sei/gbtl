@@ -134,12 +134,12 @@ namespace graphblas
         }
 
         //version 2 of getshape:
-        //returns a tuple
-        std::tuple<IndexType, IndexType> get_shape()
+        //returns a pair
+        std::pair<IndexType, IndexType> get_shape() const
         {
             IndexType num_rows, num_cols;
             m_mat.get_shape(num_rows, num_cols);
-            return std::make_tuple(num_rows, num_cols);
+            return std::make_pair(num_rows, num_cols);
         }
 
         ScalarT get_zero() const { return m_mat.get_zero(); }

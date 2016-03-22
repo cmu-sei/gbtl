@@ -255,7 +255,7 @@ namespace graphblas
                     SemiringT       s     = SemiringT(),
                     AccumT          accum = AccumT())
     {
-        vector_multiply_dimension_check(a, b.num_cols);
+        vector_multiply_dimension_check(a, b.get_shape().first);
         backend::vxm(a.m_vec, b.m_mat, c.m_vec, s, accum);
     }
 
@@ -292,7 +292,7 @@ namespace graphblas
                     SemiringT       s     = SemiringT(),
                     AccumT          accum = AccumT())
     {
-        vector_multiply_dimension_check(b, a.num_rows);
+        vector_multiply_dimension_check(b, a.get_shape().second);
         backend::mxv(a.m_mat, b.m_vec, c.m_vec, s, accum);
     }
 
@@ -504,7 +504,7 @@ namespace graphblas
                            MonoidT         m     = MonoidT(),
                            AccumT          accum = AccumT())
     {
-        if (a.num_rows != c.num_rows || c.num_cols != 1){
+        if (a.get_shape().first != c.get_shape().first || c.get_shape().second != 1){
             throw graphblas::DimensionException();
         }
         backend::row_reduce(a.m_mat, c.m_mat, m, accum);
@@ -538,7 +538,7 @@ namespace graphblas
                            MonoidT         m     = MonoidT(),
                            AccumT          accum = AccumT())
     {
-        if (a.num_cols != c.num_cols || c.num_rows != 1){
+        if (a.get_shape().first != c.get_shape().first || c.get_shape().first != 1){
             throw graphblas::DimensionException();
         }
         backend::col_reduce(a.m_mat, c.m_mat, m, accum);
@@ -576,7 +576,7 @@ namespace graphblas
                            MonoidT         sum     = MonoidT(),
                            AccumT          accum = AccumT())
     {
-        if (a.num_rows != c.num_rows || c.num_cols != 1){
+        if (a.get_shape().first != c.get_shape().first || c.get_shape().second != 1){
             throw graphblas::DimensionException();
         }
         backend::rowReduceMasked(a.m_mat, c.m_mat, mask, sum, accum);
@@ -613,7 +613,7 @@ namespace graphblas
                            MonoidT         sum     = MonoidT(),
                            AccumT          accum = AccumT())
     {
-        if (a.num_cols != c.num_cols || c.num_rows != 1){
+        if (a.get_shape().first != c.get_shape().first || c.get_shape().first != 1){
             throw graphblas::DimensionException();
         }
         backend::colReduceMasked(a.m_mat, c.m_mat, mask, sum, accum);

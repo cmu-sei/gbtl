@@ -27,8 +27,10 @@ namespace graphblas
     void same_dimension_check(AMatrixT const &a,
                               BMatrixT const &b)
     {
-        if (a.num_rows!=b.num_rows ||
-            a.num_cols!=b.num_cols)
+        auto ashape = a.get_shape();
+        auto bshape = b.get_shape();
+        if (ashape.first!=bshape.first ||
+            ashape.second!=bshape.second)
         {
             throw graphblas::DimensionException();
         }
@@ -39,7 +41,9 @@ namespace graphblas
     void multiply_dimension_check(AMatrixT const &a,
                                   BMatrixT const &b)
     {
-        if (a.num_rows!=b.num_cols)
+        auto ashape = a.get_shape();
+        auto bshape = b.get_shape();
+        if (ashape.first!=bshape.second)
         {
             throw graphblas::DimensionException();
         }
