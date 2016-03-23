@@ -73,7 +73,6 @@ namespace backend
             typedef typename MatrixTypeDst::memory_space MemorySpaceDst;
             typedef typename MatrixTypeSrc::memory_space MemorySpaceSrc;
 
-            // TODO: MZ: Should we assume that when the src and dst memory spaces are not the same, the space of the src may be stronger? Or, perhaps we should choose the memory space with select system. If the selected space is the same as that of destination, then we have to make the copy of the source.  Otherwise, we have to make a copy of the destination, right? The best solution would be to have a check if any of the memory spaces is stronger, because if they are equivalent (e.g., omp and seq), we may not need to copy anything.  We may want to basically check if one of the momory spaces is cuda, and if it is, we should copy the non-cuda matrix.  It seems that cuda is the only truly separate memory space for now, although I am not sure what happnes with tbb on MICs.
             //do copy:
             ::cusp::coo_matrix<IndexType, ValueType, MemorySpaceDst> temp_matrix(A);
             //call same memory space merge:
