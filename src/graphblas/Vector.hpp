@@ -17,102 +17,50 @@
 
 #include <cstddef>
 #include <graphblas/detail/config.hpp>
-#include <graphblas/detail/param_unpack.hpp>
 #include <graphblas/operations.hpp>
 #include <graphblas/utility.hpp>
 #include <graphblas/View.hpp>
 
-// Include matrix definitions from the appropriate backend.
-#define __GB_SYSTEM_MATRIX_HEADER <graphblas/system/__GB_SYSTEM_ROOT/Matrix.hpp>
-#include __GB_SYSTEM_MATRIX_HEADER
-#undef __GB_SYSTEM_MATRIX_HEADER
+// Include vector definitions from the appropriate backend.
+#define __GB_SYSTEM_VECTOR_HEADER <graphblas/system/__GB_SYSTEM_ROOT/Vector.hpp>
+#include __GB_SYSTEM_VECTOR_HEADER
+#undef __GB_SYSTEM_VECTOR_HEADER
 
 namespace graphblas
 {
 
     //************************************************************************
     template<typename ScalarT, typename... TagsT>
-    class Matrix
+    class Vector
     {
     public:
         typedef ScalarT ScalarType;
-        typedef typename detail::matrix_generator::result<
-            ScalarT,
-            detail::SparsenessCategoryTag,
-            detail::DirectednessCategoryTag,
-            TagsT... ,
-            detail::NullTag,
-            detail::NullTag >::type BackendType;
+        typedef graphblas::backend::Vector<ScalarT> BackendType;
 
-        /**
-         * @brief Construct an empty matrix with the specified shape.
-         *
-         * @param[in] num_rows  Number of rows in the matrix
-         * @param[in] num_cols  Number of columns in the matrix
-         * @param[in] zero      The "zero" value, additive identity, and
-         *                      the structural zero.
-         */
-
-        //note:
-        //the backend should be able to decide when to ignore any of the
-        //tags and/or arguments
-        Matrix(IndexType num_rows,
-               IndexType num_cols,
-               ScalarT   zero = static_cast<ScalarT>(0))
-            : m_mat(num_rows, num_cols, zero)
+        //@brief calls backend constructor
+        template <typename T>
+        Vector(T & t)
+            : m_vec(t)
         {
         }
 
-        /**
-         * @brief Construct a matrix from a given dense matrix.
-         *
-         * @param[in] values The dense matrix from which to construct a
-         *                   sparse matrix from.
-         * @param[in] zero   The "zero" value.
-         *
-         * @todo Should we really support this interface?
-         */
-        Matrix(std::vector<std::vector<ScalarT> > const &values,
-               ScalarT    zero = static_cast<ScalarT>(0))
-            : m_mat(values, zero)
+        //@brief calls backend constructor
+        template <typename T1, typename T2>
+        Vector(const T1 &t1, const T2 &t2)
+            : m_vec(t1, t2)
         {
         }
 
-        /**
-         * @brief Copy constructor.
-         *
-         * @param[in] rhs   The matrix to copy.
-         */
-        Matrix(Matrix<ScalarT, TagsT...> const &rhs)
-            : m_mat(rhs.m_mat)
-        {
-        }
+        ~Vector() { }
 
-        ~Matrix() { }
-
-        /**
-         * @todo need to add a parameter to handle duplicate locations.
-         */
-        template<typename RAIteratorI,
-                 typename RAIteratorJ,
-                 typename RAIteratorV,
-                 typename AccumT = graphblas::math::Assign<ScalarType> >
-        void buildmatrix(RAIteratorI  i_it,
-                         RAIteratorJ  j_it,
-                         RAIteratorV  v_it,
-                         IndexType    n,
-                         AccumT       accum = AccumT())
-        {
-            m_mat.buildmatrix(i_it, j_it, v_it, n, accum);
-        }
 
         /// @todo Should assignment work only if dimensions are same?
-        Matrix<ScalarT, TagsT...>
-        operator=(Matrix<ScalarT, TagsT...> const &rhs)
+        Vector<ScalarT, TagsT...>
+        operator=(Vector<ScalarT, TagsT...> const &rhs)
         {
             if (this != &rhs)
             {
-                m_mat = rhs.m_mat;
+                m_vec = rhs.m_vec;
             }
             return *this;
         }
@@ -120,72 +68,26 @@ namespace graphblas
 
         /// Assignment from dense data
         /// @todo This ignores the structural zero value.
-        Matrix<ScalarT, TagsT...>& operator=(
+        Vector<ScalarT, TagsT...>& operator=(
             std::vector<std::vector<ScalarT> > const &rhs)
         {
-            m_mat = rhs;
+            m_vec = rhs;
             return *this;
         }
 
-        // version 1 of getshape
-        void get_shape(IndexType &num_rows, IndexType &num_cols) const
-        {
-            m_mat.get_shape(num_rows, num_cols);
-        }
-
-        //version 2 of getshape:
-        //returns a pair
-        std::pair<IndexType, IndexType> get_shape() const
-        {
-            IndexType num_rows, num_cols;
-            m_mat.get_shape(num_rows, num_cols);
-            return std::make_pair(num_rows, num_cols);
-        }
-
-        ScalarT get_zero() const { return m_mat.get_zero(); }
-        void set_zero(ScalarT new_zero) { m_mat.set_zero(new_zero); }
-
-        IndexType get_nnz() const { return m_mat.get_nnz(); }
-
         /// @todo need to change to mix and match internal types
-        bool operator==(Matrix<ScalarT, TagsT...> const &rhs) const
+        bool operator==(Vector<ScalarT, TagsT...> const &rhs) const
         {
-            return (m_mat == rhs.m_mat);
+            return (m_vec == rhs.m_vec);
         }
 
-        bool operator!=(Matrix<ScalarT, TagsT...> const &rhs) const
+        bool operator!=(Vector<ScalarT, TagsT...> const &rhs) const
         {
             return !(*this == rhs);
         }
 
-        /// @todo I don't think this is a valid interface for sparse
-        ScalarT get_value_at(IndexType row, IndexType col) const
-        {
-            return m_mat.get_value_at(row, col);
-        }
-
-        /// @todo I don't think this is a valid interface for sparse
-        void set_value_at(IndexType row, IndexType col, ScalarT const &val)
-        {
-            m_mat.set_value_at(row, col, val);
-        }
-
-        /// This replaces operator<< and outputs implementation specific
-        /// information.  Use pretty_print in
-        void print_info(std::ostream &os) const
-        {
-            m_mat.print_info(os);
-        }
-
-        /// @todo This does not need to be a friend
-        friend std::ostream &operator<<(std::ostream &os, Matrix const &mat)
-        {
-            mat.print_info(os);
-            return os;
-        }
-
     private:
-        BackendType m_mat;
+        BackendType m_vec;
 
         template<typename AMatrixT,
                  typename BMatrixT,

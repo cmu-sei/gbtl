@@ -13,12 +13,16 @@
  * permission@sei.cmu.edu for more information.  DM-0002659
  */
 
-#ifndef GB_CUSP_TRANSPOSEVIEW_HPP
-#define GB_CUSP_TRANSPOSEVIEW_HPP
+
+#ifndef GB_CUSP_TRANSPOSE_VIEW_HPP
+#define GB_CUSP_TRANSPOSE_VIEW_HPP
 
 #include <graphblas/system/cusp/ColumnView.hpp>
+#include <graphblas/system/cusp/Matrix.hpp>
 
 namespace graphblas
+{
+namespace backend
 {
     /**
      * @brief View a matrix as if it were transposed.
@@ -33,7 +37,7 @@ namespace graphblas
 
         // CONSTRUCTORS
 
-        TransposeView(MatrixT &matrix):
+        TransposeView(MatrixT const &matrix):
             m_matrix(matrix)
         {
         }
@@ -90,6 +94,7 @@ namespace graphblas
             return m_matrix.set_zero(new_zero);
         }
 
+        IndexType get_nnz() const { return m_matrix.get_nnz(); }
 
         // EQUALITY OPERATORS
         //bool
@@ -171,12 +176,12 @@ namespace graphblas
 
 
         // Not certain about this implementation
-        void set_value_at(IndexType         row,
-                          IndexType         col,
-                          ScalarType const &val)
-        {
-            m_matrix.set_value_at(col, row, val);
-        }
+        //void set_value_at(IndexType         row,
+        //                  IndexType         col,
+        //                  ScalarType const &val)
+        //{
+        //    m_matrix.set_value_at(col, row, val);
+        //}
 
         /**
          * @brief Indexing function for accessing the rows of the
@@ -186,19 +191,19 @@ namespace graphblas
          *
          * @return The view of a row of this matrix.
          */
-        ColumnView<MatrixT const>
-        get_row(IndexType row) const
-        {
-            // note row of transpose becomes column of underlying matrix
-            return ColumnView<MatrixT const>(row, m_matrix);
-        }
+        //ColumnView<MatrixT const>
+        //get_row(IndexType row) const
+        //{
+        //    // note row of transpose becomes column of underlying matrix
+        //    return ColumnView<MatrixT const>(row, m_matrix);
+        //}
 
-        ColumnView<MatrixT>
-        get_row(IndexType row)
-        {
-            // note row of transpose becomes column of underlying matrix
-            return ColumnView<MatrixT>(row, m_matrix);
-        }
+        //ColumnView<MatrixT>
+        //get_row(IndexType row)
+        //{
+        //    // note row of transpose becomes column of underlying matrix
+        //    return ColumnView<MatrixT>(row, m_matrix);
+        //}
 
         /**
          * @brief Indexing operator for accessing the rows of the
@@ -208,20 +213,28 @@ namespace graphblas
          *
          * @return The view of a row of the transposed matrix.
          */
-        ColumnView<MatrixT const>
-        operator[](IndexType row) const
-        {
-            // note row of transpose becomes column of underlying matrix
-            return ColumnView<MatrixT const>(row, m_matrix);
-        }
+        //ColumnView<MatrixT const>
+        //operator[](IndexType row) const
+        //{
+        //    // note row of transpose becomes column of underlying matrix
+        //    return ColumnView<MatrixT const>(row, m_matrix);
+        //}
 
-        ColumnView<MatrixT>
-        operator[](IndexType row)
-        {
-            // note row of transpose becomes column of underlying matrix
-            return ColumnView<MatrixT>(row, m_matrix);
-        }
+        //ColumnView<MatrixT>
+        //operator[](IndexType row)
+        //{
+        //    // note row of transpose becomes column of underlying matrix
+        //    return ColumnView<MatrixT>(row, m_matrix);
+        //}
 
+
+        //other methods that may or may not belong here:
+        //
+        void print_info(std::ostream &os) const
+        {
+            os << "Backend TransposeView of:" << std::endl;
+            m_matrix.print_info(os);
+        }
 
         friend std::ostream&
         operator<<(std::ostream                 &os,
@@ -259,9 +272,10 @@ namespace graphblas
         operator=(TransposeView<MatrixT> const &rhs);
 
     private:
-        MatrixT &m_matrix;
+        MatrixT const &m_matrix;
     };
 
+} //backend
 } // graphblas
 
-#endif // GB_CUSP_TRANSPOSEVIEW_HPP
+#endif

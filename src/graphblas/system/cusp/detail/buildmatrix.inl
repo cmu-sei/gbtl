@@ -17,7 +17,6 @@
 
 // specialized buildmatrix function for cusp-gpu backend
 // currently supports coo matrix
-// TODO: add more matrix formats.
 
 #include <graphblas/system/cusp/detail/merge.inl>
 
@@ -36,6 +35,15 @@ namespace backend
                 return x.size();
             }
         };
+
+        struct pick_min{
+            template <typename T >
+            __host__ __device__
+            T operator()(const T &v1, const T &v2)
+            {
+                return v1<v2?v1:v2;
+            }
+        };
     }
 
     using namespace graphblas::detail;
@@ -43,6 +51,8 @@ namespace backend
     //represents a dense matrix.
     //N: number of rows
     //the objects in iterator i must have the .size() method
+    //
+    //**this method should be deprecated since it supports a non-sparse construct.**
     template<typename MatrixT,
              typename RAIteratorI,
              typename Accum>
@@ -51,11 +61,6 @@ namespace backend
                             IndexType    n,
                             Accum accum)
     {
-        /*
-          IndexType count = thrust::reduce(thrust::make_transform_iterator(i, get_vector_size()),
-          thrust::make_transform_iterator(i+n, get_vector_size()));
-        */
-        //TODO: restore previous line
         IndexType count = n* (*i).size();
         //if iterator i is empty or if its elements' sizes are 0
         if (n == 0 || (n>0 && (*i).size() ==0)) {
@@ -107,8 +112,8 @@ namespace backend
         //hardcoded coo matrix:
         MatrixT temp(m.num_rows, m.num_cols, n);
 
-        //TODO: decide what to do with duplicates
-        //merge by key, maybe?
+
+
         //assuming thrust copy deals with memspaces
         thrust::copy_n(i, n, temp.row_indices.begin());
         thrust::copy_n(j, n, temp.column_indices.begin());
@@ -116,16 +121,31 @@ namespace backend
         //sorting:
         temp.sort_by_row_and_column();
 
-        if (m.num_entries == 0)
-        {
-            m.swap(temp);
-            return;
-        }
-        else if (m.num_entries < temp.num_entries) {
-            m.resize(temp.num_entries);
-        }
+        m.resize(m.num_rows, m.num_cols, temp.num_entries);
 
-        detail::merge(temp, m, accum);
+        //filter out duplicates locally:
+        auto end = thrust::reduce_by_key(
+                thrust::make_zip_iterator(thrust::make_tuple(
+                        temp.row_indices.begin(),
+                        temp.column_indices.begin())),
+                thrust::make_zip_iterator(thrust::make_tuple(
+                        temp.row_indices.begin()+n,
+                        temp.column_indices.begin()+n)),
+                temp.values.begin(),
+                thrust::make_zip_iterator(thrust::make_tuple(
+                        m.row_indices.begin(),
+                        m.column_indices.begin())),
+                m.values.begin(),
+                thrust::equal_to< thrust::tuple<IndexType,IndexType> >(),
+                detail::pick_min());
+
+        auto filtered_size = thrust::distance(m.values.begin(), thrust::get<1>(end));
+
+        m.resize(m.num_rows, m.num_cols, filtered_size);
+
+        //do not merge. why would one want to build matrix on a matrix with valid data?
+        //just do ewiseadd if that is needed.
+        //thus, accum is useless.
     }
 
     template<typename MatrixT,
@@ -140,23 +160,5 @@ namespace backend
         buildmatrix(m, i.begin(), j.begin(), v.begin(), i.size(), accum);
     }
 
-
-    // namespace detail {
-    //     struct FakeIterator
-    //     {
-    //         operator[](const IndexType n) { return n; }
-    //     };
-    // }
-
-    // template<typename MatrixT,
-    //          typename RAIteratorI,
-    //          typename Accum>
-    // inline void buildmatrix(MatrixT     &m,
-    //                         RAIteratorI  i,
-    //                         IndexType    n,
-    //                         Accum        accum)
-    // {
-    //     buildmatrix(m, i, FakeIterator(), FakeIterator(), n, accum);
-    // }
 }
 } // graphblas
