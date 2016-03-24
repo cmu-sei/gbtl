@@ -48,7 +48,7 @@ namespace graphblas
             throw graphblas::DimensionException();
         }
     }
-                              
+
     template <typename AVectorT,
               typename SizeT >
     void vector_multiply_dimension_check(AVectorT const &a,
@@ -120,27 +120,37 @@ namespace graphblas
         backend::row_index_of(mat.m_mat);
     }
 
-    //timing:
-    //common functions:
-#if 0
-    cudaEvent_t start_event, stop_event;
+    /**
+     * @brief filters out the elements in one vector from the other.
+     *
+     * @param[in,out] v1 The vector to be filtered,.
+     * @param[in] v2  The vector to filter, .
+     *
+     * @return size of the filtered vector
+     *
+     */
+    template <typename Vector1,
+              typename Vector2,
+              typename SizeT >
+    SizeT filter(Vector1 &v1,
+                SizeT v1size,
+                Vector2 const &v2,
+                SizeT v2size)
+    {
+        namespace btl = backend_template_library;
 
-    void start_timer(){
-        cudaEventCreate(&start_event);
-        cudaEventCreate(&stop_event);
-        cudaEventRecord(start_event);
-    }
+        Vector1 temp(v1size);
+        //require c++11
+        auto end = btl::set_difference(
+                v1.begin(),
+                v1.begin()+v1size,
+                v2.begin(),
+                v2.begin()+v2size,
+                temp.begin());
 
-    void stop_timer(){
-        cudaEventRecord(stop_event);
-        cudaEventSynchronize(stop_event);
-    }
+        btl::copy(temp.begin(), end, v1.begin());
 
-    float get_elapsed_time(){
-        float ms=0;
-        cudaEventElapsedTime(&ms, start_event, stop_event);
-        return ms;
+        return btl::distance(temp.begin(), end);
     }
-#endif
 }
 

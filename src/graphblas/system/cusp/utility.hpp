@@ -19,10 +19,10 @@
 #include <graphblas/detail/config.hpp>
 #include <graphblas/system/cusp/detail/utility.inl>
 
-#pragma once
-
 namespace graphblas
 {
+    namespace backend_template_library = thrust;
+
 namespace backend
 {
     /**
@@ -75,6 +75,27 @@ namespace backend
         using namespace detail;
         thrust::constant_iterator<ValueType> tempValues(value);
         assign_vector_helper(v_src, v_ind, tempValues, v_out, accum);
+    }
+
+    //timing:
+    //common functions:
+    cudaEvent_t start_event, stop_event;
+
+    void start_timer(){
+        cudaEventCreate(&start_event);
+        cudaEventCreate(&stop_event);
+        cudaEventRecord(start_event);
+    }
+
+    void stop_timer(){
+        cudaEventRecord(stop_event);
+        cudaEventSynchronize(stop_event);
+    }
+
+    float get_elapsed_time(){
+        float ms=0;
+        cudaEventElapsedTime(&ms, start_event, stop_event);
+        return ms;
     }
 }
 }
