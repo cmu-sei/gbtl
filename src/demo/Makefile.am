@@ -10,10 +10,6 @@ include $(top_srcdir)/mk/cuda.mk
 
 noinst_PROGRAMS = CooMatrixDemoCuda bfs_demo_cuda mxm_homework_cuda
 
-CooMatrixDemoCuda_SOURCES = CooMatrixDemoCuda.cu
-
-bfs_demo_cuda_SOURCES = bfs_demo_cuda.cu
-
 mxm_homework_cuda_SOURCES = mxm_homework_cuda.cu
 
 else
