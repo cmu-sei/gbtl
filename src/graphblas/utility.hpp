@@ -133,11 +133,11 @@ namespace graphblas
               typename Vector2,
               typename SizeT >
     SizeT filter(Vector1 &v1,
-                SizeT v1size
+                SizeT v1size,
                 Vector2 const &v2,
                 SizeT v2size)
     {
-        using btl = graphblas::backend_template_library;
+        namespace btl = backend_template_library;
 
         Vector1 temp(v1size);
         //require c++11

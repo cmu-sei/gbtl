@@ -22,7 +22,7 @@
 
 namespace graphblas
 {
-    using backend_template_library = std;
+    namespace backend_template_library = std;
 
 namespace backend{
     //************************************************************************

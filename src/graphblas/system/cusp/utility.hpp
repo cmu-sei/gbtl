@@ -21,7 +21,7 @@
 
 namespace graphblas
 {
-    using backend_template_library = thrust;
+    namespace backend_template_library = thrust;
 
 namespace backend
 {
