@@ -8,7 +8,7 @@ AM_CPPFLAGS += -I$(abs_top_srcdir)/cusplibrary
 
 include $(top_srcdir)/mk/cuda.mk
 
-noinst_PROGRAMS = CooMatrixDemoCuda bfs_demo_cuda mxm_homework_cuda
+noinst_PROGRAMS = mxm_homework_cuda
 
 mxm_homework_cuda_SOURCES = mxm_homework_cuda.cu
 
