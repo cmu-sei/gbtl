@@ -92,6 +92,11 @@ namespace graphblas
             num_rows = m_num_rows;
         }
 
+        std::pair<IndexType, IndexType> get_shape() const
+        {
+            return std::make_pair(m_num_rows, m_num_cols);
+        }
+
 
         /**
          * @brief Get the value of a structural zero element.

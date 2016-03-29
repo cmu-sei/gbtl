@@ -109,7 +109,7 @@ namespace algorithms
         //graphblas::ConstantMatrix<T> scaled_teleport(
         //    1, rows, (1.0 - damping_factor)/static_cast<T>(rows), 0.0);
         //
-        graphblas::utility::increment_n <T, graphblas::math::Plus<T> > scaled_teleport((1.0 - damping_factor)/static_cast<T>(rows), graphblas::math::Plus<T>());
+        graphblas::arithmetic_n <T, graphblas::math::Plus<T> > scaled_teleport((1.0 - damping_factor)/static_cast<T>(rows));
 
         //graphblas::print_matrix(std::cout, scaled_teleport,
         //                        "scaled_teleportation");

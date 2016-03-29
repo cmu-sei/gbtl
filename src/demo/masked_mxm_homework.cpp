@@ -200,7 +200,7 @@ namespace algorithms
             ++depth;
            // ConstantMatrix<IndexType> depth_mat(wrows, wcols, depth);
 
-            graphblas::utility::arithmetic_n<
+            graphblas::arithmetic_n<
                 IndexType,
                 algebra::ArithmeticMultiplyMonoid<IndexType> >
                     incr(depth);

@@ -255,8 +255,9 @@ namespace graphblas
                     SemiringT       s     = SemiringT(),
                     AccumT          accum = AccumT())
     {
-        vector_multiply_dimension_check(a, b.get_shape().first);
-        backend::vxm(a.m_vec, b.m_mat, c.m_vec, s, accum);
+        //vector_multiply_dimension_check(a, b.get_shape().first);
+        //backend::vxm(a.m_vec, b.m_mat, c.m_vec, s, accum);
+        backend::vxm(a.m_mat, b.m_mat, c.m_mat, s, accum);
     }
 
     /**
@@ -292,8 +293,9 @@ namespace graphblas
                     SemiringT       s     = SemiringT(),
                     AccumT          accum = AccumT())
     {
-        vector_multiply_dimension_check(b, a.get_shape().second);
-        backend::mxv(a.m_mat, b.m_vec, c.m_vec, s, accum);
+        //vector_multiply_dimension_check(b, a.get_shape().second);
+        //backend::mxv(a.m_mat, b.m_vec, c.m_vec, s, accum);
+        backend::mxv(a.m_mat, b.m_mat, c.m_mat, s, accum);
     }
 
     /**

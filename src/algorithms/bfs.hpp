@@ -152,10 +152,9 @@ namespace algorithms
             ++depth;
 
             // Apply the level to all newly visited nodes
-            graphblas::utility::arithmetic_n<graphblas::IndexType,
+            graphblas::arithmetic_n<graphblas::IndexType,
                 graphblas::math::Times<graphblas::IndexType> >
-                    incr(depth,
-                         graphblas::math::Times<T>());
+                    incr(depth);
 
             graphblas::apply(wavefront, levels,
                     incr,
@@ -214,10 +213,9 @@ namespace algorithms
             ++depth;
 
             // Apply the level to all newly visited nodes
-            graphblas::utility::arithmetic_n<graphblas::IndexType,
+            graphblas::arithmetic_n<graphblas::IndexType,
                 graphblas::math::Times<graphblas::IndexType> >
-                    incr(depth,
-                         graphblas::math::Times<T>());
+                    incr(depth);
 
             graphblas::apply(wavefront, levels,
                     incr,
