@@ -152,5 +152,27 @@ namespace graphblas
 
         return btl::distance(temp.begin(), end);
     }
+
+    template <typename ConstT, typename BinaryOp>
+    struct arithmetic_n{
+        ConstT n;
+        BinaryOp op;
+
+        arithmetic_n(
+                const ConstT & value,
+                BinaryOp operation = BinaryOp() ) :
+            n(value),
+            op(operation)
+        {}
+
+        template <typename T>
+#ifdef GB_USE_CUSP_GPU
+__device__ __host__
+#endif
+        T operator()(const T& value){
+            return op(value, static_cast<T>(n));
+        }
+    };
+
 }
 

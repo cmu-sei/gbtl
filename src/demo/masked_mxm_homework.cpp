@@ -198,13 +198,19 @@ namespace algorithms
         {
             // Increment the level (ConstantMatrix is equivalent to a fill)
             ++depth;
-            ConstantMatrix<IndexType> depth_mat(wrows, wcols, depth);
+           // ConstantMatrix<IndexType> depth_mat(wrows, wcols, depth);
+
+            graphblas::utility::arithmetic_n<
+                IndexType,
+                algebra::ArithmeticMultiplyMonoid<IndexType> >
+                    incr(depth);
 
             // Apply the level to all newly visited nodes, and
             // accumulate result into the levels vectors.
-            ewisemult(wavefront, depth_mat, levels,
-                      algebra::ArithmeticMultiplyMonoid<IndexType>(),
-                      algebra::Accum<IndexType>());
+            apply(wavefront, levels, incr, algebra::Accum<IndexType>());
+            //ewisemult(wavefront, depth_mat, levels,
+            //          algebra::ArithmeticMultiplyMonoid<IndexType>(),
+            //          algebra::Accum<IndexType>());
 
             // Advance the wavefront and mask out nodes already assigned levels
             mxmMasked(wavefront, graph, wavefront,
