@@ -22,38 +22,6 @@
 
 namespace graphblas
 {
-    namespace backend{
-    namespace detail{
-        template <typename T>
-        class ConstantVector : public cusp::array1d<T, cusp::device_memory>
-        {
-            __host__  ConstantVector ()
-            {
-            }
-
-            __host__  ConstantVector (T n, const T &value)
-            {
-            }
-
-            __host__  ConstantVector (const ConstantVector &v)
-            {
-            }
-            template <typename Num>
-            T& operator[](const Num n)
-            {
-                return this->data[0];
-            }
-
-            template <typename Num>
-            T& operator[](const Num n) const
-            {
-                return this->data[0];
-            }
-        }
-    }
-    }
-    /// @todo Should we support assignment by row?
-
     /**
      * @brief Class representing a list of lists format sparse matrix.
      */
@@ -64,7 +32,6 @@ namespace graphblas
         typedef typename graphblas::backend::Matrix<ScalarT> ParentMatrixT;
 
     public:
-
         /**
          * @brief Construct a matrix whose entries are all same value
          *        with the given shape.
