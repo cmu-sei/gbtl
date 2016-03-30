@@ -32,7 +32,8 @@ namespace graphblas
         if (ashape.first!=bshape.first ||
             ashape.second!=bshape.second)
         {
-            throw graphblas::DimensionException();
+            //throw graphblas::DimensionException();
+            //std::cerr<<"warning: dim check failed"<<std::endl;
         }
     }
 
@@ -45,7 +46,8 @@ namespace graphblas
         auto bshape = b.get_shape();
         if (ashape.first!=bshape.second)
         {
-            throw graphblas::DimensionException();
+            //throw graphblas::DimensionException();
+            //std::cerr<<"warning: multiply dim check failed"<<std::endl;
         }
     }
 

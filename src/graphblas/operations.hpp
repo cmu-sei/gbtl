@@ -541,7 +541,7 @@ namespace graphblas
                            AccumT          accum = AccumT())
     {
         if (a.get_shape().first != c.get_shape().first || c.get_shape().first != 1){
-            throw graphblas::DimensionException();
+            //throw graphblas::DimensionException();
         }
         backend::col_reduce(a.m_mat, c.m_mat, m, accum);
     }
@@ -579,7 +579,7 @@ namespace graphblas
                            AccumT          accum = AccumT())
     {
         if (a.get_shape().first != c.get_shape().first || c.get_shape().second != 1){
-            throw graphblas::DimensionException();
+            //throw graphblas::DimensionException();
         }
         backend::rowReduceMasked(a.m_mat, c.m_mat, mask, sum, accum);
     }
@@ -616,7 +616,7 @@ namespace graphblas
                            AccumT          accum = AccumT())
     {
         if (a.get_shape().first != c.get_shape().first || c.get_shape().first != 1){
-            throw graphblas::DimensionException();
+            //throw graphblas::DimensionException();
         }
         backend::colReduceMasked(a.m_mat, c.m_mat, mask, sum, accum);
     }
