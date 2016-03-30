@@ -17,7 +17,6 @@
 #ifndef GB_CUSP_NEGATE_VIEW_HPP
 #define GB_CUSP_NEGATE_VIEW_HPP
 
-#include <graphblas/system/cusp/ColumnView.hpp>
 #include <graphblas/system/cusp/Matrix.hpp>
 
 namespace graphblas
@@ -197,65 +196,6 @@ namespace backend
             return SemiringNegate<SemiringT>()(m_matrix.get_value_at(row, col));
         }
 
-
-        // Not certain about this implementation
-        //void set_value_at(IndexType         row,
-        //                  IndexType         col,
-        //                  ScalarType const &val)
-        //{
-        //    m_matrix.set_value_at(row, col, math::NotFn<ScalarType>()(val));
-        //}
-
-        /**
-         * @brief Indexing function for accessing the rows of the
-         *        transposed matrix.
-         *
-         * @param[in] row  The index of the row to access.
-         *
-         * @return The view of a row of this matrix.
-         */
-        //ColumnView<MatrixT const>
-        //get_row(IndexType row) const
-        //{
-        //    // note row of transpose becomes column of underlying matrix
-        //    return ColumnView<MatrixT const>(row, m_matrix);
-        //}
-
-        //ColumnView<MatrixT>
-        //get_row(IndexType row)
-        //{
-        //    // note row of transpose becomes column of underlying matrix
-        //    return ColumnView<MatrixT>(row, m_matrix);
-        //}
-
-        /**
-         * @brief Indexing operator for accessing the rows of the
-         *        transposed matrix.
-         *
-         * @param[in] row  The index of the row to access.
-         *
-         * @return The view of a row of the transposed matrix.
-         */
-        //ColumnView<MatrixT const>
-        //operator[](IndexType row) const
-        //{
-        //    // note row of transpose becomes column of underlying matrix
-        //    return ColumnView<MatrixT const>(row, m_matrix);
-        //}
-
-        //ColumnView<MatrixT>
-        //operator[](IndexType row)
-        //{
-        //    // note row of transpose becomes column of underlying matrix
-        //    return ColumnView<MatrixT>(row, m_matrix);
-        //}
-
-
-        void print_info(std::ostream &os) const
-        {
-            os << "Backend NegateView of:" << std::endl;
-            m_matrix.print_info(os);
-        }
 
         friend std::ostream&
         operator<<(std::ostream                         &os,

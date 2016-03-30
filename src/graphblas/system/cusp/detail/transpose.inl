@@ -15,24 +15,31 @@
 
 #include <cusp/transpose.h>
 #include "./merge.inl"
+#include "../TransposeView.hpp"
 
 
 namespace graphblas
 {
 namespace backend
 {
-        template<typename AMatrixT,
-                 typename CMatrixT>
-        inline void transpose(const AMatrixT &a,
-                              CMatrixT       &c)
-        {
-            /*
-            c.resize(a.num_cols, a.num_rows, a.num_entries);
-            c.row_indices = a.column_indices;
-            c.column_indices = a.row_indices;
-            c.values = a.values;
-            */
-            ::cusp::transpose<AMatrixT, CMatrixT>(a, c);
-        }
+    template<typename AMatrixT,
+             typename CMatrixT>
+    inline void transpose(const AMatrixT &a,
+                    CMatrixT       &c)
+    {
+        /*
+           c.resize(a.num_cols, a.num_rows, a.num_entries);
+           c.row_indices = a.column_indices;
+           c.column_indices = a.row_indices;
+           c.values = a.values;
+           */
+        ::cusp::transpose<AMatrixT, CMatrixT>(a, c);
+    }
+
+    template<typename MatrixT>
+    inline TransposeView<MatrixT> transpose(MatrixT const &a)
+    {
+        return TransposeView<MatrixT>(a);
+    }
 }
 } // graphblas
