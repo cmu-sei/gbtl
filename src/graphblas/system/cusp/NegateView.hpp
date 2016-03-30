@@ -18,12 +18,12 @@
 #define GB_CUSP_NEGATE_VIEW_HPP
 
 #include <graphblas/system/cusp/Matrix.hpp>
+#include <thrust/iterator/iterator_adaptor.h>
 
 namespace graphblas
 {
 namespace backend
 {
-    //************************************************************************
     // Generalized Negate/complement
     template <typename SemiringT>
     class SemiringNegate
@@ -39,204 +39,81 @@ namespace backend
         }
     };
 
+    namespace detail{
+    //implement a matrix index iterator (1111,2222,3333...), (123412341234...)
+
+    struct row_index_transformer{
+        IndexType cols;
+
+        row_index_transformer(IndexType c) :cols(c) {}
+
+        __host__ __device__
+        inline IndexType operator()(const IndexType & sequence) {
+            return (sequence / cols);
+        }
+    };
+
+    struct col_index_transformer{
+        IndexType rows, cols;
+
+        col_index_transformer(IndexType r, IndexType c) : rows(r), cols(c) {}
+
+        __host__ __device__
+        inline IndexType operator()(const IndexType & sequence) {
+            return sequence - ((sequence / cols) * rows);
+        }
+    };
+
+    template <typename InputIt>
+    struct find_entry{
+        InputIt a_begin, a_end, b_begin, b_end;
+        find_entry(InputIt a1, InputIt a2, InputIt b1, InputIt b2):
+            a_begin(a1), a_end(a2), b_begin(b1), b_end(b2) {}
+        template <typename T>
+        __host__ __device__
+        inline bool operator()(const T& first, const T& second)
+        {
+            return thrust::binary_search
+        }
+
+    };
+    }//end detail
+
     //************************************************************************
     /**
      * @brief View a matrix as if it were negated (stored values and
      *        structural zeroes are swapped).
      *
-     * @tparam MatrixT     Implements the 2D matrix concept.
+     * @tparam MatrixT     Implements the backend matrix.
      * @tparam SemiringT   Used to define the behaviour of the negate
      */
     template<typename MatrixT, typename SemiringT>
-    class NegateView
+    class NegateView : public graphblas::backend::Matrix<typename MatrixT::ScalarType>
     {
     public:
         typedef typename MatrixT::ScalarType ScalarType;
+        typedef graphblas::backend::Matrix<typename MatrixT::ScalarType> ParentMatrixT;
 
         // CONSTRUCTORS
 
         NegateView(MatrixT const &matrix):
-            m_matrix(matrix)
+            ParentMatrix(matrix.num_rows, matrix.num_cols, 0)
         {
             /// @todo assert that matrix and semiring zero() are the same?
+            //this is a problem, since matrices really shouldn't have zeroes
+
+
+            //unfortunately will need to materialize the negation (not sparse in representation,
+            //but still sparse in storage), the cost is search.
+            auto rows = matrix.num_rows;
+            auto cols = matrix.num_cols;
+            this->num_entries = matrix.num_rows * matrix.num_cols - matrix.num_entries;
+
         }
-
-        /**
-         * Copy constructor.
-         *
-         * @param[in] rhs The negate view to copy.
-         *
-         * @todo Is this const correct?
-         */
-        NegateView(NegateView<MatrixT, SemiringT> const &rhs)
-            : m_matrix(rhs.m_matrix)
-        {
-        }
-
-        ~NegateView()
-        {
-        }
-
-        /**
-         * @brief Get the shape for this matrix.
-         *
-         * @return  A tuple containing the shape in the form (M, N),
-         *          where M is the number of rows, and N is the number
-         *          of columns.
-         */
-        void get_shape(IndexType &num_rows, IndexType &num_cols) const
-        {
-            m_matrix.get_shape(num_rows, num_cols);
-        }
+    }
 
 
-        /**
-         * @brief Get the value of a structural zero element.
-         *
-         * @return  The structural zero value.
-         */
-        ScalarType get_zero() const
-        {
-            return m_matrix.get_zero();
-        }
 
-
-        /**
-         * @brief Set the value of a structural zero element.
-         *
-         * @param[in] new_zero  The new zero value.
-         *
-         * @return The old zero element for this matrix.
-         */
-        //ScalarType set_zero(ScalarType new_zero)
-        //{
-        //    return m_matrix.set_zero(new_zero);
-        //}
-
-        /**
-         * @return  The number of stored elements in the view.
-         */
-        IndexType get_nnz() const
-        {
-            IndexType rows, cols;
-            m_matrix.get_shape(rows, cols);
-            return (rows*cols - m_matrix.get_nnz());
-        }
-
-        /**
-         * @brief Equality testing for matrix. (value equality?)
-         *
-         * @param[in] rhs  The right hand side of the equality
-         *                 operation.
-         *
-         * @return true, if this matrix and rhs are identical.
-         * @todo  Not sure we need this form.  Should we do equality
-         *        with any matrix?
-         */
-        template <typename OtherMatrixT>
-        bool operator==(OtherMatrixT const &rhs) const
-        {
-            IndexType nr, nc, rhs_nr, rhs_nc;
-            get_shape(nr, nc);
-            rhs.get_shape(rhs_nr, rhs_nc);
-
-            if ((nr != rhs_nr) || (nc != rhs_nc))
-            {
-                return false;
-            }
-
-            // Definitely a more efficient way than this.  Only compare
-            // non-zero elements.  Then decide if compare zero's
-            // explicitly
-            for (IndexType i = 0; i < nr; ++i)
-            {
-                for (IndexType j = 0; j < nc; ++j)
-                {
-                    if (get_value_at(i, j) != rhs.get_value_at(i, j))
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }
-
-
-        /**
-         * @brief Inequality testing for matrix. (value equality?)
-         *
-         * @param[in] rhs  The right hand side of the inequality
-         *                 operation.
-         *
-         * @return true, if this matrix and rhs are not identical.
-         */
-        template <typename OtherMatrixT>
-        bool operator!=(OtherMatrixT const &rhs) const
-        {
-            return !(*this == rhs);
-        }
-
-
-        /**
-         * @brief Access the elements given row and column indexes.
-         *
-         * Function provided to access the elements given row and
-         * column indices.  The functionality is the same as that
-         * of the indexing function for a standard dense matrix.
-         *
-         * @param[in] row  The index of row to access.
-         * @param[in] col  The index of column to access.
-         *
-         * @return The negated element at the given row and column.
-         */
-        ScalarType get_value_at(IndexType row, IndexType col) const
-        {
-            //return math::NotFn<ScalarType>()(m_matrix.get_value_at(row, col));
-            return SemiringNegate<SemiringT>()(m_matrix.get_value_at(row, col));
-        }
-
-
-        friend std::ostream&
-        operator<<(std::ostream                         &os,
-                   NegateView<MatrixT, SemiringT> const &mat)
-        {
-            IndexType num_rows, num_cols;
-            mat.get_shape(num_rows, num_cols);
-            for (IndexType row = 0; row < num_rows; ++row)
-            {
-                os << ((row == 0) ? "[[" : " [");
-                if (num_cols > 0)
-                {
-                    os << mat.get_value_at(row, 0);
-                }
-
-                for (IndexType col = 1; col < num_cols; ++col)
-                {
-                    os << ", " << mat.get_value_at(row, col);
-                }
-                os << ((row == num_rows - 1) ? "]]" : "]\n");
-            }
-            return os;
-        }
-
-    private:
-        /**
-         * Copy assignment not implemented.
-         *
-         * @param[in] rhs  The negate view to assign to this.
-         *
-         * @todo Assignment should be disallowed as you cannot reassign a
-         *       a reference.
-         */
-        NegateView<MatrixT, SemiringT> &
-        operator=(NegateView<MatrixT, SemiringT> const &rhs);
-
-    private:
-        MatrixT const &m_matrix;
-    };
-
-    //TODO:not implemented
     template<typename MatrixT,
              typename SemiringT =
                  graphblas::ArithmeticSemiring<typename MatrixT::ScalarType> >
