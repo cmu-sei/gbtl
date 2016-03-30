@@ -766,9 +766,9 @@ namespace graphblas
                             IndexType    n,
                             AccumT       accum = AccumT())
     {
-        if (*(i+n) == 0 || *(j+n) == 0 || *(v+n) == 0){
-            throw graphblas::DimensionException();
-        }
+        //if (*(i+n) == 0 || *(j+n) == 0 || *(v+n) == 0){
+        //    throw graphblas::DimensionException();
+        //}
         backend::buildmatrix(m.m_mat, i, j, v, n, accum);
     }
     /**
