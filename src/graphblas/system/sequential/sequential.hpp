@@ -25,7 +25,6 @@
 #include <graphblas/system/sequential/CsrMatrix.hpp>
 #include <graphblas/system/sequential/CscMatrix.hpp>
 #include <graphblas/system/sequential/coo.hpp>
-#include <graphblas/system/sequential/ConstantMatrix.hpp>
 
 #include <graphblas/system/sequential/RowView.hpp>
 #include <graphblas/system/sequential/ColumnView.hpp>
