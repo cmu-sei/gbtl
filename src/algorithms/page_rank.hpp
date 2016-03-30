@@ -106,8 +106,11 @@ namespace algorithms
         //graphblas::ConstantMatrix<T> teleportation(1, rows, 1.0/T(rows), 0.0);
         //graphblas::print_matrix(std::cout, teleportation, "teleportation");
 
-        graphblas::ConstantMatrix<T> scaled_teleport(
-            1, rows, (1.0 - damping_factor)/static_cast<T>(rows), 0.0);
+        //graphblas::ConstantMatrix<T> scaled_teleport(
+        //    1, rows, (1.0 - damping_factor)/static_cast<T>(rows), 0.0);
+        //
+        graphblas::arithmetic_n <T, graphblas::math::Plus<T> > scaled_teleport((1.0 - damping_factor)/static_cast<T>(rows));
+
         //graphblas::print_matrix(std::cout, scaled_teleport,
         //                        "scaled_teleportation");
 
@@ -135,7 +138,9 @@ namespace algorithms
             //graphblas::mxm(r2, teleportation, new_rank,
             //               graphblas::ArithmeticSemiring<T>(),
             //               graphblas::math::Accum<T>());
-            graphblas::ewiseadd(scaled_teleport, new_rank, new_rank);
+            //graphblas::ewiseadd(scaled_teleport, new_rank, new_rank);
+            //use apply:
+            graphblas::apply(new_rank, new_rank, scaled_teleport);
             //graphblas::print_matrix(std::cout, new_rank, "new_rank");
 
             // Test for convergence - we really need dot-product here so that

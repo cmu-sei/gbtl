@@ -79,6 +79,13 @@ namespace graphblas
             m_mat.get_shape(num_rows, num_cols);
         }
 
+        std::pair<IndexType, IndexType> get_shape() const
+        {
+            IndexType num_rows, num_cols;
+            m_mat.get_shape(num_rows, num_cols);
+            return std::make_pair(num_rows, num_cols);
+        }
+
         ScalarType get_zero() const
         {
             return m_mat.get_zero();
@@ -420,6 +427,13 @@ namespace graphblas
         void get_shape(IndexType &num_rows, IndexType &num_cols) const
         {
             m_mat.get_shape(num_rows, num_cols);
+        }
+
+        std::pair<IndexType, IndexType> get_shape() const
+        {
+            IndexType num_rows, num_cols;
+            m_mat.get_shape(num_rows, num_cols);
+            return std::make_pair(num_rows, num_cols);
         }
 
         ScalarType get_zero() const

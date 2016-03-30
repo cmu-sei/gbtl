@@ -255,8 +255,9 @@ namespace graphblas
                     SemiringT       s     = SemiringT(),
                     AccumT          accum = AccumT())
     {
-        vector_multiply_dimension_check(a, b.get_shape().first);
-        backend::vxm(a.m_vec, b.m_mat, c.m_vec, s, accum);
+        //vector_multiply_dimension_check(a, b.get_shape().first);
+        //backend::vxm(a.m_vec, b.m_mat, c.m_vec, s, accum);
+        backend::vxm(a.m_mat, b.m_mat, c.m_mat, s, accum);
     }
 
     /**
@@ -292,8 +293,9 @@ namespace graphblas
                     SemiringT       s     = SemiringT(),
                     AccumT          accum = AccumT())
     {
-        vector_multiply_dimension_check(b, a.get_shape().second);
-        backend::mxv(a.m_mat, b.m_vec, c.m_vec, s, accum);
+        //vector_multiply_dimension_check(b, a.get_shape().second);
+        //backend::mxv(a.m_mat, b.m_vec, c.m_vec, s, accum);
+        backend::mxv(a.m_mat, b.m_mat, c.m_mat, s, accum);
     }
 
     /**
@@ -539,7 +541,7 @@ namespace graphblas
                            AccumT          accum = AccumT())
     {
         if (a.get_shape().first != c.get_shape().first || c.get_shape().first != 1){
-            throw graphblas::DimensionException();
+            //throw graphblas::DimensionException();
         }
         backend::col_reduce(a.m_mat, c.m_mat, m, accum);
     }
@@ -577,7 +579,7 @@ namespace graphblas
                            AccumT          accum = AccumT())
     {
         if (a.get_shape().first != c.get_shape().first || c.get_shape().second != 1){
-            throw graphblas::DimensionException();
+            //throw graphblas::DimensionException();
         }
         backend::rowReduceMasked(a.m_mat, c.m_mat, mask, sum, accum);
     }
@@ -614,7 +616,7 @@ namespace graphblas
                            AccumT          accum = AccumT())
     {
         if (a.get_shape().first != c.get_shape().first || c.get_shape().first != 1){
-            throw graphblas::DimensionException();
+            //throw graphblas::DimensionException();
         }
         backend::colReduceMasked(a.m_mat, c.m_mat, mask, sum, accum);
     }
@@ -764,9 +766,9 @@ namespace graphblas
                             IndexType    n,
                             AccumT       accum = AccumT())
     {
-        if (*(i+n) == 0 || *(j+n) == 0 || *(v+n) == 0){
-            throw graphblas::DimensionException();
-        }
+        //if (*(i+n) == 0 || *(j+n) == 0 || *(v+n) == 0){
+        //    throw graphblas::DimensionException();
+        //}
         backend::buildmatrix(m.m_mat, i, j, v, n, accum);
     }
     /**
