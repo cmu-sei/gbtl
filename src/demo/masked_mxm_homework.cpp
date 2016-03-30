@@ -190,7 +190,10 @@ namespace algorithms
         wavefront.get_shape(wrows, wcols);
         if ((grows != gcols) || (wcols != grows))
         {
-            throw DimensionException();
+            throw DimensionException("grows="+std::to_string(grows)
+                    + ", gcols"+std::to_string(gcols)
+                    + "\nwcols="+std::to_string(wcols)
+                    + ", grows="+std::to_string(grows));
         }
 
         IndexType depth = 0;
