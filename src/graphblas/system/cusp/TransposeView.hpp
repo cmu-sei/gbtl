@@ -18,7 +18,6 @@
 #define GB_CUSP_TRANSPOSE_VIEW_HPP
 
 #include <graphblas/system/cusp/Matrix.hpp>
-#include <graphblas/system/cusp/detail/transpose.inl>
 
 namespace graphblas
 {
@@ -30,10 +29,10 @@ namespace backend
      * @tparam MatrixT         Implements the 2D matrix concept.
      */
     template<typename MatrixT>
-    class TransposeView : public graphblas::backend::Matrix<MatrixT::ScalarType>
+    class TransposeView : public graphblas::backend::Matrix<typename MatrixT::ScalarType>
     {
     private:
-        typedef typename graphblas::backend::Matrix<MatrixT::ScalarType> ParentMatrixT;
+        typedef typename graphblas::backend::Matrix<typename MatrixT::ScalarType> ParentMatrixT;
     public:
         typedef typename MatrixT::ScalarType ScalarType;
 
