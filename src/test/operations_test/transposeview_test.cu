@@ -12,4 +12,7 @@ int main(){
     graphblas::buildmatrix(stuff, i.begin(), j.begin(), v.begin(), count);
 
     transpose(stuff);
+
+    //negateview:
+    graphblas::negate(stuff);
 };

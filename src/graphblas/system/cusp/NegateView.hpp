@@ -45,10 +45,11 @@ namespace backend
     struct row_index_transformer{
         IndexType cols;
 
+        __host__ __device__
         row_index_transformer(IndexType c) :cols(c) {}
 
         __host__ __device__
-        inline IndexType operator()(const IndexType & sequence) {
+        IndexType operator()(const IndexType & sequence) {
             return (sequence / cols);
         }
     };
@@ -56,27 +57,84 @@ namespace backend
     struct col_index_transformer{
         IndexType rows, cols;
 
+        __host__ __device__
         col_index_transformer(IndexType r, IndexType c) : rows(r), cols(c) {}
 
         __host__ __device__
-        inline IndexType operator()(const IndexType & sequence) {
+        IndexType operator()(const IndexType & sequence) {
             return sequence - ((sequence / cols) * rows);
         }
     };
 
-    template <typename InputIt>
-    struct find_entry{
-        InputIt a_begin, a_end, b_begin, b_end;
-        find_entry(InputIt a1, InputIt a2, InputIt b1, InputIt b2):
-            a_begin(a1), a_end(a2), b_begin(b1), b_end(b2) {}
-        template <typename T>
+    cusp::array1d_view<thrust::transform_iterator<row_index_transformer, thrust::counting_iterator<IndexType> > >
+    make_row_index_iterator(IndexType rows, IndexType cols)
+    {
+        auto sequence = thrust::make_counting_iterator(rows*cols);
+        auto begin_transformed = thrust::make_transform_iterator(sequence, row_index_transformer(cols));
+        auto end_transformed = thrust::make_transform_iterator(sequence + (rows*cols), row_index_transformer(cols));
+        return cusp::make_array1d_view(begin_transformed, end_transformed);
+    }
+
+    cusp::array1d_view<thrust::transform_iterator<col_index_transformer, thrust::counting_iterator<IndexType> > >
+    make_col_index_iterator(IndexType rows, IndexType cols)
+    {
+        auto sequence = thrust::make_counting_iterator(rows*cols);
+        auto begin_transformed = thrust::make_transform_iterator(sequence, col_index_transformer(rows, cols));
+        auto end_transformed = thrust::make_transform_iterator(sequence + (rows*cols), col_index_transformer(rows, cols));
+        return cusp::make_array1d_view(begin_transformed, end_transformed);
+    }
+
+    template <typename InputIt, typename OneT, typename ZeroT>
+    struct find_entry_replace{
+        InputIt a1, a2;
+        OneT yks, r, c;
+        ZeroT nol;
+
+        typedef OneT type;
+
         __host__ __device__
-        inline bool operator()(const T& first, const T& second)
+        find_entry_replace(InputIt zip_begin, InputIt zip_end, OneT rows, OneT cols, OneT one, ZeroT zero)
+            : a1(zip_begin), a2(zip_end), r(rows), c(cols), yks(one), nol(zero) {}
+
+        __host__ __device__
+        OneT operator()(const OneT& value)
         {
-            return thrust::binary_search
+            //value to index:
+            OneT row = value/c;
+            OneT col = value - ((value/c)*r);
+            return thrust::binary_search(a1, a2, thrust::make_tuple(row, col)) ? static_cast<OneT>(nol) : yks;
         }
 
     };
+
+    template <typename IndexIterator, typename ValueType, typename SemiringT>
+    cusp::array1d_view<thrust::transform_iterator<
+        find_entry_replace<thrust::zip_iterator<thrust::tuple<IndexIterator, IndexIterator> >, ValueType, ValueType >,
+        thrust::counting_iterator<ValueType> > >
+    make_val_iterator(IndexIterator row_indices, IndexIterator col_indices, IndexType rows, IndexType cols, IndexType num_entries, ValueType, SemiringT)
+    {
+        auto sequence = thrust::make_counting_iterator(static_cast<ValueType>(rows*cols));
+        auto zipped_indices_begin = thrust::make_zip_iterator(thrust::make_tuple(row_indices, col_indices));
+        auto zipped_indices_end = thrust::make_zip_iterator(thrust::make_tuple(row_indices+num_entries, col_indices+num_entries));
+
+        ValueType one = static_cast<ValueType>(SemiringT().one());
+        ValueType zero = static_cast<ValueType>(SemiringT().zero());
+
+        find_entry_replace<thrust::zip_iterator<thrust::tuple<IndexIterator, IndexIterator> >, ValueType, ValueType >
+             op(zipped_indices_begin,
+                zipped_indices_end,
+                rows,
+                cols,
+                one,
+                zero);
+
+        auto begin_transformed = thrust::make_transform_iterator(sequence, op);
+        auto end_transformed = thrust::make_transform_iterator(sequence + (rows*cols), op);
+
+        return cusp::make_array1d_view(begin_transformed, end_transformed);
+
+    }
+
     }//end detail
 
     //************************************************************************
@@ -88,29 +146,33 @@ namespace backend
      * @tparam SemiringT   Used to define the behaviour of the negate
      */
     template<typename MatrixT, typename SemiringT>
-    class NegateView : public graphblas::backend::Matrix<typename MatrixT::ScalarType>
+    class NegateView : public cusp::coo_matrix_view<
+            cusp::array1d_view<thrust::transform_iterator<detail::row_index_transformer, thrust::counting_iterator<IndexType> > >,
+            cusp::array1d_view<thrust::transform_iterator<detail::col_index_transformer, thrust::counting_iterator<IndexType> > >,
+            cusp::array1d_view<thrust::transform_iterator<
+                detail::find_entry_replace<thrust::zip_iterator<thrust::tuple<
+                    thrust::detail::normal_iterator<thrust::device_ptr<IndexType> >,
+                    thrust::detail::normal_iterator<thrust::device_ptr<IndexType> >
+                    > >, typename MatrixT::ScalarType, typename MatrixT::ScalarType >,
+                thrust::counting_iterator<typename MatrixT::ScalarType> > > >
     {
     public:
         typedef typename MatrixT::ScalarType ScalarType;
-        typedef graphblas::backend::Matrix<typename MatrixT::ScalarType> ParentMatrixT;
+        typedef cusp::coo_matrix_view<
+            cusp::array1d_view<thrust::transform_iterator<detail::row_index_transformer, thrust::counting_iterator<IndexType> > >,
+            cusp::array1d_view<thrust::transform_iterator<detail::col_index_transformer, thrust::counting_iterator<IndexType> > >,
+            cusp::array1d_view<thrust::transform_iterator<
+                detail::find_entry_replace<thrust::zip_iterator<thrust::tuple<
+                    thrust::detail::normal_iterator<thrust::device_ptr<IndexType> >,
+                    thrust::detail::normal_iterator<thrust::device_ptr<IndexType> >
+                    > >, ScalarType, ScalarType >,
+                thrust::counting_iterator<ScalarType> > > > ParentMatrixT;
 
-        // CONSTRUCTORS
-
-        NegateView(MatrixT const &matrix):
-            ParentMatrix(matrix.num_rows, matrix.num_cols, 0)
+        NegateView(MatrixT const &matrix)
         {
-            /// @todo assert that matrix and semiring zero() are the same?
-            //this is a problem, since matrices really shouldn't have zeroes
-
-
-            //unfortunately will need to materialize the negation (not sparse in representation,
-            //but still sparse in storage), the cost is search.
-            auto rows = matrix.num_rows;
-            auto cols = matrix.num_cols;
-            this->num_entries = matrix.num_rows * matrix.num_cols - matrix.num_entries;
 
         }
-    }
+    };
 
 
 
