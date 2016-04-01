@@ -168,10 +168,19 @@ namespace backend
                     > >, ScalarType, ScalarType >,
                 thrust::counting_iterator<ScalarType> > > > ParentMatrixT;
 
-        NegateView(MatrixT const &matrix)
-        {
-
-        }
+        NegateView(MatrixT const &matrix) :
+            ParentMatrixT(matrix.num_rows,
+                    matrix.num_cols,
+                    matrix.num_rows*matrix.num_cols,
+                    detail::make_row_index_iterator(matrix.num_rows, matrix.num_cols),
+                    detail::make_col_index_iterator(matrix.num_rows, matrix.num_cols),
+                    detail::make_val_iterator(matrix.row_indices.begin(),
+                        matrix.column_indices.begin(),
+                        matrix.num_rows,
+                        matrix.num_cols,
+                        matrix.num_entries,
+                        ScalarType(0),
+                        SemiringT())) {}
     };
 
 
