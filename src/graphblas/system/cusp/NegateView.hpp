@@ -135,6 +135,28 @@ namespace backend
 
     }
 
+    //make negated index pairs:
+    template <typename IndexIterator, typename OutputIterator>
+    void make_negated_index_pairs(IndexIterator row_indices, IndexIterator col_indices, IndexType rows, IndexType cols, IndexType num_entries,
+            OutputIterator out_rows, OutputIterator out_cols)
+    {
+        auto sequence = thrust::make_counting_iterator(0);
+        auto row_begin = thrust::make_transform_iterator(sequence, row_index_transformer(cols));
+        auto row_end = thrust::make_transform_iterator(sequence + (rows*cols), row_index_transformer(cols));
+        auto col_begin = thrust::make_transform_iterator(sequence, col_index_transformer(rows, cols));
+        auto col_end = thrust::make_transform_iterator(sequence + (rows*cols), col_index_transformer(rows, cols));
+
+        auto zipped_indices_begin = thrust::make_zip_iterator(thrust::make_tuple(row_indices, col_indices));
+        auto zipped_indices_end = thrust::make_zip_iterator(thrust::make_tuple(row_indices+num_entries, col_indices+num_entries));
+
+        auto zipped_ranges_begin = thrust::make_zip_iterator(thrust::make_tuple(row_begin, col_begin));
+        auto zipped_ranges_end = thrust::make_zip_iterator(thrust::make_tuple(row_end, col_end));
+
+        thrust::set_difference(zipped_ranges_begin, zipped_ranges_end,
+                zipped_indices_begin, zipped_indices_end,
+                thrust::make_zip_iterator(thrust::make_tuple(out_rows, out_cols)));
+    }
+
     }//end detail
 
     //************************************************************************
@@ -146,41 +168,37 @@ namespace backend
      * @tparam SemiringT   Used to define the behaviour of the negate
      */
     template<typename MatrixT, typename SemiringT>
-    class NegateView : public cusp::coo_matrix_view<
-            cusp::array1d_view<thrust::transform_iterator<detail::row_index_transformer, thrust::counting_iterator<IndexType> > >,
-            cusp::array1d_view<thrust::transform_iterator<detail::col_index_transformer, thrust::counting_iterator<IndexType> > >,
-            cusp::array1d_view<thrust::transform_iterator<
-                detail::find_entry_replace<thrust::zip_iterator<thrust::tuple<
-                    thrust::detail::normal_iterator<thrust::device_ptr<IndexType> >,
-                    thrust::detail::normal_iterator<thrust::device_ptr<IndexType> >
-                    > >, typename MatrixT::ScalarType, typename MatrixT::ScalarType >,
-                thrust::counting_iterator<typename MatrixT::ScalarType> > > >
+    class NegateView : public MatrixT
     {
     public:
         typedef typename MatrixT::ScalarType ScalarType;
-        typedef cusp::coo_matrix_view<
-            cusp::array1d_view<thrust::transform_iterator<detail::row_index_transformer, thrust::counting_iterator<IndexType> > >,
-            cusp::array1d_view<thrust::transform_iterator<detail::col_index_transformer, thrust::counting_iterator<IndexType> > >,
-            cusp::array1d_view<thrust::transform_iterator<
-                detail::find_entry_replace<thrust::zip_iterator<thrust::tuple<
-                    thrust::detail::normal_iterator<thrust::device_ptr<IndexType> >,
-                    thrust::detail::normal_iterator<thrust::device_ptr<IndexType> >
-                    > >, ScalarType, ScalarType >,
-                thrust::counting_iterator<ScalarType> > > > ParentMatrixT;
+        ///typedef cusp::coo_matrix_view<
+        ///    //typename cusp::array1d< typename MatrixT::ScalarType, cusp::device_memory >::view,
+        ///    //typename cusp::array1d< typename MatrixT::ScalarType, cusp::device_memory >::view,
+        ///    cusp::array1d_view<thrust::detail::normal_iterator<thrust::device_ptr<typename MatrixT::ScalarType> > >,
+        ///    cusp::array1d_view<thrust::detail::normal_iterator<thrust::device_ptr<typename MatrixT::ScalarType> > >,
+        ///    cusp::constant_array<typename MatrixT::ScalarType> >ParentMatrixT;
 
         NegateView(MatrixT const &matrix) :
-            ParentMatrixT(matrix.num_rows,
-                    matrix.num_cols,
-                    matrix.num_rows*matrix.num_cols,
-                    detail::make_row_index_iterator(matrix.num_rows, matrix.num_cols),
-                    detail::make_col_index_iterator(matrix.num_rows, matrix.num_cols),
-                    detail::make_val_iterator(matrix.row_indices.begin(),
-                        matrix.column_indices.begin(),
-                        matrix.num_rows,
-                        matrix.num_cols,
-                        matrix.num_entries,
-                        ScalarType(0),
-                        SemiringT())) {}
+            //ParentMatrixT(
+            //        matrix.num_rows,
+            //        matrix.num_cols,
+            //        matrix.num_rows*matrix.num_cols-matrix.num_entries,
+            //        cusp::make_array1d_view(cusp::array1d<typename MatrixT::ScalarType, cusp::device_memory>(matrix.num_rows*matrix.num_cols-matrix.num_entries)),
+            //        cusp::make_array1d_view(cusp::array1d<typename MatrixT::ScalarType, cusp::device_memory>(matrix.num_rows*matrix.num_cols-matrix.num_entries)),
+            //        cusp::constant_array<ScalarType>(matrix.num_rows*matrix.num_cols-matrix.num_entries, SemiringT().one()))
+            MatrixT(matrix)
+        {
+            auto newsize = matrix.num_rows*matrix.num_cols-matrix.num_entries;
+            //resize:
+            this->resize(matrix.num_rows, matrix.num_cols, newsize);
+            //populate row and col:
+            detail::make_negated_index_pairs(matrix.row_indices.begin(),
+                    matrix.column_indices.begin(),
+                    matrix.num_rows, matrix.num_cols, matrix.num_entries,
+                    this->row_indices.begin(), this->column_indices.begin());
+            thrust::copy_n(thrust::make_constant_iterator(SemiringT().one()), newsize, this->values.begin());
+        }
     };
 
 
@@ -193,6 +211,9 @@ namespace backend
         SemiringT const &s = SemiringT())
     {
         return NegateView<MatrixT, SemiringT>(a);
+        //auto n= NegateView<MatrixT, SemiringT>(a);
+        //cusp::print(n);
+        //return n;
     }
 
 } // backend
