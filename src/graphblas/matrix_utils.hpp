@@ -211,14 +211,5 @@ namespace graphblas
         ostr << label << ": zero = " << mat.m_mat.get_zero() << std::endl;
         backend::pretty_print_matrix(ostr, mat.m_mat);
     }
-
-    /**
-     * @deprecated method for compatibility
-     */
-    template <typename MatrixT>
-    void pretty_print_matrix(std::ostream &ostr, MatrixT const &mat)
-    {
-        graphblas::print_matrix(ostr,mat, "");
-    }
 } // graphblas
 #endif // GB_MATRIX_UTILS_HPP
