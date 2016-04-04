@@ -4,7 +4,7 @@ if ENABLE_CUDA
 
 include $(top_srcdir)/mk/cuda.mk
 
-SUBDIRS = cusp
+SUBDIRS = #cusp
 ##$(abs_top_srcdir)
 AM_CPPFLAGS = -I$(abs_top_srcdir) -I$(abs_top_srcdir)/cusplibrary
 AM_LDFLAGS = $(NVCC_LDFLAGS) $(NVCC_LIBS)

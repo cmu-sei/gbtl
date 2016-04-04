@@ -42,30 +42,33 @@ namespace backend
     namespace detail{
     //implement a matrix index iterator (1111,2222,3333...), (123412341234...)
 
-    struct row_index_transformer{
+    struct row_index_transformer: public thrust::unary_function<IndexType,IndexType>{
         IndexType cols;
 
         __host__ __device__
         row_index_transformer(IndexType c) :cols(c) {}
 
+        template <typename IntT>
         __host__ __device__
-        IndexType operator()(const IndexType & sequence) {
+        IntT operator()(const IntT & sequence) {
             return (sequence / cols);
         }
     };
 
-    struct col_index_transformer{
+    struct col_index_transformer : public thrust::unary_function<IndexType,IndexType> {
         IndexType rows, cols;
 
         __host__ __device__
         col_index_transformer(IndexType r, IndexType c) : rows(r), cols(c) {}
 
+        template <typename IntT>
         __host__ __device__
-        IndexType operator()(const IndexType & sequence) {
+        IntT operator()(const IntT & sequence) {
             return sequence - ((sequence / cols) * rows);
         }
     };
 
+#if 0
     cusp::array1d_view<thrust::transform_iterator<row_index_transformer, thrust::counting_iterator<IndexType> > >
     make_row_index_iterator(IndexType rows, IndexType cols)
     {
@@ -134,6 +137,7 @@ namespace backend
         return cusp::make_array1d_view(begin_transformed, end_transformed);
 
     }
+#endif
 
     //make negated index pairs:
     template <typename IndexIterator, typename OutputIterator>
@@ -187,11 +191,9 @@ namespace backend
             //        cusp::make_array1d_view(cusp::array1d<typename MatrixT::ScalarType, cusp::device_memory>(matrix.num_rows*matrix.num_cols-matrix.num_entries)),
             //        cusp::make_array1d_view(cusp::array1d<typename MatrixT::ScalarType, cusp::device_memory>(matrix.num_rows*matrix.num_cols-matrix.num_entries)),
             //        cusp::constant_array<ScalarType>(matrix.num_rows*matrix.num_cols-matrix.num_entries, SemiringT().one()))
-            MatrixT(matrix)
+            MatrixT(matrix.num_rows, matrix.num_cols, matrix.num_cols-matrix.num_entries)
         {
             auto newsize = matrix.num_rows*matrix.num_cols-matrix.num_entries;
-            //resize:
-            this->resize(matrix.num_rows, matrix.num_cols, newsize);
             //populate row and col:
             detail::make_negated_index_pairs(matrix.row_indices.begin(),
                     matrix.column_indices.begin(),
