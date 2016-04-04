@@ -62,6 +62,7 @@ namespace graphblas
                ScalarT   zero = static_cast<ScalarT>(0))
             : m_mat(num_rows, num_cols, zero)
         {
+            m_mat.set_zero(zero);
         }
 
         /**
@@ -77,6 +78,7 @@ namespace graphblas
                ScalarT    zero = static_cast<ScalarT>(0))
             : m_mat(values, zero)
         {
+            m_mat.set_zero(zero);
         }
 
         /**

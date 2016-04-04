@@ -105,7 +105,10 @@ int main()
     // Trying the row vector approach
     graphblas::Matrix<unsigned int, graphblas::DirectedMatrixTag>
         root(1, num_nodes);
-    root.set_value_at(0, 30, 1);  // pick an arbitrary root;
+    // pick an arbitrary root:
+    std::vector<graphblas::IndexType> temp_r(1,0), temp_c(1,30);
+    std::vector<unsigned int> temp_v(1,1);
+    graphblas::buildmatrix(root, temp_r.begin(), temp_c.begin(), temp_v.begin(), 1);
 
     graphblas::Matrix<unsigned int,
                       graphblas::DirectedMatrixTag> levels1(1,
