@@ -1,13 +1,7 @@
-2015-07-16 John Matty <jcmatty@sei.cmu.edu>
-	* Everything: Initial prototyping.
-2015-09-30 Scott McMillan <smcmillan@sei.cmu.edu>
-	* Alpha release of GraphBLAS API (WIP)
-	* Alpha release of graph algorithms suite
-	* Alpha release of GPU backend built on Cusp and Thrust (and a proof
-	  of concept release of a simple, naive sequential backend for CPU)
-2016-02-14
-	* Version 0.1 released; CUSP and sequential backends (except for
-	  support of "views" like TransposeView, NegateView, "extended" views).
+2016-04-04
+	* cusp::NegateView implemented
+	* anything that doesn't require (get,set)_value_at, masking or pretty print can be compiled on the cusp backend
+
 2016-03-30
 	* added files for compilation
 	* added vector concept (dense vector)
@@ -15,3 +9,16 @@
 	* added utility::filter convenience method
 	* removed ConstantMatrix from both backends and replaced with apply
 	* implemented TransposeView in cusp
+
+2016-02-14
+	* Version 0.1 released; CUSP and sequential backends (except for
+	  support of "views" like TransposeView, NegateView, "extended" views).
+
+2015-09-30 Scott McMillan <smcmillan@sei.cmu.edu>
+	* Alpha release of GraphBLAS API (WIP)
+	* Alpha release of graph algorithms suite
+	* Alpha release of GPU backend built on Cusp and Thrust (and a proof
+	  of concept release of a simple, naive sequential backend for CPU)
+	  
+2015-07-16 John Matty <jcmatty@sei.cmu.edu>
+	* Everything: Initial prototyping.
