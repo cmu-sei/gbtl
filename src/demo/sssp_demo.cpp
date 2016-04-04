@@ -49,12 +49,12 @@ void run_demo()
     graphblas::buildmatrix(G_tn, i.begin(), j.begin(), v.begin(), i.size());
 
     std::cout << "G_tn: zero = " << G_tn.get_zero() << std::endl;
-    graphblas::pretty_print_matrix(std::cout, G_tn);
+    graphblas::print_matrix(std::cout, G_tn);
 
     auto ident = graphblas::identity<
         graphblas::Matrix<T, graphblas::DirectedMatrixTag > >(NUM_NODES,INF,0);
     std::cout << "ident: zero = " << ident.get_zero() << std::endl;
-    graphblas::pretty_print_matrix(std::cout, ident);
+    graphblas::print_matrix(std::cout, ident);
 
     // compute all shortest paths
     graphblas::Matrix<T, graphblas::DirectedMatrixTag>
@@ -62,7 +62,7 @@ void run_demo()
     algorithms::sssp(G_tn, ident, G_tn_res);
 
     std::cout << "Results:" << std::endl;
-    graphblas::pretty_print_matrix(std::cout, G_tn_res);
+    graphblas::print_matrix(std::cout, G_tn_res);
 }
 
 //****************************************************************************

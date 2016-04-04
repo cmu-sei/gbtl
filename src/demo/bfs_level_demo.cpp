@@ -117,22 +117,22 @@ int main()
     algorithms::bfs_level(G_karate, root, levels1);
 
 //    std::cout << "Graph: " << std::endl;
-//    graphblas::pretty_print_matrix(std::cout, G_karate);
+//    graphblas::print_matrix(std::cout, G_karate);
     std::cout << "bfs_level output" << std::endl;
     std::cout << "root:" << std::endl;
-    graphblas::pretty_print_matrix(std::cout, root);
+    graphblas::print_matrix(std::cout, root);
     std::cout << "levels:" << std::endl;
-    graphblas::pretty_print_matrix(std::cout, levels1);
+    graphblas::print_matrix(std::cout, levels1);
 
     algorithms::bfs_level_masked(G_karate, root, levels);
 
 //    std::cout << "Graph: " << std::endl;
-//    graphblas::pretty_print_matrix(std::cout, G_karate);
+//    graphblas::print_matrix(std::cout, G_karate);
     std::cout << std::endl;
     std::cout << "root:" << std::endl;
-    graphblas::pretty_print_matrix(std::cout, root);
+    graphblas::print_matrix(std::cout, root);
     std::cout << "levels:" << std::endl;
-    graphblas::pretty_print_matrix(std::cout, levels);
+    graphblas::print_matrix(std::cout, levels);
 
     return 0;
 }
