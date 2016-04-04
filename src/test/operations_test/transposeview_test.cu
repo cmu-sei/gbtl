@@ -1,4 +1,5 @@
 #include <graphblas/graphblas.hpp>
+#include <cusp/print.h>
 
 int main(){
     using namespace graphblas;
@@ -11,5 +12,8 @@ int main(){
 
     graphblas::buildmatrix(stuff, i.begin(), j.begin(), v.begin(), count);
 
-    transpose(stuff);
+    //transpose(stuff);
+
+    //negateview:
+    graphblas::negate(stuff);
 };

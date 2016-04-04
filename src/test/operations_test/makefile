@@ -6,8 +6,11 @@ FLAGS= -std=c++11  $(BOOST_FLAGS) $(CUDA_FLAGS)
 
 INC=-I../.. -I../../../cusplibrary -I/usr/local/include
 
-OBJS=extract buildmatrix assign extracttuples transpose apply ewise mxm bfs sssp vector transposeview
+OBJS=extract buildmatrix assign extracttuples transpose apply ewise mxm bfs sssp vector transposeview utility
 all: $(OBJS)
+
+utility: utility_test.cu
+	$(CC) $(FLAGS) $(INC) utility_test.cu -o utility
 
 transposeview: transposeview_test.cu
 	$(CC) $(FLAGS) $(INC) transposeview_test.cu -o transposeview
