@@ -17,11 +17,13 @@
 #ifndef GB_CUSP_NEGATE_VIEW_HPP
 #define GB_CUSP_NEGATE_VIEW_HPP
 
-#include <graphblas/system/cusp/ColumnView.hpp>
+#include <graphblas/system/cusp/Matrix.hpp>
+#include <thrust/iterator/iterator_adaptor.h>
 
 namespace graphblas
 {
-    //************************************************************************
+namespace backend
+{
     // Generalized Negate/complement
     template <typename SemiringT>
     class SemiringNegate
@@ -37,256 +39,186 @@ namespace graphblas
         }
     };
 
+    namespace detail{
+    //implement a matrix index iterator (1111,2222,3333...), (123412341234...)
+
+    struct row_index_transformer: public thrust::unary_function<IndexType,IndexType>{
+        IndexType cols;
+
+        __host__ __device__
+        row_index_transformer(IndexType c) :cols(c) {}
+
+        template <typename IntT>
+        __host__ __device__
+        IntT operator()(const IntT & sequence) {
+            return (sequence / cols);
+        }
+    };
+
+    struct col_index_transformer : public thrust::unary_function<IndexType,IndexType> {
+        IndexType rows, cols;
+
+        __host__ __device__
+        col_index_transformer(IndexType r, IndexType c) : rows(r), cols(c) {}
+
+        template <typename IntT>
+        __host__ __device__
+        IntT operator()(const IntT & sequence) {
+            return sequence - ((sequence / cols) * rows);
+        }
+    };
+
+#if 0
+    cusp::array1d_view<thrust::transform_iterator<row_index_transformer, thrust::counting_iterator<IndexType> > >
+    make_row_index_iterator(IndexType rows, IndexType cols)
+    {
+        auto sequence = thrust::make_counting_iterator(rows*cols);
+        auto begin_transformed = thrust::make_transform_iterator(sequence, row_index_transformer(cols));
+        auto end_transformed = thrust::make_transform_iterator(sequence + (rows*cols), row_index_transformer(cols));
+        return cusp::make_array1d_view(begin_transformed, end_transformed);
+    }
+
+    cusp::array1d_view<thrust::transform_iterator<col_index_transformer, thrust::counting_iterator<IndexType> > >
+    make_col_index_iterator(IndexType rows, IndexType cols)
+    {
+        auto sequence = thrust::make_counting_iterator(rows*cols);
+        auto begin_transformed = thrust::make_transform_iterator(sequence, col_index_transformer(rows, cols));
+        auto end_transformed = thrust::make_transform_iterator(sequence + (rows*cols), col_index_transformer(rows, cols));
+        return cusp::make_array1d_view(begin_transformed, end_transformed);
+    }
+
+    template <typename InputIt, typename OneT, typename ZeroT>
+    struct find_entry_replace{
+        InputIt a1, a2;
+        OneT yks, r, c;
+        ZeroT nol;
+
+        typedef OneT type;
+
+        __host__ __device__
+        find_entry_replace(InputIt zip_begin, InputIt zip_end, OneT rows, OneT cols, OneT one, ZeroT zero)
+            : a1(zip_begin), a2(zip_end), r(rows), c(cols), yks(one), nol(zero) {}
+
+        __host__ __device__
+        OneT operator()(const OneT& value)
+        {
+            //value to index:
+            OneT row = value/c;
+            OneT col = value - ((value/c)*r);
+            return thrust::binary_search(a1, a2, thrust::make_tuple(row, col)) ? static_cast<OneT>(nol) : yks;
+        }
+
+    };
+
+    template <typename IndexIterator, typename ValueType, typename SemiringT>
+    cusp::array1d_view<thrust::transform_iterator<
+        find_entry_replace<thrust::zip_iterator<thrust::tuple<IndexIterator, IndexIterator> >, ValueType, ValueType >,
+        thrust::counting_iterator<ValueType> > >
+    make_val_iterator(IndexIterator row_indices, IndexIterator col_indices, IndexType rows, IndexType cols, IndexType num_entries, ValueType, SemiringT)
+    {
+        auto sequence = thrust::make_counting_iterator(static_cast<ValueType>(rows*cols));
+        auto zipped_indices_begin = thrust::make_zip_iterator(thrust::make_tuple(row_indices, col_indices));
+        auto zipped_indices_end = thrust::make_zip_iterator(thrust::make_tuple(row_indices+num_entries, col_indices+num_entries));
+
+        ValueType one = static_cast<ValueType>(SemiringT().one());
+        ValueType zero = static_cast<ValueType>(SemiringT().zero());
+
+        find_entry_replace<thrust::zip_iterator<thrust::tuple<IndexIterator, IndexIterator> >, ValueType, ValueType >
+             op(zipped_indices_begin,
+                zipped_indices_end,
+                rows,
+                cols,
+                one,
+                zero);
+
+        auto begin_transformed = thrust::make_transform_iterator(sequence, op);
+        auto end_transformed = thrust::make_transform_iterator(sequence + (rows*cols), op);
+
+        return cusp::make_array1d_view(begin_transformed, end_transformed);
+
+    }
+#endif
+
+    //make negated index pairs:
+    template <typename IndexIterator, typename OutputIterator>
+    void make_negated_index_pairs(IndexIterator row_indices, IndexIterator col_indices, IndexType rows, IndexType cols, IndexType num_entries,
+            OutputIterator out_rows, OutputIterator out_cols)
+    {
+        auto sequence = thrust::make_counting_iterator(0);
+        auto row_begin = thrust::make_transform_iterator(sequence, row_index_transformer(cols));
+        auto row_end = thrust::make_transform_iterator(sequence + (rows*cols), row_index_transformer(cols));
+        auto col_begin = thrust::make_transform_iterator(sequence, col_index_transformer(rows, cols));
+        auto col_end = thrust::make_transform_iterator(sequence + (rows*cols), col_index_transformer(rows, cols));
+
+        auto zipped_indices_begin = thrust::make_zip_iterator(thrust::make_tuple(row_indices, col_indices));
+        auto zipped_indices_end = thrust::make_zip_iterator(thrust::make_tuple(row_indices+num_entries, col_indices+num_entries));
+
+        auto zipped_ranges_begin = thrust::make_zip_iterator(thrust::make_tuple(row_begin, col_begin));
+        auto zipped_ranges_end = thrust::make_zip_iterator(thrust::make_tuple(row_end, col_end));
+
+        thrust::set_difference(zipped_ranges_begin, zipped_ranges_end,
+                zipped_indices_begin, zipped_indices_end,
+                thrust::make_zip_iterator(thrust::make_tuple(out_rows, out_cols)));
+    }
+
+    }//end detail
+
     //************************************************************************
     /**
      * @brief View a matrix as if it were negated (stored values and
      *        structural zeroes are swapped).
      *
-     * @tparam MatrixT     Implements the 2D matrix concept.
+     * @tparam MatrixT     Implements the backend matrix.
      * @tparam SemiringT   Used to define the behaviour of the negate
      */
     template<typename MatrixT, typename SemiringT>
-    class NegateView
+    class NegateView : public MatrixT
     {
     public:
         typedef typename MatrixT::ScalarType ScalarType;
+        ///typedef cusp::coo_matrix_view<
+        ///    //typename cusp::array1d< typename MatrixT::ScalarType, cusp::device_memory >::view,
+        ///    //typename cusp::array1d< typename MatrixT::ScalarType, cusp::device_memory >::view,
+        ///    cusp::array1d_view<thrust::detail::normal_iterator<thrust::device_ptr<typename MatrixT::ScalarType> > >,
+        ///    cusp::array1d_view<thrust::detail::normal_iterator<thrust::device_ptr<typename MatrixT::ScalarType> > >,
+        ///    cusp::constant_array<typename MatrixT::ScalarType> >ParentMatrixT;
 
-        // CONSTRUCTORS
-
-        NegateView(MatrixT const &matrix):
-            m_matrix(matrix)
+        NegateView(MatrixT const &matrix) :
+            //ParentMatrixT(
+            //        matrix.num_rows,
+            //        matrix.num_cols,
+            //        matrix.num_rows*matrix.num_cols-matrix.num_entries,
+            //        cusp::make_array1d_view(cusp::array1d<typename MatrixT::ScalarType, cusp::device_memory>(matrix.num_rows*matrix.num_cols-matrix.num_entries)),
+            //        cusp::make_array1d_view(cusp::array1d<typename MatrixT::ScalarType, cusp::device_memory>(matrix.num_rows*matrix.num_cols-matrix.num_entries)),
+            //        cusp::constant_array<ScalarType>(matrix.num_rows*matrix.num_cols-matrix.num_entries, SemiringT().one()))
+            MatrixT(matrix.num_rows, matrix.num_cols, matrix.num_cols-matrix.num_entries)
         {
-            /// @todo assert that matrix and semiring zero() are the same?
+            auto newsize = matrix.num_rows*matrix.num_cols-matrix.num_entries;
+            //populate row and col:
+            detail::make_negated_index_pairs(matrix.row_indices.begin(),
+                    matrix.column_indices.begin(),
+                    matrix.num_rows, matrix.num_cols, matrix.num_entries,
+                    this->row_indices.begin(), this->column_indices.begin());
+            thrust::copy_n(thrust::make_constant_iterator(SemiringT().one()), newsize, this->values.begin());
         }
-
-        /**
-         * Copy constructor.
-         *
-         * @param[in] rhs The negate view to copy.
-         *
-         * @todo Is this const correct?
-         */
-        NegateView(NegateView<MatrixT, SemiringT> const &rhs)
-            : m_matrix(rhs.m_matrix)
-        {
-        }
-
-        ~NegateView()
-        {
-        }
-
-        /**
-         * @brief Get the shape for this matrix.
-         *
-         * @return  A tuple containing the shape in the form (M, N),
-         *          where M is the number of rows, and N is the number
-         *          of columns.
-         */
-        void get_shape(IndexType &num_rows, IndexType &num_cols) const
-        {
-            m_matrix.get_shape(num_rows, num_cols);
-        }
-
-
-        /**
-         * @brief Get the value of a structural zero element.
-         *
-         * @return  The structural zero value.
-         */
-        ScalarType get_zero() const
-        {
-            return m_matrix.get_zero();
-        }
-
-
-        /**
-         * @brief Set the value of a structural zero element.
-         *
-         * @param[in] new_zero  The new zero value.
-         *
-         * @return The old zero element for this matrix.
-         */
-        //ScalarType set_zero(ScalarType new_zero)
-        //{
-        //    return m_matrix.set_zero(new_zero);
-        //}
-
-        /**
-         * @return  The number of stored elements in the view.
-         */
-        IndexType get_nnz() const
-        {
-            IndexType rows, cols;
-            m_matrix.get_shape(rows, cols);
-            return (rows*cols - m_matrix.get_nnz());
-        }
-
-        /**
-         * @brief Equality testing for matrix. (value equality?)
-         *
-         * @param[in] rhs  The right hand side of the equality
-         *                 operation.
-         *
-         * @return true, if this matrix and rhs are identical.
-         * @todo  Not sure we need this form.  Should we do equality
-         *        with any matrix?
-         */
-        template <typename OtherMatrixT>
-        bool operator==(OtherMatrixT const &rhs) const
-        {
-            IndexType nr, nc, rhs_nr, rhs_nc;
-            get_shape(nr, nc);
-            rhs.get_shape(rhs_nr, rhs_nc);
-
-            if ((nr != rhs_nr) || (nc != rhs_nc))
-            {
-                return false;
-            }
-
-            // Definitely a more efficient way than this.  Only compare
-            // non-zero elements.  Then decide if compare zero's
-            // explicitly
-            for (IndexType i = 0; i < nr; ++i)
-            {
-                for (IndexType j = 0; j < nc; ++j)
-                {
-                    if (get_value_at(i, j) != rhs.get_value_at(i, j))
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }
-
-
-        /**
-         * @brief Inequality testing for matrix. (value equality?)
-         *
-         * @param[in] rhs  The right hand side of the inequality
-         *                 operation.
-         *
-         * @return true, if this matrix and rhs are not identical.
-         */
-        template <typename OtherMatrixT>
-        bool operator!=(OtherMatrixT const &rhs) const
-        {
-            return !(*this == rhs);
-        }
-
-
-        /**
-         * @brief Access the elements given row and column indexes.
-         *
-         * Function provided to access the elements given row and
-         * column indices.  The functionality is the same as that
-         * of the indexing function for a standard dense matrix.
-         *
-         * @param[in] row  The index of row to access.
-         * @param[in] col  The index of column to access.
-         *
-         * @return The negated element at the given row and column.
-         */
-        ScalarType get_value_at(IndexType row, IndexType col) const
-        {
-            //return math::NotFn<ScalarType>()(m_matrix.get_value_at(row, col));
-            return SemiringNegate<SemiringT>()(m_matrix.get_value_at(row, col));
-        }
-
-
-        // Not certain about this implementation
-        //void set_value_at(IndexType         row,
-        //                  IndexType         col,
-        //                  ScalarType const &val)
-        //{
-        //    m_matrix.set_value_at(row, col, math::NotFn<ScalarType>()(val));
-        //}
-
-        /**
-         * @brief Indexing function for accessing the rows of the
-         *        transposed matrix.
-         *
-         * @param[in] row  The index of the row to access.
-         *
-         * @return The view of a row of this matrix.
-         */
-        //ColumnView<MatrixT const>
-        //get_row(IndexType row) const
-        //{
-        //    // note row of transpose becomes column of underlying matrix
-        //    return ColumnView<MatrixT const>(row, m_matrix);
-        //}
-
-        //ColumnView<MatrixT>
-        //get_row(IndexType row)
-        //{
-        //    // note row of transpose becomes column of underlying matrix
-        //    return ColumnView<MatrixT>(row, m_matrix);
-        //}
-
-        /**
-         * @brief Indexing operator for accessing the rows of the
-         *        transposed matrix.
-         *
-         * @param[in] row  The index of the row to access.
-         *
-         * @return The view of a row of the transposed matrix.
-         */
-        //ColumnView<MatrixT const>
-        //operator[](IndexType row) const
-        //{
-        //    // note row of transpose becomes column of underlying matrix
-        //    return ColumnView<MatrixT const>(row, m_matrix);
-        //}
-
-        //ColumnView<MatrixT>
-        //operator[](IndexType row)
-        //{
-        //    // note row of transpose becomes column of underlying matrix
-        //    return ColumnView<MatrixT>(row, m_matrix);
-        //}
-
-
-        friend std::ostream&
-        operator<<(std::ostream                         &os,
-                   NegateView<MatrixT, SemiringT> const &mat)
-        {
-            IndexType num_rows, num_cols;
-            mat.get_shape(num_rows, num_cols);
-            for (IndexType row = 0; row < num_rows; ++row)
-            {
-                os << ((row == 0) ? "[[" : " [");
-                if (num_cols > 0)
-                {
-                    os << mat.get_value_at(row, 0);
-                }
-
-                for (IndexType col = 1; col < num_cols; ++col)
-                {
-                    os << ", " << mat.get_value_at(row, col);
-                }
-                os << ((row == num_rows - 1) ? "]]" : "]\n");
-            }
-            return os;
-        }
-
-    private:
-        /**
-         * Copy assignment not implemented.
-         *
-         * @param[in] rhs  The negate view to assign to this.
-         *
-         * @todo Assignment should be disallowed as you cannot reassign a
-         *       a reference.
-         */
-        NegateView<MatrixT, SemiringT> &
-        operator=(NegateView<MatrixT, SemiringT> const &rhs);
-
-    private:
-        MatrixT const &m_matrix;
     };
 
+
+
+    template<typename MatrixT,
+             typename SemiringT =
+                 graphblas::ArithmeticSemiring<typename MatrixT::ScalarType> >
+    inline NegateView<MatrixT, SemiringT> negate(
+        MatrixT const   &a,
+        SemiringT const &s = SemiringT())
+    {
+        return NegateView<MatrixT, SemiringT>(a);
+        //auto n= NegateView<MatrixT, SemiringT>(a);
+        //cusp::print(n);
+        //return n;
+    }
+
+} // backend
 } // graphblas
 
-#endif // GB_SEQUENTIAL_NEGATE_VIEW_HPP
+#endif

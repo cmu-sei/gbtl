@@ -150,12 +150,15 @@ namespace algorithms
         {
             // Increment the level
             ++depth;
-            graphblas::ConstantMatrix<unsigned int> depth_mat(rows, cols, depth);
 
             // Apply the level to all newly visited nodes
-            graphblas::ewisemult(wavefront, depth_mat, levels,
-                                 graphblas::math::Times<unsigned int>(),
-                                 graphblas::math::Accum<unsigned int>());
+            graphblas::arithmetic_n<graphblas::IndexType,
+                graphblas::math::Times<graphblas::IndexType> >
+                    incr(depth);
+
+            graphblas::apply(wavefront, levels,
+                    incr,
+                    graphblas::math::Accum<unsigned int>());
 
             graphblas::mxm(wavefront, graph, wavefront,
                            graphblas::IntLogicalSemiring<unsigned int>());
@@ -208,14 +211,15 @@ namespace algorithms
         {
             // Increment the level
             ++depth;
-            graphblas::ConstantMatrix<graphblas::IndexType>
-                depth_mat(rows, cols, depth);
 
             // Apply the level to all newly visited nodes
-            graphblas::ewisemult(
-                wavefront, depth_mat, levels,
-                graphblas::math::Times<graphblas::IndexType>(),
-                graphblas::math::Accum<graphblas::IndexType>());
+            graphblas::arithmetic_n<graphblas::IndexType,
+                graphblas::math::Times<graphblas::IndexType> >
+                    incr(depth);
+
+            graphblas::apply(wavefront, levels,
+                    incr,
+                    graphblas::math::Accum<unsigned int>());
 
             // Advance the wavefront and mask out nodes already assigned levels
             graphblas::mxmMasked(

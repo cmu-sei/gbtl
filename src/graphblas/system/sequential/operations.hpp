@@ -64,7 +64,12 @@ namespace backend{
         if ((a_num_rows != b_num_rows) || (b_num_rows != c_num_rows) ||
             (a_num_cols != b_num_cols) || (b_num_cols != c_num_cols))
         {
-            throw DimensionException();
+            std::string err_msg =
+                std::to_string(a_num_rows) + "," + std::to_string(b_num_rows) + "\n" +
+                std::to_string(b_num_rows) + "," + std::to_string(c_num_rows) + "\n" +
+                std::to_string(a_num_cols) + "," + std::to_string(b_num_cols) + "\n" +
+                std::to_string(b_num_cols) + "," + std::to_string(c_num_cols);
+            throw DimensionException(err_msg);
         }
 
         /// @todo Assert that all Matrixs have the same ScalarType.
@@ -502,7 +507,10 @@ namespace backend{
         // Assert shapes are the same.
         if ((a_num_rows != c_num_rows) || (a_num_cols != c_num_cols))
         {
-            throw DimensionException();
+            std::string err_msg =
+                std::to_string(a_num_rows) + "," + std::to_string(c_num_rows) + "\n" +
+                std::to_string(a_num_cols) + "," + std::to_string(c_num_cols);
+            throw DimensionException(err_msg);
         }
 
         /// @todo Assert that all Matrixs have the same ScalarType?

@@ -22,6 +22,8 @@
 
 namespace graphblas
 {
+    namespace backend_template_library = std;
+
 namespace backend{
     //************************************************************************
     template <typename MatrixA, typename MatrixB>

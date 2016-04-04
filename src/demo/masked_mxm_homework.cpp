@@ -190,7 +190,10 @@ namespace algorithms
         wavefront.get_shape(wrows, wcols);
         if ((grows != gcols) || (wcols != grows))
         {
-            throw DimensionException();
+            throw DimensionException("grows="+std::to_string(grows)
+                    + ", gcols"+std::to_string(gcols)
+                    + "\nwcols="+std::to_string(wcols)
+                    + ", grows="+std::to_string(grows));
         }
 
         IndexType depth = 0;
@@ -198,13 +201,19 @@ namespace algorithms
         {
             // Increment the level (ConstantMatrix is equivalent to a fill)
             ++depth;
-            ConstantMatrix<IndexType> depth_mat(wrows, wcols, depth);
+           // ConstantMatrix<IndexType> depth_mat(wrows, wcols, depth);
+
+            graphblas::arithmetic_n<
+                IndexType,
+                algebra::ArithmeticMultiplyMonoid<IndexType> >
+                    incr(depth);
 
             // Apply the level to all newly visited nodes, and
             // accumulate result into the levels vectors.
-            ewisemult(wavefront, depth_mat, levels,
-                      algebra::ArithmeticMultiplyMonoid<IndexType>(),
-                      algebra::Accum<IndexType>());
+            apply(wavefront, levels, incr, algebra::Accum<IndexType>());
+            //ewisemult(wavefront, depth_mat, levels,
+            //          algebra::ArithmeticMultiplyMonoid<IndexType>(),
+            //          algebra::Accum<IndexType>());
 
             // Advance the wavefront and mask out nodes already assigned levels
             mxmMasked(wavefront, graph, wavefront,

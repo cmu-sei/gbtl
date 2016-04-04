@@ -22,6 +22,46 @@
 
 namespace graphblas
 {
+    template <typename AMatrixT,
+              typename BMatrixT >
+    void same_dimension_check(AMatrixT const &a,
+                              BMatrixT const &b)
+    {
+        auto ashape = a.get_shape();
+        auto bshape = b.get_shape();
+        if (ashape.first!=bshape.first ||
+            ashape.second!=bshape.second)
+        {
+            //throw graphblas::DimensionException();
+            //std::cerr<<"warning: dim check failed"<<std::endl;
+        }
+    }
+
+    template <typename AMatrixT,
+              typename BMatrixT >
+    void multiply_dimension_check(AMatrixT const &a,
+                                  BMatrixT const &b)
+    {
+        auto ashape = a.get_shape();
+        auto bshape = b.get_shape();
+        if (ashape.first!=bshape.second)
+        {
+            //throw graphblas::DimensionException();
+            //std::cerr<<"warning: multiply dim check failed"<<std::endl;
+        }
+    }
+
+    template <typename AVectorT,
+              typename SizeT >
+    void vector_multiply_dimension_check(AVectorT const &a,
+                                         SizeT const &b)
+    {
+        //a is a vector with a method called "size()"
+        if (a.size()!=b)
+        {
+            throw graphblas::DimensionException();
+        }
+    }
 
     /** @note This file contains interfaces that have some use in certain
      *        situations, but their future in GraphBLAS is uncertain.
@@ -82,27 +122,59 @@ namespace graphblas
         backend::row_index_of(mat.m_mat);
     }
 
-    //timing:
-    //common functions:
-#if 0
-    cudaEvent_t start_event, stop_event;
+    /**
+     * @brief filters out the elements in one vector from the other.
+     *
+     * @param[in,out] v1 The vector to be filtered,.
+     * @param[in] v2  The vector to filter, .
+     *
+     * @return size of the filtered vector
+     *
+     */
+    template <typename Vector1,
+              typename Vector2,
+              typename SizeT >
+    SizeT filter(Vector1 &v1,
+                SizeT v1size,
+                Vector2 const &v2,
+                SizeT v2size)
+    {
+        namespace btl = backend_template_library;
 
-    void start_timer(){
-        cudaEventCreate(&start_event);
-        cudaEventCreate(&stop_event);
-        cudaEventRecord(start_event);
+        Vector1 temp(v1size);
+        //require c++11
+        auto end = btl::set_difference(
+                v1.begin(),
+                v1.begin()+v1size,
+                v2.begin(),
+                v2.begin()+v2size,
+                temp.begin());
+
+        btl::copy(temp.begin(), end, v1.begin());
+
+        return btl::distance(temp.begin(), end);
     }
 
-    void stop_timer(){
-        cudaEventRecord(stop_event);
-        cudaEventSynchronize(stop_event);
-    }
+    template <typename ConstT, typename BinaryOp>
+    struct arithmetic_n{
+        ConstT n;
+        BinaryOp op;
 
-    float get_elapsed_time(){
-        float ms=0;
-        cudaEventElapsedTime(&ms, start_event, stop_event);
-        return ms;
-    }
+        arithmetic_n(
+                const ConstT & value,
+                BinaryOp operation = BinaryOp() ) :
+            n(value),
+            op(operation)
+        {}
+
+        template <typename T>
+#ifdef GB_USE_CUSP_GPU
+__device__ __host__
 #endif
+        T operator()(const T& value){
+            return op(value, static_cast<T>(n));
+        }
+    };
+
 }
 
