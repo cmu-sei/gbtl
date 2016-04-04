@@ -1,6 +1,7 @@
 2016-04-04
 	* cusp::NegateView implemented
-	* anything that doesn't require (get,set)_value_at, masking or pretty print can be compiled on the cusp backend
+	* cusp::pretty_print_matrix implemented to support frontend matrix_util::print_matrix
+	* anything that doesn't require (get,set)_value_at and masking can be compiled on the cusp backend
 
 2016-03-30
 	* added files for compilation

@@ -20,6 +20,7 @@
 #include <graphblas/detail/param_unpack.hpp>
 #include <graphblas/operations.hpp>
 #include <graphblas/utility.hpp>
+#include <graphblas/matrix_utils.hpp>
 #include <graphblas/View.hpp>
 
 // Include matrix definitions from the appropriate backend.
@@ -395,13 +396,13 @@ namespace graphblas
                                 IndexType    n,
                                 AccumT       accum);
 
-    template<typename MatrixT,
-             typename AccumT >
-    friend inline void buildmatrix(MatrixT              &m,
-                            IndexArrayType const &i,
-                            IndexArrayType const &j,
-                            std::vector<typename MatrixT::ScalarType> const &v,
-                            AccumT                accum );
+        template<typename MatrixT,
+                 typename AccumT >
+        friend inline void buildmatrix(MatrixT              &m,
+                                IndexArrayType const &i,
+                                IndexArrayType const &j,
+                                std::vector<typename MatrixT::ScalarType> const &v,
+                                AccumT                accum );
 
 
         template<typename AMatrixT, typename BMatrixT>
@@ -415,27 +416,32 @@ namespace graphblas
         template<typename MatrixT>
         friend void row_index_of(MatrixT &mat);
 
-    template<typename AMatrixT,
-             typename CMatrixT,
-             typename MMatrixT,
-             typename MonoidT,
-             typename AccumT >
-    friend inline void rowReduceMasked(AMatrixT const &a,
-                           CMatrixT       &c, // vector?
-                           MMatrixT       &mask,
-                           MonoidT         sum,
-                           AccumT          accum);
+        template<typename AMatrixT,
+                 typename CMatrixT,
+                 typename MMatrixT,
+                 typename MonoidT,
+                 typename AccumT >
+        friend inline void rowReduceMasked(AMatrixT const &a,
+                               CMatrixT       &c, // vector?
+                               MMatrixT       &mask,
+                               MonoidT         sum,
+                               AccumT          accum);
 
-    template<typename AMatrixT,
-             typename CMatrixT,
-             typename MMatrixT,
-             typename MonoidT,
-             typename AccumT >
-    friend inline void colReduceMasked(AMatrixT const &a,
-                           CMatrixT       &c, // vector?
-                           MMatrixT       &mask,
-                           MonoidT         sum,
-                           AccumT          accum);
+        template<typename AMatrixT,
+                 typename CMatrixT,
+                 typename MMatrixT,
+                 typename MonoidT,
+                 typename AccumT >
+        friend inline void colReduceMasked(AMatrixT const &a,
+                               CMatrixT       &c, // vector?
+                               MMatrixT       &mask,
+                               MonoidT         sum,
+                               AccumT          accum);
 
-    };
+        template <typename MatrixT>
+        friend void print_matrix(std::ostream &ostr, MatrixT const &mat,
+                          std::string const &label);
+
+        };
+
 } // end namespace graphblas

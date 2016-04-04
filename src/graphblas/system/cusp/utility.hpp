@@ -18,6 +18,7 @@
 
 #include <graphblas/detail/config.hpp>
 #include <graphblas/system/cusp/detail/utility.inl>
+#include <cusp/print.h>
 
 namespace graphblas
 {
@@ -96,6 +97,20 @@ namespace backend
         float ms=0;
         cudaEventElapsedTime(&ms, start_event, stop_event);
         return ms;
+    }
+
+    /**
+     *  @brief Output the matrix in array form.  Mainly for debugging
+     *         small matrices.
+     *
+     *  @param[in] ostr  The output stream to send the contents
+     *  @param[in] mat   The matrix to output
+     *
+     */
+    template <typename MatrixT>
+    void pretty_print_matrix(std::ostream &ostr, MatrixT const &mat)
+    {
+        cusp::print(mat, ostr);
     }
 }
 }

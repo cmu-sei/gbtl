@@ -42,7 +42,7 @@ int main()
     graphblas::buildmatrix(G_m1, i1.begin(), j1.begin(), v1.begin(), i1.size());
 
     auto ans = algorithms::peer_pressure_cluster(G_m1);
-    graphblas::pretty_print_matrix(std::cout, ans);
+    graphblas::print_matrix(std::cout, ans);
 
     auto clusters = algorithms::get_cluster_assignments(ans);
     std::cout << "cluster assignments:";
@@ -65,7 +65,7 @@ int main()
     graphblas::buildmatrix(G_m2, i2.begin(), j2.begin(), v2.begin(), i2.size());
 
     auto ans2 = algorithms::peer_pressure_cluster(G_m2);
-    graphblas::pretty_print_matrix(std::cout, ans2);
+    graphblas::print_matrix(std::cout, ans2);
 
     auto clusters2 = algorithms::get_cluster_assignments(ans2);
     std::cout << "cluster assignments:";

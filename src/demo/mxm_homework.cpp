@@ -29,15 +29,15 @@ int main(int, char**)
     graphblas::buildmatrix(b, i.begin(), j.begin(), v.begin(), i.size());
 
     std::cout << "A = " << std::endl;
-    graphblas::pretty_print_matrix(std::cout, a);
+    graphblas::print_matrix(std::cout, a);
     std::cout << "B = " << std::endl;
-    graphblas::pretty_print_matrix(std::cout, b);
+    graphblas::print_matrix(std::cout, b);
 
     // matrix multiply (default parameter values used for some)
     graphblas::mxm(a, b, c);
 
     std::cout << "A * B = " << std::endl;
-    graphblas::pretty_print_matrix(std::cout, c);
+    graphblas::print_matrix(std::cout, c);
 
     // extract the results: get_nnz() method tells us how big
     graphblas::IndexType nnz = c.get_nnz();
