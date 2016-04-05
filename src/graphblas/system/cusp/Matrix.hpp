@@ -20,6 +20,7 @@
 
 #include <graphblas/detail/config.hpp>
 #include <cusp/coo_matrix.h>
+#include <cusp/print.h>
 
 namespace graphblas
 {
@@ -71,6 +72,22 @@ namespace graphblas
             void get_shape(T1 &t1, T2 &t2) const{
                 t1 = this->num_rows;
                 t2 = this->num_cols;
+            }
+
+            bool operator==(Matrix<ScalarT, TagsT...> const &rhs) const
+            {
+                //address comparison
+                return this == &rhs;
+            }
+
+            bool operator!=(Matrix<ScalarT, TagsT...> const &rhs) const
+            {
+                return this != &rhs;
+            }
+
+            void print_info(std::ostream &os) const
+            {
+                cusp::print(*this, os);
             }
 
         };

@@ -110,7 +110,7 @@ namespace backend
         IndexType len_i = v_i.size();
         IndexType len_j = v_j.size();
 
-        assign(a, v_i.begin(), v_j.begin(), c, accum);
+        backend::assign(a, v_i.begin(), v_j.begin(), c, accum);
     }
 }
 }//end graphblas

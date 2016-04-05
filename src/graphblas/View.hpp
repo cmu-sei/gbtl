@@ -120,7 +120,7 @@ namespace graphblas
         template <typename OtherMatrixT>
         bool operator==(OtherMatrixT const &rhs) const
         {
-            return (m_mat.operator==(rhs));
+            return (OtherMatrixT*)(this) == &rhs;
         }
 
         template <typename OtherMatrixT>
@@ -470,7 +470,9 @@ namespace graphblas
         template <typename OtherMatrixT>
         bool operator==(OtherMatrixT const &rhs) const
         {
-            return (m_mat.operator==(rhs));
+            //return (m_mat.operator==(rhs.m_mat));
+            //immutable DS, should only do address comparison to preserve speed.
+            return (OtherMatrixT*)this == &rhs;
         }
 
         template <typename OtherMatrixT>

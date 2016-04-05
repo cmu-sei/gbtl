@@ -172,7 +172,7 @@ namespace backend
      * @tparam SemiringT   Used to define the behaviour of the negate
      */
     template<typename MatrixT, typename SemiringT>
-    class NegateView : public MatrixT
+    class NegateView : public graphblas::backend::Matrix<typename MatrixT::ScalarType>
     {
     public:
         typedef typename MatrixT::ScalarType ScalarType;
@@ -182,6 +182,7 @@ namespace backend
         ///    cusp::array1d_view<thrust::detail::normal_iterator<thrust::device_ptr<typename MatrixT::ScalarType> > >,
         ///    cusp::array1d_view<thrust::detail::normal_iterator<thrust::device_ptr<typename MatrixT::ScalarType> > >,
         ///    cusp::constant_array<typename MatrixT::ScalarType> >ParentMatrixT;
+        typedef graphblas::backend::Matrix<typename MatrixT::ScalarType> ParentMatrixT;
 
         NegateView(MatrixT const &matrix) :
             //ParentMatrixT(
@@ -191,7 +192,7 @@ namespace backend
             //        cusp::make_array1d_view(cusp::array1d<typename MatrixT::ScalarType, cusp::device_memory>(matrix.num_rows*matrix.num_cols-matrix.num_entries)),
             //        cusp::make_array1d_view(cusp::array1d<typename MatrixT::ScalarType, cusp::device_memory>(matrix.num_rows*matrix.num_cols-matrix.num_entries)),
             //        cusp::constant_array<ScalarType>(matrix.num_rows*matrix.num_cols-matrix.num_entries, SemiringT().one()))
-            MatrixT(matrix.num_rows, matrix.num_cols, matrix.num_cols-matrix.num_entries)
+            ParentMatrixT(matrix.num_rows, matrix.num_cols, matrix.num_cols-matrix.num_entries)
         {
             auto newsize = matrix.num_rows*matrix.num_cols-matrix.num_entries;
             //populate row and col:

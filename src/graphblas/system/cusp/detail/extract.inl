@@ -106,7 +106,7 @@ namespace backend
         //     throw DimensionException();
         // }
 
-        extract(a, v_i.begin(), v_j.begin(), c, accum);
+        backend::extract(a, v_i.begin(), v_j.begin(), c, accum);
     }
 }
 }//end graphblas
