@@ -9,7 +9,6 @@ AC_CONFIG_FILES([
     Makefile
     demo/Makefile
     test/Makefile
-    test/cusp/Makefile
     test/sequential/Makefile
 ])
 #find out what version we are running
