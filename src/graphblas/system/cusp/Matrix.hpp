@@ -76,13 +76,12 @@ namespace graphblas
 
             bool operator==(Matrix<ScalarT, TagsT...> const &rhs) const
             {
-                //address comparison
-                return this == &rhs;
+                return (*this == rhs);
             }
 
             bool operator!=(Matrix<ScalarT, TagsT...> const &rhs) const
             {
-                return this != &rhs;
+                return !(*this == rhs);
             }
 
             void print_info(std::ostream &os) const

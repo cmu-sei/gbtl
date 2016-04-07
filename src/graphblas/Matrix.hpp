@@ -158,7 +158,7 @@ namespace graphblas
 
         bool operator!=(Matrix<ScalarT, TagsT...> const &rhs) const
         {
-            return !(*this == rhs);
+            return !(m_mat == rhs.m_mat);
         }
 
         /// @todo I don't think this is a valid interface for sparse
