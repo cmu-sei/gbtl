@@ -93,7 +93,7 @@ namespace graphblas
             {
                 //this is partially acceptable in case of testing
                 //but still should not be used and is considered deprecated.
-                if (row>this->num_rows || col>this->num_cols || row<0 || col<0)
+                if (row>(this->num_rows) || col>(this->num_cols))
                 {
                     throw graphblas::DimensionException("index out of range at backend::matrix.hpp");
                 }
@@ -106,7 +106,7 @@ namespace graphblas
                 {
                     auto entry = thrust::distance(thrust::make_zip_iterator(
                                 thrust::make_tuple(this->row_indices.begin(), this->column_indices.begin())), found);
-                    return static_cast<ScalarT>(*(this->values+entry));
+                    return static_cast<ScalarT>(*((this->values)+entry));
                 }
                 else {
                     return this->zero_value;

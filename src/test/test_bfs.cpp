@@ -77,9 +77,9 @@ BOOST_AUTO_TEST_CASE(bfs_test_basic_one_root)
     buildmatrix(G_tn, i, j, v);
 
     GrBMatrix root(1, NUM_NODES, INF);
-    std::vector<IndexType> r={0}, c={START_INDEX};
-    std::vector<T> v={0};
-    graphblas::buildmatrix(root, r.begin(), c.begin(), v.begin(), v.size());
+    std::vector<graphblas::IndexType> r={0}, c={START_INDEX};
+    std::vector<T> v_r={0};
+    graphblas::buildmatrix(root, r.begin(), c.begin(), v_r.begin(), v_r.size());
     //root.set_value_at(0, START_INDEX, 0);  // multiplicative identity
 
     auto G_tn_answer(get_tn_answer(INF));
@@ -113,9 +113,9 @@ BOOST_AUTO_TEST_CASE(bfs_test_basic_one_root_integer)
     graphblas::buildmatrix(G_tn, i, j, v);
 
     GrBMatrix root(1, NUM_NODES, INF);
-    std::vector<IndexType> r={0}, c={START_INDEX};
-    std::vector<T> v={0};
-    graphblas::buildmatrix(root, r.begin(), c.begin(), v.begin(), v.size());
+    std::vector<graphblas::IndexType> r={0}, c={START_INDEX};
+    std::vector<T> v_r={0};
+    graphblas::buildmatrix(root, r.begin(), c.begin(), v_r.begin(), v_r.size());
     //root.set_value_at(0, START_INDEX, 0);  // multiplicative identity
 
     auto G_tn_answer(get_tn_answer(INF));
@@ -219,8 +219,8 @@ BOOST_AUTO_TEST_CASE(bfs_test_level_one_root)
     buildmatrix(G_tn, i, j, v);
 
     GrBMatrix root(1, NUM_NODES, 0);
-    std::vector<IndexType> r={0}, c={START_INDEX};
-    std::vector<T> v={0};
+    std::vector<graphblas::IndexType> r={0}, c={START_INDEX};
+    std::vector<T> v_r={0};
     graphblas::buildmatrix(root, r.begin(), c.begin(), v.begin(), v.size());
     //root.set_value_at(0, START_INDEX, 1);  // multiplicative identity
 
@@ -254,8 +254,8 @@ BOOST_AUTO_TEST_CASE(bfs_test_level_one_root_integer)
     graphblas::buildmatrix(G_tn, i, j, v);
 
     GrBMatrix root(1, NUM_NODES, 0);
-    std::vector<IndexType> r={0}, c={START_INDEX};
-    std::vector<T> v={0};
+    std::vector<graphblas::IndexType> r={0}, c={START_INDEX};
+    std::vector<T> v_r={0};
     graphblas::buildmatrix(root, r.begin(), c.begin(), v.begin(), v.size());
     //root.set_value_at(0, START_INDEX, 1);  // multiplicative identity
 
@@ -289,8 +289,8 @@ BOOST_AUTO_TEST_CASE(bfs_test_level_masked_one_root)
     buildmatrix(G_tn, i, j, v);
 
     GrBMatrix root(1, NUM_NODES, 0);
-    std::vector<IndexType> r={0}, c={START_INDEX};
-    std::vector<T> v={0};
+    std::vector<graphblas::IndexType> r={0}, c={START_INDEX};
+    std::vector<T> v_r={0};
     graphblas::buildmatrix(root, r.begin(), c.begin(), v.begin(), v.size());
     //root.set_value_at(0, START_INDEX, 1);  // multiplicative identity
 
@@ -324,8 +324,8 @@ BOOST_AUTO_TEST_CASE(bfs_test_level_masked_one_root_integer)
     graphblas::buildmatrix(G_tn, i, j, v);
 
     GrBMatrix root(1, NUM_NODES, 0);
-    std::vector<IndexType> r={0}, c={START_INDEX};
-    std::vector<T> v={0};
+    std::vector<graphblas::IndexType> r={0}, c={START_INDEX};
+    std::vector<T> v_r={0};
     graphblas::buildmatrix(root, r.begin(), c.begin(), v.begin(), v.size());
     //root.set_value_at(0, START_INDEX, 1);  // multiplicative identity
 

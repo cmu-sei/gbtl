@@ -85,7 +85,7 @@ namespace algorithms
 
         MatrixT seen(rows,1);
         T weight = static_cast<T>(0);
-        std::vector<IndexType> seen_r={1}, seen_c={0};
+        std::vector<graphblas::IndexType> seen_r={1}, seen_c={0};
         std::vector<T> seen_v = {std::numeric_limits<T>::max()};
         graphblas::buildmatrix(seen, seen_r.begin(), seen_c.begin(),
                 seen_v.begin(), seen_r.size());
