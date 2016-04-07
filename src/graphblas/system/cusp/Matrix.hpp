@@ -90,6 +90,18 @@ namespace graphblas
                 cusp::print(*this, os);
             }
 
+            //NOT supported, not valid interface for a sparse matrix.
+            ScalarT get_value_at(IndexType row, IndexType col) const
+            {
+                return 0;
+            }
+
+            //NOT supported, not valid interface for a sparse matrix.
+            void set_value_at(IndexType row, IndexType col, ScalarT const &val)
+            {
+                return;
+            }
+
         };
     } // backend
 } // graphblas
