@@ -89,10 +89,29 @@ namespace graphblas
                 cusp::print(*this, os);
             }
 
-            //NOT supported, not valid interface for a sparse matrix.
             ScalarT get_value_at(IndexType row, IndexType col) const
             {
-                return 0;
+                //this is partially acceptable in case of testing
+                //but still should not be used and is considered deprecated.
+                if (row>this->num_rows || col>this->num_cols || row<0 || col<0)
+                {
+                    throw graphblas::DimensionException("index out of range at backend::matrix.hpp");
+                }
+
+                auto found = thrust::find(
+                            thrust::make_zip_iterator(thrust::make_tuple(this->row_indices.begin(), this->column_indices.begin())),
+                            thrust::make_zip_iterator(thrust::make_tuple(this->row_indices.end(), this->column_indices.end())),
+                            thrust::make_tuple(row, col));
+                if (found != thrust::make_zip_iterator(thrust::make_tuple(this->row_indices.end(), this->column_indices.end())))
+                {
+                    auto entry = thrust::distance(thrust::make_zip_iterator(
+                                thrust::make_tuple(this->row_indices.begin(), this->column_indices.begin())), found);
+                    return static_cast<ScalarT>(*(this->values+entry));
+                }
+                else {
+                    return this->zero_value;
+                }
+
             }
 
             //NOT supported, not valid interface for a sparse matrix.

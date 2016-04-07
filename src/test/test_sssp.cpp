@@ -31,36 +31,36 @@ using namespace algorithms;
 BOOST_AUTO_TEST_SUITE(sssp_suite)
 
 //****************************************************************************
-template <typename T>
-Matrix<T, DirectedMatrixTag> get_tn_answer(T const &INF)
-{
-    std::vector<std::vector<T> > G_tn_answer_dense =
-        {{0, 2, 3, 1, 2, 4, 2, INF, 3},
-         {2, 0, 2, 1, 2, 3, 1, INF, 3},
-         {3, 2, 0, 2, 1, 1, 1, INF, 1},
-         {1, 1, 2, 0, 1, 3, 1, INF, 2},
-         {2, 2, 1, 1, 0, 2, 2, INF, 1},
-         {4, 3, 1, 3, 2, 0, 2, INF, 2},
-         {2, 1, 1, 1, 2, 2, 0, INF, 2},
-         {INF, INF, INF, INF, INF, INF, INF, 0, INF},
-         {3, 3, 1, 2, 1, 2, 2, INF, 0}};
-    return Matrix<T, DirectedMatrixTag>(G_tn_answer_dense, INF);
-}
+//template <typename T>
+//Matrix<T, DirectedMatrixTag> get_tn_answer(T const &INF)
+//{
+//    std::vector<std::vector<T> > G_tn_answer_dense =
+//        {{0, 2, 3, 1, 2, 4, 2, INF, 3},
+//         {2, 0, 2, 1, 2, 3, 1, INF, 3},
+//         {3, 2, 0, 2, 1, 1, 1, INF, 1},
+//         {1, 1, 2, 0, 1, 3, 1, INF, 2},
+//         {2, 2, 1, 1, 0, 2, 2, INF, 1},
+//         {4, 3, 1, 3, 2, 0, 2, INF, 2},
+//         {2, 1, 1, 1, 2, 2, 0, INF, 2},
+//         {INF, INF, INF, INF, INF, INF, INF, 0, INF},
+//         {3, 3, 1, 2, 1, 2, 2, INF, 0}};
+//    return Matrix<T, DirectedMatrixTag>(G_tn_answer_dense, INF);
+//}
 
 //****************************************************************************
-template <typename T>
-Matrix<T, DirectedMatrixTag> get_gilbert_answer(T const &INF)
-{
-    std::vector<std::vector<T> > G_gilbert_answer_dense =
-        {{  0,   1,   2,   1,   2,   3,   2},
-         {  3,   0,   2,   2,   1,   2,   1},
-         {INF, INF,   0, INF, INF,   1, INF},
-         {  1,   2,   1,   0,   3,   2,   3},
-         {INF, INF,   2, INF,   0,   1, INF},
-         {INF, INF,   1, INF, INF,   0, INF},
-         {  2,   3,   1,   1,   1,   2,   0}};
-    return Matrix<T, DirectedMatrixTag>(G_gilbert_answer_dense, INF);
-}
+//template <typename T>
+//Matrix<T, DirectedMatrixTag> get_gilbert_answer(T const &INF)
+//{
+//    std::vector<std::vector<T> > G_gilbert_answer_dense =
+//        {{  0,   1,   2,   1,   2,   3,   2},
+//         {  3,   0,   2,   2,   1,   2,   1},
+//         {INF, INF,   0, INF, INF,   1, INF},
+//         {  1,   2,   1,   0,   3,   2,   3},
+//         {INF, INF,   2, INF,   0,   1, INF},
+//         {INF, INF,   1, INF, INF,   0, INF},
+//         {  2,   3,   1,   1,   1,   2,   0}};
+//    return Matrix<T, DirectedMatrixTag>(G_gilbert_answer_dense, INF);
+//}
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(sssp_basic_double_one_root)
@@ -78,7 +78,10 @@ BOOST_AUTO_TEST_CASE(sssp_basic_double_one_root)
     buildmatrix(G_tn, i, j, v);
 
     graphblas::Matrix<double, DirectedMatrixTag> root(1, NUM_NODES, INF);
-    root.set_value_at(0, start_index, 0);
+    std::vector<IndexType> r={0}, c={start_index};
+    std::vector<T> v={0};
+    graphblas::buildmatrix(root, r.begin(), c.begin(), v.begin(), v.size());
+    //root.set_value_at(0, start_index, 0);
 
     Matrix<double, DirectedMatrixTag> distance(1, NUM_NODES, INF);
     sssp(G_tn, root, distance);
