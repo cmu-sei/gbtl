@@ -43,6 +43,49 @@ namespace
              {INF, INF, INF, INF, INF, INF, INF,   7, INF},
              {  3,   3,   8,   4,   8,   2,   2, INF,   8}});
     }
+    /*
+     *
+     * template:
+    template <typename T>
+    Matrix<T, DirectedMatrixTag> get_tn_answer(T const &INF)
+    {
+        std::vector<graphblas::IndexType> rows = {
+        };
+        std::vector<graphblas::IndexType> cols = {
+        };
+        std::vector<T> vals = {
+        };
+
+        Matrix<T, DirectedMatrixTag> temp(9,9, INF);
+        buildmatrix(temp, rows.begin(), cols.begin(), vals.begin(), rows.size());
+        return temp;
+    }
+    */
+    //template <typename T>
+    //graphblas::Matrix<T> get_tn_answer(T const &INF)
+    //{
+    //    std::vector<graphblas::IndexType> rows = {
+    //        0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2,
+    //        2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5,
+    //        5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 7, 8, 8, 8, 8, 8, 8, 8, 8
+    //    };
+    //    std::vector<graphblas::IndexType> cols = {
+    //        0, 1, 2, 3, 4, 5, 6, 8, 0, 1, 2, 3, 4, 5, 6, 8, 0, 1, 2, 3, 4, 5, 6,
+    //        8, 0, 1, 2, 3, 4, 5, 6, 8, 0, 1, 2, 3, 4, 5, 6, 8, 0, 1, 2, 3, 4, 5,
+    //        6, 8, 0, 1, 2, 3, 4, 5, 6, 8, 7, 0, 1, 2, 3, 4, 5, 6, 8
+    //    };
+    //    std::vector<T> vals = {
+    //        0,   3,   4,   0,   3,   2,   3,   4,   3,   1,   6,   1,   3,
+    //        2,   1,   2,   3,   6,   2,   4,   2,   2,   2,   2,   3,   3,
+    //        4,   3,   3,   2,   3,   4,   3,   3,   4,   4,   4,   2,   2,
+    //        4,   3,   6,   5,   4,   2,   5,   2,   2,   3,   6,   6,   6,
+    //        2,   2,   6,   2,   7,   3,   3,   8,   4,   8,   2,   2,   8
+    //    };
+
+    //    graphblas::Matrix<T> temp(9,9, INF);
+    //    graphblas::buildmatrix(temp, rows.begin(), cols.begin(), vals.begin(), rows.size());
+    //    return temp;
+    //}
 
     template <typename T>
     std::vector<std::vector<T> > get_gilbert_answer(T const &INF)
@@ -56,6 +99,27 @@ namespace
              {INF,INF,  5,INF,INF,  5,INF},
              {  3,  0,  6,  6,  6,  2,  6}});
     }
+    //template <typename T>
+    //graphblas::Matrix<T> get_gilbert_answer(T const &INF)
+    //{
+    //    std::vector<graphblas::IndexType> rows = {
+    //        0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 3, 3, 3, 3, 3, 3, 3,
+    //        4, 4, 4, 5, 5, 6, 6, 6, 6, 6, 6, 6
+    //    };
+    //    std::vector<graphblas::IndexType> cols = {
+    //        0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 2, 5, 0, 1, 2, 3, 4, 5, 6,
+    //        2, 4, 5, 2, 5, 0, 1, 2, 3, 4, 5, 6
+    //    };
+    //    std::vector<T> vals = {
+    //        0, 0,   3, 0,   1,   2,   1,   3,   1,   6,   6,   1,   4,
+    //        1,   2,   2,   3, 0,   3,   3,   1,   2,   1,   5,   4,   4,
+    //        5,   5,   3, 0,   6,   6,   6,   2,   6
+    //    };
+
+    //    graphblas::Matrix<T> temp(9,9, INF);
+    //    graphblas::buildmatrix(temp, rows.begin(), cols.begin(), vals.begin(), rows.size());
+    //    return temp;
+    //}
 }
 
 //****************************************************************************
@@ -220,7 +284,7 @@ BOOST_AUTO_TEST_CASE(bfs_test_level_one_root)
 
     GrBMatrix root(1, NUM_NODES, 0);
     std::vector<graphblas::IndexType> r={0}, c={START_INDEX};
-    std::vector<T> v_r={0};
+    std::vector<T> v_r={1};
     graphblas::buildmatrix(root, r.begin(), c.begin(), v.begin(), v.size());
     //root.set_value_at(0, START_INDEX, 1);  // multiplicative identity
 
@@ -228,6 +292,9 @@ BOOST_AUTO_TEST_CASE(bfs_test_level_one_root)
     algorithms::bfs_level(G_tn, root, levels);
 
     std::vector<T> answer = {5, 4, 2, 4, 3, 1, 3, 0, 3};
+    //debug:
+    graphblas::print_matrix(std::cout,levels);
+    graphblas::print_matrix(std::cout,root);
     for (graphblas::IndexType ix = 0; ix < NUM_NODES; ++ix)
     {
         BOOST_CHECK_EQUAL(levels.get_value_at(0, ix),
@@ -255,7 +322,7 @@ BOOST_AUTO_TEST_CASE(bfs_test_level_one_root_integer)
 
     GrBMatrix root(1, NUM_NODES, 0);
     std::vector<graphblas::IndexType> r={0}, c={START_INDEX};
-    std::vector<T> v_r={0};
+    std::vector<T> v_r={1};
     graphblas::buildmatrix(root, r.begin(), c.begin(), v.begin(), v.size());
     //root.set_value_at(0, START_INDEX, 1);  // multiplicative identity
 
@@ -290,7 +357,7 @@ BOOST_AUTO_TEST_CASE(bfs_test_level_masked_one_root)
 
     GrBMatrix root(1, NUM_NODES, 0);
     std::vector<graphblas::IndexType> r={0}, c={START_INDEX};
-    std::vector<T> v_r={0};
+    std::vector<T> v_r={1};
     graphblas::buildmatrix(root, r.begin(), c.begin(), v.begin(), v.size());
     //root.set_value_at(0, START_INDEX, 1);  // multiplicative identity
 
@@ -325,7 +392,7 @@ BOOST_AUTO_TEST_CASE(bfs_test_level_masked_one_root_integer)
 
     GrBMatrix root(1, NUM_NODES, 0);
     std::vector<graphblas::IndexType> r={0}, c={START_INDEX};
-    std::vector<T> v_r={0};
+    std::vector<T> v_r={1};
     graphblas::buildmatrix(root, r.begin(), c.begin(), v.begin(), v.size());
     //root.set_value_at(0, START_INDEX, 1);  // multiplicative identity
 
