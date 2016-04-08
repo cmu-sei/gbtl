@@ -105,7 +105,7 @@ namespace backend
                     AccumT          accum = AccumT())
     {
         typedef typename AVectorT::ScalarType ScalarType;
-        cusp::constant_array<ScalarType> zeros(a.size(), 0);
+        cusp::constant_array<ScalarType> zeros(a.num_entries, 0);
         //transpose B:
         BMatrixT temp(b);
         thrust::swap(temp.row_indices, temp.column_indices);
