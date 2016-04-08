@@ -127,7 +127,6 @@ namespace backend
                     thrust::make_zip_iterator(thrust::make_tuple(b.row_indices.begin(), b.column_indices.begin())),
                     thrust::make_zip_iterator(thrust::make_tuple(b.row_indices.end(), b.column_indices.end())),
                     thrust::make_counting_iterator(0),
-                    //thrust::make_zip_iterator(thrust::make_tuple(thrust::make_discard_iterator(),thrust::make_discard_iterator())),
                     thrust::make_discard_iterator(),
                     a_indices.begin()
                     );
@@ -140,7 +139,6 @@ namespace backend
                     thrust::make_zip_iterator(thrust::make_tuple(a.row_indices.begin(), a.column_indices.begin())),
                     thrust::make_zip_iterator(thrust::make_tuple(a.row_indices.end(), a.column_indices.end())),
                     thrust::make_counting_iterator(0),
-                    //thrust::make_zip_iterator(thrust::make_tuple(thrust::make_discard_iterator(),thrust::make_discard_iterator())),
                     thrust::make_discard_iterator(),
                     b_indices.begin()
                     );
