@@ -20,6 +20,7 @@
 
 #include <graphblas/detail/config.hpp>
 #include <cusp/coo_matrix.h>
+#include <cusp/print.h>
 
 namespace graphblas
 {
@@ -71,6 +72,52 @@ namespace graphblas
             void get_shape(T1 &t1, T2 &t2) const{
                 t1 = this->num_rows;
                 t2 = this->num_cols;
+            }
+
+            bool operator==(Matrix<ScalarT, TagsT...> const &rhs) const
+            {
+                return (*this == rhs);
+            }
+
+            bool operator!=(Matrix<ScalarT, TagsT...> const &rhs) const
+            {
+                return !(*this == rhs);
+            }
+
+            void print_info(std::ostream &os) const
+            {
+                cusp::print(*this, os);
+            }
+
+            ScalarT get_value_at(IndexType row, IndexType col) const
+            {
+                //this is partially acceptable in case of testing
+                //but still should not be used and is considered deprecated.
+                if (row>(this->num_rows) || col>(this->num_cols))
+                {
+                    throw graphblas::DimensionException("index out of range at backend::matrix.hpp");
+                }
+
+                auto found = thrust::find(
+                            thrust::make_zip_iterator(thrust::make_tuple(this->row_indices.begin(), this->column_indices.begin())),
+                            thrust::make_zip_iterator(thrust::make_tuple(this->row_indices.end(), this->column_indices.end())),
+                            thrust::make_tuple(row, col));
+                if (found != thrust::make_zip_iterator(thrust::make_tuple(this->row_indices.end(), this->column_indices.end())))
+                {
+                    auto entry = thrust::distance(thrust::make_zip_iterator(
+                                thrust::make_tuple(this->row_indices.begin(), this->column_indices.begin())), found);
+                    return static_cast<ScalarT>(*((this->values)+entry));
+                }
+                else {
+                    return this->zero_value;
+                }
+
+            }
+
+            //NOT supported, not valid interface for a sparse matrix.
+            void set_value_at(IndexType row, IndexType col, ScalarT const &val)
+            {
+                return;
             }
 
         };

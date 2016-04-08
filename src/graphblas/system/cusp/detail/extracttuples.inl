@@ -37,16 +37,9 @@ namespace backend
         typedef typename AMatrixT::index_type IndexType;
         typedef typename AMatrixT::value_type ValueType;
 
-        for (int index = 0; index < a.num_entries; ++index)
-        {
-            i[index] = a.row_indices[index];
-            j[index] = a.column_indices[index];
-            v[index] = a.values[index];
-        }
-        // FIXME If we passed in std::vector, this didn't work...
-        //thrust::copy_n(a.row_indices.begin(), a.num_entries, i);
-        //thrust::copy_n(a.column_indices.begin(), a.num_entries, j);
-        //thrust::copy_n(a.values.begin(), a.num_entries, v);
+        thrust::copy_n(a.row_indices.begin(), a.num_entries, i);
+        thrust::copy_n(a.column_indices.begin(), a.num_entries, j);
+        thrust::copy_n(a.values.begin(), a.num_entries, v);
     }
 
     template<typename AMatrixT>

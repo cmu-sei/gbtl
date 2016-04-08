@@ -158,6 +158,7 @@ namespace graphblas
 
         bool operator!=(Matrix<ScalarT, TagsT...> const &rhs) const
         {
+            //return !(m_mat == rhs.m_mat);
             return !(*this == rhs);
         }
 

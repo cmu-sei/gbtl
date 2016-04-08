@@ -6,7 +6,7 @@ include $(top_srcdir)/mk/cuda.mk
 
 SUBDIRS = #cusp
 ##$(abs_top_srcdir)
-AM_CPPFLAGS = -I$(abs_top_srcdir) -I$(abs_top_srcdir)/cusplibrary
+AM_CPPFLAGS = -I$(abs_top_srcdir) -I$(abs_top_srcdir)/cusplibrary  --expt-relaxed-constexpr
 AM_LDFLAGS = $(NVCC_LDFLAGS) $(NVCC_LIBS)
 
 noinst_PROGRAMS = \
