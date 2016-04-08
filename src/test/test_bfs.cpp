@@ -292,9 +292,7 @@ BOOST_AUTO_TEST_CASE(bfs_test_level_one_root)
     algorithms::bfs_level(G_tn, root, levels);
 
     std::vector<T> answer = {5, 4, 2, 4, 3, 1, 3, 0, 3};
-    //debug:
-    graphblas::print_matrix(std::cout,levels);
-    graphblas::print_matrix(std::cout,root);
+
     for (graphblas::IndexType ix = 0; ix < NUM_NODES; ++ix)
     {
         BOOST_CHECK_EQUAL(levels.get_value_at(0, ix),
