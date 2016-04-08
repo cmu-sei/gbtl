@@ -92,7 +92,7 @@ Matrix<T, DirectedMatrixTag> get_gilbert_answer(T const &INF)
         1, 0,   1,   1,   2,   1, 0,   3,   2,   3,   2, 0,   1,
         1, 0,   2,   3,   1,   1,   1,   2, 0
     };
-    Matrix<T, DirectedMatrixTag> temp(9,9, INF);
+    Matrix<T, DirectedMatrixTag> temp(7,7, INF);
     buildmatrix(temp, rows.begin(), cols.begin(), vals.begin(), rows.size());
     return temp;
 }
