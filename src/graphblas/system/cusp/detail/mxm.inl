@@ -104,17 +104,18 @@ namespace backend
                     SemiringT       s     = SemiringT(),
                     AccumT          accum = AccumT())
     {
-        typedef typename AVectorT::ScalarType ScalarType;
-        cusp::constant_array<ScalarType> zeros(a.size(), 0);
-        //transpose B:
-        BMatrixT temp(b);
-        thrust::swap(temp.row_indices, temp.column_indices);
-        temp.sort_by_row_and_column();
+        return backend::mxm(a,b,c,s,accum);
+        //typedef typename AVectorT::ScalarType ScalarType;
+        //cusp::constant_array<ScalarType> zeros(a.num_entries, 0);
+        ////transpose B:
+        //BMatrixT temp(b);
+        //thrust::swap(temp.row_indices, temp.column_indices);
+        //temp.sort_by_row_and_column();
 
-        ::cusp::generalized_spmv(temp, a, zeros,
-                         c,
-                         make_multiplicative_monoid_from_semiring(s),
-                         make_additive_monoid_from_semiring(s));
+        //::cusp::generalized_spmv(temp, a, zeros,
+        //                 c,
+        //                 make_multiplicative_monoid_from_semiring(s),
+        //                 make_additive_monoid_from_semiring(s));
     }
 
     template<typename AMatrixT,
@@ -130,15 +131,16 @@ namespace backend
                     SemiringT       s     = SemiringT(),
                     AccumT          accum = AccumT())
     {
-        typedef typename AMatrixT::ScalarType ScalarType;
-        cusp::constant_array<ScalarType> zeros(b.size(), 0);
+        return backend::mxm(a,b,c,s,accum);
+        //typedef typename AMatrixT::ScalarType ScalarType;
+        //cusp::constant_array<ScalarType> zeros(b.size(), 0);
 
-        AMatrixT temp(a);
+        //AMatrixT temp(a);
 
-        ::cusp::generalized_spmv(temp, b, zeros,
-                         c,
-                         make_multiplicative_monoid_from_semiring(s),
-                         make_additive_monoid_from_semiring(s));
+        //::cusp::generalized_spmv(temp, b, zeros,
+        //                 c,
+        //                 make_multiplicative_monoid_from_semiring(s),
+        //                 make_additive_monoid_from_semiring(s));
     }
 }
 } // graphblas

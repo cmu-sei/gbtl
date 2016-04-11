@@ -35,38 +35,43 @@ namespace backend
         return;
     }
 
-    template <typename T>
-    struct ReplaceNonZero{
-        T zero;
-        ReplaceNonZero(T z) : zero(z){}
+    //template <typename T>
+    //struct ReplaceNonZero{
+    //    T zero;
+    //    ReplaceNonZero(T z) : zero(z){}
 
-        template <typename V>
-        __device__ __host__ bool operator()(const V val){
-            return fabs(val - zero) > 0.5;
-        }
-    };
+    //    template <typename V>
+    //    __device__ __host__ bool operator()(const V val){
+    //        //return fabs(val - zero) > 0.5;
+    //        //assume fp == is not overflown
+    //        return val != zero;
+    //    }
+    //};
 
     //col_index_of.
     //in-place implementation
     template<typename MatrixT>
     void col_index_of(MatrixT &mat)
     {
-        //not sure why zero value is not passed in. manually hardcode.
-        ReplaceNonZero <typename MatrixT::ScalarType > opr(std::numeric_limits<double>::max());
-        std::cout<<"stored zeroval: "<<std::numeric_limits<double>::max()
-            <<std::endl
-            <<"numentries="<<mat.num_entries
-            <<std::endl;
+        typedef typename MatrixT::ScalarType T;
+        //not sure why zero value is not passed in. get from matrix?
+        //ReplaceNonZero <T> opr(mat.get_zero());
+        //
         //stencil cannot overlap with result...
-        cusp::array1d<double, cusp::device_memory> temp(mat.values);
-        thrust::copy_if(
-                mat.column_indices.begin(),
-                mat.column_indices.begin()+mat.num_entries,
-                mat.values.begin(),
-                temp.begin(),
-                //mat.values.begin(),
-                opr);
-        thrust::copy(temp.begin(), temp.begin()+mat.num_entries, mat.values.begin());
+        //cusp::array1d<T, cusp::device_memory> temp(mat.values);
+        //thrust::copy_if(
+        //        mat.column_indices.begin(),
+        //        mat.column_indices.begin()+mat.num_entries,
+        //        mat.values.begin(),
+        //        temp.begin(),
+        //        //mat.values.begin(),
+        //        opr);
+        //thrust::copy(temp.begin(), temp.begin()+mat.num_entries, mat.values.begin());
+
+        //update 2016.04.11:
+        //zero values are not supposed to be stored in this backend.
+        //thus, just copy column indices.
+        thrust::copy(mat.column_indices.begin(), mat.column_indices.begin()+mat.num_entries, mat.values.begin());
     }
 
     template<typename MatrixT>
@@ -74,34 +79,5 @@ namespace backend
     {
         thrust::copy_n(mat.row_indices.begin(), mat.num_entries, mat.values.begin());
     }
-
-    namespace detail
-    {
-        template<typename VectorI,
-                 typename VectorJ,
-                 typename IteratorType,
-                 typename ValueType = typename VectorI::value_type,
-                 typename Accum=graphblas::math::Assign<typename VectorI::value_type> >
-        inline void assign_vector_helper(
-            VectorI &v_src,
-            VectorI &v_ind,
-            IteratorType v_val_iter,
-            VectorJ &v_out,
-            Accum          accum=Accum())
-        {
-            v_out = VectorJ(v_src);
-            typedef typename VectorJ::iterator OutputIterator;
-            typedef typename VectorI::iterator IndexIterator;
-            thrust::permutation_iterator<OutputIterator, IndexIterator> iter(v_out.begin(), v_ind.begin());
-            thrust::transform(
-                iter,
-                iter+thrust::distance(v_ind.begin(), v_ind.end()),
-                v_val_iter,
-                iter,
-                accum);
-        }
-    } //end detail
-
-
 }
 }

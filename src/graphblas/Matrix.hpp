@@ -153,7 +153,8 @@ namespace graphblas
         /// @todo need to change to mix and match internal types
         bool operator==(Matrix<ScalarT, TagsT...> const &rhs) const
         {
-            return (m_mat == rhs.m_mat);
+            //return (m_mat == rhs.m_mat);
+            return matrix_equal_helper(*this, rhs);
         }
 
         bool operator!=(Matrix<ScalarT, TagsT...> const &rhs) const
@@ -190,6 +191,11 @@ namespace graphblas
 
     private:
         BackendType m_mat;
+
+        template <typename AMatrixT, typename BMatrixT>
+        friend bool matrix_equal_helper(
+                    const AMatrixT& a,
+                    const BMatrixT& b);
 
         template<typename AMatrixT,
                  typename BMatrixT,

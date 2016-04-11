@@ -98,8 +98,8 @@ namespace algorithms
         MatrixT mask(cols, 1);
 
         std::vector<T> mask_v = {1};
-        graphblas::buildmatrix(seen, seen_r.begin(), seen_c.begin(),
-                mask_v.begin(), seen_r.size());
+        graphblas::buildmatrix(mask, seen_r.begin(), seen_c.begin(),
+                mask_v.begin(), mask_v.size());
         //mask.set_value_at(1,0,1);
 
         graphblas::mxv(A, mask, d);

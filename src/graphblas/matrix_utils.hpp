@@ -211,5 +211,23 @@ namespace graphblas
         ostr << label << ": zero = " << mat.m_mat.get_zero() << std::endl;
         backend::pretty_print_matrix(ostr, mat.m_mat);
     }
+
+
+    /**
+     *  @brief helps with the == operators in View.hpp and Matrix.hpp
+     *
+     *  @param[in] lhs.
+     *  @param[in] rhs.
+     *  @param[out] result of the comparison.
+     */
+    template <typename AMatrixT, typename BMatrixT>
+    bool matrix_equal_helper(
+            const AMatrixT& a,
+            const BMatrixT& b)
+    {
+        return a.m_mat.operator==(b.m_mat);
+    }
+
+
 } // graphblas
 #endif // GB_MATRIX_UTILS_HPP

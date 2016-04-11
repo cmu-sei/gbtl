@@ -128,7 +128,8 @@ namespace backend
                     thrust::make_zip_iterator(thrust::make_tuple(b.row_indices.end(), b.column_indices.end())),
                     thrust::make_counting_iterator(0),
                     thrust::make_discard_iterator(),
-                    a_indices.begin()
+                    a_indices.begin(),
+                    thrust::equal_to< thrust::tuple<IndexType,IndexType> >()
                     );
 
             auto intersection_size = thrust::distance(a_indices.begin(), intersection_end.second);
@@ -140,7 +141,8 @@ namespace backend
                     thrust::make_zip_iterator(thrust::make_tuple(a.row_indices.end(), a.column_indices.end())),
                     thrust::make_counting_iterator(0),
                     thrust::make_discard_iterator(),
-                    b_indices.begin()
+                    b_indices.begin(),
+                    thrust::equal_to< thrust::tuple<IndexType,IndexType> >()
                     );
             //try transform:
             auto a_values_begin = thrust::make_permutation_iterator(
