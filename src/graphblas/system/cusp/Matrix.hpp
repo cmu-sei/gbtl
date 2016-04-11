@@ -77,7 +77,7 @@ namespace graphblas
             bool operator==(Matrix<ScalarT, TagsT...> const &rhs) const
             {
                 if (this->num_entries != rhs.num_entries ||
-                        this->num_rows != rhs.num_entries ||
+                        this->num_rows != rhs.num_rows ||
                         this->num_cols != rhs.num_cols)
                 {
                     return false;

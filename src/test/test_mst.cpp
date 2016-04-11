@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(mst_test_with_weight_one)
     bool valid = true;
     valid = valid && (result.first == answer.first);
     valid = valid && (result.second.size() == answer.second.size());
-    for (int index=0; index < result.second.size(); index++)
+    for (IndexType index=0; index < result.second.size(); ++index)
     {
     	auto tuple = result.second[index];
     	auto ans_tuple = answer.second[index];
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE(mst_test_with_weights)
     bool valid = true;
     valid = valid && (result.first == answer.first);
     valid = valid && (result.second.size() == answer.second.size());
-    for (int index = 0; index < result.second.size(); index++)
+    for (IndexType index = 0; index < result.second.size(); ++index)
     {
         auto tuple = result.second[index];
         auto ans_tuple = answer.second[index];

@@ -24,10 +24,10 @@ test_cusp_gpu_negate \
 test_cusp_gpu_bfs \
 test_cusp_gpu_metrics \
 test_cusp_gpu_maxflow \
-test_cusp_gpu_mis \
 test_cusp_gpu_mst \
 test_cusp_gpu_sssp \
 test_cusp_gpu_cluster
+#test_cusp_gpu_mis
 
 test_cusp_gpu_math_SOURCES = test_math_cuda.cu
 
@@ -57,7 +57,7 @@ test_cusp_gpu_metrics_SOURCES = test_metrics_cuda.cu
 
 test_cusp_gpu_maxflow_SOURCES = test_maxflow_cuda.cu
 
-test_cusp_gpu_mis_SOURCES = test_mis_cuda.cu
+#test_cusp_gpu_mis_SOURCES = test_mis_cuda.cu
 
 test_cusp_gpu_mst_SOURCES = test_mst_cuda.cu
 
