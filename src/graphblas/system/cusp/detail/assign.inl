@@ -32,6 +32,14 @@ namespace backend
                 return thrust::get<0>(a) < thrust::get<0>(b);
             }
         };
+
+        struct decrement_by_one{
+            template <typename T>
+            __host__ __device__
+            inline T operator() (const T& val){
+                return val+1;
+            }
+        };
     }
 
     template<typename AMatrixT,
@@ -65,7 +73,18 @@ namespace backend
         ::cusp::array1d<IndexType, MemorySpace> j_d(a.num_cols);
         thrust::copy_n(i, a.num_rows, i_d.begin());
         thrust::copy_n(j, a.num_cols, j_d.begin());
+        //need to decrement i, j, given math doc specs.
+        thrust::transform(i_d.begin(), i_d.begin()+a.num_rows, i_d.begin(), detail::decrement_by_one());
+        thrust::transform(j_d.begin(), j_d.begin()+a.num_cols, j_d.begin(), detail::decrement_by_one());
 
+        //range check:
+//        auto i_extrema = thrust::max_element(i_d.begin(), i_d.end());
+//        auto j_extrema = thrust::max_element(j_d.begin(), j_d.end());
+//        if (*i_extrema > a.num_rows-1 || *j_extrema > a.num_cols-1)
+//        {
+//            throw graphblas::DimensionException("assignment dimension check failed in cusp::assign, assign.inl:85");
+//        }
+//
         //pick out intersection of (i,j) with a:
         thrust::gather(
             a.row_indices.begin(),

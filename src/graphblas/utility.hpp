@@ -51,6 +51,28 @@ namespace graphblas
         }
     }
 
+    template <typename AMatrixT,
+              typename ForwardIterator1,
+              typename ForwardIterator2 >
+    void assign_dimension_check(AMatrixT const &a,
+                                ForwardIterator1 i,
+                                ForwardIterator2 j)
+    {
+        //namespace btl = backend_template_library;
+        //potentially could use c++ parallel (experimental?)
+        auto ar=a.num_rows;
+        auto ac=a.num_cols;
+
+        auto i_extrema = std::max_element(i, i+ar);
+        auto j_extrema = std::max_element(j, j+ac);
+
+        std::cerr<<*i_extrema<<" "<<*j_extrema<<std::endl;
+        if (*i_extrema > ar || *j_extrema > ac)
+        {
+            throw graphblas::DimensionException("assignment dimension check failed");
+        }
+    }
+
     template <typename AVectorT,
               typename SizeT >
     void vector_multiply_dimension_check(AVectorT const &a,
@@ -155,6 +177,7 @@ namespace graphblas
         return btl::distance(temp.begin(), end);
     }
 
+    //does arithmetic operation by n value
     template <typename ConstT, typename BinaryOp>
     struct arithmetic_n{
         ConstT n;
