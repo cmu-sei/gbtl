@@ -76,7 +76,7 @@ namespace graphblas
                          MonoidT         monoid = MonoidT(),
                          AccumT          accum = AccumT())
     {
-        same_dimension_check(a,b);
+        same_dimension_check(a,b,std::string("ewiseadd"));
         backend::ewiseadd(a.m_mat, b.m_mat, c.m_mat, monoid, accum);
     }
 
@@ -115,7 +115,7 @@ namespace graphblas
                           MonoidT         monoid = MonoidT(),
                           AccumT          accum = AccumT())
     {
-        same_dimension_check(a,b);
+        same_dimension_check(a,b,std::string("ewisemult"));
         backend::ewisemult(a.m_mat, b.m_mat, c.m_mat, monoid, accum);
     }
 
@@ -151,7 +151,7 @@ namespace graphblas
                     SemiringT       s     = SemiringT(),
                     AccumT          accum = AccumT())
     {
-        multiply_dimension_check(a,b);
+        multiply_dimension_check(a,b,std::string("mxm"));
         backend::mxm(a.m_mat, b.m_mat, c.m_mat, s, accum);
     }
 
@@ -184,7 +184,7 @@ namespace graphblas
                           SemiringT       s = SemiringT(),
                           AccumT          accum = AccumT())
     {
-        multiply_dimension_check(a,b);
+        multiply_dimension_check(a,b,std::string("mxmMasked"));
         backend::mxmMasked(a.m_mat, b.m_mat, c.m_mat, m.m_mat, s, accum);
     }
 
@@ -218,7 +218,7 @@ namespace graphblas
                             SemiringT       s = SemiringT(),
                             AccumT          accum = AccumT())
     {
-        multiply_dimension_check(a,b);
+        multiply_dimension_check(a,b,std::string("mxmMaskedV2"));
         backend::mxmMasked(a.m_mat, b.m_mat, c.m_mat, m.m_mat, s, accum);
     }
 
@@ -474,7 +474,7 @@ namespace graphblas
                       UnaryFunctionT  f,
                       AccumT          accum = AccumT())
     {
-        same_dimension_check(a,c);
+        same_dimension_check(a,c,std::string("apply"));
         backend::apply(a.m_mat, c.m_mat, f, accum);
     }
 
@@ -656,8 +656,8 @@ namespace graphblas
     inline void transpose(AMatrixT const &a,
                           CMatrixT       &c)
     {
-        multiply_dimension_check(a,c);
-        multiply_dimension_check(c,a);
+        multiply_dimension_check(a,c, std::string("transpose"));
+        multiply_dimension_check(c,a, std::string("transpose"));
         backend::transpose(a.m_mat, c.m_mat);
     }
 

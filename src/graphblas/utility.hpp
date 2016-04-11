@@ -25,29 +25,29 @@ namespace graphblas
     template <typename AMatrixT,
               typename BMatrixT >
     void same_dimension_check(AMatrixT const &a,
-                              BMatrixT const &b)
+                              BMatrixT const &b,
+                              std::string msg)
     {
         auto ashape = a.get_shape();
         auto bshape = b.get_shape();
         if (ashape.first!=bshape.first ||
             ashape.second!=bshape.second)
         {
-            //throw graphblas::DimensionException();
-            //std::cerr<<"warning: dim check failed"<<std::endl;
+            throw graphblas::DimensionException("dimension check failed: "+msg);
         }
     }
 
     template <typename AMatrixT,
               typename BMatrixT >
     void multiply_dimension_check(AMatrixT const &a,
-                                  BMatrixT const &b)
+                                  BMatrixT const &b,
+                                  std::string msg)
     {
         auto ashape = a.get_shape();
         auto bshape = b.get_shape();
-        if (ashape.first!=bshape.second)
+        if (ashape.second!=bshape.first)
         {
-            //throw graphblas::DimensionException();
-            //std::cerr<<"warning: multiply dim check failed"<<std::endl;
+            throw graphblas::DimensionException("multiply dimension check failed: "+msg);
         }
     }
 
