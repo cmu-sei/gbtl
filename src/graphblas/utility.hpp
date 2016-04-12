@@ -22,6 +22,18 @@
 
 namespace graphblas
 {
+    struct LessThanOperator{
+        template <typename T1, typename T2>
+        inline bool operator()(const T1& t1, const T2& t2){
+            return t1 < (T1)t2;
+        }
+    };
+    struct LessEqualOperator{
+        template <typename T1, typename T2>
+        inline bool operator()(const T1& t1, const T2& t2){
+            return t1 <= (T1)t2;
+        }
+    };
     template <typename AMatrixT,
               typename BMatrixT >
     void same_dimension_check(AMatrixT const &a,
@@ -52,25 +64,27 @@ namespace graphblas
     }
 
     template <typename AMatrixT,
+              typename CMatrixT,
               typename ForwardIterator1,
-              typename ForwardIterator2 >
-    void assign_dimension_check(AMatrixT const &a,
-                                ForwardIterator1 i,
-                                ForwardIterator2 j)
+              typename ForwardIterator2>
+    void assign_extract_dimension_check(AMatrixT const &a,
+                                        CMatrixT const &c,
+                                        ForwardIterator1 i,
+                                        ForwardIterator2 j)
     {
         //namespace btl = backend_template_library;
         //potentially could use c++ parallel (experimental?)
         auto ashape = a.get_shape();
+        auto cshape = c.get_shape();
         auto ar=ashape.first;
         auto ac=ashape.second;
 
-        auto i_extrema = std::max_element(i, i+ar);
-        auto j_extrema = std::max_element(j, j+ac);
+        auto i_extrema = std::max_element(i, i+cshape.first);
+        auto j_extrema = std::max_element(j, j+cshape.second);
 
-        std::cerr<<*i_extrema<<" "<<*j_extrema<<std::endl;
-        if (*i_extrema > ar || *j_extrema > ac)
+        if (*i_extrema>=ar || *j_extrema>=ac)
         {
-            throw graphblas::DimensionException("assignment dimension check failed");
+            throw graphblas::DimensionException("assignment/extract dimension check failed");
         }
     }
 
