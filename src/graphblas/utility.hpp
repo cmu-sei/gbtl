@@ -60,8 +60,9 @@ namespace graphblas
     {
         //namespace btl = backend_template_library;
         //potentially could use c++ parallel (experimental?)
-        auto ar=a.num_rows;
-        auto ac=a.num_cols;
+        auto ashape = a.get_shape();
+        auto ar=ashape.first;
+        auto ac=ashape.second;
 
         auto i_extrema = std::max_element(i, i+ar);
         auto j_extrema = std::max_element(j, j+ac);

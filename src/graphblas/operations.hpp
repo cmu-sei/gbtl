@@ -405,24 +405,7 @@ namespace graphblas
                        CMatrixT          &c,
                        AccumT             accum = AccumT())
     {
-        //backends need to handle dimension checks here due to different
-        //memory space possibilities
-        //assign_dimension_check(a, i, j);
-
-        auto ar=a.num_rows;
-        auto ac=a.num_cols;
-
-        auto i_extrema = std::max_element(i, i+ar);
-        auto j_extrema = std::max_element(j, j+ac);
-
-        std::cout<<"here"<<std::endl;
-
-        std::cout<<*i_extrema<<" "<<*j_extrema<<std::endl;
-        if (*i_extrema > ar || *j_extrema > ac)
-        {
-            throw graphblas::DimensionException("assignment dimension check failed");
-        }
-
+        assign_dimension_check(a, i, j);
         backend::assign(a.m_mat, i, j, c.m_mat, accum);
     }
 
@@ -459,8 +442,7 @@ namespace graphblas
                        CMatrixT             &c,
                        AccumT                accum = AccumT())
     {
-        //backends need to handle dimension checks here due to different
-        //memory space possibilities
+        assign_dimension_check(a, i.begin(), j.begin());
         backend::assign(a.m_mat, i, j, c.m_mat, accum);
     }
 
