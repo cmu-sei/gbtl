@@ -540,8 +540,9 @@ namespace graphblas
                            MonoidT         m     = MonoidT(),
                            AccumT          accum = AccumT())
     {
-        if (a.get_shape().first != c.get_shape().first || c.get_shape().first != 1){
-            throw graphblas::DimensionException("col reduce dimension error");
+        if (a.get_shape().second != c.get_shape().second || c.get_shape().first != 1){
+            throw graphblas::DimensionException("col reduce dimension error, arg1.cols="+std::to_string(a.get_shape().second)
+                    +" ,arg2.cols="+std::to_string(c.get_shape().second));
         }
         backend::col_reduce(a.m_mat, c.m_mat, m, accum);
     }
@@ -615,8 +616,9 @@ namespace graphblas
                            MonoidT         sum     = MonoidT(),
                            AccumT          accum = AccumT())
     {
-        if (a.get_shape().first != c.get_shape().first || c.get_shape().first != 1){
-            throw graphblas::DimensionException("col reduce masked dimension error");
+        if (a.get_shape().second != c.get_shape().second || c.get_shape().first != 1){
+            throw graphblas::DimensionException("col reduce dimension error, arg1.cols="+std::to_string(a.get_shape().second)
+                    +" ,arg2.cols="+std::to_string(c.get_shape().second));
         }
         backend::colReduceMasked(a.m_mat, c.m_mat, mask, sum, accum);
     }
