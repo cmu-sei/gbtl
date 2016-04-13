@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(extract_test_bad_dimensions)
     graphblas::Matrix<double, DirectedMatrixTag> c(2,3);
 
     graphblas::IndexArrayType vect_I({0, 2});
-    graphblas::IndexArrayType vect_J({0, 1, 3, 2});
+    graphblas::IndexArrayType vect_J({0, 4, 1, 2});
 
     // nvcc requires that the acccumulator be explicitly specified to compile.
     BOOST_CHECK_THROW(graphblas::extract(m1, vect_I, vect_J, c,

@@ -22,32 +22,69 @@
 
 namespace graphblas
 {
+    struct LessThanOperator{
+        template <typename T1, typename T2>
+        inline bool operator()(const T1& t1, const T2& t2){
+            return t1 < (T1)t2;
+        }
+    };
+    struct LessEqualOperator{
+        template <typename T1, typename T2>
+        inline bool operator()(const T1& t1, const T2& t2){
+            return t1 <= (T1)t2;
+        }
+    };
     template <typename AMatrixT,
               typename BMatrixT >
     void same_dimension_check(AMatrixT const &a,
-                              BMatrixT const &b)
+                              BMatrixT const &b,
+                              std::string msg)
     {
         auto ashape = a.get_shape();
         auto bshape = b.get_shape();
         if (ashape.first!=bshape.first ||
             ashape.second!=bshape.second)
         {
-            //throw graphblas::DimensionException();
-            //std::cerr<<"warning: dim check failed"<<std::endl;
+            throw graphblas::DimensionException("dimension check failed: "+msg);
         }
     }
 
     template <typename AMatrixT,
               typename BMatrixT >
     void multiply_dimension_check(AMatrixT const &a,
-                                  BMatrixT const &b)
+                                  BMatrixT const &b,
+                                  std::string msg)
     {
         auto ashape = a.get_shape();
         auto bshape = b.get_shape();
-        if (ashape.first!=bshape.second)
+        if (ashape.second!=bshape.first)
         {
-            //throw graphblas::DimensionException();
-            //std::cerr<<"warning: multiply dim check failed"<<std::endl;
+            throw graphblas::DimensionException("multiply dimension check failed: "+msg);
+        }
+    }
+
+    template <typename AMatrixT,
+              typename CMatrixT,
+              typename ForwardIterator1,
+              typename ForwardIterator2>
+    void assign_extract_dimension_check(AMatrixT const &a,
+                                        CMatrixT const &c,
+                                        ForwardIterator1 i,
+                                        ForwardIterator2 j)
+    {
+        //namespace btl = backend_template_library;
+        //potentially could use c++ parallel (experimental?)
+        auto ashape = a.get_shape();
+        auto cshape = c.get_shape();
+        auto ar=ashape.first;
+        auto ac=ashape.second;
+
+        auto i_extrema = std::max_element(i, i+cshape.first);
+        auto j_extrema = std::max_element(j, j+cshape.second);
+
+        if (*i_extrema>=ar || *j_extrema>=ac)
+        {
+            throw graphblas::DimensionException("assignment/extract dimension check failed");
         }
     }
 
@@ -155,6 +192,7 @@ namespace graphblas
         return btl::distance(temp.begin(), end);
     }
 
+    //does arithmetic operation by n value
     template <typename ConstT, typename BinaryOp>
     struct arithmetic_n{
         ConstT n;

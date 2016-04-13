@@ -32,6 +32,14 @@ namespace backend
                 return thrust::get<0>(a) < thrust::get<0>(b);
             }
         };
+
+        struct decrement_by_one{
+            template <typename T>
+            __host__ __device__
+            inline T operator() (const T& val){
+                return val+1;
+            }
+        };
     }
 
     template<typename AMatrixT,
@@ -79,7 +87,6 @@ namespace backend
             j_d.begin(),
             selected_cols.begin());
 
-        //sort by key (don't care about stability):
         thrust::sort_by_key(
             thrust::make_zip_iterator(thrust::make_tuple(selected_rows.begin(), selected_cols.begin())),
             thrust::make_zip_iterator(thrust::make_tuple(selected_rows.end(), selected_cols.end())),

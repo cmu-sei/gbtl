@@ -26,7 +26,7 @@ namespace backend
     /**
      * @brief View a matrix as if it were transposed.
      *
-     * @tparam MatrixT         Implements the 2D matrix concept.
+     * @tparam MatrixT         Inherits from the backend matrix.
      */
     template<typename MatrixT>
     class TransposeView : public graphblas::backend::Matrix<typename MatrixT::ScalarType>
@@ -42,6 +42,7 @@ namespace backend
             : ParentMatrixT(matrix)
         {
             thrust::swap(this->row_indices, this->column_indices);
+            thrust::swap(this->num_rows, this->num_cols);
             this->sort_by_row_and_column();
         }
     };
