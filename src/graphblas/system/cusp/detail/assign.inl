@@ -15,7 +15,6 @@
 
 #include <graphblas/detail/config.hpp>
 #include <graphblas/system/cusp/detail/merge.inl>
-#include <cusp/print.h>
 
 namespace graphblas
 {
@@ -42,39 +41,6 @@ namespace backend
         typedef typename AMatrixT::memory_space MemorySpace;
         typedef cusp::array1d <IndexType, MemorySpace> ArrayType;
 
-//matrix mult method (according to the math doc)
-#if 0
-        //copy i, j iterators
-        auto i_size = a.num_rows;
-        auto j_size = a.num_cols;
-
-        ArrayType  i_d(i, i+a.num_rows);
-        ArrayType  j_d(j, j+a.num_cols);
-
-        CMatrixT temp1(c.num_rows, a.num_rows, i_size);
-        CMatrixT temp2(c.num_cols, a.num_cols, j_size);
-
-        thrust::sequence(temp1.column_indices.begin(), temp1.column_indices.begin()+i_size);
-        temp1.row_indices = i_d;
-        thrust::fill(temp1.values.begin(), temp1.values.begin()+i_size, 1);
-
-        cusp::multiply(temp1, a, temp1);
-
-        thrust::sequence(temp2.row_indices.begin(), temp2.row_indices.begin()+i_size);
-        temp2.column_indices = j_d;
-        thrust::fill(temp2.values.begin(), temp2.values.begin()+i_size, 1);
-
-        cusp::multiply(temp1, temp2, temp2);
-
-
-        //cusp::print(temp2);
-        //merge:
-        temp2.resize(c.num_rows, c.num_cols, temp2.num_entries);
-        detail::merge(temp2, c, accum);
-#endif
-
-//raw thrust method:
-#if 1 
         //temp storage:
         AMatrixT temp(c.num_rows, c.num_cols, a.num_entries);
 
@@ -146,7 +112,7 @@ namespace backend
             //write to temp?
             temp.resize(c.num_rows, c.num_cols, zero_size);
 
-            //pick out intersection of (i,j) with a:
+            //pick out intersection of (i,j):
             thrust::gather(
                 zero_r.begin(),
                 zero_r.end(),
@@ -177,8 +143,6 @@ namespace backend
 
             c.num_entries = thrust::distance(c.values.begin(), end_diff.second);
         }
-
-#endif 
     }
 
     template<typename AMatrixT,

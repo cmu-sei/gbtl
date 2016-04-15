@@ -31,8 +31,7 @@ namespace backend
              typename RAIteratorI,
              typename RAIteratorJ,
              typename AccumT >
-    inline void extract(//AMatrixT const    &a_o,
-                        AMatrixT const    &a,
+    inline void extract(AMatrixT const    &a,
                         RAIteratorI        i,
                         RAIteratorJ        j,
                         CMatrixT          &c,
@@ -70,7 +69,7 @@ namespace backend
 
         //select columns:
         thrust::sequence(temp.column_indices.begin(), temp.column_indices.begin()+j_size);
-        temp.column_indices = j_d;
+        temp.row_indices = j_d;
         thrust::fill(temp.values.begin(), temp.values.begin()+j_size, 1);
         temp.num_entries = j_size;
 

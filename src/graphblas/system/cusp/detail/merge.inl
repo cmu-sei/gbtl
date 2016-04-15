@@ -35,10 +35,7 @@
 #include <cusp/krylov/cg.h>
 #include <cusp/detail/format.h>
 #include <cusp/sort.h>
-#include <cusp/print.h>
 #include <cusp/verify.h>
-
-//#include <graphblas/system/cusp/matrix.hpp>
 
 namespace graphblas
 {
