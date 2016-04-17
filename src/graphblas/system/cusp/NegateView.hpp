@@ -40,33 +40,6 @@ namespace backend
     };
 
     namespace detail{
-    //implement a matrix index iterator (1111,2222,3333...), (123412341234...)
-
-    struct row_index_transformer: public thrust::unary_function<IndexType,IndexType>{
-        IndexType cols;
-
-        __host__ __device__
-        row_index_transformer(IndexType c) :cols(c) {}
-
-        template <typename IntT>
-        __host__ __device__
-        IntT operator()(const IntT & sequence) {
-            return (sequence / cols);
-        }
-    };
-
-    struct col_index_transformer : public thrust::unary_function<IndexType,IndexType> {
-        IndexType rows, cols;
-
-        __host__ __device__
-        col_index_transformer(IndexType r, IndexType c) : rows(r), cols(c) {}
-
-        template <typename IntT>
-        __host__ __device__
-        IntT operator()(const IntT & sequence) {
-            return sequence - ((sequence / cols) * rows);
-        }
-    };
 
 #if 0
     cusp::array1d_view<thrust::transform_iterator<row_index_transformer, thrust::counting_iterator<IndexType> > >
