@@ -582,7 +582,7 @@ namespace graphblas
         if (a.get_shape().first != c.get_shape().first || c.get_shape().second != 1){
             throw graphblas::DimensionException("row reduce masked dimension error");
         }
-        backend::rowReduceMasked(a.m_mat, c.m_mat, mask, sum, accum);
+        backend::rowReduceMasked(a.m_mat, c.m_mat, mask.m_mat, sum, accum);
     }
 
     /**
@@ -620,7 +620,7 @@ namespace graphblas
             throw graphblas::DimensionException("col reduce dimension error, arg1.cols="+std::to_string(a.get_shape().second)
                     +" ,arg2.cols="+std::to_string(c.get_shape().second));
         }
-        backend::colReduceMasked(a.m_mat, c.m_mat, mask, sum, accum);
+        backend::colReduceMasked(a.m_mat, c.m_mat, mask.m_mat, sum, accum);
     }
 
     /**
