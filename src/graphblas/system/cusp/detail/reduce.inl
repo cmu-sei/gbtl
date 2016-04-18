@@ -15,25 +15,13 @@
 
 #pragma once
 
-#include <graphblas/system/cusp/detail/merge.inl>
-#include <cusp/multiply.h>
-#include <cusp/coo_matrix.h>
-#include <cusp/print.h>
+#include "merge.inl"
 
 namespace graphblas
 {
 namespace backend
 {
     namespace detail{
-        struct is_zero
-        {
-            template <typename T>
-            __host__ __device__
-            bool operator()(const T& x)
-            {
-                return x == 0;
-            }
-        };
 
         template <typename AccumT>
         struct tsl_zero
@@ -183,15 +171,6 @@ namespace backend
         //mask is assumed to be binary (1,0) where 1=keep and 0=discard
         //otherwise a switchable zero value in mask will invalidate the following code, and
         //will make the complexity a lot higher
-        //detail::merge(mask, temp, graphblas::math::Times<typename CMatrixT::ScalarType>());
-
-        //detect zeros/ones:
-        //cusp::array1d<IndexType, cusp::device_memory> keep_idx(mask.row_indices);
-        //thrust::transform(keep_idx.begin(), keep_idx.end(), mask.values.begin(), keep_idx.begin(), thrust::multiplies<IndexType>());
-        //auto end = thrust::remove_if(keep_idx.begin(), keep_idx.end(), detail::is_zero());
-        //auto dist = thrust::distance(keep_idx.begin(), end);
-        //auto perm = thrust::make_permutation_iterator(temp.values.begin(), keep_idx.begin());
-
         //c and temp have to be a dense vector by definition, can be optimized.
         //assert this fact:
         if (mask.num_rows != mask.num_entries || temp.num_entries != temp.num_rows || c.num_entries != c.num_rows){
@@ -206,7 +185,6 @@ namespace backend
                         mask.values.begin())),
                 c.values.begin(),
                 tsl);
-        //detail::merge(temp, c, accum);
     }
 
     template<typename AMatrixT,
@@ -264,8 +242,6 @@ namespace backend
                         mask.values.begin())),
                 c.values.begin(),
                 tsl);
-        //detail::merge(mask, temp2, graphblas::math::Times<typename CMatrixT::ScalarType>());
-        //detail::merge(temp2, c, accum);
     }
 }
 } // graphblas
