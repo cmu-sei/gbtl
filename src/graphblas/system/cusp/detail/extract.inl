@@ -19,9 +19,6 @@
 #include <graphblas/detail/config.hpp>
 #include <graphblas/system/cusp/detail/merge.inl>
 
-#include <cusp/print.h>
-
-//TODO: check that we have access to the sizes of the matrices
 namespace graphblas
 {
 namespace backend
@@ -52,7 +49,6 @@ namespace backend
 
 
         CMatrixT temp2(i_size, j_size, a.num_entries);
-        //CMatrixT temp3(i_size, j_size, a.num_entries);
 
         //build selection matrix for rows:
         CMatrixT temp(a.num_rows, a.num_rows, i_size);
@@ -75,11 +71,8 @@ namespace backend
 
         cusp::multiply(temp2, temp, temp2);
 
-
         temp2.resize(i_size, j_size, temp2.num_entries);
 
-        //just swap for now, otherwise merge might mess up results.
-        //c.swap(temp3);
         detail::merge(temp2, c, accum);
     }
 
