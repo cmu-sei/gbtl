@@ -165,7 +165,7 @@ namespace backend
             //        cusp::make_array1d_view(cusp::array1d<typename MatrixT::ScalarType, cusp::device_memory>(matrix.num_rows*matrix.num_cols-matrix.num_entries)),
             //        cusp::make_array1d_view(cusp::array1d<typename MatrixT::ScalarType, cusp::device_memory>(matrix.num_rows*matrix.num_cols-matrix.num_entries)),
             //        cusp::constant_array<ScalarType>(matrix.num_rows*matrix.num_cols-matrix.num_entries, SemiringT().one()))
-            ParentMatrixT(matrix.num_rows, matrix.num_cols, matrix.num_cols-matrix.num_entries)
+            ParentMatrixT(matrix.num_rows, matrix.num_cols, matrix.num_rows*matrix.num_cols-matrix.num_entries)
         {
             auto newsize = matrix.num_rows*matrix.num_cols-matrix.num_entries;
             //populate row and col:
