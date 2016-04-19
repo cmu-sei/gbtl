@@ -114,8 +114,14 @@ namespace backend
 
     //make negated index pairs:
     template <typename IndexIterator, typename OutputIterator>
-    void make_negated_index_pairs(IndexIterator row_indices, IndexIterator col_indices, IndexType rows, IndexType cols, IndexType num_entries,
-            OutputIterator out_rows, OutputIterator out_cols)
+    void make_negated_index_pairs(
+            IndexIterator row_indices,
+            IndexIterator col_indices,
+            IndexType rows,
+            IndexType cols,
+            IndexType num_entries,
+            OutputIterator out_rows,
+            OutputIterator out_cols)
     {
         auto sequence = thrust::make_counting_iterator(0);
         auto row_begin = thrust::make_transform_iterator(sequence, row_index_transformer(cols));
@@ -129,8 +135,11 @@ namespace backend
         auto zipped_ranges_begin = thrust::make_zip_iterator(thrust::make_tuple(row_begin, col_begin));
         auto zipped_ranges_end = thrust::make_zip_iterator(thrust::make_tuple(row_end, col_end));
 
-        thrust::set_difference(zipped_ranges_begin, zipped_ranges_end,
-                zipped_indices_begin, zipped_indices_end,
+        auto output = thrust::set_difference(
+                zipped_ranges_begin,
+                zipped_ranges_end,
+                zipped_indices_begin,
+                zipped_indices_end,
                 thrust::make_zip_iterator(thrust::make_tuple(out_rows, out_cols)));
     }
 
@@ -169,10 +178,15 @@ namespace backend
         {
             auto newsize = matrix.num_rows*matrix.num_cols-matrix.num_entries;
             //populate row and col:
-            detail::make_negated_index_pairs(matrix.row_indices.begin(),
+            detail::make_negated_index_pairs(
+                    matrix.row_indices.begin(),
                     matrix.column_indices.begin(),
-                    matrix.num_rows, matrix.num_cols, matrix.num_entries,
-                    this->row_indices.begin(), this->column_indices.begin());
+                    matrix.num_rows,
+                    matrix.num_cols,
+                    matrix.num_entries,
+                    this->row_indices.begin(),
+                    this->column_indices.begin());
+
             thrust::copy_n(thrust::make_constant_iterator(SemiringT().one()), newsize, this->values.begin());
         }
     };
