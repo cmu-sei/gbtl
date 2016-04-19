@@ -135,7 +135,7 @@ namespace backend
         auto zipped_ranges_begin = thrust::make_zip_iterator(thrust::make_tuple(row_begin, col_begin));
         auto zipped_ranges_end = thrust::make_zip_iterator(thrust::make_tuple(row_end, col_end));
 
-        auto output = thrust::set_difference(
+        thrust::set_difference(
                 zipped_ranges_begin,
                 zipped_ranges_end,
                 zipped_indices_begin,

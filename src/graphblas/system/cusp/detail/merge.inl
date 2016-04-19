@@ -67,7 +67,6 @@ namespace backend
             template <typename IntT>
             __host__ __device__
             IntT operator()(const IntT & sequence) {
-                //return sequence - ((sequence / cols) * rows);
                 return sequence % cols;
             }
         };
