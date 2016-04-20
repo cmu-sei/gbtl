@@ -70,6 +70,7 @@ namespace backend
                           SemiringT       s = SemiringT(),
                           AccumT          accum = AccumT())
     {
+        backend::mxm(a,b,c,s,accum);
     }
 
     template<typename AMatrixT,
@@ -87,6 +88,7 @@ namespace backend
                             SemiringT       s = SemiringT(),
                             AccumT          accum = AccumT())
     {
+        backend::mxm(a,b,c,s,accum);
     }
 
     //if sparse vectors are needed, use mxm
