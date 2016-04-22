@@ -72,7 +72,7 @@ namespace backend
     {
         //the mask **must** be sparse.
         backend::mxm(a,b,c,s,accum);
-        backend::ewisemult(c,m,c);
+        backend::ewisemult(c,m,c,graphblas::math::Times<typename AMatrixT::ScalarType>(),accum);
     }
 
     template<typename AMatrixT,
