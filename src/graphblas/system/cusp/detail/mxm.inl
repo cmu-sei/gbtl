@@ -70,7 +70,9 @@ namespace backend
                           SemiringT       s = SemiringT(),
                           AccumT          accum = AccumT())
     {
+        //the mask **must** be sparse.
         backend::mxm(a,b,c,s,accum);
+        backend::ewisemult(c,m,c);
     }
 
     template<typename AMatrixT,
@@ -88,7 +90,7 @@ namespace backend
                             SemiringT       s = SemiringT(),
                             AccumT          accum = AccumT())
     {
-        backend::mxm(a,b,c,s,accum);
+        backend::mxmMasked(a,b,c,m,s,accum);
     }
 
     //if sparse vectors are needed, use mxm
