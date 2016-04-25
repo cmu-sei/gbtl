@@ -1,8 +1,8 @@
-CXX = /usr/local/cuda-7.0/bin/nvcc
+CXX = nvcc
 CXXFLAGS = -std=c++11 -Xcompiler "-fopenmp -std=c++11 -Wall -Drestrict=__restrict__ -DNDEBUG -ffast-math -DGRAPH_GENERATOR_OMP -Wall" -lineinfo # -g -pg
 LDFLAGS= -lcudadevrt 
-LD= #-L/u/yz79/local/lib
-INC= -I. #-I/u/yz79/local/include -I./graph/
+LD=#.
+INC= -I.
 CFLAGS= -O3 -rdc=true -gencode arch=compute_35,code=sm_35 #-g -G
 GENERATOR_SOURCES = generator/graph_generator.c generator/make_graph.c generator/splittable_mrg.c generator/utils.c xalloc.c
 
