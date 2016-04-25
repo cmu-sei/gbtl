@@ -54,7 +54,16 @@ namespace backend
         //detail::merge(tmp_matrix, c, accum);
     }
 
-    //TODO: implement these methods in future iterations
+    namespace detail{
+        struct SelectFirst{
+            template <typename LhsT, typename RhsT>
+            __host__ __device__
+            LhsT operator()(const LhsT & lhs, const RhsT & rhs){
+                return lhs;
+            }
+        };
+    }
+
     template<typename AMatrixT,
              typename BMatrixT,
              typename CMatrixT,
@@ -72,7 +81,8 @@ namespace backend
     {
         //the mask **must** be sparse.
         backend::mxm(a,b,c,s,accum);
-        backend::ewisemult(c,m,c,graphblas::math::Times<typename AMatrixT::ScalarType>(),accum);
+        //backend::ewisemult(c,m,c,graphblas::math::Times<typename AMatrixT::ScalarType>(),accum);
+        backend::ewisemult(c,m,c,detail::SelectFirst(),accum);
     }
 
     template<typename AMatrixT,
