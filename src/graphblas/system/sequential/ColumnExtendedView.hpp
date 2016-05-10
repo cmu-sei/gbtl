@@ -35,7 +35,7 @@ namespace graphblas
     public:
         typedef typename MatrixT::ScalarType ScalarType;
         //WARNING: this breaks the sequential backend where this class is used.
-        ColumnExtendedView <MatrixT> &m_mat;
+        ColumnExtendedView<MatrixT> &m_mat;
 
         // CONSTRUCTORS
         /**
@@ -92,6 +92,9 @@ namespace graphblas
             num_rows = m_num_rows;
         }
 
+        /**
+         * @return  a pair containing the shape for this matrix.
+         */
         std::pair<IndexType, IndexType> get_shape() const
         {
             return std::make_pair(m_num_rows, m_num_cols);
@@ -177,7 +180,7 @@ namespace graphblas
         }
 
 
-        // Not certain about this implementation
+        /// @todo Not certain about this implementation
         void set_value_at(IndexType         row,
                           IndexType         col,
                           ScalarType const &val)
@@ -186,47 +189,8 @@ namespace graphblas
             m_matrix.set_value_at(m_row_index, col, val);
         }
 
-        /**
-         * @brief Not sure about this implementation.
-         *
-         * @param[in] row  The index of the row to access.
-         *
-         * @return ???
-         */
-        RowView<ColumnExtendedView<MatrixT>  const>
-        get_row(IndexType row) const
-        {
-            return RowView<ColumnExtendedView<MatrixT>  const>(row, *this);
-        }
-
-        RowView<ColumnExtendedView<MatrixT> >
-        get_row(IndexType row)
-        {
-            return RowView<ColumnExtendedView<MatrixT> >(row, *this);
-        }
-
-        /**
-         * @brief Indexing operator for accessing the rows of the
-         *        extended matrix.
-         *
-         * @param[in] row The index of the row to access.
-         *
-         * @return The view of a row of the extendd matrix.
-         */
-        RowView<ColumnExtendedView<MatrixT>  const>
-        operator[](IndexType row) const
-        {
-            return RowView<ColumnExtendedView<MatrixT>  const>(row, *this);
-        }
-
-        RowView<ColumnExtendedView<MatrixT> >
-        operator[](IndexType row)
-        {
-            return RowView<ColumnExtendedView<MatrixT> >(row, *this);
-        }
-
         friend std::ostream&
-        operator<<(std::ostream                   &os,
+        operator<<(std::ostream                      &os,
                    ColumnExtendedView<MatrixT> const &mat)
         {
             IndexType num_rows, num_cols;
@@ -251,23 +215,13 @@ namespace graphblas
     private:
 
         /**
-         * Copy assignment.
+         * Copy assignment (disallowed).
          *
-         * @param[in] rhs  The extend view to assign to this.
-         * @todo Assignment should be disallowed
-         * @return *this.
+         * @note Assignment is disallowed. you cannot reassign a reference
+         * @todo Should use C++11 'deleted'
          */
-        // NOTE: you cannot reassign a reference
-        // Not implemented
         ColumnExtendedView<MatrixT>&
         operator=(ColumnExtendedView<MatrixT> const &rhs);
-        //{
-        //    if (this != &rhs)
-        //    {
-        //        m_matrix = rhs.m_matrix;
-        //    }
-        //    return *this;
-        //}
 
     private:
         IndexType  m_row_index;

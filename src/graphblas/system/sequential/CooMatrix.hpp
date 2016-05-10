@@ -14,14 +14,14 @@
  */
 
 
-#ifndef GB_SEQUENTIAL_COO_HPP
-#define GB_SEQUENTIAL_COO_HPP
+#ifndef GB_SEQUENTIAL_COO_MATRIX_HPP
+#define GB_SEQUENTIAL_COO_MATRIX_HPP
 
 #include <algorithm>
 #include <iostream>
 #include <vector>
 
-#include <graphblas/system/sequential/RowView.hpp>
+//#include <graphblas/system/sequential/RowView.hpp>
 
 namespace graphblas
 {
@@ -209,6 +209,12 @@ namespace graphblas
             return old_zero;
         }
 
+        /// @return the number of stored values in this
+        IndexType get_nnz() const
+        {
+            return m_values.size();
+        }
+
         /**
          * @brief Access the elements of this CooMatrix given row and
          *        column indexes.
@@ -315,44 +321,6 @@ namespace graphblas
             }
         }
 
-        /**
-         * @brief Indexing function for accessing the rows of this
-         *        CooMatrix.
-         *
-         * @param[in] row  The row to access.
-         *
-         * @return The row of this CooMatrix as a dense_vector.
-         */
-        RowView<CooMatrix<ScalarT> const> get_row(IndexType row) const
-        {
-            return RowView<CooMatrix<ScalarT> const>(row, *this);
-        }
-
-        RowView<CooMatrix<ScalarT> > get_row(IndexType row)
-        {
-            return RowView<CooMatrix<ScalarT> >(row, *this);
-        }
-
-        /**
-         * @brief Indexing operator for accessing the rows of this
-         *        CooMatrix.
-         *
-         * @param[in] row  The row to access.
-         * @return The row of this CooMatrix as a dense_vector.
-         */
-        RowView<CooMatrix<ScalarT> const>
-        operator[](IndexType row) const
-        {
-            return RowView<CooMatrix<ScalarT> const>(row, *this);
-        }
-
-        // need a non-const version for mutation.
-        RowView<CooMatrix<ScalarT> >
-        operator[](IndexType row)
-        {
-            return RowView<CooMatrix<ScalarT> >(row, *this);
-        }
-
         // OPERATORS
 
         /**
@@ -392,31 +360,35 @@ namespace graphblas
             return !(*this == rhs);
         }
 
+        void print_info(std::ostream &os) const
+        {
+            os << "CooMatrix<" << typeid(ScalarT).name() << ">" << std::endl;
+            os << "dimension: " << m_num_rows << " x " << m_num_cols
+               << std::endl;
+            os << "num nonzeros = " << get_nnz() << std::endl;
+            os << "structural zero value = " << get_zero() << std::endl;
+
+            for (IndexType i = 0; i < get_nnz(); ++i)
+            {
+                os << m_rows[i] << ", " << m_columns[i] << ": "
+                   << m_values[i] << std::endl;
+            }
+        }
+
         friend std::ostream& operator<<(std::ostream        &os,
                                         const CooMatrix<ScalarT> &coo)
         {
-            IndexType M, N;
-            coo.get_shape(M, N);
-            /// @todo Minimum values for M and N?
-            os << "[" << coo[0] << "," << std::endl;
-            for (IndexType i = 1; i < M - 1; i++)
-            {
-                os << " " << coo[i] << "," << std::endl;
-            }
-            os << " " << coo[M - 1] << "]";
+            coo.print_info(os);
             return os;
         }
 
-    protected:
-        // DATA
-
+    private:
         /** The shape of this CooMatrix. */
         IndexType m_num_rows;
         IndexType m_num_cols;
         /** The zero element for this CooMatrix. */
         ScalarT m_zero;
 
-    private:
         /**
         * @todo We assume that these are "sorted" for efficiency (they are
         * added like in the constructor above).

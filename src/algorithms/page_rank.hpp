@@ -35,6 +35,8 @@ namespace algorithms
      * @note Because of the random component of this algorithm, the MIS
      *       calculated across various calls to <code>mis</code> may vary.
      *
+     * @note This only works with floating point scalars.
+     *
      * @param[in]  graph            NxN adjacency matrix of graph to compute
      *                              the page rank.  The structural zero needs
      *                              to be '0' and edges are indicated by '1'
@@ -46,7 +48,6 @@ namespace algorithms
      *                              threshold.
      *
      */
-    /// @todo only works with floating point scalars
     template<typename MatrixT, typename PRMatrixT>
     void page_rank(MatrixT const  &graph,
                    PRMatrixT      &page_rank,
@@ -109,7 +110,8 @@ namespace algorithms
         //graphblas::ConstantMatrix<T> scaled_teleport(
         //    1, rows, (1.0 - damping_factor)/static_cast<T>(rows), 0.0);
         //
-        graphblas::arithmetic_n <T, graphblas::math::Plus<T> > scaled_teleport((1.0 - damping_factor)/static_cast<T>(rows));
+        graphblas::arithmetic_n <T, graphblas::math::Plus<T> > scaled_teleport(
+            (1.0 - damping_factor)/static_cast<T>(rows));
 
         //graphblas::print_matrix(std::cout, scaled_teleport,
         //                        "scaled_teleportation");

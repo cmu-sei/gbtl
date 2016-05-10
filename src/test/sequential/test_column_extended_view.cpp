@@ -28,7 +28,7 @@ using namespace graphblas;
 BOOST_AUTO_TEST_SUITE(column_extended_view_suite)
 
 //****************************************************************************
-// COO basic constructor
+// basic constructor
 BOOST_AUTO_TEST_CASE(cev_test_construction_vector)
 {
     // Build a matrix that is a column vector
@@ -57,6 +57,7 @@ BOOST_AUTO_TEST_CASE(cev_test_construction_vector)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(cev_test_construction_row_view)
 {
+/*
     std::vector<std::vector<double> > mat = {{6, 0, 0, 4},
                                              {7, 0, 0, 0},
                                              {0, 0, 9, 4},
@@ -90,6 +91,7 @@ BOOST_AUTO_TEST_CASE(cev_test_construction_row_view)
                               mat[orig_row_index][j]);
         }
     }
+*/
 }
 
 

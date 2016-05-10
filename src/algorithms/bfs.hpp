@@ -31,6 +31,7 @@
 
 namespace algorithms
 {
+    //************************************************************************
     /**
      * @brief Perform a breadth first search (BFS) traversal on the given graph.
      *
@@ -116,6 +117,7 @@ namespace algorithms
         }
     }
 
+    //************************************************************************
     /**
      * @brief Perform a breadth first search (BFS) on the given graph.
      *
@@ -152,13 +154,13 @@ namespace algorithms
             ++depth;
 
             // Apply the level to all newly visited nodes
-            graphblas::arithmetic_n<graphblas::IndexType,
-                graphblas::math::Times<graphblas::IndexType> >
-                    incr(depth);
+            graphblas::arithmetic_n<unsigned int,
+                                    graphblas::math::Times<unsigned int> >
+                    apply_depth(depth);
 
             graphblas::apply(wavefront, levels,
-                    incr,
-                    graphblas::math::Accum<unsigned int>());
+                             apply_depth,
+                             graphblas::math::Accum<unsigned int>());
 
             graphblas::mxm(wavefront, graph, wavefront,
                            graphblas::IntLogicalSemiring<unsigned int>());
@@ -179,10 +181,10 @@ namespace algorithms
      * @param[in]  graph      NxN adjacency matrix of the graph on which to
      *                        perform a BFS (not the transpose).  A value of
      *                        1 indicates an edge (structural zero = 0).
-     * @param[in]  wavefront  RxN initial wavefronts to use in the calculation of
-     *                        R simultaneous traversals.  A value of 1 in a given
-     *                        row indicates a root for the corresponding traversal.
-     *                        (structural zero = 0).
+     * @param[in]  wavefront  RxN initial wavefronts to use in the calculation
+     *                        of R simultaneous traversals.  A value of 1 in a
+     *                        given row indicates a root for the corresponding
+     *                        traversal. (structural zero = 0).
      * @param[out] levels     The level (distance in unweighted graphs) from
      *                        the corresponding root of that BFS.  Roots are
      *                        assigned a value of 1. (a value of 0 implies not
@@ -215,11 +217,11 @@ namespace algorithms
             // Apply the level to all newly visited nodes
             graphblas::arithmetic_n<graphblas::IndexType,
                 graphblas::math::Times<graphblas::IndexType> >
-                    incr(depth);
+                    apply_depth(depth);
 
             graphblas::apply(wavefront, levels,
-                    incr,
-                    graphblas::math::Accum<unsigned int>());
+                             apply_depth,
+                             graphblas::math::Accum<unsigned int>());
 
             // Advance the wavefront and mask out nodes already assigned levels
             graphblas::mxmMasked(

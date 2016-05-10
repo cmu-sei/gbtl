@@ -28,7 +28,7 @@
 #include <vector>
 #include <typeinfo>
 
-#include <graphblas/system/sequential/RowView.hpp>
+//#include <graphblas/system/sequential/RowView.hpp>
 
 namespace graphblas
 {
@@ -378,44 +378,6 @@ namespace graphblas
                 m_data[row].push_back(std::make_tuple(col, new_val));
             }
             /// @todo should we store zero?? TBD.
-        }
-
-        /**
-         * @brief Indexing function for accessing the rows of this
-         *        LilMatrix.
-         *
-         * @param[in] row  The row to access.
-         *
-         * @return The row of this LilMatrix as a dense_vector.
-         */
-        RowView<LilMatrix<ScalarT> const> get_row(IndexType row) const
-        {
-            return RowView<LilMatrix<ScalarT> const>(row, *this);
-        }
-
-        RowView<LilMatrix<ScalarT> > get_row(IndexType row)
-        {
-            return RowView<LilMatrix<ScalarT> >(row, *this);
-        }
-
-        /**
-         * @brief Indexing operator for accessing the rows of this
-         *        LilMatrix.
-         *
-         * @param[in] row  The row to access.
-         * @return The row of this LilMatrix as a dense_vector.
-         */
-        RowView<LilMatrix<ScalarT> const>
-        operator[](IndexType row) const
-        {
-            return RowView<LilMatrix<ScalarT> const>(row, *this);
-        }
-
-        // need a non-const version for mutation.
-        RowView<LilMatrix<ScalarT> >
-        operator[](IndexType row)
-        {
-            return RowView<LilMatrix<ScalarT> >(row, *this);
         }
 
         // output specific to the storage layout of this type of matrix

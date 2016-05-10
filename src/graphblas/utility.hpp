@@ -22,44 +22,51 @@
 
 namespace graphblas
 {
-    struct LessThanOperator{
+    struct LessThanOperator
+    {
         template <typename T1, typename T2>
-        inline bool operator()(const T1& t1, const T2& t2){
+        inline bool operator()(const T1& t1, const T2& t2)
+        {
             return t1 < (T1)t2;
         }
     };
-    struct LessEqualOperator{
+
+    struct LessEqualOperator
+    {
         template <typename T1, typename T2>
-        inline bool operator()(const T1& t1, const T2& t2){
+        inline bool operator()(const T1& t1, const T2& t2)
+        {
             return t1 <= (T1)t2;
         }
     };
+
     template <typename AMatrixT,
               typename BMatrixT >
-    void same_dimension_check(AMatrixT const &a,
-                              BMatrixT const &b,
-                              std::string msg)
+    void same_dimension_check(AMatrixT const    &a,
+                              BMatrixT const    &b,
+                              std::string const &msg)
     {
         auto ashape = a.get_shape();
         auto bshape = b.get_shape();
         if (ashape.first!=bshape.first ||
             ashape.second!=bshape.second)
         {
-            throw graphblas::DimensionException("dimension check failed: "+msg);
+            throw graphblas::DimensionException("dimension check failed: "+ msg);
         }
     }
 
     template <typename AMatrixT,
               typename BMatrixT >
-    void multiply_dimension_check(AMatrixT const &a,
-                                  BMatrixT const &b,
-                                  std::string msg)
+    void multiply_dimension_check(AMatrixT const    &a,
+                                  BMatrixT const    &b,
+                                  std::string const &msg)
     {
         auto ashape = a.get_shape();
         auto bshape = b.get_shape();
         if (ashape.second!=bshape.first)
         {
-            throw graphblas::DimensionException("multiply dimension check failed: "+msg);
+            throw graphblas::DimensionException(
+                "multiply dimension check failed: "+ msg);
         }
     }
 
@@ -76,25 +83,26 @@ namespace graphblas
         //potentially could use c++ parallel (experimental?)
         auto ashape = a.get_shape();
         auto cshape = c.get_shape();
-        auto ar=ashape.first;
-        auto ac=ashape.second;
+        auto ar = ashape.first;
+        auto ac = ashape.second;
 
-        auto i_extrema = std::max_element(i, i+cshape.first);
-        auto j_extrema = std::max_element(j, j+cshape.second);
+        auto i_extrema = std::max_element(i, i + cshape.first);
+        auto j_extrema = std::max_element(j, j + cshape.second);
 
         if (*i_extrema>=ar || *j_extrema>=ac)
         {
-            throw graphblas::DimensionException("assignment/extract dimension check failed");
+            throw graphblas::DimensionException(
+                "assignment/extract dimension check failed");
         }
     }
 
     template <typename AVectorT,
               typename SizeT >
     void vector_multiply_dimension_check(AVectorT const &a,
-                                         SizeT const &b)
+                                         SizeT const    &b)
     {
         //a is a vector with a method called "size()"
-        if (a.size()!=b)
+        if (a.size() != b)
         {
             throw graphblas::DimensionException();
         }
@@ -171,10 +179,10 @@ namespace graphblas
     template <typename Vector1,
               typename Vector2,
               typename SizeT >
-    SizeT filter(Vector1 &v1,
-                SizeT v1size,
+    SizeT filter(Vector1      &v1,
+                SizeT          v1size,
                 Vector2 const &v2,
-                SizeT v2size)
+                SizeT          v2size)
     {
         namespace btl = backend_template_library;
 
@@ -182,9 +190,9 @@ namespace graphblas
         //require c++11
         auto end = btl::set_difference(
                 v1.begin(),
-                v1.begin()+v1size,
+                v1.begin() + v1size,
                 v2.begin(),
-                v2.begin()+v2size,
+                v2.begin() + v2size,
                 temp.begin());
 
         btl::copy(temp.begin(), end, v1.begin());
@@ -194,13 +202,13 @@ namespace graphblas
 
     //does arithmetic operation by n value
     template <typename ConstT, typename BinaryOp>
-    struct arithmetic_n{
+    struct arithmetic_n
+    {
         ConstT n;
         BinaryOp op;
 
-        arithmetic_n(
-                const ConstT & value,
-                BinaryOp operation = BinaryOp() ) :
+        arithmetic_n(ConstT const &value,
+                     BinaryOp      operation = BinaryOp() ) :
             n(value),
             op(operation)
         {}
@@ -215,4 +223,3 @@ __device__ __host__
     };
 
 }
-

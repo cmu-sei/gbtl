@@ -17,7 +17,7 @@
 #ifndef GB_SEQUENTIAL_NEGATE_VIEW_HPP
 #define GB_SEQUENTIAL_NEGATE_VIEW_HPP
 
-#include <graphblas/system/sequential/ColumnView.hpp>
+//#include <graphblas/system/sequential/ColumnView.hpp>
 #include <graphblas/system/sequential/Matrix.hpp>
 
 namespace graphblas
@@ -205,51 +205,6 @@ namespace backend
         //{
         //    m_matrix.set_value_at(row, col, math::NotFn<ScalarType>()(val));
         //}
-
-        /**
-         * @brief Indexing function for accessing the rows of the
-         *        transposed matrix.
-         *
-         * @param[in] row  The index of the row to access.
-         *
-         * @return The view of a row of this matrix.
-         */
-        //ColumnView<MatrixT const>
-        //get_row(IndexType row) const
-        //{
-        //    // note row of transpose becomes column of underlying matrix
-        //    return ColumnView<MatrixT const>(row, m_matrix);
-        //}
-
-        //ColumnView<MatrixT>
-        //get_row(IndexType row)
-        //{
-        //    // note row of transpose becomes column of underlying matrix
-        //    return ColumnView<MatrixT>(row, m_matrix);
-        //}
-
-        /**
-         * @brief Indexing operator for accessing the rows of the
-         *        transposed matrix.
-         *
-         * @param[in] row  The index of the row to access.
-         *
-         * @return The view of a row of the transposed matrix.
-         */
-        //ColumnView<MatrixT const>
-        //operator[](IndexType row) const
-        //{
-        //    // note row of transpose becomes column of underlying matrix
-        //    return ColumnView<MatrixT const>(row, m_matrix);
-        //}
-
-        //ColumnView<MatrixT>
-        //operator[](IndexType row)
-        //{
-        //    // note row of transpose becomes column of underlying matrix
-        //    return ColumnView<MatrixT>(row, m_matrix);
-        //}
-
 
         void print_info(std::ostream &os) const
         {

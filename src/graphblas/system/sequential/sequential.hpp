@@ -21,13 +21,13 @@
 #include <graphblas/system/sequential/utility.hpp>
 
 #include <graphblas/system/sequential/LilMatrix.hpp>
-#include <graphblas/system/sequential/DiaMatrix.hpp>
 #include <graphblas/system/sequential/CsrMatrix.hpp>
 #include <graphblas/system/sequential/CscMatrix.hpp>
-#include <graphblas/system/sequential/coo.hpp>
+#include <graphblas/system/sequential/CooMatrix.hpp>
+//#include <graphblas/system/sequential/DiaMatrix.hpp>
 
-#include <graphblas/system/sequential/RowView.hpp>
-#include <graphblas/system/sequential/ColumnView.hpp>
+//#include <graphblas/system/sequential/RowView.hpp>
+//#include <graphblas/system/sequential/ColumnView.hpp>
 #include <graphblas/system/sequential/TransposeView.hpp>
 #include <graphblas/system/sequential/RowExtendedView.hpp>
 #include <graphblas/system/sequential/ColumnExtendedView.hpp>

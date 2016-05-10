@@ -188,45 +188,6 @@ namespace graphblas
             m_matrix.set_value_at(row, m_col_index, val);
         }
 
-        /**
-         * @brief Not sure about this implementation.
-         *
-         * @param[in] row  The index of the row to access.
-         *
-         * @return ???
-         */
-        RowView<RowExtendedView<MatrixT>  const>
-        get_row(IndexType row) const
-        {
-            return RowView<RowExtendedView<MatrixT>  const>(row, *this);
-        }
-
-        RowView<RowExtendedView<MatrixT> >
-        get_row(IndexType row)
-        {
-            return RowView<RowExtendedView<MatrixT> >(row, *this);
-        }
-
-        /**
-         * @brief Indexing operator for accessing the rows of the
-         *        extended matrix.
-         *
-         * @param[in] row The index of the row to access.
-         *
-         * @return The view of a row of the extendd matrix.
-         */
-        RowView<RowExtendedView<MatrixT>  const>
-        operator[](IndexType row) const
-        {
-            return RowView<RowExtendedView<MatrixT>  const>(row, *this);
-        }
-
-        RowView<RowExtendedView<MatrixT> >
-        operator[](IndexType row)
-        {
-            return RowView<RowExtendedView<MatrixT> >(row, *this);
-        }
-
         friend std::ostream&
         operator<<(std::ostream                   &os,
                    RowExtendedView<MatrixT> const &mat)
