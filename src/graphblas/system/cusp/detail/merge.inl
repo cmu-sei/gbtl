@@ -37,14 +37,39 @@
 #include <cusp/sort.h>
 #include <cusp/verify.h>
 
-//#include <graphblas/system/cusp/matrix.hpp>
-
 namespace graphblas
 {
 namespace backend
 {
     namespace detail
     {
+        //implement a matrix index iterator (1111,2222,3333...), (123412341234...)
+
+        struct row_index_transformer: public thrust::unary_function<IndexType,IndexType>{
+            IndexType cols;
+
+            __host__ __device__
+            row_index_transformer(IndexType c) :cols(c) {}
+
+            template <typename IntT>
+            __host__ __device__
+            IntT operator()(const IntT & sequence) {
+                return (sequence / cols);
+            }
+        };
+
+        struct col_index_transformer : public thrust::unary_function<IndexType,IndexType> {
+            IndexType rows, cols;
+
+            __host__ __device__
+            col_index_transformer(IndexType r, IndexType c) : rows(r), cols(c) {}
+
+            template <typename IntT>
+            __host__ __device__
+            IntT operator()(const IntT & sequence) {
+                return sequence % cols;
+            }
+        };
         template <typename MatrixTypeSrc,
                   typename MatrixTypeDst,
                   typename MergeFunction >
@@ -123,12 +148,12 @@ namespace backend
             //merging:
             //merge row, col and values of A and B into temp:
             thrust::merge_by_key(
-                thrust::make_zip_iterator(thrust::make_tuple(A.row_indices.begin(), A.column_indices.begin())),
-                thrust::make_zip_iterator(thrust::make_tuple(A.row_indices.end(), A.column_indices.end())),
                 thrust::make_zip_iterator(thrust::make_tuple(B.row_indices.begin(), B.column_indices.begin())),
                 thrust::make_zip_iterator(thrust::make_tuple(B.row_indices.end(), B.column_indices.end())),
-                A.values.begin(),
+                thrust::make_zip_iterator(thrust::make_tuple(A.row_indices.begin(), A.column_indices.begin())),
+                thrust::make_zip_iterator(thrust::make_tuple(A.row_indices.end(), A.column_indices.end())),
                 B.values.begin(),
+                A.values.begin(),
                 thrust::make_zip_iterator(thrust::make_tuple(temp.row_indices.begin(), temp.column_indices.begin())),
                 temp.values.begin());
 
@@ -143,7 +168,7 @@ namespace backend
 
             //resize B:
             B.resize(A.num_rows, A.num_cols, B_unique_nnz);
-
+        
             //reduce by key:
             thrust::reduce_by_key(
                 thrust::make_zip_iterator(thrust::make_tuple(temp.row_indices.begin(), temp.column_indices.begin())),

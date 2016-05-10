@@ -19,7 +19,7 @@
 #include <iostream>
 #include <vector>
 
-#include <graphblas/system/sequential/RowView.hpp>
+//#include <graphblas/system/sequential/RowView.hpp>
 
 namespace graphblas
 {
@@ -157,10 +157,11 @@ namespace graphblas
                 bool is_zero_col = true;
                 for (IndexType row = 0; row < M; ++row)
                 {
-                    if (values[row][col] != zero)
+                    ScalarType val = values.get_value_at(row, col);
+                    if (val != zero)
                     {
                         is_zero_col = false;
-                        m_val.push_back(values[row][col]);
+                        m_val.push_back(val);
                         m_row_ind.push_back(row);
                         if (is_first_nonzero)
                         {
@@ -399,80 +400,38 @@ namespace graphblas
             }
         }
 
-        /**
-         * @brief Indexing function for accessing the rows of this
-         *        CscMatrix.
-         *
-         * @param[in] row  The row to access.
-         *
-         * @return The row of this CscMatrix as a dense_vector.
-         */
-        RowView<CscMatrix<ScalarT> const> get_row(IndexType row) const
-        {
-            return RowView<CscMatrix<ScalarT> const>(row, *this);
-        }
-
-        RowView<CscMatrix<ScalarT> > get_row(IndexType row)
-        {
-            return RowView<CscMatrix<ScalarT> >(row, *this);
-        }
-
-        /**
-         * @brief Indexing operator for accessing the rows of this
-         *        CscMatrix.
-         *
-         * @param[in] row  The row to access.
-         * @return The row of this CscMatrix as a dense_vector.
-         */
-        RowView<CscMatrix<ScalarT> const> operator[](IndexType row) const
-        {
-            return RowView<CscMatrix<ScalarT> const>(row, *this);
-        }
-
-        // need a non-const version for mutation.
-        RowView<CscMatrix<ScalarT> > operator[](IndexType row)
-        {
-            return RowView<CscMatrix<ScalarT> >(row, *this);
-        }
-
         // output specific to the storage layout of this type of matrix
-        friend std::ostream& operator<<(std::ostream             &os,
-                                        CscMatrix<ScalarT> const &Csc)
+        void print_info(std::ostream &os) const
         {
-            for (IndexType row = 0; row < Csc.m_num_rows; ++row)
-            {
-                os << ((row == 0) ? "[[" : " [");
-                if (Csc.m_num_cols > 0)
-                {
-                    os << Csc.get_value_at(row, 0);
-                }
+            os << "CscMatrix<" << typeid(ScalarT).name() << ">" << std::endl;
+            os << "dimension: " << m_num_rows << " x " << m_num_cols
+               << std::endl;
+            os << "num nonzeros = " << get_nnz() << std::endl;
+            os << "structural zero value = " << get_zero() << std::endl;
 
-                for (IndexType col = 1; col < Csc.m_num_cols; ++col)
-                {
-                    os << ", " << Csc.get_value_at(row, col);
-                }
-                os << ((row == Csc.m_num_rows - 1) ? "]]" : "]\n");
-            }
-#ifdef GB_DEBUG
-            // Friendly debugging
-            os << "\nA: ";
-            for (auto a: Csc.m_val) {
-                os << a << " ";
+            os << "row_ind: ";
+            for (auto ja: m_row_ind) {
+                os << ja << " ";
             }
             os << std::endl;
 
-            os << "IA: ";
-            for (auto ia: Csc.m_col_ptr) {
+            os << "col_ptr: ";
+            for (auto ia: m_col_ptr) {
                 os << ia << " ";
             }
             os << std::endl;
 
-            os << "JA: ";
-            for (auto ja: Csc.m_row_ind) {
-                os << ja << " ";
+            os << "val: ";
+            for (auto a: m_val) {
+                os << a << " ";
             }
             os << std::endl;
-#endif
+        }
+
+        friend std::ostream& operator<<(std::ostream             &os,
+                                        CscMatrix<ScalarT> const &csc)
+        {
+            csc.print_info(os);
             return os;
         }
 

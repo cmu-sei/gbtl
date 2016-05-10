@@ -40,33 +40,6 @@ namespace backend
     };
 
     namespace detail{
-    //implement a matrix index iterator (1111,2222,3333...), (123412341234...)
-
-    struct row_index_transformer: public thrust::unary_function<IndexType,IndexType>{
-        IndexType cols;
-
-        __host__ __device__
-        row_index_transformer(IndexType c) :cols(c) {}
-
-        template <typename IntT>
-        __host__ __device__
-        IntT operator()(const IntT & sequence) {
-            return (sequence / cols);
-        }
-    };
-
-    struct col_index_transformer : public thrust::unary_function<IndexType,IndexType> {
-        IndexType rows, cols;
-
-        __host__ __device__
-        col_index_transformer(IndexType r, IndexType c) : rows(r), cols(c) {}
-
-        template <typename IntT>
-        __host__ __device__
-        IntT operator()(const IntT & sequence) {
-            return sequence - ((sequence / cols) * rows);
-        }
-    };
 
 #if 0
     cusp::array1d_view<thrust::transform_iterator<row_index_transformer, thrust::counting_iterator<IndexType> > >
@@ -141,8 +114,14 @@ namespace backend
 
     //make negated index pairs:
     template <typename IndexIterator, typename OutputIterator>
-    void make_negated_index_pairs(IndexIterator row_indices, IndexIterator col_indices, IndexType rows, IndexType cols, IndexType num_entries,
-            OutputIterator out_rows, OutputIterator out_cols)
+    void make_negated_index_pairs(
+            IndexIterator row_indices,
+            IndexIterator col_indices,
+            IndexType rows,
+            IndexType cols,
+            IndexType num_entries,
+            OutputIterator out_rows,
+            OutputIterator out_cols)
     {
         auto sequence = thrust::make_counting_iterator(0);
         auto row_begin = thrust::make_transform_iterator(sequence, row_index_transformer(cols));
@@ -156,8 +135,11 @@ namespace backend
         auto zipped_ranges_begin = thrust::make_zip_iterator(thrust::make_tuple(row_begin, col_begin));
         auto zipped_ranges_end = thrust::make_zip_iterator(thrust::make_tuple(row_end, col_end));
 
-        thrust::set_difference(zipped_ranges_begin, zipped_ranges_end,
-                zipped_indices_begin, zipped_indices_end,
+        thrust::set_difference(
+                zipped_ranges_begin,
+                zipped_ranges_end,
+                zipped_indices_begin,
+                zipped_indices_end,
                 thrust::make_zip_iterator(thrust::make_tuple(out_rows, out_cols)));
     }
 
@@ -172,7 +154,7 @@ namespace backend
      * @tparam SemiringT   Used to define the behaviour of the negate
      */
     template<typename MatrixT, typename SemiringT>
-    class NegateView : public MatrixT
+    class NegateView : public graphblas::backend::Matrix<typename MatrixT::ScalarType>
     {
     public:
         typedef typename MatrixT::ScalarType ScalarType;
@@ -182,6 +164,7 @@ namespace backend
         ///    cusp::array1d_view<thrust::detail::normal_iterator<thrust::device_ptr<typename MatrixT::ScalarType> > >,
         ///    cusp::array1d_view<thrust::detail::normal_iterator<thrust::device_ptr<typename MatrixT::ScalarType> > >,
         ///    cusp::constant_array<typename MatrixT::ScalarType> >ParentMatrixT;
+        typedef graphblas::backend::Matrix<typename MatrixT::ScalarType> ParentMatrixT;
 
         NegateView(MatrixT const &matrix) :
             //ParentMatrixT(
@@ -191,14 +174,19 @@ namespace backend
             //        cusp::make_array1d_view(cusp::array1d<typename MatrixT::ScalarType, cusp::device_memory>(matrix.num_rows*matrix.num_cols-matrix.num_entries)),
             //        cusp::make_array1d_view(cusp::array1d<typename MatrixT::ScalarType, cusp::device_memory>(matrix.num_rows*matrix.num_cols-matrix.num_entries)),
             //        cusp::constant_array<ScalarType>(matrix.num_rows*matrix.num_cols-matrix.num_entries, SemiringT().one()))
-            MatrixT(matrix.num_rows, matrix.num_cols, matrix.num_cols-matrix.num_entries)
+            ParentMatrixT(matrix.num_rows, matrix.num_cols, matrix.num_rows*matrix.num_cols-matrix.num_entries)
         {
             auto newsize = matrix.num_rows*matrix.num_cols-matrix.num_entries;
             //populate row and col:
-            detail::make_negated_index_pairs(matrix.row_indices.begin(),
+            detail::make_negated_index_pairs(
+                    matrix.row_indices.begin(),
                     matrix.column_indices.begin(),
-                    matrix.num_rows, matrix.num_cols, matrix.num_entries,
-                    this->row_indices.begin(), this->column_indices.begin());
+                    matrix.num_rows,
+                    matrix.num_cols,
+                    matrix.num_entries,
+                    this->row_indices.begin(),
+                    this->column_indices.begin());
+
             thrust::copy_n(thrust::make_constant_iterator(SemiringT().one()), newsize, this->values.begin());
         }
     };

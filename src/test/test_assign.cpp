@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(assign_test_bad_dimensions)
     Matrix<double, DirectedMatrixTag> a(2, 2);
     buildmatrix(a, i_a, j_a, v_a);
 
-    IndexArrayType vect_I({1,2,3});
+    IndexArrayType vect_I({1,3,2});
     IndexArrayType vect_J({1,2});
 
     // nvcc requires that the acccumulator be explicitly specified to compile.

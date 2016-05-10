@@ -120,7 +120,8 @@ namespace graphblas
         template <typename OtherMatrixT>
         bool operator==(OtherMatrixT const &rhs) const
         {
-            return (m_mat.operator==(rhs));
+            //return (m_mat.operator==(rhs));
+            return matrix_equal_helper(*this, rhs);
         }
 
         template <typename OtherMatrixT>
@@ -132,6 +133,11 @@ namespace graphblas
 
     private:
         BackendType m_mat;
+
+        template <typename AMatrixT, typename BMatrixT>
+        friend bool matrix_equal_helper(
+                    const AMatrixT& a,
+                    const BMatrixT& b);
 
         template<typename AMatrixT,
                  typename BMatrixT,
@@ -470,7 +476,8 @@ namespace graphblas
         template <typename OtherMatrixT>
         bool operator==(OtherMatrixT const &rhs) const
         {
-            return (m_mat.operator==(rhs));
+            //return (m_mat.operator==(rhs.m_mat));
+            return matrix_equal_helper(*this, rhs);
         }
 
         template <typename OtherMatrixT>
@@ -483,6 +490,11 @@ namespace graphblas
 
     private:
         BackendType m_mat;
+
+        template <typename AMatrixT, typename BMatrixT>
+        friend bool matrix_equal_helper(
+                    const AMatrixT& a,
+                    const BMatrixT& b);
 
         template<typename AMatrixT,
                  typename BMatrixT,

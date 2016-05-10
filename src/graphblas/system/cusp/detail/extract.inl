@@ -19,7 +19,6 @@
 #include <graphblas/detail/config.hpp>
 #include <graphblas/system/cusp/detail/merge.inl>
 
-//TODO: check that we have access to the sizes of the matrices
 namespace graphblas
 {
 namespace backend
@@ -31,8 +30,7 @@ namespace backend
              typename RAIteratorI,
              typename RAIteratorJ,
              typename AccumT >
-    inline void extract(//AMatrixT const    &a_o,
-                        AMatrixT const    &a,
+    inline void extract(AMatrixT const    &a,
                         RAIteratorI        i,
                         RAIteratorJ        j,
                         CMatrixT          &c,
@@ -46,18 +44,11 @@ namespace backend
         IndexType i_size = c.num_rows;
         IndexType j_size = c.num_cols;
 
-        ArrayType t_rows(a.num_entries);
-        ArrayType t_cols(a.num_entries);
-        cusp::array1d <ValueTypeC, MemorySpaceC> t_vals(a.num_entries);
+        ArrayType i_d(i, i+i_size);
+        ArrayType j_d(j, j+j_size);
 
-        ArrayType i_d(i_size);
-        ArrayType j_d(j_size);
-
-        thrust::copy_n(i, i_size, i_d.begin());
-        thrust::copy_n(j, j_size, j_d.begin());
 
         CMatrixT temp2(i_size, j_size, a.num_entries);
-        CMatrixT temp3(i_size, j_size, a.num_entries);
 
         //build selection matrix for rows:
         CMatrixT temp(a.num_rows, a.num_rows, i_size);
@@ -66,23 +57,23 @@ namespace backend
         thrust::fill(temp.values.begin(), temp.values.begin()+i_size, 1);
         temp.num_entries = i_size;
 
+
         cusp::multiply(temp, a, temp2);
+
+        temp.resize(a.num_cols, a.num_cols, j_size);
 
         //select columns:
         thrust::sequence(temp.column_indices.begin(), temp.column_indices.begin()+j_size);
-        temp.column_indices = j_d;
+        temp.row_indices = j_d;
         thrust::fill(temp.values.begin(), temp.values.begin()+j_size, 1);
         temp.num_entries = j_size;
 
 
-        cusp::multiply(temp2, temp, temp3);
+        cusp::multiply(temp2, temp, temp2);
 
+        temp2.resize(i_size, j_size, temp2.num_entries);
 
-        temp3.resize(i_size, j_size, temp3.num_entries);
-
-        //just swap for now, otherwise merge might mess up results.
-        c.swap(temp3);
-        //detail::merge(temp3, c, accum);
+        detail::merge(temp2, c, accum);
     }
 
     template<typename AMatrixT,
@@ -106,7 +97,7 @@ namespace backend
         //     throw DimensionException();
         // }
 
-        extract(a, v_i.begin(), v_j.begin(), c, accum);
+        backend::extract(a, v_i.begin(), v_j.begin(), c, accum);
     }
 }
 }//end graphblas

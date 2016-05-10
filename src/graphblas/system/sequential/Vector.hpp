@@ -25,7 +25,8 @@ namespace graphblas
 {
     namespace backend
     {
-        //ignoring all tags here, coo matrices only.
+        //**********************************************************************
+        /// @note ignoring all tags here, std::vectors only.
         template<typename ScalarT, typename... TagsT>
         class Vector : public std::vector <ScalarT>
         {
@@ -33,17 +34,18 @@ namespace graphblas
             typedef typename std::vector <ScalarT> ParentVectorT;
         public:
             typedef ScalarT ScalarType;
+
             Vector(): ParentVectorT(){};
 
             //use parent copy constructor:
             //use parent constructor with num vals:
-            template<typename T>
-            Vector(const T &v)
-                : ParentVectorT(v) {}
+            template<typename OtherVectorT>
+            Vector(OtherVectorT const &vec)
+                : ParentVectorT(vec) {}
 
-            template<typename T1, typename T2>
-            Vector(const T1 &v1, const T2 & v2)
-                : ParentVectorT(v1, v2) {}
+            template<typename SizeT>
+            Vector(SizeT const &count, ScalarT const &value)
+                : ParentVectorT(count, value) {}
         };
     }
 }

@@ -21,6 +21,10 @@
 
 #include <graphblas/graphblas.hpp>
 
+#define __GB_SYSTEM_UTILITY_HEADER <graphblas/system/__GB_SYSTEM_ROOT/utility.hpp>
+#include __GB_SYSTEM_UTILITY_HEADER
+#undef __GB_SYSTEM_UTILITY_HEADER
+
 namespace graphblas
 {
 
@@ -198,54 +202,32 @@ namespace graphblas
      *
      *  @param[in] ostr  The output stream to send the contents
      *  @param[in] mat   The matrix to output
-     *
-     *  @deprecated Use print_matrix() instead.
-     */
-    template <typename MatrixT>
-    void pretty_print_matrix(std::ostream &ostr, MatrixT const &mat)
-    {
-        IndexType rows, cols;
-        mat.get_shape(rows, cols);
-        typename MatrixT::ScalarType zero(mat.get_zero());
-
-        for (IndexType row = 0; row < rows; ++row)
-        {
-            ostr << ((row == 0) ? "[[" : " [");
-            if (cols > 0)
-            {
-                auto val = mat.get_value_at(row, 0);
-                if (val == zero)
-                    ostr << " ";
-                else
-                    ostr << val;
-            }
-
-            for (IndexType col = 1; col < cols; ++col)
-            {
-                auto val = mat.get_value_at(row, col);
-                if (val == zero)
-                    ostr << ",  ";
-                else
-                    ostr << ", " << val;
-            }
-            ostr << ((row == rows - 1) ? "]]\n" : "]\n");
-        }
-    }
-
-    /**
-     *  @brief Output the matrix in array form.  Mainly for debugging
-     *         small matrices.
-     *
-     *  @param[in] ostr  The output stream to send the contents
-     *  @param[in] mat   The matrix to output
      *  @param[in] label Optional label to output first.
      */
     template <typename MatrixT>
     void print_matrix(std::ostream &ostr, MatrixT const &mat,
                       std::string const &label = "")
     {
-        ostr << label << ": zero = " << mat.get_zero() << std::endl;
-        pretty_print_matrix(ostr, mat);
+        ostr << label << ": zero = " << mat.m_mat.get_zero() << std::endl;
+        backend::pretty_print_matrix(ostr, mat.m_mat);
     }
+
+
+    /**
+     *  @brief helps with the == operators in View.hpp and Matrix.hpp
+     *
+     *  @param[in] lhs.
+     *  @param[in] rhs.
+     *  @param[out] result of the comparison.
+     */
+    template <typename AMatrixT, typename BMatrixT>
+    bool matrix_equal_helper(
+            const AMatrixT& a,
+            const BMatrixT& b)
+    {
+        return a.m_mat.operator==(b.m_mat);
+    }
+
+
 } // graphblas
 #endif // GB_MATRIX_UTILS_HPP

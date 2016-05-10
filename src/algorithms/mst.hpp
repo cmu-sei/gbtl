@@ -82,16 +82,25 @@ namespace algorithms
 
         MatrixT A(graph);
         A.set_zero(std::numeric_limits<T>::max());
-        
+
         MatrixT seen(rows,1);
         T weight = static_cast<T>(0);
+        std::vector<graphblas::IndexType> seen_r={1}, seen_c={0};
+        std::vector<T> seen_v = {std::numeric_limits<T>::max()};
+        graphblas::buildmatrix(seen, seen_r.begin(), seen_c.begin(),
+                seen_v.begin(), seen_r.size());
 
-        seen.set_value_at(1, 0, std::numeric_limits<T>::max());
+        //seen.set_value_at(1, 0, std::numeric_limits<T>::max());
+
         MatrixT sources = graphblas::fill<MatrixT>(1, rows, 1);
 
         MatrixT d(rows, 1);
         MatrixT mask(cols, 1);
-        mask.set_value_at(1,0,1);
+
+        std::vector<T> mask_v = {1};
+        graphblas::buildmatrix(mask, seen_r.begin(), seen_c.begin(),
+                mask_v.begin(), mask_v.size());
+        //mask.set_value_at(1,0,1);
 
         graphblas::mxv(A, mask, d);
 
@@ -104,6 +113,7 @@ namespace algorithms
             graphblas::ewiseadd(seen, d, temp);
 
             //position of a single minimum element in vector
+            //this is not really how loops should be used in graphblas, though....
             graphblas::IndexType u = 0;
             for (graphblas::IndexType i = 1; i < rows; ++i)
             {

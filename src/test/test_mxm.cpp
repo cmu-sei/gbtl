@@ -159,6 +159,40 @@ BOOST_AUTO_TEST_CASE(test_mxm_masked)
 
 
 //****************************************************************************
+BOOST_AUTO_TEST_CASE(test_mxm_not_all_one_masked)
+{
+    graphblas::IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    graphblas::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    std::vector<double> v_mA = {12, 7, 3, 4, 5, 6, 7, 8, 9};
+    Matrix<double, DirectedMatrixTag> mA(3, 3);
+    buildmatrix(mA, i_mA, j_mA, v_mA);
+
+    graphblas::IndexArrayType i_mB    = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2};
+    graphblas::IndexArrayType j_mB    = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2, 3};
+    std::vector<double> v_mB = {5, 8, 1, 2, 6, 7, 3, 4, 5, 9, 1};
+    Matrix<double, DirectedMatrixTag> mB(3, 4);
+    buildmatrix(mB, i_mB, j_mB, v_mB);
+
+    Matrix<double, DirectedMatrixTag> result(3, 4);
+
+    graphblas::IndexArrayType i_answer = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2};
+    graphblas::IndexArrayType j_answer = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2};
+    std::vector<double> v_answer = {114, 160, 60, 27, 74, 97,
+                                    73, 14, 119, 157, 112};
+    Matrix<double, DirectedMatrixTag> answer(3, 4);
+    buildmatrix(answer, i_answer, j_answer, v_answer);
+
+    Matrix<unsigned int, DirectedMatrixTag> mask(3,4);
+    std::vector<unsigned int> v_mask(i_answer.size(), 1);
+    buildmatrix(mask, i_answer, j_answer, v_mask);
+
+    mxmMasked(mA, mB, result, mask);
+
+    BOOST_CHECK_EQUAL(result, answer);
+}
+
+
+//****************************************************************************
 BOOST_AUTO_TEST_CASE(test_a_transpose)
 {
     graphblas::IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
@@ -274,23 +308,43 @@ BOOST_AUTO_TEST_CASE(test_a_equals_c_transpose)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_a_negate)
 {
-    graphblas::IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
-    std::vector<double> v_mA = {0, 1, 1, 0, 0, 0, 1, 1, 1};
+    //graphblas::IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    //graphblas::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    //std::vector<double> v_mA = {0, 1, 1, 0, 0, 0, 1, 1, 1};
+    //Matrix<double, DirectedMatrixTag> mA(3, 3);
+    //buildmatrix(mA, i_mA, j_mA, v_mA);
+
+    //graphblas::IndexArrayType i_mB    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    //graphblas::IndexArrayType j_mB    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    //std::vector<double> v_mB = {1, 0, 1, 1, 1, 0, 1, 0, 1};
+    //Matrix<double, DirectedMatrixTag> mB(3, 3);
+    //buildmatrix(mB, i_mB, j_mB, v_mB);
+
+    //Matrix<double, DirectedMatrixTag> result(3, 3);
+
+    //graphblas::IndexArrayType i_answer = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    //graphblas::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    //std::vector<double> v_answer = {1, 0, 1, 3, 1, 2, 0, 0, 0};
+    //Matrix<double, DirectedMatrixTag> answer(3, 3);
+    //buildmatrix(answer, i_answer, j_answer, v_answer);
+
+    graphblas::IndexArrayType i_mA    = {0, 0, 2, 2, 2};
+    graphblas::IndexArrayType j_mA    = {1, 2, 0, 1, 2};
+    std::vector<double> v_mA =          {1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> mA(3, 3);
     buildmatrix(mA, i_mA, j_mA, v_mA);
 
-    graphblas::IndexArrayType i_mB    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_mB    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
-    std::vector<double> v_mB = {1, 0, 1, 1, 1, 0, 1, 0, 1};
+    graphblas::IndexArrayType i_mB    = {0, 0, 1, 1, 2, 2};
+    graphblas::IndexArrayType j_mB    = {0, 2, 0, 1, 0, 2};
+    std::vector<double> v_mB =          {1, 1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> mB(3, 3);
     buildmatrix(mB, i_mB, j_mB, v_mB);
 
     Matrix<double, DirectedMatrixTag> result(3, 3);
 
-    graphblas::IndexArrayType i_answer = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
-    std::vector<double> v_answer = {1, 0, 1, 3, 1, 2, 0, 0, 0};
+    graphblas::IndexArrayType i_answer = {0, 0, 1, 1, 1};
+    graphblas::IndexArrayType j_answer = {0, 2, 0, 1, 2};
+    std::vector<double> v_answer =       {1, 1, 3, 1, 2};
     Matrix<double, DirectedMatrixTag> answer(3, 3);
     buildmatrix(answer, i_answer, j_answer, v_answer);
 
@@ -301,23 +355,43 @@ BOOST_AUTO_TEST_CASE(test_a_negate)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_b_negate)
 {
-    graphblas::IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
-    std::vector<double> v_mA = {0, 1, 1, 0, 0, 0, 1, 1, 1};
+    //graphblas::IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    //graphblas::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    //std::vector<double> v_mA = {0, 1, 1, 0, 0, 0, 1, 1, 1};
+    //Matrix<double, DirectedMatrixTag> mA(3, 3);
+    //buildmatrix(mA, i_mA, j_mA, v_mA);
+
+    //graphblas::IndexArrayType i_mB    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    //graphblas::IndexArrayType j_mB    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    //std::vector<double> v_mB = {1, 0, 1, 1, 1, 0, 1, 0, 1};
+    //Matrix<double, DirectedMatrixTag> mB(3, 3);
+    //buildmatrix(mB, i_mB, j_mB, v_mB);
+
+    //Matrix<double, DirectedMatrixTag> result(3, 3);
+
+    //graphblas::IndexArrayType i_answer = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    //graphblas::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    //std::vector<double> v_answer = {0, 1, 1, 0, 0, 0, 0, 2, 1};
+    //Matrix<double, DirectedMatrixTag> answer(3, 3);
+    //buildmatrix(answer, i_answer, j_answer, v_answer);
+
+    graphblas::IndexArrayType i_mA    = {0, 0, 2, 2, 2};
+    graphblas::IndexArrayType j_mA    = {1, 2, 0, 1, 2};
+    std::vector<double> v_mA =          {1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> mA(3, 3);
     buildmatrix(mA, i_mA, j_mA, v_mA);
 
-    graphblas::IndexArrayType i_mB    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_mB    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
-    std::vector<double> v_mB = {1, 0, 1, 1, 1, 0, 1, 0, 1};
+    graphblas::IndexArrayType i_mB    = {0, 0, 1, 1, 2, 2};
+    graphblas::IndexArrayType j_mB    = {0, 2, 0, 1, 0, 2};
+    std::vector<double> v_mB =          {1, 1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> mB(3, 3);
     buildmatrix(mB, i_mB, j_mB, v_mB);
 
     Matrix<double, DirectedMatrixTag> result(3, 3);
 
-    graphblas::IndexArrayType i_answer = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
-    std::vector<double> v_answer = {0, 1, 1, 0, 0, 0, 0, 2, 1};
+    graphblas::IndexArrayType i_answer = {0, 0, 2, 2};
+    graphblas::IndexArrayType j_answer = {1, 2, 1, 2};
+    std::vector<double> v_answer =       {1, 1, 2, 1};
     Matrix<double, DirectedMatrixTag> answer(3, 3);
     buildmatrix(answer, i_answer, j_answer, v_answer);
 
@@ -328,23 +402,43 @@ BOOST_AUTO_TEST_CASE(test_b_negate)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_a_and_b_negate)
 {
-    graphblas::IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
-    std::vector<double> v_mA = {0, 1, 1, 0, 0, 0, 1, 1, 1};
+    //graphblas::IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    //graphblas::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    //std::vector<double> v_mA = {0, 1, 1, 0, 0, 0, 1, 1, 1};
+    //Matrix<double, DirectedMatrixTag> mA(3, 3);
+    //buildmatrix(mA, i_mA, j_mA, v_mA);
+
+    //graphblas::IndexArrayType i_mB    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    //graphblas::IndexArrayType j_mB    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    //std::vector<double> v_mB = {1, 0, 1, 1, 1, 0, 1, 0, 1};
+    //Matrix<double, DirectedMatrixTag> mB(3, 3);
+    //buildmatrix(mB, i_mB, j_mB, v_mB);
+
+    //Matrix<double, DirectedMatrixTag> result(3, 3);
+
+    //graphblas::IndexArrayType i_answer = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    //graphblas::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    //std::vector<double> v_answer = {0, 1, 0, 0, 2, 1, 0, 0, 0};
+    //Matrix<double, DirectedMatrixTag> answer(3, 3);
+    //buildmatrix(answer, i_answer, j_answer, v_answer);
+
+    graphblas::IndexArrayType i_mA    = {0, 0, 2, 2, 2};
+    graphblas::IndexArrayType j_mA    = {1, 2, 0, 1, 2};
+    std::vector<double> v_mA =          {1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> mA(3, 3);
     buildmatrix(mA, i_mA, j_mA, v_mA);
 
-    graphblas::IndexArrayType i_mB    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_mB    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
-    std::vector<double> v_mB = {1, 0, 1, 1, 1, 0, 1, 0, 1};
+    graphblas::IndexArrayType i_mB    = {0, 0, 1, 1, 2, 2};
+    graphblas::IndexArrayType j_mB    = {0, 2, 0, 1, 0, 2};
+    std::vector<double> v_mB =          {1, 1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> mB(3, 3);
     buildmatrix(mB, i_mB, j_mB, v_mB);
 
     Matrix<double, DirectedMatrixTag> result(3, 3);
 
-    graphblas::IndexArrayType i_answer = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
-    std::vector<double> v_answer = {0, 1, 0, 0, 2, 1, 0, 0, 0};
+    graphblas::IndexArrayType i_answer = {0, 1, 1};
+    graphblas::IndexArrayType j_answer = {1, 1, 2};
+    std::vector<double> v_answer =       {1, 2, 1};
     Matrix<double, DirectedMatrixTag> answer(3, 3);
     buildmatrix(answer, i_answer, j_answer, v_answer);
 
@@ -355,23 +449,43 @@ BOOST_AUTO_TEST_CASE(test_a_and_b_negate)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_a_equals_c_negate)
 {
-    graphblas::IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
-    std::vector<double> v_mA = {0, 1, 1, 0, 0, 0, 1, 1, 1};
+    //graphblas::IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    //graphblas::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    //std::vector<double> v_mA = {0, 1, 1, 0, 0, 0, 1, 1, 1};
+    //Matrix<double, DirectedMatrixTag> mA(3, 3);
+    //buildmatrix(mA, i_mA, j_mA, v_mA);
+
+    //graphblas::IndexArrayType i_mB    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    //graphblas::IndexArrayType j_mB    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    //std::vector<double> v_mB = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+    //Matrix<double, DirectedMatrixTag> mB(3, 3);
+    //buildmatrix(mB, i_mB, j_mB, v_mB);
+
+    //Matrix<double, DirectedMatrixTag> result(3, 3);
+
+    //graphblas::IndexArrayType i_answer = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    //graphblas::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    //std::vector<double> v_answer = {1, 0, 0, 1, 1, 1, 0, 0, 0};
+    //Matrix<double, DirectedMatrixTag> answer(3, 3);
+    //buildmatrix(answer, i_answer, j_answer, v_answer);
+
+    graphblas::IndexArrayType i_mA    = {0, 0, 2, 2, 2};
+    graphblas::IndexArrayType j_mA    = {1, 2, 0, 1, 2};
+    std::vector<double> v_mA =          {1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> mA(3, 3);
     buildmatrix(mA, i_mA, j_mA, v_mA);
 
-    graphblas::IndexArrayType i_mB    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_mB    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
-    std::vector<double> v_mB = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+    graphblas::IndexArrayType i_mB    = {0, 1, 2};
+    graphblas::IndexArrayType j_mB    = {0, 1, 2};
+    std::vector<double> v_mB =          {1, 1, 1};
     Matrix<double, DirectedMatrixTag> mB(3, 3);
     buildmatrix(mB, i_mB, j_mB, v_mB);
 
     Matrix<double, DirectedMatrixTag> result(3, 3);
 
-    graphblas::IndexArrayType i_answer = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
-    std::vector<double> v_answer = {1, 0, 0, 1, 1, 1, 0, 0, 0};
+    graphblas::IndexArrayType i_answer = {0, 1, 1, 1};
+    graphblas::IndexArrayType j_answer = {0, 0, 1, 2};
+    std::vector<double> v_answer =       {1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> answer(3, 3);
     buildmatrix(answer, i_answer, j_answer, v_answer);
 
@@ -382,26 +496,45 @@ BOOST_AUTO_TEST_CASE(test_a_equals_c_negate)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_a_transpose_and_negate)
 {
-    graphblas::IndexArrayType i_mA = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_mA = {0, 1, 2, 0, 1, 2, 0, 1, 2};
-    std::vector<double> v_mA = {0, 1, 1, 0, 0, 0, 1, 1, 1};
+    //graphblas::IndexArrayType i_mA = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    //graphblas::IndexArrayType j_mA = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    //std::vector<double> v_mA = {0, 1, 1, 0, 0, 0, 1, 1, 1};
+    //Matrix<double, DirectedMatrixTag> mA(3, 3);
+    //buildmatrix(mA, i_mA, j_mA, v_mA);
+
+    //graphblas::IndexArrayType i_mB = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    //graphblas::IndexArrayType j_mB = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    //std::vector<double> v_mB = {1, 0, 1, 1, 1, 0, 1, 0, 1};
+    //Matrix<double, DirectedMatrixTag> mB(3, 3);
+    //buildmatrix(mB, i_mB, j_mB, v_mB);
+
+    //Matrix<double, DirectedMatrixTag> result(3, 3);
+
+    //graphblas::IndexArrayType i_answer = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    //graphblas::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    //std::vector<double> v_answer = {2, 1, 1, 1, 1, 0, 1, 1, 0};
+    //Matrix<double, DirectedMatrixTag> answer(3, 3);
+    //buildmatrix(answer, i_answer, j_answer, v_answer);
+
+    graphblas::IndexArrayType i_mA = {0, 0, 2, 2, 2};
+    graphblas::IndexArrayType j_mA = {1, 2, 0, 1, 2};
+    std::vector<double> v_mA =       {1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> mA(3, 3);
     buildmatrix(mA, i_mA, j_mA, v_mA);
 
-    graphblas::IndexArrayType i_mB = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_mB = {0, 1, 2, 0, 1, 2, 0, 1, 2};
-    std::vector<double> v_mB = {1, 0, 1, 1, 1, 0, 1, 0, 1};
+    graphblas::IndexArrayType i_mB = {0, 0, 1, 1, 2, 2};
+    graphblas::IndexArrayType j_mB = {0, 2, 0, 1, 0, 2};
+    std::vector<double> v_mB =       {1, 1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> mB(3, 3);
     buildmatrix(mB, i_mB, j_mB, v_mB);
 
     Matrix<double, DirectedMatrixTag> result(3, 3);
 
-    graphblas::IndexArrayType i_answer = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
-    std::vector<double> v_answer = {2, 1, 1, 1, 1, 0, 1, 1, 0};
+    graphblas::IndexArrayType i_answer = {0, 0, 0, 1, 1, 2, 2};
+    graphblas::IndexArrayType j_answer = {0, 1, 2, 0, 1, 0, 1};
+    std::vector<double> v_answer =       {2, 1, 1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> answer(3, 3);
     buildmatrix(answer, i_answer, j_answer, v_answer);
-
     mxm(negate(transpose(mA)), mB, result);
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -409,26 +542,45 @@ BOOST_AUTO_TEST_CASE(test_a_transpose_and_negate)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_b_transpose_and_negate)
 {
-    graphblas::IndexArrayType i_mA = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_mA = {0, 1, 2, 0, 1, 2, 0, 1, 2};
-    std::vector<double> v_mA = {0, 1, 1, 0, 0, 0, 1, 1, 1};
+    //graphblas::IndexArrayType i_mA = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    //graphblas::IndexArrayType j_mA = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    //std::vector<double> v_mA = {0, 1, 1, 0, 0, 0, 1, 1, 1};
+    //Matrix<double, DirectedMatrixTag> mA(3, 3);
+    //buildmatrix(mA, i_mA, j_mA, v_mA);
+
+    //graphblas::IndexArrayType i_mB = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    //graphblas::IndexArrayType j_mB = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    //std::vector<double> v_mB = {1, 0, 1, 1, 1, 0, 1, 0, 1};
+    //Matrix<double, DirectedMatrixTag> mB(3, 3);
+    //buildmatrix(mB, i_mB, j_mB, v_mB);
+
+    //Matrix<double, DirectedMatrixTag> result(3, 3);
+
+    //graphblas::IndexArrayType i_answer = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    //graphblas::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    //std::vector<double> v_answer = {1, 1, 1, 0, 0, 0, 1, 1, 1};
+    //Matrix<double, DirectedMatrixTag> answer(3, 3);
+    //buildmatrix(answer, i_answer, j_answer, v_answer);
+
+    graphblas::IndexArrayType i_mA = {0, 0, 2, 2, 2};
+    graphblas::IndexArrayType j_mA = {1, 2, 0, 1, 2};
+    std::vector<double> v_mA =       {1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> mA(3, 3);
     buildmatrix(mA, i_mA, j_mA, v_mA);
 
-    graphblas::IndexArrayType i_mB = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_mB = {0, 1, 2, 0, 1, 2, 0, 1, 2};
-    std::vector<double> v_mB = {1, 0, 1, 1, 1, 0, 1, 0, 1};
+    graphblas::IndexArrayType i_mB = {0, 0, 1, 1, 2, 2};
+    graphblas::IndexArrayType j_mB = {0, 2, 0, 1, 0, 2};
+    std::vector<double> v_mB =       {1, 1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> mB(3, 3);
     buildmatrix(mB, i_mB, j_mB, v_mB);
 
     Matrix<double, DirectedMatrixTag> result(3, 3);
 
-    graphblas::IndexArrayType i_answer = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
-    std::vector<double> v_answer = {1, 1, 1, 0, 0, 0, 1, 1, 1};
+    graphblas::IndexArrayType i_answer = {0, 0, 0, 2, 2, 2};
+    graphblas::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2};
+    std::vector<double> v_answer =       {1, 1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> answer(3, 3);
     buildmatrix(answer, i_answer, j_answer, v_answer);
-
     mxm(mA, negate(transpose(mB)), result);
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -436,26 +588,45 @@ BOOST_AUTO_TEST_CASE(test_b_transpose_and_negate)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_a_and_b_transpose_and_negate)
 {
-    graphblas::IndexArrayType i_mA = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_mA = {0, 1, 2, 0, 1, 2, 0, 1, 2};
-    std::vector<double> v_mA = {0, 1, 1, 0, 0, 0, 1, 1, 1};
+    //graphblas::IndexArrayType i_mA = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    //graphblas::IndexArrayType j_mA = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    //std::vector<double> v_mA = {0, 1, 1, 0, 0, 0, 1, 1, 1};
+    //Matrix<double, DirectedMatrixTag> mA(3, 3);
+    //buildmatrix(mA, i_mA, j_mA, v_mA);
+
+    //graphblas::IndexArrayType i_mB = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    //graphblas::IndexArrayType j_mB = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    //std::vector<double> v_mB = {1, 0, 1, 1, 1, 0, 1, 0, 1};
+    //Matrix<double, DirectedMatrixTag> mB(3, 3);
+    //buildmatrix(mB, i_mB, j_mB, v_mB);
+
+    //Matrix<double, DirectedMatrixTag> result(3, 3);
+
+    //graphblas::IndexArrayType i_answer = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    //graphblas::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    //std::vector<double> v_answer = {1, 0, 1, 1, 0, 1, 1, 0, 1};
+    //Matrix<double, DirectedMatrixTag> answer(3, 3);
+    //buildmatrix(answer, i_answer, j_answer, v_answer);
+
+    graphblas::IndexArrayType i_mA = {0, 0, 2, 2, 2};
+    graphblas::IndexArrayType j_mA = {1, 2, 0, 1, 2};
+    std::vector<double> v_mA =       {1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> mA(3, 3);
     buildmatrix(mA, i_mA, j_mA, v_mA);
 
-    graphblas::IndexArrayType i_mB = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_mB = {0, 1, 2, 0, 1, 2, 0, 1, 2};
-    std::vector<double> v_mB = {1, 0, 1, 1, 1, 0, 1, 0, 1};
+    graphblas::IndexArrayType i_mB = {0, 0, 1, 1, 2, 2};
+    graphblas::IndexArrayType j_mB = {0, 2, 0, 1, 0, 2};
+    std::vector<double> v_mB =       {1, 1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> mB(3, 3);
     buildmatrix(mB, i_mB, j_mB, v_mB);
 
     Matrix<double, DirectedMatrixTag> result(3, 3);
 
-    graphblas::IndexArrayType i_answer = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
-    std::vector<double> v_answer = {1, 0, 1, 1, 0, 1, 1, 0, 1};
+    graphblas::IndexArrayType i_answer = {0, 0, 1, 1, 2, 2};
+    graphblas::IndexArrayType j_answer = {0, 2, 0, 2, 0, 2};
+    std::vector<double> v_answer =       {1, 1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> answer(3, 3);
     buildmatrix(answer, i_answer, j_answer, v_answer);
-
     mxm(negate(transpose(mA)), negate(transpose(mB)), result);
     BOOST_CHECK_EQUAL(result, answer);
 }

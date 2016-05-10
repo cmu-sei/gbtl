@@ -19,7 +19,7 @@
 #include <iostream>
 #include <vector>
 
-#include <graphblas/system/sequential/RowView.hpp>
+//#include <graphblas/system/sequential/RowView.hpp>
 
 namespace graphblas
 {
@@ -390,15 +390,15 @@ namespace graphblas
          *
          * @return The row of this CsrMatrix as a dense_vector.
          */
-        RowView<CsrMatrix<ScalarT> const> get_row(IndexType row) const
-        {
-            return RowView<CsrMatrix<ScalarT> const>(row, *this);
-        }
+        // RowView<CsrMatrix<ScalarT> const> get_row(IndexType row) const
+        // {
+        //     return RowView<CsrMatrix<ScalarT> const>(row, *this);
+        // }
 
-        RowView<CsrMatrix<ScalarT> > get_row(IndexType row)
-        {
-            return RowView<CsrMatrix<ScalarT> >(row, *this);
-        }
+        // RowView<CsrMatrix<ScalarT> > get_row(IndexType row)
+        // {
+        //     return RowView<CsrMatrix<ScalarT> >(row, *this);
+        // }
 
         /**
          * @brief Indexing operator for accessing the rows of this
@@ -407,55 +407,49 @@ namespace graphblas
          * @param[in] row  The row to access.
          * @return The row of this CsrMatrix as a dense_vector.
          */
-        RowView<CsrMatrix<ScalarT> const> operator[](IndexType row) const
-        {
-            return RowView<CsrMatrix<ScalarT> const>(row, *this);
-        }
+        // RowView<CsrMatrix<ScalarT> const> operator[](IndexType row) const
+        // {
+        //     return RowView<CsrMatrix<ScalarT> const>(row, *this);
+        // }
 
         // need a non-const version for mutation.
-        RowView<CsrMatrix<ScalarT> > operator[](IndexType row)
-        {
-            return RowView<CsrMatrix<ScalarT> >(row, *this);
-        }
+        // RowView<CsrMatrix<ScalarT> > operator[](IndexType row)
+        // {
+        //     return RowView<CsrMatrix<ScalarT> >(row, *this);
+        // }
 
         // output specific to the storage layout of this type of matrix
-        friend std::ostream& operator<<(std::ostream             &os,
-                                        CsrMatrix<ScalarT> const &csr)
+        void print_info(std::ostream &os) const
         {
-            for (IndexType row = 0; row < csr.m_num_rows; ++row)
-            {
-                os << ((row == 0) ? "[[" : " [");
-                if (csr.m_num_cols > 0)
-                {
-                    os << csr.get_value_at(row, 0);
-                }
+            os << "CsrMatrix<" << typeid(ScalarT).name() << ">" << std::endl;
+            os << "dimension: " << m_num_rows << " x " << m_num_cols
+               << std::endl;
+            os << "num nonzeros = " << get_nnz() << std::endl;
+            os << "structural zero value = " << get_zero() << std::endl;
 
-                for (IndexType col = 1; col < csr.m_num_cols; ++col)
-                {
-                    os << ", " << csr.get_value_at(row, col);
-                }
-                os << ((row == csr.m_num_rows - 1) ? "]]" : "]\n");
-            }
-#ifdef GB_DEBUG
-            // Friendly debugging
-            os << "\nA: ";
-            for (auto a: csr.m_val) {
-                os << a << " ";
+            os << "col_ind: ";
+            for (auto ja: m_col_ind) {
+                os << ja << " ";
             }
             os << std::endl;
 
-            os << "IA: ";
-            for (auto ia: csr.m_row_ptr) {
+            os << "row_ptr: ";
+            for (auto ia: m_row_ptr) {
                 os << ia << " ";
             }
             os << std::endl;
 
-            os << "JA: ";
-            for (auto ja: csr.m_col_ind) {
-                os << ja << " ";
+            os << "val: ";
+            for (auto a: m_val) {
+                os << a << " ";
             }
             os << std::endl;
-#endif
+        }
+
+        friend std::ostream& operator<<(std::ostream             &os,
+                                        CsrMatrix<ScalarT> const &csr)
+        {
+            csr.print_info(os);
             return os;
         }
 

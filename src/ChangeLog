@@ -1,6 +1,20 @@
+2016-04-25
+	* implemented mxm masking in cusp
+	* fixed ewisemult issue
+	* fixed ewisemult and mxm tests
+	* fixed negation tests
+	* all basic functionalities described in M2 completed.
+2016-04-18
+	* fixed extract and assign operations (passing tests) in cusp
+	* fixed reduction operations and implemented masked reduction operations
+2016-04-15
+	* fixed dimension checks on the frontend
+	* implemented == operator on cusp backend matrices
+	* fixed some issues in reduce, extract, assign
 2016-04-04
 	* cusp::NegateView implemented
-	* anything that doesn't require (get,set)_value_at, masking or pretty print can be compiled on the cusp backend
+	* cusp::pretty_print_matrix implemented to support frontend matrix_util::print_matrix
+	* implemented (get,set)_value_at on the cusp backend
 
 2016-03-30
 	* added files for compilation

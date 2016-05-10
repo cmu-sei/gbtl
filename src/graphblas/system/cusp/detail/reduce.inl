@@ -15,14 +15,28 @@
 
 #pragma once
 
-#include <graphblas/system/cusp/detail/merge.inl>
-#include <cusp/multiply.h>
-#include <cusp/coo_matrix.h>
+#include "merge.inl"
 
 namespace graphblas
 {
 namespace backend
 {
+    namespace detail{
+
+        template <typename AccumT>
+        struct tsl_zero
+        {
+            AccumT accum;
+            tsl_zero(AccumT a) : accum(a) {}
+            template <typename T1, typename T2>
+            __host__ __device__
+            T1 operator()(const T1& t1, const T2 t2){
+                auto t = thrust::get<1>(t2);
+                return t==0 ? t1 :
+                    accum(t1, static_cast<T1>(thrust::get<0>(t2)));
+            }
+        };
+    }
     /**
      * @brief Apply a reduction operation to each row of a matrix.
      *
@@ -52,7 +66,7 @@ namespace backend
 
         //assuming cmatrix is of type coo matrix
         CMatrixT temp(a.num_rows, 1, a.num_rows);
-        thrust::reduce_by_key(
+        auto reduced = thrust::reduce_by_key(
             a.row_indices.begin(),
             a.row_indices.end(),
             a.values.begin(),
@@ -65,8 +79,9 @@ namespace backend
                 thrust::make_constant_iterator(0),
                 a.num_rows,
                 temp.column_indices.begin());
-        detail::merge(temp, c, accum);
 
+        temp.resize(temp.num_rows, temp.num_cols, thrust::distance(temp.values.begin(), reduced.second));
+        detail::merge(temp, c, accum);
     }
 
     /**
@@ -103,7 +118,7 @@ namespace backend
                 temp1.column_indices.end(),
                 thrust::make_zip_iterator(thrust::make_tuple(temp1.row_indices.begin(), temp1.values.begin())));
 
-        thrust::reduce_by_key(
+        auto reduced = thrust::reduce_by_key(
             temp1.column_indices.begin(),
             temp1.column_indices.end(),
             temp1.values.begin(),
@@ -117,8 +132,10 @@ namespace backend
                 a.num_cols,
                 temp2.row_indices.begin());
 
+
+        temp2.resize(temp2.num_rows, temp2.num_cols, thrust::distance(temp2.values.begin(), reduced.second));
         detail::merge(temp2, c, accum);
-    }
+    } 
 
     template<typename AMatrixT,
              typename CMatrixT,
@@ -133,6 +150,41 @@ namespace backend
                            MonoidT         sum     = MonoidT(),
                            AccumT          accum = AccumT())
     {
+        //assuming cmatrix is of type coo matrix
+        CMatrixT temp(a.num_rows, 1, a.num_rows);
+        auto reduced = thrust::reduce_by_key(
+            a.row_indices.begin(),
+            a.row_indices.end(),
+            a.values.begin(),
+            temp.row_indices.begin(),
+            temp.values.begin(),
+            thrust::equal_to< IndexType >(),
+            sum);
+        //write col indices:
+        thrust::copy_n(
+                thrust::make_constant_iterator(0),
+                a.num_rows,
+                temp.column_indices.begin());
+
+        temp.resize(temp.num_rows, temp.num_cols, thrust::distance(temp.values.begin(), reduced.second));
+        //annihilate value with mask:
+        //mask is assumed to be binary (1,0) where 1=keep and 0=discard
+        //otherwise a switchable zero value in mask will invalidate the following code, and
+        //will make the complexity a lot higher
+        //c and temp have to be a dense vector by definition, can be optimized.
+        //assert this fact:
+        if (mask.num_rows != mask.num_entries || temp.num_entries != temp.num_rows || c.num_entries != c.num_rows){
+            throw graphblas::DimensionException("vector or mask not dense! aborting::backend::reduce.inl:183");
+        }
+
+        detail::tsl_zero<AccumT> tsl(accum);
+
+        thrust::transform(c.values.begin(), c.values.end(),
+                thrust::make_zip_iterator(thrust::make_tuple(
+                        temp.values.begin(),
+                        mask.values.begin())),
+                c.values.begin(),
+                tsl);
     }
 
     template<typename AMatrixT,
@@ -148,6 +200,48 @@ namespace backend
                            MonoidT         sum     = MonoidT(),
                            AccumT          accum = AccumT())
     {
+        AMatrixT temp1(a);
+        CMatrixT temp2(1, a.num_cols, a.num_entries);
+        //sort by column:
+        thrust::sort_by_key(
+                temp1.column_indices.begin(),
+                temp1.column_indices.end(),
+                thrust::make_zip_iterator(thrust::make_tuple(temp1.row_indices.begin(), temp1.values.begin())));
+
+        auto reduced = thrust::reduce_by_key(
+            temp1.column_indices.begin(),
+            temp1.column_indices.end(),
+            temp1.values.begin(),
+            temp2.column_indices.begin(),
+            temp2.values.begin(),
+            thrust::equal_to< IndexType >(),
+            sum);
+        //write row indices:
+        thrust::copy_n(
+                thrust::make_constant_iterator(0),
+                a.num_cols,
+                temp2.row_indices.begin());
+
+
+        temp2.resize(temp2.num_rows, temp2.num_cols, thrust::distance(temp2.values.begin(), reduced.second));
+        //annihilate value with mask:
+        //mask is assumed to be binary (1,0) where 1=keep and 0=discard
+        //otherwise a switchable zero value in mask will invalidate the following code, and
+        //will make the complexity a lot higher
+        //c and temp have to be a dense vector by definition, can be optimized.
+        //assert this fact:
+        if (mask.num_cols != mask.num_entries || temp2.num_entries != temp2.num_cols || c.num_entries != c.num_cols){
+            throw graphblas::DimensionException("vector or mask not dense! aborting::backend::reduce.inl:260");
+        }
+
+        detail::tsl_zero<AccumT> tsl(accum);
+
+        thrust::transform(c.values.begin(), c.values.end(),
+                thrust::make_zip_iterator(thrust::make_tuple(
+                        temp2.values.begin(),
+                        mask.values.begin())),
+                c.values.begin(),
+                tsl);
     }
 }
 } // graphblas

@@ -93,6 +93,46 @@ namespace backend{
             }
         }
     }
+
+    /**
+     *  @brief Output the matrix in array form.  Mainly for debugging
+     *         small matrices.
+     *
+     *  @param[in] ostr  The output stream to send the contents
+     *  @param[in] mat   The matrix to output
+     *
+     */
+    template <typename MatrixT>
+    void pretty_print_matrix(std::ostream &ostr, MatrixT const &mat)
+    {
+        IndexType rows, cols;
+        mat.get_shape(rows, cols);
+        typename MatrixT::ScalarType zero(mat.get_zero());
+
+        for (IndexType row = 0; row < rows; ++row)
+        {
+            ostr << ((row == 0) ? "[[" : " [");
+            if (cols > 0)
+            {
+                auto val = mat.get_value_at(row, 0);
+                if (val == zero)
+                    ostr << " ";
+                else
+                    ostr << val;
+            }
+
+            for (IndexType col = 1; col < cols; ++col)
+            {
+                auto val = mat.get_value_at(row, col);
+                if (val == zero)
+                    ostr << ",  ";
+                else
+                    ostr << ", " << val;
+            }
+            ostr << ((row == rows - 1) ? "]]\n" : "]\n");
+        }
+    }
+
 } //backend
 } // graphblas
 

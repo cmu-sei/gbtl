@@ -47,7 +47,7 @@ int main()
     GBMatrix G_tn(NUM_NODES, NUM_NODES, INF);
     graphblas::buildmatrix(G_tn, i.begin(), j.begin(), v.begin(), i.size());
     std::cout << "G_tn: zero = " << G_tn.get_zero() << std::endl;
-    graphblas::pretty_print_matrix(std::cout, G_tn);
+    graphblas::print_matrix(std::cout, G_tn);
 
     // Perform BFS from all roots simultaneously (should the value be 0?)
     auto roots = graphblas::identity<GBMatrix>(NUM_NODES, INF, 0);
@@ -58,7 +58,7 @@ int main()
 
     std::cout << "Parents by rows: zero = " << G_tn_res.get_zero()
               << std::endl;
-    graphblas::pretty_print_matrix(std::cout, G_tn_res);
+    graphblas::print_matrix(std::cout, G_tn_res);
 
     return 0;
 }

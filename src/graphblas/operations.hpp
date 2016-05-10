@@ -76,7 +76,7 @@ namespace graphblas
                          MonoidT         monoid = MonoidT(),
                          AccumT          accum = AccumT())
     {
-        same_dimension_check(a,b);
+        same_dimension_check(a,b,std::string("ewiseadd"));
         backend::ewiseadd(a.m_mat, b.m_mat, c.m_mat, monoid, accum);
     }
 
@@ -115,7 +115,7 @@ namespace graphblas
                           MonoidT         monoid = MonoidT(),
                           AccumT          accum = AccumT())
     {
-        same_dimension_check(a,b);
+        same_dimension_check(a,b,std::string("ewisemult"));
         backend::ewisemult(a.m_mat, b.m_mat, c.m_mat, monoid, accum);
     }
 
@@ -151,7 +151,7 @@ namespace graphblas
                     SemiringT       s     = SemiringT(),
                     AccumT          accum = AccumT())
     {
-        multiply_dimension_check(a,b);
+        multiply_dimension_check(a,b,std::string("mxm"));
         backend::mxm(a.m_mat, b.m_mat, c.m_mat, s, accum);
     }
 
@@ -184,7 +184,7 @@ namespace graphblas
                           SemiringT       s = SemiringT(),
                           AccumT          accum = AccumT())
     {
-        multiply_dimension_check(a,b);
+        multiply_dimension_check(a,b,std::string("mxmMasked"));
         backend::mxmMasked(a.m_mat, b.m_mat, c.m_mat, m.m_mat, s, accum);
     }
 
@@ -218,7 +218,7 @@ namespace graphblas
                             SemiringT       s = SemiringT(),
                             AccumT          accum = AccumT())
     {
-        multiply_dimension_check(a,b);
+        multiply_dimension_check(a,b,std::string("mxmMaskedV2"));
         backend::mxmMasked(a.m_mat, b.m_mat, c.m_mat, m.m_mat, s, accum);
     }
 
@@ -332,6 +332,7 @@ namespace graphblas
                         CMatrixT             &c,
                         AccumT                accum = AccumT())
     {
+        assign_extract_dimension_check(a,c,i,j);
         backend::extract(a.m_mat, i, j, c.m_mat, accum);
     }
 
@@ -368,6 +369,7 @@ namespace graphblas
                         CMatrixT             &c,
                         AccumT                accum = AccumT())
     {
+        assign_extract_dimension_check(a,c,i.begin(),j.begin());
         backend::extract(a.m_mat, i, j, c.m_mat, accum);
     }
 
@@ -405,8 +407,7 @@ namespace graphblas
                        CMatrixT          &c,
                        AccumT             accum = AccumT())
     {
-        //backends need to handle dimension checks here due to different
-        //memory space possibilities
+        assign_extract_dimension_check(c,a,i,j);
         backend::assign(a.m_mat, i, j, c.m_mat, accum);
     }
 
@@ -443,8 +444,7 @@ namespace graphblas
                        CMatrixT             &c,
                        AccumT                accum = AccumT())
     {
-        //backends need to handle dimension checks here due to different
-        //memory space possibilities
+        assign_extract_dimension_check(c, a, i.begin(), j.begin());
         backend::assign(a.m_mat, i, j, c.m_mat, accum);
     }
 
@@ -474,7 +474,7 @@ namespace graphblas
                       UnaryFunctionT  f,
                       AccumT          accum = AccumT())
     {
-        same_dimension_check(a,c);
+        same_dimension_check(a,c,std::string("apply"));
         backend::apply(a.m_mat, c.m_mat, f, accum);
     }
 
@@ -507,7 +507,7 @@ namespace graphblas
                            AccumT          accum = AccumT())
     {
         if (a.get_shape().first != c.get_shape().first || c.get_shape().second != 1){
-            throw graphblas::DimensionException();
+            throw graphblas::DimensionException("row reduce dimension error");
         }
         backend::row_reduce(a.m_mat, c.m_mat, m, accum);
     }
@@ -540,8 +540,9 @@ namespace graphblas
                            MonoidT         m     = MonoidT(),
                            AccumT          accum = AccumT())
     {
-        if (a.get_shape().first != c.get_shape().first || c.get_shape().first != 1){
-            //throw graphblas::DimensionException();
+        if (a.get_shape().second != c.get_shape().second || c.get_shape().first != 1){
+            throw graphblas::DimensionException("col reduce dimension error, arg1.cols="+std::to_string(a.get_shape().second)
+                    +" ,arg2.cols="+std::to_string(c.get_shape().second));
         }
         backend::col_reduce(a.m_mat, c.m_mat, m, accum);
     }
@@ -579,9 +580,9 @@ namespace graphblas
                            AccumT          accum = AccumT())
     {
         if (a.get_shape().first != c.get_shape().first || c.get_shape().second != 1){
-            //throw graphblas::DimensionException();
+            throw graphblas::DimensionException("row reduce masked dimension error");
         }
-        backend::rowReduceMasked(a.m_mat, c.m_mat, mask, sum, accum);
+        backend::rowReduceMasked(a.m_mat, c.m_mat, mask.m_mat, sum, accum);
     }
 
     /**
@@ -615,10 +616,11 @@ namespace graphblas
                            MonoidT         sum     = MonoidT(),
                            AccumT          accum = AccumT())
     {
-        if (a.get_shape().first != c.get_shape().first || c.get_shape().first != 1){
-            //throw graphblas::DimensionException();
+        if (a.get_shape().second != c.get_shape().second || c.get_shape().first != 1){
+            throw graphblas::DimensionException("col reduce dimension error, arg1.cols="+std::to_string(a.get_shape().second)
+                    +" ,arg2.cols="+std::to_string(c.get_shape().second));
         }
-        backend::colReduceMasked(a.m_mat, c.m_mat, mask, sum, accum);
+        backend::colReduceMasked(a.m_mat, c.m_mat, mask.m_mat, sum, accum);
     }
 
     /**
@@ -656,8 +658,8 @@ namespace graphblas
     inline void transpose(AMatrixT const &a,
                           CMatrixT       &c)
     {
-        multiply_dimension_check(a,c);
-        multiply_dimension_check(c,a);
+        multiply_dimension_check(a,c, std::string("transpose"));
+        multiply_dimension_check(c,a, std::string("transpose"));
         backend::transpose(a.m_mat, c.m_mat);
     }
 

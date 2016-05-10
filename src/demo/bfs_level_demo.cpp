@@ -105,7 +105,10 @@ int main()
     // Trying the row vector approach
     graphblas::Matrix<unsigned int, graphblas::DirectedMatrixTag>
         root(1, num_nodes);
-    root.set_value_at(0, 30, 1);  // pick an arbitrary root;
+    // pick an arbitrary root:
+    std::vector<graphblas::IndexType> temp_r(1,0), temp_c(1,30);
+    std::vector<unsigned int> temp_v(1,1);
+    graphblas::buildmatrix(root, temp_r.begin(), temp_c.begin(), temp_v.begin(), 1);
 
     graphblas::Matrix<unsigned int,
                       graphblas::DirectedMatrixTag> levels1(1,
@@ -117,22 +120,22 @@ int main()
     algorithms::bfs_level(G_karate, root, levels1);
 
 //    std::cout << "Graph: " << std::endl;
-//    graphblas::pretty_print_matrix(std::cout, G_karate);
+//    graphblas::print_matrix(std::cout, G_karate);
     std::cout << "bfs_level output" << std::endl;
     std::cout << "root:" << std::endl;
-    graphblas::pretty_print_matrix(std::cout, root);
+    graphblas::print_matrix(std::cout, root);
     std::cout << "levels:" << std::endl;
-    graphblas::pretty_print_matrix(std::cout, levels1);
+    graphblas::print_matrix(std::cout, levels1);
 
     algorithms::bfs_level_masked(G_karate, root, levels);
 
 //    std::cout << "Graph: " << std::endl;
-//    graphblas::pretty_print_matrix(std::cout, G_karate);
+//    graphblas::print_matrix(std::cout, G_karate);
     std::cout << std::endl;
     std::cout << "root:" << std::endl;
-    graphblas::pretty_print_matrix(std::cout, root);
+    graphblas::print_matrix(std::cout, root);
     std::cout << "levels:" << std::endl;
-    graphblas::pretty_print_matrix(std::cout, levels);
+    graphblas::print_matrix(std::cout, levels);
 
     return 0;
 }
