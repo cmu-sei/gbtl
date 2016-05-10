@@ -41,7 +41,7 @@ namespace graphblas
             //use parent copy constructor:
             //use parent constructor with num vals:
             template<typename OtherVectorT>
-            Vector(OtherVector const &vec)
+            Vector(OtherVectorT const &vec)
                 : ParentVectorT(vec) {}
 
             template<typename SizeT>
