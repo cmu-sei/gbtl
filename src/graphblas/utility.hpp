@@ -92,7 +92,14 @@ namespace graphblas
         if (*i_extrema>=ar || *j_extrema>=ac)
         {
             throw graphblas::DimensionException(
-                "assignment/extract dimension check failed");
+                "assignment/extract dimension check failed: "+
+                std::to_string(*i_extrema) +
+                ">="+
+                std::to_string(ar) +
+                ", or "+
+                std::to_string(*j_extrema) +
+                ">="+
+                std::to_string(ac));
         }
     }
 
