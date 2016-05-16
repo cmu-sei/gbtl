@@ -125,6 +125,8 @@ namespace backend
                 j_d.begin(),
                 temp.column_indices.begin());
 
+            temp.sort_by_row_and_column();
+
             //remove entries from c:
             auto end_diff = thrust::set_difference_by_key(
                     thrust::make_zip_iterator(thrust::make_tuple(
