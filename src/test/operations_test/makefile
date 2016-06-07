@@ -1,5 +1,5 @@
-CC=nvcc -O3
-CUDA_FLAGS=-Xcompiler -Wall -arch sm_35 -Xcompiler -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA -DGB_USE_CUSP_GPU --expt-relaxed-constexpr
+CC=nvcc -O3 -DGB_USE_CUB_GPU  #-DGB_USE_CUSP_GPU 
+CUDA_FLAGS=-Xcompiler -Wall -arch sm_35 -Xcompiler -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA --expt-relaxed-constexpr
 BOOST_FLAGS=#-lboost_unit_test_framework -L/usr/local/lib
 
 FLAGS= -std=c++11  $(BOOST_FLAGS) $(CUDA_FLAGS)

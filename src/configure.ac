@@ -57,6 +57,9 @@ AS_CASE([$with_backend],
       [sequential],
                  [BACKEND_CPPFLAGS="-DGB_USE_SEQUENTIAL"
                  USING_CUDA="false"],
+      [cub],
+                 [BACKEND_CPPFLAGS="-DGB_USE_CUB_GPU"
+                 USING_CUDA="true"],
       [AC_MSG_ERROR([No backend specified.])]
 )
 

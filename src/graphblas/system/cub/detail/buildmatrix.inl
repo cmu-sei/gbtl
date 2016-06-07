@@ -1,8 +1,8 @@
 #pragma once
 
 #include <thrust/device_ptr.h>
-#include <graphblas/header.hpp>
-#include <graphblas/config.hpp>
+#include "../header.hpp"
+#include "../config.hpp"
 
 namespace graphblas{
 namespace backend{
@@ -28,7 +28,7 @@ namespace backend{
                 &(*i), &(*j), &(*v),
                 n);
         //sorting:
-        //temp.sort_by_row_and_column();
+        temp.sort_by_row_and_column();
     }
 } //backend
 } // graphblas

@@ -7,9 +7,9 @@
 #include <thrust/sort.h>
 #include <thrust/iterator/iterator_facade.h>
 #include <cub/cub.cuh>
-#include <graphblas/header.hpp>
-#include <graphblas/config.hpp>
-#include <graphblas/utility.hpp>
+#include "header.hpp"
+#include "config.hpp"
+#include "utility.hpp"
 #include <utility>
 
 namespace graphblas

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <graphblas/header.hpp>
-#include <graphblas/config.hpp>
+#include "header.hpp"
+#include "config.hpp"
 //#include <moderngpu/include/moderngpu.cuh>
 #include <cub/cub.cuh>
 #include <cstdint>

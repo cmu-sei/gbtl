@@ -12,29 +12,9 @@
  * This Program is distributed under a BSD license.  Please see LICENSE file or
  * permission@sei.cmu.edu for more information.  DM-0002659
  */
+
 #pragma once
 
-/**
-*	@todo We need to differentiate between cusp cpu and cusp gpu
-*/	
-#if defined(GB_USE_CUSP_GPU)
-#    define __GB_SYSTEM_ROOT cusp
-#elif defined(GB_USE_SEQUENTIAL)
-#    define __GB_SYSTEM_ROOT sequential
-#elif defined(GB_USE_CUB_GPU)
-#    define __GB_SYSTEM_ROOT cub
-// ....
-#else
-#    error GraphBLAS library type unspecified at compile time!
-#endif
+#include <graphblas/detail/config.hpp>
 
-#if !defined(__CUDACC__)
-#ifndef __host__
-#define __host__
-#endif // __host__
-
-#ifndef __device__
-#define __device__
-#endif // __device__
-
-#endif // __CUDACC__
+#include <graphblas/system/cub/operations.hpp>
