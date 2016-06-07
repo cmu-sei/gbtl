@@ -1,0 +1,7 @@
+Experimental cub backend
+
+Most of the algorithm implementations should be the same comparing to cusp,
+only without the cusp library.
+
+We are trying cub because of its relatively low programming complexity
+comparing to moderngpu, with an ``acceptable'' level of performance.
