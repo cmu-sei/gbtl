@@ -36,6 +36,7 @@ namespace backend
     public:
 
         typedef IndexType index_type;
+        typedef ScalarT value_type;
 
         thrust::device_ptr<IndexType> row_indices;
         thrust::device_ptr<IndexType> column_indices;
@@ -101,6 +102,24 @@ namespace backend
             cudaFree(row);
             cudaFree(col);
             cudaFree(val);
+        }
+
+        template <typename ZeroT>
+        void set_zero(ZeroT z){
+        }
+
+        IndexType get_nnz() const{
+            return static_cast<IndexType>(this->num_entries);
+        }
+
+        ScalarT get_zero() const{
+            return 0;
+        }
+
+        template <typename T1, typename T2>
+        void get_shape(T1 &t1, T2 &t2) const{
+            t1 = this->num_rows;
+            t2 = this->num_cols;
         }
 
         //similar to cusp interface
