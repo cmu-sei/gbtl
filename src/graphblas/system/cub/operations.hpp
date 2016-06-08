@@ -18,14 +18,14 @@
 
 #pragma once
 
-//#include "detail/reduce.inl"
-//#include "detail/apply.inl"
-//#include "detail/assign.inl"
-//#include "detail/extract.inl"
+#include "detail/reduce.inl"
+#include "detail/apply.inl"
+#include "detail/assign.inl"
+#include "detail/extract.inl"
 #include "detail/extracttuples.inl"
 #include "detail/buildmatrix.inl"
-//#include "detail/ewiseapply.inl"
-//#include "detail/mxm.inl"
-//#include "detail/transpose.inl"
+#include "detail/ewiseapply.inl"
+#include "detail/mxm.inl"
+#include "detail/transpose.inl"
 
 #endif // GB_CUSP_OPERATIONS_HPP

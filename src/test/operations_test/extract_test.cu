@@ -4,7 +4,6 @@
 #include <iostream>
 
 #include <graphblas/graphblas.hpp>
-#include <cusp/print.h>
 #include <vector>
 
 int main() {
@@ -24,14 +23,12 @@ int main() {
     //call assign (matrix version)
     graphblas::assign(a,ia.begin(), ja.begin(), c);
     //using cusp func:
-//::cusp::print(c);
     //new matrix b:
     Matrix <int> b(3,3);
     std::vector<IndexType> ic = {3,5,1};
     std::vector<IndexType> jc = {4,1,5};
     //extract from c to b:
     graphblas::extract(c, ic.begin(), jc.begin(), b);
- //   ::cusp::print(b);
 
     return 0;
 }
