@@ -20,41 +20,12 @@
 
 #include <graphblas/detail/config.hpp>
 
+#include "./merge.inl"
+
 namespace graphblas
 {
 namespace backend
 {
-        template<typename AMatrixT,
-                 typename BMatrixT,
-                 typename CMatrixT,
-                 typename MonoidT,
-                 typename AccumT>
-        inline void ewiseapply(const AMatrixT &a,
-                               const BMatrixT &b,
-                               CMatrixT       &c,
-                               MonoidT         monoid,
-                               AccumT          accum)
-        {
-          //as discussed last time, the shape checks should be done on the front
-          //end, correct?
-
-            if (a.num_rows != b.num_rows ||
-                b.num_cols != a.num_cols)
-            {
-              return;
-            }
-
-            // Create a temporary matrix for return.
-            CMatrixT temp_matrix(a.num_rows, a.num_cols, 0);
-            temp_matrix.resize(a.num_rows, a.num_cols, a.num_entries + b.num_entries);
-
-            //call cusp elementwise:
-            ::cusp::elementwise(a, b, temp_matrix, monoid);
-
-            //merging results:
-            detail::merge(temp_matrix, c, accum);
-        }
-
         template<typename AMatrixT,
                  typename BMatrixT,
                  typename CMatrixT,
@@ -66,10 +37,9 @@ namespace backend
                              MonoidT         m,
                              AccumT          accum)
         {
-            // FIXME Implement ewiseapply optimized for addition here.
-            //return ewiseapply<AMatrixT, BMatrixT, CMatrixT, MonoidT, AccumT>
-            return ewiseapply
-                (a, b, c, m, accum);
+            BMatrixT temp(b);
+            detail::merge(a,temp,m);
+            detail::merge(temp,c,accum);
         }
 
         template<typename AMatrixT,
@@ -83,6 +53,7 @@ namespace backend
                               MonoidT         m,
                               AccumT          accum)
         {
+#if 0
             graphblas::IndexType num_rows=a.num_rows;
             graphblas::IndexType num_cols=a.num_cols;
 
@@ -144,6 +115,7 @@ namespace backend
                     intersection_size,
                     temp.column_indices.begin());
             c = temp;
+#endif
         }
 }
 } // graphblas

@@ -14,7 +14,7 @@
  */
 
 #include <graphblas/detail/config.hpp>
-#include <graphblas/system/cusp/detail/merge.inl>
+#include "../header.hpp"
 
 namespace graphblas
 {

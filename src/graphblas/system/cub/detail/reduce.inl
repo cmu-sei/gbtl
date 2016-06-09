@@ -15,7 +15,6 @@
 
 #pragma once
 
-#include "merge.inl"
 
 namespace graphblas
 {

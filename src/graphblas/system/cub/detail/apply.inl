@@ -15,8 +15,6 @@
 
 #include <thrust/functional.h>
 #include <thrust/transform.h>
-#include <graphblas/system/cusp/detail/merge.inl>
-#include <cusp/elementwise.h>
 
 namespace graphblas
 {
