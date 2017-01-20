@@ -45,7 +45,7 @@ namespace backend{
              typename CMatrixT,
              typename MonoidT,
              typename AccumT =
-                 graphblas::math::Assign<typename AMatrixT::ScalarType> >
+                 graphblas::math::Assign<typename CMatrixT::ScalarType> >
     inline void _ewiseapply(AMatrixT const &a,
                             BMatrixT const &b,
                             CMatrixT       &c,
@@ -604,9 +604,9 @@ namespace backend{
              typename MonoidT =
                  graphblas::PlusMonoid<typename AMatrixT::ScalarType>,
              typename AccumT =
-                 graphblas::math::Assign<typename AMatrixT::ScalarType> >
+                 graphblas::math::Assign<typename CMatrixT::ScalarType> >
     inline void rowReduceMasked(AMatrixT const &a,
-                           CMatrixT       &c, 
+                           CMatrixT       &c,
                            MMatrixT       &mask,
                            MonoidT         sum     = MonoidT(),
                            AccumT          accum = AccumT())
@@ -625,14 +625,14 @@ namespace backend{
         {
             typename AMatrixT::ScalarType tmp_sum = sum.identity();
             if(mask.get_value_at(i,0) != mask.get_zero())
-            {    
+            {
                 for (IndexType j = 0; j < N; ++j)
                 {
                     tmp_sum = sum(tmp_sum, a.get_value_at(i, j));
                 }
                 c.set_value_at(i, 0,
                                accum(c.get_value_at(i, 0), tmp_sum));
-            }    
+            }
         }
     }
 
@@ -645,9 +645,9 @@ namespace backend{
              typename MonoidT =
                  graphblas::PlusMonoid<typename AMatrixT::ScalarType>,
              typename AccumT =
-                 graphblas::math::Assign<typename AMatrixT::ScalarType> >
+                 graphblas::math::Assign<typename CMatrixT::ScalarType> >
     inline void colReduceMasked(AMatrixT const &a,
-                           CMatrixT       &c, 
+                           CMatrixT       &c,
                            MMatrixT       &mask,
                            MonoidT         sum    = MonoidT(),
                            AccumT          accum = AccumT())
@@ -666,14 +666,14 @@ namespace backend{
         {
             typename AMatrixT::ScalarType tmp_sum = sum.identity();
             if(mask.get_value_at(0,j) != mask.get_zero())
-            {    
+            {
                 for (IndexType i = 0; i < M; ++i)
                 {
                     tmp_sum = sum(tmp_sum, a.get_value_at(i, j));
                 }
                 c.set_value_at(0, j,
                                accum(c.get_value_at(0, j), tmp_sum));
-            }    
+            }
         }
     }
 

@@ -33,5 +33,6 @@
 #include <algorithms/mst.hpp>
 #include <algorithms/page_rank.hpp>
 #include <algorithms/sssp.hpp>
+#include <algorithms/bc.hpp>
 
 #endif // ALGORITHMS_HPP

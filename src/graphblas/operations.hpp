@@ -69,7 +69,7 @@ namespace graphblas
              typename MonoidT =
                  graphblas::math::Plus<typename AMatrixT::ScalarType>,
              typename AccumT =
-                 graphblas::math::Assign<typename AMatrixT::ScalarType> >
+                 graphblas::math::Assign<typename CMatrixT::ScalarType> >
     inline void ewiseadd(AMatrixT const &a,
                          BMatrixT const &b,
                          CMatrixT       &c,
@@ -108,7 +108,7 @@ namespace graphblas
              typename MonoidT =
                  graphblas::math::Times<typename AMatrixT::ScalarType>,
              typename AccumT =
-                 graphblas::math::Assign<typename AMatrixT::ScalarType> >
+                 graphblas::math::Assign<typename CMatrixT::ScalarType> >
     inline void ewisemult(AMatrixT const &a,
                           BMatrixT const &b,
                           CMatrixT       &c,
@@ -144,7 +144,7 @@ namespace graphblas
              typename SemiringT =
                  graphblas::ArithmeticSemiring<typename AMatrixT::ScalarType>,
              typename AccumT =
-                 graphblas::math::Assign<typename AMatrixT::ScalarType> >
+                 graphblas::math::Assign<typename CMatrixT::ScalarType> >
     inline void mxm(AMatrixT const &a,
                     BMatrixT const &b,
                     CMatrixT       &c,
@@ -176,7 +176,7 @@ namespace graphblas
              typename SemiringT =
                     graphblas::ArithmeticSemiring<typename AMatrixT::ScalarType>,
              typename AccumT =
-                    graphblas::math::Assign<typename AMatrixT::ScalarType> >
+                    graphblas::math::Assign<typename CMatrixT::ScalarType> >
     inline void mxmMasked(AMatrixT const &a,
                           BMatrixT const &b,
                           CMatrixT       &c,
@@ -210,7 +210,7 @@ namespace graphblas
              typename SemiringT =
                  graphblas::ArithmeticSemiring<typename AMatrixT::ScalarType>,
              typename AccumT =
-                 graphblas::math::Assign<typename AMatrixT::ScalarType> >
+                 graphblas::math::Assign<typename CMatrixT::ScalarType> >
     inline void mxmMaskedV2(AMatrixT const &a,
                             BMatrixT const &b,
                             CMatrixT       &c,
@@ -248,7 +248,7 @@ namespace graphblas
              typename SemiringT =
                  graphblas::ArithmeticSemiring<typename AVectorT::ScalarType>,
              typename AccumT =
-                 graphblas::math::Assign<typename AVectorT::ScalarType> >
+                 graphblas::math::Assign<typename CVectorT::ScalarType> >
     inline void vxm(AVectorT const &a,
                     BMatrixT const &b,
                     CVectorT       &c,
@@ -286,7 +286,7 @@ namespace graphblas
              typename SemiringT =
                  graphblas::ArithmeticSemiring<typename AMatrixT::ScalarType>,
              typename AccumT =
-                 graphblas::math::Assign<typename AMatrixT::ScalarType> >
+                 graphblas::math::Assign<typename CVectorT::ScalarType> >
     inline void mxv(AMatrixT const &a,
                     BVectorT const &b,
                     CVectorT       &c,
@@ -325,7 +325,7 @@ namespace graphblas
              typename RAIteratorI,
              typename RAIteratorJ,
              typename AccumT =
-                 graphblas::math::Assign<typename AMatrixT::ScalarType> >
+                 graphblas::math::Assign<typename CMatrixT::ScalarType> >
     inline void extract(AMatrixT       const &a,
                         RAIteratorI           i,
                         RAIteratorJ           j,
@@ -362,13 +362,14 @@ namespace graphblas
     template<typename AMatrixT,
              typename CMatrixT,
              typename AccumT =
-                 graphblas::math::Assign<typename AMatrixT::ScalarType> >
+                 graphblas::math::Assign<typename CMatrixT::ScalarType> >
     inline void extract(AMatrixT       const &a,
                         IndexArrayType const &i,
                         IndexArrayType const &j,
                         CMatrixT             &c,
                         AccumT                accum = AccumT())
     {
+        /// @todo this does not check the dimension of C against i and j
         assign_extract_dimension_check(a,c,i.begin(),j.begin());
         backend::extract(a.m_mat, i, j, c.m_mat, accum);
     }
@@ -400,7 +401,7 @@ namespace graphblas
              typename RAIteratorI,
              typename RAIteratorJ,
              typename AccumT =
-                 graphblas::math::Assign<typename AMatrixT::ScalarType> >
+                 graphblas::math::Assign<typename CMatrixT::ScalarType> >
     inline void assign(AMatrixT const    &a,
                        RAIteratorI        i,
                        RAIteratorJ        j,
@@ -437,7 +438,7 @@ namespace graphblas
     template<typename AMatrixT,
              typename CMatrixT,
              typename AccumT =
-                 graphblas::math::Assign<typename AMatrixT::ScalarType> >
+                 graphblas::math::Assign<typename CMatrixT::ScalarType> >
     inline void assign(AMatrixT const       &a,
                        IndexArrayType const &i,
                        IndexArrayType const &j,
@@ -468,7 +469,7 @@ namespace graphblas
              typename CMatrixT,
              typename UnaryFunctionT,
              typename AccumT=
-                 graphblas::math::Assign<typename AMatrixT::ScalarType> >
+                 graphblas::math::Assign<typename CMatrixT::ScalarType> >
     inline void apply(AMatrixT const &a,
                       CMatrixT       &c,
                       UnaryFunctionT  f,
@@ -500,7 +501,7 @@ namespace graphblas
              typename MonoidT =
                  graphblas::PlusMonoid<typename AMatrixT::ScalarType>,
              typename AccumT =
-                 graphblas::math::Assign<typename AMatrixT::ScalarType> >
+                 graphblas::math::Assign<typename CMatrixT::ScalarType> >
     inline void row_reduce(AMatrixT const &a,
                            CMatrixT       &c, // vector?
                            MonoidT         m     = MonoidT(),
@@ -534,7 +535,7 @@ namespace graphblas
              typename MonoidT =
                  graphblas::PlusMonoid<typename AMatrixT::ScalarType>,
              typename AccumT =
-                 graphblas::math::Assign<typename AMatrixT::ScalarType> >
+                 graphblas::math::Assign<typename CMatrixT::ScalarType> >
     inline void col_reduce(AMatrixT const &a,
                            CMatrixT       &c, // vector?
                            MonoidT         m     = MonoidT(),
@@ -572,7 +573,7 @@ namespace graphblas
              typename MonoidT =
                  graphblas::PlusMonoid<typename AMatrixT::ScalarType>,
              typename AccumT =
-                 graphblas::math::Assign<typename AMatrixT::ScalarType> >
+                 graphblas::math::Assign<typename CMatrixT::ScalarType> >
     inline void rowReduceMasked(AMatrixT const &a,
                            CMatrixT       &c, // vector?
                            MMatrixT       &mask,
@@ -609,7 +610,7 @@ namespace graphblas
              typename MonoidT =
                  graphblas::PlusMonoid<typename AMatrixT::ScalarType>,
              typename AccumT =
-                 graphblas::math::Assign<typename AMatrixT::ScalarType> >
+                 graphblas::math::Assign<typename CMatrixT::ScalarType> >
     inline void colReduceMasked(AMatrixT const &a,
                            CMatrixT       &c, // vector?
                            MMatrixT       &mask,
