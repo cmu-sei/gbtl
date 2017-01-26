@@ -120,6 +120,34 @@ namespace graphblas
     }
 
     /**
+     * @brief Perform an element wise binary operation that can be optimized
+     *        for "multiply" semantics (AND short circuit logic) with output mask
+     */
+    template<typename AMatrixT,
+             typename BMatrixT,
+             typename CMatrixT,
+             typename MMatrixT,
+             typename MonoidT =
+                 graphblas::math::Times<typename AMatrixT::ScalarType>,
+             typename AccumT =
+                 graphblas::math::Assign<typename CMatrixT::ScalarType> >
+    inline void ewisemultMasked(AMatrixT const &a,
+                                BMatrixT const &b,
+                                CMatrixT       &c,
+                                MMatrixT const &m,
+                                bool            replace_flag,
+                                MonoidT         monoid = MonoidT(),
+                                AccumT          accum = AccumT())
+    {
+        same_dimension_check(a,b,std::string("ewisemultMasked"));
+        same_dimension_check(a,c,std::string("ewisemultMasked"));
+        same_dimension_check(c,m,std::string("ewisemultMasked"));
+        backend::ewisemultMasked(a.m_mat, b.m_mat, c.m_mat,
+                                 m.m_mat, replace_flag,
+                                 monoid, accum);
+    }
+
+    /**
      * @brief Perform matrix-matrix multiply
      *
      * @tparam <MatrixT>   Models the Matrix concept

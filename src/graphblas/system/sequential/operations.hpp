@@ -128,6 +128,68 @@ namespace backend{
     template<typename AMatrixT,
              typename BMatrixT,
              typename CMatrixT,
+             typename MMatrixT,
+             typename MonoidT,
+             typename AccumT>
+    inline void ewisemultMasked(AMatrixT const &a,
+                                BMatrixT const &b,
+                                CMatrixT       &c,
+                                MMatrixT const &m,
+                                bool            replace_flag,
+                                MonoidT         func,
+                                AccumT          accum)
+    {
+
+        IndexType num_rows, num_cols;
+
+        a.get_shape(num_rows, num_cols);
+
+        // Assert shapes are the same.
+        // DONE IN frontend
+
+        /// @todo Assert that all Matrixs have the same ScalarType.
+
+        /// @todo can we assign directly to c?
+        CMatrixT tmp(num_rows, num_cols, c.get_zero());
+
+        for (IndexType i = 0; i < num_rows; i++)
+        {
+            for (IndexType j = 0; j < num_cols; j++)
+            {
+                if ((a.get_value_at(i, j) != a.get_zero()) &&
+                    (b.get_value_at(i, j) != b.get_zero()))
+                {
+                    tmp.set_value_at(i, j,
+                                     accum(c.get_value_at(i, j),
+                                           func(a.get_value_at(i,j),
+                                                b.get_value_at(i,j))));
+                }
+            }
+        }
+
+        // Apply merge or replace semantics
+        for (IndexType i = 0; i < num_rows; i++)
+        {
+            for (IndexType j = 0; j < num_cols; j++)
+            {
+                if (m.get_value_at(i,j))
+                {
+                    c.set_value_at(i, j, tmp.get_value_at(i, j));
+                }
+                else if (replace_flag)
+                {
+                    c.set_value_at(i, j, c.get_zero());
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     */
+    template<typename AMatrixT,
+             typename BMatrixT,
+             typename CMatrixT,
              typename SemiringT,
              typename AccumT>
     inline void mxm(AMatrixT const &a,

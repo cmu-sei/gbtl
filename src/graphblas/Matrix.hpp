@@ -227,6 +227,20 @@ namespace graphblas
                                      CMatrixT       &c,
                                      MonoidT         monoid,
                                      AccumT          accum);
+        template<typename AMatrixT,
+                 typename BMatrixT,
+                 typename CMatrixT,
+                 typename MMatrixT,
+                 typename MonoidT,
+                 typename AccumT >
+        friend inline void ewisemultMasked(AMatrixT const &a,
+                                           BMatrixT const &b,
+                                           CMatrixT       &c,
+                                           MMatrixT const &m,
+                                           bool            replace_flag,
+                                           MonoidT         monoid,
+                                           AccumT          accum);
+
 
         template<typename AMatrixT,
                  typename BMatrixT,

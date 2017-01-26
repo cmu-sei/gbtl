@@ -76,6 +76,23 @@ namespace graphblas
         };
 
         /**
+         * @brief Unary identity.
+         *
+         * @param[in]  a  the number to return.
+         *
+         * @return  The input value (possibly cast).
+         */
+        template <typename T, typename Tin = T>
+        __device__ __host__ inline T identity(Tin a) { return static_cast<T>(a); }
+
+        template <typename T, typename Tin = T>
+        struct Identity
+        {
+            typedef T result_type;
+            __device__ __host__ inline T operator()(Tin a) { return identity<T,Tin>(a); }
+        };
+
+        /**
          * @brief Unary inverse.
          *
          * @param[in]  a  The number to take the inverse of.
@@ -169,6 +186,28 @@ namespace graphblas
         };
 
         /**
+         * @brief Standard arithmetic division with zero check.
+         *
+         * @param[in]  a  The dividend
+         * @param[in]  b  The divisor
+         *
+         * @return a divided by b.
+         *
+         */
+        template <typename T>
+        __device__ __host__ inline T annihilator_div(T a, T b)
+        {
+            if ((a == (T)0) || (b == (T)0))
+            {
+                return (T)0;
+            }
+            else
+            {
+                return a / b;
+            }
+        }
+
+        /**
          * @brief Standard arithmetic division.
          *
          * @param[in]  a  The dividend
@@ -180,6 +219,7 @@ namespace graphblas
          */
         template <typename T>
         __device__ __host__ inline T div(T a, T b) { return a / b; }
+
 
         template<typename T>
         struct Div
@@ -709,6 +749,9 @@ namespace graphblas
 
     GB_GEN_MONOID(PlusMonoid, graphblas::math::plus, 0)
     GB_GEN_MONOID(TimesMonoid, graphblas::math::times, 1)
+
+    // The right-identity is 1, the left identity is 1/rhs
+    GB_GEN_MONOID(DivMonoid, graphblas::math::annihilator_div, 1)
 
     GB_GEN_MONOID(MinMonoid,
                   graphblas::math::arithmetic_min,

@@ -22,6 +22,7 @@ test_cusp_gpu_buildmatrix \
 test_cusp_gpu_transpose \
 test_cusp_gpu_negate \
 test_cusp_gpu_bfs \
+test_cusp_gpu_bc \
 test_cusp_gpu_metrics \
 test_cusp_gpu_maxflow \
 test_cusp_gpu_mst \
@@ -52,6 +53,8 @@ test_cusp_gpu_transpose_SOURCES = test_transpose_cuda.cu
 test_cusp_gpu_negate_SOURCES = test_negate_cuda.cu
 
 test_cusp_gpu_bfs_SOURCES = test_bfs_cuda.cu
+
+test_cusp_gpu_bc_SOURCES = test_bc_cuda.cu
 
 test_cusp_gpu_metrics_SOURCES = test_metrics_cuda.cu
 
@@ -84,6 +87,7 @@ test_sequential_buildmatrix \
 test_sequential_transpose \
 test_sequential_negate \
 test_sequential_bfs \
+test_sequential_bc \
 test_sequential_metrics \
 test_sequential_maxflow \
 test_sequential_mis \
@@ -116,6 +120,8 @@ test_sequential_transpose_SOURCES = test_transpose.cpp
 test_sequential_negate_SOURCES = test_negate.cpp
 
 test_sequential_bfs_SOURCES = test_bfs.cpp
+
+test_sequential_bc_SOURCES = test_bc.cpp
 
 test_sequential_metrics_SOURCES = test_metrics.cpp
 

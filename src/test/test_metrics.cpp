@@ -62,22 +62,6 @@ static std::vector<double> tv(tr.size(), 1);
 //    INF);
 static Matrix<double, DirectedMatrixTag> test5x5(5,5,INF);
 
-static std::vector<double> br={0, 0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 6};
-static std::vector<double> bc={1, 2, 3, 2, 4, 4, 2, 4, 5, 6, 7, 7};
-static std::vector<double> bv(br.size(), 1);
-
-//static Matrix<double, DirectedMatrixTag> betweenness(
-//    {{0, 1, 1, 1, 0, 0, 0, 0},
-//     {0, 0, 1, 0, 1, 0, 0, 0},
-//     {0, 0, 0, 0, 1, 0, 0, 0},
-//     {0, 0, 1, 0, 1, 0, 0, 0},
-//     {0, 0, 0, 0, 0, 1, 1, 0},
-//     {0, 0, 0, 0, 0, 0, 0, 1},
-//     {0, 0, 0, 0, 0, 0, 0, 1},
-//     {0, 0, 0, 0, 0, 0, 0, 0}});
-//
-static Matrix<double, DirectedMatrixTag> betweenness(8,8);
-
 BOOST_AUTO_TEST_CASE(metrics_test_vertex_count)
 {
     graphblas::buildmatrix(G_tn, gr.begin(), gc.begin(), gv.begin(), gv.size());
@@ -197,40 +181,6 @@ BOOST_AUTO_TEST_CASE(metrics_test_closeness_centrality)
     BOOST_CHECK_EQUAL(result, 4);
 }
 
-
-BOOST_AUTO_TEST_CASE(metrics_test_vertex_betweenness_centrality)
-{
-    graphblas::buildmatrix(betweenness, br.begin(), bc.begin(), bv.begin(), bv.size());
-    std::vector<double> result = vertex_betweenness_centrality(betweenness);
-    std::vector<double> answer = {0.0, 4.0/3, 4.0/3, 4.0/3, 12.0, 2.5, 2.5, 0.0};
-
-    BOOST_CHECK_EQUAL_COLLECTIONS(result.begin(), result.end(), answer.begin(), answer.end());
-}
-
-
-BOOST_AUTO_TEST_CASE(metrics_test_edge_betweenness_centrality)
-{
-    Matrix<double, DirectedMatrixTag> result(8,8);
-    //Matrix<double, DirectedMatrixTag> answer ({{0,  6,  6,  6,  0,  0,  0,  0},
-    //                            {0,  0,  1,  0, 10,  0,  0,  0},
-    //                            {0,  0,  0,  0, 10,  0,  0,  0},
-    //                            {0,  0,  1,  0, 10,  0,  0,  0},
-    //                            {0,  0,  0,  0,  0, 14, 14,  0},
-    //                            {0,  0,  0,  0,  0,  0,  0,  8},
-    //                            {0,  0,  0,  0,  0,  0,  0,  8},
-    //                            {0,  0,  0,  0,  0,  0,  0,  0}});
-
-    std::vector<double> ar={0, 0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 6};
-    std::vector<double> ac={1, 2, 3, 2, 4, 4, 2, 4, 5, 6, 7, 7};
-    std::vector<double> av={6,  6,  6,  1, 10, 10,  1, 10, 14, 14,  8,  8};
-    Matrix<double, DirectedMatrixTag> answer(8,8);
-    graphblas::buildmatrix(answer, ar.begin(), ac.begin(), av.begin(), av.size());
-
-    graphblas::buildmatrix(betweenness, br.begin(), bc.begin(), bv.begin(), bv.size());
-    result = edge_betweenness_centrality(betweenness);
-    //std::cout << result << std::endl;
-    BOOST_CHECK_EQUAL(result, answer);
-}
 
 BOOST_AUTO_TEST_CASE(metrics_test_triangle_counting)
 {
