@@ -76,6 +76,7 @@ SUBDIRS = sequential
 
 noinst_PROGRAMS = \
 test_sequential_math \
+test_sequential_graphblas_algebra \
 test_sequential_mxm \
 test_sequential_ewiseapply \
 test_sequential_extracttuples \
@@ -98,6 +99,8 @@ test_sequential_page_rank
 
 
 test_sequential_math_SOURCES = test_math.cpp
+
+test_sequential_graphblas_algebra_SOURCES = test_graphblas_algebra.cpp
 
 test_sequential_mxm_SOURCES = test_mxm.cpp
 
