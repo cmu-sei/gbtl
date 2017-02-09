@@ -1,13 +1,12 @@
 /*
- * Copyright (c) 2015 Carnegie Mellon University and The Trustees of Indiana
- * University.
+ * Copyright (c) 2017 Carnegie Mellon University.
  * All Rights Reserved.
  *
  * THIS SOFTWARE IS PROVIDED "AS IS," WITH NO WARRANTIES WHATSOEVER. CARNEGIE
- * MELLON UNIVERSITY AND THE TRUSTEES OF INDIANA UNIVERSITY EXPRESSLY DISCLAIM
- * TO THE FULLEST EXTENT PERMITTED BY LAW ALL EXPRESS, IMPLIED, AND STATUTORY
- * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT OF PROPRIETARY RIGHTS.
+ * MELLON UNIVERSITY EXPRESSLY DISCLAIMS TO THE FULLEST EXTENT PERMITTED BY
+ * LAW ALL EXPRESS, IMPLIED, AND STATUTORY WARRANTIES, INCLUDING, WITHOUT
+ * LIMITATION, THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+ * PURPOSE, AND NON-INFRINGEMENT OF PROPRIETARY RIGHTS.
  *
  * This Program is distributed under a BSD license.  Please see LICENSE file or
  * permission@sei.cmu.edu for more information.  DM-0002659
@@ -34,5 +33,8 @@
 #include <graphblas/system/sequential/NegateView.hpp>
 
 #include <graphblas/system/sequential/operations.hpp>
+
+#include <graphblas/system/sequential/LilSparseMatrix.hpp>
+#include <graphblas/system/sequential/operations_sparse.hpp>
 
 #endif // GB_SEQUENTIAL_HPP

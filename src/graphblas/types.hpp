@@ -29,4 +29,10 @@ namespace graphblas
     typedef std::vector<IndexType> IndexArrayType;
 } // graphblas
 
+namespace GraphBLAS
+{
+    typedef uint64_t IndexType;
+    typedef std::vector<IndexType> IndexArrayType;
+}
+
 #endif // GB_TYPES_HPP

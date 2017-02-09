@@ -12,7 +12,8 @@ test_sequential_coo_matrix \
 test_sequential_csc_matrix \
 test_sequential_csr_matrix \
 test_sequential_row_extended_view \
-test_sequential_column_extended_view
+test_sequential_column_extended_view \
+test_sequential_lil_sparse_matrix
 
 test_sequential_lil_matrix_SOURCES = test_lil_matrix.cpp
 
@@ -25,5 +26,7 @@ test_sequential_csr_matrix_SOURCES = test_csr_matrix.cpp
 test_sequential_row_extended_view_SOURCES = test_row_extended_view.cpp
 
 test_sequential_column_extended_view_SOURCES = test_column_extended_view.cpp
+
+test_sequential_lil_sparse_matrix_SOURCES = test_lil_sparse_matrix.cpp
 
 endif
