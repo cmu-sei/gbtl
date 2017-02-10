@@ -33,6 +33,37 @@
 #include <graphblas/system/sequential/TransposeView.hpp>
 #include <graphblas/system/sequential/NegateView.hpp>
 
+namespace GraphBLAS
+{
+namespace backend
+{
+
+    /**
+    *
+    */
+    template<typename MatrixT>
+    inline ComplementView<MatrixT> complement(MatrixT const &A)
+    {
+        return ComplementView<MatrixT>(A);
+    }
+
+
+    /**
+    *
+    */
+    template<typename MatrixT>
+    inline TransposeView<MatrixT> transpose(MatrixT const &A)
+    {
+        return TransposeView<MatrixT>(A);
+    }
+
+} // backend
+} // GraphBLAS
+
+//****************************************************************************
+/// @deprecated
+//****************************************************************************
+
 namespace graphblas
 {
 namespace backend{

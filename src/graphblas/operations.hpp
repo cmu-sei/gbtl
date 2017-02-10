@@ -31,6 +31,8 @@
 #define __GB_SYSTEM_HEADER <graphblas/system/__GB_SYSTEM_ROOT/TransposeView.hpp>
 #include __GB_SYSTEM_HEADER
 #undef __GB_SYSTEM_HEADER
+
+/// @todo rename this file to ComplementView after cutover to GraphBLAS ns.
 #define __GB_SYSTEM_HEADER <graphblas/system/__GB_SYSTEM_ROOT/NegateView.hpp>
 #include __GB_SYSTEM_HEADER
 #undef __GB_SYSTEM_HEADER
@@ -653,31 +655,25 @@ namespace GraphBLAS
 
 
     /**
-     * @brief  Return a view that structurally negates the elements of a matrix.
-     * @param[in]  a  The matrix to negate
+     * @brief  Return a view that complements the structure  of a matrix.
+     * @param[in]  a  The matrix to complement
      *
-     * @todo MOVE NegateView to GraphBLAS namespace
      */
-    template<typename MatrixT,
-             typename SemiringT =
-                 graphblas::ArithmeticSemiring<typename MatrixT::ScalarType> >
-    inline graphblas::backend::NegateView<MatrixT, SemiringT> negate(
-        MatrixT const   &a,
-        SemiringT const &s = SemiringT())
+    template<typename MatrixT>
+    inline backend::ComplementView<MatrixT> complement(MatrixT const &A)
     {
-        return graphblas::backend::NegateView<MatrixT, SemiringT>(graphblas::backend::negate(a.m_mat, s));
+        return backend::ComplementView<MatrixT>(backend::complement(A.m_mat));
     }
 
     /**
      * @brief  "Flip" the rows and columns of a matrix
-     * @param[in]  a  The matrix to flip
+     * @param[in]  a  The matrix to transpose
      *
-     * @todo MOVE TransposeView to GraphBLAS namespace
-    */
-    template<typename AMatrixT>
-    inline graphblas::backend::TransposeView<AMatrixT> transpose(AMatrixT const &a)
+     */
+    template<typename MatrixT>
+    inline backend::TransposeView<MatrixT> transpose(MatrixT const &A)
     {
-        return graphblas::backend::TransposeView<AMatrixT>(graphblas::backend::transpose(a.m_mat));
+        return backend::TransposeView<MatrixT>(backend::transpose(A.m_mat));
     }
 
 } // GraphBLAS
