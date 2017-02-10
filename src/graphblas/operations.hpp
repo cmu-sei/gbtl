@@ -71,7 +71,7 @@ namespace GraphBLAS
              typename MaskT,
              typename AccumT,
              typename ValueT,
-             typename BinaryOpT> >
+             typename BinaryOpT>
     inline void matrixBuild(CMatrixT                   &C,
                             MaskT                const &Mask,
                             AccumT                      accum,
@@ -104,10 +104,10 @@ namespace GraphBLAS
              typename MaskT,
              typename AccumT,
              typename ValueT,
-             typename BinaryOpT> >
+             typename BinaryOpT>
     inline void vectorBuild(WVectorT                   &w,
                             MaskT                const &mask,
-                            AccumT                      accum = AccumT(),
+                            AccumT                      accum,
                             IndexArrayType       const &indices,
                             std::vector<ValueT>  const &values,
                             BinaryOpT                   dup,
@@ -157,7 +157,7 @@ namespace GraphBLAS
     inline void vectorExtract(IndexArrayType            &indices,
                               std::vector<ValueT>       &values,
                               WVectorT            const &w,
-                              MaskT               cons  &mask,
+                              MaskT               const &mask,
                               std::string               &err);
 
     //****************************************************************************
@@ -216,7 +216,7 @@ namespace GraphBLAS
              typename UVectorT,
              typename VVectorT>
     inline void eWiseMult(WVectorT        &w,
-                          MaskT     const &mask
+                          MaskT     const &mask,
                           AccumT           accum,
                           BinaryOpT        op,
                           UVectorT  const &u,
@@ -231,7 +231,7 @@ namespace GraphBLAS
              typename AMatrixT,
              typename BMatrixT>
     inline void eWiseMult(CMatrixT         &C,
-                          MaskT      const &Mask
+                          MaskT      const &Mask,
                           AccumT            accum,
                           BinaryOpT         op,
                           AMatrixT   const &A,
@@ -249,7 +249,7 @@ namespace GraphBLAS
              typename UVectorT,
              typename VVectorT>
     inline void eWiseAdd(WVectorT         &w,
-                         MaskT      const &mask
+                         MaskT      const &mask,
                          AccumT            accum,
                          BinaryOpT         op,
                          UVectorT   const &u,
@@ -616,22 +616,22 @@ namespace GraphBLAS
              typename AccumT,
              typename MonoidT, // monoid only
              typename UVectorT>
-    inline void reduce(ValueT                &dst,
-                       AccumT                 accum,
-                       BinaryFunctionT        op,
-                       UVectorT        const &u,
-                       bool                   replace_flag = false);
+    inline void reduce(ValueT           &dst,
+                       AccumT            accum,
+                       MonoidT           op,
+                       UVectorT   const &u,
+                       bool              replace_flag = false);
 
     // matrix-scalar variant
     template<typename ValueT,
              typename AccumT,
              typename MonoidT, // monoid only
              typename AMatrixT>
-    inline void reduce(ValueT                &dst,
-                       AccumT                 accum,
-                       BinaryFunctionT        op,
-                       AMatrixT        const &A,
-                       bool                   replace_flag = false);
+    inline void reduce(ValueT           &dst,
+                       AccumT            accum,
+                       MonoidT           op,
+                       AMatrixT   const &A,
+                       bool              replace_flag = false);
 
     //****************************************************************************
     // Transpose
@@ -643,7 +643,7 @@ namespace GraphBLAS
              typename AMatrixT>
     inline void transpose(CMatrixT       &C,
                           MaskT    const &Mask,
-                          AccumT          accum
+                          AccumT          accum,
                           AMatrixT const &A,
                           bool            replace_flag);
 
@@ -655,25 +655,29 @@ namespace GraphBLAS
     /**
      * @brief  Return a view that structurally negates the elements of a matrix.
      * @param[in]  a  The matrix to negate
+     *
+     * @todo MOVE NegateView to GraphBLAS namespace
      */
     template<typename MatrixT,
              typename SemiringT =
                  graphblas::ArithmeticSemiring<typename MatrixT::ScalarType> >
-    inline NegateView<MatrixT, SemiringT> negate(
+    inline graphblas::backend::NegateView<MatrixT, SemiringT> negate(
         MatrixT const   &a,
         SemiringT const &s = SemiringT())
     {
-        return NegateView<MatrixT, SemiringT>(backend::negate(a.m_mat, s));
+        return graphblas::backend::NegateView<MatrixT, SemiringT>(graphblas::backend::negate(a.m_mat, s));
     }
 
     /**
      * @brief  "Flip" the rows and columns of a matrix
      * @param[in]  a  The matrix to flip
+     *
+     * @todo MOVE TransposeView to GraphBLAS namespace
     */
     template<typename AMatrixT>
-    inline TransposeView<AMatrixT> transpose(AMatrixT const &a)
+    inline graphblas::backend::TransposeView<AMatrixT> transpose(AMatrixT const &a)
     {
-        return TransposeView<AMatrixT>(backend::transpose(a.m_mat));
+        return graphblas::backend::TransposeView<AMatrixT>(graphblas::backend::transpose(a.m_mat));
     }
 
 } // GraphBLAS
