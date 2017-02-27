@@ -95,7 +95,8 @@ test_sequential_mis \
 test_sequential_mst \
 test_sequential_sssp \
 test_sequential_cluster \
-test_sequential_page_rank
+test_sequential_page_rank \
+test_sequential_mxm_sparse
 
 
 test_sequential_math_SOURCES = test_math.cpp
@@ -139,5 +140,7 @@ test_sequential_sssp_SOURCES = test_sssp.cpp
 test_sequential_cluster_SOURCES = test_cluster.cpp
 
 test_sequential_page_rank_SOURCES = test_page_rank.cpp
+
+test_sequential_mxm_sparse_SOURCES = test_mxm_sparse.cpp
 
 endif

@@ -26,7 +26,7 @@
 #include <utility>
 #include <vector>
 #include <iterator>
-
+#include <iostream>
 #include <graphblas/accum.hpp>
 #include <graphblas/algebra.hpp>
 #include <graphblas/system/sequential/TransposeView.hpp>
@@ -82,33 +82,29 @@ namespace GraphBLAS { namespace backend {
         
         auto tmp_sum = op.zero();
         auto tmp_product = op.zero();
-        
-        for (irow = 0; irow = nrow_C; irow++)
+        for (irow = 0; irow < nrow_C; irow++)
         {
             A.getColumnIndices(irow, indA[irow]);
-            for (icol = 0; icol = ncol_C; icol++)
+            for (icol = 0; icol < ncol_C; icol++)
             {
-                if (irow == 0)
+                B.getRowIndices(icol, indB[icol]);
+                if (!indA[irow].empty() && !indB[icol].empty())
                 {
-                    B.getRowIndices(irow, indB[icol]);
-                }
-                
-                // Get intersection of row index of A and column index of B.
-                ind_intersection.clear();
-                std::set_intersection(indA[irow].begin(), indA[irow].end(),
-                                      indB[icol].begin(), indB[icol].end(),
-                                      std::back_inserter(ind_intersection));
-                if (!ind_intersection.empty())
-                {
-                    tmp_sum = op.zero();
-                    for (auto kk : ind_intersection) // Range-based loop, access by value
+                    ind_intersection.clear();
+                    std::set_intersection(indA[irow].begin(), indA[irow].end(),
+                                          indB[icol].begin(), indB[icol].end(),
+                                          std::back_inserter(ind_intersection));
+                    if (!ind_intersection.empty())
                     {
-                        // Matrix multiply kernel
-                        tmp_product = op.mult(A.get_value_at(irow,kk), B.get_value_at(kk,icol));
-                        tmp_sum = op.add(tmp_sum, tmp_product);
+                        tmp_sum = op.zero();
+                        for (auto kk : ind_intersection) // Range-based loop, access by value
+                        {
+                            // Matrix multiply kernel
+                            tmp_product = op.mult(A.get_value_at(irow,kk), B.get_value_at(kk,icol));
+                            tmp_sum = op.add(tmp_sum, tmp_product);
+                        }
+                        C.set_value_at(irow, icol, tmp_sum);
                     }
-                    //setValueAt(C, irow, icol, accum(C.get_value_at(irow,icol), tmp_sum));
-                    C.set_value_at(irow, icol, tmp_sum);
                 }
             }
         }

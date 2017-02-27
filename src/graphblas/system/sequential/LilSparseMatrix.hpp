@@ -65,24 +65,45 @@ namespace GraphBLAS
             }
         }
         
+        // Constructor - from dense matrix, without implied zeros
+        LilSparseMatrix(std::vector<std::vector<ScalarT>> const &val,
+                        ScalarT const zero)
+            : m_num_rows(val.size()),
+              m_num_cols(val[0].size())
+        {
+            m_data.resize(m_num_rows);
+            m_nnz = 0;
+            for (IndexType ii = 0; ii < m_num_rows; ii++)
+            {
+                for (IndexType jj = 0; jj < m_num_cols; jj++)
+                {
+                    if (val[ii][jj] != zero)
+                    {
+                        m_data[ii].push_back(std::make_tuple(jj, val[ii][jj]));
+                        m_nnz = m_nnz + 1;
+                    }
+                }
+            }
+        }
+        
         // Destructor
         ~LilSparseMatrix()
         {}
         
         // Number of rows
-        void nrows(IndexType &num_rows)
+        void nrows(IndexType &num_rows) const
         {
             num_rows = m_num_rows;
         }
         
         // Number of columns
-        void ncols(IndexType &num_cols)
+        void ncols(IndexType &num_cols) const
         {
             num_cols = m_num_cols;
         }
         
         // Number of non-zeroes
-        IndexType get_nnz() const
+        IndexType nnz() const
         {
             return m_nnz;
         }
@@ -120,6 +141,7 @@ namespace GraphBLAS
             if (m_data[irow].empty())
             {
                 m_data[irow].push_back(std::make_tuple(icol, val));
+                m_nnz = m_nnz + 1;
             }
             else
             {
@@ -135,10 +157,12 @@ namespace GraphBLAS
                     else if (std::get<0>(*it) > icol)
                     {
                         m_data[irow].insert(it, std::make_tuple(icol, val));
+                        m_nnz = m_nnz + 1;
                         return;
                     }
                 }
                 m_data[irow].push_back(std::make_tuple(icol, val));
+                m_nnz = m_nnz + 1;
             }
         }
         
@@ -154,6 +178,7 @@ namespace GraphBLAS
             {
                 IndexType ind;
                 ScalarT val;
+                v.resize(0);
                 
                 for (auto tupl : m_data[irow])
                 {
@@ -173,6 +198,7 @@ namespace GraphBLAS
             
             IndexType ind;
             ScalarT val;
+            v.resize(0);
             
             for (IndexType ii = 0; ii < m_num_rows; ii++)
             {
@@ -204,25 +230,35 @@ namespace GraphBLAS
         bool operator==(LilSparseMatrix<ScalarT> const &rhs) const
         {
             if ((m_num_rows != rhs.m_num_rows) ||
-                (m_num_cols != rhs.m_num_cols))
+                (m_num_cols != rhs.m_num_cols) ||
+                (m_nnz != rhs.m_nnz))
             {
                 return false;
             }
-            
-            // Definitely a more efficient way than this.  Only compare
-            // non-zero elements.  Then decide if compare zero's
-            // explicitly
-            for (IndexType i = 0; i < m_num_rows; ++i)
+            IndexArrayType thisIndex;
+            IndexArrayType rhsIndex;
+            for (IndexType ii = 0; ii < m_num_rows; ii++)
             {
-                for (IndexType j = 0; j < m_num_cols; ++j)
+                getColumnIndices(ii, thisIndex);
+                rhs.getColumnIndices(ii, rhsIndex);
+                if (thisIndex != rhsIndex)
                 {
-                    if (get_value_at(i, j) != rhs.get_value_at(i, j))
+                    return false;
+                }
+                else
+                {
+                    if (thisIndex.empty())
                     {
-                        return false;
+                        for (IndexType jj = 0; jj < thisIndex.size(); jj++)
+                        {
+                            if (get_value_at(ii, thisIndex[jj]) != rhs.get_value_at(ii, thisIndex[jj]))
+                            {
+                                return false;
+                            }
+                        }
                     }
                 }
             }
-            
             return true;
         }
         
