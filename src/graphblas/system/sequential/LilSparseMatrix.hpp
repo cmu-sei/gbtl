@@ -18,6 +18,7 @@
 #include <iostream>
 #include <vector>
 #include <typeinfo>
+#include <stdexcept>
 
 namespace GraphBLAS
 {
@@ -118,8 +119,16 @@ namespace GraphBLAS
             }
             IndexType ind;
             ScalarT val;
-            
-            for (auto tupl : m_data[irow])		// Range-based loop, access by value
+            if (m_data.empty())
+            {
+                throw DimensionException("get_value_at: no entry at index");
+            }
+            if (m_data.at(irow).empty())
+            {
+                throw DimensionException("get_value_at: no entry at index");
+            }
+            //for (auto tupl : m_data[irow])		// Range-based loop, access by value
+            for (auto tupl : m_data.at(irow))		// Range-based loop, access by value
             {
                 std::tie(ind, val) = tupl;
                 if (ind == icol)
@@ -219,6 +228,22 @@ namespace GraphBLAS
                     }
                 }
             }
+        }
+        
+        // BACKWARDS COMPATIBILITY FUNCTIONS
+        IndexType get_nrows() const
+        {
+            return m_num_rows;
+        }
+        
+        IndexType get_ncols() const
+        {
+            return m_num_cols;
+        }
+        
+        IndexType get_nvals() const
+        {
+            return m_nnz;
         }
         
         // EQUALITY OPERATORS

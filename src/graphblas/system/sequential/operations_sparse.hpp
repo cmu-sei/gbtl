@@ -33,19 +33,20 @@
 #include <graphblas/system/sequential/NegateView.hpp>
 
 namespace GraphBLAS { namespace backend {
-    /**
-     *
-     */
-    template<typename AMatrixT,
-             typename BMatrixT,
-             typename CMatrixT,
-             typename SemiringT,
-             typename AccumT>
-    inline void mxm(AMatrixT const &A,
-                    BMatrixT const &B,
-                    CMatrixT       &C,
+
+    //****************************************************************************
+    //Matrix-Matrix multiply for LilSparseMatrix
+    //****************************************************************************
+    template<typename CMatrixT,
+    typename SemiringT,
+    typename AccumT,
+    typename AMatrixT,
+    typename BMatrixT>
+    inline void mxm(CMatrixT       &C,
+                    AccumT          accum,
                     SemiringT       op,
-                    AccumT          accum)
+                    AMatrixT const &A,
+                    BMatrixT const &B)
     {
         IndexType nrow_A, ncol_A;
         IndexType nrow_B, ncol_B;
@@ -87,7 +88,10 @@ namespace GraphBLAS { namespace backend {
             A.getColumnIndices(irow, indA[irow]);
             for (icol = 0; icol < ncol_C; icol++)
             {
-                B.getRowIndices(icol, indB[icol]);
+                if (irow == 0)
+                {
+                    B.getRowIndices(icol, indB[icol]);
+                }
                 if (!indA[irow].empty() && !indB[icol].empty())
                 {
                     ind_intersection.clear();
@@ -103,6 +107,7 @@ namespace GraphBLAS { namespace backend {
                             tmp_product = op.mult(A.get_value_at(irow,kk), B.get_value_at(kk,icol));
                             tmp_sum = op.add(tmp_sum, tmp_product);
                         }
+                        //C.set_value_at(irow, icol, accum(C.get_value_at(irow, icol), tmp_sum));
                         C.set_value_at(irow, icol, tmp_sum);
                     }
                 }
