@@ -20,32 +20,33 @@
 
 #include <graphblas/detail/config.hpp>
 #include <vector>
+#include <graphblas/system/sequential/BitmapSparseVector.hpp>
 
-namespace graphblas
+namespace GraphBLAS
 {
     namespace backend
     {
         //**********************************************************************
-        /// @note ignoring all tags here, std::vectors only.
+        /// @note ignoring all tags here, there is currently only one
+        ///       implementation of vector: dense+bitmap.
         template<typename ScalarT, typename... TagsT>
-        class Vector : public std::vector <ScalarT>
+        class Vector : public BitmapSparseVector<ScalarT>
         {
         private:
-            typedef typename std::vector <ScalarT> ParentVectorT;
+            typedef BitmapSparseVector<ScalarT> ParentVectorType;
+
         public:
             typedef ScalarT ScalarType;
 
-            Vector(): ParentVectorT(){};
+            Vector() = delete;
 
-            //use parent copy constructor:
-            //use parent constructor with num vals:
             template<typename OtherVectorT>
-            Vector(OtherVectorT const &vec)
-                : ParentVectorT(vec) {}
+            Vector(OtherVectorT const &vec) : ParentVectorType(vec) {}
 
-            template<typename SizeT>
-            Vector(SizeT const &count, ScalarT const &value)
-                : ParentVectorT(count, value) {}
+            Vector(IndexType nsize) : ParentVectorType(nsize) {}
+
+            Vector(IndexType const &nsize, ScalarT const &value)
+                : ParentVectorType(nsize, value) {}
         };
     }
 }

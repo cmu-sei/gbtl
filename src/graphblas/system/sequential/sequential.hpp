@@ -34,6 +34,9 @@
 
 #include <graphblas/system/sequential/operations.hpp>
 
+// NEW CLASSES
+
+#include <graphblas/system/sequential/BitmapSparseVector.hpp>
 #include <graphblas/system/sequential/LilSparseMatrix.hpp>
 #include <graphblas/system/sequential/operations_sparse.hpp>
 

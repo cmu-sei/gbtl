@@ -748,3 +748,183 @@ namespace graphblas
     };
 
 } // end namespace graphblas
+
+//****************************************************************************
+//****************************************************************************
+
+
+namespace GraphBLAS
+{
+    template<typename MatrixT>
+    class TransposeView;
+
+    //************************************************************************
+    template<typename MatrixT>
+    class ComplementView
+    {
+    public:
+        typedef typename backend::ComplementView<typename MatrixT::BackendType> BackendType;
+        typedef typename MatrixT::ScalarType ScalarType;
+
+        //note:
+        //the backend should be able to decide when to ignore any of the
+        //tags and/or arguments
+        ComplementView(BackendType backend_view)
+            : m_mat(backend_view)
+        {
+        }
+
+        /**
+         * @brief Copy constructor.
+         *
+         * @param[in] rhs   The matrix to copy.
+         */
+        ComplementView(ComplementView<MatrixT> const &rhs)
+            : m_mat(rhs.m_mat)
+        {
+        }
+
+        ~ComplementView() { }
+
+        //void get_shape(IndexType &num_rows, IndexType &num_cols) const
+        //{
+        //    m_mat.get_shape(num_rows, num_cols);
+        //}
+
+        IndexType get_nrows() const
+        {
+            return m_mat.get_nrows();
+        }
+
+        IndexType get_ncols() const
+        {
+            return m_mat.get_ncols();
+        }
+
+        IndexType get_nvals() const
+        {
+            return m_mat.get_nvals();
+        }
+
+        ScalarType get_value_at(IndexType row, IndexType col) const
+        {
+            return m_mat.get_value_at(row, col);
+        }
+
+        //other methods that may or may not belong here:
+        //
+        void print_info(std::ostream &os) const
+        {
+            os << "Frontend ComplementView of:";
+            m_mat.print_info(os);
+        }
+
+        /// @todo This does not need to be a friend
+        friend std::ostream &operator<<(std::ostream &os, ComplementView const &mat)
+        {
+            mat.print_info(os);
+            return os;
+        }
+
+        /// @todo need to change to mix and match internal types
+        template <typename OtherMatrixT>
+        bool operator==(OtherMatrixT const &rhs) const
+        {
+            //return (m_mat.operator==(rhs));
+            throw 1;
+            ///@todo Not implemented yet
+            //return matrix_equal_helper(*this, rhs);
+        }
+
+        template <typename OtherMatrixT>
+        bool operator!=(OtherMatrixT const &rhs) const
+        {
+            return !(*this == rhs);
+        }
+        //end other methods
+
+    private:
+        BackendType m_mat;
+
+        // PUT ALL FRIEND DECLARATIONS HERE
+    };
+
+    //************************************************************************
+    template<typename MatrixT>
+    class TransposeView
+    {
+    public:
+        typedef typename backend::TransposeView<
+            typename MatrixT::BackendType> BackendType;
+        typedef typename MatrixT::ScalarType ScalarType;
+
+        //note:
+        //the backend should be able to decide when to ignore any of the
+        //tags and/or arguments
+        TransposeView(BackendType backend_view)
+            : m_mat(backend_view)
+        {
+        }
+
+        /**
+         * @brief Copy constructor.
+         *
+         * @param[in] rhs   The matrix to copy.
+         */
+        TransposeView(TransposeView<MatrixT> const &rhs)
+            : m_mat(rhs.m_mat)
+        {
+        }
+
+
+        ~TransposeView() { }
+
+        IndexType get_nrows() const { return m_mat.get_nrows(); }
+        IndexType get_ncols() const { return m_mat.get_ncols(); }
+        IndexType get_nvals() const { return m_mat.get_nvals(); }
+
+        ScalarType get_value_at(IndexType row, IndexType col) const
+        {
+            return m_mat.get_value_at(row, col);
+        }
+
+        //other methods that may or may not belong here:
+        //
+        void print_info(std::ostream &os) const
+        {
+            os << "Frontend TransposeView of:" << std::endl;
+            m_mat.print_info(os);
+        }
+
+        /// @todo This does not need to be a friend
+        friend std::ostream &operator<<(std::ostream &os, TransposeView const &mat)
+        {
+            mat.print_info(os);
+            return os;
+        }
+
+        /// @todo need to change to mix and match internal types
+        template <typename OtherMatrixT>
+        bool operator==(OtherMatrixT const &rhs) const
+        {
+            //return (m_mat.operator==(rhs.m_mat));
+            throw 1;
+            ///@todo Not implemented yet
+            //return matrix_equal_helper(*this, rhs);
+        }
+
+        template <typename OtherMatrixT>
+        bool operator!=(OtherMatrixT const &rhs) const
+        {
+            return !(*this == rhs);
+        }
+        //end other methods
+
+
+    private:
+        BackendType m_mat;
+
+        // PUT ALL FRIEND DECLARATIONS HERE
+    };
+
+} // end namespace GraphBLAS

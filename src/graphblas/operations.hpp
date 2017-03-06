@@ -52,55 +52,40 @@ namespace GraphBLAS
      *        collection of tuples
      */
     template<typename CMatrixT,
-             typename MaskT,
-             typename AccumT,
              typename RAIteratorIT,
              typename RAIteratorJT,
              typename RAIteratorVT,
              typename BinaryOpT>
     inline void matrixBuild(CMatrixT           &C,
-                            MaskT        const &Mask,
-                            AccumT              accum,
                             RAIteratorIT        row_indices,
                             RAIteratorJT        col_indices,
                             RAIteratorVT        values,
                             IndexType           num_vals,
-                            BinaryOpT           dup,
-                            bool                replace_flag = false);
+                            BinaryOpT           dup);
 
 
     template<typename CMatrixT,
-             typename MaskT,
-             typename AccumT,
              typename ValueT,
              typename BinaryOpT>
     inline void matrixBuild(CMatrixT                   &C,
-                            MaskT                const &Mask,
-                            AccumT                      accum,
                             IndexArrayType       const &row_indices,
                             IndexArrayType       const &col_indices,
                             std::vector<ValueT>  const &values,
-                            BinaryOpT                   dup,
-                            bool                        replace_flag = false);
+                            BinaryOpT                   dup);
 
     /**
      * @brief Populate a Vector with stored values at specified locations from a
      *        collection of tuples
      */
     template<typename WVectorT,
-             typename MaskT,
-             typename AccumT,
              typename RAIteratorIT,
              typename RAIteratorVT,
              typename BinaryOpT>
     inline void vectorBuild(WVectorT           &w,
-                            MaskT        const &mask,
-                            AccumT              accum,
                             RAIteratorIT        indices,
                             RAIteratorVT        values,
                             IndexType           numVals,
-                            BinaryOpT           dup,
-                            bool                replace_flag = false);
+                            BinaryOpT           dup);
 
     template<typename WVectorT,
              typename MaskT,
@@ -108,12 +93,9 @@ namespace GraphBLAS
              typename ValueT,
              typename BinaryOpT>
     inline void vectorBuild(WVectorT                   &w,
-                            MaskT                const &mask,
-                            AccumT                      accum,
                             IndexArrayType       const &indices,
                             std::vector<ValueT>  const &values,
-                            BinaryOpT                   dup,
-                            bool                        replace_flag = false);
+                            BinaryOpT                   dup);
 
     /**
      * @brief Output (row, col, value) tuples from Matrix as three vectors.
@@ -121,23 +103,19 @@ namespace GraphBLAS
     template<typename RAIteratorIT,
              typename RAIteratorJT,
              typename RAIteratorVT,
-             typename AMatrixT,
-             typename MaskT>
+             typename AMatrixT>
     inline void matrixExtract(RAIteratorIT        row_indices,
                               RAIteratorJT        col_indices,
                               RAIteratorVT        values,
                               AMatrixT     const &A,
-                              MaskT        const &Mask,
                               std::string        &err);
 
     template<typename ValueT,
-             typename AMatrixT,
-             typename MaskT>
+             typename AMatrixT>
     inline void matrixExtract(IndexArrayType            &row_indices,
                               IndexArrayType            &col_indices,
                               std::vector<ValueT>       &values,
                               AMatrixT            const &A,
-                              MaskT               const &Mask,
                               std::string               &err);
 
     /**
@@ -145,27 +123,22 @@ namespace GraphBLAS
      */
     template<typename RAIteratorIT,
              typename RAIteratorVT,
-             typename WVectorT,
-             typename MaskT>
+             typename WVectorT>
     inline void vectorExtract(RAIteratorIT        indices,
                               RAIteratorVT        values,
                               WVectorT     const &w,
-                              MaskT        const &mask,
                               std::string        &err);
 
     template<typename ValueT,
-             typename WVectorT,
-             typename MaskT>
+             typename WVectorT>
     inline void vectorExtract(IndexArrayType            &indices,
                               std::vector<ValueT>       &values,
                               WVectorT            const &w,
-                              MaskT               const &mask,
                               std::string               &err);
 
     //****************************************************************************
     // mxm, vxm, mxv
     //****************************************************************************
-
     template<typename CMatrixT,
              typename MaskT,
              typename AccumT,
@@ -178,7 +151,7 @@ namespace GraphBLAS
                     SemiringT         op,
                     AMatrixT   const &A,
                     BMatrixT   const &B,
-                    bool              replace_flag);
+                    bool              replace_flag = false);
 
     template<typename WVectorT,
              typename MaskT,
@@ -192,7 +165,7 @@ namespace GraphBLAS
                     SemiringT         op,
                     UVectorT   const &u,
                     AMatrixT   const &A,
-                    bool              replace_flag);
+                    bool              replace_flag = false);
 
     template<typename WVectorT,
              typename MaskT,
@@ -206,7 +179,7 @@ namespace GraphBLAS
                     SemiringT        op,
                     AMatrixT  const &A,
                     UVectorT  const &u,
-                    bool             replace_flag);
+                    bool             replace_flag = false);
 
     //****************************************************************************
     // eWiseAdd and eWiseMult
@@ -214,7 +187,7 @@ namespace GraphBLAS
     template<typename WVectorT,
              typename MaskT,
              typename AccumT,
-             typename BinaryOpT,  //can be monoid or binaryop (Semiring not supported)
+             typename BinaryOpT,  //can be monoid or binaryop (not Semiring)
              typename UVectorT,
              typename VVectorT>
     inline void eWiseMult(WVectorT        &w,
@@ -223,13 +196,13 @@ namespace GraphBLAS
                           BinaryOpT        op,
                           UVectorT  const &u,
                           VVectorT  const &v,
-                          bool             replace_flag);
+                          bool             replace_flag = false);
 
     /// @todo no way to distinguish between vector and matrix variants
     template<typename CMatrixT,
              typename MaskT,
              typename AccumT,
-             typename BinaryOpT,  //can be monoid or binaryop (Semiring not supported)
+             typename BinaryOpT,  //can be monoid or binaryop (not Semiring)
              typename AMatrixT,
              typename BMatrixT>
     inline void eWiseMult(CMatrixT         &C,
@@ -238,7 +211,7 @@ namespace GraphBLAS
                           BinaryOpT         op,
                           AMatrixT   const &A,
                           BMatrixT   const &B,
-                          bool              replace_flag);
+                          bool              replace_flag = false);
 
     /**
      * @brief Perform an element wise binary operation that can be optimized
@@ -247,7 +220,7 @@ namespace GraphBLAS
     template<typename WVectorT,
              typename MaskT,
              typename AccumT,
-             typename BinaryOpT,  //can be monoid or binaryop (Semiring not supported)
+             typename BinaryOpT,  //can be monoid or binaryop (not Semiring)
              typename UVectorT,
              typename VVectorT>
     inline void eWiseAdd(WVectorT         &w,
@@ -256,7 +229,7 @@ namespace GraphBLAS
                          BinaryOpT         op,
                          UVectorT   const &u,
                          VVectorT   const &v,
-                         bool              replace_flag);
+                         bool              replace_flag = false);
 
     /// @todo no way to distinguish between vector and matrix variants
     template<typename CMatrixT,
@@ -271,7 +244,7 @@ namespace GraphBLAS
                          BinaryOpT         op,
                          AMatrixT   const &A,
                          BMatrixT   const &B,
-                         bool              replace_flag);
+                         bool              replace_flag = false);
 
     //****************************************************************************
     // Extract
@@ -647,7 +620,7 @@ namespace GraphBLAS
                           MaskT    const &Mask,
                           AccumT          accum,
                           AMatrixT const &A,
-                          bool            replace_flag);
+                          bool            replace_flag = false);
 
 
     //****************************************************************************
