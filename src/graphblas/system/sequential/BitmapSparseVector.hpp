@@ -104,9 +104,9 @@ namespace GraphBLAS
          * @deprecated Use vectorBuild method
          */
         BitmapSparseVector(
-            IndexType                                   nsize,
-            std::vector<std::vector<IndexType> > const &indices,
-            std::vector<std::vector<ScalarT> >   const &values)
+            IndexType                     nsize,
+            std::vector<IndexType> const &indices,
+            std::vector<ScalarT>   const &values)
             : m_size(nsize),
               m_nvals(0),
               m_vals(nsize),
@@ -118,7 +118,7 @@ namespace GraphBLAS
                 IndexType i = indices[idx];
                 if (i >= m_size)
                 {
-                    throw DimensionException();
+                    throw DimensionException();  // Should this be IndexOutOfBounds?
                 }
 
                 m_vals[i] = values[idx];

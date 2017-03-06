@@ -84,59 +84,80 @@ BOOST_AUTO_TEST_CASE(test_sparse_construction_from_dense)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_copy_construction_equality_operator)
 {
-    std::vector<double> vec = {6, 0, 0, 4, 7, 0, 9, 4};
+    double zero(0);
+    std::vector<double> vec = {6, zero, zero, 4, 7, zero, 9, 4};
 
-    GraphBLAS::BitmapSparseVector<double> v1(vec, 0);
+    GraphBLAS::BitmapSparseVector<double> v1(vec, zero);
 
     GraphBLAS::BitmapSparseVector<double> v2(v1);
 
     BOOST_CHECK_EQUAL(v1, v2);
 }
 
-#if 0
-
 //****************************************************************************
-// Assignment to empty location
-BOOST_AUTO_TEST_CASE(lil_test_assign_to_implied_zero)
+BOOST_AUTO_TEST_CASE(test_access_novalue_in_non_empty_vector)
 {
-    std::vector<std::vector<double>> mat = {{6, 0, 0, 4},
-                                            {7, 0, 0, 0},
-                                            {0, 0, 9, 4},
-                                            {2, 5, 0, 3},
-                                            {2, 0, 0, 1},
-                                            {0, 0, 0, 0},
-                                            {0, 1, 0, 2}};
+    std::vector<double> vec = {6, 0, 0, 4, 7, 0, 9, 4};
 
-    GraphBLAS::BitmapSparseVector<double> m1(mat, 0);
+    GraphBLAS::BitmapSparseVector<double> v1(vec, 0);
 
-    mat[0][1] = 8;
-    m1.set_value_at(0, 1, 8);
-    BOOST_CHECK_EQUAL(m1.get_value_at(0, 1), mat[0][1]);
-
-    GraphBLAS::BitmapSparseVector<double> m2(mat, 0);
-    BOOST_CHECK_EQUAL(m1, m2);
+    BOOST_CHECK_EQUAL(v1.get_nvals(), 5);
+    BOOST_CHECK_THROW(v1.get_value_at(1), NoValueException);
 }
 
 //****************************************************************************
-// Assignment to a location with a previous value
-BOOST_AUTO_TEST_CASE(lil_test_assign_to_nonzero_element)
+BOOST_AUTO_TEST_CASE(test_assign_to_implied_zero_and_stored_value)
 {
-    std::vector<std::vector<double>> mat = {{6, 0, 0, 4},
-                                            {7, 0, 0, 0},
-                                            {0, 0, 9, 4},
-                                            {2, 5, 0, 3},
-                                            {2, 0, 0, 1},
-                                            {0, 0, 0, 0},
-                                            {0, 1, 0, 2}};
+    double zero(0);
+    std::vector<double> vec = {6, zero, zero, 4, 7, zero, 9, 4};
 
-    GraphBLAS::BitmapSparseVector<double> m1(mat, 0);
+    GraphBLAS::BitmapSparseVector<double> v1(vec, zero);
 
-    mat[0][0] = 8;
-    m1.set_value_at(0, 0, 8);
-    BOOST_CHECK_EQUAL(m1.get_value_at(0, 0), mat[0][0]);
+    v1.set_value_at(1, 2.);
 
-    GraphBLAS::BitmapSparseVector<double> m2(mat, 0);
-    BOOST_CHECK_EQUAL(m1, m2);
+    GraphBLAS::BitmapSparseVector<double> v2(vec, zero);
+    BOOST_CHECK(v1 != v2);
+
+    v2.set_value_at(1, 3.);
+    BOOST_CHECK(v1 != v2);
+
+    v2.set_value_at(1, 2.);
+    BOOST_CHECK_EQUAL(v1, v2);
 }
-#endif
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_index_array_constrution)
+{
+    double zero(0);
+    std::vector<double> vec = {6, zero, zero, 4, 7, zero, 9, 4};
+
+    GraphBLAS::BitmapSparseVector<double> v1(vec, zero);
+
+    std::vector<IndexType> indices = {0, 3, 4, 6, 7};
+    std::vector<double>    values  = {6 ,4, 7, 9, 4};
+
+    GraphBLAS::BitmapSparseVector<double> v2(8, indices, values);
+    BOOST_CHECK_EQUAL(v1, v2);
+
+    GraphBLAS::BitmapSparseVector<double> v3(9, indices, values);
+    BOOST_CHECK(v1 != v3);
+
+    BOOST_CHECK_THROW(GraphBLAS::BitmapSparseVector<double>(7, indices, values),
+                      DimensionException);
+    BOOST_CHECK_EQUAL(v1, v2);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_assignment)
+{
+    std::vector<IndexType> indices = {0, 3, 4, 6, 7};
+    std::vector<double>    values  = {6 ,4, 7, 9, 4};
+
+    GraphBLAS::BitmapSparseVector<double> v1(8, indices, values);
+    GraphBLAS::BitmapSparseVector<double> v2(8);
+
+    v2 = v1;
+    BOOST_CHECK_EQUAL(v1, v2);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
