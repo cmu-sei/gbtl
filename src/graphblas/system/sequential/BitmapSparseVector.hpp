@@ -147,16 +147,23 @@ namespace GraphBLAS
 
         ~BitmapSparseVector() {}
 
+        void clear()
+        {
+            m_nvals = 0;
+            //m_vals.clear();
+            m_bitmap.assign(m_size, false);
+        }
+
         /**
          * @todo need to handle duplicate locations.
          */
         template<typename RAIteratorIT,
                  typename RAIteratorVT,
                  typename BinaryOpT = GraphBLAS::Second<ScalarType> >
-        void vectorBuild(RAIteratorIT  i_it,
-                         RAIteratorVT  v_it,
-                         IndexType     nvals,
-                         BinaryOpT     dup = BinaryOpT())
+        void build(RAIteratorIT  i_it,
+                   RAIteratorVT  v_it,
+                   IndexType     nvals,
+                   BinaryOpT     dup = BinaryOpT())
         {
             std::vector<ScalarType> vals(m_size);
             std::vector<bool> bitmap(m_size);
@@ -248,6 +255,20 @@ namespace GraphBLAS
         IndexType get_nvals() const
         {
             return m_nvals;
+        }
+
+        IndexArrayType get_indices() const
+        {
+            IndexArrayType indices;
+            indices.reserve(m_nvals);
+            for (IndexType idx = 0; idx < m_size; ++idx)
+            {
+                if (m_bitmap[idx])
+                {
+                    indices.push_back(idx);
+                }
+            }
+            return indices;
         }
 
         // EQUALITY OPERATORS
@@ -347,14 +368,14 @@ namespace GraphBLAS
             {
                 if (m_bitmap[idx])
                 {
-                    os << ", -";
+                    os << ", " << m_vals[idx];
                 }
                 else
                 {
-                    os << ", " << m_vals[idx];
+                    os << ", -";
                 }
-                os << std::endl;
             }
+            os << std::endl;
         }
 
         friend std::ostream &operator<<(std::ostream             &os,

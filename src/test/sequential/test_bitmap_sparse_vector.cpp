@@ -160,4 +160,36 @@ BOOST_AUTO_TEST_CASE(test_assignment)
     BOOST_CHECK_EQUAL(v1, v2);
 }
 
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_mxv_sparse_nomask_noaccum)
+{
+    std::vector<std::vector<double>> mat = {{0, 0, 0, 0},
+                                            {0, 0, 0, 4},
+                                            {0, 0, 9, 0},
+                                            {0, 0, 5, 3},
+                                            {0, 2, 0, 0},
+                                            {0, 3, 0, 1},
+                                            {0, 3, 3, 0},
+                                            {0, 1, 4, 2},
+                                            {6, 0, 0, 0},
+                                            {6, 0, 0, 2},
+                                            {6, 0, 4, 0},
+                                            {6, 0, 4, 2},
+                                            {6, 1, 0, 0},
+                                            {6, 1, 0, 2},
+                                            {6, 1, 4, 0},
+                                            {6, 1, 4, 2}};
+    GraphBLAS::LilSparseMatrix<double> m1(mat, 0);
+
+    std::vector<double> vec = {6, 0, 0, 4};
+    GraphBLAS::BitmapSparseVector<double> v1(vec, 0);
+
+    GraphBLAS::BitmapSparseVector<double> w(16), mask(16);
+
+    GraphBLAS::backend::mxv(w, mask, GraphBLAS::Second<double>(),
+                            GraphBLAS::ArithmeticSemiring<double>(),
+                            m1, v1, true);
+    w.print_info(std::cerr);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

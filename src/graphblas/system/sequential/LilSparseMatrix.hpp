@@ -3,9 +3,9 @@
  * All Rights Reserved.
  *
  * THIS SOFTWARE IS PROVIDED "AS IS," WITH NO WARRANTIES WHATSOEVER. CARNEGIE
- * MELLON UNIVERSITY EXPRESSLY DISCLAIMS TO THE FULLEST EXTENT PERMITTED BY 
- * LAW ALL EXPRESS, IMPLIED, AND STATUTORY WARRANTIES, INCLUDING, WITHOUT 
- * LIMITATION, THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
+ * MELLON UNIVERSITY EXPRESSLY DISCLAIMS TO THE FULLEST EXTENT PERMITTED BY
+ * LAW ALL EXPRESS, IMPLIED, AND STATUTORY WARRANTIES, INCLUDING, WITHOUT
+ * LIMITATION, THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
  * PURPOSE, AND NON-INFRINGEMENT OF PROPRIETARY RIGHTS.
  *
  * This Program is distributed under a BSD license.  Please see LICENSE file or
@@ -27,7 +27,7 @@ namespace GraphBLAS
     {
     public:
         typedef ScalarT ScalarType;
-        
+
         // Constructor
         LilSparseMatrix(IndexType num_rows,
                         IndexType num_cols)
@@ -36,7 +36,7 @@ namespace GraphBLAS
             m_data.resize(m_num_rows);
             m_nnz = 0;
         }
-        
+
         // Constructor - copy
         LilSparseMatrix(LilSparseMatrix<ScalarT> const &rhs)
         {
@@ -48,7 +48,7 @@ namespace GraphBLAS
                 m_data = rhs.m_data;
             }
         }
-        
+
         // Constructor - from dense matrix
         LilSparseMatrix(std::vector<std::vector<ScalarT>> const &val)
             : m_num_rows(val.size()),
@@ -65,7 +65,7 @@ namespace GraphBLAS
                 }
             }
         }
-        
+
         // Constructor - from dense matrix, without implied zeros
         LilSparseMatrix(std::vector<std::vector<ScalarT>> const &val,
                         ScalarT const zero)
@@ -86,29 +86,29 @@ namespace GraphBLAS
                 }
             }
         }
-        
+
         // Destructor
         ~LilSparseMatrix()
         {}
-        
+
         // Number of rows
         void nrows(IndexType &num_rows) const
         {
             num_rows = m_num_rows;
         }
-        
+
         // Number of columns
         void ncols(IndexType &num_cols) const
         {
             num_cols = m_num_cols;
         }
-        
+
         // Number of non-zeroes
         IndexType nnz() const
         {
             return m_nnz;
         }
-        
+
         // Get value at index
         ScalarT get_value_at(IndexType irow,
                              IndexType icol) const
@@ -138,7 +138,7 @@ namespace GraphBLAS
             }
             throw DimensionException("get_value_at: no entry at index");
         }
-        
+
         // Set value at index
         void set_value_at(IndexType irow, IndexType icol, ScalarT const &val)
         {
@@ -146,7 +146,7 @@ namespace GraphBLAS
             {
                 throw DimensionException("set_value_at: index out of bounds");
             }
-            
+
             if (m_data[irow].empty())
             {
                 m_data[irow].push_back(std::make_tuple(icol, val));
@@ -174,7 +174,7 @@ namespace GraphBLAS
                 m_nnz = m_nnz + 1;
             }
         }
-        
+
         // Get column indices for a given row
         void getColumnIndices(IndexType irow, IndexArrayType &v) const
         {
@@ -182,13 +182,13 @@ namespace GraphBLAS
             {
                 throw DimensionException("getColumnIndices: index out of bounds");
             }
-            
+
             if (!m_data[irow].empty())
             {
                 IndexType ind;
                 ScalarT val;
                 v.resize(0);
-                
+
                 for (auto tupl : m_data[irow])
                 {
                     std::tie(ind, val) = tupl;
@@ -196,7 +196,13 @@ namespace GraphBLAS
                 }
             }
         }
-        
+
+        std::vector<std::tuple<IndexType, ScalarT> > const &get_row(
+            IndexType row_index) const
+        {
+            return m_data[row_index];
+        }
+
         // Get row indices for a given column
         void getRowIndices(IndexType icol, IndexArrayType &v) const
         {
@@ -204,11 +210,11 @@ namespace GraphBLAS
             {
                 throw DimensionException("getRowIndices: index out of bounds");
             }
-            
+
             IndexType ind;
             ScalarT val;
             v.resize(0);
-            
+
             for (IndexType ii = 0; ii < m_num_rows; ii++)
             {
                 if (!m_data[ii].empty())
@@ -229,23 +235,23 @@ namespace GraphBLAS
                 }
             }
         }
-        
+
         // BACKWARDS COMPATIBILITY FUNCTIONS
         IndexType get_nrows() const
         {
             return m_num_rows;
         }
-        
+
         IndexType get_ncols() const
         {
             return m_num_cols;
         }
-        
+
         IndexType get_nvals() const
         {
             return m_nnz;
         }
-        
+
         // EQUALITY OPERATORS
         /**
          * @brief Equality testing for LilMatrix.
@@ -286,7 +292,7 @@ namespace GraphBLAS
             }
             return true;
         }
-        
+
         /**
          * @brief Inequality testing for LilMatrix.
          * @param rhs The right hand side of the inequality operation.
@@ -296,7 +302,7 @@ namespace GraphBLAS
         {
             return !(*this == rhs);
         }
-        
+
         // output specific to the storage layout of this type of matrix
         void print_info(std::ostream &os) const
         {
@@ -317,23 +323,23 @@ namespace GraphBLAS
                 os << std::endl;
             }
         }
-        
+
         friend std::ostream &operator<<(std::ostream             &os,
                                         LilSparseMatrix<ScalarT> const &mat)
         {
             mat.print_info(os);
             return os;
         }
-    
+
     private:
         IndexType m_num_rows;    // Number of rows
         IndexType m_num_cols;    // Number of columns
         IndexType m_nnz;  // Number of non-zero values
-        
+
         // List-of-lists storage (LIL)
         std::vector<std::vector<std::tuple<IndexType, ScalarT>>> m_data;
     };
-    
+
 
 }
 
