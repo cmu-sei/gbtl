@@ -32,6 +32,131 @@
 #include <graphblas/system/sequential/TransposeView.hpp>
 #include <graphblas/system/sequential/NegateView.hpp>
 
+//****************************************************************************
+namespace {
+    /// Perform the dot product of a row of a matrix with a sparse vector without
+    /// pulling the indices out of the vector first.
+    template <typename D1, typename D2, typename D3, typename SemiringT>
+    bool dot(D3                                                      &ans,
+             std::vector<std::tuple<GraphBLAS::IndexType,D1> > const &A_row,
+             std::vector<bool>                                 const &u_bitmap,
+             std::vector<D2>                                   const &u_vals,
+             GraphBLAS::IndexType                                     u_nvals,
+             SemiringT                                                op)
+    {
+        bool value_set(false);
+        ans = op.zero();
+
+        if ((u_nvals == 0) || A_row.empty())
+        {
+            return value_set;
+        }
+
+        // find first stored value in u
+        GraphBLAS::IndexType u_idx(0);
+        while (!u_bitmap[u_idx]) ++u_idx; // skip unstored elements
+
+        // pull first value out of the row
+        auto A_iter = A_row.begin();
+        D1 a_val;
+        GraphBLAS::IndexType a_idx;
+
+        // loop through both ordered sets to compute sparse dot prod
+        while ((A_iter != A_row.end()) && (u_idx < u_vals.size()))
+        {
+            std::tie(a_idx, a_val) = *A_iter;
+            //std::cerr << "Examine u index = " << u_idx << "," << u_vals[u_idx]
+            //          << ", A col_idx = " << a_idx << "," << a_val << std::endl;
+
+            if (u_idx == a_idx)
+            {
+                //std::cerr << ans << " + "  << a_val << " * "  << u_vals[u_idx]
+                //          << " = " << op.mult(a_val, u_vals[u_idx]) << std::endl;
+
+                ans = op.add(ans, op.mult(a_val, u_vals[u_idx]));
+                value_set = true;
+
+                //std::cerr << "Equal, mutliply_accum, ans = " << ans << std::endl;
+
+                do { ++u_idx; } while ((u_idx < u_vals.size()) && !u_bitmap[u_idx]);
+                ++A_iter;
+            }
+            else if (u_idx > a_idx)
+            {
+                //std::cerr << "Advancing A_iter" << std::endl;
+                ++A_iter;
+            }
+            else
+            {
+                //std::cerr << "Advancing u_iter" << std::endl;
+                do { ++u_idx; } while ((u_idx < u_vals.size()) && !u_bitmap[u_idx]);
+            }
+        }
+
+        return value_set;
+    }
+
+    //************************************************************************
+    /// A dot product with elements extracted from vector
+    template <typename D1, typename D2, typename D3, typename SemiringT>
+    bool dot(D3                                                      &ans,
+             std::vector<std::tuple<GraphBLAS::IndexType,D1> > const &A_row,
+             std::vector<std::tuple<GraphBLAS::IndexType,D2> > const &u_contents,
+             SemiringT                                                op)
+    {
+        bool value_set(false);
+        ans = op.zero();
+
+        if (u_contents.empty() || A_row.empty())
+        {
+            return value_set;
+        }
+
+        auto A_iter = A_row.begin();
+        auto u_iter = u_contents.begin();
+
+        // pull first value out of the row
+        D1 a_val;
+        D2 u_val;
+        GraphBLAS::IndexType a_idx, u_idx;
+
+        // loop through both ordered sets to compute sparse dot prod
+        while ((A_iter != A_row.end()) &&
+               (u_iter != u_contents.end()))
+        {
+            std::tie(a_idx, a_val) = *A_iter;
+            std::tie(u_idx, u_val) = *u_iter;
+
+            //std::cerr << "Examine u idx,val = " << u_idx << "," << u_val
+            //          << "; A col_idx,val = " << a_idx << "," << a_val << std::endl;
+
+            if (u_idx == a_idx)
+            {
+                //std::cerr << ans << " + " << a_val << " * " << u_val << " = ";
+                ans = op.add(ans, op.mult(a_val, u_val));
+                value_set = true;
+                //std::cerr << ans << std::endl;
+
+                ++u_iter;
+                ++A_iter;
+            }
+            else if (u_idx > a_idx)
+            {
+                //std::cerr << "Advancing A_iter" << std::endl;
+                ++A_iter;
+            }
+            else
+            {
+                //std::cerr << "Advancing u_iter" << std::endl;
+                ++u_iter;
+            }
+        }
+
+        return value_set;
+    }
+}
+
+//****************************************************************************
 namespace GraphBLAS {
     namespace backend {
 
@@ -70,82 +195,51 @@ namespace GraphBLAS {
 
             if (u.get_nvals() > 0)
             {
-                IndexArrayType u_indices(u.get_indices());
-
-                //**************************************************************
-
-                IndexArrayType A_indices;
-
-                for (IndexType row_idx = 0; row_idx < num_elts; ++row_idx)
+                /// @todo need a heuristic for switching between two modes
+                if (u.get_size()/u.get_nvals() >= 4)
                 {
-                    std::cerr << "***** PROCESSING MATRIX ROW " << row_idx << " *****" << std::endl;
-                    ARowType const &A_row(A.get_row(row_idx));
-
-                    if (!A_row.empty())
+                    auto u_contents(u.get_contents());
+                    for (IndexType row_idx = 0; row_idx < num_elts; ++row_idx)
                     {
-                        bool value_set = false;
-                        WScalarType tmp_sum = op.zero();
+                        //std::cerr << "**1** PROCESSING MATRIX ROW " << row_idx
+                        //          << " *****" << std::endl;
+                        ARowType const &A_row(A.get_row(row_idx));
 
-                        typename ARowType::const_iterator A_iter = A_row.begin();
-                        IndexArrayType::const_iterator    u_iter = u_indices.begin();
-
-                        // pull first value out of the row
-                        AScalarType a_val;
-                        IndexType a_idx;
-                        std::tie(a_idx, a_val) = *A_iter;
-
-                        // loop through both ordered sets to compute sparse dot prod
-                        while ((A_iter != A_row.end()) && (u_iter != u_indices.end()))
+                        if (!A_row.empty())
                         {
-                            std::cerr << "Examine u index = " << *u_iter
-                                      << "," << u.get_value_at(*u_iter)
-                                      << ", A col_idx = "
-                                      << a_idx << "," << a_val << std::endl;
-
-                            if (*u_iter == a_idx)
+                            WScalarType w_val;
+                            if (dot(w_val, A_row, u_contents, op))
                             {
-                                std::cerr << tmp_sum << " + "
-                                          << a_val << " * " << u.get_value_at(*u_iter)
-                                          << " = "
-                                          << op.mult(a_val, u.get_value_at(*u_iter))
-                                          << std::endl;
-                                tmp_sum = op.add(tmp_sum,
-                                                 op.mult(a_val,
-                                                         u.get_value_at(*u_iter)));
-                                value_set = true;
-                                std::cerr << "Equal, mutliply_accum, tmp_sum = "
-                                          << tmp_sum << std::endl;
-                                ++u_iter;
-                                ++A_iter;
-                                std::tie(a_idx, a_val) = *A_iter;
+                                w_indices.push_back(row_idx);
+                                w_values.push_back(w_val);
                             }
-                            else if (*u_iter > a_idx)
-                            {
-                                std::cerr << "Advancing A_iter" << std::endl;
-                                ++A_iter;
-                                std::tie(a_idx, a_val) = *A_iter;
-                            }
-                            else
-                            {
-                                std::cerr << "Advancing u_iter" << std::endl;
-                                ++u_iter;
-                            }
-                        }
-
-                        if (value_set)
-                        {
-                            std::cerr << "Pushing idx,val: " << row_idx << "," << tmp_sum
-                                      << std::endl;
-                            w_values.push_back(tmp_sum);
-                            w_indices.push_back(row_idx);
                         }
                     }
-                    else
+                }
+                else
+                {
+                    std::vector<bool> const &u_bitmap(u.get_bitmap());
+                    std::vector<UScalarType> const &u_values(u.get_vals());
+
+                    for (IndexType row_idx = 0; row_idx < num_elts; ++row_idx)
                     {
-                        std::cerr << "A row empty." << std::endl;
+                        //std::cerr << "**2** PROCESSING MATRIX ROW " << row_idx
+                        //          << " *****" << std::endl;
+                        ARowType const &A_row(A.get_row(row_idx));
+
+                        if (!A_row.empty())
+                        {
+                            WScalarType w_val;
+                            if (dot(w_val, A_row, u_bitmap, u_values, u.get_nvals(), op))
+                            {
+                                w_indices.push_back(row_idx);
+                                w_values.push_back(w_val);
+                            }
+                        }
                     }
                 }
             }
+
             // accum here
             // mask here
             // store in w

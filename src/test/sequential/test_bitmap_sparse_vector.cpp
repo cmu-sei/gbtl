@@ -189,6 +189,11 @@ BOOST_AUTO_TEST_CASE(test_mxv_sparse_nomask_noaccum)
     GraphBLAS::backend::mxv(w, mask, GraphBLAS::Second<double>(),
                             GraphBLAS::ArithmeticSemiring<double>(),
                             m1, v1, true);
+
+    std::vector<double> answer = { 0, 16,  0, 12,  0,  4,  0,  8,
+                                  36, 44, 36, 44, 36, 44, 36, 44};
+    GraphBLAS::BitmapSparseVector<double> ans(answer, 0);
+    BOOST_CHECK_EQUAL(ans, w);
     w.print_info(std::cerr);
 }
 

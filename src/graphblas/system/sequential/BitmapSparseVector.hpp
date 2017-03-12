@@ -257,20 +257,6 @@ namespace GraphBLAS
             return m_nvals;
         }
 
-        IndexArrayType get_indices() const
-        {
-            IndexArrayType indices;
-            indices.reserve(m_nvals);
-            for (IndexType idx = 0; idx < m_size; ++idx)
-            {
-                if (m_bitmap[idx])
-                {
-                    indices.push_back(idx);
-                }
-            }
-            return indices;
-        }
-
         // EQUALITY OPERATORS
         /**
          * @brief Equality testing for BitmapSparseVector.
@@ -364,18 +350,13 @@ namespace GraphBLAS
             os << "BitmapSparseVector<" << typeid(ScalarT).name() << ">" << std::endl;
             os << "size  = " << get_size()  << std::endl;
             os << "nvals = " << get_nvals() << std::endl;
-            for (IndexType idx = 0; idx < m_size; ++idx)
+            os << "contents: [";
+            if (m_bitmap[0]) os << m_vals[0]; else os << "-";
+            for (IndexType idx = 1; idx < m_size; ++idx)
             {
-                if (m_bitmap[idx])
-                {
-                    os << ", " << m_vals[idx];
-                }
-                else
-                {
-                    os << ", -";
-                }
+                if (m_bitmap[idx]) os << ", " << m_vals[idx]; else os << ", -";
             }
-            os << std::endl;
+            os << "]" << std::endl;
         }
 
         friend std::ostream &operator<<(std::ostream             &os,
@@ -384,6 +365,24 @@ namespace GraphBLAS
             mat.print_info(os);
             return os;
         }
+
+        std::vector<bool> const &get_bitmap() const { return m_bitmap; }
+        std::vector<ScalarT> const &get_vals() const { return m_vals; }
+
+        std::vector<std::tuple<IndexType,ScalarT> > get_contents() const
+        {
+            std::vector<std::tuple<IndexType,ScalarT> > contents;
+            contents.reserve(m_nvals);
+            for (IndexType idx = 0; idx < m_size; ++idx)
+            {
+                if (m_bitmap[idx])
+                {
+                    contents.push_back(std::make_tuple(idx, m_vals[idx]));
+                }
+            }
+            return contents;
+        }
+
 
     private:
         IndexType             m_size;
