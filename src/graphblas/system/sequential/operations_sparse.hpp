@@ -107,8 +107,15 @@ namespace GraphBLAS { namespace backend {
                             tmp_product = op.mult(A.get_value_at(irow,kk), B.get_value_at(kk,icol));
                             tmp_sum = op.add(tmp_sum, tmp_product);
                         }
+                        try {
+                            std::cout << "\nTry";
+                            C.set_value_at(irow, icol, accum(C.get_value_at(irow, icol), tmp_sum));
+                        } catch (int e) {
+                            std::cout << "\nCatch";
+                            C.set_value_at(irow, icol, tmp_sum);
+                        }
                         //C.set_value_at(irow, icol, accum(C.get_value_at(irow, icol), tmp_sum));
-                        C.set_value_at(irow, icol, tmp_sum);
+                        //C.set_value_at(irow, icol, tmp_sum);
                     }
                 }
             }

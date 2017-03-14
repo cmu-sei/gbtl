@@ -125,7 +125,9 @@ namespace GraphBLAS
             }
             if (m_data.at(irow).empty())
             {
-                throw DimensionException("get_value_at: no entry at index");
+                std::cout << "\nEmpty!";
+                throw 999;
+                //throw DimensionException("get_value_at: no entry at index");
             }
             //for (auto tupl : m_data[irow])		// Range-based loop, access by value
             for (auto tupl : m_data.at(irow))		// Range-based loop, access by value
