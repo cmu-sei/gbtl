@@ -199,6 +199,7 @@ namespace GraphBLAS
                           bool             replace_flag = false);
 
     /// @todo no way to distinguish between vector and matrix variants
+    /*
     template<typename CMatrixT,
              typename MaskT,
              typename AccumT,
@@ -212,6 +213,7 @@ namespace GraphBLAS
                           AMatrixT   const &A,
                           BMatrixT   const &B,
                           bool              replace_flag = false);
+    */
 
     /**
      * @brief Perform an element wise binary operation that can be optimized
@@ -232,6 +234,7 @@ namespace GraphBLAS
                          bool              replace_flag = false);
 
     /// @todo no way to distinguish between vector and matrix variants
+    /*
     template<typename CMatrixT,
              typename MaskT,
              typename AccumT,
@@ -245,6 +248,7 @@ namespace GraphBLAS
                          AMatrixT   const &A,
                          BMatrixT   const &B,
                          bool              replace_flag = false);
+    */
 
     //****************************************************************************
     // Extract
@@ -556,7 +560,9 @@ namespace GraphBLAS
                       UVectorT       const &u,
                       bool                  replace_flag = false);
 
+    /// @todo no way to distinguish between vector and matrix variants
     // matrix variant
+    /*
     template<typename CMatrixT,
              typename MaskT,
              typename AccumT,
@@ -568,6 +574,7 @@ namespace GraphBLAS
                       UnaryFunctionT        op,
                       AMatrixT       const &A,
                       bool                  replace_flag = false);
+    */
 
     //****************************************************************************
     // reduce
@@ -597,7 +604,9 @@ namespace GraphBLAS
                        UVectorT   const &u,
                        bool              replace_flag = false);
 
+    /// @todo no way to distinguish between vector and matrix variants
     // matrix-scalar variant
+    /*
     template<typename ValueT,
              typename AccumT,
              typename MonoidT, // monoid only
@@ -607,6 +616,7 @@ namespace GraphBLAS
                        MonoidT           op,
                        AMatrixT   const &A,
                        bool              replace_flag = false);
+    */
 
     //****************************************************************************
     // Transpose
