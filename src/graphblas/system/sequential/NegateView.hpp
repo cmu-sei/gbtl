@@ -61,50 +61,20 @@ namespace backend
         {
         }
 
-        /**
-         * @brief Get the shape for this matrix.
-         *
-         * @return  A tuple containing the shape in the form (M, N),
-         *          where M is the number of rows, and N is the number
-         *          of columns.
-         */
-        void get_shape(IndexType &num_rows, IndexType &num_cols) const
+        IndexType get_nrows() const
         {
-            m_matrix.get_shape(num_rows, num_cols);
+            return m_matrix.get_nrows();
         }
 
-
-        /**
-         * @brief Get the value of a structural zero element.
-         *
-         * @return  The structural zero value.
-         */
-        ScalarType get_zero() const
+        IndexType get_ncols() const
         {
-            return m_matrix.get_zero();
+            return m_matrix.get_ncols();
         }
 
-
-        /**
-         * @brief Set the value of a structural zero element.
-         *
-         * @param[in] new_zero  The new zero value.
-         *
-         * @return The old zero element for this matrix.
-         */
-        //ScalarType set_zero(ScalarType new_zero)
-        //{
-        //    return m_matrix.set_zero(new_zero);
-        //}
-
-        /**
-         * @return  The number of stored elements in the view.
-         */
-        IndexType get_nnz() const
+        IndexType get_nvals() const
         {
-            IndexType rows, cols;
-            m_matrix.get_shape(rows, cols);
-            return (rows*cols - m_matrix.get_nnz());
+            return (m_matrix.get_nrows()*m_matrix.get_ncols() -
+                    m_matrix.get_nvals());
         }
 
         /**
@@ -120,11 +90,11 @@ namespace backend
         template <typename OtherMatrixT>
         bool operator==(OtherMatrixT const &rhs) const
         {
-            IndexType nr, nc, rhs_nr, rhs_nc;
-            get_shape(nr, nc);
-            rhs.get_shape(rhs_nr, rhs_nc);
+            IndexType nr = get_nrows();
+            IndexType nc = get_ncols();
 
-            if ((nr != rhs_nr) || (nc != rhs_nc))
+            if ((nr != rhs.get_nrows()) || (nc != rhs.get_ncols()) ||
+                (get_nvals() != rhs.get_nvals()))
             {
                 return false;
             }
@@ -132,16 +102,9 @@ namespace backend
             // Definitely a more efficient way than this.  Only compare
             // non-zero elements.  Then decide if compare zero's
             // explicitly
-            for (IndexType i = 0; i < nr; ++i)
-            {
-                for (IndexType j = 0; j < nc; ++j)
-                {
-                    if (get_value_at(i, j) != rhs.get_value_at(i, j))
-                    {
-                        return false;
-                    }
-                }
-            }
+            throw 1;  // Not implemented yet
+
+            /// @todo Not implemented yet.
 
             return true;
         }
@@ -178,20 +141,9 @@ namespace backend
          */
         ScalarType get_value_at(IndexType row, IndexType col) const
         {
-            if (m_matrix.get_value_at(row, col) == get_zero())
-                return !get_zero();
-            else
-                return get_zero();
+            /// @todo Not implemented yet
+            return !m_matrix.get_value_at(row, col);
         }
-
-        // DONT ALLOW MODIFICATION OF MASKS.
-        // Not certain about this implementation
-        //void set_value_at(IndexType         row,
-        //                  IndexType         col,
-        //                  ScalarType const &val)
-        //{
-        //    m_matrix.set_value_at(row, col, math::NotFn<ScalarType>()(val));
-        //}
 
         void print_info(std::ostream &os) const
         {

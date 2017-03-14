@@ -17,6 +17,7 @@
 
 #include <cstddef>
 #include <graphblas/system/sequential/LilMatrix.hpp>
+#include <graphblas/system/sequential/LilSparseMatrix.hpp>
 
 namespace graphblas
 {
@@ -60,6 +61,55 @@ namespace graphblas
             {
                 os << "Sequential Backend:" << std::endl;
                 LilMatrix<ScalarT>::print_info(os);
+            }
+        };
+    }
+}
+
+//****************************************************************************
+//****************************************************************************
+
+
+namespace GraphBLAS
+{
+    namespace backend
+    {
+        template<typename ScalarT, typename... TagsT>
+        class Matrix : public LilSparseMatrix<ScalarT>
+        {
+        public:
+            typedef ScalarT ScalarType;
+
+            // construct an empty matrix of fixed dimensions
+            Matrix(IndexType   num_rows,
+                   IndexType   num_cols)
+                : LilSparseMatrix<ScalarT>(num_rows, num_cols)
+            {
+            }
+
+            // copy construct
+            Matrix(Matrix const &rhs)
+                : LilSparseMatrix<ScalarT>(rhs)
+            {
+            }
+
+            // construct a matrix from dense data.
+            Matrix(std::vector<std::vector<ScalarT> > const &values)
+                : LilSparseMatrix<ScalarT>(values)
+            {
+            }
+
+            //default constructor for constmat
+            //Matrix(): LilSparseMatrix<ScalarT>(1,1,0) {}
+
+            ~Matrix()
+            {
+            }
+
+            void print_info(std::ostream &os) const
+            {
+                os << "Sequential Backend:" << std::endl;
+                LilSparseMatrix<ScalarT>::print_info(os);
             }
         };
     }
