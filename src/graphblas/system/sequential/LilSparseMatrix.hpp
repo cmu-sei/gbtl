@@ -31,49 +31,47 @@ namespace GraphBLAS
         // Constructor
         LilSparseMatrix(IndexType num_rows,
                         IndexType num_cols)
-        : m_num_rows(num_rows), m_num_cols(num_cols)
+            : m_num_rows(num_rows),
+              m_num_cols(num_cols),
+              m_nvals(0)
         {
             m_data.resize(m_num_rows);
-            m_nnz = 0;
         }
 
         // Constructor - copy
         LilSparseMatrix(LilSparseMatrix<ScalarT> const &rhs)
+            : m_num_rows(rhs.m_num_rows),
+              m_num_cols(rhs.m_num_cols),
+              m_nvals(rhs.m_nvals),
+              m_data(rhs.m_data)
         {
-            if (this != &rhs)
-            {
-                m_num_rows = rhs.m_num_rows;
-                m_num_cols = rhs.m_num_cols;
-                m_nnz = rhs.m_nnz;
-                m_data = rhs.m_data;
-            }
         }
 
-        // Constructor - from dense matrix
+        // Constructor - dense from dense matrix
         LilSparseMatrix(std::vector<std::vector<ScalarT>> const &val)
             : m_num_rows(val.size()),
               m_num_cols(val[0].size())
         {
             m_data.resize(m_num_rows);
-            m_nnz = 0;
+            m_nvals = 0;
             for (IndexType ii = 0; ii < m_num_rows; ii++)
             {
                 for (IndexType jj = 0; jj < m_num_cols; jj++)
                 {
                     m_data[ii].push_back(std::make_tuple(jj, val[ii][jj]));
-                    m_nnz = m_nnz + 1;
+                    m_nvals = m_nvals + 1;
                 }
             }
         }
 
-        // Constructor - from dense matrix, without implied zeros
+        // Constructor - sparse from dense matrix, removing specifed implied zeros
         LilSparseMatrix(std::vector<std::vector<ScalarT>> const &val,
                         ScalarT const zero)
             : m_num_rows(val.size()),
               m_num_cols(val[0].size())
         {
             m_data.resize(m_num_rows);
-            m_nnz = 0;
+            m_nvals = 0;
             for (IndexType ii = 0; ii < m_num_rows; ii++)
             {
                 for (IndexType jj = 0; jj < m_num_cols; jj++)
@@ -81,7 +79,7 @@ namespace GraphBLAS
                     if (val[ii][jj] != zero)
                     {
                         m_data[ii].push_back(std::make_tuple(jj, val[ii][jj]));
-                        m_nnz = m_nnz + 1;
+                        m_nvals = m_nvals + 1;
                     }
                 }
             }
@@ -91,22 +89,29 @@ namespace GraphBLAS
         ~LilSparseMatrix()
         {}
 
-        // Number of rows
-        void nrows(IndexType &num_rows) const
+        void clear()
         {
-            num_rows = m_num_rows;
+            /// @todo make atomic? transactional?
+            m_nvals = 0;
+            for (IndexType row = 0; row < m_data.size(); ++row)
+            {
+                m_data[row].clear();
+            }
         }
 
-        // Number of columns
-        void ncols(IndexType &num_cols) const
+        IndexType get_nrows() const
         {
-            num_cols = m_num_cols;
+            return m_num_rows;
         }
 
-        // Number of non-zeroes
-        IndexType nnz() const
+        IndexType get_ncols() const
         {
-            return m_nnz;
+            return m_num_cols;
+        }
+
+        IndexType get_nvals() const
+        {
+            return m_nvals;
         }
 
         // Get value at index
@@ -115,22 +120,23 @@ namespace GraphBLAS
         {
             if (irow >= m_num_rows || icol >= m_num_cols)
             {
-                throw DimensionException("get_value_at: index out of bounds");
+                throw IndexOutOfBoundsException(
+                    "mxm::get_value_at: index out of bounds");
             }
-            IndexType ind;
-            ScalarT val;
             if (m_data.empty())
             {
-                throw DimensionException("get_value_at: no entry at index");
+                throw NoValueException("mxm::get_value_at: no entry at index");
             }
             if (m_data.at(irow).empty())
             {
                 std::cout << "\nEmpty!";
-                throw 999;
-                //throw DimensionException("get_value_at: no entry at index");
+                throw NoValueException("mxm::get_value_at: no entry at index");
             }
-            //for (auto tupl : m_data[irow])		// Range-based loop, access by value
-            for (auto tupl : m_data.at(irow))		// Range-based loop, access by value
+
+            IndexType ind;
+            ScalarT val;
+            //for (auto tupl : m_data[irow])// Range-based loop, access by value
+            for (auto tupl : m_data.at(irow))// Range-based loop, access by value
             {
                 std::tie(ind, val) = tupl;
                 if (ind == icol)
@@ -146,13 +152,13 @@ namespace GraphBLAS
         {
             if (irow >= m_num_rows || icol >= m_num_cols)
             {
-                throw DimensionException("set_value_at: index out of bounds");
+                throw IndexOutOfBoundsException("set_value_at: index out of bounds");
             }
 
             if (m_data[irow].empty())
             {
                 m_data[irow].push_back(std::make_tuple(icol, val));
-                m_nnz = m_nnz + 1;
+                m_nvals = m_nvals + 1;
             }
             else
             {
@@ -168,13 +174,128 @@ namespace GraphBLAS
                     else if (std::get<0>(*it) > icol)
                     {
                         m_data[irow].insert(it, std::make_tuple(icol, val));
-                        m_nnz = m_nnz + 1;
+                        m_nvals = m_nvals + 1;
                         return;
                     }
                 }
                 m_data[irow].push_back(std::make_tuple(icol, val));
-                m_nnz = m_nnz + 1;
+                m_nvals = m_nvals + 1;
             }
+        }
+
+        std::vector<std::tuple<IndexType, ScalarT> > const &get_row(
+            IndexType row_index) const
+        {
+            return m_data[row_index];
+        }
+
+        void set_row(IndexType row_index,
+                     std::vector<std::tuple<IndexType, ScalarT> > &row_data)
+        {
+            IndexType old_nvals = m_data[row_index].size();
+            IndexType new_nvals = row_data.size();
+
+            m_nvals = m_nvals + new_nvals - old_nvals;
+            m_data[row_index] = row_data;   // swap here?
+        }
+
+        /// @todo need move semantics.
+        std::vector<std::tuple<IndexType, ScalarT> > get_col(
+            IndexType col_index) const
+        {
+            std::vector<std::tuple<IndexType, ScalarT> > data;
+
+            for (IndexType ii = 0; ii < m_num_rows; ii++)
+            {
+                if (!m_data[ii].empty())
+                {
+                    for (auto tupl : m_data[ii])
+                    {
+                        if (std::get<0>(tupl) == col_index)
+                        {
+                            data.push_back(std::make_tuple(ii, std::get<1>(tupl)));
+                        }
+                    }
+                }
+            }
+
+            return data;
+        }
+
+        // col_data must be in increasing index order
+        /// @todo this could be vastly improved.
+        void set_col(IndexType col_index,
+                     std::vector<std::tuple<IndexType, ScalarT> > &col_data)
+        {
+            auto it = col_data.begin();
+            for (IndexType row_index = 0; row_index < m_num_rows; row_index++)
+            {
+                // Check for any values to clear: either there are column entries
+                // left to examine, or the index is less than the next one to
+                // insert
+
+                // No value to insert in this row.
+                if ((it == col_data.end()) || (row_index < std::get<0>(*it)))
+                {
+                    for (auto row_it = m_data[row_index].begin();
+                         row_it != m_data[row_index].end();
+                         ++row_it)
+                    {
+                        if (std::get<0>(*row_it) == col_index)
+                        {
+                            //std::cerr << "Erasing row element" << std::endl;
+                            m_data[row_index].erase(row_it);
+                            --m_nvals;
+                            break;
+                        }
+                    }
+                }
+                // replace existing or insert
+                else if (row_index == std::get<0>(*it))
+                {
+                    //std::cerr << "Row index matches col_data row" << std::endl;
+                    bool inserted=false;
+                    for (auto row_it = m_data[row_index].begin();
+                         row_it != m_data[row_index].end();
+                         ++row_it)
+                    {
+                        if (std::get<0>(*row_it) == col_index)
+                        {
+                            //std::cerr << "Found row element to replace" << std::endl;
+                            // replace
+                            std::get<1>(*row_it) = std::get<1>(*it);
+                            ++it;
+                            inserted = true;
+                            break;
+                        }
+                        else if (std::get<0>(*row_it) > col_index)
+                        {
+                            //std::cerr << "Inserting new row element" << std::endl;
+                            m_data[row_index].insert(row_it, *it);
+                            ++m_nvals;
+                            ++it;
+                            inserted = true;
+                            break;
+                        }
+                    }
+                    if (!inserted)
+                    {
+                        //std::cerr << "Appending new row element" << std::endl;
+                        m_data[row_index].insert(m_data[row_index].end(),
+                                                 std::make_tuple(col_index,
+                                                                 std::get<1>(*it)));
+                        ++m_nvals;
+                        ++it;
+                    }
+                }
+                else // row_index > next entry to insert
+                {
+                    // This should not happen
+                    throw GraphBLAS::PanicException(
+                        "LilSparseMatrix::set_col() INTERNAL ERROR");
+                }
+            }
+
         }
 
         // Get column indices for a given row
@@ -182,7 +303,8 @@ namespace GraphBLAS
         {
             if (irow >= m_num_rows)
             {
-                throw DimensionException("getColumnIndices: index out of bounds");
+                throw IndexOutOfBoundsException(
+                    "getColumnIndices: index out of bounds");
             }
 
             if (!m_data[irow].empty())
@@ -199,18 +321,13 @@ namespace GraphBLAS
             }
         }
 
-        std::vector<std::tuple<IndexType, ScalarT> > const &get_row(
-            IndexType row_index) const
-        {
-            return m_data[row_index];
-        }
-
         // Get row indices for a given column
         void getRowIndices(IndexType icol, IndexArrayType &v) const
         {
             if (icol >= m_num_cols)
             {
-                throw DimensionException("getRowIndices: index out of bounds");
+                throw IndexOutOfBoundsException(
+                    "getRowIndices: index out of bounds");
             }
 
             IndexType ind;
@@ -238,22 +355,6 @@ namespace GraphBLAS
             }
         }
 
-        // BACKWARDS COMPATIBILITY FUNCTIONS
-        IndexType get_nrows() const
-        {
-            return m_num_rows;
-        }
-
-        IndexType get_ncols() const
-        {
-            return m_num_cols;
-        }
-
-        IndexType get_nvals() const
-        {
-            return m_nnz;
-        }
-
         // EQUALITY OPERATORS
         /**
          * @brief Equality testing for LilMatrix.
@@ -264,7 +365,7 @@ namespace GraphBLAS
         {
             if ((m_num_rows != rhs.m_num_rows) ||
                 (m_num_cols != rhs.m_num_cols) ||
-                (m_nnz != rhs.m_nnz))
+                (m_nvals != rhs.m_nvals))
             {
                 return false;
             }
@@ -284,7 +385,8 @@ namespace GraphBLAS
                     {
                         for (IndexType jj = 0; jj < thisIndex.size(); jj++)
                         {
-                            if (get_value_at(ii, thisIndex[jj]) != rhs.get_value_at(ii, thisIndex[jj]))
+                            if (get_value_at(ii, thisIndex[jj]) !=
+                                rhs.get_value_at(ii, thisIndex[jj]))
                             {
                                 return false;
                             }
@@ -308,10 +410,11 @@ namespace GraphBLAS
         // output specific to the storage layout of this type of matrix
         void print_info(std::ostream &os) const
         {
-            os << "LilSparseMatrix<" << typeid(ScalarT).name() << ">" << std::endl;
+            os << "LilSparseMatrix<" << typeid(ScalarT).name() << ">"
+               << std::endl;
             os << "dimensions: " << m_num_rows << " x " << m_num_cols
-            << std::endl;
-            os << "num nonzeros = " << m_nnz << std::endl;
+               << std::endl;
+            os << "num stored values = " << m_nvals << std::endl;
             for (IndexType row = 0; row < m_data.size(); ++row)
             {
                 os << row << " :";
@@ -320,7 +423,7 @@ namespace GraphBLAS
                      ++it)
                 {
                     os << " " << std::get<0>(*it)
-                    << ":" << std::get<1>(*it);
+                       << ":" << std::get<1>(*it);
                 }
                 os << std::endl;
             }
@@ -334,15 +437,13 @@ namespace GraphBLAS
         }
 
     private:
-        IndexType m_num_rows;    // Number of rows
-        IndexType m_num_cols;    // Number of columns
-        IndexType m_nnz;  // Number of non-zero values
+        IndexType m_num_rows;
+        IndexType m_num_cols;
+        IndexType m_nvals;
 
         // List-of-lists storage (LIL)
         std::vector<std::vector<std::tuple<IndexType, ScalarT>>> m_data;
     };
-
-
 }
 
 #endif // GB_SEQUENTIAL_LILSPARSEMATRIX_HPP

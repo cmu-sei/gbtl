@@ -45,6 +45,24 @@ namespace graphblas
 namespace GraphBLAS
 {
     //************************************************************************
+    class PanicException : public std::exception
+    {
+    public:
+        PanicException(std::string const &msg)
+            : m_message(msg) {}
+
+        PanicException() {}
+
+    private:
+        const char* what() const throw()
+        {
+            return ("PanicException: " + m_message).c_str();
+        }
+
+        std::string m_message;
+    };
+
+    //************************************************************************
     class DimensionException : public std::exception
     {
     public:

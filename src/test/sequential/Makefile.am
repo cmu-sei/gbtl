@@ -14,7 +14,8 @@ test_sequential_csr_matrix \
 test_sequential_row_extended_view \
 test_sequential_column_extended_view \
 test_sequential_lil_sparse_matrix \
-test_sequential_bitmap_sparse_vector
+test_sequential_bitmap_sparse_vector \
+test_sequential_mxm_sparse
 
 test_sequential_lil_matrix_SOURCES = test_lil_matrix.cpp
 
@@ -31,5 +32,7 @@ test_sequential_column_extended_view_SOURCES = test_column_extended_view.cpp
 test_sequential_lil_sparse_matrix_SOURCES = test_lil_sparse_matrix.cpp
 
 test_sequential_bitmap_sparse_vector_SOURCES = test_bitmap_sparse_vector.cpp
+
+test_sequential_mxm_sparse_SOURCES = test_mxm_sparse.cpp
 
 endif

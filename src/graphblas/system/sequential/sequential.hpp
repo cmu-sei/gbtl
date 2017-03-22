@@ -34,11 +34,11 @@
 
 #include <graphblas/system/sequential/operations.hpp>
 
-// NEW CLASSES
+// NEW CLASSES AND OPERATIONS
 
 #include <graphblas/system/sequential/BitmapSparseVector.hpp>
 #include <graphblas/system/sequential/LilSparseMatrix.hpp>
+
 #include <graphblas/system/sequential/operations_sparse.hpp>
-#include <graphblas/system/sequential/mxv_sparse.hpp>
 
 #endif // GB_SEQUENTIAL_HPP

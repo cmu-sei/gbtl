@@ -32,6 +32,7 @@
 #include <graphblas/system/sequential/TransposeView.hpp>
 #include <graphblas/system/sequential/NegateView.hpp>
 
+#if 0
 //****************************************************************************
 namespace {
     /// Perform the dot product of a row of a matrix with a sparse vector without
@@ -248,5 +249,5 @@ namespace GraphBLAS {
         }
     }  // backend
 }  // GraphBLAS
-
+#endif
 #endif // GB_SEQUENTIAL_MXV_SPARSE_HPP

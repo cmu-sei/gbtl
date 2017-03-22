@@ -31,15 +31,15 @@ BOOST_AUTO_TEST_CASE(mxm_reg)
     std::vector<std::vector<double>> mat1 = {{8, 1, 6},
                                              {3, 5, 7},
                                              {4, 9, 2}};
-    
+
     std::vector<std::vector<double>> mat2 = {{0, 1, 1},
                                              {1, 0, 1},
                                              {1, 1, 0}};
-    
+
     std::vector<std::vector<double>> mat3 = {{7, 14, 9},
                                              {12, 10, 8},
                                              {11, 6, 13}};
-    
+
     GraphBLAS::LilSparseMatrix<double> m1(mat1, 0);
     GraphBLAS::LilSparseMatrix<double> m2(mat2, 0);
     GraphBLAS::LilSparseMatrix<double> answer(mat3, 0);
@@ -63,15 +63,15 @@ BOOST_AUTO_TEST_CASE(mxm_reg_empty)
     std::vector<std::vector<double>> mat1 = {{8, 1, 6},
                                              {3, 5, 7},
                                              {4, 9, 2}};
-    
+
     std::vector<std::vector<double>> mat2 = {{0, 0, 0},
                                              {1, 0, 1},
                                              {0, 0, 1}};
-    
+
     std::vector<std::vector<double>> mat3 = {{1, 0, 7},
                                              {5, 0, 12},
                                              {9, 0, 11}};
-    
+
     GraphBLAS::LilSparseMatrix<double> m1(mat1, 0);
     GraphBLAS::LilSparseMatrix<double> m2(mat2, 0);
     GraphBLAS::LilSparseMatrix<double> answer(mat3, 0);
@@ -87,7 +87,66 @@ BOOST_AUTO_TEST_CASE(mxm_reg_empty)
 }
 
 //****************************************************************************
-// Matrix multiply, with accum
+BOOST_AUTO_TEST_CASE(mxm2_empty_rows_and_columns)
+{
+    std::vector<std::vector<double>> mat1 = {{8, 1, 6},
+                                             {3, 5, 7},
+                                             {4, 9, 2}};
+
+    std::vector<std::vector<double>> mat2 = {{0, 0, 0},
+                                             {1, 0, 1},
+                                             {0, 0, 1}};
+
+    std::vector<std::vector<double>> mat3 = {{1, 0, 7},
+                                             {5, 0, 12},
+                                             {9, 0, 11}};
+
+    GraphBLAS::LilSparseMatrix<double> m1(mat1, 0);
+    GraphBLAS::LilSparseMatrix<double> m2(mat2, 0);
+    GraphBLAS::LilSparseMatrix<double> answer(mat3, 0);
+    GraphBLAS::IndexType M = 3;
+    GraphBLAS::IndexType N = 3;
+    GraphBLAS::LilSparseMatrix<double> result(M, N);
+    GraphBLAS::backend::mxm_v2(result,
+                               GraphBLAS::Second<double>(),
+                               GraphBLAS::ArithmeticSemiring<double>(),
+                               m1,
+                               m2);
+    BOOST_CHECK_EQUAL(result, answer);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(mxm2_accum_with_empty_rows_and_columns)
+{
+    std::vector<std::vector<double>> mat0 = {{1, 1, 1},
+                                             {1, 1, 1},
+                                             {1, 1, 1}};
+
+    std::vector<std::vector<double>> mat1 = {{8, 1, 6},
+                                             {3, 5, 7},
+                                             {4, 9, 2}};
+
+    std::vector<std::vector<double>> mat2 = {{0, 0, 0},
+                                             {1, 0, 1},
+                                             {0, 0, 1}};
+
+    std::vector<std::vector<double>> mat3 = {{2,  1, 8},
+                                             {6,  1, 13},
+                                             {10, 1, 12}};
+
+    GraphBLAS::LilSparseMatrix<double> A(mat1, 0);
+    GraphBLAS::LilSparseMatrix<double> B(mat2, 0);
+    GraphBLAS::LilSparseMatrix<double> answer(mat3, 0);
+    GraphBLAS::IndexType M = 3;
+    GraphBLAS::IndexType N = 3;
+    GraphBLAS::LilSparseMatrix<double> C(mat0, 0);
+    GraphBLAS::backend::mxm_v2(C,
+                               GraphBLAS::Plus<double>(),
+                               GraphBLAS::ArithmeticSemiring<double>(),
+                               A,
+                               B);
+    BOOST_CHECK_EQUAL(C, answer);
+}
 
 
 BOOST_AUTO_TEST_SUITE_END()
