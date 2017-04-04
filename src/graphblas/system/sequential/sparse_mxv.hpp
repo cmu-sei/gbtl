@@ -110,7 +110,7 @@ namespace GraphBLAS
                         if (!A_row.empty())
                         {
                             WScalarType t_val;
-                            if (dot(t_val, A_row, u_bitmap, u_values, u.get_nvals(), op))
+                            if (dot2(t_val, A_row, u_bitmap, u_values, u.get_nvals(), op))
                             {
                                 t_indices.push_back(row_idx);
                                 t_values.push_back(t_val);
