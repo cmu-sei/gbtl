@@ -54,7 +54,7 @@ namespace GraphBLAS
                         SemiringT        op,
                         AMatrixT  const &A,
                         UVectorT  const &u,
-                        bool             replace_flag)
+                        bool             replace_flag = false)
         {
             // The following should be checked by the frontend only:
             if ((w.get_size() != A.get_nrows()) ||
