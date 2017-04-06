@@ -27,6 +27,7 @@
 #include <vector>
 #include <iterator>
 #include <iostream>
+#include <string>
 #include <graphblas/accum.hpp>
 #include <graphblas/algebra.hpp>
 
@@ -262,6 +263,47 @@ namespace GraphBLAS
                     ++v2_it;
                 }
             }
+        }
+
+        //************************************************************************
+        /// Simple check to make sure the matricies are the same size.  Prints out 
+        /// useful error messages.
+
+
+        template <typename M1, typename M2>
+        void check_dimensions(M1 m1, std::string m1Name, M2 m2, std::string m2Name)
+        {
+            if (m1.get_nrows() != m2.get_nrows())
+            {
+                throw DimensionException("Matrix ROW counts are not the same. " + 
+                    m1Name + " = " + std::to_string(m1.get_nrows()) + ", " + 
+                    m2Name + " = " + std::to_string(m2.get_nrows()) );
+            }
+
+            if (m1.get_ncols() != m2.get_ncols())
+            {
+                throw DimensionException("Matrix COL counts are not the same. " + 
+                    m1Name + " = " + std::to_string(m1.get_ncols()) + ", " + 
+                    m2Name + " = " + std::to_string(m2.get_ncols()) );
+            }
+        }
+
+        template <typename M1, typename M2>
+        void check_transposed_dimensions(M1 m1, std::string m1Name, M2 m2, std::string m2Name)
+        {
+            if (m1.get_nrows() != m2.get_ncols())
+            {
+                throw DimensionException("Matrix ROW vs COL counts are not the same. " + 
+                    m1Name + " row = " + std::to_string(m1.get_nrows()) + ", " + 
+                    m2Name + " col = " + std::to_string(m2.get_ncols()) );
+            }
+
+            if (m1.get_ncols() != m2.get_nrows())
+            {
+                throw DimensionException("Matrix COL vs ROW counts are not the same. " + 
+                    m1Name + " col = " + std::to_string(m1.get_ncols()) + ", " + 
+                    m2Name + " row = " + std::to_string(m2.get_nrows()) );
+            }           
         }
 
     } // backend
