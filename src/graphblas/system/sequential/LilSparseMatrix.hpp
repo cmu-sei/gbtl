@@ -66,7 +66,7 @@ namespace GraphBLAS
 
         // Constructor - sparse from dense matrix, removing specifed implied zeros
         LilSparseMatrix(std::vector<std::vector<ScalarT>> const &val,
-                        ScalarT const zero)
+                        ScalarT zero)
             : m_num_rows(val.size()),
               m_num_cols(val[0].size())
         {
@@ -88,6 +88,96 @@ namespace GraphBLAS
         // Destructor
         ~LilSparseMatrix()
         {}
+
+        // Assignment (currently restricted to same dimensions)
+        LilSparseMatrix<ScalarT> &operator=(LilSparseMatrix<ScalarT> const &rhs)
+        {
+            if (this != &rhs)
+            {
+                // push this check to frontend
+                if ((m_num_rows != rhs.m_num_rows) ||
+                    (m_num_cols != rhs.m_num_cols))
+                {
+                    throw DimensionException();
+                }
+
+                m_nvals = rhs.m_nvals;
+                m_data = rhs.m_data;
+            }
+            return *this;
+        }
+
+        // EQUALITY OPERATORS
+        /**
+         * @brief Equality testing for LilMatrix.
+         * @param rhs The right hand side of the equality operation.
+         * @return If this LilMatrix and rhs are identical.
+         */
+        bool operator==(LilSparseMatrix<ScalarT> const &rhs) const
+        {
+            if ((m_num_rows != rhs.m_num_rows) ||
+                (m_num_cols != rhs.m_num_cols) ||
+                (m_nvals != rhs.m_nvals))
+            {
+                return false;
+            }
+            IndexArrayType thisIndex;
+            IndexArrayType rhsIndex;
+            for (IndexType ii = 0; ii < m_num_rows; ii++)
+            {
+                getColumnIndices(ii, thisIndex);
+                rhs.getColumnIndices(ii, rhsIndex);
+                if (thisIndex != rhsIndex)
+                {
+                    return false;
+                }
+                else
+                {
+                    if (thisIndex.empty())
+                    {
+                        for (IndexType jj = 0; jj < thisIndex.size(); jj++)
+                        {
+                            if (get_value_at(ii, thisIndex[jj]) !=
+                                rhs.get_value_at(ii, thisIndex[jj]))
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+
+        /**
+         * @brief Inequality testing for LilMatrix.
+         * @param rhs The right hand side of the inequality operation.
+         * @return If this LilMatrix and rhs are not identical.
+         */
+        bool operator!=(LilSparseMatrix<ScalarT> const &rhs) const
+        {
+            return !(*this == rhs);
+        }
+
+        template<typename RAIteratorI,
+                 typename RAIteratorJ,
+                 typename RAIteratorV,
+                 typename DupT>
+        void build(RAIteratorI  i_it,
+                   RAIteratorJ  j_it,
+                   RAIteratorV  v_it,
+                   IndexType    n,
+                   DupT         dup)
+        {
+            /// @todo DOING SOMETHING REALLY STUPID RIGHT NOW AND IGNORING DUP
+            clear();
+
+            for (IndexType ix = 0; ix < n; ++ix)
+            {
+                set_value_at(*i_it, *j_it, *v_it);
+                ++i_it; ++j_it; ++v_it;
+            }
+        }
 
         void clear()
         {
@@ -121,16 +211,15 @@ namespace GraphBLAS
             if (irow >= m_num_rows || icol >= m_num_cols)
             {
                 throw IndexOutOfBoundsException(
-                    "mxm::get_value_at: index out of bounds");
+                    "get_value_at: index out of bounds");
             }
             if (m_data.empty())
             {
-                throw NoValueException("mxm::get_value_at: no entry at index");
+                throw NoValueException("get_value_at: no entry at index");
             }
             if (m_data.at(irow).empty())
             {
-                std::cout << "\nEmpty!";
-                throw NoValueException("mxm::get_value_at: no entry at index");
+                throw NoValueException("get_value_at: no entry at index");
             }
 
             IndexType ind;
@@ -138,13 +227,15 @@ namespace GraphBLAS
             //for (auto tupl : m_data[irow])// Range-based loop, access by value
             for (auto tupl : m_data.at(irow))// Range-based loop, access by value
             {
-                std::tie(ind, val) = tupl;
-                if (ind == icol)
+                //std::tie(ind, val) = tupl;
+                //if (ind == icol)
+                if (std::get<0>(tupl) == icol)
                 {
-                    return val;
+                    //return val;
+                    return std::get<1>(tupl);
                 }
             }
-            throw DimensionException("get_value_at: no entry at index");
+            throw NoValueException("get_value_at: no entry at index");
         }
 
         // Set value at index
@@ -353,58 +444,6 @@ namespace GraphBLAS
                     }
                 }
             }
-        }
-
-        // EQUALITY OPERATORS
-        /**
-         * @brief Equality testing for LilMatrix.
-         * @param rhs The right hand side of the equality operation.
-         * @return If this LilMatrix and rhs are identical.
-         */
-        bool operator==(LilSparseMatrix<ScalarT> const &rhs) const
-        {
-            if ((m_num_rows != rhs.m_num_rows) ||
-                (m_num_cols != rhs.m_num_cols) ||
-                (m_nvals != rhs.m_nvals))
-            {
-                return false;
-            }
-            IndexArrayType thisIndex;
-            IndexArrayType rhsIndex;
-            for (IndexType ii = 0; ii < m_num_rows; ii++)
-            {
-                getColumnIndices(ii, thisIndex);
-                rhs.getColumnIndices(ii, rhsIndex);
-                if (thisIndex != rhsIndex)
-                {
-                    return false;
-                }
-                else
-                {
-                    if (thisIndex.empty())
-                    {
-                        for (IndexType jj = 0; jj < thisIndex.size(); jj++)
-                        {
-                            if (get_value_at(ii, thisIndex[jj]) !=
-                                rhs.get_value_at(ii, thisIndex[jj]))
-                            {
-                                return false;
-                            }
-                        }
-                    }
-                }
-            }
-            return true;
-        }
-
-        /**
-         * @brief Inequality testing for LilMatrix.
-         * @param rhs The right hand side of the inequality operation.
-         * @return If this LilMatrix and rhs are not identical.
-         */
-        bool operator!=(LilSparseMatrix<ScalarT> const &rhs) const
-        {
-            return !(*this == rhs);
         }
 
         // output specific to the storage layout of this type of matrix

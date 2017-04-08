@@ -35,29 +35,62 @@
 
 namespace GraphBLAS
 {
-namespace backend
-{
-
-    /**
-    *
-    */
-    template<typename MatrixT>
-    inline ComplementView<MatrixT> complement(MatrixT const &A)
+    namespace backend
     {
-        return ComplementView<MatrixT>(A);
-    }
+        // Note: this forward might not be necessary.  Need to revisit
+        template<typename CMatrixT,
+                 typename AccumT,
+                 typename SemiringT,
+                 typename AMatrixT,
+                 typename BMatrixT>
+        inline void mxm(CMatrixT       &C,
+                        AccumT          accum,
+                        SemiringT       op,
+                        AMatrixT const &A,
+                        BMatrixT const &B,
+                        bool            replace_flag)
+        {
+            mxm_v2(C, accum, op, A, B);
+        }
+
+        // Note: this forward might not be necessary.  Need to revisit
+        template<typename CMatrixT,
+                 typename MMatrixT,
+                 typename AccumT,
+                 typename SemiringT,
+                 typename AMatrixT,
+                 typename BMatrixT>
+        inline void mxm(CMatrixT       &C,
+                        MMatrixT const &M,              // Mask
+                        AccumT          accum,
+                        SemiringT       op,
+                        AMatrixT const &A,
+                        BMatrixT const &B,
+                        bool            replace_flag)
+        {
+            mxm_v2_mask(C, M, accum, op, A, B);
+        }
+
+        /**
+         *
+         */
+        template<typename MatrixT>
+        inline ComplementView<MatrixT> complement(MatrixT const &A)
+        {
+            return ComplementView<MatrixT>(A);
+        }
 
 
-    /**
-    *
-    */
-    template<typename MatrixT>
-    inline TransposeView<MatrixT> transpose(MatrixT const &A)
-    {
-        return TransposeView<MatrixT>(A);
-    }
+        /**
+         *
+         */
+        template<typename MatrixT>
+        inline TransposeView<MatrixT> transpose(MatrixT const &A)
+        {
+            return TransposeView<MatrixT>(A);
+        }
 
-} // backend
+    } // backend
 } // GraphBLAS
 
 //****************************************************************************

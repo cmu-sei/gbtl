@@ -90,7 +90,36 @@ namespace algorithms
                            graphblas::MinPlusSemiring<T>,
                            MinAccum>(paths, graph, paths);
             //std::cout << "Iteration " << k << std::endl;
-            //pretty_print_matrix(std::cout, paths);
+            //graphblas::backend::pretty_print_matrix(std::cout, paths);
+            //std::cout << std::endl;
+        }
+        // paths holds return value
+    }
+
+    //****************************************************************************
+    template<typename MatrixT,
+             typename PathMatrixT>
+    void GrB_sssp(MatrixT const     &graph,
+                  PathMatrixT       &paths)  // paths are initialized to start
+    {
+        using T = typename MatrixT::ScalarType;
+
+        if ((graph.get_nrows() != paths.get_ncols()) ||
+            (graph.get_ncols() != paths.get_ncols()))
+        {
+            throw graphblas::DimensionException();
+        }
+
+        /// @todo why num_rows iterations?  Should be the diameter or terminate
+        /// when there are no changes?
+        for (graphblas::IndexType k = 0; k < graph.get_nrows(); ++k)
+        {
+            GraphBLAS::mxm(paths,
+                           GraphBLAS::Min<T>(), GraphBLAS::MinPlusSemiring<T>(),
+                           paths, graph);
+
+            //std::cout << "Iteration " << k << std::endl;
+            //paths.print_info(std::cout);
             //std::cout << std::endl;
         }
         // paths holds return value

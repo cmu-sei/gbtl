@@ -518,28 +518,9 @@ namespace GraphBLAS
          * @param[in] zero      The "zero" value, additive identity, and
          *                      the structural zero.
          */
-        Matrix(IndexType num_rows,
-               IndexType num_cols,
-               ScalarT   zero = static_cast<ScalarT>(0))
-            : m_mat(num_rows, num_cols, zero)
+        Matrix(IndexType num_rows, IndexType num_cols)
+            : m_mat(num_rows, num_cols)
         {
-            m_mat.set_zero(zero);
-        }
-
-        /**
-         * @brief Construct a matrix from a given dense matrix.
-         *
-         * @param[in] values The dense matrix from which to construct a
-         *                   sparse matrix from.
-         * @param[in] zero   The "zero" value.
-         *
-         * @todo Should we really support this interface?
-         */
-        Matrix(std::vector<std::vector<ScalarT> > const &values,
-               ScalarT    zero = static_cast<ScalarT>(0))
-            : m_mat(values, zero)
-        {
-            m_mat.set_zero(zero);
         }
 
         /**
@@ -549,6 +530,33 @@ namespace GraphBLAS
          */
         Matrix(Matrix<ScalarT, TagsT...> const &rhs)
             : m_mat(rhs.m_mat)
+        {
+        }
+
+        /**
+         * @brief Construct a dense matrix from dense data
+         *
+         * @param[in] values The dense matrix from which to construct a
+         *                   sparse matrix from.
+         *
+         * @todo Should we really support this interface?
+         */
+        Matrix(std::vector<std::vector<ScalarT> > const &values)
+            : m_mat(values)
+        {
+        }
+
+        /**
+         * @brief Construct a sparse matrix from dense data.
+         *
+         * @param[in] values The dense matrix from which to construct a
+         *                   sparse matrix from.
+         * @param[in] zero   The "zero" value.
+         *
+         * @todo Should we really support this interface?
+         */
+        Matrix(std::vector<std::vector<ScalarT> > const &values, ScalarT zero)
+            : m_mat(values, zero)
         {
         }
 
@@ -571,22 +579,23 @@ namespace GraphBLAS
         template<typename RAIteratorI,
                  typename RAIteratorJ,
                  typename RAIteratorV,
-                 typename AccumT = graphblas::math::Assign<ScalarType> >
-        void buildmatrix(RAIteratorI  i_it,
-                         RAIteratorJ  j_it,
-                         RAIteratorV  v_it,
-                         IndexType    n,
-                         AccumT       accum = AccumT())
+                 typename DupT = GraphBLAS::Second<ScalarType> >
+        void build(RAIteratorI  i_it,
+                   RAIteratorJ  j_it,
+                   RAIteratorV  v_it,
+                   IndexType    n,
+                   DupT         dup = DupT())
         {
-            m_mat.buildmatrix(i_it, j_it, v_it, n, accum);
+            m_mat.build(i_it, j_it, v_it, n, dup);
         }
 
         /// @todo Should assignment work only if dimensions are same?
-        Matrix<ScalarT, TagsT...>
+        Matrix<ScalarT, TagsT...> &
         operator=(Matrix<ScalarT, TagsT...> const &rhs)
         {
             if (this != &rhs)
             {
+                // backend currently doing dimension check.
                 m_mat = rhs.m_mat;
             }
             return *this;
@@ -595,38 +604,23 @@ namespace GraphBLAS
 
         /// Assignment from dense data
         /// @todo This ignores the structural zero value.
-        Matrix<ScalarT, TagsT...>& operator=(
-            std::vector<std::vector<ScalarT> > const &rhs)
-        {
-            m_mat = rhs;
-            return *this;
-        }
+        //Matrix<ScalarT, TagsT...>& operator=(
+        //    std::vector<std::vector<ScalarT> > const &rhs)
+        //{
+        //    m_mat = rhs;
+        //    return *this;
+        //}
 
-        /// Version 1 of getshape that assigns to two passed parameters
-        void get_shape(IndexType &num_rows, IndexType &num_cols) const
-        {
-            m_mat.get_shape(num_rows, num_cols);
-        }
+        void clear() { m_mat.clear(); }
 
-        /// Version 2 of getshape that returns a std::pair = [rows, cols]
-        std::pair<IndexType, IndexType> get_shape() const
-        {
-            IndexType num_rows, num_cols;
-            m_mat.get_shape(num_rows, num_cols);
-            return std::make_pair(num_rows, num_cols);
-        }
-
-        ScalarT get_zero() const { return m_mat.get_zero(); }
-        void set_zero(ScalarT new_zero) { m_mat.set_zero(new_zero); }
-
-        /// Get the number of stored values (including stored zeros).
-        IndexType get_nnz() const { return m_mat.get_nnz(); }
+        IndexType get_nrows() const  { return m_mat.get_nrows(); }
+        IndexType get_ncols() const  { return m_mat.get_ncols(); }
+        IndexType get_nvals() const  { return m_mat.get_nvals(); }
 
         /// @todo need to change to mix and match internal types
         bool operator==(Matrix<ScalarT, TagsT...> const &rhs) const
         {
-            //return (m_mat == rhs.m_mat);
-            return matrix_equal_helper(*this, rhs);
+            return (m_mat == rhs.m_mat);
         }
 
         bool operator!=(Matrix<ScalarT, TagsT...> const &rhs) const
@@ -636,13 +630,13 @@ namespace GraphBLAS
         }
 
         /// @todo I don't think this is a valid interface for sparse
-        ScalarT get_value_at(IndexType row, IndexType col) const
+        ScalarT extractElement(IndexType row, IndexType col) const
         {
             return m_mat.get_value_at(row, col);
         }
 
         /// @todo I don't think this is a valid interface for sparse
-        void set_value_at(IndexType row, IndexType col, ScalarT const &val)
+        void assignElement(IndexType row, IndexType col, ScalarT const &val)
         {
             m_mat.set_value_at(row, col, val);
         }
@@ -684,339 +678,33 @@ namespace GraphBLAS
                                        std::vector<ValueT>  const &values,
                                        BinaryOpT                   dup);
 
-        template<typename RAIteratorIT,
-                 typename RAIteratorJT,
-                 typename RAIteratorVT,
-                 typename AMatrixT>
-        friend inline void matrixExtract(RAIteratorIT        row_indices,
-                                         RAIteratorJT        col_indices,
-                                         RAIteratorVT        values,
-                                         AMatrixT     const &A,
-                                         std::string        &err);
-
-        template<typename ValueT,
-                 typename AMatrixT>
-        friend inline void matrixExtract(IndexArrayType            &row_indices,
-                                         IndexArrayType            &col_indices,
-                                         std::vector<ValueT>       &values,
-                                         AMatrixT            const &A,
-                                         std::string               &err);
-
         template<typename CMatrixT,
-                 typename MaskT,
                  typename AccumT,
                  typename SemiringT,
                  typename AMatrixT,
                  typename BMatrixT>
         friend inline void mxm(CMatrixT         &C,
-                               MaskT      const &Mask,
                                AccumT            accum,
                                SemiringT         op,
                                AMatrixT   const &A,
                                BMatrixT   const &B,
                                bool              replace_flag);
 
-        template<typename WVectorT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename UVectorT,
-                 typename AMatrixT>
-        friend inline void vxm(WVectorT         &w,
-                               MaskT      const &mask,
-                               AccumT            accum,
-                               SemiringT         op,
-                               UVectorT   const &u,
-                               AMatrixT   const &A,
-                               bool              replace_flag);
-
-        template<typename WVectorT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename AMatrixT,
-                 typename UVectorT>
-        friend inline void mxv(WVectorT        &w,
-                               MaskT     const &mask,
-                               AccumT           accum,
-                               SemiringT        op,
-                               AMatrixT  const &A,
-                               UVectorT  const &u,
-                               bool             replace_flag);
-
         template<typename CMatrixT,
                  typename MaskT,
                  typename AccumT,
-                 typename BinaryOpT,  //can be monoid or binaryop (not Semiring)
+                 typename SemiringT,
                  typename AMatrixT,
                  typename BMatrixT>
-        friend inline void eWiseMult(CMatrixT         &C,
-                                     MaskT      const &Mask,
-                                     AccumT            accum,
-                                     BinaryOpT         op,
-                                     AMatrixT   const &A,
-                                     BMatrixT   const &B,
-                                     bool              replace_flag);
+        inline void mxm(CMatrixT         &C,
+                        MaskT      const &Mask,
+                        AccumT            accum,
+                        SemiringT         op,
+                        AMatrixT   const &A,
+                        BMatrixT   const &B,
+                        bool              replace_flag);
 
-        template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename BinaryOpT,
-                 typename AMatrixT,
-                 typename BMatrixT >
-        friend inline void eWiseAdd(CMatrixT         &C,
-                                    MaskT      const &Mask,
-                                    AccumT            accum,
-                                    BinaryOpT         op,
-                                    AMatrixT   const &A,
-                                    BMatrixT   const &B,
-                                    bool              replace_flag);
-
-        /// Standard Matrix version
-        template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename AMatrixT,
-                 typename RAIteratorI,
-                 typename RAIteratorJ>
-        friend inline void extract(CMatrixT             &C,
-                                   MaskT          const &Mask,
-                                   AccumT                accum,
-                                   AMatrixT       const &A,
-                                   RAIteratorI           row_indices,
-                                   IndexType             nrows,
-                                   RAIteratorJ           col_indices,
-                                   IndexType             ncols,
-                                   bool                  replace_flag);
-
-        template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename AMatrixT>
-        friend inline void extract(CMatrixT             &C,
-                                   MaskT          const &Mask,
-                                   AccumT                accum,
-                                   AMatrixT       const &A,
-                                   IndexArrayType const &row_indices,
-                                   IndexArrayType const &col_indices,
-                                   bool                  replace_flag);
-
-        // Extract col (or row with transpose)
-        template<typename WVectorT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename AMatrixT,
-                 typename RAIteratorI>
-        friend inline void extract(WVectorT             &w,
-                                   MaskT          const &mask,
-                                   AccumT                accum,
-                                   AMatrixT       const &A,
-                                   RAIteratorI           row_indices,
-                                   IndexType             nrows,
-                                   IndexType             col_index,
-                                   bool                  replace_flag);
-
-        template<typename WVectorT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename AMatrixT>
-        friend inline void extract(WVectorT             &w,
-                                   MaskT          const &mask,
-                                   AccumT                accum,
-                                   AMatrixT       const &A,
-                                   IndexArrayType const &row_indices,
-                                   IndexType             col_index,
-                                   bool                  replace_flag);
-
-        // Extract single element (vector and matrix variants
-        template <typename ValueT,
-                  typename AccumT,
-                  typename AMatrixT>
-        friend inline void extract(ValueT            &dst,
-                                   AccumT             accum,
-                                   AMatrixT    const &A,
-                                   IndexType          row_index,
-                                   IndexType          col_index,
-                                   std::string       &err);
-
-        // Standard Matrix variant
-        template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename AMatrixT,
-                 typename RAIteratorI,
-                 typename RAIteratorJ>
-        friend inline void assign(CMatrixT          &C,
-                                  MaskT       const &Mask,
-                                  AccumT             accum,
-                                  AMatrixT    const &A,
-                                  RAIteratorI        row_indices,
-                                  IndexType          num_rows,
-                                  RAIteratorJ        col_indices,
-                                  IndexType          num_cols,
-                                  bool               replace_flag);
-
-        template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename AMatrixT>
-        friend inline void assign(CMatrixT             &C,
-                                  MaskT          const &Mask,
-                                  AccumT                accum,
-                                  AMatrixT       const &A,
-                                  IndexArrayType const &row_indices,
-                                  IndexArrayType const &col_indices,
-                                  bool                  replace_flag);
-
-        // Assign Column variant
-        template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename UVectorT,
-                 typename RAIteratorT>
-        friend inline void assign(CMatrixT          &C,
-                                  MaskT       const &mask,  // a vector
-                                  AccumT             accum,
-                                  UVectorT    const &u,
-                                  RAIteratorT        row_indices,
-                                  IndexType          num_rows,
-                                  IndexType          col_index,
-                                  bool               replace_flag);
-
-        template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename UVectorT>
-        friend inline void assign(CMatrixT             &C,
-                                  MaskT          const &mask,  // a vector
-                                  AccumT                accum,
-                                  UVectorT       const &u,
-                                  IndexArrayType const &row_indices,
-                                  IndexType             col_index,
-                                  bool                  replace_flag);
-
-        // Assign row variant
-        template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename UVectorT,
-                 typename RAIteratorT>
-        friend inline void assign(CMatrixT          &C,
-                                  MaskT       const &mask,  // a vector
-                                  AccumT             accum,
-                                  UVectorT    const &u,
-                                  IndexType          row_index,
-                                  RAIteratorT        col_indices,
-                                  IndexType          num_cols,
-                                  bool               replace_flag);
-
-        template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename UVectorT>
-        friend inline void assign(CMatrixT             &C,
-                                  MaskT          const &mask,  // a vector
-                                  AccumT                accum,
-                                  UVectorT       const &u,
-                                  IndexType             row_index,
-                                  IndexArrayType const &col_indices,
-                                  bool                  replace_flag);
-
-        // Single value variant (matrix)
-        template<typename CMatrixT,
-                 typename AccumT,
-                 typename ValueT>
-        friend inline void assign(CMatrixT             &C,
-                                  AccumT                accum,
-                                  ValueT                src,
-                                  IndexType             row_index,
-                                  IndexType             col_index,
-                                  bool                  replace_flag);
-
-        // Matrix constant variant
-        template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename ValueT,
-                 typename RAIteratorIT,
-                 typename RAIteratorJT>
-        friend inline void assign(CMatrixT           &C,
-                                  MaskT        const &Mask,
-                                  AccumT              accum,
-                                  ValueT              val,
-                                  RAIteratorIT const &row_indices,
-                                  IndexType           num_rows,
-                                  RAIteratorJT const &col_indices,
-                                  IndexType           num_cols,
-                                  bool                replace_flag);
-
-
-        template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename ValueT>
-        friend inline void assign(CMatrixT             &C,
-                                  MaskT          const &Mask,
-                                  AccumT                accum,
-                                  ValueT                val,
-                                  IndexArrayType const &row_indices,
-                                  IndexArrayType const &col_indices,
-                                  bool                  replace_flag);
-
-        // matrix variant
-        template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename UnaryFunctionT,
-                 typename AMatrixT>
-        friend inline void apply(CMatrixT             &C,
-                                 MaskT          const &Mask,
-                                 AccumT                accum,
-                                 UnaryFunctionT        op,
-                                 AMatrixT       const &A,
-                                 bool                  replace_flag);
-
-        // row reduce matrix to vector variant (transpose for col reduce)
-        template<typename WVectorT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename BinaryFunctionT,  // monoid or binary op only
-                 typename AMatrixT>
-        friend inline void reduce(WVectorT              &u,
-                                  MaskT           const &mask,
-                                  AccumT                 accum,
-                                  BinaryFunctionT        op,
-                                  AMatrixT        const &A,
-                                  bool                   replace_flag);
-
-        // matrix-scalar variant
-        template<typename ValueT,
-                 typename AccumT,
-                 typename MonoidT, // monoid only
-                 typename AMatrixT>
-        friend inline void reduce(ValueT           &dst,
-                                  AccumT            accum,
-                                  MonoidT           op,
-                                  AMatrixT   const &A,
-                                  bool              replace_flag);
-
-        template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename AMatrixT>
-        friend inline void transpose(CMatrixT       &C,
-                                     MaskT    const &Mask,
-                                     AccumT          accum,
-                                     AMatrixT const &A,
-                                     bool            replace_flag);
-
-        template<typename MatrixT>
-        friend inline ComplementView<MatrixT> complement(MatrixT const &A);
-
-
-        template<typename MatrixT>
-        friend inline TransposeView<MatrixT> transpose(MatrixT const &A);
-
+        // .... ADD OTHER OPERATIONS AS FRIENDS AS THEY ARE IMPLEMENTED .....
 
         template <typename MatrixT>
         friend void print_matrix(std::ostream      &ostr,
@@ -1026,7 +714,6 @@ namespace GraphBLAS
 
     private:
         BackendType m_mat;
-
     };
 
 } // end namespace GraphBLAS

@@ -140,6 +140,27 @@ namespace GraphBLAS
     // mxm, vxm, mxv
     //****************************************************************************
     template<typename CMatrixT,
+             typename AccumT,
+             typename SemiringT,
+             typename AMatrixT,
+             typename BMatrixT>
+    inline void mxm(CMatrixT         &C,
+                    AccumT            accum,
+                    SemiringT         op,
+                    AMatrixT   const &A,
+                    BMatrixT   const &B,
+                    bool              replace_flag = false)
+    {
+        if ((C.get_nrows() != A.get_nrows()) ||
+            (A.get_ncols() != B.get_nrows()) ||
+            (C.get_ncols() != B.get_ncols()))
+        {
+            throw DimensionException("mxm(nomask)");
+        }
+        backend::mxm(C.m_mat, accum, op, A.m_mat, B.m_mat, replace_flag);
+    }
+
+    template<typename CMatrixT,
              typename MaskT,
              typename AccumT,
              typename SemiringT,
@@ -151,7 +172,18 @@ namespace GraphBLAS
                     SemiringT         op,
                     AMatrixT   const &A,
                     BMatrixT   const &B,
-                    bool              replace_flag = false);
+                    bool              replace_flag = false)
+    {
+        if ((C.get_nrows() != A.get_nrows()) ||
+            (A.get_ncols() != B.get_nrows()) ||
+            (C.get_ncols() != B.get_ncols()) ||
+            (C.get_nrows() != Mask.get_nrows()) ||
+            (C.get_ncols() != Mask.get_ncols()))
+        {
+            throw DimensionException("mxm(mask)");
+        }
+        backend::mxm(C.m_mat, Mask.m_mat, accum, op, A.m_mat, B.m_mat, replace_flag);
+    }
 
     template<typename WVectorT,
              typename MaskT,

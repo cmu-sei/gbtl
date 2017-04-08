@@ -93,17 +93,31 @@ namespace GraphBLAS
             {
             }
 
-            // construct a matrix from dense data.
+            // construct a dense matrix from dense data.
             Matrix(std::vector<std::vector<ScalarT> > const &values)
                 : LilSparseMatrix<ScalarT>(values)
             {
             }
 
-            //default constructor for constmat
-            //Matrix(): LilSparseMatrix<ScalarT>(1,1,0) {}
+            // construct a sparse matrix from dense data and a zero val.
+            Matrix(std::vector<std::vector<ScalarT> > const &values,
+                   ScalarT                                   zero)
+                : LilSparseMatrix<ScalarT>(values, zero)
+            {
+            }
 
             ~Matrix()
             {
+            }
+
+            bool operator==(Matrix const &rhs) const
+            {
+                return LilSparseMatrix<ScalarT>::operator==(rhs);
+            }
+
+            bool operator!=(Matrix const &rhs) const
+            {
+                return LilSparseMatrix<ScalarT>::operator!=(rhs);
             }
 
             void print_info(std::ostream &os) const
