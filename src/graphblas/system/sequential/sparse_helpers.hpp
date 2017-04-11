@@ -160,6 +160,7 @@ namespace GraphBLAS
 
         //************************************************************************
         /// Apply element-wise operation to union on sparse vectors.
+        // @todo: What is the bool return type for?
         template <typename D1, typename D2, typename D3, typename BinaryOpT>
         bool ewise_or(std::vector<std::tuple<GraphBLAS::IndexType,D3> >       &ans,
                       std::vector<std::tuple<GraphBLAS::IndexType,D1> > const &vec1,
@@ -195,12 +196,14 @@ namespace GraphBLAS
                     else if (v2_idx > v1_idx)
                     {
                         //std::cerr << "Copying v1, Advancing v1_it" << std::endl;
+                        // @todo: Should these static_cast??
                         ans.push_back(std::make_tuple(v1_idx, v1_val));
                         ++v1_it;
                     }
                     else
                     {
                         //std::cerr << "Copying v2, Advancing v2_it" << std::endl;
+                        // @todo: Should these static_cast??
                         ans.push_back(std::make_tuple(v2_idx, v2_val));
                         ++v2_it;
                     }
@@ -218,6 +221,188 @@ namespace GraphBLAS
                     ++v2_it;
                 }
             }
+        }
+
+        //************************************************************************
+        //************************************************************************
+
+        /// Increments the provided iterate while the value is less than the provided index
+        template <typename I>
+        void increment_until_true(
+            // std::vector<std::tuple<GraphBLAS::IndexType,D> >::const_iterator    &iter,
+            // std::vector<std::tuple<GraphBLAS::IndexType,D> >::const_iterator    &iter_end,
+            I          &iter,
+            I const    &iter_end)
+        {
+            using value_type = typename std::iterator_traits<I>::value_type;
+            using data_type = typename std::tuple_element<1, value_type>::type;
+
+            GraphBLAS::IndexType tmp_idx;
+            data_type tmp_val;
+
+            if (iter == iter_end)
+                return;
+
+            std::tie(tmp_idx, tmp_val) = *iter;
+            while (!tmp_val && iter != iter_end)
+            {
+                //std::cout << "Iter not true. index: " + std::to_string(tmp_idx) + 
+                //    " incrementing."  << std::endl;;
+                ++iter;
+                if (iter == iter_end)
+                    return;
+
+                // Reload
+                std::tie(tmp_idx, tmp_val) = *iter;
+            }
+        }
+
+        //************************************************************************
+
+        /// Increments the provided iterate while the value is less than the provided index
+        template <typename I>
+        void increment_while_below(
+            // std::vector<std::tuple<GraphBLAS::IndexType,D> >::const_iterator    &iter,
+            // std::vector<std::tuple<GraphBLAS::IndexType,D> >::const_iterator    &iter_end,
+            I         &iter,
+            I const   &iter_end,
+            GraphBLAS::IndexType                                                 idx)
+        {
+            using value_type = typename std::iterator_traits<I>::value_type;
+            using data_type = typename std::tuple_element<1, value_type>::type;
+
+            GraphBLAS::IndexType tmp_idx;
+            data_type tmp_val;
+
+            if (iter == iter_end)
+                return;
+
+            std::tie(tmp_idx, tmp_val) = *iter;
+            while (tmp_idx < idx && iter != iter_end)
+            {
+                //std::cout << "Iter at: " + std::to_string(tmp_idx) +  ", below index: " + 
+                //    std::to_string(idx) + " incrementing."  << std::endl;;
+                ++iter;
+                if (iter == iter_end)
+                    return;
+
+                // Reload
+                std::tie(tmp_idx, tmp_val) = *iter;
+            }
+        }
+
+        //************************************************************************
+
+        template <typename D1, typename D2, typename D3, typename M, typename BinaryOpT>
+        void ewise_or_mask(std::vector<std::tuple<GraphBLAS::IndexType,D3> >       &ans,
+                           std::vector<std::tuple<GraphBLAS::IndexType,D1> > const &vec1,
+                           std::vector<std::tuple<GraphBLAS::IndexType,D2> > const &vec2,
+                           std::vector<std::tuple<GraphBLAS::IndexType,M> > const  &mask,
+                           BinaryOpT                                                op)
+        {
+            // DESIGN:
+            // This algo is driven by the mask, so we move to a valid mask entry, then
+            // "catch up" the other iterators.  If they match the current valid mask
+            // then we process them as with the other ewise option.  Rinse, repeat.
+            ans.clear();
+
+            //std::cerr << "" << std::endl;
+            //std::cerr << "Starting ewise_or_mask on row" << std::endl;
+            if (mask.empty())
+            {
+                //std::cerr << "Mask exhausted(0)." << std::endl;
+                return;
+            }
+
+            auto v1_it = vec1.begin();
+            auto v2_it = vec2.begin();
+            auto mask_it = mask.begin();
+
+            D1 v1_val;
+            D2 v2_val;
+            M  mask_val;
+            GraphBLAS::IndexType v1_idx, v2_idx, mask_idx;
+
+            // Walk the mask.
+            while (mask_it != mask.end())
+            {
+                // Make sure the mask is on a valid value
+                increment_until_true(mask_it, mask.end());
+
+                // If we run out of mask, we are done!
+                if (mask_it == mask.end())
+                {
+                    //std::cerr << "Mask exhausted(1)." << std::endl;
+                    return;
+                }
+
+                std::tie(mask_idx, mask_val) = *mask_it;
+
+                // Increment V1 while less than mask
+                increment_while_below(v1_it, vec1.end(), mask_idx);
+
+                // Increment V2 while less than mask
+                increment_while_below(v2_it, vec2.end(), mask_idx);
+
+                // If any of the input vectors match, put their values in the ouput vectors
+                // invoking the supplied binary operator if we have both values, otherwise
+                // just put in that value.
+                // @todo: Is that really valid?  Should we still call the accumulator with
+                // some "empty" value, or "zero" value?
+                if ((v1_it != vec1.end()) && (v2_it != vec2.end()))
+                {
+                    std::tie(v1_idx, v1_val) = *v1_it;
+                    std::tie(v2_idx, v2_val) = *v2_it;
+
+                    if (v1_idx == v2_idx && v1_idx == mask_idx)
+                    {
+                        //std::cerr << "Accum: " << std::to_string(v1_val) << " op " <<
+                        //    std::to_string(v2_val) << std::endl;
+                        ans.push_back(std::make_tuple(mask_idx,
+                                                      static_cast<D3>(op(v1_val, v2_val))));
+                    }
+                    else if (v1_idx == mask_idx)
+                    {
+                        ans.push_back(std::make_tuple(mask_idx, static_cast<D3>(v1_val)));
+                        //std::cerr << "Copying v1. val: " << std::to_string(v1_val) << std::endl;
+                    }
+                    else if (v2_idx == mask_idx)
+                    {
+                        ans.push_back(std::make_tuple(mask_idx, static_cast<D3>(v2_val)));
+                        //std::cerr << "Copying v2. val: " <<  std::to_string(v2_val) << std::endl;
+                    }
+                }
+                else if (v1_it != vec1.end())
+                {
+                    std::tie(v1_idx, v1_val) = *v1_it;
+                    if (v1_idx == mask_idx)
+                    {
+                        ans.push_back(std::make_tuple(mask_idx, static_cast<D3>(v1_val)));
+                        //std::cerr << "Copying v1. val: " << std::to_string(v1_val) << std::endl;
+                    }
+                }
+                else if (v2_it != vec2.end())
+                {
+                    std::tie(v2_idx, v2_val) = *v2_it;
+                    if (v2_idx == mask_idx)
+                    {
+                        ans.push_back(std::make_tuple(mask_idx, static_cast<D3>(v2_val)));
+                        //std::cerr << "Copying v2. val: " <<  std::to_string(v2_val) << std::endl;
+                    }
+                }
+                else
+                {
+                    // We have more mask, but no more other vec
+                    //std::cerr << "Inputs (not mask) exhausted." << std::endl;
+                    return;
+                }
+
+                // Now move to the next mask entry.
+                ++mask_it;
+
+            } // while mask_it != end
+
+            //std::cerr << "Mask exhausted(2)." << std::endl;
         }
 
         //************************************************************************
@@ -289,21 +474,32 @@ namespace GraphBLAS
         }
 
         template <typename M1, typename M2>
-        void check_transposed_dimensions(M1 m1, std::string m1Name, M2 m2, std::string m2Name)
+        void check_inside_dimensions(M1 m1, std::string m1Name, M2 m2, std::string m2Name)
         {
-            if (m1.get_nrows() != m2.get_ncols())
-            {
-                throw DimensionException("Matrix ROW vs COL counts are not the same. " + 
-                    m1Name + " row = " + std::to_string(m1.get_nrows()) + ", " + 
-                    m2Name + " col = " + std::to_string(m2.get_ncols()) );
-            }
-
             if (m1.get_ncols() != m2.get_nrows())
             {
-                throw DimensionException("Matrix COL vs ROW counts are not the same. " + 
+                throw DimensionException("Matrix COL vs ROW counts (inner) are not the same. " + 
                     m1Name + " col = " + std::to_string(m1.get_ncols()) + ", " + 
                     m2Name + " row = " + std::to_string(m2.get_nrows()) );
-            }           
+            }
+        }
+
+        template <typename M1, typename M2, typename M3>
+        void check_outside_dimensions(M1 m1, std::string m1Name, M2 m2, std::string m2Name, M3 m3, std::string m3Name)
+        {
+            if (m1.get_nrows() != m3.get_nrows())
+            {
+                throw DimensionException("Matrix ROW vs ROW counts (outer) are not the same. " + 
+                    m1Name + " row = " + std::to_string(m1.get_nrows()) + ", " + 
+                    m3Name + " row = " + std::to_string(m3.get_nrows()) );
+            }
+
+            if (m2.get_ncols() != m3.get_ncols())
+            {
+                throw DimensionException("Matrix COL vs COL counts (outer) are not the same. " + 
+                    m2Name + " col = " + std::to_string(m2.get_ncols()) + ", " + 
+                    m3Name + " col = " + std::to_string(m3.get_ncols()) );
+            }
         }
 
     } // backend

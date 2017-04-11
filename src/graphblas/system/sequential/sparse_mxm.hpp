@@ -129,6 +129,13 @@ namespace GraphBLAS
 
         //**********************************************************************
         /// Matrix-matrix multiply for LilSparseMatrix'es
+
+        // Okay! This is a total mess.  If we change the name to "mxm" it conflicts
+        // with the names in operations and sequentail/operations.  Lots of weird
+        // wiring going on here.  I (andrew) can't get this thing to properly resolve
+        // all the symbols.  It is either a namespace error, or overload error or 
+        // something.  Switching to more strict signatures ends up with weird
+        // errors in GraphBLAS::backend::Matrix when operations tries to get m_mat.
         template<typename CMatrixT,
                  typename AccumT,
                  typename SemiringT,
@@ -148,10 +155,11 @@ namespace GraphBLAS
             IndexType ncol_C(C.get_ncols());
 
             // The following should be checked by the frontend only:
-            if (ncol_A != nrow_B || nrow_A != nrow_C || ncol_B != ncol_C)
-            {
-                throw DimensionException("mxm: matrix dimensions are not compatible");
-            }
+            // Inside parts must match
+            check_inside_dimensions(A, "A", B, "B");
+
+            // Output must match
+            check_outside_dimensions(A, "A", B, "B", C, "C");
 
             typedef typename AMatrixT::ScalarType AScalarType;
             typedef typename BMatrixT::ScalarType BScalarType;
@@ -221,7 +229,8 @@ namespace GraphBLAS
                                 AccumT          accum,
                                 SemiringT       op,
                                 AMatrixT const &A,
-                                BMatrixT const &B)
+                                BMatrixT const &B,
+                                bool            replace = false)
         {
             IndexType nrow_A(A.get_nrows());
             IndexType ncol_A(A.get_ncols());
@@ -233,9 +242,10 @@ namespace GraphBLAS
             IndexType ncol_M(M.get_ncols());
 
             // @todo: Move these checks into the front end when we get that wired up
-            check_transposed_dimensions(A, "A", B, "B");
-            check_dimensions(A, "A", C, "C");
-            check_dimensions(C, "C", M, "M");
+            // @todo: Move these checks into the front end when we get that wired up
+            check_inside_dimensions(A, "A", B, "B");
+            check_outside_dimensions(A, "A", B, "B", C, "C");
+            check_dimensions(A, "A", M, "M");
 
             typedef typename AMatrixT::ScalarType AScalarType;
             typedef typename BMatrixT::ScalarType BScalarType;
@@ -314,20 +324,29 @@ namespace GraphBLAS
 
             /// @todo  Detect if accum is GrB_NULL, and take a short cut
             // Perform accum
+
             // NOTE: We do not consult the mask!  Since no value should have been
             // generated above, and we ASSUME ('cause we looked at the code) that 
-            // the ewise_or does a no-op on cells that have not value, then we 
-            // shouldn't need to mask.
+            // the ewise_or does a no-op (accum-wise) on cells that have no value, then we 
+            // shouldn't need to mask here as well.
             CColType tmp_row;
-            for (IndexType row_idx = 0; row_idx < nrow_C; ++row_idx)
+            if (replace)
             {
-                ewise_or(tmp_row, C.get_row(row_idx), T.get_row(row_idx), accum);
-                C.set_row(row_idx, tmp_row);
+                for (IndexType row_idx = 0; row_idx < nrow_C; ++row_idx)
+                {
+                    ewise_or_mask(tmp_row, C.get_row(row_idx), T.get_row(row_idx), M.get_row(row_idx), accum);
+                    C.set_row(row_idx, tmp_row);
+                }
+            }
+            else
+            {
+                for (IndexType row_idx = 0; row_idx < nrow_C; ++row_idx)
+                {
+                    ewise_or(tmp_row, C.get_row(row_idx), T.get_row(row_idx), accum);
+                    C.set_row(row_idx, tmp_row);
+                }
             }
         }
-
-
-
     } // backend
 
 

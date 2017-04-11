@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_SUITE(mxm_suite)
 
 //****************************************************************************
 // Matrix multiply
-BOOST_AUTO_TEST_CASE(mxm_reg)
+BOOST_AUTO_TEST_CASE(mxm_reg_square)
 {
     std::vector<std::vector<double>> mat1 = {{8, 1, 6},
                                              {3, 5, 7},
@@ -46,24 +46,45 @@ BOOST_AUTO_TEST_CASE(mxm_reg)
     GraphBLAS::IndexType M = 3;
     GraphBLAS::IndexType N = 3;
     GraphBLAS::LilSparseMatrix<double> result(M, N);
-    std::cout << "\nMatrices built";
-    GraphBLAS::backend::mxm(result,
-                            GraphBLAS::Second<double>(),                // accum
-                            GraphBLAS::ArithmeticSemiring<double>(),    // semiring
-                            m1,
-                            m2);
-    std::cout << "\nmxm computed";
-    BOOST_CHECK_EQUAL(result, answer);
 
     GraphBLAS::backend::mxm_v2(result,
                             GraphBLAS::Second<double>(),                // accum
                             GraphBLAS::ArithmeticSemiring<double>(),    // semiring
                             m1,
                             m2);
-    std::cout << "\nmxm_v2 computed";
     BOOST_CHECK_EQUAL(result, answer);
 }
 
+//****************************************************************************
+// Matrix multiply with a rectangular matrix
+BOOST_AUTO_TEST_CASE(mxm_reg_rect)
+{
+    std::vector<std::vector<double>> mat1 = {{8, 1},
+                                             {3, 5},
+                                             {4, 9}};
+
+    std::vector<std::vector<double>> mat2 = {{0, 1, 1},
+                                             {1, 0, 1}};
+
+    std::vector<std::vector<double>> mat3 = {{1, 8, 9},
+                                             {5, 3, 8},
+                                             {9, 4, 13}};
+
+    GraphBLAS::LilSparseMatrix<double> m1(mat1, 0);
+    GraphBLAS::LilSparseMatrix<double> m2(mat2, 0);
+    GraphBLAS::LilSparseMatrix<double> answer(mat3, 0);
+    GraphBLAS::IndexType M = 3;
+    GraphBLAS::IndexType N = 3;
+    GraphBLAS::LilSparseMatrix<double> result(M, N);
+
+    // Accumulate "Second" should provide same result.
+    GraphBLAS::backend::mxm_v2(result,
+                            GraphBLAS::Second<double>(),                // accum
+                            GraphBLAS::ArithmeticSemiring<double>(),    // semiring
+                            m1,
+                            m2);
+    BOOST_CHECK_EQUAL(result, answer);
+}
 
 //****************************************************************************
 // Matrix multiply with a boolean mask
@@ -100,6 +121,95 @@ BOOST_AUTO_TEST_CASE(mxm_mask_bool)
                             m1,
                             m2);
     BOOST_CHECK_EQUAL(result, answer);
+}
+
+
+//****************************************************************************
+// Matrix multiply with a boolean mask
+BOOST_AUTO_TEST_CASE(mxm_mask_bool_accum)
+{
+    std::vector<std::vector<double>> mat1 = {{8, 1, 6},
+                                             {3, 5, 7},
+                                             {4, 9, 2}};
+
+    std::vector<std::vector<double>> mat2 = {{0, 1, 1},
+                                             {1, 0, 1},
+                                             {1, 1, 0}};
+
+    std::vector<std::vector<bool>>   matMask = {{true,  false, true},
+                                                {false, true,  false},
+                                                {true,  false, true}};
+
+    std::vector<std::vector<double>> matExisting = {{1, 1, 1},
+                                                    {0, 0, 0},
+                                                    {0, 0, 0}};
+
+    // without pre-existing but with mask                                              
+    // std::vector<std::vector<double>> matAnswer = {{7, 0, 9},
+    //                                               {0, 10, 0},
+    //                                               {11, 0, 13}};
+    std::vector<std::vector<double>> matAnswer = {{8,  1,  10},
+                                                  {0,  10, 0},
+                                                  {11, 0,  13}};
+
+    GraphBLAS::LilSparseMatrix<double> m1(mat1, 0);
+    GraphBLAS::LilSparseMatrix<double> m2(mat2, 0);
+    GraphBLAS::LilSparseMatrix<bool> mask(matMask, 0);
+    GraphBLAS::LilSparseMatrix<double> answer(matAnswer, 0);
+    GraphBLAS::LilSparseMatrix<double> result(matExisting, 0);
+
+    GraphBLAS::backend::mxm_v2_mask(result,
+                            mask,
+                            GraphBLAS::Plus<double>(),                // accum
+                            GraphBLAS::ArithmeticSemiring<double>(),  // semiring
+                            m1,
+                            m2);
+    BOOST_CHECK_EQUAL(result, answer);
+}
+
+//****************************************************************************
+// Matrix multiply with a boolean mask
+BOOST_AUTO_TEST_CASE(mxm_mask_bool_accum_replace)
+{
+    std::vector<std::vector<double>> mat1 = {{8, 1, 6},
+                                             {3, 5, 7},
+                                             {4, 9, 2}};
+
+    std::vector<std::vector<double>> mat2 = {{0, 1, 1},
+                                             {1, 0, 1},
+                                             {1, 1, 0}};
+
+    std::vector<std::vector<bool>>   matMask = {{true,  false, true},
+                                                {false, true,  false},
+                                                {true,  false, true}};
+
+    std::vector<std::vector<double>> matExisting = {{1, 2, 3},
+                                                    {4, 5, 6},
+                                                    {7, 8, 9}};
+
+    // without pre-existing                                                
+    // std::vector<std::vector<double>> matAnswer = {{7, 0, 9},
+    //                                               {0, 10, 0},
+    //                                               {11, 0, 13}};
+    std::vector<std::vector<double>> matAnswer = {{8,  0,  12},
+                                                  {0,  15, 0},
+                                                  {18, 0,  22}};
+
+    GraphBLAS::LilSparseMatrix<double> m1(mat1, 0);
+    GraphBLAS::LilSparseMatrix<double> m2(mat2, 0);
+    GraphBLAS::LilSparseMatrix<bool> mask(matMask, 0);
+    GraphBLAS::LilSparseMatrix<double> answer(matAnswer, 0);
+    GraphBLAS::LilSparseMatrix<double> result(matExisting, 0);
+
+    GraphBLAS::backend::mxm_v2_mask(result,
+                            mask,
+                            GraphBLAS::Plus<double>(),                // accum
+                            GraphBLAS::ArithmeticSemiring<double>(),  // semiring
+                            m1,
+                            m2,
+                            true);
+    BOOST_CHECK_EQUAL(result, answer);
+
 }
 
 //****************************************************************************
@@ -161,7 +271,7 @@ BOOST_AUTO_TEST_CASE(mxm_reg_empty)
     GraphBLAS::IndexType M = 3;
     GraphBLAS::IndexType N = 3;
     GraphBLAS::LilSparseMatrix<double> result(M, N);
-    GraphBLAS::backend::mxm(result,
+    GraphBLAS::backend::mxm_v2(result,
                             GraphBLAS::Second<double>(),
                             GraphBLAS::ArithmeticSemiring<double>(),
                             m1,
