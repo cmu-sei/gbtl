@@ -173,8 +173,9 @@ namespace algorithms
         }
         std::cerr << "======= END BACKPROP phase =======" << std::endl;
         graphblas::print_matrix(std::cerr, BCu, "BC Updates");
+
         graphblas::Matrix<float> result =
-            graphblas::fill<graphblas::Matrix<float>>(-nsver, 1, n);
+            graphblas::fill<graphblas::Matrix<float>>(nsver * -1.0F, 1, n);
         graphblas::col_reduce(BCu, result, FP32Add,
                               graphblas::math::Accum<float>());
         graphblas::print_matrix(std::cerr, result, "RESULT");
@@ -341,7 +342,7 @@ namespace algorithms
         std::cerr << "======= END BACKPROP phase =======" << std::endl;
         graphblas::print_matrix(std::cerr, BCu, "BC Updates");
         graphblas::Matrix<float> result =
-            graphblas::fill<graphblas::Matrix<float>>(-nsver, n, 1);
+            graphblas::fill<graphblas::Matrix<float>>(nsver * -1.0F, n, 1);
         graphblas::row_reduce(BCu, result, FP32Add,
                               graphblas::math::Accum<float>());
         graphblas::print_matrix(std::cerr, result, "RESULT");
@@ -505,8 +506,9 @@ namespace algorithms
         }
         std::cerr << "======= END BACKPROP phase =======" << std::endl;
         graphblas::print_matrix(std::cerr, BCu, "BC Updates");
+
         graphblas::Matrix<float> result =
-            graphblas::fill<graphblas::Matrix<float>>(-nsver, n, 1);
+            graphblas::fill<graphblas::Matrix<float>>(nsver * -1.0F, n, 1);
         graphblas::row_reduce(BCu, result, FP32Add,
                               graphblas::math::Accum<float>());
         graphblas::print_matrix(std::cerr, result, "RESULT");
