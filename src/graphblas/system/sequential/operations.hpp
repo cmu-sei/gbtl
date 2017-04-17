@@ -32,7 +32,11 @@
 #include <graphblas/algebra.hpp>
 #include <graphblas/system/sequential/TransposeView.hpp>
 #include <graphblas/system/sequential/NegateView.hpp>
-#include <graphblas/system/sequential/operations_sparse.hpp>
+
+// Add individual operation files here
+//#include <graphblas/system/sequential/.hpp>
+#include <graphblas/system/sequential/sparse_mxm.hpp>
+#include <graphblas/system/sequential/sparse_mxv.hpp>
 
 namespace GraphBLAS
 {
@@ -42,20 +46,27 @@ namespace GraphBLAS
         /**
          *  @todo Need to add a parameter (functor?) to handle duplicate locations
          */
-        template<typename MatrixT,
-                 typename RAIteratorI,
-                 typename RAIteratorJ,
-                 typename RAIteratorV,
-                 typename AccumT>
-        inline void matrixBuild(MatrixT     &m,
-                                RAIteratorI  i,
-                                RAIteratorJ  j,
-                                RAIteratorV  v,
-                                IndexType    n,
-                                AccumT       accum)
+        template<typename CMatrixT,
+                 typename RAIteratorIT,
+                 typename RAIteratorJT,
+                 typename RAIteratorVT,
+                 typename BinaryOpT>
+        inline void matrixBuild(CMatrixT           &C,
+                                RAIteratorIT        row_it,
+                                RAIteratorJT        col_it,
+                                RAIteratorVT        val_it,
+                                IndexType           num_vals,
+                                BinaryOpT           dup)
         {
             // @todo: Why change names again?  (e.g. buildmatrix -> matrixBuild -> build)
-            m.build(i, j, v, n, accum);
+            if (C.get_nvals() != 0)
+            {
+                /// @todo Do we silently clear or throw an exception
+                //throw NotEmptyException("matrixBuild");
+            }
+
+            // C.build() currently calls C.clear()
+            C.build(row_it, col_it, val_it, num_vals, dup);
         }
 
         // Note: this forward might not be necessary.  Need to revisit
