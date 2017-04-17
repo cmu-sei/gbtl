@@ -39,92 +39,92 @@ namespace GraphBLAS
 {
     namespace backend
     {
-        //**************************************************************************
-        //Matrix-Matrix multiply for LilSparseMatrix
-        // @deprecated - see version 2
-        //**************************************************************************
-        template<typename CMatrixT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename AMatrixT,
-                 typename BMatrixT>
-        inline void mxm(CMatrixT       &C,
-                        AccumT          accum,
-                        SemiringT       op,
-                        AMatrixT const &A,
-                        BMatrixT const &B)
-        {
-            IndexType nrow_A(A.get_nrows());
-            IndexType ncol_A(A.get_ncols());
-            IndexType nrow_B(B.get_nrows());
-            IndexType ncol_B(B.get_ncols());
-            IndexType nrow_C(C.get_nrows());
-            IndexType ncol_C(C.get_ncols());
+//         //**************************************************************************
+//         //Matrix-Matrix multiply for LilSparseMatrix
+//         // @deprecated - see version 2
+//         //**************************************************************************
+//         template<typename CMatrixT,
+//                  typename AccumT,
+//                  typename SemiringT,
+//                  typename AMatrixT,
+//                  typename BMatrixT>
+//         inline void mxm(CMatrixT       &C,
+//                         AccumT          accum,
+//                         SemiringT       op,
+//                         AMatrixT const &A,
+//                         BMatrixT const &B)
+//         {
+//             IndexType nrow_A(A.get_nrows());
+//             IndexType ncol_A(A.get_ncols());
+//             IndexType nrow_B(B.get_nrows());
+//             IndexType ncol_B(B.get_ncols());
+//             IndexType nrow_C(C.get_nrows());
+//             IndexType ncol_C(C.get_ncols());
 
-            if (ncol_A != nrow_B || nrow_A != nrow_C || ncol_B != ncol_C)
-            {
-                throw DimensionException("mxm: matrix dimensions are not compatible");
-            }
+//             if (ncol_A != nrow_B || nrow_A != nrow_C || ncol_B != ncol_C)
+//             {
+//                 throw DimensionException("mxm: matrix dimensions are not compatible");
+//             }
 
-            IndexType irow;
-            IndexType icol;
-            std::vector<IndexArrayType> indA;   // Row-column
-            std::vector<IndexArrayType> indB;   // Column-row
-            std::vector<IndexType> ind_intersection;
+//             IndexType irow;
+//             IndexType icol;
+//             std::vector<IndexArrayType> indA;   // Row-column
+//             std::vector<IndexArrayType> indB;   // Column-row
+//             std::vector<IndexType> ind_intersection;
 
-            indA.resize(nrow_A);
-            indB.resize(ncol_B);
+//             indA.resize(nrow_A);
+//             indB.resize(ncol_B);
 
-            auto tmp_sum = op.zero();
-            auto tmp_product = op.zero();
-            for (irow = 0; irow < nrow_C; irow++)
-            {
-                A.getColumnIndices(irow, indA[irow]);
-                for (icol = 0; icol < ncol_C; icol++)
-                {
-                    if (irow == 0)
-                    {
-                        B.getRowIndices(icol, indB[icol]);
-                    }
-                    if (!indA[irow].empty() && !indB[icol].empty())
-                    {
-                        ind_intersection.clear();
-                        std::set_intersection(indA[irow].begin(), indA[irow].end(),
-                                              indB[icol].begin(), indB[icol].end(),
-                                              std::back_inserter(ind_intersection));
-                        if (!ind_intersection.empty())
-                        {
-                            tmp_sum = op.zero();
-                            // Range-based loop, access by value
-                            for (auto kk : ind_intersection)
-                            {
-                                // Matrix multiply kernel
-                                tmp_product = op.mult(A.get_value_at(irow,kk),
-                                                      B.get_value_at(kk,icol));
-                                tmp_sum = op.add(tmp_sum, tmp_product);
-                            }
-#if 0
-                            try {
-                                std::cout << "\nTry";
-                                C.set_value_at(irow, icol,
-                                               accum(C.get_value_at(irow, icol),
-                                                     tmp_sum));
-                            } catch (int e) {
-                                std::cout << "\nCatch";
-                                C.set_value_at(irow, icol, tmp_sum);
-                            }
-                            //C.set_value_at(irow, icol,
-                            //               accum(C.get_value_at(irow, icol),
-                            //                     tmp_sum));
-                            //C.set_value_at(irow, icol, tmp_sum);
-#else
-                            C.set_value_at(irow, icol, tmp_sum);
-#endif
-                        }
-                    }
-                }
-            }
-        }
+//             auto tmp_sum = op.zero();
+//             auto tmp_product = op.zero();
+//             for (irow = 0; irow < nrow_C; irow++)
+//             {
+//                 A.getColumnIndices(irow, indA[irow]);
+//                 for (icol = 0; icol < ncol_C; icol++)
+//                 {
+//                     if (irow == 0)
+//                     {
+//                         B.getRowIndices(icol, indB[icol]);
+//                     }
+//                     if (!indA[irow].empty() && !indB[icol].empty())
+//                     {
+//                         ind_intersection.clear();
+//                         std::set_intersection(indA[irow].begin(), indA[irow].end(),
+//                                               indB[icol].begin(), indB[icol].end(),
+//                                               std::back_inserter(ind_intersection));
+//                         if (!ind_intersection.empty())
+//                         {
+//                             tmp_sum = op.zero();
+//                             // Range-based loop, access by value
+//                             for (auto kk : ind_intersection)
+//                             {
+//                                 // Matrix multiply kernel
+//                                 tmp_product = op.mult(A.get_value_at(irow,kk),
+//                                                       B.get_value_at(kk,icol));
+//                                 tmp_sum = op.add(tmp_sum, tmp_product);
+//                             }
+// #if 0
+//                             try {
+//                                 std::cout << "\nTry";
+//                                 C.set_value_at(irow, icol,
+//                                                accum(C.get_value_at(irow, icol),
+//                                                      tmp_sum));
+//                             } catch (int e) {
+//                                 std::cout << "\nCatch";
+//                                 C.set_value_at(irow, icol, tmp_sum);
+//                             }
+//                             //C.set_value_at(irow, icol,
+//                             //               accum(C.get_value_at(irow, icol),
+//                             //                     tmp_sum));
+//                             //C.set_value_at(irow, icol, tmp_sum);
+// #else
+//                             C.set_value_at(irow, icol, tmp_sum);
+// #endif
+//                         }
+//                     }
+//                 }
+//             }
+//         }
 
 
         //**********************************************************************
@@ -141,11 +141,11 @@ namespace GraphBLAS
                  typename SemiringT,
                  typename AMatrixT,
                  typename BMatrixT>
-        inline void mxm_v2(CMatrixT       &C,
-                           AccumT          accum,
-                           SemiringT       op,
-                           AMatrixT const &A,
-                           BMatrixT const &B)
+        inline void mxm(CMatrixT       &C,
+                        AccumT          accum,
+                        SemiringT       op,
+                        AMatrixT const &A,
+                        BMatrixT const &B)
         {
             IndexType nrow_A(A.get_nrows());
             IndexType ncol_A(A.get_ncols());
@@ -224,13 +224,13 @@ namespace GraphBLAS
                  typename SemiringT,
                  typename AMatrixT,
                  typename BMatrixT>
-        inline void mxm_v2_mask(CMatrixT       &C,
-                                MMatrixT const &M,              // Mask
-                                AccumT          accum,
-                                SemiringT       op,
-                                AMatrixT const &A,
-                                BMatrixT const &B,
-                                bool            replace = false)
+        inline void mxm(CMatrixT       &C,
+                        MMatrixT const &M,              // Mask
+                        AccumT          accum,
+                        SemiringT       op,
+                        AMatrixT const &A,
+                        BMatrixT const &B,
+                        bool            replace = false)
         {
             IndexType nrow_A(A.get_nrows());
             IndexType ncol_A(A.get_ncols());

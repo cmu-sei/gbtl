@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(mxm_reg_square)
     GraphBLAS::IndexType N = 3;
     GraphBLAS::LilSparseMatrix<double> result(M, N);
 
-    GraphBLAS::backend::mxm_v2(result,
+    GraphBLAS::backend::mxm(result,
                             GraphBLAS::Second<double>(),                // accum
                             GraphBLAS::ArithmeticSemiring<double>(),    // semiring
                             m1,
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(mxm_reg_rect)
     GraphBLAS::LilSparseMatrix<double> result(M, N);
 
     // Accumulate "Second" should provide same result.
-    GraphBLAS::backend::mxm_v2(result,
+    GraphBLAS::backend::mxm(result,
                             GraphBLAS::Second<double>(),                // accum
                             GraphBLAS::ArithmeticSemiring<double>(),    // semiring
                             m1,
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(mxm_reg_rect)
 
 //****************************************************************************
 // Matrix multiply with a boolean mask
-BOOST_AUTO_TEST_CASE(mxm_mask_bool)
+BOOST_AUTO_TEST_CASE(mxm_bool)
 {
     std::vector<std::vector<double>> mat1 = {{8, 1, 6},
                                              {3, 5, 7},
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(mxm_mask_bool)
     GraphBLAS::IndexType N = 3;
     GraphBLAS::LilSparseMatrix<double> result(M, N);
 
-    GraphBLAS::backend::mxm_v2_mask(result,
+    GraphBLAS::backend::mxm(result,
                             mask,
                             GraphBLAS::Second<double>(),                // accum
                             GraphBLAS::ArithmeticSemiring<double>(),    // semiring
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(mxm_mask_bool)
 
 //****************************************************************************
 // Matrix multiply with a boolean mask
-BOOST_AUTO_TEST_CASE(mxm_mask_bool_accum)
+BOOST_AUTO_TEST_CASE(mxm_bool_accum)
 {
     std::vector<std::vector<double>> mat1 = {{8, 1, 6},
                                              {3, 5, 7},
@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE(mxm_mask_bool_accum)
     GraphBLAS::LilSparseMatrix<double> answer(matAnswer, 0);
     GraphBLAS::LilSparseMatrix<double> result(matExisting, 0);
 
-    GraphBLAS::backend::mxm_v2_mask(result,
+    GraphBLAS::backend::mxm(result,
                             mask,
                             GraphBLAS::Plus<double>(),                // accum
                             GraphBLAS::ArithmeticSemiring<double>(),  // semiring
@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE(mxm_mask_bool_accum)
 
 //****************************************************************************
 // Matrix multiply with a boolean mask
-BOOST_AUTO_TEST_CASE(mxm_mask_bool_accum_replace)
+BOOST_AUTO_TEST_CASE(mxm_bool_accum_replace)
 {
     std::vector<std::vector<double>> mat1 = {{8, 1, 6},
                                              {3, 5, 7},
@@ -201,7 +201,7 @@ BOOST_AUTO_TEST_CASE(mxm_mask_bool_accum_replace)
     GraphBLAS::LilSparseMatrix<double> answer(matAnswer, 0);
     GraphBLAS::LilSparseMatrix<double> result(matExisting, 0);
 
-    GraphBLAS::backend::mxm_v2_mask(result,
+    GraphBLAS::backend::mxm(result,
                             mask,
                             GraphBLAS::Plus<double>(),                // accum
                             GraphBLAS::ArithmeticSemiring<double>(),  // semiring
@@ -214,7 +214,7 @@ BOOST_AUTO_TEST_CASE(mxm_mask_bool_accum_replace)
 
 //****************************************************************************
 // Matrix multiply with a non-boolean type
-BOOST_AUTO_TEST_CASE(mxm_mask_other)
+BOOST_AUTO_TEST_CASE(mxm_other)
 {
     std::vector<std::vector<double>> mat1 = {{8, 1, 6},
                                              {3, 5, 7},
@@ -240,7 +240,7 @@ BOOST_AUTO_TEST_CASE(mxm_mask_other)
     GraphBLAS::IndexType N = 3;
     GraphBLAS::LilSparseMatrix<double> result(M, N);
 
-    GraphBLAS::backend::mxm_v2_mask(result,
+    GraphBLAS::backend::mxm(result,
                             mask,
                             GraphBLAS::Second<double>(),                // accum
                             GraphBLAS::ArithmeticSemiring<double>(),    // semiring
@@ -271,7 +271,7 @@ BOOST_AUTO_TEST_CASE(mxm_reg_empty)
     GraphBLAS::IndexType M = 3;
     GraphBLAS::IndexType N = 3;
     GraphBLAS::LilSparseMatrix<double> result(M, N);
-    GraphBLAS::backend::mxm_v2(result,
+    GraphBLAS::backend::mxm(result,
                             GraphBLAS::Second<double>(),
                             GraphBLAS::ArithmeticSemiring<double>(),
                             m1,
@@ -300,7 +300,7 @@ BOOST_AUTO_TEST_CASE(mxm2_empty_rows_and_columns)
     GraphBLAS::IndexType M = 3;
     GraphBLAS::IndexType N = 3;
     GraphBLAS::LilSparseMatrix<double> result(M, N);
-    GraphBLAS::backend::mxm_v2(result,
+    GraphBLAS::backend::mxm(result,
                                GraphBLAS::Second<double>(),
                                GraphBLAS::ArithmeticSemiring<double>(),
                                m1,
@@ -333,7 +333,7 @@ BOOST_AUTO_TEST_CASE(mxm2_accum_with_empty_rows_and_columns)
     GraphBLAS::IndexType M = 3;
     GraphBLAS::IndexType N = 3;
     GraphBLAS::LilSparseMatrix<double> C(mat0, 0);
-    GraphBLAS::backend::mxm_v2(C,
+    GraphBLAS::backend::mxm(C,
                                GraphBLAS::Plus<double>(),
                                GraphBLAS::ArithmeticSemiring<double>(),
                                A,

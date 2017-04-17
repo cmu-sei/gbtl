@@ -160,8 +160,7 @@ namespace GraphBLAS
                     AccumT            accum,
                     SemiringT         op,
                     AMatrixT   const &A,
-                    BMatrixT   const &B,
-                    bool              replace_flag = false)
+                    BMatrixT   const &B)
     {
         if ((C.get_nrows() != A.get_nrows()) ||
             (A.get_ncols() != B.get_nrows()) ||
@@ -169,7 +168,7 @@ namespace GraphBLAS
         {
             throw DimensionException("mxm(nomask)");
         }
-        backend::mxm(C.m_mat, accum, op, A.m_mat, B.m_mat, replace_flag);
+        backend::mxm(C.m_mat, accum, op, A.m_mat, B.m_mat);
     }
 
     template<typename CMatrixT,

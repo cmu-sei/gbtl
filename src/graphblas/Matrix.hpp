@@ -29,6 +29,249 @@
 #undef __GB_SYSTEM_MATRIX_HEADER
 
 //****************************************************************************
+// The new namespace
+//****************************************************************************
+
+namespace GraphBLAS
+{
+    //************************************************************************
+    template<typename ScalarT, typename... TagsT>
+    class Matrix
+    {
+    public:
+        typedef ScalarT ScalarType;
+        typedef typename detail::matrix_generator::result<
+            ScalarT,
+            detail::SparsenessCategoryTag,
+            detail::DirectednessCategoryTag,
+            TagsT... ,
+            detail::NullTag,
+            detail::NullTag >::type BackendType;
+
+        /**
+         * @brief Construct an empty matrix with the specified shape.
+         *
+         * @note The backend should be able to decide when to ignore any of the
+         *       tags and/or arguments.
+         *
+         * @param[in] num_rows  Number of rows in the matrix
+         * @param[in] num_cols  Number of columns in the matrix
+         * @param[in] zero      The "zero" value, additive identity, and
+         *                      the structural zero.
+         */
+        Matrix(IndexType num_rows, IndexType num_cols)
+            : m_mat(num_rows, num_cols)
+        {
+        }
+
+        /**
+         * @brief Copy constructor.
+         *
+         * @param[in] rhs   The matrix to copy.
+         */
+        Matrix(Matrix<ScalarT, TagsT...> const &rhs)
+            : m_mat(rhs.m_mat)
+        {
+        }
+
+        /**
+         * @brief Construct a dense matrix from dense data
+         *
+         * @param[in] values The dense matrix from which to construct a
+         *                   sparse matrix from.
+         *
+         * @todo Should we really support this interface?
+         */
+        Matrix(std::vector<std::vector<ScalarT> > const &values)
+            : m_mat(values)
+        {
+        }
+
+        /**
+         * @brief Construct a sparse matrix from dense data.
+         *
+         * @param[in] values The dense matrix from which to construct a
+         *                   sparse matrix from.
+         * @param[in] zero   The "zero" value.
+         *
+         * @todo Should we really support this interface?
+         */
+        Matrix(std::vector<std::vector<ScalarT> > const &values, ScalarT zero)
+            : m_mat(values, zero)
+        {
+        }
+
+        ~Matrix() { }
+
+        /// Version 1 of getshape that assigns to two passed parameters
+        void get_shape(IndexType &num_rows, IndexType &num_cols) const
+        {
+            m_mat.get_shape(num_rows, num_cols);
+        }
+
+        /// Version 2 of getshape that returns a std::pair = [rows, cols]
+        std::pair<IndexType, IndexType> get_shape() const
+        {
+            IndexType num_rows, num_cols;
+            m_mat.get_shape(num_rows, num_cols);
+            return std::make_pair(num_rows, num_cols);
+        }
+
+        /**
+         * Populate the matrix with stored values (using iterators).
+         *
+         * @param[in]  i_it  Row index iterator
+         * @param[in]  j_it  Column index iterator
+         * @param[in]  v_it  Value (scalar) iterator
+         * @param[in]  n     Number of elements to store
+         * @param[in]  accum binary function to call when computing value to
+         *                   store. Takes current value and incoming value
+         *                   as input.
+         *
+         * @todo need to add a parameter to handle duplicate locations.
+         * @todo Should this clear out all previous storage if accum is Assign?
+         */
+        template<typename RAIteratorI,
+                 typename RAIteratorJ,
+                 typename RAIteratorV,
+                 typename DupT = GraphBLAS::Second<ScalarType> >
+        void build(RAIteratorI  i_it,
+                   RAIteratorJ  j_it,
+                   RAIteratorV  v_it,
+                   IndexType    n,
+                   DupT         dup = DupT())
+        {
+            m_mat.build(i_it, j_it, v_it, n, dup);
+        }
+
+        /// @todo Should assignment work only if dimensions are same?
+        Matrix<ScalarT, TagsT...> &
+        operator=(Matrix<ScalarT, TagsT...> const &rhs)
+        {
+            if (this != &rhs)
+            {
+                // backend currently doing dimension check.
+                m_mat = rhs.m_mat;
+            }
+            return *this;
+        }
+
+
+        /// Assignment from dense data
+        /// @todo This ignores the structural zero value.
+        //Matrix<ScalarT, TagsT...>& operator=(
+        //    std::vector<std::vector<ScalarT> > const &rhs)
+        //{
+        //    m_mat = rhs;
+        //    return *this;
+        //}
+
+        void clear() { m_mat.clear(); }
+
+        IndexType get_nrows() const  { return m_mat.get_nrows(); }
+        IndexType get_ncols() const  { return m_mat.get_ncols(); }
+        IndexType get_nvals() const  { return m_mat.get_nvals(); }
+
+        /// @todo need to change to mix and match internal types
+        bool operator==(Matrix<ScalarT, TagsT...> const &rhs) const
+        {
+            return (m_mat == rhs.m_mat);
+        }
+
+        bool operator!=(Matrix<ScalarT, TagsT...> const &rhs) const
+        {
+            //return !(m_mat == rhs.m_mat);
+            return !(*this == rhs);
+        }
+
+        /// @todo I don't think this is a valid interface for sparse
+        ScalarT extractElement(IndexType row, IndexType col) const
+        {
+            return m_mat.get_value_at(row, col);
+        }
+
+        /// @todo I don't think this is a valid interface for sparse
+        void assignElement(IndexType row, IndexType col, ScalarT const &val)
+        {
+            m_mat.set_value_at(row, col, val);
+        }
+
+        /// This replaces operator<< and outputs implementation specific
+        /// information.
+        void print_info(std::ostream &os) const
+        {
+            m_mat.print_info(os);
+        }
+
+        /// @todo This does not need to be a friend
+        friend std::ostream &operator<<(std::ostream &os, Matrix const &mat)
+        {
+            mat.print_info(os);
+            return os;
+        }
+
+    private:
+        template<typename CMatrixT,
+                 typename RAIteratorIT,
+                 typename RAIteratorJT,
+                 typename RAIteratorVT,
+                 typename BinaryOpT>
+        friend inline void matrixBuild(CMatrixT           &C,
+                                       RAIteratorIT        row_indices,
+                                       RAIteratorJT        col_indices,
+                                       RAIteratorVT        values,
+                                       IndexType           num_vals,
+                                       BinaryOpT           dup);
+
+
+        template<typename CMatrixT,
+                 typename ValueT,
+                 typename BinaryOpT>
+        friend inline void matrixBuild(CMatrixT                   &C,
+                                       IndexArrayType       const &row_indices,
+                                       IndexArrayType       const &col_indices,
+                                       std::vector<ValueT>  const &values,
+                                       BinaryOpT                   dup);
+
+        template<typename CMatrixT,
+                 typename AccumT,
+                 typename SemiringT,
+                 typename AMatrixT,
+                 typename BMatrixT>
+        friend inline void mxm(CMatrixT         &C,
+                               AccumT            accum,
+                               SemiringT         op,
+                               AMatrixT   const &A,
+                               BMatrixT   const &B);
+
+        template<typename CMatrixT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename SemiringT,
+                 typename AMatrixT,
+                 typename BMatrixT>
+        friend inline void mxm(CMatrixT         &C,
+                               MaskT      const &Mask,
+                               AccumT            accum,
+                               SemiringT         op,
+                               AMatrixT   const &A,
+                               BMatrixT   const &B,
+                               bool              replace_flag);
+
+        // .... ADD OTHER OPERATIONS AS FRIENDS AS THEY ARE IMPLEMENTED .....
+
+        template <typename MatrixT>
+        friend void print_matrix(std::ostream      &ostr,
+                                 MatrixT const     &mat,
+                                 std::string const &label);
+
+    private:
+        BackendType m_mat;
+    };
+
+} // end namespace GraphBLAS
+
+//****************************************************************************
 // The deprecated namespace -- scroll down for the new namespace object
 //****************************************************************************
 
@@ -486,248 +729,3 @@ namespace graphblas
 
 } // end namespace graphblas
 
-//****************************************************************************
-// The new namespace
-//****************************************************************************
-
-
-namespace GraphBLAS
-{
-    //************************************************************************
-    template<typename ScalarT, typename... TagsT>
-    class Matrix
-    {
-    public:
-        typedef ScalarT ScalarType;
-        typedef typename detail::matrix_generator::result<
-            ScalarT,
-            detail::SparsenessCategoryTag,
-            detail::DirectednessCategoryTag,
-            TagsT... ,
-            detail::NullTag,
-            detail::NullTag >::type BackendType;
-
-        /**
-         * @brief Construct an empty matrix with the specified shape.
-         *
-         * @note The backend should be able to decide when to ignore any of the
-         *       tags and/or arguments.
-         *
-         * @param[in] num_rows  Number of rows in the matrix
-         * @param[in] num_cols  Number of columns in the matrix
-         * @param[in] zero      The "zero" value, additive identity, and
-         *                      the structural zero.
-         */
-        Matrix(IndexType num_rows, IndexType num_cols)
-            : m_mat(num_rows, num_cols)
-        {
-        }
-
-        /**
-         * @brief Copy constructor.
-         *
-         * @param[in] rhs   The matrix to copy.
-         */
-        Matrix(Matrix<ScalarT, TagsT...> const &rhs)
-            : m_mat(rhs.m_mat)
-        {
-        }
-
-        /**
-         * @brief Construct a dense matrix from dense data
-         *
-         * @param[in] values The dense matrix from which to construct a
-         *                   sparse matrix from.
-         *
-         * @todo Should we really support this interface?
-         */
-        Matrix(std::vector<std::vector<ScalarT> > const &values)
-            : m_mat(values)
-        {
-        }
-
-        /**
-         * @brief Construct a sparse matrix from dense data.
-         *
-         * @param[in] values The dense matrix from which to construct a
-         *                   sparse matrix from.
-         * @param[in] zero   The "zero" value.
-         *
-         * @todo Should we really support this interface?
-         */
-        Matrix(std::vector<std::vector<ScalarT> > const &values, ScalarT zero)
-            : m_mat(values, zero)
-        {
-        }
-
-        ~Matrix() { }
-
-        /// Version 1 of getshape that assigns to two passed parameters
-        void get_shape(IndexType &num_rows, IndexType &num_cols) const
-        {
-            m_mat.get_shape(num_rows, num_cols);
-        }
-
-        /// Version 2 of getshape that returns a std::pair = [rows, cols]
-        std::pair<IndexType, IndexType> get_shape() const
-        {
-            IndexType num_rows, num_cols;
-            m_mat.get_shape(num_rows, num_cols);
-            return std::make_pair(num_rows, num_cols);
-        }
-
-        /**
-         * Populate the matrix with stored values (using iterators).
-         *
-         * @param[in]  i_it  Row index iterator
-         * @param[in]  j_it  Column index iterator
-         * @param[in]  v_it  Value (scalar) iterator
-         * @param[in]  n     Number of elements to store
-         * @param[in]  accum binary function to call when computing value to
-         *                   store. Takes current value and incoming value
-         *                   as input.
-         *
-         * @todo need to add a parameter to handle duplicate locations.
-         * @todo Should this clear out all previous storage if accum is Assign?
-         */
-        template<typename RAIteratorI,
-                 typename RAIteratorJ,
-                 typename RAIteratorV,
-                 typename DupT = GraphBLAS::Second<ScalarType> >
-        void build(RAIteratorI  i_it,
-                   RAIteratorJ  j_it,
-                   RAIteratorV  v_it,
-                   IndexType    n,
-                   DupT         dup = DupT())
-        {
-            m_mat.build(i_it, j_it, v_it, n, dup);
-        }
-
-        /// @todo Should assignment work only if dimensions are same?
-        Matrix<ScalarT, TagsT...> &
-        operator=(Matrix<ScalarT, TagsT...> const &rhs)
-        {
-            if (this != &rhs)
-            {
-                // backend currently doing dimension check.
-                m_mat = rhs.m_mat;
-            }
-            return *this;
-        }
-
-
-        /// Assignment from dense data
-        /// @todo This ignores the structural zero value.
-        //Matrix<ScalarT, TagsT...>& operator=(
-        //    std::vector<std::vector<ScalarT> > const &rhs)
-        //{
-        //    m_mat = rhs;
-        //    return *this;
-        //}
-
-        void clear() { m_mat.clear(); }
-
-        IndexType get_nrows() const  { return m_mat.get_nrows(); }
-        IndexType get_ncols() const  { return m_mat.get_ncols(); }
-        IndexType get_nvals() const  { return m_mat.get_nvals(); }
-
-        /// @todo need to change to mix and match internal types
-        bool operator==(Matrix<ScalarT, TagsT...> const &rhs) const
-        {
-            return (m_mat == rhs.m_mat);
-        }
-
-        bool operator!=(Matrix<ScalarT, TagsT...> const &rhs) const
-        {
-            //return !(m_mat == rhs.m_mat);
-            return !(*this == rhs);
-        }
-
-        /// @todo I don't think this is a valid interface for sparse
-        ScalarT extractElement(IndexType row, IndexType col) const
-        {
-            return m_mat.get_value_at(row, col);
-        }
-
-        /// @todo I don't think this is a valid interface for sparse
-        void assignElement(IndexType row, IndexType col, ScalarT const &val)
-        {
-            m_mat.set_value_at(row, col, val);
-        }
-
-        /// This replaces operator<< and outputs implementation specific
-        /// information.
-        void print_info(std::ostream &os) const
-        {
-            m_mat.print_info(os);
-        }
-
-        /// @todo This does not need to be a friend
-        friend std::ostream &operator<<(std::ostream &os, Matrix const &mat)
-        {
-            mat.print_info(os);
-            return os;
-        }
-
-    private:
-        template<typename CMatrixT,
-                 typename RAIteratorIT,
-                 typename RAIteratorJT,
-                 typename RAIteratorVT,
-                 typename BinaryOpT>
-        friend inline void matrixBuild(CMatrixT           &C,
-                                       RAIteratorIT        row_indices,
-                                       RAIteratorJT        col_indices,
-                                       RAIteratorVT        values,
-                                       IndexType           num_vals,
-                                       BinaryOpT           dup);
-
-
-        template<typename CMatrixT,
-                 typename ValueT,
-                 typename BinaryOpT>
-        friend inline void matrixBuild(CMatrixT                   &C,
-                                       IndexArrayType       const &row_indices,
-                                       IndexArrayType       const &col_indices,
-                                       std::vector<ValueT>  const &values,
-                                       BinaryOpT                   dup);
-
-        template<typename CMatrixT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename AMatrixT,
-                 typename BMatrixT>
-        friend inline void mxm(CMatrixT         &C,
-                               AccumT            accum,
-                               SemiringT         op,
-                               AMatrixT   const &A,
-                               BMatrixT   const &B,
-                               bool              replace_flag);
-
-        template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename AMatrixT,
-                 typename BMatrixT>
-        inline void mxm(CMatrixT         &C,
-                        MaskT      const &Mask,
-                        AccumT            accum,
-                        SemiringT         op,
-                        AMatrixT   const &A,
-                        BMatrixT   const &B,
-                        bool              replace_flag);
-
-        // .... ADD OTHER OPERATIONS AS FRIENDS AS THEY ARE IMPLEMENTED .....
-
-        template <typename MatrixT>
-        friend void print_matrix(std::ostream      &ostr,
-                                 MatrixT const     &mat,
-                                 std::string const &label);
-
-
-    private:
-        BackendType m_mat;
-    };
-
-} // end namespace GraphBLAS

@@ -70,38 +70,37 @@ namespace GraphBLAS
         }
 
         // Note: this forward might not be necessary.  Need to revisit
-        template<typename CMatrixT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename AMatrixT,
-                 typename BMatrixT>
-        inline void mxm(CMatrixT       &C,
-                        AccumT          accum,
-                        SemiringT       op,
-                        AMatrixT const &A,
-                        BMatrixT const &B,
-                        bool            replace_flag)
-        {
-            mxm_v2(C, accum, op, A, B);
-        }
+        // template<typename CMatrixT,
+        //          typename AccumT,
+        //          typename SemiringT,
+        //          typename AMatrixT,
+        //          typename BMatrixT>
+        // inline void mxm(CMatrixT       &C,
+        //                 AccumT          accum,
+        //                 SemiringT       op,
+        //                 AMatrixT const &A,
+        //                 BMatrixT const &B)
+        // {
+        //     backend::mxm(C, accum, op, A, B);
+        // }
 
         // Note: this forward might not be necessary.  Need to revisit
-        template<typename CMatrixT,
-                 typename MMatrixT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename AMatrixT,
-                 typename BMatrixT>
-        inline void mxm(CMatrixT       &C,
-                        MMatrixT const &M,              // Mask
-                        AccumT          accum,
-                        SemiringT       op,
-                        AMatrixT const &A,
-                        BMatrixT const &B,
-                        bool            replace_flag)
-        {
-            mxm_v2_mask(C, M, accum, op, A, B);
-        }
+        // template<typename CMatrixT,
+        //          typename MMatrixT,
+        //          typename AccumT,
+        //          typename SemiringT,
+        //          typename AMatrixT,
+        //          typename BMatrixT>
+        // inline void mxm(CMatrixT       &C,
+        //                 MMatrixT const &M,              // Mask
+        //                 AccumT          accum,
+        //                 SemiringT       op,
+        //                 AMatrixT const &A,
+        //                 BMatrixT const &B,
+        //                 bool            replace_flag)
+        // {
+        //     backend::mxm(C, M, accum, op, A, B, replace_flag);
+        // }
 
         /**
          *
