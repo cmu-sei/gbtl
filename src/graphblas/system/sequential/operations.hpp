@@ -38,6 +38,26 @@ namespace GraphBLAS
 {
     namespace backend
     {
+
+        /**
+         *  @todo Need to add a parameter (functor?) to handle duplicate locations
+         */
+        template<typename MatrixT,
+                 typename RAIteratorI,
+                 typename RAIteratorJ,
+                 typename RAIteratorV,
+                 typename AccumT>
+        inline void matrixBuild(MatrixT     &m,
+                                RAIteratorI  i,
+                                RAIteratorJ  j,
+                                RAIteratorV  v,
+                                IndexType    n,
+                                AccumT       accum)
+        {
+            // @todo: Why change names again?  (e.g. buildmatrix -> matrixBuild -> build)
+            m.build(i, j, v, n, accum);
+        }
+
         // Note: this forward might not be necessary.  Need to revisit
         template<typename CMatrixT,
                  typename AccumT,

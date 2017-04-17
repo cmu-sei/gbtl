@@ -57,13 +57,13 @@ namespace GraphBLAS
              typename RAIteratorVT,
              typename BinaryOpT>
     inline void matrixBuild(CMatrixT           &C,
-                            RAIteratorIT        row_it,
-                            RAIteratorJT        col_it,
-                            RAIteratorVT        val_it,
+                            RAIteratorIT        row_indices,
+                            RAIteratorJT        col_indices,
+                            RAIteratorVT        values,
                             IndexType           num_vals,
                             BinaryOpT           dup)
     {
-        backend::matrixBuild(C.m_mat, row_it, col_it, val_it, num_vals, dup);
+        backend::matrixBuild(C, row_indices, col_indices, values, num_vals, dup);
     }
 
 

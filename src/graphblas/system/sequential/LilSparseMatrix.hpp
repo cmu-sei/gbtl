@@ -205,6 +205,13 @@ namespace GraphBLAS
             return m_nvals;
         }
 
+        /// Version 1 of getshape that assigns to two passed parameters
+        void get_shape(IndexType &num_rows, IndexType &num_cols) const
+        {
+            num_rows = m_num_rows;
+            num_cols = m_num_cols;
+        }
+
         // Get value at index
         ScalarT get_value_at(IndexType irow, IndexType icol) const
         {

@@ -25,6 +25,193 @@
 
 namespace algorithms
 {
+
+    /**
+     * @brief Compute the vertex betweenness centrality of all vertices in the
+     *        given graph from a batch of src vertices.
+     *
+     * The betweenness centrality of a vertex measures the number of
+     * times a vertex acts as a bridge along the shortest path between two
+     * vertices.
+     *
+     * \f$C_b(v)=\sum\limits_{s \\neq v \in V}\sum\limits_{t \\neq v \in V}\\frac{\sigma_{st}(v)}{\sigma_{st}}\f$
+     *
+     * @param[in]  graph     The graph to compute the betweenness centrality of.
+     * @param[in]  s         The set of source vertex indices from which to compute
+     *                       BC contributions
+     *
+     * @return The betweenness centrality of all vertices in the graph relative to
+     *         the specified source vertices.
+     */
+    template<typename MatrixT>
+    std::vector<float>
+    vertex_betweenness_centrality_batch_alt_trans_v2(
+        MatrixT const                   &A,
+        GraphBLAS::IndexArrayType const &s)
+    {
+        GraphBLAS::print_matrix(std::cerr, A, "Graph");
+
+        // nsver = |s| (partition size)
+        GraphBLAS::IndexType nsver(s.size());
+        if (nsver == 0)
+        {
+            throw graphblas::DimensionException();
+        }
+
+        std::cerr << "batch size (p): " << nsver << std::endl;
+
+        using T = typename MatrixT::ScalarType;
+        GraphBLAS::IndexType m, n;
+
+        // GrB_Matrix_nrows(&n, A)
+        A.get_shape(m, n);
+        if (m != n)
+        {
+            throw GraphBLAS::DimensionException();
+        }
+
+        std::cerr << "num nodes (n): " << n << std::endl;
+
+        // Placeholder for GrB_ALL where dimension size is nsver=|s|
+        ///std::vector<GraphBLAS::IndexType> GrB_ALL_nsver;     // fill with sequence
+        GraphBLAS::IndexArrayType GrB_ALL_nsver;     // fill with sequence
+        GrB_ALL_nsver.reserve(nsver);
+        for (GraphBLAS::IndexType idx = 0; idx < nsver; ++idx)
+        {
+            GrB_ALL_nsver.push_back(idx); // tilln
+        }
+
+        // Placeholder for GrB_ALL where dimension is n
+        //std::vector<GraphBLAS::IndexType> GrB_ALL_n;     // fill with sequence
+        GraphBLAS::IndexArrayType GrB_ALL_n;
+        GrB_ALL_n.reserve(n);
+        for (GraphBLAS::IndexType idx = 0; idx < n; ++idx)
+        {
+            GrB_ALL_n.push_back(idx);
+        }
+
+        // The current frontier for all BFS's (from all roots)
+        // It is initialized to the out neighbors of the specified roots
+        // GraphBLAS::Matrix<int32_t> Frontier(nsver, n);     // F is nsver x n (rows)
+        // GraphBLAS::extract(A, s, GrB_ALL_n, Frontier);
+        // GraphBLAS::print_matrix(std::cerr, Frontier, "initial frontier");
+
+        // // NumSP holds number of shortest paths to a vertex from a given root
+        // // NumSP is initialized with the each starting root in 's':
+        // // NumSP[i,s[i]] = 1 where 0 <= i < nsver; implied zero elsewhere
+        // graphblas::Matrix<int32_t> NumSP(nsver, n);
+        // graphblas::buildmatrix(NumSP, GrB_ALL_nsver, s,
+        //                        std::vector<int32_t>(nsver, 1));
+        // graphblas::print_matrix(std::cerr, NumSP, "initial NumSP");
+
+        // // ==================== BFS phase ====================
+        // // Placeholders for GraphBLAS operators
+        // graphblas::PlusMonoid<int32_t>            Int32Add;
+        // graphblas::ArithmeticSemiring<int32_t>    Int32AddMul;
+        // graphblas::math::Identity<bool, int32_t>  GrB_IDENTITY_BOOL;
+
+        // std::vector<graphblas::Matrix<bool>* > Sigmas;
+        // std::cerr << "======= START BFS phase ======" << std::endl;
+        // int32_t d = 0;
+        // while (Frontier.get_nnz() > 0)
+        // {
+        //     std::cerr << "------- BFS iteration " << d << " --------" << std::endl;
+
+        //     Sigmas.push_back(new graphblas::Matrix<bool>(nsver, n, false));
+        //     // Sigma[d] = (bool)F
+        //     graphblas::apply(Frontier, *(Sigmas[d]), GrB_IDENTITY_BOOL);
+        //     graphblas::print_matrix(std::cerr, *Sigmas[d], "Sigma[d] = (bool)Frontier");
+        //     // P = F + P
+        //     graphblas::ewiseadd(NumSP, Frontier, NumSP, Int32Add);
+        //     graphblas::print_matrix(std::cerr, NumSP, "NumSP");
+        //     // F<!P> = F +.* A
+
+        //     // graphblas::mxmMasked(Frontier,                                  // a
+        //     //                      A,                                         // b
+        //     //                      Frontier,                                  // c
+        //     //                      graphblas::negate(NumSP, Int32AddMul),     // m
+        //     //                      Int32AddMul);                              // op
+
+        //     GraphBLAS::mxm(Frontier,                                        // C
+        //                     graphblas::negate(NumSP, Int32AddMul),          // M
+        //                     GraphBLAS::Second<double>(),                    // accum
+        //                     Int32AddMul,                                     // op
+        //                     Frontier,                                       // A
+        //                     A);                                              // B
+
+        //     graphblas::print_matrix(std::cerr, Frontier, "New frontier");
+
+        //     ++d;
+        // }
+        // std::cerr << "======= END BFS phase =======" << std::endl;
+
+        // // ================== backprop phase ==================
+        // // Placeholders for GraphBLAS operators
+        // graphblas::PlusMonoid<float>           FP32Add;
+        // graphblas::TimesMonoid<float>          FP32Mul;
+        // graphblas::ArithmeticSemiring<float>   FP32AddMul;
+        // graphblas::math::Inverse<float>        GrB_MINV_FP32;
+
+        // graphblas::Matrix<float> NspInv(nsver, n);
+        // graphblas::apply(NumSP, NspInv, GrB_MINV_FP32);
+        // graphblas::print_matrix(std::cerr, NspInv, "(1 ./ P)");
+
+        // graphblas::Matrix<float> BCu = graphblas::fill<graphblas::Matrix<float>>
+        //     (1.0f, nsver, n);
+
+        // graphblas::print_matrix(std::cerr, BCu, "U");
+
+        // graphblas::Matrix<float> W(nsver, n);
+
+        // std::cerr << "======= BEGIN BACKPROP phase =======" << std::endl;
+        // for (int32_t i = d - 1; i > 0; --i)
+        // {
+        //     std::cerr << "------- BACKPROP iteration " << i << " --------" << std::endl;
+
+        //     // W<Sigma[i]> = (1 ./ P) .* U
+        //     bool const GrB_REPLACE = true;
+        //     graphblas::ewisemultMasked(NspInv, BCu, W, *Sigmas[i], GrB_REPLACE, FP32Mul);
+        //     graphblas::print_matrix(std::cerr, W, "W<Sigma[i]> = (1 ./ P) .* U");
+
+        //     // W<Sigma[i-1]> = A +.* W
+        //     graphblas::mxmMasked(W, graphblas::transpose(A), W,
+        //                          *Sigmas[i-1], FP32AddMul);
+        //     graphblas::print_matrix(std::cerr, W, "W<Sigma[i-1]> = A +.* W");
+
+        //     // U += W .* P
+        //     graphblas::ewisemult(W, NumSP, BCu, FP32Mul,
+        //                          graphblas::math::Accum<float>());
+        //     graphblas::print_matrix(std::cerr, BCu, "U += W .* P");
+
+        //     --d;
+        // }
+        // std::cerr << "======= END BACKPROP phase =======" << std::endl;
+        // graphblas::print_matrix(std::cerr, BCu, "BC Updates");
+
+        // graphblas::Matrix<float> result =
+        //     graphblas::fill<graphblas::Matrix<float>>(nsver * -1.0F, 1, n);
+        // graphblas::col_reduce(BCu, result, FP32Add,
+        //                       graphblas::math::Accum<float>());
+        // graphblas::print_matrix(std::cerr, result, "RESULT");
+
+        // std::vector<float> betweenness_centrality;
+        // for (graphblas::IndexType k = 0; k < n;k++)
+        // {
+        //     betweenness_centrality.push_back(result.get_value_at(0, k));
+        // }
+
+        // for (auto it = Sigmas.begin(); it != Sigmas.end(); ++it)
+        // {
+        //     delete *it;
+        // }
+        // return betweenness_centrality;
+
+
+        std::vector<float> betweenness_centrality;
+        return betweenness_centrality;
+    }
+
+
     /**
      * @brief Compute the vertex betweenness centrality of all vertices in the
      *        given graph from a batch of src vertices.
@@ -525,6 +712,8 @@ namespace algorithms
         }
         return betweenness_centrality;
     }
+
+
 
     /**
      * @brief Compute the vertex betweenness centrality of all vertices in the

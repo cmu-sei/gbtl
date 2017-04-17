@@ -562,6 +562,20 @@ namespace GraphBLAS
 
         ~Matrix() { }
 
+        /// Version 1 of getshape that assigns to two passed parameters
+        void get_shape(IndexType &num_rows, IndexType &num_cols) const
+        {
+            m_mat.get_shape(num_rows, num_cols);
+        }
+
+        /// Version 2 of getshape that returns a std::pair = [rows, cols]
+        std::pair<IndexType, IndexType> get_shape() const
+        {
+            IndexType num_rows, num_cols;
+            m_mat.get_shape(num_rows, num_cols);
+            return std::make_pair(num_rows, num_cols);
+        }
+
         /**
          * Populate the matrix with stored values (using iterators).
          *
