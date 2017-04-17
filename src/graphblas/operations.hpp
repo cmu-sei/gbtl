@@ -57,11 +57,14 @@ namespace GraphBLAS
              typename RAIteratorVT,
              typename BinaryOpT>
     inline void matrixBuild(CMatrixT           &C,
-                            RAIteratorIT        row_indices,
-                            RAIteratorJT        col_indices,
-                            RAIteratorVT        values,
+                            RAIteratorIT        row_it,
+                            RAIteratorJT        col_it,
+                            RAIteratorVT        val_it,
                             IndexType           num_vals,
-                            BinaryOpT           dup);
+                            BinaryOpT           dup)
+    {
+        backend::matrixBuild(C.m_mat, row_it, col_it, val_it, num_vals, dup);
+    }
 
 
     template<typename CMatrixT,
@@ -71,7 +74,16 @@ namespace GraphBLAS
                             IndexArrayType       const &row_indices,
                             IndexArrayType       const &col_indices,
                             std::vector<ValueT>  const &values,
-                            BinaryOpT                   dup);
+                            BinaryOpT                   dup)
+    {
+        if ((row_indices.size() != col_indices.size()) ||
+            (row_indices.size() != values.size()))
+        {
+            throw DimensionException("matrixBuild(array)");
+        }
+        matrixBuild(C, row_indices.begin(), col_indices.begin(), values.begin(),
+                    values.size(), dup);
+    }
 
     /**
      * @brief Populate a Vector with stored values at specified locations from a

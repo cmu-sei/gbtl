@@ -34,6 +34,7 @@
 
 // Add individual operation files here
 //#include <graphblas/system/sequential/.hpp>
+#include <graphblas/system/sequential/sparse_matrixBuild.hpp>
 #include <graphblas/system/sequential/sparse_mxm.hpp>
 #include <graphblas/system/sequential/sparse_mxv.hpp>
 

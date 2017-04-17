@@ -75,6 +75,8 @@ AM_CPPFLAGS = -I$(abs_top_srcdir) $(BACKEND_CPPFLAGS)
 SUBDIRS = sequential
 
 noinst_PROGRAMS = \
+test_sequential_sparse_algebra \
+test_sequential_sparse_mxm \
 test_sequential_math \
 test_sequential_graphblas_algebra \
 test_sequential_mxm \
@@ -97,6 +99,11 @@ test_sequential_sssp \
 test_sequential_cluster \
 test_sequential_page_rank
 
+test_sequential_sparse_algebra_SOURCES = test_sparse_algebra.cpp
+
+test_sequential_sparse_mxm_SOURCES = test_sparse_mxm.cpp
+
+#DEPRECATED TEST CODE
 
 test_sequential_math_SOURCES = test_math.cpp
 

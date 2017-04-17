@@ -125,7 +125,11 @@ namespace GraphBLAS
     {
         typedef D3 result_type;
         // ((bool)lhs) != ((bool)rhs)
-        inline D3 operator()(D1 lhs, D2 rhs) { return lhs ^ rhs; }
+        // inline D3 operator()(D1 lhs, D2 rhs) { return lhs ^ rhs; }
+        inline D3 operator()(D1 lhs, D2 rhs)
+        {
+            return ((lhs && !rhs) || (!lhs && rhs));
+        }
     };
 
     template <typename D1, typename D2 = D1, typename D3 = bool>
@@ -261,7 +265,11 @@ namespace GraphBLAS
     GEN_GRAPHBLAS_MONOID(PlusMonoid, Plus, 0)
     GEN_GRAPHBLAS_MONOID(TimesMonoid, Times, 1)
     GEN_GRAPHBLAS_MONOID(MinMonoid, Min, std::numeric_limits<ScalarT>::max())
+
+    /// @todo The following identity only works for unsigned domains
+    /// std::numerical_limits<>::min() does not work for floating point types
     GEN_GRAPHBLAS_MONOID(MaxMonoid, Max, 0)
+
     GEN_GRAPHBLAS_MONOID(LogicalOrMonoid, LogicalOr, false)
 } // GraphBLAS
 
@@ -301,8 +309,9 @@ namespace GraphBLAS
 
     GEN_GRAPHBLAS_SEMIRING(LogicalSemiring, LogicalOrMonoid, LogicalAnd)
 
-    /// @todo the Plus operator needs to be "infinity aware".  I.e. it needs
-    ///       to check for numeric_limits<T>::max() and do the right thing.
+    /// @note the Plus operator would need to be "infinity aware" if the caller
+    /// were to pass "infinity" sentinel as one of the arguments. But no GraphBLAS
+    /// operations should do that.
     GEN_GRAPHBLAS_SEMIRING(MinPlusSemiring, MinMonoid, Plus)
 
     GEN_GRAPHBLAS_SEMIRING(MaxTimesSemiring, MaxMonoid, Times)

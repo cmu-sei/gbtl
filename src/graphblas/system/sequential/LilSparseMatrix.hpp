@@ -169,12 +169,13 @@ namespace GraphBLAS
                    IndexType    n,
                    DupT         dup)
         {
-            /// @todo DOING SOMETHING REALLY STUPID RIGHT NOW AND IGNORING DUP
+            /// @todo should this function call clear?
             clear();
 
+            /// @todo DOING SOMETHING REALLY STUPID RIGHT NOW
             for (IndexType ix = 0; ix < n; ++ix)
             {
-                set_value_at(*i_it, *j_it, *v_it);
+                set_value_at(*i_it, *j_it, *v_it, dup);
                 ++i_it; ++j_it; ++v_it;
             }
         }
@@ -205,8 +206,7 @@ namespace GraphBLAS
         }
 
         // Get value at index
-        ScalarT get_value_at(IndexType irow,
-                             IndexType icol) const
+        ScalarT get_value_at(IndexType irow, IndexType icol) const
         {
             if (irow >= m_num_rows || icol >= m_num_cols)
             {
@@ -260,6 +260,47 @@ namespace GraphBLAS
                     {
                         it = m_data[irow].erase(it);
                         m_data[irow].insert(it, std::make_tuple(icol, val));
+                        return;
+                    }
+                    else if (std::get<0>(*it) > icol)
+                    {
+                        m_data[irow].insert(it, std::make_tuple(icol, val));
+                        m_nvals = m_nvals + 1;
+                        return;
+                    }
+                }
+                m_data[irow].push_back(std::make_tuple(icol, val));
+                m_nvals = m_nvals + 1;
+            }
+        }
+
+        // Set value at index + 'merge' with any existing value according to the
+        // BinaryOp passed.
+        template <typename BinaryOpT>
+        void set_value_at(IndexType irow, IndexType icol, ScalarT const &val,
+                          BinaryOpT merge)
+        {
+            if (irow >= m_num_rows || icol >= m_num_cols)
+            {
+                throw IndexOutOfBoundsException("set_value_at: index out of bounds");
+            }
+
+            if (m_data[irow].empty())
+            {
+                m_data[irow].push_back(std::make_tuple(icol, val));
+                m_nvals = m_nvals + 1;
+            }
+            else
+            {
+                typename std::vector<std::tuple<IndexType, ScalarT>>::iterator it;
+                for (it = m_data[irow].begin(); it != m_data[irow].end(); it++)
+                {
+                    if (std::get<0>(*it) == icol)
+                    {
+                        // merge with existing stored value
+                        std::get<1>(*it) = merge(std::get<1>(*it), val);
+                        //it = m_data[irow].erase(it);
+                        //m_data[irow].insert(it, std::make_tuple(icol, tmp));
                         return;
                     }
                     else if (std::get<0>(*it) > icol)

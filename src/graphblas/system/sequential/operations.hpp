@@ -32,6 +32,7 @@
 #include <graphblas/algebra.hpp>
 #include <graphblas/system/sequential/TransposeView.hpp>
 #include <graphblas/system/sequential/NegateView.hpp>
+#include <graphblas/system/sequential/operations_sparse.hpp>
 
 namespace GraphBLAS
 {
