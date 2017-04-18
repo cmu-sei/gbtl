@@ -27,3 +27,4 @@ cusplibrary
 *.bak
 *.old
 errors.txt
+.idea/*
