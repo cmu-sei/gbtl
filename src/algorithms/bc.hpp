@@ -197,7 +197,7 @@ namespace algorithms
         // std::vector<float> betweenness_centrality;
         // for (graphblas::IndexType k = 0; k < n;k++)
         // {
-        //     betweenness_centrality.push_back(result.get_value_at(0, k));
+        //     betweenness_centrality.push_back(result.extractElement(0, k));
         // }
 
         // for (auto it = Sigmas.begin(); it != Sigmas.end(); ++it)
@@ -370,7 +370,7 @@ namespace algorithms
         std::vector<float> betweenness_centrality;
         for (graphblas::IndexType k = 0; k < n;k++)
         {
-            betweenness_centrality.push_back(result.get_value_at(0, k));
+            betweenness_centrality.push_back(result.extractElement(0, k));
         }
 
         for (auto it = Sigmas.begin(); it != Sigmas.end(); ++it)
@@ -537,7 +537,7 @@ namespace algorithms
         std::vector<float> betweenness_centrality;
         for (graphblas::IndexType k = 0; k < n;k++)
         {
-            betweenness_centrality.push_back(result.get_value_at(k, 0));
+            betweenness_centrality.push_back(result.extractElement(k, 0));
         }
 
         for (auto it = Sigmas.begin(); it != Sigmas.end(); ++it)
@@ -703,7 +703,7 @@ namespace algorithms
         std::vector<float> betweenness_centrality;
         for (graphblas::IndexType k = 0; k < n;k++)
         {
-            betweenness_centrality.push_back(result.get_value_at(k, 0));
+            betweenness_centrality.push_back(result.extractElement(k, 0));
         }
 
         for (auto it = Sigmas.begin(); it != Sigmas.end(); ++it)
@@ -866,7 +866,7 @@ namespace algorithms
         std::vector<double> betweenness_centrality;
         for (graphblas::IndexType k = 0; k < N;k++)
         {
-            betweenness_centrality.push_back(result.get_value_at(0, k));
+            betweenness_centrality.push_back(result.extractElement(0, k));
         }
 
         return betweenness_centrality;
@@ -907,11 +907,11 @@ namespace algorithms
             /// @todo replaced with extract?
             for (graphblas::IndexType k = 0; k < num_nodes; ++k)
             {
-                fringe.set_value_at(0, k, graph.get_value_at(i, k));
+                fringe.setElement(0, k, graph.extractElement(i, k));
             }
 
             MatrixT n_shortest_paths(1, num_nodes);
-            n_shortest_paths.set_value_at(0, i, static_cast<T>(1));
+            n_shortest_paths.setElement(0, i, static_cast<T>(1));
 
             while(fringe.get_nnz() != 0)
             {
@@ -920,22 +920,22 @@ namespace algorithms
 
                 for (graphblas::IndexType k = 0; k < num_nodes; ++k)
                 {
-                    search.set_value_at(
+                    search.setElement(
                         depth, k,
-                        (fringe.get_value_at(0, k) != 0));  // cast<T>?
+                        (fringe.extractElement(0, k) != 0));  // cast<T>?
                 }
 
                 MatrixT not_in_sps = graphblas::fill<MatrixT>(1, 1, num_nodes);
                 //for (graphblas::IndexType k = 0; k < num_nodes; ++k)
                 //{
-                //    not_in_sps.set_value_at(0, k, 1);
+                //    not_in_sps.setElement(0, k, 1);
                 //}
 
                 for (graphblas::IndexType k = 0; k < num_nodes; ++k)
                 {
-                    if (n_shortest_paths.get_value_at(0, k) != 0)
+                    if (n_shortest_paths.extractElement(0, k) != 0)
                     {
-                        not_in_sps.set_value_at(0, k, 0); // get_zero()
+                        not_in_sps.setElement(0, k, 0); // get_zero()
                     }
                 }
                 graphblas::mxm(fringe, graph, fringe);
@@ -961,10 +961,10 @@ namespace algorithms
                 for (graphblas::IndexType k = 0; k < num_nodes; ++k)
                 {
                     //weights[k][0] = search[depth][k] * temp[0][k];
-                    weights.set_value_at(
+                    weights.setElement(
                         k, 0,
-                        search.get_value_at(depth, k) *
-                        temp.get_value_at(0, k));
+                        search.extractElement(depth, k) *
+                        temp.extractElement(0, k));
                 }
 
                 mxm(graph, weights, weights);
@@ -972,10 +972,10 @@ namespace algorithms
                 for (graphblas::IndexType k = 0; k < num_nodes; ++k)
                 {
                     //temp[0][k] = search[depth-1][k] * n_shortest_paths[0][k];
-                    temp.set_value_at(
+                    temp.setElement(
                         0, k,
-                        search.get_value_at(depth - 1, k) *
-                        n_shortest_paths.get_value_at(0, k));
+                        search.extractElement(depth - 1, k) *
+                        n_shortest_paths.extractElement(0, k));
                 }
 
                 graphblas::ewisemult(weights,
@@ -996,7 +996,7 @@ namespace algorithms
         std::vector <typename MatrixT::ScalarType> betweenness_centrality;
         for (graphblas::IndexType k = 0; k<num_nodes;k++)
         {
-            betweenness_centrality.push_back(bc_mat.get_value_at(0, k));
+            betweenness_centrality.push_back(bc_mat.extractElement(0, k));
         }
 
         return betweenness_centrality;
@@ -1038,17 +1038,17 @@ namespace algorithms
             for (graphblas::IndexType k = 0; k < num_nodes; ++k)
             {
                 //fringe[0][k] = graph[root][k];
-                fringe.set_value_at(0, k,
-                                    graph.get_value_at(root, k));
+                fringe.setElement(0, k,
+                                    graph.extractElement(root, k));
             }
             MatrixT n_shortest_paths(1, num_nodes);
             //n_shortest_paths[0][root] = 1;
-            n_shortest_paths.set_value_at(0, root, 1);
+            n_shortest_paths.setElement(0, root, 1);
 
             MatrixT update(num_nodes, num_nodes);
             MatrixT flow(1, num_nodes);
             //search[depth][root] = 1;
-            search.set_value_at(depth, root, 1);
+            search.setElement(depth, root, 1);
 
             while (fringe.get_nnz() != 0)
             {
@@ -1059,8 +1059,8 @@ namespace algorithms
                 for (graphblas::IndexType i = 0; i < num_nodes; ++i)
                 {
                     //search[depth][i] = (fringe[0][i] != 0);
-                    search.set_value_at(depth, i,
-                                        (fringe.get_value_at(0, i) != 0));
+                    search.setElement(depth, i,
+                                        (fringe.extractElement(0, i) != 0));
                 }
 
                 MatrixT not_in_sps = graphblas::fill<MatrixT>(1, 1, num_nodes);
@@ -1071,9 +1071,9 @@ namespace algorithms
 
                 for (graphblas::IndexType k = 0; k < num_nodes; ++k)
                 {
-                    if (n_shortest_paths.get_value_at(0, k) != 0)
+                    if (n_shortest_paths.extractElement(0, k) != 0)
                     {
-                        not_in_sps.set_value_at(0, k, 0);  // get_zero()?
+                        not_in_sps.setElement(0, k, 0);  // get_zero()?
                     }
                 }
 
@@ -1093,10 +1093,10 @@ namespace algorithms
                 {
                     //weights[0][k] =
                     //    search[depth][k] * n_shortest_paths_inv[0][k];
-                    weights.set_value_at(
+                    weights.setElement(
                         0, k,
-                        search.get_value_at(depth, k) *
-                        n_shortest_paths_inv.get_value_at(0, k));
+                        search.extractElement(depth, k) *
+                        n_shortest_paths_inv.extractElement(0, k));
                 }
 
                 graphblas::ewisemult(weights, flow, weights);
@@ -1104,10 +1104,10 @@ namespace algorithms
                 for (graphblas::IndexType k = 0; k < num_nodes; ++k)
                 {
                     //weights[0][k] = weights[0][k] + search[depth][k];
-                    weights.set_value_at(
+                    weights.setElement(
                         0, k,
-                        weights.get_value_at(0, k) +
-                        search.get_value_at(depth, k));
+                        weights.extractElement(0, k) +
+                        search.extractElement(depth, k));
                 }
 
 
@@ -1116,10 +1116,10 @@ namespace algorithms
                     for (graphblas::IndexType k=0;k<num_nodes; k++)
                     {
                         //update[i][k] = graph[i][k] * weights[0][k];
-                        update.set_value_at(
+                        update.setElement(
                             i, k,
-                            graph.get_value_at(i, k) *
-                            weights.get_value_at(0, k));
+                            graph.extractElement(i, k) *
+                            weights.extractElement(0, k));
                     }
                 }
 
@@ -1127,10 +1127,10 @@ namespace algorithms
                 {
                     //weights[0][k] =
                     //    search[depth-1][k] * n_shortest_paths[0][k];
-                    weights.set_value_at(
+                    weights.setElement(
                         0, k,
-                        search.get_value_at(depth - 1, k) *
-                        n_shortest_paths.get_value_at(0, k));
+                        search.extractElement(depth - 1, k) *
+                        n_shortest_paths.extractElement(0, k));
                 }
 
                 for (graphblas::IndexType i = 0; i < num_nodes; ++i)
@@ -1138,10 +1138,10 @@ namespace algorithms
                     for (graphblas::IndexType k = 0; k < num_nodes; ++k)
                     {
                         //update[k][i] = weights[0][k] * update[k][i];
-                        update.set_value_at(
+                        update.setElement(
                             k, i,
-                            weights.get_value_at(0, k) *
-                            update.get_value_at(k, i));
+                            weights.extractElement(0, k) *
+                            update.extractElement(k, i));
                     }
                 }
                 graphblas::ewiseadd(score, update, score);
@@ -1151,7 +1151,7 @@ namespace algorithms
                 for (graphblas::IndexType k = 0; k < num_nodes; ++k)
                 {
                     //flow[0][k] = temp[k][0];
-                    flow.set_value_at(0, k, temp.get_value_at(k, 0));
+                    flow.setElement(0, k, temp.extractElement(k, 0));
                 }
 
                 depth = depth - 1;

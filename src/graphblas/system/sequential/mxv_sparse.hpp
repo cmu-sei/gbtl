@@ -178,8 +178,8 @@ namespace GraphBLAS {
                         bool             replace_flag)
         {
             // The following should be checked by the frontend:
-            if ((w.get_size() != A.get_nrows()) ||
-                (u.get_size() != A.get_ncols()) ||
+            if ((w.get_size() != A.nrows()) ||
+                (u.get_size() != A.ncols()) ||
                 (w.get_size() != mask.get_size()))
             {
                 throw DimensionException("mxv: dimensions are not compatible.");
@@ -194,17 +194,17 @@ namespace GraphBLAS {
             IndexArrayType w_indices;
             std::vector<WScalarType> w_values;
 
-            if (u.get_nvals() > 0)
+            if (u.nvals() > 0)
             {
                 /// @todo need a heuristic for switching between two modes
-                if (u.get_size()/u.get_nvals() >= 4)
+                if (u.get_size()/u.nvals() >= 4)
                 {
                     auto u_contents(u.get_contents());
                     for (IndexType row_idx = 0; row_idx < num_elts; ++row_idx)
                     {
                         //std::cerr << "**1** PROCESSING MATRIX ROW " << row_idx
                         //          << " *****" << std::endl;
-                        ARowType const &A_row(A.get_row(row_idx));
+                        ARowType const &A_row(A.getRow(row_idx));
 
                         if (!A_row.empty())
                         {
@@ -226,12 +226,12 @@ namespace GraphBLAS {
                     {
                         //std::cerr << "**2** PROCESSING MATRIX ROW " << row_idx
                         //          << " *****" << std::endl;
-                        ARowType const &A_row(A.get_row(row_idx));
+                        ARowType const &A_row(A.getRow(row_idx));
 
                         if (!A_row.empty())
                         {
                             WScalarType w_val;
-                            if (dot(w_val, A_row, u_bitmap, u_values, u.get_nvals(), op))
+                            if (dot(w_val, A_row, u_bitmap, u_values, u.nvals(), op))
                             {
                                 w_indices.push_back(row_idx);
                                 w_values.push_back(w_val);

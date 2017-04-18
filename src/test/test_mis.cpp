@@ -66,12 +66,12 @@ BOOST_AUTO_TEST_CASE(mis_test)
         //graphblas::print_matrix(std::cout, levels, "BFS levels from IS");
         for (graphblas::IndexType ix = 0; ix < NUM_NODES; ++ix)
         {
-            double lvl = levels.get_value_at(0, ix);
+            double lvl = levels.extractElement(0, ix);
             BOOST_CHECK((lvl < 3) && (lvl > 0));
             if (lvl == 1)
-                BOOST_CHECK_EQUAL(isT.get_value_at(0, ix), 1.0);
+                BOOST_CHECK_EQUAL(isT.extractElement(0, ix), 1.0);
             else
-                BOOST_CHECK_EQUAL(isT.get_value_at(0, ix), 0.0);
+                BOOST_CHECK_EQUAL(isT.extractElement(0, ix), 0.0);
         }
     }
 }
@@ -119,12 +119,12 @@ BOOST_AUTO_TEST_CASE(mis2_test)
         //graphblas::print_matrix(std::cout, levels, "BFS levels from IS");
         for (graphblas::IndexType ix = 0; ix < NUM_NODES; ++ix)
         {
-            double lvl = levels.get_value_at(0, ix);
+            double lvl = levels.extractElement(0, ix);
             BOOST_CHECK((lvl < 3) && (lvl > 0));
             if (lvl == 1)
-                BOOST_CHECK_EQUAL(isT.get_value_at(0, ix), 1.0);
+                BOOST_CHECK_EQUAL(isT.extractElement(0, ix), 1.0);
             else
-                BOOST_CHECK_EQUAL(isT.get_value_at(0, ix), 0.0);
+                BOOST_CHECK_EQUAL(isT.extractElement(0, ix), 0.0);
         }
     }
 }

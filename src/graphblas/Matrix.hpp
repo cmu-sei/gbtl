@@ -168,9 +168,9 @@ namespace GraphBLAS
 
         void clear() { m_mat.clear(); }
 
-        IndexType get_nrows() const  { return m_mat.get_nrows(); }
-        IndexType get_ncols() const  { return m_mat.get_ncols(); }
-        IndexType get_nvals() const  { return m_mat.get_nvals(); }
+        IndexType nrows() const  { return m_mat.nrows(); }
+        IndexType ncols() const  { return m_mat.ncols(); }
+        IndexType nvals() const  { return m_mat.nvals(); }
 
         /// @todo need to change to mix and match internal types
         bool operator==(Matrix<ScalarT, TagsT...> const &rhs) const
@@ -187,13 +187,13 @@ namespace GraphBLAS
         /// @todo I don't think this is a valid interface for sparse
         ScalarT extractElement(IndexType row, IndexType col) const
         {
-            return m_mat.get_value_at(row, col);
+            return m_mat.extractElement(row, col);
         }
 
         /// @todo I don't think this is a valid interface for sparse
         void assignElement(IndexType row, IndexType col, ScalarT const &val)
         {
-            m_mat.set_value_at(row, col, val);
+            m_mat.setElement(row, col, val);
         }
 
         /// This replaces operator<< and outputs implementation specific
@@ -421,15 +421,15 @@ namespace graphblas
         }
 
         /// @todo I don't think this is a valid interface for sparse
-        ScalarT get_value_at(IndexType row, IndexType col) const
+        ScalarT extractElement(IndexType row, IndexType col) const
         {
-            return m_mat.get_value_at(row, col);
+            return m_mat.extractElement(row, col);
         }
 
         /// @todo I don't think this is a valid interface for sparse
-        void set_value_at(IndexType row, IndexType col, ScalarT const &val)
+        void setElement(IndexType row, IndexType col, ScalarT const &val)
         {
-            m_mat.set_value_at(row, col, val);
+            m_mat.setElement(row, col, val);
         }
 
         /// This replaces operator<< and outputs implementation specific

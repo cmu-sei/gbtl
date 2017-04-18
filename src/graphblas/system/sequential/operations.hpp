@@ -59,7 +59,7 @@ namespace GraphBLAS
                                 BinaryOpT           dup)
         {
             // @todo: Why change names again?  (e.g. buildmatrix -> matrixBuild -> build)
-            if (C.get_nvals() != 0)
+            if (C.nvals() != 0)
             {
                 /// @todo Do we silently clear or throw an exception
                 //throw NotEmptyException("matrixBuild");
@@ -173,10 +173,10 @@ namespace backend{
         {
             for (IndexType j = 0; j < a_num_cols; j++)
             {
-                c.set_value_at(i, j,
-                               accum(c.get_value_at(i, j),
-                                     func(a.get_value_at(i,j),
-                                          b.get_value_at(i,j))));
+                c.setElement(i, j,
+                               accum(c.extractElement(i, j),
+                                     func(a.extractElement(i,j),
+                                          b.extractElement(i,j))));
             }
         }
     }
@@ -251,13 +251,13 @@ namespace backend{
         {
             for (IndexType j = 0; j < num_cols; j++)
             {
-                if ((a.get_value_at(i, j) != a.get_zero()) &&
-                    (b.get_value_at(i, j) != b.get_zero()))
+                if ((a.extractElement(i, j) != a.get_zero()) &&
+                    (b.extractElement(i, j) != b.get_zero()))
                 {
-                    tmp.set_value_at(i, j,
-                                     accum(c.get_value_at(i, j),
-                                           func(a.get_value_at(i,j),
-                                                b.get_value_at(i,j))));
+                    tmp.setElement(i, j,
+                                     accum(c.extractElement(i, j),
+                                           func(a.extractElement(i,j),
+                                                b.extractElement(i,j))));
                 }
             }
         }
@@ -267,13 +267,13 @@ namespace backend{
         {
             for (IndexType j = 0; j < num_cols; j++)
             {
-                if (m.get_value_at(i,j))
+                if (m.extractElement(i,j))
                 {
-                    c.set_value_at(i, j, tmp.get_value_at(i, j));
+                    c.setElement(i, j, tmp.extractElement(i, j));
                 }
                 else if (replace_flag)
                 {
-                    c.set_value_at(i, j, c.get_zero());
+                    c.setElement(i, j, c.get_zero());
                 }
             }
         }
@@ -322,11 +322,11 @@ namespace backend{
                 auto tmp_sum = s.zero();
                 for (IndexType k = 0; k < b_num_rows; k++)
                 {
-                    mult_res = s.mult(a.get_value_at(i, k),
-                                      b.get_value_at(k, j));
+                    mult_res = s.mult(a.extractElement(i, k),
+                                      b.extractElement(k, j));
                     tmp_sum = s.add(tmp_sum, mult_res);
                 }
-                tmp.set_value_at(i, j, tmp_sum);
+                tmp.setElement(i, j, tmp_sum);
             }
         }
 
@@ -335,9 +335,9 @@ namespace backend{
         {
             for (IndexType j = 0; j < b_num_cols; j++)
             {
-                c.set_value_at(i, j,
-                               accum(c.get_value_at(i, j),
-                                     tmp.get_value_at(i, j)));
+                c.setElement(i, j,
+                               accum(c.extractElement(i, j),
+                                     tmp.extractElement(i, j)));
             }
         }
     }
@@ -384,16 +384,16 @@ namespace backend{
         {
             for (IndexType j = 0; j < c_num_cols; ++j)
             {
-                if (m.get_value_at(i,j) != m.get_zero()) /// @todo Or s.zero()?
+                if (m.extractElement(i,j) != m.get_zero()) /// @todo Or s.zero()?
                 {
                     auto tmp_sum = s.zero();
                     for (IndexType k = 0; k < b_num_rows; ++k)
                     {
-                        auto mult_res = s.mult(a.get_value_at(i, k),
-                                               b.get_value_at(k, j));
+                        auto mult_res = s.mult(a.extractElement(i, k),
+                                               b.extractElement(k, j));
                         tmp_sum = s.add(tmp_sum, mult_res);
                     }
-                    tmp.set_value_at(i, j, tmp_sum);
+                    tmp.setElement(i, j, tmp_sum);
                 }
             }
         }
@@ -403,9 +403,9 @@ namespace backend{
         {
             for (IndexType j = 0; j < b_num_cols; ++j)
             {
-                c.set_value_at(i, j,
-                               accum(c.get_value_at(i, j),
-                                     tmp.get_value_at(i, j)));
+                c.setElement(i, j,
+                               accum(c.extractElement(i, j),
+                                     tmp.extractElement(i, j)));
             }
         }
     }
@@ -445,9 +445,9 @@ namespace backend{
         {
             for (IndexType ci = 0; ci < c_num_cols; ++ci)
             {
-                if (m.get_value_at(ri, ci) == m.get_zero()) /// @todo s.zero()?
+                if (m.extractElement(ri, ci) == m.get_zero()) /// @todo s.zero()?
                 {
-                    c.set_value_at(ri, ci, c.get_zero()); /// @todo s.zero()?
+                    c.setElement(ri, ci, c.get_zero()); /// @todo s.zero()?
                 }
             }
         }
@@ -543,9 +543,9 @@ namespace backend{
             {
                 /// @todo How do we detect and handle structural zeros
                 ///       for accum or assign.
-                c.set_value_at(i, j,
-                               accum(c.get_value_at(i, j),
-                                     a.get_value_at(i_it[i], j_it[j])));
+                c.setElement(i, j,
+                               accum(c.extractElement(i, j),
+                                     a.extractElement(i_it[i], j_it[j])));
             }
         }
     }
@@ -599,7 +599,7 @@ namespace backend{
         /// len(j_it) == n_A
 
         /// @todo Need to check that dimension assigning to are correct?
-        ///       Do that in the call to c.set_value_at()
+        ///       Do that in the call to c.setElement()
 
         /// %todo there is a better way that involves increment only
         for (IndexType i = 0; i < m_A; ++i)
@@ -608,11 +608,11 @@ namespace backend{
             {
                 /// @todo What do we do with structural zeros on
                 ///  the rhs or lhs of this operation?
-                c.set_value_at(
+                c.setElement(
                     *(i_it + i),
                     *(j_it + j),
-                    accum(c.get_value_at(i_it[i], j_it[j]),
-                          a.get_value_at(i, j)));
+                    accum(c.extractElement(i_it[i], j_it[j]),
+                          a.extractElement(i, j)));
             }
         }
     }
@@ -677,9 +677,9 @@ namespace backend{
         {
             for (IndexType j = 0; j < a_num_cols; j++)
             {
-                c.set_value_at(i, j,
-                               accum(c.get_value_at(i, j),
-                                     func(a.get_value_at(i, j))));
+                c.setElement(i, j,
+                               accum(c.extractElement(i, j),
+                                     func(a.extractElement(i, j))));
             }
         }
     }
@@ -711,10 +711,10 @@ namespace backend{
             typename AMatrixT::ScalarType tmp_sum = sum.identity();
             for (IndexType j = 0; j < N; ++j)
             {
-                tmp_sum = sum(tmp_sum, a.get_value_at(i, j));
+                tmp_sum = sum(tmp_sum, a.extractElement(i, j));
             }
-            c.set_value_at(i, 0,
-                           accum(c.get_value_at(i, 0), tmp_sum));
+            c.setElement(i, 0,
+                           accum(c.extractElement(i, 0), tmp_sum));
         }
     }
 
@@ -745,10 +745,10 @@ namespace backend{
             typename AMatrixT::ScalarType tmp_sum = sum.identity();
             for (IndexType i = 0; i < M; ++i)
             {
-                tmp_sum = sum(tmp_sum, a.get_value_at(i, j));
+                tmp_sum = sum(tmp_sum, a.extractElement(i, j));
             }
-            c.set_value_at(0, j,
-                           accum(c.get_value_at(0, j), tmp_sum));
+            c.setElement(0, j,
+                           accum(c.extractElement(0, j), tmp_sum));
         }
     }
 
@@ -781,14 +781,14 @@ namespace backend{
         for (IndexType i = 0; i < M; ++i)
         {
             typename AMatrixT::ScalarType tmp_sum = sum.identity();
-            if(mask.get_value_at(i,0) != mask.get_zero())
+            if(mask.extractElement(i,0) != mask.get_zero())
             {
                 for (IndexType j = 0; j < N; ++j)
                 {
-                    tmp_sum = sum(tmp_sum, a.get_value_at(i, j));
+                    tmp_sum = sum(tmp_sum, a.extractElement(i, j));
                 }
-                c.set_value_at(i, 0,
-                               accum(c.get_value_at(i, 0), tmp_sum));
+                c.setElement(i, 0,
+                               accum(c.extractElement(i, 0), tmp_sum));
             }
         }
     }
@@ -822,14 +822,14 @@ namespace backend{
         for (IndexType j = 0; j < N; ++j)
         {
             typename AMatrixT::ScalarType tmp_sum = sum.identity();
-            if(mask.get_value_at(0,j) != mask.get_zero())
+            if(mask.extractElement(0,j) != mask.get_zero())
             {
                 for (IndexType i = 0; i < M; ++i)
                 {
-                    tmp_sum = sum(tmp_sum, a.get_value_at(i, j));
+                    tmp_sum = sum(tmp_sum, a.extractElement(i, j));
                 }
-                c.set_value_at(0, j,
-                               accum(c.get_value_at(0, j), tmp_sum));
+                c.setElement(0, j,
+                               accum(c.extractElement(0, j), tmp_sum));
             }
         }
     }
@@ -866,7 +866,7 @@ namespace backend{
         {
             for (IndexType j = 0; j < c_num_cols; ++j)
             {
-                c.set_value_at(i, j, a.get_value_at(j, i));
+                c.setElement(i, j, a.extractElement(j, i));
             }
         }
     }
@@ -901,7 +901,7 @@ namespace backend{
         {
             for (IndexType jj = 0; jj < num_cols; jj++)
             {
-                auto matrix_value = a.get_value_at(ii, jj);
+                auto matrix_value = a.extractElement(ii, jj);
                 if (matrix_value != a.get_zero())
                 {
                     i[idx] = ii;

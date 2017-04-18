@@ -90,7 +90,7 @@ namespace algorithms
         graphblas::buildmatrix(seen, seen_r.begin(), seen_c.begin(),
                 seen_v.begin(), seen_r.size());
 
-        //seen.set_value_at(1, 0, std::numeric_limits<T>::max());
+        //seen.setElement(1, 0, std::numeric_limits<T>::max());
 
         MatrixT sources = graphblas::fill<MatrixT>(1, rows, 1);
 
@@ -100,7 +100,7 @@ namespace algorithms
         std::vector<T> mask_v = {1};
         graphblas::buildmatrix(mask, seen_r.begin(), seen_c.begin(),
                 mask_v.begin(), mask_v.size());
-        //mask.set_value_at(1,0,1);
+        //mask.setElement(1,0,1);
 
         graphblas::mxv(A, mask, d);
 
@@ -117,34 +117,34 @@ namespace algorithms
             graphblas::IndexType u = 0;
             for (graphblas::IndexType i = 1; i < rows; ++i)
             {
-                if (temp.get_value_at(i, 0) < temp.get_value_at(u, 0))
+                if (temp.extractElement(i, 0) < temp.extractElement(u, 0))
                 {
                     u = i;
                 }
             }
 
-            seen.set_value_at(u, 0, std::numeric_limits<T>::max());
-            weight += d.get_value_at(u,0);
+            seen.setElement(u, 0, std::numeric_limits<T>::max());
+            weight += d.extractElement(u,0);
 
             edges.push_back(
                 std::make_tuple(
-                    sources.get_value_at(u, 0),
+                    sources.extractElement(u, 0),
                     u,
-                    A.get_value_at(sources.get_value_at(u,0),u)));
+                    A.extractElement(sources.extractElement(u,0),u)));
 
             /*for (graphblas::IndexType i = 1; i < rows; ++i)
             {
-                if (A.get_value_at(u,i) < d.get_value_at(i,0))
+                if (A.extractElement(u,i) < d.extractElement(i,0))
                 {
-                    d.set_value_at(i,0, A.get_value_at(u, i));
-                    sources.set_value_at(i, 0, u);
+                    d.setElement(i,0, A.extractElement(u, i));
+                    sources.setElement(i, 0, u);
                 }
             }*/
 
             // A[u][:]
             MatrixT slice(cols, 1);
             MatrixT slice_mask(cols, 1);
-            slice_mask.set_value_at(u,0,1);
+            slice_mask.setElement(u,0,1);
 
             graphblas::mxv(A, slice_mask, slice);
 

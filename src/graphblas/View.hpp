@@ -96,9 +96,9 @@ namespace graphblas
             return m_mat.get_nnz();
         }
 
-        ScalarType get_value_at(IndexType row, IndexType col) const
+        ScalarType extractElement(IndexType row, IndexType col) const
         {
-            return m_mat.get_value_at(row, col);
+            return m_mat.extractElement(row, col);
         }
 
         //other methods that may or may not belong here:
@@ -452,9 +452,9 @@ namespace graphblas
             return m_mat.get_nnz();
         }
 
-        ScalarType get_value_at(IndexType row, IndexType col) const
+        ScalarType extractElement(IndexType row, IndexType col) const
         {
-            return m_mat.get_value_at(row, col);
+            return m_mat.extractElement(row, col);
         }
 
         //other methods that may or may not belong here:
@@ -791,24 +791,24 @@ namespace GraphBLAS
         //    m_mat.get_shape(num_rows, num_cols);
         //}
 
-        IndexType get_nrows() const
+        IndexType nrows() const
         {
-            return m_mat.get_nrows();
+            return m_mat.nrows();
         }
 
-        IndexType get_ncols() const
+        IndexType ncols() const
         {
-            return m_mat.get_ncols();
+            return m_mat.ncols();
         }
 
-        IndexType get_nvals() const
+        IndexType nvals() const
         {
-            return m_mat.get_nvals();
+            return m_mat.nvals();
         }
 
-        ScalarType get_value_at(IndexType row, IndexType col) const
+        ScalarType extractElement(IndexType row, IndexType col) const
         {
-            return m_mat.get_value_at(row, col);
+            return m_mat.extractElement(row, col);
         }
 
         //other methods that may or may not belong here:
@@ -879,13 +879,13 @@ namespace GraphBLAS
 
         ~TransposeView() { }
 
-        IndexType get_nrows() const { return m_mat.get_nrows(); }
-        IndexType get_ncols() const { return m_mat.get_ncols(); }
-        IndexType get_nvals() const { return m_mat.get_nvals(); }
+        IndexType nrows() const { return m_mat.nrows(); }
+        IndexType ncols() const { return m_mat.ncols(); }
+        IndexType nvals() const { return m_mat.nvals(); }
 
-        ScalarType get_value_at(IndexType row, IndexType col) const
+        ScalarType extractElement(IndexType row, IndexType col) const
         {
-            return m_mat.get_value_at(row, col);
+            return m_mat.extractElement(row, col);
         }
 
         //other methods that may or may not belong here:

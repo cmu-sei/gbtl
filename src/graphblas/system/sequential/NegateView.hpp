@@ -61,20 +61,20 @@ namespace backend
         {
         }
 
-        IndexType get_nrows() const
+        IndexType nrows() const
         {
-            return m_matrix.get_nrows();
+            return m_matrix.nrows();
         }
 
-        IndexType get_ncols() const
+        IndexType ncols() const
         {
-            return m_matrix.get_ncols();
+            return m_matrix.ncols();
         }
 
-        IndexType get_nvals() const
+        IndexType nvals() const
         {
-            return (m_matrix.get_nrows()*m_matrix.get_ncols() -
-                    m_matrix.get_nvals());
+            return (m_matrix.nrows()*m_matrix.ncols() -
+                    m_matrix.nvals());
         }
 
         /**
@@ -90,11 +90,11 @@ namespace backend
         template <typename OtherMatrixT>
         bool operator==(OtherMatrixT const &rhs) const
         {
-            IndexType nr = get_nrows();
-            IndexType nc = get_ncols();
+            IndexType nr = nrows();
+            IndexType nc = ncols();
 
-            if ((nr != rhs.get_nrows()) || (nc != rhs.get_ncols()) ||
-                (get_nvals() != rhs.get_nvals()))
+            if ((nr != rhs.nrows()) || (nc != rhs.ncols()) ||
+                (nvals() != rhs.nvals()))
             {
                 return false;
             }
@@ -139,10 +139,10 @@ namespace backend
          *
          * @todo this needs to go away
          */
-        ScalarType get_value_at(IndexType row, IndexType col) const
+        ScalarType extractElement(IndexType row, IndexType col) const
         {
             /// @todo Not implemented yet
-            return !m_matrix.get_value_at(row, col);
+            return !m_matrix.extractElement(row, col);
         }
 
         void print_info(std::ostream &os) const
@@ -162,12 +162,12 @@ namespace backend
                 os << ((row == 0) ? "[[" : " [");
                 if (num_cols > 0)
                 {
-                    os << mat.get_value_at(row, 0);
+                    os << mat.extractElement(row, 0);
                 }
 
                 for (IndexType col = 1; col < num_cols; ++col)
                 {
-                    os << ", " << mat.get_value_at(row, col);
+                    os << ", " << mat.extractElement(row, col);
                 }
                 os << ((row == num_rows - 1) ? "]]" : "]\n");
             }
@@ -331,7 +331,7 @@ namespace backend
             {
                 for (IndexType j = 0; j < nc; ++j)
                 {
-                    if (get_value_at(i, j) != rhs.get_value_at(i, j))
+                    if (extractElement(i, j) != rhs.extractElement(i, j))
                     {
                         return false;
                     }
@@ -369,19 +369,19 @@ namespace backend
          *
          * @return The negated element at the given row and column.
          */
-        ScalarType get_value_at(IndexType row, IndexType col) const
+        ScalarType extractElement(IndexType row, IndexType col) const
         {
-            //return math::NotFn<ScalarType>()(m_matrix.get_value_at(row, col));
-            return SemiringNegate<SemiringT>()(m_matrix.get_value_at(row, col));
+            //return math::NotFn<ScalarType>()(m_matrix.extractElement(row, col));
+            return SemiringNegate<SemiringT>()(m_matrix.extractElement(row, col));
         }
 
 
         // Not certain about this implementation
-        //void set_value_at(IndexType         row,
+        //void setElement(IndexType         row,
         //                  IndexType         col,
         //                  ScalarType const &val)
         //{
-        //    m_matrix.set_value_at(row, col, math::NotFn<ScalarType>()(val));
+        //    m_matrix.setElement(row, col, math::NotFn<ScalarType>()(val));
         //}
 
         void print_info(std::ostream &os) const
@@ -401,12 +401,12 @@ namespace backend
                 os << ((row == 0) ? "[[" : " [");
                 if (num_cols > 0)
                 {
-                    os << mat.get_value_at(row, 0);
+                    os << mat.extractElement(row, 0);
                 }
 
                 for (IndexType col = 1; col < num_cols; ++col)
                 {
-                    os << ", " << mat.get_value_at(row, col);
+                    os << ", " << mat.extractElement(row, col);
                 }
                 os << ((row == num_rows - 1) ? "]]" : "]\n");
             }

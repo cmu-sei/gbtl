@@ -458,47 +458,47 @@ namespace GraphBLAS
         template <typename M1, typename M2>
         void check_dimensions(M1 m1, std::string m1Name, M2 m2, std::string m2Name)
         {
-            if (m1.get_nrows() != m2.get_nrows())
+            if (m1.nrows() != m2.nrows())
             {
                 throw DimensionException("Matrix ROW counts are not the same. " + 
-                    m1Name + " = " + std::to_string(m1.get_nrows()) + ", " + 
-                    m2Name + " = " + std::to_string(m2.get_nrows()) );
+                    m1Name + " = " + std::to_string(m1.nrows()) + ", " +
+                    m2Name + " = " + std::to_string(m2.nrows()) );
             }
 
-            if (m1.get_ncols() != m2.get_ncols())
+            if (m1.ncols() != m2.ncols())
             {
                 throw DimensionException("Matrix COL counts are not the same. " + 
-                    m1Name + " = " + std::to_string(m1.get_ncols()) + ", " + 
-                    m2Name + " = " + std::to_string(m2.get_ncols()) );
+                    m1Name + " = " + std::to_string(m1.ncols()) + ", " +
+                    m2Name + " = " + std::to_string(m2.ncols()) );
             }
         }
 
         template <typename M1, typename M2>
         void check_inside_dimensions(M1 m1, std::string m1Name, M2 m2, std::string m2Name)
         {
-            if (m1.get_ncols() != m2.get_nrows())
+            if (m1.ncols() != m2.nrows())
             {
                 throw DimensionException("Matrix COL vs ROW counts (inner) are not the same. " + 
-                    m1Name + " col = " + std::to_string(m1.get_ncols()) + ", " + 
-                    m2Name + " row = " + std::to_string(m2.get_nrows()) );
+                    m1Name + " col = " + std::to_string(m1.ncols()) + ", " +
+                    m2Name + " row = " + std::to_string(m2.nrows()) );
             }
         }
 
         template <typename M1, typename M2, typename M3>
         void check_outside_dimensions(M1 m1, std::string m1Name, M2 m2, std::string m2Name, M3 m3, std::string m3Name)
         {
-            if (m1.get_nrows() != m3.get_nrows())
+            if (m1.nrows() != m3.nrows())
             {
                 throw DimensionException("Matrix ROW vs ROW counts (outer) are not the same. " + 
-                    m1Name + " row = " + std::to_string(m1.get_nrows()) + ", " + 
-                    m3Name + " row = " + std::to_string(m3.get_nrows()) );
+                    m1Name + " row = " + std::to_string(m1.nrows()) + ", " +
+                    m3Name + " row = " + std::to_string(m3.nrows()) );
             }
 
-            if (m2.get_ncols() != m3.get_ncols())
+            if (m2.ncols() != m3.ncols())
             {
                 throw DimensionException("Matrix COL vs COL counts (outer) are not the same. " + 
-                    m2Name + " col = " + std::to_string(m2.get_ncols()) + ", " + 
-                    m3Name + " col = " + std::to_string(m3.get_ncols()) );
+                    m2Name + " col = " + std::to_string(m2.ncols()) + ", " +
+                    m3Name + " col = " + std::to_string(m3.ncols()) );
             }
         }
 

@@ -240,7 +240,7 @@ int main(){
     std::vector<T> z(x.size(), 1);
 
     graphblas::buildmatrix(root, x.begin(),y.begin(),z.begin(), x.size());
-    //root.set_value_at(0, START_INDEX, 1);  // multiplicative identity
+    //root.setElement(0, START_INDEX, 1);  // multiplicative identity
 
     GrBMatrix levels(1, NUM_NODES, 0);
     bfs_level(G_tn, root, levels);

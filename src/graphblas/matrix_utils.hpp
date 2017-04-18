@@ -163,7 +163,7 @@ namespace GraphBLAS
         {
             for (graphblas::IndexType j = 0; j < num_cols; j++)
             {
-                m.set_value_at(i, j, fill_value);
+                m.setElement(i, j, fill_value);
             }
         }
 
@@ -369,7 +369,7 @@ namespace graphblas
         {
             for (graphblas::IndexType j = 0; j < num_cols; j++)
             {
-                m.set_value_at(i, j, fill_value);
+                m.setElement(i, j, fill_value);
             }
         }
 

@@ -225,7 +225,7 @@ namespace graphblas
          * @return The element of this CooMatrix at the given row and
          *         column.
          */
-        ScalarT get_value_at(IndexType i, IndexType j) const
+        ScalarT extractElement(IndexType i, IndexType j) const
         {
             IndexType vec_index = 0;
             bool missing_element = false;
@@ -265,7 +265,7 @@ namespace graphblas
             }
         }
 
-        void set_value_at(IndexType row_index, IndexType elem_index,
+        void setElement(IndexType row_index, IndexType elem_index,
                           ScalarT const &rhs)
         {
             IndexType vec_index = 0;
@@ -340,7 +340,7 @@ namespace graphblas
             {
                 for (IndexType j = 0; j < m_num_cols; ++j)
                 {
-                    if (get_value_at(i, j) != rhs.get_value_at(i, j))
+                    if (extractElement(i, j) != rhs.extractElement(i, j))
                     {
                         return false;
                     }

@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(sssp_basic_double_one_root)
     std::vector<graphblas::IndexType> r={0}, c={start_index};
     std::vector<double> v_r={0};
     graphblas::buildmatrix(root, r.begin(), c.begin(), v_r.begin(), v_r.size());
-    //root.set_value_at(0, start_index, 0);
+    //root.setElement(0, start_index, 0);
 
     graphblas::Matrix<double, graphblas::DirectedMatrixTag> distance(1, NUM_NODES, INF);
     sssp(G_tn, root, distance);
@@ -126,8 +126,8 @@ BOOST_AUTO_TEST_CASE(sssp_basic_double_one_root)
 
     for (graphblas::IndexType ix = 0; ix < NUM_NODES; ++ix)
     {
-        BOOST_CHECK_EQUAL(distance.get_value_at(0, ix),
-                          G_tn_answer.get_value_at(start_index, ix));
+        BOOST_CHECK_EQUAL(distance.extractElement(0, ix),
+                          G_tn_answer.extractElement(start_index, ix));
     }
 }
 

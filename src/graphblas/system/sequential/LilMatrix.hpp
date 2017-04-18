@@ -165,7 +165,7 @@ namespace graphblas
                     throw DimensionException();
                 }
 
-                set_value_at(i, j, accum(get_value_at(i, j), v_it[idx]));
+                setElement(i, j, accum(extractElement(i, j), v_it[idx]));
             }
         }
 
@@ -281,7 +281,7 @@ namespace graphblas
             {
                 for (IndexType j = 0; j < m_num_cols; ++j)
                 {
-                    if (get_value_at(i, j) != rhs.get_value_at(i, j))
+                    if (extractElement(i, j) != rhs.extractElement(i, j))
                     {
                         return false;
                     }
@@ -316,7 +316,7 @@ namespace graphblas
          * @return The element of this LilMatrix at the given row and
          *         column.
          */
-        ScalarT get_value_at(IndexType row_index,
+        ScalarT extractElement(IndexType row_index,
                              IndexType col_index) const
         {
             /// @todo assert indices within ranges?
@@ -338,7 +338,7 @@ namespace graphblas
         }
 
         // Not certain about this implementation
-        void set_value_at(IndexType      row,
+        void setElement(IndexType      row,
                           IndexType      col,
                           ScalarT const &new_val)
         {

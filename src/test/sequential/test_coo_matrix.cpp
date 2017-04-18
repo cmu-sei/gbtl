@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(coo_constructor)
     {
         for (graphblas::IndexType j = 0; j < N; j++)
         {
-            BOOST_CHECK_EQUAL(m1.get_value_at(i, j), mat[i][j]);
+            BOOST_CHECK_EQUAL(m1.extractElement(i, j), mat[i][j]);
         }
     }
 }
@@ -60,12 +60,12 @@ BOOST_AUTO_TEST_CASE(coo_assignment_empty_location)
     BOOST_CHECK_EQUAL(num_cols, N);
 
     mat[0][1] = 8;
-    m1.set_value_at(0,1,8);
+    m1.setElement(0,1,8);
     for (graphblas::IndexType i = 0; i < M; i++)
     {
         for (graphblas::IndexType j = 0; j < N; j++)
         {
-            BOOST_CHECK_EQUAL(m1.get_value_at(i, j), mat[i][j]);
+            BOOST_CHECK_EQUAL(m1.extractElement(i, j), mat[i][j]);
         }
     }
 }
@@ -91,13 +91,13 @@ BOOST_AUTO_TEST_CASE(coo_assignment_previous_value)
     BOOST_CHECK_EQUAL(num_cols, N);
 
     mat[0][0] = 8;
-    m1.set_value_at(0,0,8);
+    m1.setElement(0,0,8);
 
     for (graphblas::IndexType i = 0; i < M; i++)
     {
         for (graphblas::IndexType j = 0; j < N; j++)
         {
-            BOOST_CHECK_EQUAL(m1.get_value_at(i, j), mat[i][j]);
+            BOOST_CHECK_EQUAL(m1.extractElement(i, j), mat[i][j]);
         }
     }
 }
@@ -123,12 +123,12 @@ BOOST_AUTO_TEST_CASE(coo_remove_value)
     BOOST_CHECK_EQUAL(num_cols, N);
 
     mat[0][2] = 0;
-    m1.set_value_at(0,2,0);
+    m1.setElement(0,2,0);
     for (graphblas::IndexType i = 0; i < M; i++)
     {
         for (graphblas::IndexType j = 0; j < N; j++)
         {
-            BOOST_CHECK_EQUAL(m1.get_value_at(i, j), mat[i][j]);
+            BOOST_CHECK_EQUAL(m1.extractElement(i, j), mat[i][j]);
         }
     }
 }
@@ -171,13 +171,13 @@ BOOST_AUTO_TEST_CASE(coo_test_get_rows)
     m1.get_shape(M, N);
 
     graphblas::IndexType row_index = 2;
-    auto mat_row2a = m1.get_row(row_index);
+    auto mat_row2a = m1.getRow(row_index);
     auto mat_row2b = m1[row_index];
 
     for (graphblas::IndexType j = 0; j < N; ++j)
     {
-        BOOST_CHECK_EQUAL(mat_row2a[j], m1.get_value_at(row_index, j));
-        BOOST_CHECK_EQUAL(mat_row2b[j], m1.get_value_at(row_index, j));
+        BOOST_CHECK_EQUAL(mat_row2a[j], m1.extractElement(row_index, j));
+        BOOST_CHECK_EQUAL(mat_row2b[j], m1.extractElement(row_index, j));
     }
 */
 }
@@ -210,7 +210,7 @@ BOOST_AUTO_TEST_CASE(coo_test_transpose_view)
     {
         for (graphblas::IndexType j = 0; j < N; j++)
         {
-            BOOST_CHECK_EQUAL(m1.get_value_at(i, j), mT.get_value_at(j, i));
+            BOOST_CHECK_EQUAL(m1.extractElement(i, j), mT.extractElement(j, i));
         }
     }
 }
@@ -237,13 +237,13 @@ BOOST_AUTO_TEST_CASE(coo_double_assignment)
 
     mat[1][1] = 1;
     mat[2][2] = 0;
-    m1.set_value_at(1,1,1);
-    m1.set_value_at(2,2,0);
+    m1.setElement(1,1,1);
+    m1.setElement(2,2,0);
     for (graphblas::IndexType i = 0; i < M; i++)
     {
         for (graphblas::IndexType j = 0; j < N; j++)
         {
-            BOOST_CHECK_EQUAL(m1.get_value_at(i, j), mat[i][j]);
+            BOOST_CHECK_EQUAL(m1.extractElement(i, j), mat[i][j]);
         }
     }
 }

@@ -252,7 +252,7 @@ namespace GraphBLAS
 
 
         /// @return the number of stored values in this
-        IndexType get_nvals() const
+        IndexType nvals() const
         {
             return m_nvals;
         }
@@ -313,7 +313,7 @@ namespace GraphBLAS
          * @return The element of this BitmapSparseVector at the given row and
          *         column.
          */
-        ScalarT get_value_at(IndexType index) const
+        ScalarT extractElement(IndexType index) const
         {
             if (index >= m_size)
             {
@@ -329,7 +329,7 @@ namespace GraphBLAS
         }
 
         // Not certain about this implementation
-        void set_value_at(IndexType      index,
+        void setElement(IndexType      index,
                           ScalarT const &new_val)
         {
             if (index >= m_size)
@@ -349,7 +349,7 @@ namespace GraphBLAS
         {
             os << "BitmapSparseVector<" << typeid(ScalarT).name() << ">" << std::endl;
             os << "size  = " << get_size()  << std::endl;
-            os << "nvals = " << get_nvals() << std::endl;
+            os << "nvals = " << nvals() << std::endl;
             os << "contents: [";
             if (m_bitmap[0]) os << m_vals[0]; else os << "-";
             for (IndexType idx = 1; idx < m_size; ++idx)

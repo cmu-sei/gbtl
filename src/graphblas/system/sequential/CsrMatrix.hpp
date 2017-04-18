@@ -76,7 +76,7 @@ namespace graphblas
                     throw DimensionException();
                 }
 
-                set_value_at(i, j, accum(get_value_at(i, j), v_it[idx]));
+                setElement(i, j, accum(extractElement(i, j), v_it[idx]));
             }
         }
 
@@ -289,7 +289,7 @@ namespace graphblas
             {
                 for (IndexType j = 0; j < m_num_cols; ++j)
                 {
-                    if (get_value_at(i, j) != rhs.get_value_at(i, j))
+                    if (extractElement(i, j) != rhs.extractElement(i, j))
                     {
                         return false;
                     }
@@ -324,7 +324,7 @@ namespace graphblas
          * @return The element of this CsrMatrix at the given row and
          *         column.
          */
-        ScalarT get_value_at(IndexType row_index,
+        ScalarT extractElement(IndexType row_index,
                              IndexType col_index) const
         {
             IndexType start = m_row_ptr[row_index];
@@ -340,7 +340,7 @@ namespace graphblas
         }
 
 
-        void set_value_at(IndexType        row,
+        void setElement(IndexType        row,
                           IndexType        col,
                           ScalarT const &new_val)
         {
@@ -390,12 +390,12 @@ namespace graphblas
          *
          * @return The row of this CsrMatrix as a dense_vector.
          */
-        // RowView<CsrMatrix<ScalarT> const> get_row(IndexType row) const
+        // RowView<CsrMatrix<ScalarT> const> getRow(IndexType row) const
         // {
         //     return RowView<CsrMatrix<ScalarT> const>(row, *this);
         // }
 
-        // RowView<CsrMatrix<ScalarT> > get_row(IndexType row)
+        // RowView<CsrMatrix<ScalarT> > getRow(IndexType row)
         // {
         //     return RowView<CsrMatrix<ScalarT> >(row, *this);
         // }

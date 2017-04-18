@@ -131,7 +131,7 @@ namespace backend
             {
                 for (IndexType j = 0; j < nc; ++j)
                 {
-                    if (get_value_at(i, j) != rhs.get_value_at(i, j))
+                    if (extractElement(i, j) != rhs.extractElement(i, j))
                     {
                         return false;
                     }
@@ -169,18 +169,18 @@ namespace backend
          *
          * @return The element at the given transposed row and column.
          */
-        ScalarType get_value_at(IndexType row, IndexType col) const
+        ScalarType extractElement(IndexType row, IndexType col) const
         {
-            return m_matrix.get_value_at(col, row);
+            return m_matrix.extractElement(col, row);
         }
 
 
         // Not certain about this implementation
-        //void set_value_at(IndexType         row,
+        //void setElement(IndexType         row,
         //                  IndexType         col,
         //                  ScalarType const &val)
         //{
-        //    m_matrix.set_value_at(col, row, val);
+        //    m_matrix.setElement(col, row, val);
         //}
 
         //other methods that may or may not belong here:
@@ -202,12 +202,12 @@ namespace backend
                 os << ((row == 0) ? "[[" : " [");
                 if (num_cols > 0)
                 {
-                    os << mat.get_value_at(row, 0);
+                    os << mat.extractElement(row, 0);
                 }
 
                 for (IndexType col = 1; col < num_cols; ++col)
                 {
-                    os << ", " << mat.get_value_at(row, col);
+                    os << ", " << mat.extractElement(row, col);
                 }
                 os << ((row == num_rows - 1) ? "]]" : "]\n");
             }
@@ -349,7 +349,7 @@ namespace backend
             {
                 for (IndexType j = 0; j < nc; ++j)
                 {
-                    if (get_value_at(i, j) != rhs.get_value_at(i, j))
+                    if (extractElement(i, j) != rhs.extractElement(i, j))
                     {
                         return false;
                     }
@@ -387,18 +387,18 @@ namespace backend
          *
          * @return The element at the given transposed row and column.
          */
-        ScalarType get_value_at(IndexType row, IndexType col) const
+        ScalarType extractElement(IndexType row, IndexType col) const
         {
-            return m_matrix.get_value_at(col, row);
+            return m_matrix.extractElement(col, row);
         }
 
 
         // Not certain about this implementation
-        //void set_value_at(IndexType         row,
+        //void setElement(IndexType         row,
         //                  IndexType         col,
         //                  ScalarType const &val)
         //{
-        //    m_matrix.set_value_at(col, row, val);
+        //    m_matrix.setElement(col, row, val);
         //}
 
         //other methods that may or may not belong here:
@@ -420,12 +420,12 @@ namespace backend
                 os << ((row == 0) ? "[[" : " [");
                 if (num_cols > 0)
                 {
-                    os << mat.get_value_at(row, 0);
+                    os << mat.extractElement(row, 0);
                 }
 
                 for (IndexType col = 1; col < num_cols; ++col)
                 {
-                    os << ", " << mat.get_value_at(row, col);
+                    os << ", " << mat.extractElement(row, col);
                 }
                 os << ((row == num_rows - 1) ? "]]" : "]\n");
             }

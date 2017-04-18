@@ -162,9 +162,9 @@ namespace GraphBLAS
                     AMatrixT   const &A,
                     BMatrixT   const &B)
     {
-        if ((C.get_nrows() != A.get_nrows()) ||
-            (A.get_ncols() != B.get_nrows()) ||
-            (C.get_ncols() != B.get_ncols()))
+        if ((C.nrows() != A.nrows()) ||
+            (A.ncols() != B.nrows()) ||
+            (C.ncols() != B.ncols()))
         {
             throw DimensionException("mxm(nomask)");
         }
@@ -185,11 +185,11 @@ namespace GraphBLAS
                     BMatrixT   const &B,
                     bool              replace_flag = false)
     {
-        if ((C.get_nrows() != A.get_nrows()) ||
-            (A.get_ncols() != B.get_nrows()) ||
-            (C.get_ncols() != B.get_ncols()) ||
-            (C.get_nrows() != Mask.get_nrows()) ||
-            (C.get_ncols() != Mask.get_ncols()))
+        if ((C.nrows() != A.nrows()) ||
+            (A.ncols() != B.nrows()) ||
+            (C.ncols() != B.ncols()) ||
+            (C.nrows() != Mask.nrows()) ||
+            (C.ncols() != Mask.ncols()))
         {
             throw DimensionException("mxm(mask)");
         }

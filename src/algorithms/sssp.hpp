@@ -104,15 +104,15 @@ namespace algorithms
     {
         using T = typename MatrixT::ScalarType;
 
-        if ((graph.get_nrows() != paths.get_ncols()) ||
-            (graph.get_ncols() != paths.get_ncols()))
+        if ((graph.nrows() != paths.ncols()) ||
+            (graph.ncols() != paths.ncols()))
         {
             throw graphblas::DimensionException();
         }
 
         /// @todo why num_rows iterations?  Should be the diameter or terminate
         /// when there are no changes?
-        for (graphblas::IndexType k = 0; k < graph.get_nrows(); ++k)
+        for (graphblas::IndexType k = 0; k < graph.nrows(); ++k)
         {
             GraphBLAS::mxm(paths,
                            GraphBLAS::Min<T>(), GraphBLAS::MinPlusSemiring<T>(),

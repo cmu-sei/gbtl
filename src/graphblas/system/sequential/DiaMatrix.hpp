@@ -85,7 +85,7 @@ namespace graphblas
                     throw DimensionException();
                 }
 
-                set_value_at(i, j, accum(get_value_at(i, j), v_it[idx]));
+                setElement(i, j, accum(extractElement(i, j), v_it[idx]));
             }
         }
 
@@ -269,7 +269,7 @@ namespace graphblas
          * @return The element of this DiaMatrix at the given row and
          *         column.
          */
-        ScalarT get_value_at(IndexType i, IndexType j) const
+        ScalarT extractElement(IndexType i, IndexType j) const
         {
             if (m_offsets.size() == 0)
             {
@@ -316,7 +316,7 @@ namespace graphblas
             }
         }
 
-        void set_value_at(IndexType row, IndexType col, ScalarT const &rhs)
+        void setElement(IndexType row, IndexType col, ScalarT const &rhs)
         {
             IndexType M = m_num_rows;
             IndexType N = m_num_cols;
@@ -410,12 +410,12 @@ namespace graphblas
          * @param[in] row  The row to access.
          * @return The row of this DiaMatrix as a dense_vector.
          */
-        RowView<DiaMatrix<ScalarT> const> get_row(IndexType row) const
+        RowView<DiaMatrix<ScalarT> const> getRow(IndexType row) const
         {
             return RowView<DiaMatrix<ScalarT> const>(row, *this);
         }
 
-        RowView<DiaMatrix<ScalarT> > get_row(IndexType row)
+        RowView<DiaMatrix<ScalarT> > getRow(IndexType row)
         {
             return RowView<DiaMatrix<ScalarT> >(row, *this);
         }

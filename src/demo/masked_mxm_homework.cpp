@@ -138,9 +138,9 @@ namespace views
         }
 
         /// Generalized negate/complement/invert?? for illustrative purposes
-        ScalarType get_value_at(IndexType row, IndexType col) const
+        ScalarType extractElement(IndexType row, IndexType col) const
         {
-            auto value = m_matrix.get_value_at(row, col);
+            auto value = m_matrix.extractElement(row, col);
 
             if (value == SemiringT().zero())
                 return SemiringT().one();

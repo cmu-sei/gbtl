@@ -150,7 +150,7 @@ namespace graphblas
             {
                 for (IndexType j = 0; j < m_num_cols; ++j)
                 {
-                    if (get_value_at(i, j) != rhs.get_value_at(i, j))
+                    if (extractElement(i, j) != rhs.extractElement(i, j))
                     {
                         return false;
                     }
@@ -173,20 +173,20 @@ namespace graphblas
          * @return The element at the given row and column of the
          *         extended view.
          */
-        ScalarType get_value_at(IndexType row, IndexType col) const
+        ScalarType extractElement(IndexType row, IndexType col) const
         {
             //assert(row < m_num_rows); /// @todo throw or ignore?
-            return m_matrix.get_value_at(m_row_index, col);
+            return m_matrix.extractElement(m_row_index, col);
         }
 
 
         /// @todo Not certain about this implementation
-        void set_value_at(IndexType         row,
+        void setElement(IndexType         row,
                           IndexType         col,
                           ScalarType const &val)
         {
             //assert(row < m_num_rows); /// @todo throw or ignore?
-            m_matrix.set_value_at(m_row_index, col, val);
+            m_matrix.setElement(m_row_index, col, val);
         }
 
         friend std::ostream&
@@ -200,12 +200,12 @@ namespace graphblas
                 os << ((row == 0) ? "[[" : " [");
                 if (num_cols > 0)
                 {
-                    os << mat.get_value_at(row, 0);
+                    os << mat.extractElement(row, 0);
                 }
 
                 for (IndexType col = 1; col < num_cols; ++col)
                 {
-                    os << ", " << mat.get_value_at(row, col);
+                    os << ", " << mat.extractElement(row, col);
                 }
                 os << ((row == num_rows - 1) ? "]]" : "]\n");
             }

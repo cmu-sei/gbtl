@@ -33,8 +33,8 @@ BOOST_AUTO_TEST_CASE(lil_test_construction_basic)
     GraphBLAS::IndexType N = 4;
     GraphBLAS::LilSparseMatrix<double> m1(M, N);
 
-    GraphBLAS::IndexType num_rows(m1.get_nrows());
-    GraphBLAS::IndexType num_cols(m1.get_ncols());
+    GraphBLAS::IndexType num_rows(m1.nrows());
+    GraphBLAS::IndexType num_cols(m1.ncols());
 
     BOOST_CHECK_EQUAL(num_rows, M);
     BOOST_CHECK_EQUAL(num_cols, N);
@@ -57,8 +57,8 @@ BOOST_AUTO_TEST_CASE(lil_test_construction_dense)
 
     GraphBLAS::IndexType M = mat.size();
     GraphBLAS::IndexType N = mat[0].size();
-    GraphBLAS::IndexType num_rows(m1.get_nrows());
-    GraphBLAS::IndexType num_cols(m1.get_ncols());
+    GraphBLAS::IndexType num_rows(m1.nrows());
+    GraphBLAS::IndexType num_cols(m1.ncols());
 
     BOOST_CHECK_EQUAL(num_rows, M);
     BOOST_CHECK_EQUAL(num_cols, N);
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(lil_test_construction_dense)
     {
         for (graphblas::IndexType j = 0; j < N; j++)
         {
-            BOOST_CHECK_EQUAL(m1.get_value_at(i, j), mat[i][j]);
+            BOOST_CHECK_EQUAL(m1.extractElement(i, j), mat[i][j]);
         }
     }
 }
@@ -87,8 +87,8 @@ BOOST_AUTO_TEST_CASE(lil_test_construction_dense_zero)
 
     GraphBLAS::IndexType M = mat.size();
     GraphBLAS::IndexType N = mat[0].size();
-    GraphBLAS::IndexType num_rows(m1.get_nrows());
-    GraphBLAS::IndexType num_cols(m1.get_ncols());
+    GraphBLAS::IndexType num_rows(m1.nrows());
+    GraphBLAS::IndexType num_cols(m1.ncols());
 
     BOOST_CHECK_EQUAL(num_rows, M);
     BOOST_CHECK_EQUAL(num_cols, N);
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(lil_test_construction_dense_zero)
         {
             if (mat[i][j] != 0)
             {
-                BOOST_CHECK_EQUAL(m1.get_value_at(i, j), mat[i][j]);
+                BOOST_CHECK_EQUAL(m1.extractElement(i, j), mat[i][j]);
             }
         }
     }
@@ -138,8 +138,8 @@ BOOST_AUTO_TEST_CASE(lil_test_assign_to_implied_zero)
     GraphBLAS::LilSparseMatrix<double> m1(mat, 0);
 
     mat[0][1] = 8;
-    m1.set_value_at(0, 1, 8);
-    BOOST_CHECK_EQUAL(m1.get_value_at(0, 1), mat[0][1]);
+    m1.setElement(0, 1, 8);
+    BOOST_CHECK_EQUAL(m1.extractElement(0, 1), mat[0][1]);
 
     GraphBLAS::LilSparseMatrix<double> m2(mat, 0);
     BOOST_CHECK_EQUAL(m1, m2);
@@ -160,8 +160,8 @@ BOOST_AUTO_TEST_CASE(lil_test_assign_to_nonzero_element)
     GraphBLAS::LilSparseMatrix<double> m1(mat, 0);
 
     mat[0][0] = 8;
-    m1.set_value_at(0, 0, 8);
-    BOOST_CHECK_EQUAL(m1.get_value_at(0, 0), mat[0][0]);
+    m1.setElement(0, 0, 8);
+    BOOST_CHECK_EQUAL(m1.extractElement(0, 0), mat[0][0]);
 
     GraphBLAS::LilSparseMatrix<double> m2(mat, 0);
     BOOST_CHECK_EQUAL(m1, m2);
@@ -182,32 +182,32 @@ BOOST_AUTO_TEST_CASE(lil_test_get_set_col)
 
     GraphBLAS::LilSparseMatrix<double> m1(mat, 0);
 
-    auto col = m1.get_col(0);
+    auto col = m1.getCol(0);
     BOOST_CHECK_EQUAL(4UL, col.size());
 
-    col = m1.get_col(1);
+    col = m1.getCol(1);
     BOOST_CHECK_EQUAL(2UL, col.size());
 
-    col = m1.get_col(2);
+    col = m1.getCol(2);
     BOOST_CHECK_EQUAL(1UL, col.size());
 
-    col = m1.get_col(3);
+    col = m1.getCol(3);
     BOOST_CHECK_EQUAL(5UL, col.size());
 
-    BOOST_CHECK_EQUAL(12UL, m1.get_nvals());
+    BOOST_CHECK_EQUAL(12UL, m1.nvals());
     col.clear();
-    m1.set_col(0, col);
-    col = m1.get_col(0);
+    m1.setCol(0, col);
+    col = m1.getCol(0);
     BOOST_CHECK_EQUAL(0UL, col.size());
-    BOOST_CHECK_EQUAL(8UL, m1.get_nvals());
+    BOOST_CHECK_EQUAL(8UL, m1.nvals());
 
     col.clear();
-    m1.set_col(1, col);
-    BOOST_CHECK_EQUAL(6UL, m1.get_nvals());
-    m1.set_col(2, col);
-    BOOST_CHECK_EQUAL(5UL, m1.get_nvals());
-    m1.set_col(3, col);
-    BOOST_CHECK_EQUAL(0UL, m1.get_nvals());
+    m1.setCol(1, col);
+    BOOST_CHECK_EQUAL(6UL, m1.nvals());
+    m1.setCol(2, col);
+    BOOST_CHECK_EQUAL(5UL, m1.nvals());
+    m1.setCol(3, col);
+    BOOST_CHECK_EQUAL(0UL, m1.nvals());
 
 
     std::vector<std::vector<double>> mat2= {{0, 1, 0, 3, 0, 5, 0, 7, 0, 1, 0, 3, 0, 5, 0, 7},
@@ -220,9 +220,9 @@ BOOST_AUTO_TEST_CASE(lil_test_get_set_col)
     for (GraphBLAS::IndexType ci = 0; ci < 16; ++ci)
     {
         GraphBLAS::IndexType nz(0);
-        //m3.set_col(0, m2.get_col(ci));
-        auto c = m2.get_col(ci);
-        m3.set_col(0, c);
+        //m3.setCol(0, m2.getCol(ci));
+        auto c = m2.getCol(ci);
+        m3.setCol(0, c);
 
         for (GraphBLAS::IndexType ri = 0; ri < 4; ++ri)
         {
@@ -232,10 +232,10 @@ BOOST_AUTO_TEST_CASE(lil_test_get_set_col)
             }
             else
             {
-                BOOST_CHECK_EQUAL(mat2[ri][ci], m3.get_value_at(ri, 0));
+                BOOST_CHECK_EQUAL(mat2[ri][ci], m3.extractElement(ri, 0));
             }
         }
-        BOOST_CHECK_EQUAL(m3.get_nvals(), 4UL - nz);
+        BOOST_CHECK_EQUAL(m3.nvals(), 4UL - nz);
     }
 }
 
@@ -250,32 +250,32 @@ BOOST_AUTO_TEST_CASE(lil_test_get_set_row)
 
     GraphBLAS::LilSparseMatrix<double> m1(mat, 0);
 
-    auto row = m1.get_row(0);
+    auto row = m1.getRow(0);
     BOOST_CHECK_EQUAL(4UL, row.size());
 
-    row = m1.get_row(1);
+    row = m1.getRow(1);
     BOOST_CHECK_EQUAL(2UL, row.size());
 
-    row = m1.get_row(2);
+    row = m1.getRow(2);
     BOOST_CHECK_EQUAL(1UL, row.size());
 
-    row = m1.get_row(3);
+    row = m1.getRow(3);
     BOOST_CHECK_EQUAL(5UL, row.size());
 
-    BOOST_CHECK_EQUAL(12UL, m1.get_nvals());
+    BOOST_CHECK_EQUAL(12UL, m1.nvals());
     row.clear();
-    m1.set_row(0, row);
-    row = m1.get_row(0);
+    m1.setRow(0, row);
+    row = m1.getRow(0);
     BOOST_CHECK_EQUAL(0UL, row.size());
-    BOOST_CHECK_EQUAL(8UL, m1.get_nvals());
+    BOOST_CHECK_EQUAL(8UL, m1.nvals());
 
     row.clear();
-    m1.set_row(1, row);
-    BOOST_CHECK_EQUAL(6UL, m1.get_nvals());
-    m1.set_row(2, row);
-    BOOST_CHECK_EQUAL(5UL, m1.get_nvals());
-    m1.set_row(3, row);
-    BOOST_CHECK_EQUAL(0UL, m1.get_nvals());
+    m1.setRow(1, row);
+    BOOST_CHECK_EQUAL(6UL, m1.nvals());
+    m1.setRow(2, row);
+    BOOST_CHECK_EQUAL(5UL, m1.nvals());
+    m1.setRow(3, row);
+    BOOST_CHECK_EQUAL(0UL, m1.nvals());
 
 
     std::vector<std::vector<double>> mat2= {{0, 0, 0, 0},
@@ -300,8 +300,8 @@ BOOST_AUTO_TEST_CASE(lil_test_get_set_row)
     for (GraphBLAS::IndexType row_idx = 0; row_idx < 16; ++row_idx)
     {
         GraphBLAS::IndexType nz(0);
-        auto c = m2.get_row(row_idx);
-        m3.set_row(0, c);
+        auto c = m2.getRow(row_idx);
+        m3.setRow(0, c);
 
         for (GraphBLAS::IndexType col_idx = 0; col_idx < 4; ++col_idx)
         {
@@ -311,10 +311,10 @@ BOOST_AUTO_TEST_CASE(lil_test_get_set_row)
             }
             else
             {
-                BOOST_CHECK_EQUAL(mat2[row_idx][col_idx], m3.get_value_at(0, col_idx));
+                BOOST_CHECK_EQUAL(mat2[row_idx][col_idx], m3.extractElement(0, col_idx));
             }
         }
-        BOOST_CHECK_EQUAL(m3.get_nvals(), 4UL - nz);
+        BOOST_CHECK_EQUAL(m3.nvals(), 4UL - nz);
     }
 }
 

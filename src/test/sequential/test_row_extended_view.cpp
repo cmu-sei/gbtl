@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(rev_test_construction_vector)
     {
         for (graphblas::IndexType j = 0; j < N; j++)
         {
-            BOOST_CHECK_EQUAL(m1.get_value_at(i, j), col_vector[i][0]);
+            BOOST_CHECK_EQUAL(m1.extractElement(i, j), col_vector[i][0]);
         }
     }
 }
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(rev_test_construction_column_view)
     {
         for (graphblas::IndexType j = 0; j < N; j++)
         {
-            BOOST_CHECK_EQUAL(rev_mat.get_value_at(i, j),
+            BOOST_CHECK_EQUAL(rev_mat.extractElement(i, j),
                               mat[i][orig_col_index]);
         }
     }
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(rev_test_construction_matrix_col_index)
     {
         for (graphblas::IndexType j = 0; j < N; j++)
         {
-            BOOST_CHECK_EQUAL(rev_mat.get_value_at(i, j),
+            BOOST_CHECK_EQUAL(rev_mat.extractElement(i, j),
                               mat[i][orig_col_index]);
         }
     }
@@ -163,14 +163,14 @@ BOOST_AUTO_TEST_CASE(rev_test_modify_element)
 
     // modify the second value
     double new_value = 55.0;
-    rev_mat.set_value_at(1, 0, new_value);
+    rev_mat.setElement(1, 0, new_value);
     mat[1][orig_col_index] = new_value;
 
     for (graphblas::IndexType i = 0; i < M; i++)
     {
         for (graphblas::IndexType j = 0; j < N; j++)
         {
-            BOOST_CHECK_EQUAL(rev_mat.get_value_at(i, j),
+            BOOST_CHECK_EQUAL(rev_mat.extractElement(i, j),
                               mat[i][orig_col_index]);
         }
     }
@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE(rev_test_modify_element)
     {
         for (graphblas::IndexType j = 0; j < N; j++)
         {
-            BOOST_CHECK_EQUAL(matrix.get_value_at(i, j), mat[i][j]);
+            BOOST_CHECK_EQUAL(matrix.extractElement(i, j), mat[i][j]);
         }
     }
 }

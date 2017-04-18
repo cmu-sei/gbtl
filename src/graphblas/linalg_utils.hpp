@@ -42,11 +42,11 @@ namespace graphblas
             {
                 if (i < j)
                 {
-                    U.set_value_at(i, j, A.get_value_at(i, j));
+                    U.setElement(i, j, A.extractElement(i, j));
                 }
                 else
                 {
-                    L.set_value_at(i, j, A.get_value_at(i, j));
+                    L.setElement(i, j, A.extractElement(i, j));
                 }
             }
         }

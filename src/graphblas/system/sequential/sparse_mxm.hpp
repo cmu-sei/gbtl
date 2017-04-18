@@ -39,94 +39,6 @@ namespace GraphBLAS
 {
     namespace backend
     {
-//         //**************************************************************************
-//         //Matrix-Matrix multiply for LilSparseMatrix
-//         // @deprecated - see version 2
-//         //**************************************************************************
-//         template<typename CMatrixT,
-//                  typename AccumT,
-//                  typename SemiringT,
-//                  typename AMatrixT,
-//                  typename BMatrixT>
-//         inline void mxm(CMatrixT       &C,
-//                         AccumT          accum,
-//                         SemiringT       op,
-//                         AMatrixT const &A,
-//                         BMatrixT const &B)
-//         {
-//             IndexType nrow_A(A.get_nrows());
-//             IndexType ncol_A(A.get_ncols());
-//             IndexType nrow_B(B.get_nrows());
-//             IndexType ncol_B(B.get_ncols());
-//             IndexType nrow_C(C.get_nrows());
-//             IndexType ncol_C(C.get_ncols());
-
-//             if (ncol_A != nrow_B || nrow_A != nrow_C || ncol_B != ncol_C)
-//             {
-//                 throw DimensionException("mxm: matrix dimensions are not compatible");
-//             }
-
-//             IndexType irow;
-//             IndexType icol;
-//             std::vector<IndexArrayType> indA;   // Row-column
-//             std::vector<IndexArrayType> indB;   // Column-row
-//             std::vector<IndexType> ind_intersection;
-
-//             indA.resize(nrow_A);
-//             indB.resize(ncol_B);
-
-//             auto tmp_sum = op.zero();
-//             auto tmp_product = op.zero();
-//             for (irow = 0; irow < nrow_C; irow++)
-//             {
-//                 A.getColumnIndices(irow, indA[irow]);
-//                 for (icol = 0; icol < ncol_C; icol++)
-//                 {
-//                     if (irow == 0)
-//                     {
-//                         B.getRowIndices(icol, indB[icol]);
-//                     }
-//                     if (!indA[irow].empty() && !indB[icol].empty())
-//                     {
-//                         ind_intersection.clear();
-//                         std::set_intersection(indA[irow].begin(), indA[irow].end(),
-//                                               indB[icol].begin(), indB[icol].end(),
-//                                               std::back_inserter(ind_intersection));
-//                         if (!ind_intersection.empty())
-//                         {
-//                             tmp_sum = op.zero();
-//                             // Range-based loop, access by value
-//                             for (auto kk : ind_intersection)
-//                             {
-//                                 // Matrix multiply kernel
-//                                 tmp_product = op.mult(A.get_value_at(irow,kk),
-//                                                       B.get_value_at(kk,icol));
-//                                 tmp_sum = op.add(tmp_sum, tmp_product);
-//                             }
-// #if 0
-//                             try {
-//                                 std::cout << "\nTry";
-//                                 C.set_value_at(irow, icol,
-//                                                accum(C.get_value_at(irow, icol),
-//                                                      tmp_sum));
-//                             } catch (int e) {
-//                                 std::cout << "\nCatch";
-//                                 C.set_value_at(irow, icol, tmp_sum);
-//                             }
-//                             //C.set_value_at(irow, icol,
-//                             //               accum(C.get_value_at(irow, icol),
-//                             //                     tmp_sum));
-//                             //C.set_value_at(irow, icol, tmp_sum);
-// #else
-//                             C.set_value_at(irow, icol, tmp_sum);
-// #endif
-//                         }
-//                     }
-//                 }
-//             }
-//         }
-
-
         //**********************************************************************
         /// Matrix-matrix multiply for LilSparseMatrix'es
 
@@ -147,12 +59,12 @@ namespace GraphBLAS
                         AMatrixT const &A,
                         BMatrixT const &B)
         {
-            IndexType nrow_A(A.get_nrows());
-            IndexType ncol_A(A.get_ncols());
-            IndexType nrow_B(B.get_nrows());
-            IndexType ncol_B(B.get_ncols());
-            IndexType nrow_C(C.get_nrows());
-            IndexType ncol_C(C.get_ncols());
+            IndexType nrow_A(A.nrows());
+            IndexType ncol_A(A.ncols());
+            IndexType nrow_B(B.nrows());
+            IndexType ncol_B(B.ncols());
+            IndexType nrow_C(C.nrows());
+            IndexType ncol_C(C.ncols());
 
             // The following should be checked by the frontend only:
             // Inside parts must match
@@ -171,19 +83,19 @@ namespace GraphBLAS
             // T, intermediate matrix holding the product of A and B.
             // T = <D3(op), nrows(A), ncols(B), contents of A.op.B>
             LilSparseMatrix<typename SemiringT::result_type> T(nrow_A, ncol_B);
-            if ((A.get_nvals() > 0) && (B.get_nvals() > 0))
+            if ((A.nvals() > 0) && (B.nvals() > 0))
             {
                 // create a column of result at a time
                 CColType T_col;
                 for (IndexType col_idx = 0; col_idx < ncol_B; ++col_idx)
                 {
-                    BColType B_col(B.get_col(col_idx));
+                    BColType B_col(B.getCol(col_idx));
 
                     if (!B_col.empty())
                     {
                         for (IndexType row_idx = 0; row_idx < nrow_A; ++row_idx)
                         {
-                            ARowType const &A_row(A.get_row(row_idx));
+                            ARowType const &A_row(A.getRow(row_idx));
                             if (!A_row.empty())
                             {
                                 CScalarType C_val;
@@ -196,7 +108,7 @@ namespace GraphBLAS
                         }
                         if (!T_col.empty())
                         {
-                            T.set_col(col_idx, T_col);
+                            T.setCol(col_idx, T_col);
                             T_col.clear();
                         }
                     }
@@ -208,8 +120,8 @@ namespace GraphBLAS
             CColType tmp_row;
             for (IndexType row_idx = 0; row_idx < nrow_C; ++row_idx)
             {
-                ewise_or(tmp_row, C.get_row(row_idx), T.get_row(row_idx), accum);
-                C.set_row(row_idx, tmp_row);
+                ewise_or(tmp_row, C.getRow(row_idx), T.getRow(row_idx), accum);
+                C.setRow(row_idx, tmp_row);
             }
         }
 
@@ -232,14 +144,14 @@ namespace GraphBLAS
                         BMatrixT const &B,
                         bool            replace = false)
         {
-            IndexType nrow_A(A.get_nrows());
-            IndexType ncol_A(A.get_ncols());
-            IndexType nrow_B(B.get_nrows());
-            IndexType ncol_B(B.get_ncols());
-            IndexType nrow_C(C.get_nrows());
-            IndexType ncol_C(C.get_ncols());
-            IndexType nrow_M(M.get_nrows());
-            IndexType ncol_M(M.get_ncols());
+            IndexType nrow_A(A.nrows());
+            IndexType ncol_A(A.ncols());
+            IndexType nrow_B(B.nrows());
+            IndexType ncol_B(B.ncols());
+            IndexType nrow_C(C.nrows());
+            IndexType ncol_C(C.ncols());
+            IndexType nrow_M(M.nrows());
+            IndexType ncol_M(M.ncols());
 
             // @todo: Move these checks into the front end when we get that wired up
             // @todo: Move these checks into the front end when we get that wired up
@@ -261,15 +173,15 @@ namespace GraphBLAS
             // T, intermediate matrix holding the product of A and B.
             // T = <D3(op), nrows(A), ncols(B), contents of A.op.B>
             LilSparseMatrix<typename SemiringT::result_type> T(nrow_A, ncol_B);
-            if ((A.get_nvals() > 0) && (B.get_nvals() > 0))
+            if ((A.nvals() > 0) && (B.nvals() > 0))
             {
                 // create a column of results at a time in the T matrix
                 CColType T_col;
 
                 for (IndexType col_idx = 0; col_idx < ncol_B; ++col_idx)
                 {
-                    BColType B_col(B.get_col(col_idx));
-                    MColType M_col(M.get_col(col_idx));
+                    BColType B_col(B.getCol(col_idx));
+                    MColType M_col(M.getCol(col_idx));
 
                     IndexType m_idx;
                     MScalarType m_val;
@@ -292,7 +204,7 @@ namespace GraphBLAS
                             {
                                 if (m_val )
                                 {
-                                    ARowType const &A_row(A.get_row(row_idx));
+                                    ARowType const &A_row(A.getRow(row_idx));
                                     if (!A_row.empty())
                                     {
                                         CScalarType C_val;
@@ -315,7 +227,7 @@ namespace GraphBLAS
                         // If we didn't do anything at all, then don't add it
                         if (!T_col.empty())
                         {
-                            T.set_col(col_idx, T_col);
+                            T.setCol(col_idx, T_col);
                             T_col.clear();
                         }
                     }
@@ -334,16 +246,16 @@ namespace GraphBLAS
             {
                 for (IndexType row_idx = 0; row_idx < nrow_C; ++row_idx)
                 {
-                    ewise_or_mask(tmp_row, C.get_row(row_idx), T.get_row(row_idx), M.get_row(row_idx), accum);
-                    C.set_row(row_idx, tmp_row);
+                    ewise_or_mask(tmp_row, C.getRow(row_idx), T.getRow(row_idx), M.getRow(row_idx), accum);
+                    C.setRow(row_idx, tmp_row);
                 }
             }
             else
             {
                 for (IndexType row_idx = 0; row_idx < nrow_C; ++row_idx)
                 {
-                    ewise_or(tmp_row, C.get_row(row_idx), T.get_row(row_idx), accum);
-                    C.set_row(row_idx, tmp_row);
+                    ewise_or(tmp_row, C.getRow(row_idx), T.getRow(row_idx), accum);
+                    C.setRow(row_idx, tmp_row);
                 }
             }
         }

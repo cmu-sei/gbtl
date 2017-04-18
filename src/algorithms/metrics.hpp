@@ -83,7 +83,7 @@ namespace algorithms
         graphblas::IndexType in_degree = 0;
         for (graphblas::IndexType i = 0; i < cols; ++i)
         {
-            if (graph.get_value_at(vid, i) != graph.get_zero())
+            if (graph.extractElement(vid, i) != graph.get_zero())
             {
                 ++in_degree;
             }
@@ -115,7 +115,7 @@ namespace algorithms
         graphblas::IndexType out_degree = 0;
         for (graphblas::IndexType i = 0; i < rows; ++i)
         {
-            if (graph.get_value_at(i, vid) != graph.get_zero())
+            if (graph.extractElement(i, vid) != graph.get_zero())
             {
                 out_degree++;
             }
@@ -169,7 +169,7 @@ namespace algorithms
         }
 
         MatrixT start(rows, rows, std::numeric_limits<T>::max());
-        start.set_value_at(sid, sid, static_cast<T>(0));
+        start.setElement(sid, sid, static_cast<T>(0));
 
         sssp(graph, start, result);
     }
@@ -236,16 +236,16 @@ namespace algorithms
 
         MatrixT start(rows, rows,
                       std::numeric_limits<T>::max());
-        start.set_value_at(vid, vid, static_cast<T>(0));
+        start.setElement(vid, vid, static_cast<T>(0));
 
         MatrixT result(rows, rows);
         sssp(graph, start, result);
 
-        T current_max = result.get_value_at(vid, 0);
+        T current_max = result.extractElement(vid, 0);
         for (graphblas::IndexType i = 1; i < rows; ++i)
         {
             current_max = std::max(current_max,
-                                   result.get_value_at(vid, i));
+                                   result.extractElement(vid, i));
         }
         return current_max;
     }
@@ -338,10 +338,10 @@ namespace algorithms
         MatrixT result(rows, cols);
         graph_distance(graph, vid, result);
 
-        T sum = result.get_value_at(vid, 0);
+        T sum = result.extractElement(vid, 0);
         for (graphblas::IndexType i = 1; i < cols; ++i)
         {
-            sum += result.get_value_at(vid, i);
+            sum += result.extractElement(vid, i);
         }
         return sum;
     }
@@ -416,7 +416,7 @@ namespace algorithms
         {
             for (graphblas::IndexType j = 0; j < cols; ++j)
             {
-                sum = sum + C.get_value_at(i, j);
+                sum = sum + C.extractElement(i, j);
             }
         }
         return sum / static_cast<T>(2);

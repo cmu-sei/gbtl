@@ -39,15 +39,15 @@ namespace GraphBLAS
             {
                 for (IndexType j = 0; j < cols; ++j)
                 {
-                    auto mat_ij = mat.get_value_at(i, j);
+                    auto mat_ij = mat.extractElement(i, j);
                     if (mat_ij > 0 || mat_ij == std::numeric_limits<T>::max())
                     {
-                        indexed_of_mat.set_value_at(i, j, i + base_index);
+                        indexed_of_mat.setElement(i, j, i + base_index);
                     }
                     else
                     {
                         // FIXME indexed_of_mat.get_zero()?
-                        indexed_of_mat.set_value_at(i, j, mat.get_zero());
+                        indexed_of_mat.setElement(i, j, mat.get_zero());
                     }
                 }
             }
@@ -64,10 +64,10 @@ namespace GraphBLAS
             {
                 for (IndexType j = 0; j < cols; ++j)
                 {
-                    auto mat_ij = mat.get_value_at(i, j);
+                    auto mat_ij = mat.extractElement(i, j);
                     if (mat_ij != mat.get_zero())
                     {
-                        mat.set_value_at(i, j, j);
+                        mat.setElement(i, j, j);
                     }
                 }
             }
@@ -84,10 +84,10 @@ namespace GraphBLAS
             {
                 for (IndexType j = 0; j < cols; ++j)
                 {
-                    auto mat_ij = mat.get_value_at(i, j);
+                    auto mat_ij = mat.extractElement(i, j);
                     if (mat_ij != mat.get_zero())
                     {
-                        mat.set_value_at(i, j, i);
+                        mat.setElement(i, j, i);
                     }
                 }
             }
@@ -108,14 +108,14 @@ namespace GraphBLAS
             typedef typename MatrixT::ScalarType ScalarT;
             typedef std::vector<std::tuple<GraphBLAS::IndexType, ScalarT> > RowType;
 
-            IndexType num_rows = mat.get_nrows();
-            IndexType num_cols = mat.get_ncols();
+            IndexType num_rows = mat.nrows();
+            IndexType num_cols = mat.ncols();
 
             for (IndexType row_idx = 0; row_idx < num_rows; ++row_idx)
             {
                 ostr << ((row_idx == 0) ? "[[" : " [");
 
-                RowType const &row(mat.get_row(row_idx));
+                RowType const &row(mat.getRow(row_idx));
                 IndexType curr_idx = 0;
                 
                 if (row.empty())
@@ -169,7 +169,7 @@ namespace GraphBLAS
             //     ostr << ((row == 0) ? "[[" : " [");
             //     if (cols > 0)
             //     {
-            //         auto val = mat.get_value_at(row, 0);
+            //         auto val = mat.extractElement(row, 0);
             //         if (val == zero)
             //             ostr << " ";
             //         else
@@ -178,7 +178,7 @@ namespace GraphBLAS
 
             //     for (IndexType col = 1; col < cols; ++col)
             //     {
-            //         auto val = mat.get_value_at(row, col);
+            //         auto val = mat.extractElement(row, col);
             //         if (val == zero)
             //             ostr << ",  ";
             //         else
@@ -212,15 +212,15 @@ namespace backend{
         {
             for (IndexType j = 0; j < cols; ++j)
             {
-                auto mat_ij = mat.get_value_at(i, j);
+                auto mat_ij = mat.extractElement(i, j);
                 if (mat_ij > 0 || mat_ij == std::numeric_limits<T>::max())
                 {
-                    indexed_of_mat.set_value_at(i, j, i + base_index);
+                    indexed_of_mat.setElement(i, j, i + base_index);
                 }
                 else
                 {
                     // FIXME indexed_of_mat.get_zero()?
-                    indexed_of_mat.set_value_at(i, j, mat.get_zero());
+                    indexed_of_mat.setElement(i, j, mat.get_zero());
                 }
             }
         }
@@ -237,10 +237,10 @@ namespace backend{
         {
             for (IndexType j = 0; j < cols; ++j)
             {
-                auto mat_ij = mat.get_value_at(i, j);
+                auto mat_ij = mat.extractElement(i, j);
                 if (mat_ij != mat.get_zero())
                 {
-                    mat.set_value_at(i, j, j);
+                    mat.setElement(i, j, j);
                 }
             }
         }
@@ -257,10 +257,10 @@ namespace backend{
         {
             for (IndexType j = 0; j < cols; ++j)
             {
-                auto mat_ij = mat.get_value_at(i, j);
+                auto mat_ij = mat.extractElement(i, j);
                 if (mat_ij != mat.get_zero())
                 {
-                    mat.set_value_at(i, j, i);
+                    mat.setElement(i, j, i);
                 }
             }
         }
@@ -286,7 +286,7 @@ namespace backend{
             ostr << ((row == 0) ? "[[" : " [");
             if (cols > 0)
             {
-                auto val = mat.get_value_at(row, 0);
+                auto val = mat.extractElement(row, 0);
                 if (val == zero)
                     ostr << " ";
                 else
@@ -295,7 +295,7 @@ namespace backend{
 
             for (IndexType col = 1; col < cols; ++col)
             {
-                auto val = mat.get_value_at(row, col);
+                auto val = mat.extractElement(row, col);
                 if (val == zero)
                     ostr << ",  ";
                 else

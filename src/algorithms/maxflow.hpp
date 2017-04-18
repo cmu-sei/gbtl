@@ -30,15 +30,15 @@ static void push(MatrixT const &C,
                  graphblas::IndexType v)
 {
     using T = typename MatrixT::ScalarType;
-    T a = excess.get_value_at(0, u);
-    T b = C.get_value_at(u, v) - F.get_value_at(u, v);
+    T a = excess.extractElement(0, u);
+    T b = C.extractElement(u, v) - F.extractElement(u, v);
     T send = std::min(a, b);
 
-    F.set_value_at(u, v, F.get_value_at(u, v) + send);
-    F.set_value_at(v, u, F.get_value_at(v, u) - send);
+    F.setElement(u, v, F.extractElement(u, v) + send);
+    F.setElement(v, u, F.extractElement(v, u) - send);
 
-    excess.set_value_at(0, u, excess.get_value_at(0, u) - send);
-    excess.set_value_at(0, v, excess.get_value_at(0, v) + send);
+    excess.setElement(0, u, excess.extractElement(0, u) - send);
+    excess.setElement(0, v, excess.extractElement(0, v) + send);
 }
 
 //****************************************************************************
@@ -55,11 +55,11 @@ static void relabel(MatrixT const &C,
     T min_height = std::numeric_limits<T>::max();
     for (graphblas::IndexType v = 0; v < num_nodes; ++v)
     {
-        if ((C.get_value_at(u, v) - F.get_value_at(u, v)) > 0)
+        if ((C.extractElement(u, v) - F.extractElement(u, v)) > 0)
         {
-            T a = height.get_value_at(0, v);
+            T a = height.extractElement(0, v);
             min_height = std::min(min_height, a);
-            height.set_value_at(0, u, min_height + 1);
+            height.setElement(0, u, min_height + 1);
         }
     }
 }
@@ -77,25 +77,25 @@ static void discharge(MatrixT const &C,
     graphblas::IndexType num_nodes, cols;
     C.get_shape(num_nodes, cols);
 
-    while (excess.get_value_at(0, u) > 0)
+    while (excess.extractElement(0, u) > 0)
     {
-        if (seen.get_value_at(0, u) < num_nodes)
+        if (seen.extractElement(0, u) < num_nodes)
         {
-            graphblas::IndexType v = seen.get_value_at(0, u);
-            if (((C.get_value_at(u, v) - F.get_value_at(u, v)) > 0) &&
-                (height.get_value_at(0, u) > height.get_value_at(0, v)))
+            graphblas::IndexType v = seen.extractElement(0, u);
+            if (((C.extractElement(u, v) - F.extractElement(u, v)) > 0) &&
+                (height.extractElement(0, u) > height.extractElement(0, v)))
             {
                 push(C, F, excess, u, v);
             }
             else
             {
-                seen.set_value_at(0, u, seen.get_value_at(0, u) + 1);
+                seen.setElement(0, u, seen.extractElement(0, u) + 1);
             }
         }
         else
         {
             relabel(C, F, height, u);
-            seen.set_value_at(0, u, 0);
+            seen.setElement(0, u, 0);
         }
     }
 }
@@ -163,8 +163,8 @@ namespace algorithms
             }
         }
 
-        height.set_value_at(0, source, num_nodes);
-        excess.set_value_at(0, source,
+        height.setElement(0, source, num_nodes);
+        excess.setElement(0, source,
                             std::numeric_limits<T>::max());
         for (graphblas::IndexType i = 0; i < num_nodes; ++i)
         {
@@ -175,9 +175,9 @@ namespace algorithms
         while (p < (num_nodes - 2))
         {
             graphblas::IndexType u = list[p];
-            T old_height = height.get_value_at(0, u);
+            T old_height = height.extractElement(0, u);
             discharge(capacity, flow, excess, height, seen, u);
-            if (height.get_value_at(0, u) > old_height)
+            if (height.extractElement(0, u) > old_height)
             {
                 graphblas::IndexType t = list[p];
 
@@ -195,7 +195,7 @@ namespace algorithms
         T maxflow = static_cast<T>(0);
         for (graphblas::IndexType i = 0; i < num_nodes; ++i)
         {
-            maxflow += flow.get_value_at(source, i);
+            maxflow += flow.extractElement(source, i);
         }
 
         return maxflow;

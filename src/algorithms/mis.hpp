@@ -89,7 +89,7 @@ namespace algorithms
         independent_set.get_shape(rows, cols);
         for (graphblas::IndexType i = 0; i < rows; ++i)
         {
-            if (independent_set.get_value_at(i, 0) != independent_set.get_zero())
+            if (independent_set.extractElement(i, 0) != independent_set.get_zero())
             {
                 ans.push_back(i);
             }

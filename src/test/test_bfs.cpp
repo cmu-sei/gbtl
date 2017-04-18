@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE(bfs_test_basic_one_root)
     std::vector<graphblas::IndexType> r={0}, c={START_INDEX};
     std::vector<T> v_r={0};
     graphblas::buildmatrix(root, r.begin(), c.begin(), v_r.begin(), v_r.size());
-    //root.set_value_at(0, START_INDEX, 0);  // multiplicative identity
+    //root.setElement(0, START_INDEX, 0);  // multiplicative identity
 
     auto G_tn_answer(get_tn_answer(INF));
 
@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE(bfs_test_basic_one_root)
 
     for (graphblas::IndexType ix = 0; ix < NUM_NODES; ++ix)
     {
-        BOOST_CHECK_EQUAL(parent_list.get_value_at(0, ix),
+        BOOST_CHECK_EQUAL(parent_list.extractElement(0, ix),
                           G_tn_answer[START_INDEX][ix]);
     }
 }
@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE(bfs_test_basic_one_root_integer)
     std::vector<graphblas::IndexType> r={0}, c={START_INDEX};
     std::vector<T> v_r={0};
     graphblas::buildmatrix(root, r.begin(), c.begin(), v_r.begin(), v_r.size());
-    //root.set_value_at(0, START_INDEX, 0);  // multiplicative identity
+    //root.setElement(0, START_INDEX, 0);  // multiplicative identity
 
     auto G_tn_answer(get_tn_answer(INF));
 
@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE(bfs_test_basic_one_root_integer)
 
     for (graphblas::IndexType ix = 0; ix < NUM_NODES; ++ix)
     {
-        BOOST_CHECK_EQUAL(parent_list.get_value_at(0, ix),
+        BOOST_CHECK_EQUAL(parent_list.extractElement(0, ix),
                           G_tn_answer[START_INDEX][ix]);
     }
 }
@@ -224,7 +224,7 @@ BOOST_AUTO_TEST_CASE(bfs_test_basic)
     {
         for (graphblas::IndexType c = 0; c < NUM_NODES; ++c)
         {
-            BOOST_CHECK_EQUAL(parent_lists.get_value_at(r, c),
+            BOOST_CHECK_EQUAL(parent_lists.extractElement(r, c),
                               G_tn_answer[r][c]);
         }
     }
@@ -258,7 +258,7 @@ BOOST_AUTO_TEST_CASE(bfs_test_gilbert)
     {
         for (graphblas::IndexType c = 0; c < NUM_NODES; ++c)
         {
-            BOOST_CHECK_EQUAL(parent_lists.get_value_at(r, c),
+            BOOST_CHECK_EQUAL(parent_lists.extractElement(r, c),
                               G_gilbert_answer[r][c]);
         }
     }
@@ -286,7 +286,7 @@ BOOST_AUTO_TEST_CASE(bfs_test_level_one_root)
     std::vector<graphblas::IndexType> r={0}, c={START_INDEX};
     std::vector<T> v_r={1};
     graphblas::buildmatrix(root, r.begin(), c.begin(), v_r.begin(), v_r.size());
-    //root.set_value_at(0, START_INDEX, 1);  // multiplicative identity
+    //root.setElement(0, START_INDEX, 1);  // multiplicative identity
 
     GrBMatrix levels(1, NUM_NODES, 0);
     algorithms::bfs_level(G_tn, root, levels);
@@ -295,7 +295,7 @@ BOOST_AUTO_TEST_CASE(bfs_test_level_one_root)
 
     for (graphblas::IndexType ix = 0; ix < NUM_NODES; ++ix)
     {
-        BOOST_CHECK_EQUAL(levels.get_value_at(0, ix),
+        BOOST_CHECK_EQUAL(levels.extractElement(0, ix),
                           answer[ix]);
     }
 }
@@ -322,7 +322,7 @@ BOOST_AUTO_TEST_CASE(bfs_test_level_one_root_integer)
     std::vector<graphblas::IndexType> r={0}, c={START_INDEX};
     std::vector<T> v_r={1};
     graphblas::buildmatrix(root, r.begin(), c.begin(), v_r.begin(), v_r.size());
-    //root.set_value_at(0, START_INDEX, 1);  // multiplicative identity
+    //root.setElement(0, START_INDEX, 1);  // multiplicative identity
 
     GrBMatrix levels(1, NUM_NODES, 0);
     algorithms::bfs_level(G_tn, root, levels);
@@ -330,7 +330,7 @@ BOOST_AUTO_TEST_CASE(bfs_test_level_one_root_integer)
     std::vector<T> answer = {5, 4, 2, 4, 3, 1, 3, 0, 3};
     for (graphblas::IndexType ix = 0; ix < NUM_NODES; ++ix)
     {
-        BOOST_CHECK_EQUAL(levels.get_value_at(0, ix),
+        BOOST_CHECK_EQUAL(levels.extractElement(0, ix),
                           answer[ix]);
     }
 }
@@ -357,7 +357,7 @@ BOOST_AUTO_TEST_CASE(bfs_test_level_masked_one_root)
     std::vector<graphblas::IndexType> r={0}, c={START_INDEX};
     std::vector<T> v_r={1};
     graphblas::buildmatrix(root, r.begin(), c.begin(), v_r.begin(), v_r.size());
-    //root.set_value_at(0, START_INDEX, 1);  // multiplicative identity
+    //root.setElement(0, START_INDEX, 1);  // multiplicative identity
 
     GrBMatrix levels(1, NUM_NODES, 0);
     algorithms::bfs_level_masked(G_tn, root, levels);
@@ -365,7 +365,7 @@ BOOST_AUTO_TEST_CASE(bfs_test_level_masked_one_root)
     std::vector<T> answer = {5, 4, 2, 4, 3, 1, 3, 0, 3};
     for (graphblas::IndexType ix = 0; ix < NUM_NODES; ++ix)
     {
-        BOOST_CHECK_EQUAL(levels.get_value_at(0, ix),
+        BOOST_CHECK_EQUAL(levels.extractElement(0, ix),
                           answer[ix]);
     }
 }
@@ -392,7 +392,7 @@ BOOST_AUTO_TEST_CASE(bfs_test_level_masked_one_root_integer)
     std::vector<graphblas::IndexType> r={0}, c={START_INDEX};
     std::vector<T> v_r={1};
     graphblas::buildmatrix(root, r.begin(), c.begin(), v_r.begin(), v_r.size());
-    //root.set_value_at(0, START_INDEX, 1);  // multiplicative identity
+    //root.setElement(0, START_INDEX, 1);  // multiplicative identity
 
     GrBMatrix levels(1, NUM_NODES, 0);
     algorithms::bfs_level_masked(G_tn, root, levels);
@@ -400,7 +400,7 @@ BOOST_AUTO_TEST_CASE(bfs_test_level_masked_one_root_integer)
     std::vector<T> answer = {5, 4, 2, 4, 3, 1, 3, 0, 3};
     for (graphblas::IndexType ix = 0; ix < NUM_NODES; ++ix)
     {
-        BOOST_CHECK_EQUAL(levels.get_value_at(0, ix),
+        BOOST_CHECK_EQUAL(levels.extractElement(0, ix),
                           answer[ix]);
     }
 }

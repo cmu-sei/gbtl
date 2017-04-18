@@ -108,7 +108,7 @@ namespace graphblas
                 cusp::print(*this, os);
             }
 
-            ScalarT get_value_at(IndexType row, IndexType col) const
+            ScalarT extractElement(IndexType row, IndexType col) const
             {
                 //this is partially acceptable in case of testing
                 //but still should not be used and is considered deprecated.
@@ -134,7 +134,7 @@ namespace graphblas
 
             //NOT supported, not valid interface for a sparse matrix.
             //still implemented (in an extremely slow manner) for (in)convenience.
-            void set_value_at(IndexType row, IndexType col, ScalarT const &val)
+            void setElement(IndexType row, IndexType col, ScalarT const &val)
             {
                 if (row>(this->num_rows) || col>(this->num_cols))
                 {

@@ -76,7 +76,7 @@ namespace graphblas
                     throw DimensionException();
                 }
 
-                set_value_at(i, j, accum(get_value_at(i, j), v_it[idx]));
+                setElement(i, j, accum(extractElement(i, j), v_it[idx]));
             }
         }
 
@@ -157,7 +157,7 @@ namespace graphblas
                 bool is_zero_col = true;
                 for (IndexType row = 0; row < M; ++row)
                 {
-                    ScalarType val = values.get_value_at(row, col);
+                    ScalarType val = values.extractElement(row, col);
                     if (val != zero)
                     {
                         is_zero_col = false;
@@ -307,7 +307,7 @@ namespace graphblas
             {
                 for (IndexType j = 0; j < m_num_cols; j++)
                 {
-                    if (get_value_at(i, j) != rhs.get_value_at(i, j))
+                    if (extractElement(i, j) != rhs.extractElement(i, j))
                     {
                         return false;
                     }
@@ -342,7 +342,7 @@ namespace graphblas
          * @return The element of this CscMatrix at the given row and
          *         column.
          */
-        ScalarT get_value_at(IndexType row_index, IndexType col_index) const
+        ScalarT extractElement(IndexType row_index, IndexType col_index) const
         {
             IndexType start = m_col_ptr[col_index];
             IndexType end = m_col_ptr[col_index + 1];
@@ -357,7 +357,7 @@ namespace graphblas
         }
 
 
-        void set_value_at(IndexType        row,
+        void setElement(IndexType        row,
                           IndexType        col,
                           ScalarT const &new_val)
         {

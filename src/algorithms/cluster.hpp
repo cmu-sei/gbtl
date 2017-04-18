@@ -50,9 +50,9 @@ namespace algorithms
             double max_val = 0.0;
             for (graphblas::IndexType c = 0; c < num_clusters; ++c)
             {
-                if (cluster_matrix.get_value_at(c, v) > max_val)
+                if (cluster_matrix.extractElement(c, v) > max_val)
                 {
-                    max_val = cluster_matrix.get_value_at(c, v);
+                    max_val = cluster_matrix.extractElement(c, v);
                     clusters[v] = c;
                 }
             }
@@ -152,10 +152,10 @@ namespace algorithms
         {
             for (graphblas::IndexType j = 0; j < n_vertices; ++j)
             {
-                auto w_i0 = w.get_value_at(i, 0);
+                auto w_i0 = w.extractElement(i, 0);
                 if (w_i0 > 0)
                 {
-                    a.set_value_at(i, j, (a.get_value_at(i, j) / w_i0));
+                    a.setElement(i, j, (a.extractElement(i, j) / w_i0));
                 }
             }
         }
@@ -176,8 +176,8 @@ namespace algorithms
                      cluster < n_vertices;
                      ++cluster)
                 {
-                    if (tally.get_value_at(maxpos, vertex) <
-                        tally.get_value_at(cluster, vertex))
+                    if (tally.extractElement(maxpos, vertex) <
+                        tally.extractElement(cluster, vertex))
                     {
                         maxpos = cluster;
                     }
@@ -189,7 +189,7 @@ namespace algorithms
 
             for (graphblas::IndexType vertex = 0; vertex < n_vertices; ++vertex)
             {
-                c_f.set_value_at(m[vertex], vertex, 1);
+                c_f.setElement(m[vertex], vertex, 1);
             }
 
             if (c_f == c_i)  // costly comparison?
@@ -330,7 +330,7 @@ namespace algorithms
                      cluster < num_vertices;
                      ++cluster)
                 {
-                    if (c_f.get_value_at(cluster, vertex) != 0)
+                    if (c_f.extractElement(cluster, vertex) != 0)
                     {
                         std::cout << " " << cluster;
                     }
@@ -392,10 +392,10 @@ namespace algorithms
         {
             for (graphblas::IndexType j = 0; j < n_vertices; j++ )
             {
-                auto w_0i = w.get_value_at(0, i);
+                auto w_0i = w.extractElement(0, i);
                 if (w_0i > 0)
                 {
-                    a.set_value_at(j, i, (a.get_value_at(j, i) / w_0i));
+                    a.setElement(j, i, (a.extractElement(j, i) / w_0i));
                 }
             }
         }
@@ -425,10 +425,10 @@ namespace algorithms
             {
                 for (graphblas::IndexType j = 0; j < n_vertices; j++ )
                 {
-                    auto w_0i = w.get_value_at(0, i);
+                    auto w_0i = w.extractElement(0, i);
                     if (w_0i > 0)
                     {
-                        c_i.set_value_at(j, i, (c_i.get_value_at(j, i) / w_0i));
+                        c_i.setElement(j, i, (c_i.extractElement(j, i) / w_0i));
                     }
                 }
             }

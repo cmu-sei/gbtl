@@ -32,10 +32,10 @@ BOOST_AUTO_TEST_CASE(test_construction_basic)
     GraphBLAS::BitmapSparseVector<double> v1(M);
 
     BOOST_CHECK_EQUAL(v1.get_size(), M);
-    BOOST_CHECK_EQUAL(v1.get_nvals(), 0);
-    BOOST_CHECK_THROW(v1.get_value_at(0), NoValueException);
-    BOOST_CHECK_THROW(v1.get_value_at(M-1), NoValueException);
-    BOOST_CHECK_THROW(v1.get_value_at(M), IndexOutOfBoundsException);
+    BOOST_CHECK_EQUAL(v1.nvals(), 0);
+    BOOST_CHECK_THROW(v1.extractElement(0), NoValueException);
+    BOOST_CHECK_THROW(v1.extractElement(M-1), NoValueException);
+    BOOST_CHECK_THROW(v1.extractElement(M), IndexOutOfBoundsException);
 
     BOOST_CHECK_THROW(GraphBLAS::BitmapSparseVector<double>(0),
                       InvalidValueException);
@@ -49,12 +49,12 @@ BOOST_AUTO_TEST_CASE(test_construction_from_dense)
     GraphBLAS::BitmapSparseVector<double> v1(vec);
 
     BOOST_CHECK_EQUAL(v1.get_size(), vec.size());
-    BOOST_CHECK_EQUAL(v1.get_nvals(), vec.size());
+    BOOST_CHECK_EQUAL(v1.nvals(), vec.size());
     for (GraphBLAS::IndexType i = 0; i < vec.size(); ++i)
     {
-        BOOST_CHECK_EQUAL(v1.get_value_at(i), vec[i]);
+        BOOST_CHECK_EQUAL(v1.extractElement(i), vec[i]);
     }
-    BOOST_CHECK_THROW(v1.get_value_at(v1.get_size()), IndexOutOfBoundsException);
+    BOOST_CHECK_THROW(v1.extractElement(v1.get_size()), IndexOutOfBoundsException);
 }
 
 //****************************************************************************
@@ -66,19 +66,19 @@ BOOST_AUTO_TEST_CASE(test_sparse_construction_from_dense)
     GraphBLAS::BitmapSparseVector<double> v1(vec, zero);
 
     BOOST_CHECK_EQUAL(v1.get_size(), vec.size());
-    BOOST_CHECK_EQUAL(v1.get_nvals(), 5);
+    BOOST_CHECK_EQUAL(v1.nvals(), 5);
     for (GraphBLAS::IndexType i = 0; i < vec.size(); ++i)
     {
         if (vec[i] == zero)
         {
-            BOOST_CHECK_THROW(v1.get_value_at(i), NoValueException);
+            BOOST_CHECK_THROW(v1.extractElement(i), NoValueException);
         }
         else
         {
-            BOOST_CHECK_EQUAL(v1.get_value_at(i), vec[i]);
+            BOOST_CHECK_EQUAL(v1.extractElement(i), vec[i]);
         }
     }
-    BOOST_CHECK_THROW(v1.get_value_at(v1.get_size()), IndexOutOfBoundsException);
+    BOOST_CHECK_THROW(v1.extractElement(v1.get_size()), IndexOutOfBoundsException);
 }
 
 //****************************************************************************
@@ -101,8 +101,8 @@ BOOST_AUTO_TEST_CASE(test_access_novalue_in_non_empty_vector)
 
     GraphBLAS::BitmapSparseVector<double> v1(vec, 0);
 
-    BOOST_CHECK_EQUAL(v1.get_nvals(), 5);
-    BOOST_CHECK_THROW(v1.get_value_at(1), NoValueException);
+    BOOST_CHECK_EQUAL(v1.nvals(), 5);
+    BOOST_CHECK_THROW(v1.extractElement(1), NoValueException);
 }
 
 //****************************************************************************
@@ -113,15 +113,15 @@ BOOST_AUTO_TEST_CASE(test_assign_to_implied_zero_and_stored_value)
 
     GraphBLAS::BitmapSparseVector<double> v1(vec, zero);
 
-    v1.set_value_at(1, 2.);
+    v1.setElement(1, 2.);
 
     GraphBLAS::BitmapSparseVector<double> v2(vec, zero);
     BOOST_CHECK(v1 != v2);
 
-    v2.set_value_at(1, 3.);
+    v2.setElement(1, 3.);
     BOOST_CHECK(v1 != v2);
 
-    v2.set_value_at(1, 2.);
+    v2.setElement(1, 2.);
     BOOST_CHECK_EQUAL(v1, v2);
 }
 

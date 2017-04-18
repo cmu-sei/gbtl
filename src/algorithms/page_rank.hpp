@@ -146,7 +146,7 @@ namespace algorithms
             //graphblas::print_matrix(std::cout, new_rank, "new_rank");
 
             // Test for convergence - we really need dot-product here so that
-            // we don't need to use get_value_at(0,0) to get the result of
+            // we don't need to use extractElement(0,0) to get the result of
             // delta * delta'.
             graphblas::ewiseadd(page_rank, new_rank, delta,
                                 graphblas::math::Sub<T>());
@@ -154,7 +154,7 @@ namespace algorithms
             //graphblas::print_matrix(std::cout, r2, "Squared error");
 
             page_rank = new_rank;
-            if (r2.get_value_at(0, 0) < threshold)
+            if (r2.extractElement(0, 0) < threshold)
             {
                 break;
             }

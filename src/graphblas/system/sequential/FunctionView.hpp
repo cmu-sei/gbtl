@@ -151,9 +151,9 @@ namespace graphblas
          * @return The element at the given row and column.
          */
         ScalarType
-        get_value_at(IndexType row, IndexType col) const
+        extractElement(IndexType row, IndexType col) const
         {
-            return m_func(m_matrix.get_value_at(row, col));
+            return m_func(m_matrix.extractElement(row, col));
         }
 
 
@@ -166,7 +166,7 @@ namespace graphblas
          * @return The view of a row of this matrix.
          */
         RowView<FunctionView<MatrixT, UnaryFunctionT> >
-        get_row(IndexType row) const
+        getRow(IndexType row) const
         {
             return RowView<FunctionView<MatrixT, UnaryFunctionT> >(
                 row, *this);

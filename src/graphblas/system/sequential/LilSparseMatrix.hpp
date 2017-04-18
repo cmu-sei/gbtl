@@ -137,8 +137,8 @@ namespace GraphBLAS
                     {
                         for (IndexType jj = 0; jj < thisIndex.size(); jj++)
                         {
-                            if (get_value_at(ii, thisIndex[jj]) !=
-                                rhs.get_value_at(ii, thisIndex[jj]))
+                            if (extractElement(ii, thisIndex[jj]) !=
+                                rhs.extractElement(ii, thisIndex[jj]))
                             {
                                 return false;
                             }
@@ -175,7 +175,7 @@ namespace GraphBLAS
             /// @todo DOING SOMETHING REALLY STUPID RIGHT NOW
             for (IndexType ix = 0; ix < n; ++ix)
             {
-                set_value_at(*i_it, *j_it, *v_it, dup);
+                setElement(*i_it, *j_it, *v_it, dup);
                 ++i_it; ++j_it; ++v_it;
             }
         }
@@ -190,17 +190,17 @@ namespace GraphBLAS
             }
         }
 
-        IndexType get_nrows() const
+        IndexType nrows() const
         {
             return m_num_rows;
         }
 
-        IndexType get_ncols() const
+        IndexType ncols() const
         {
             return m_num_cols;
         }
 
-        IndexType get_nvals() const
+        IndexType nvals() const
         {
             return m_nvals;
         }
@@ -213,7 +213,7 @@ namespace GraphBLAS
         }
 
         // Get value at index
-        ScalarT get_value_at(IndexType irow, IndexType icol) const
+        ScalarT extractElement(IndexType irow, IndexType icol) const
         {
             if (irow >= m_num_rows || icol >= m_num_cols)
             {
@@ -246,7 +246,7 @@ namespace GraphBLAS
         }
 
         // Set value at index
-        void set_value_at(IndexType irow, IndexType icol, ScalarT const &val)
+        void setElement(IndexType irow, IndexType icol, ScalarT const &val)
         {
             if (irow >= m_num_rows || icol >= m_num_cols)
             {
@@ -284,7 +284,7 @@ namespace GraphBLAS
         // Set value at index + 'merge' with any existing value according to the
         // BinaryOp passed.
         template <typename BinaryOpT>
-        void set_value_at(IndexType irow, IndexType icol, ScalarT const &val,
+        void setElement(IndexType irow, IndexType icol, ScalarT const &val,
                           BinaryOpT merge)
         {
             if (irow >= m_num_rows || icol >= m_num_cols)
@@ -322,13 +322,13 @@ namespace GraphBLAS
             }
         }
 
-        std::vector<std::tuple<IndexType, ScalarT> > const &get_row(
+        std::vector<std::tuple<IndexType, ScalarT> > const &getRow(
             IndexType row_index) const
         {
             return m_data[row_index];
         }
 
-        void set_row(IndexType row_index,
+        void setRow(IndexType row_index,
                      std::vector<std::tuple<IndexType, ScalarT> > &row_data)
         {
             IndexType old_nvals = m_data[row_index].size();
@@ -339,7 +339,7 @@ namespace GraphBLAS
         }
 
         /// @todo need move semantics.
-        std::vector<std::tuple<IndexType, ScalarT> > get_col(
+        std::vector<std::tuple<IndexType, ScalarT> > getCol(
             IndexType col_index) const
         {
             std::vector<std::tuple<IndexType, ScalarT> > data;
@@ -363,7 +363,7 @@ namespace GraphBLAS
 
         // col_data must be in increasing index order
         /// @todo this could be vastly improved.
-        void set_col(IndexType col_index,
+        void setCol(IndexType col_index,
                      std::vector<std::tuple<IndexType, ScalarT> > &col_data)
         {
             auto it = col_data.begin();
@@ -431,7 +431,7 @@ namespace GraphBLAS
                 {
                     // This should not happen
                     throw GraphBLAS::PanicException(
-                        "LilSparseMatrix::set_col() INTERNAL ERROR");
+                        "LilSparseMatrix::setCol() INTERNAL ERROR");
                 }
             }
 
