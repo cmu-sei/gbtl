@@ -59,10 +59,10 @@ BOOST_AUTO_TEST_SUITE(sparse_mxm_suite)
 BOOST_AUTO_TEST_CASE(mxm_bad_dimensions)
 {
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(3, 3);
-    matrixBuild(mA, i_mA, j_mA, v_mA, GraphBLAS::Second<double>());
+    mA.build(i_mA, j_mA, v_mA, GraphBLAS::Second<double>());
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(3, 4);
-    matrixBuild(mB, i_mB, j_mB, v_mB, GraphBLAS::Second<double>());
+    mB.build(i_mB, j_mB, v_mB, GraphBLAS::Second<double>());
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 4);
 
@@ -77,15 +77,15 @@ BOOST_AUTO_TEST_CASE(mxm_bad_dimensions)
 BOOST_AUTO_TEST_CASE(mxm_reg)
 {
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(3, 3);
-    matrixBuild(mA, i_mA, j_mA, v_mA, GraphBLAS::Second<double>());
+    mA.build(i_mA, j_mA, v_mA, GraphBLAS::Second<double>());
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(3, 4);
-    matrixBuild(mB, i_mB, j_mB, v_mB, GraphBLAS::Second<double>());
+    mB.build(i_mB, j_mB, v_mB, GraphBLAS::Second<double>());
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 4);
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 4);
-    matrixBuild(answer, i_answer, j_answer, v_answer, GraphBLAS::Second<double>());
+    answer.build(i_answer, j_answer, v_answer, GraphBLAS::Second<double>());
 
     GraphBLAS::mxm(result,
                    GraphBLAS::Second<double>(),
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(mxm_accum)
     GraphBLAS::IndexArrayType j = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double>       v = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mat(4, 4);
-    matrixBuild(mat, i, j, v);
+    .build(mat, i, j, v);
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> m3(4, 4);
 
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(mxm_accum)
     std::vector<double> v_answer = {2, 3, 2,  3, 9, 10, 6,
                                     2, 10, 22, 21,  6, 21, 25};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(4, 4);
-    matrixBuild(answer, i_answer, j_answer, v_answer);
+    answer.build(i_answer, j_answer, v_answer);
 
     mxm(mat, mat, m3);
 
@@ -126,13 +126,13 @@ BOOST_AUTO_TEST_CASE(test_mxm_masked)
     GraphBLAS::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_mA = {12, 7, 3, 4, 5, 6, 7, 8, 9};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(3, 3);
-    matrixBuild(mA, i_mA, j_mA, v_mA);
+    mA.Build(i_mA, j_mA, v_mA);
 
     GraphBLAS::IndexArrayType i_mB    = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2};
     GraphBLAS::IndexArrayType j_mB    = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2, 3};
     std::vector<double> v_mB = {5, 8, 1, 2, 6, 7, 3, 4, 5, 9, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(3, 4);
-    matrixBuild(mB, i_mB, j_mB, v_mB);
+    mB.build(i_mB, j_mB, v_mB);
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 4);
 
@@ -141,11 +141,11 @@ BOOST_AUTO_TEST_CASE(test_mxm_masked)
     std::vector<double> v_answer = {114, 160, 60, 27, 74, 97,
                                     73, 14, 119, 157, 112, 23};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 4);
-    matrixBuild(answer, i_answer, j_answer, v_answer);
+    answer.build(i_answer, j_answer, v_answer);
 
     GraphBLAS::Matrix<unsigned int, GraphBLAS::DirectedMatrixTag> mask(3,4);
     std::vector<unsigned int> v_mask(i_answer.size(), 1);
-    matrixBuild(mask, i_answer, j_answer, v_mask);
+    .build(mask, i_answer, j_answer, v_mask);
 
     mxmMasked(mA, mB, result, mask);
 
@@ -160,13 +160,13 @@ BOOST_AUTO_TEST_CASE(test_mxm_not_all_one_masked)
     GraphBLAS::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_mA = {12, 7, 3, 4, 5, 6, 7, 8, 9};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(3, 3);
-    matrixBuild(mA, i_mA, j_mA, v_mA);
+    mA.build(i_mA, j_mA, v_mA);
 
     GraphBLAS::IndexArrayType i_mB    = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2};
     GraphBLAS::IndexArrayType j_mB    = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2, 3};
     std::vector<double> v_mB = {5, 8, 1, 2, 6, 7, 3, 4, 5, 9, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(3, 4);
-    matrixBuild(mB, i_mB, j_mB, v_mB);
+    mB.build(i_mB, j_mB, v_mB);
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 4);
 
@@ -175,11 +175,11 @@ BOOST_AUTO_TEST_CASE(test_mxm_not_all_one_masked)
     std::vector<double> v_answer = {114, 160, 60, 27, 74, 97,
                                     73, 14, 119, 157, 112};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 4);
-    matrixBuild(answer, i_answer, j_answer, v_answer);
+    answer.build(i_answer, j_answer, v_answer);
 
     GraphBLAS::Matrix<unsigned int, GraphBLAS::DirectedMatrixTag> mask(3,4);
     std::vector<unsigned int> v_mask(i_answer.size(), 1);
-    matrixBuild(mask, i_answer, j_answer, v_mask);
+    .build(mask, i_answer, j_answer, v_mask);
 
     mxmMasked(mA, mB, result, mask);
 
@@ -194,13 +194,13 @@ BOOST_AUTO_TEST_CASE(test_a_transpose)
     GraphBLAS::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_mA = {12, 7, 3, 4, 5, 6, 7, 8, 9};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(3, 3);
-    matrixBuild(mA, i_mA, j_mA, v_mA);
+    mA.build(i_mA, j_mA, v_mA);
 
     GraphBLAS::IndexArrayType i_mB    = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2};
     GraphBLAS::IndexArrayType j_mB    = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2, 3};
     std::vector<double> v_mB = {5, 8, 1, 2, 6, 7, 3, 4, 5, 9, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(3, 4);
-    matrixBuild(mB, i_mB, j_mB, v_mB);
+    mB.build(i_mB, j_mB, v_mB);
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 4);
 
@@ -209,7 +209,7 @@ BOOST_AUTO_TEST_CASE(test_a_transpose)
     std::vector<double> v_answer = {112, 159, 87, 31, 97, 131,
                                     94, 22, 87, 111, 102, 15};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 4);
-    matrixBuild(answer, i_answer, j_answer, v_answer);
+    answer.build(i_answer, j_answer, v_answer);
 
     mxm(transpose(mA), mB, result);
 
@@ -223,13 +223,13 @@ BOOST_AUTO_TEST_CASE(test_b_transpose)
     GraphBLAS::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_mA = {12, 7, 3, 4, 5, 6, 7, 8, 9};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(3, 3);
-    matrixBuild(mA, i_mA, j_mA, v_mA);
+    mA.build(i_mA, j_mA, v_mA);
 
     GraphBLAS::IndexArrayType i_mB    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
     GraphBLAS::IndexArrayType j_mB    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_mB = {5, 8, 1, 2, 6, 7, 3, 4, 5};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(3, 3);
-    matrixBuild(mB, i_mB, j_mB, v_mB);
+    mB.build(i_mB, j_mB, v_mB);
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 3);
 
@@ -237,7 +237,7 @@ BOOST_AUTO_TEST_CASE(test_b_transpose)
     GraphBLAS::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_answer = {119, 87, 79, 66, 80, 62, 108, 125, 98};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
-    matrixBuild(answer, i_answer, j_answer, v_answer);
+    answer.build(i_answer, j_answer, v_answer);
 
     mxm(mA, transpose(mB), result);
 
@@ -251,13 +251,13 @@ BOOST_AUTO_TEST_CASE(test_a_and_b_transpose)
     GraphBLAS::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_mA = {12, 7, 3, 4, 5, 6, 7, 8, 9};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(3, 3);
-    matrixBuild(mA, i_mA, j_mA, v_mA);
+    mA.build(i_mA, j_mA, v_mA);
 
     GraphBLAS::IndexArrayType i_mB    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
     GraphBLAS::IndexArrayType j_mB    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_mB = {5, 8, 1, 2, 6, 7, 3, 4, 5};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(3, 3);
-    matrixBuild(mB, i_mB, j_mB, v_mB);
+    mB.build(i_mB, j_mB, v_mB);
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 3);
 
@@ -265,7 +265,7 @@ BOOST_AUTO_TEST_CASE(test_a_and_b_transpose)
     GraphBLAS::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_answer = {99, 97, 87, 83, 100, 81, 72, 105, 78};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
-    matrixBuild(answer, i_answer, j_answer, v_answer);
+    answer.build(i_answer, j_answer, v_answer);
 
     mxm(transpose(mA), transpose(mB), result);
 
@@ -279,13 +279,13 @@ BOOST_AUTO_TEST_CASE(test_a_equals_c_transpose)
     GraphBLAS::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_mA = {12, 7, 3, 4, 5, 6, 7, 8, 9};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(3, 3);
-    matrixBuild(mA, i_mA, j_mA, v_mA);
+    mA.build(i_mA, j_mA, v_mA);
 
     GraphBLAS::IndexArrayType i_mB    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
     GraphBLAS::IndexArrayType j_mB    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_mB = {1, 0, 0, 0, 1, 0, 0, 0, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(3, 3);
-    matrixBuild(mB, i_mB, j_mB, v_mB);
+    mB.build(i_mB, j_mB, v_mB);
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 3);
 
@@ -293,7 +293,7 @@ BOOST_AUTO_TEST_CASE(test_a_equals_c_transpose)
     GraphBLAS::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_answer = {12, 4, 7, 7, 5, 8, 3, 6, 9};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
-    matrixBuild(answer, i_answer, j_answer, v_answer);
+    answer.build(i_answer, j_answer, v_answer);
 
     mxm(transpose(mA), mB, result);
 
@@ -307,13 +307,13 @@ BOOST_AUTO_TEST_CASE(test_a_negate)
     //GraphBLAS::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     //std::vector<double> v_mA = {0, 1, 1, 0, 0, 0, 1, 1, 1};
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(3, 3);
-    //matrixBuild(mA, i_mA, j_mA, v_mA);
+    //mA.build(i_mA, j_mA, v_mA);
 
     //GraphBLAS::IndexArrayType i_mB    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
     //GraphBLAS::IndexArrayType j_mB    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     //std::vector<double> v_mB = {1, 0, 1, 1, 1, 0, 1, 0, 1};
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(3, 3);
-    //matrixBuild(mB, i_mB, j_mB, v_mB);
+    //mB.build(i_mB, j_mB, v_mB);
 
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 3);
 
@@ -321,19 +321,19 @@ BOOST_AUTO_TEST_CASE(test_a_negate)
     //GraphBLAS::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     //std::vector<double> v_answer = {1, 0, 1, 3, 1, 2, 0, 0, 0};
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
-    //matrixBuild(answer, i_answer, j_answer, v_answer);
+    //answer.build(i_answer, j_answer, v_answer);
 
     GraphBLAS::IndexArrayType i_mA    = {0, 0, 2, 2, 2};
     GraphBLAS::IndexArrayType j_mA    = {1, 2, 0, 1, 2};
     std::vector<double> v_mA =          {1, 1, 1, 1, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(3, 3);
-    matrixBuild(mA, i_mA, j_mA, v_mA);
+    mA.build(i_mA, j_mA, v_mA);
 
     GraphBLAS::IndexArrayType i_mB    = {0, 0, 1, 1, 2, 2};
     GraphBLAS::IndexArrayType j_mB    = {0, 2, 0, 1, 0, 2};
     std::vector<double> v_mB =          {1, 1, 1, 1, 1, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(3, 3);
-    matrixBuild(mB, i_mB, j_mB, v_mB);
+    mB.build(i_mB, j_mB, v_mB);
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 3);
 
@@ -341,7 +341,7 @@ BOOST_AUTO_TEST_CASE(test_a_negate)
     GraphBLAS::IndexArrayType j_answer = {0, 2, 0, 1, 2};
     std::vector<double> v_answer =       {1, 1, 3, 1, 2};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
-    matrixBuild(answer, i_answer, j_answer, v_answer);
+    answer.build(i_answer, j_answer, v_answer);
 
     mxm(negate(mA), mB, result);
     BOOST_CHECK_EQUAL(result, answer);
@@ -354,13 +354,13 @@ BOOST_AUTO_TEST_CASE(test_b_negate)
     //GraphBLAS::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     //std::vector<double> v_mA = {0, 1, 1, 0, 0, 0, 1, 1, 1};
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(3, 3);
-    //matrixBuild(mA, i_mA, j_mA, v_mA);
+    //mA.build(i_mA, j_mA, v_mA);
 
     //GraphBLAS::IndexArrayType i_mB    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
     //GraphBLAS::IndexArrayType j_mB    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     //std::vector<double> v_mB = {1, 0, 1, 1, 1, 0, 1, 0, 1};
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(3, 3);
-    //matrixBuild(mB, i_mB, j_mB, v_mB);
+    //mB.build(i_mB, j_mB, v_mB);
 
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 3);
 
@@ -368,19 +368,19 @@ BOOST_AUTO_TEST_CASE(test_b_negate)
     //GraphBLAS::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     //std::vector<double> v_answer = {0, 1, 1, 0, 0, 0, 0, 2, 1};
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
-    //matrixBuild(answer, i_answer, j_answer, v_answer);
+    //answer.build(i_answer, j_answer, v_answer);
 
     GraphBLAS::IndexArrayType i_mA    = {0, 0, 2, 2, 2};
     GraphBLAS::IndexArrayType j_mA    = {1, 2, 0, 1, 2};
     std::vector<double> v_mA =          {1, 1, 1, 1, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(3, 3);
-    matrixBuild(mA, i_mA, j_mA, v_mA);
+    mA.build(i_mA, j_mA, v_mA);
 
     GraphBLAS::IndexArrayType i_mB    = {0, 0, 1, 1, 2, 2};
     GraphBLAS::IndexArrayType j_mB    = {0, 2, 0, 1, 0, 2};
     std::vector<double> v_mB =          {1, 1, 1, 1, 1, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(3, 3);
-    matrixBuild(mB, i_mB, j_mB, v_mB);
+    mB.build(i_mB, j_mB, v_mB);
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 3);
 
@@ -388,7 +388,7 @@ BOOST_AUTO_TEST_CASE(test_b_negate)
     GraphBLAS::IndexArrayType j_answer = {1, 2, 1, 2};
     std::vector<double> v_answer =       {1, 1, 2, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
-    matrixBuild(answer, i_answer, j_answer, v_answer);
+    answer.build(i_answer, j_answer, v_answer);
 
     mxm(mA, negate(mB), result);
     BOOST_CHECK_EQUAL(result, answer);
@@ -401,13 +401,13 @@ BOOST_AUTO_TEST_CASE(test_a_and_b_negate)
     //GraphBLAS::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     //std::vector<double> v_mA = {0, 1, 1, 0, 0, 0, 1, 1, 1};
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(3, 3);
-    //matrixBuild(mA, i_mA, j_mA, v_mA);
+    //mA.build(i_mA, j_mA, v_mA);
 
     //GraphBLAS::IndexArrayType i_mB    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
     //GraphBLAS::IndexArrayType j_mB    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     //std::vector<double> v_mB = {1, 0, 1, 1, 1, 0, 1, 0, 1};
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(3, 3);
-    //matrixBuild(mB, i_mB, j_mB, v_mB);
+    //mB.build(i_mB, j_mB, v_mB);
 
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 3);
 
@@ -415,19 +415,19 @@ BOOST_AUTO_TEST_CASE(test_a_and_b_negate)
     //GraphBLAS::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     //std::vector<double> v_answer = {0, 1, 0, 0, 2, 1, 0, 0, 0};
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
-    //matrixBuild(answer, i_answer, j_answer, v_answer);
+    //answer.build(i_answer, j_answer, v_answer);
 
     GraphBLAS::IndexArrayType i_mA    = {0, 0, 2, 2, 2};
     GraphBLAS::IndexArrayType j_mA    = {1, 2, 0, 1, 2};
     std::vector<double> v_mA =          {1, 1, 1, 1, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(3, 3);
-    matrixBuild(mA, i_mA, j_mA, v_mA);
+    mA.build(i_mA, j_mA, v_mA);
 
     GraphBLAS::IndexArrayType i_mB    = {0, 0, 1, 1, 2, 2};
     GraphBLAS::IndexArrayType j_mB    = {0, 2, 0, 1, 0, 2};
     std::vector<double> v_mB =          {1, 1, 1, 1, 1, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(3, 3);
-    matrixBuild(mB, i_mB, j_mB, v_mB);
+    mB.build(i_mB, j_mB, v_mB);
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 3);
 
@@ -435,7 +435,7 @@ BOOST_AUTO_TEST_CASE(test_a_and_b_negate)
     GraphBLAS::IndexArrayType j_answer = {1, 1, 2};
     std::vector<double> v_answer =       {1, 2, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
-    matrixBuild(answer, i_answer, j_answer, v_answer);
+    answer.build(i_answer, j_answer, v_answer);
 
     mxm(negate(mA), negate(mB), result);
     BOOST_CHECK_EQUAL(result, answer);
@@ -448,13 +448,13 @@ BOOST_AUTO_TEST_CASE(test_a_equals_c_negate)
     //GraphBLAS::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     //std::vector<double> v_mA = {0, 1, 1, 0, 0, 0, 1, 1, 1};
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(3, 3);
-    //matrixBuild(mA, i_mA, j_mA, v_mA);
+    //mA.build(i_mA, j_mA, v_mA);
 
     //GraphBLAS::IndexArrayType i_mB    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
     //GraphBLAS::IndexArrayType j_mB    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     //std::vector<double> v_mB = {1, 0, 0, 0, 1, 0, 0, 0, 1};
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(3, 3);
-    //matrixBuild(mB, i_mB, j_mB, v_mB);
+    //mB.build(i_mB, j_mB, v_mB);
 
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 3);
 
@@ -462,19 +462,19 @@ BOOST_AUTO_TEST_CASE(test_a_equals_c_negate)
     //GraphBLAS::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     //std::vector<double> v_answer = {1, 0, 0, 1, 1, 1, 0, 0, 0};
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
-    //matrixBuild(answer, i_answer, j_answer, v_answer);
+    //answer.build(i_answer, j_answer, v_answer);
 
     GraphBLAS::IndexArrayType i_mA    = {0, 0, 2, 2, 2};
     GraphBLAS::IndexArrayType j_mA    = {1, 2, 0, 1, 2};
     std::vector<double> v_mA =          {1, 1, 1, 1, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(3, 3);
-    matrixBuild(mA, i_mA, j_mA, v_mA);
+    mA.build(i_mA, j_mA, v_mA);
 
     GraphBLAS::IndexArrayType i_mB    = {0, 1, 2};
     GraphBLAS::IndexArrayType j_mB    = {0, 1, 2};
     std::vector<double> v_mB =          {1, 1, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(3, 3);
-    matrixBuild(mB, i_mB, j_mB, v_mB);
+    mB.build(i_mB, j_mB, v_mB);
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 3);
 
@@ -482,7 +482,7 @@ BOOST_AUTO_TEST_CASE(test_a_equals_c_negate)
     GraphBLAS::IndexArrayType j_answer = {0, 0, 1, 2};
     std::vector<double> v_answer =       {1, 1, 1, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
-    matrixBuild(answer, i_answer, j_answer, v_answer);
+    answer.build(i_answer, j_answer, v_answer);
 
     mxm(negate(mA), mB, result);
     BOOST_CHECK_EQUAL(result, answer);
@@ -495,13 +495,13 @@ BOOST_AUTO_TEST_CASE(test_a_transpose_and_negate)
     //GraphBLAS::IndexArrayType j_mA = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     //std::vector<double> v_mA = {0, 1, 1, 0, 0, 0, 1, 1, 1};
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(3, 3);
-    //matrixBuild(mA, i_mA, j_mA, v_mA);
+    //mA.build(i_mA, j_mA, v_mA);
 
     //GraphBLAS::IndexArrayType i_mB = {0, 0, 0, 1, 1, 1, 2, 2, 2};
     //GraphBLAS::IndexArrayType j_mB = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     //std::vector<double> v_mB = {1, 0, 1, 1, 1, 0, 1, 0, 1};
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(3, 3);
-    //matrixBuild(mB, i_mB, j_mB, v_mB);
+    //mB.build(i_mB, j_mB, v_mB);
 
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 3);
 
@@ -509,19 +509,19 @@ BOOST_AUTO_TEST_CASE(test_a_transpose_and_negate)
     //GraphBLAS::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     //std::vector<double> v_answer = {2, 1, 1, 1, 1, 0, 1, 1, 0};
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
-    //matrixBuild(answer, i_answer, j_answer, v_answer);
+    //answer.build(i_answer, j_answer, v_answer);
 
     GraphBLAS::IndexArrayType i_mA = {0, 0, 2, 2, 2};
     GraphBLAS::IndexArrayType j_mA = {1, 2, 0, 1, 2};
     std::vector<double> v_mA =       {1, 1, 1, 1, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(3, 3);
-    matrixBuild(mA, i_mA, j_mA, v_mA);
+    mA.build(i_mA, j_mA, v_mA);
 
     GraphBLAS::IndexArrayType i_mB = {0, 0, 1, 1, 2, 2};
     GraphBLAS::IndexArrayType j_mB = {0, 2, 0, 1, 0, 2};
     std::vector<double> v_mB =       {1, 1, 1, 1, 1, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(3, 3);
-    matrixBuild(mB, i_mB, j_mB, v_mB);
+    mB.build(i_mB, j_mB, v_mB);
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 3);
 
@@ -529,7 +529,7 @@ BOOST_AUTO_TEST_CASE(test_a_transpose_and_negate)
     GraphBLAS::IndexArrayType j_answer = {0, 1, 2, 0, 1, 0, 1};
     std::vector<double> v_answer =       {2, 1, 1, 1, 1, 1, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
-    matrixBuild(answer, i_answer, j_answer, v_answer);
+    answer.build(i_answer, j_answer, v_answer);
     mxm(negate(transpose(mA)), mB, result);
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -541,13 +541,13 @@ BOOST_AUTO_TEST_CASE(test_b_transpose_and_negate)
     //GraphBLAS::IndexArrayType j_mA = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     //std::vector<double> v_mA = {0, 1, 1, 0, 0, 0, 1, 1, 1};
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(3, 3);
-    //matrixBuild(mA, i_mA, j_mA, v_mA);
+    //mA.build(i_mA, j_mA, v_mA);
 
     //GraphBLAS::IndexArrayType i_mB = {0, 0, 0, 1, 1, 1, 2, 2, 2};
     //GraphBLAS::IndexArrayType j_mB = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     //std::vector<double> v_mB = {1, 0, 1, 1, 1, 0, 1, 0, 1};
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(3, 3);
-    //matrixBuild(mB, i_mB, j_mB, v_mB);
+    //mB.build(i_mB, j_mB, v_mB);
 
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 3);
 
@@ -555,19 +555,19 @@ BOOST_AUTO_TEST_CASE(test_b_transpose_and_negate)
     //GraphBLAS::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     //std::vector<double> v_answer = {1, 1, 1, 0, 0, 0, 1, 1, 1};
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
-    //matrixBuild(answer, i_answer, j_answer, v_answer);
+    //answer.build(i_answer, j_answer, v_answer);
 
     GraphBLAS::IndexArrayType i_mA = {0, 0, 2, 2, 2};
     GraphBLAS::IndexArrayType j_mA = {1, 2, 0, 1, 2};
     std::vector<double> v_mA =       {1, 1, 1, 1, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(3, 3);
-    matrixBuild(mA, i_mA, j_mA, v_mA);
+    mA.build(i_mA, j_mA, v_mA);
 
     GraphBLAS::IndexArrayType i_mB = {0, 0, 1, 1, 2, 2};
     GraphBLAS::IndexArrayType j_mB = {0, 2, 0, 1, 0, 2};
     std::vector<double> v_mB =       {1, 1, 1, 1, 1, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(3, 3);
-    matrixBuild(mB, i_mB, j_mB, v_mB);
+    mB.build(i_mB, j_mB, v_mB);
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 3);
 
@@ -575,7 +575,7 @@ BOOST_AUTO_TEST_CASE(test_b_transpose_and_negate)
     GraphBLAS::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2};
     std::vector<double> v_answer =       {1, 1, 1, 1, 1, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
-    matrixBuild(answer, i_answer, j_answer, v_answer);
+    answer.build(i_answer, j_answer, v_answer);
     mxm(mA, negate(transpose(mB)), result);
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -587,13 +587,13 @@ BOOST_AUTO_TEST_CASE(test_a_and_b_transpose_and_negate)
     //GraphBLAS::IndexArrayType j_mA = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     //std::vector<double> v_mA = {0, 1, 1, 0, 0, 0, 1, 1, 1};
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(3, 3);
-    //matrixBuild(mA, i_mA, j_mA, v_mA);
+    //mA.build(i_mA, j_mA, v_mA);
 
     //GraphBLAS::IndexArrayType i_mB = {0, 0, 0, 1, 1, 1, 2, 2, 2};
     //GraphBLAS::IndexArrayType j_mB = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     //std::vector<double> v_mB = {1, 0, 1, 1, 1, 0, 1, 0, 1};
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(3, 3);
-    //matrixBuild(mB, i_mB, j_mB, v_mB);
+    //mB.build(i_mB, j_mB, v_mB);
 
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 3);
 
@@ -601,19 +601,19 @@ BOOST_AUTO_TEST_CASE(test_a_and_b_transpose_and_negate)
     //GraphBLAS::IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     //std::vector<double> v_answer = {1, 0, 1, 1, 0, 1, 1, 0, 1};
     //GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
-    //matrixBuild(answer, i_answer, j_answer, v_answer);
+    //answer.build(i_answer, j_answer, v_answer);
 
     GraphBLAS::IndexArrayType i_mA = {0, 0, 2, 2, 2};
     GraphBLAS::IndexArrayType j_mA = {1, 2, 0, 1, 2};
     std::vector<double> v_mA =       {1, 1, 1, 1, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(3, 3);
-    matrixBuild(mA, i_mA, j_mA, v_mA);
+    mA.build(i_mA, j_mA, v_mA);
 
     GraphBLAS::IndexArrayType i_mB = {0, 0, 1, 1, 2, 2};
     GraphBLAS::IndexArrayType j_mB = {0, 2, 0, 1, 0, 2};
     std::vector<double> v_mB =       {1, 1, 1, 1, 1, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(3, 3);
-    matrixBuild(mB, i_mB, j_mB, v_mB);
+    mB.build(i_mB, j_mB, v_mB);
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 3);
 
@@ -621,7 +621,7 @@ BOOST_AUTO_TEST_CASE(test_a_and_b_transpose_and_negate)
     GraphBLAS::IndexArrayType j_answer = {0, 2, 0, 2, 0, 2};
     std::vector<double> v_answer =       {1, 1, 1, 1, 1, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
-    matrixBuild(answer, i_answer, j_answer, v_answer);
+    answer.build(i_answer, j_answer, v_answer);
     mxm(negate(transpose(mA)), negate(transpose(mB)), result);
     BOOST_CHECK_EQUAL(result, answer);
 }

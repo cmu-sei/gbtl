@@ -61,10 +61,9 @@ namespace algorithms
         std::cerr << "batch size (p): " << nsver << std::endl;
 
         using T = typename MatrixT::ScalarType;
-        GraphBLAS::IndexType m, n;
 
-        // GrB_Matrix_nrows(&n, A)
-        A.get_shape(m, n);
+        GraphBLAS::IndexType m(A.nrows());
+        GraphBLAS::IndexType n(A.ncols());
         if (m != n)
         {
             throw GraphBLAS::DimensionException();

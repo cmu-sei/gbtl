@@ -245,7 +245,7 @@ BOOST_AUTO_TEST_CASE(metrics_test_vertex_betweennes_centrality_batch_alt_trans_v
 //    Matrix<double, DirectedMatrixTag> betweenness(8,8);
 //    graphblas::buildmatrix(betweenness, br.begin(), bc.begin(), bv.begin(), bv.size());
     GraphBLAS::Matrix<double, DirectedMatrixTag> betweenness(8,8);
-    GraphBLAS::matrixBuild(betweenness, br.begin(), bc.begin(), bv.begin(), bv.size(), GraphBLAS::Second<double>());
+    betweenness.build(br.begin(), bc.begin(), bv.begin(), bv.size());
 
     //graphblas::IndexArrayType seed_set={0, 1, 2, 3, 4, 5, 6, 7};
     GraphBLAS::IndexArrayType seed_set={0};

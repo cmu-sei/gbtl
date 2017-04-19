@@ -40,7 +40,9 @@ BOOST_AUTO_TEST_CASE(mis_test)
     GBMatrix graph(NUM_NODES, NUM_NODES, 0);
     graphblas::buildmatrix(graph, i, j, v);
 
-    // Run MANY expeeriments to get different IS's
+    std::cout << "*********** MIS1 *********" << std::endl;
+    double set_sizes(0);
+    // Run MANY experiments to get different IS's
     for (unsigned int seed = 1000; seed < 1200; ++seed)
     {
         GBMatrix independent_set(NUM_NODES, 1, 0);
@@ -51,9 +53,11 @@ BOOST_AUTO_TEST_CASE(mis_test)
         // Get the set of vertex ID's
         graphblas::IndexArrayType result(
             algorithms::get_vertex_IDs(independent_set));
+        //std::cout << "Seed=" << seed << ": ";
         //for (auto it = result.begin(); it != result.end(); ++it)
         //    std::cerr << *it << " ";
         //std::cerr << std::endl;
+        set_sizes += result.size();
 
         // Check the result by performing bfs_level() from the independent_set
         // All levels should be 1 (if in IS) or 2 (if not in IS)
@@ -74,6 +78,7 @@ BOOST_AUTO_TEST_CASE(mis_test)
                 BOOST_CHECK_EQUAL(isT.extractElement(0, ix), 0.0);
         }
     }
+    std::cerr << "Avg. size = " << set_sizes/200.0 << std::endl;
 }
 
 
@@ -84,16 +89,22 @@ BOOST_AUTO_TEST_CASE(mis2_test)
     typedef graphblas::Matrix<uint32_t, graphblas::DirectedMatrixTag> IntMatrix;
     graphblas::IndexType const NUM_NODES(7);
     graphblas::IndexArrayType i = {0, 0, 1, 1, 2, 2, 3, 3, 3,
-                                   4, 4, 4, 5, 5, 6, 6};
-    graphblas::IndexArrayType j = {1, 2, 0, 3, 0, 4, 1, 5, 6,
-                                   2, 5, 6, 3, 4, 3, 4};
+                                   4, 4, 5, 5, 5, 6, 6};
+    graphblas::IndexArrayType j = {1, 2, 0, 3, 0, 5, 1, 4, 6,
+                                   3, 5, 2, 4, 6, 3, 5};
+    //graphblas::IndexArrayType i = {0, 0, 1, 1, 2, 2, 3, 3, 3,
+    //                               4, 4, 4, 5, 5, 6, 6};
+    //graphblas::IndexArrayType j = {1, 2, 0, 3, 0, 4, 1, 5, 6,
+    //                               2, 5, 6, 3, 4, 3, 4};
     std::vector<uint32_t> v(i.size(), 1);
     IntMatrix graph(NUM_NODES, NUM_NODES, 0);
     graphblas::buildmatrix(graph, i, j, v);
 
+    std::cout << "*********** MIS2 *********" << std::endl;
+    double set_sizes(0);
     // Run MANY experiments to get different IS's
-    unsigned int seed = 1000;
-    //for (unsigned int seed = 1000; seed < 1200; ++seed)
+    //unsigned int seed = 1000;
+    for (unsigned int seed = 1000; seed < 1200; ++seed)
     {
         IntMatrix independent_set(NUM_NODES, 1, 0);
         algorithms::mis2(graph, independent_set, float(seed));
@@ -103,10 +114,11 @@ BOOST_AUTO_TEST_CASE(mis2_test)
         // Get the set of vertex ID's
         graphblas::IndexArrayType result(
             algorithms::get_vertex_IDs(independent_set));
-        std::cout << "Seed=" << seed << ": ";
-        for (auto it = result.begin(); it != result.end(); ++it)
-            std::cout << *it << " ";
-        std::cout << std::endl;
+        //std::cout << "Seed=" << seed << ": ";
+        //for (auto it = result.begin(); it != result.end(); ++it)
+        //    std::cout << *it << " ";
+        //std::cout << std::endl;
+        set_sizes += result.size();
 
         // Check the result by performing bfs_level() from the independent_set
         // All levels should be 1 (if in IS) or 2 (if not in IS)
@@ -127,6 +139,67 @@ BOOST_AUTO_TEST_CASE(mis2_test)
                 BOOST_CHECK_EQUAL(isT.extractElement(0, ix), 0.0);
         }
     }
+    std::cerr << "Avg. size = " << set_sizes/200.0 << std::endl;
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(mis3_masked_test)
+{
+    typedef graphblas::Matrix<float, graphblas::DirectedMatrixTag> FMatrix;
+    typedef graphblas::Matrix<uint32_t, graphblas::DirectedMatrixTag> IntMatrix;
+    graphblas::IndexType const NUM_NODES(7);
+    graphblas::IndexArrayType i = {0, 0, 1, 1, 2, 2, 3, 3, 3,
+                                   4, 4, 5, 5, 5, 6, 6};
+    graphblas::IndexArrayType j = {1, 2, 0, 3, 0, 5, 1, 4, 6,
+                                   3, 5, 2, 4, 6, 3, 5};
+    //graphblas::IndexArrayType i = {0, 0, 1, 1, 2, 2, 3, 3, 3,
+    //                               4, 4, 4, 5, 5, 6, 6};
+    //graphblas::IndexArrayType j = {1, 2, 0, 3, 0, 4, 1, 5, 6,
+    //                               2, 5, 6, 3, 4, 3, 4};
+    std::vector<uint32_t> v(i.size(), 1);
+    IntMatrix graph(NUM_NODES, NUM_NODES, 0);
+    graphblas::buildmatrix(graph, i, j, v);
+
+    std::cout << "*********** MIS3 MASKED *********" << std::endl;
+    double set_sizes(0);
+    // Run MANY experiments to get different IS's
+    //unsigned int seed = 1000;
+    for (unsigned int seed = 1000; seed < 1200; ++seed)
+    {
+        IntMatrix independent_set(NUM_NODES, 1, 0);
+        algorithms::mis3_masked(graph, independent_set, float(seed));
+        //graphblas::print_matrix(std::cout, independent_set,
+        //                        "independent_set (flags)");
+
+        // Get the set of vertex ID's
+        graphblas::IndexArrayType result(
+            algorithms::get_vertex_IDs(independent_set));
+        //std::cout << "Seed=" << seed << ": ";
+        //for (auto it = result.begin(); it != result.end(); ++it)
+        //    std::cout << *it << " ";
+        //std::cout << std::endl;
+        set_sizes += result.size();
+
+        // Check the result by performing bfs_level() from the independent_set
+        // All levels should be 1 (if in IS) or 2 (if not in IS)
+        /// @todo I was unable to use transpose(independent_set) for wavefront.
+        IntMatrix levels(1, NUM_NODES, 0);
+        IntMatrix isT(1, NUM_NODES, 0);
+        graphblas::transpose(independent_set, isT);
+        algorithms::bfs_level_masked(graph, isT, levels);
+
+        //graphblas::print_matrix(std::cout, levels, "BFS levels from IS");
+        for (graphblas::IndexType ix = 0; ix < NUM_NODES; ++ix)
+        {
+            double lvl = levels.extractElement(0, ix);
+            BOOST_CHECK((lvl < 3) && (lvl > 0));
+            if (lvl == 1)
+                BOOST_CHECK_EQUAL(isT.extractElement(0, ix), 1.0);
+            else
+                BOOST_CHECK_EQUAL(isT.extractElement(0, ix), 0.0);
+        }
+    }
+    std::cerr << "Avg. size = " << set_sizes/200.0 << std::endl;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

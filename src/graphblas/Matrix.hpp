@@ -88,11 +88,12 @@ namespace GraphBLAS
         }
 
         /**
-         * @brief Construct a sparse matrix from dense data.
+         * @brief Construct a sparse matrix from dense data and a sentinel zero value.
          *
          * @param[in] values The dense matrix from which to construct a
          *                   sparse matrix from.
-         * @param[in] zero   The "zero" value.
+         * @param[in] zero   The "zero" value used to determine implied
+         *                   zeroes (no stored value) in the sparse structure
          *
          * @todo Should we really support this interface?
          */
@@ -102,47 +103,6 @@ namespace GraphBLAS
         }
 
         ~Matrix() { }
-
-        /// Version 1 of getshape that assigns to two passed parameters
-        void get_shape(IndexType &num_rows, IndexType &num_cols) const
-        {
-            m_mat.get_shape(num_rows, num_cols);
-        }
-
-        /// Version 2 of getshape that returns a std::pair = [rows, cols]
-        std::pair<IndexType, IndexType> get_shape() const
-        {
-            IndexType num_rows, num_cols;
-            m_mat.get_shape(num_rows, num_cols);
-            return std::make_pair(num_rows, num_cols);
-        }
-
-        /**
-         * Populate the matrix with stored values (using iterators).
-         *
-         * @param[in]  i_it  Row index iterator
-         * @param[in]  j_it  Column index iterator
-         * @param[in]  v_it  Value (scalar) iterator
-         * @param[in]  n     Number of elements to store
-         * @param[in]  accum binary function to call when computing value to
-         *                   store. Takes current value and incoming value
-         *                   as input.
-         *
-         * @todo need to add a parameter to handle duplicate locations.
-         * @todo Should this clear out all previous storage if accum is Assign?
-         */
-        template<typename RAIteratorI,
-                 typename RAIteratorJ,
-                 typename RAIteratorV,
-                 typename DupT = GraphBLAS::Second<ScalarType> >
-        void build(RAIteratorI  i_it,
-                   RAIteratorJ  j_it,
-                   RAIteratorV  v_it,
-                   IndexType    n,
-                   DupT         dup = DupT())
-        {
-            m_mat.build(i_it, j_it, v_it, n, dup);
-        }
 
         /// @todo Should assignment work only if dimensions are same?
         Matrix<ScalarT, TagsT...> &
@@ -166,11 +126,19 @@ namespace GraphBLAS
         //    return *this;
         //}
 
-        void clear() { m_mat.clear(); }
+        /// Version 1 of getshape that assigns to two passed parameters
+        //void get_shape(IndexType &num_rows, IndexType &num_cols) const
+        //{
+        //    m_mat.get_shape(num_rows, num_cols);
+        //}
 
-        IndexType nrows() const  { return m_mat.nrows(); }
-        IndexType ncols() const  { return m_mat.ncols(); }
-        IndexType nvals() const  { return m_mat.nvals(); }
+        /// Version 2 of getshape that returns a std::pair = [rows, cols]
+        //std::pair<IndexType, IndexType> get_shape() const
+        //{
+        //    IndexType num_rows, num_cols;
+        //    m_mat.get_shape(num_rows, num_cols);
+        //    return std::make_pair(num_rows, num_cols);
+        //}
 
         /// @todo need to change to mix and match internal types
         bool operator==(Matrix<ScalarT, TagsT...> const &rhs) const
@@ -184,55 +152,120 @@ namespace GraphBLAS
             return !(*this == rhs);
         }
 
+        /**
+         * Populate the matrix with stored values (using iterators).
+         *
+         * @param[in]  i_it      Row index iterator
+         * @param[in]  j_it      Column index iterator
+         * @param[in]  v_it      Value (scalar) iterator
+         * @param[in]  num_vals  Number of elements to store
+         * @param[in]  dup       Binary function to call when value is being stored
+         *                       in a location that already has a stored value.
+         *                       stored_val = dup(stored_val, *v_it)
+         *
+         * @todo The C spec says it is an error to call build on a non-empty
+         *       matrix.  Unclear if the C++ should.
+         */
+        template<typename RAIteratorI,
+                 typename RAIteratorJ,
+                 typename RAIteratorV,
+                 typename BinaryOpT = GraphBLAS::Second<ScalarType> >
+        void build(RAIteratorI  i_it,
+                   RAIteratorJ  j_it,
+                   RAIteratorV  v_it,
+                   IndexType    num_vals,
+                   BinaryOpT    dup = BinaryOpT())
+        {
+            m_mat.build(i_it, j_it, v_it, num_vals, dup);
+        }
+
+        /**
+         * Populate the matrix with stored values (using iterators).
+         *
+         * @param[in]  row_indices  Array of row indices
+         * @param[in]  col_indices  Array of column indices
+         * @param[in]  values       Array of values
+         * @param[in]  dup          binary function to call when value is being stored
+         *                          in a location that already has a stored value.
+         *                          stored_val = dup(stored_val, *v_it)
+         *
+         * @todo The C spec says it is an error to call build on a non-empty
+         *       matrix.  Unclear if the C++ should.
+         */
+        template<typename ValueT,
+                 typename BinaryOpT = GraphBLAS::Second<ScalarType> >
+        inline void build(IndexArrayType       const &row_indices,
+                          IndexArrayType       const &col_indices,
+                          std::vector<ValueT>  const &values,
+                          BinaryOpT                   dup)
+        {
+            if ((row_indices.size() != col_indices.size()) ||
+                (row_indices.size() != values.size()))
+            {
+                throw DimensionException("Matrix::build");
+            }
+            m_mat.build(row_indices.begin(), col_indices.begin(),
+                        values.begin(), values.size(), dup);
+        }
+
+        void clear() { m_mat.clear(); }
+
+        IndexType nrows() const  { return m_mat.nrows(); }
+        IndexType ncols() const  { return m_mat.ncols(); }
+        IndexType nvals() const  { return m_mat.nvals(); }
+
+        bool hasElement(IndexType row, IndexType col) const
+        {
+            return m_mat.hasElement(row, col);
+        }
+
         /// @todo I don't think this is a valid interface for sparse
+        void setElement(IndexType row, IndexType col, ScalarT const &val)
+        {
+            m_mat.setElement(row, col, val);
+        }
+
+        /// @throw NoValueException if there is no value stored at (row,col)
         ScalarT extractElement(IndexType row, IndexType col) const
         {
             return m_mat.extractElement(row, col);
         }
 
-        /// @todo I don't think this is a valid interface for sparse
-        void assignElement(IndexType row, IndexType col, ScalarT const &val)
+        template<typename RAIteratorIT,
+                 typename RAIteratorJT,
+                 typename RAIteratorVT,
+                 typename AMatrixT>
+        inline void extractTuples(RAIteratorIT        row_indices,
+                                  RAIteratorJT        col_indices,
+                                  RAIteratorVT        values)
         {
-            m_mat.setElement(row, col, val);
+            /// @todo
+        }
+
+        template<typename ValueT,
+                 typename AMatrixT>
+        inline void extractTuples(IndexArrayType            &row_indices,
+                                  IndexArrayType            &col_indices,
+                                  std::vector<ValueT>       &values)
+        {
+            /// @todo
         }
 
         /// This replaces operator<< and outputs implementation specific
         /// information.
-        void print_info(std::ostream &os) const
+        void printInfo(std::ostream &os) const
         {
-            m_mat.print_info(os);
+            m_mat.printInfo(os);
         }
 
         /// @todo This does not need to be a friend
         friend std::ostream &operator<<(std::ostream &os, Matrix const &mat)
         {
-            mat.print_info(os);
+            mat.printInfo(os);
             return os;
         }
 
     private:
-        template<typename CMatrixT,
-                 typename RAIteratorIT,
-                 typename RAIteratorJT,
-                 typename RAIteratorVT,
-                 typename BinaryOpT>
-        friend inline void matrixBuild(CMatrixT           &C,
-                                       RAIteratorIT        row_indices,
-                                       RAIteratorJT        col_indices,
-                                       RAIteratorVT        values,
-                                       IndexType           num_vals,
-                                       BinaryOpT           dup);
-
-
-        template<typename CMatrixT,
-                 typename ValueT,
-                 typename BinaryOpT>
-        friend inline void matrixBuild(CMatrixT                   &C,
-                                       IndexArrayType       const &row_indices,
-                                       IndexArrayType       const &col_indices,
-                                       std::vector<ValueT>  const &values,
-                                       BinaryOpT                   dup);
-
         template<typename CMatrixT,
                  typename AccumT,
                  typename SemiringT,
@@ -728,4 +761,3 @@ namespace graphblas
     };
 
 } // end namespace graphblas
-

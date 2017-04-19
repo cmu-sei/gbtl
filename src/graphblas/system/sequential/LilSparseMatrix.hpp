@@ -20,8 +20,12 @@
 #include <typeinfo>
 #include <stdexcept>
 
+//****************************************************************************
+
 namespace GraphBLAS
 {
+    /// @todo Need to add nested "backend" namespace
+
     template<typename ScalarT, typename... TagsT>
     class LilSparseMatrix
     {
@@ -56,6 +60,11 @@ namespace GraphBLAS
             m_nvals = 0;
             for (IndexType ii = 0; ii < m_num_rows; ii++)
             {
+                if (val[ii].size() != m_num_cols)
+                {
+                    throw DimensionException("LilSparseMatix(dense ctor)");
+                }
+
                 for (IndexType jj = 0; jj < m_num_cols; jj++)
                 {
                     m_data[ii].push_back(std::make_tuple(jj, val[ii][jj]));
@@ -74,6 +83,11 @@ namespace GraphBLAS
             m_nvals = 0;
             for (IndexType ii = 0; ii < m_num_rows; ii++)
             {
+                if (val[ii].size() != m_num_cols)
+                {
+                    throw DimensionException("LilSparseMatix(dense ctor)");
+                }
+
                 for (IndexType jj = 0; jj < m_num_cols; jj++)
                 {
                     if (val[ii][jj] != zero)
@@ -169,8 +183,10 @@ namespace GraphBLAS
                    IndexType    n,
                    DupT         dup)
         {
+            /// @todo should this function throw an error if matrix is not empty
+
             /// @todo should this function call clear?
-            clear();
+            //clear();
 
             /// @todo DOING SOMETHING REALLY STUPID RIGHT NOW
             for (IndexType ix = 0; ix < n; ++ix)
@@ -190,26 +206,44 @@ namespace GraphBLAS
             }
         }
 
-        IndexType nrows() const
-        {
-            return m_num_rows;
-        }
-
-        IndexType ncols() const
-        {
-            return m_num_cols;
-        }
-
-        IndexType nvals() const
-        {
-            return m_nvals;
-        }
+        IndexType nrows() const { return m_num_rows; }
+        IndexType ncols() const { return m_num_cols; }
+        IndexType nvals() const { return m_nvals; }
 
         /// Version 1 of getshape that assigns to two passed parameters
-        void get_shape(IndexType &num_rows, IndexType &num_cols) const
+        // void get_shape(IndexType &num_rows, IndexType &num_cols) const
+        // {
+        //     num_rows = m_num_rows;
+        //     num_cols = m_num_cols;
+        // }
+
+        bool hasElement(IndexType irow, IndexType icol) const
         {
-            num_rows = m_num_rows;
-            num_cols = m_num_cols;
+            if (irow >= m_num_rows || icol >= m_num_cols)
+            {
+                throw IndexOutOfBoundsException(
+                    "get_value_at: index out of bounds");
+            }
+            if (m_data.empty())
+            {
+                return false;
+            }
+            if (m_data.at(irow).empty())
+            {
+                return false;
+            }
+
+            IndexType ind;
+            ScalarT val;
+            //for (auto tupl : m_data[irow])// Range-based loop, access by value
+            for (auto tupl : m_data.at(irow))// Range-based loop, access by value
+            {
+                if (std::get<0>(tupl) == icol)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         // Get value at index
@@ -285,7 +319,7 @@ namespace GraphBLAS
         // BinaryOp passed.
         template <typename BinaryOpT>
         void setElement(IndexType irow, IndexType icol, ScalarT const &val,
-                          BinaryOpT merge)
+                        BinaryOpT merge)
         {
             if (irow >= m_num_rows || icol >= m_num_cols)
             {
@@ -495,7 +529,7 @@ namespace GraphBLAS
         }
 
         // output specific to the storage layout of this type of matrix
-        void print_info(std::ostream &os) const
+        void printInfo(std::ostream &os) const
         {
             os << "LilSparseMatrix<" << typeid(ScalarT).name() << ">"
                << std::endl;
@@ -519,7 +553,7 @@ namespace GraphBLAS
         friend std::ostream &operator<<(std::ostream             &os,
                                         LilSparseMatrix<ScalarT> const &mat)
         {
-            mat.print_info(os);
+            mat.printInfo(os);
             return os;
         }
 
