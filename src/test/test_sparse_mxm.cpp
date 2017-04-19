@@ -20,6 +20,9 @@
 
 #include <boost/test/included/unit_test.hpp>
 
+BOOST_AUTO_TEST_SUITE(sparse_mxm_suite)
+
+//****************************************************************************
 
 namespace
 {
@@ -53,7 +56,6 @@ namespace
     //                                                     {1, 1, 1, 1}};
     //static Matrix<double, DirectedMatrixTag> mC(mC_dense);
 }
-BOOST_AUTO_TEST_SUITE(sparse_mxm_suite)
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(mxm_bad_dimensions)
@@ -92,16 +94,16 @@ BOOST_AUTO_TEST_CASE(mxm_reg)
                    GraphBLAS::ArithmeticSemiring<double>(), mA, mB);
     BOOST_CHECK_EQUAL(result, answer);
 }
-#if 0
+
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(mxm_accum)
+BOOST_AUTO_TEST_CASE(mxm_duplicate_input)
 {
     // Build some matrices.
     GraphBLAS::IndexArrayType i = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
     GraphBLAS::IndexArrayType j = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double>       v = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mat(4, 4);
-    .build(mat, i, j, v);
+    mat.build(i, j, v);
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> m3(4, 4);
 
@@ -114,7 +116,9 @@ BOOST_AUTO_TEST_CASE(mxm_accum)
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(4, 4);
     answer.build(i_answer, j_answer, v_answer);
 
-    mxm(mat, mat, m3);
+    GraphBLAS::mxm(m3,
+                   GraphBLAS::Second<double>(),
+                   GraphBLAS::ArithmeticSemiring<double>(), mat, mat);
 
     BOOST_CHECK_EQUAL(m3, answer);
 }
@@ -126,7 +130,7 @@ BOOST_AUTO_TEST_CASE(test_mxm_masked)
     GraphBLAS::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_mA = {12, 7, 3, 4, 5, 6, 7, 8, 9};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(3, 3);
-    mA.Build(i_mA, j_mA, v_mA);
+    mA.build(i_mA, j_mA, v_mA);
 
     GraphBLAS::IndexArrayType i_mB    = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2};
     GraphBLAS::IndexArrayType j_mB    = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2, 3};
@@ -145,14 +149,17 @@ BOOST_AUTO_TEST_CASE(test_mxm_masked)
 
     GraphBLAS::Matrix<unsigned int, GraphBLAS::DirectedMatrixTag> mask(3,4);
     std::vector<unsigned int> v_mask(i_answer.size(), 1);
-    .build(mask, i_answer, j_answer, v_mask);
+    mask.build(i_answer, j_answer, v_mask);
 
-    mxmMasked(mA, mB, result, mask);
+    GraphBLAS::mxm(result,
+                   mask,
+                   GraphBLAS::Second<double>(),
+                   GraphBLAS::ArithmeticSemiring<double>(), mA, mB);
 
     BOOST_CHECK_EQUAL(result, answer);
 }
 
-
+#if 0
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_not_all_one_masked)
 {

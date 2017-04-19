@@ -45,7 +45,7 @@ namespace GraphBLAS
         // Okay! This is a total mess.  If we change the name to "mxm" it conflicts
         // with the names in operations and sequentail/operations.  Lots of weird
         // wiring going on here.  I (andrew) can't get this thing to properly resolve
-        // all the symbols.  It is either a namespace error, or overload error or 
+        // all the symbols.  It is either a namespace error, or overload error or
         // something.  Switching to more strict signatures ends up with weird
         // errors in GraphBLAS::backend::Matrix when operations tries to get m_mat.
         template<typename CMatrixT,
@@ -131,7 +131,7 @@ namespace GraphBLAS
         // NOTE: The mask is a actually a boolean matrix not an exists/doesn't exist
         // as described in the background.
         template<typename CMatrixT,
-                 typename MMatrixT,                             
+                 typename MMatrixT,
                  typename AccumT,
                  typename SemiringT,
                  typename AMatrixT,
@@ -157,7 +157,7 @@ namespace GraphBLAS
             // @todo: Move these checks into the front end when we get that wired up
             check_inside_dimensions(A, "A", B, "B");
             check_outside_dimensions(A, "A", B, "B", C, "C");
-            check_dimensions(A, "A", M, "M");
+            check_dimensions(C, "C", M, "M");
 
             typedef typename AMatrixT::ScalarType AScalarType;
             typedef typename BMatrixT::ScalarType BScalarType;
@@ -199,7 +199,7 @@ namespace GraphBLAS
                         for (IndexType row_idx = 0; row_idx < nrow_A; ++row_idx)
                         {
                             // Check the mask to see if we need to do the operation
-                            // for this row.  
+                            // for this row.
                             if (m_it != M_col.end() && row_idx == m_idx)
                             {
                                 if (m_val )
@@ -238,8 +238,8 @@ namespace GraphBLAS
             // Perform accum
 
             // NOTE: We do not consult the mask!  Since no value should have been
-            // generated above, and we ASSUME ('cause we looked at the code) that 
-            // the ewise_or does a no-op (accum-wise) on cells that have no value, then we 
+            // generated above, and we ASSUME ('cause we looked at the code) that
+            // the ewise_or does a no-op (accum-wise) on cells that have no value, then we
             // shouldn't need to mask here as well.
             CColType tmp_row;
             if (replace)

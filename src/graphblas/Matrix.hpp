@@ -197,7 +197,7 @@ namespace GraphBLAS
         inline void build(IndexArrayType       const &row_indices,
                           IndexArrayType       const &col_indices,
                           std::vector<ValueT>  const &values,
-                          BinaryOpT                   dup)
+                          BinaryOpT                   dup = BinaryOpT())
         {
             if ((row_indices.size() != col_indices.size()) ||
                 (row_indices.size() != values.size()))

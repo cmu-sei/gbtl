@@ -163,6 +163,7 @@ namespace GraphBLAS
                     AMatrixT   const &A,
                     BMatrixT   const &B)
     {
+        /// @todo move the dimension checks to the backend
         if ((C.nrows() != A.nrows()) ||
             (A.ncols() != B.nrows()) ||
             (C.ncols() != B.ncols()))
@@ -186,6 +187,7 @@ namespace GraphBLAS
                     BMatrixT   const &B,
                     bool              replace_flag = false)
     {
+        /// @todo move the dimension checks to the backend
         if ((C.nrows() != A.nrows()) ||
             (A.ncols() != B.nrows()) ||
             (C.ncols() != B.ncols()) ||
