@@ -42,66 +42,6 @@ namespace GraphBLAS
 {
     namespace backend
     {
-
-        /**
-         *  @todo Need to add a parameter (functor?) to handle duplicate locations
-         */
-        // template<typename CMatrixT,
-        //          typename RAIteratorIT,
-        //          typename RAIteratorJT,
-        //          typename RAIteratorVT,
-        //          typename BinaryOpT>
-        // inline void matrixBuild(CMatrixT           &C,
-        //                         RAIteratorIT        row_it,
-        //                         RAIteratorJT        col_it,
-        //                         RAIteratorVT        val_it,
-        //                         IndexType           num_vals,
-        //                         BinaryOpT           dup)
-        // {
-        //     // @todo: Why change names again?  (e.g. buildmatrix -> matrixBuild -> build)
-        //     if (C.nvals() != 0)
-        //     {
-        //         /// @todo Do we silently clear or throw an exception
-        //         //throw NotEmptyException("matrixBuild");
-        //     }
-
-        //     // C.build() currently calls C.clear()
-        //     C.build(row_it, col_it, val_it, num_vals, dup);
-        // }
-
-        // Note: this forward might not be necessary.  Need to revisit
-        // template<typename CMatrixT,
-        //          typename AccumT,
-        //          typename SemiringT,
-        //          typename AMatrixT,
-        //          typename BMatrixT>
-        // inline void mxm(CMatrixT       &C,
-        //                 AccumT          accum,
-        //                 SemiringT       op,
-        //                 AMatrixT const &A,
-        //                 BMatrixT const &B)
-        // {
-        //     backend::mxm(C, accum, op, A, B);
-        // }
-
-        // Note: this forward might not be necessary.  Need to revisit
-        // template<typename CMatrixT,
-        //          typename MMatrixT,
-        //          typename AccumT,
-        //          typename SemiringT,
-        //          typename AMatrixT,
-        //          typename BMatrixT>
-        // inline void mxm(CMatrixT       &C,
-        //                 MMatrixT const &M,              // Mask
-        //                 AccumT          accum,
-        //                 SemiringT       op,
-        //                 AMatrixT const &A,
-        //                 BMatrixT const &B,
-        //                 bool            replace_flag)
-        // {
-        //     backend::mxm(C, M, accum, op, A, B, replace_flag);
-        // }
-
         /**
          *
          */

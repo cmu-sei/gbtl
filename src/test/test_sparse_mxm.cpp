@@ -159,7 +159,6 @@ BOOST_AUTO_TEST_CASE(test_mxm_masked)
     BOOST_CHECK_EQUAL(result, answer);
 }
 
-#if 0
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_not_all_one_masked)
 {
@@ -186,13 +185,15 @@ BOOST_AUTO_TEST_CASE(test_mxm_not_all_one_masked)
 
     GraphBLAS::Matrix<unsigned int, GraphBLAS::DirectedMatrixTag> mask(3,4);
     std::vector<unsigned int> v_mask(i_answer.size(), 1);
-    .build(mask, i_answer, j_answer, v_mask);
+    mask.build(i_answer, j_answer, v_mask);
 
-    mxmMasked(mA, mB, result, mask);
+    GraphBLAS::mxm(result,
+                   mask,
+                   GraphBLAS::Second<double>(),
+                   GraphBLAS::ArithmeticSemiring<double>(), mA, mB);
 
     BOOST_CHECK_EQUAL(result, answer);
 }
-
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_a_transpose)
@@ -218,10 +219,14 @@ BOOST_AUTO_TEST_CASE(test_a_transpose)
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 4);
     answer.build(i_answer, j_answer, v_answer);
 
-    mxm(transpose(mA), mB, result);
+    GraphBLAS::mxm(result,
+                   GraphBLAS::Second<double>(),
+                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mA), mB);
 
     BOOST_CHECK_EQUAL(result, answer);
 }
+
+#if 0
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_b_transpose)

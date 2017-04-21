@@ -31,6 +31,229 @@
 #include __GB_SYSTEM_TRANSPOSEVIEW_HEADER
 #undef __GB_SYSTEM_TRANSPOSEVIEW_HEADER
 
+
+//****************************************************************************
+//****************************************************************************
+
+
+namespace GraphBLAS
+{
+    template<typename MatrixT>
+    class TransposeView;
+
+    //************************************************************************
+    template<typename MatrixT>
+    class ComplementView
+    {
+    public:
+        typedef typename backend::ComplementView<typename MatrixT::BackendType> BackendType;
+        typedef typename MatrixT::ScalarType ScalarType;
+
+        //note:
+        //the backend should be able to decide when to ignore any of the
+        //tags and/or arguments
+        ComplementView(BackendType backend_view)
+            : m_mat(backend_view)
+        {
+        }
+
+        /**
+         * @brief Copy constructor.
+         *
+         * @param[in] rhs   The matrix to copy.
+         */
+        ComplementView(ComplementView<MatrixT> const &rhs)
+            : m_mat(rhs.m_mat)
+        {
+        }
+
+        ~ComplementView() { }
+
+        //void get_shape(IndexType &num_rows, IndexType &num_cols) const
+        //{
+        //    m_mat.get_shape(num_rows, num_cols);
+        //}
+
+        IndexType nrows() const  { return m_mat.nrows(); }
+        IndexType ncols() const  { return m_mat.ncols(); }
+        IndexType nvals() const  { return m_mat.nvals(); }
+
+        ScalarType extractElement(IndexType row, IndexType col) const
+        {
+            return m_mat.extractElement(row, col);
+        }
+
+        //other methods that may or may not belong here:
+        //
+        void printInfo(std::ostream &os) const
+        {
+            os << "Frontend ComplementView of:";
+            m_mat.print_info(os);
+        }
+
+        /// @todo This does not need to be a friend
+        friend std::ostream &operator<<(std::ostream &os, ComplementView const &mat)
+        {
+            mat.printInfo(os);
+            return os;
+        }
+
+        /// @todo need to change to mix and match internal types
+        template <typename OtherMatrixT>
+        bool operator==(OtherMatrixT const &rhs) const
+        {
+            //return (m_mat.operator==(rhs));
+            throw 1;
+            ///@todo Not implemented yet
+            //return matrix_equal_helper(*this, rhs);
+        }
+
+        template <typename OtherMatrixT>
+        bool operator!=(OtherMatrixT const &rhs) const
+        {
+            return !(*this == rhs);
+        }
+        //end other methods
+
+    private:
+        BackendType m_mat;
+
+        // PUT ALL FRIEND DECLARATIONS HERE
+    };
+
+    //************************************************************************
+    template<typename MatrixT>
+    class TransposeView
+    {
+    public:
+        typedef typename backend::TransposeView<
+            typename MatrixT::BackendType> BackendType;
+        typedef typename MatrixT::ScalarType ScalarType;
+
+        //note:
+        //the backend should be able to decide when to ignore any of the
+        //tags and/or arguments
+        TransposeView(BackendType backend_view)
+            : m_mat(backend_view)
+        {
+        }
+
+        /**
+         * @brief Copy constructor.
+         *
+         * @param[in] rhs   The matrix to copy.
+         */
+        TransposeView(TransposeView<MatrixT> const &rhs)
+            : m_mat(rhs.m_mat)
+        {
+        }
+
+
+        ~TransposeView() { }
+
+        /// @todo need to change to mix and match internal types
+        template <typename OtherMatrixT>
+        bool operator==(OtherMatrixT const &rhs) const
+        {
+            //return (m_mat.operator==(rhs.m_mat));
+            throw 1;
+            ///@todo Not implemented yet
+            //return matrix_equal_helper(*this, rhs);
+        }
+
+        template <typename OtherMatrixT>
+        bool operator!=(OtherMatrixT const &rhs) const
+        {
+            return !(*this == rhs);
+        }
+
+        IndexType nrows() const { return m_mat.nrows(); }
+        IndexType ncols() const { return m_mat.ncols(); }
+        IndexType nvals() const { return m_mat.nvals(); }
+
+        bool hasElement(IndexType row, IndexType col) const
+        {
+            return m_mat.hasElement(row, col);
+        }
+
+        ScalarType extractElement(IndexType row, IndexType col) const
+        {
+            return m_mat.extractElement(row, col);
+        }
+
+        template<typename RAIteratorIT,
+                 typename RAIteratorJT,
+                 typename RAIteratorVT,
+                 typename AMatrixT>
+        inline void extractTuples(RAIteratorIT        row_it,
+                                  RAIteratorJT        col_it,
+                                  RAIteratorVT        values)
+        {
+            m_mat.extractTuples(row_it, col_it, values);
+        }
+
+        template<typename ValueT,
+                 typename AMatrixT>
+        inline void extractTuples(IndexArrayType            &row_indices,
+                                  IndexArrayType            &col_indices,
+                                  std::vector<ValueT>       &values)
+        {
+            m_mat.extractTuples(row_indices, col_indices, values);
+        }
+
+        //other methods that may or may not belong here:
+        //
+        void printInfo(std::ostream &os) const
+        {
+            os << "Frontend TransposeView of:" << std::endl;
+            m_mat.printInfo(os);
+        }
+
+        /// @todo This does not need to be a friend
+        friend std::ostream &operator<<(std::ostream &os, TransposeView const &mat)
+        {
+            mat.printInfo(os);
+            return os;
+        }
+
+    private:
+        BackendType m_mat;
+
+        // PUT ALL FRIEND DECLARATIONS HERE
+        template<typename CMatrixT,
+                 typename AccumT,
+                 typename SemiringT,
+                 typename AMatrixT,
+                 typename BMatrixT>
+        friend inline void mxm(CMatrixT         &C,
+                               AccumT            accum,
+                               SemiringT         op,
+                               AMatrixT   const &A,
+                               BMatrixT   const &B);
+
+        template<typename CMatrixT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename SemiringT,
+                 typename AMatrixT,
+                 typename BMatrixT>
+        friend inline void mxm(CMatrixT         &C,
+                               MaskT      const &Mask,
+                               AccumT            accum,
+                               SemiringT         op,
+                               AMatrixT   const &A,
+                               BMatrixT   const &B,
+                               bool              replace_flag);
+    };
+
+} // end namespace GraphBLAS
+
+
+//****************************************************************************
+// The following signatures (and namespace) are deprecated
+//****************************************************************************
+
+/// @deprecated
 namespace graphblas
 {
     template<typename MatrixT>
@@ -748,183 +971,3 @@ namespace graphblas
     };
 
 } // end namespace graphblas
-
-//****************************************************************************
-//****************************************************************************
-
-
-namespace GraphBLAS
-{
-    template<typename MatrixT>
-    class TransposeView;
-
-    //************************************************************************
-    template<typename MatrixT>
-    class ComplementView
-    {
-    public:
-        typedef typename backend::ComplementView<typename MatrixT::BackendType> BackendType;
-        typedef typename MatrixT::ScalarType ScalarType;
-
-        //note:
-        //the backend should be able to decide when to ignore any of the
-        //tags and/or arguments
-        ComplementView(BackendType backend_view)
-            : m_mat(backend_view)
-        {
-        }
-
-        /**
-         * @brief Copy constructor.
-         *
-         * @param[in] rhs   The matrix to copy.
-         */
-        ComplementView(ComplementView<MatrixT> const &rhs)
-            : m_mat(rhs.m_mat)
-        {
-        }
-
-        ~ComplementView() { }
-
-        //void get_shape(IndexType &num_rows, IndexType &num_cols) const
-        //{
-        //    m_mat.get_shape(num_rows, num_cols);
-        //}
-
-        IndexType nrows() const
-        {
-            return m_mat.nrows();
-        }
-
-        IndexType ncols() const
-        {
-            return m_mat.ncols();
-        }
-
-        IndexType nvals() const
-        {
-            return m_mat.nvals();
-        }
-
-        ScalarType extractElement(IndexType row, IndexType col) const
-        {
-            return m_mat.extractElement(row, col);
-        }
-
-        //other methods that may or may not belong here:
-        //
-        void print_info(std::ostream &os) const
-        {
-            os << "Frontend ComplementView of:";
-            m_mat.print_info(os);
-        }
-
-        /// @todo This does not need to be a friend
-        friend std::ostream &operator<<(std::ostream &os, ComplementView const &mat)
-        {
-            mat.print_info(os);
-            return os;
-        }
-
-        /// @todo need to change to mix and match internal types
-        template <typename OtherMatrixT>
-        bool operator==(OtherMatrixT const &rhs) const
-        {
-            //return (m_mat.operator==(rhs));
-            throw 1;
-            ///@todo Not implemented yet
-            //return matrix_equal_helper(*this, rhs);
-        }
-
-        template <typename OtherMatrixT>
-        bool operator!=(OtherMatrixT const &rhs) const
-        {
-            return !(*this == rhs);
-        }
-        //end other methods
-
-    private:
-        BackendType m_mat;
-
-        // PUT ALL FRIEND DECLARATIONS HERE
-    };
-
-    //************************************************************************
-    template<typename MatrixT>
-    class TransposeView
-    {
-    public:
-        typedef typename backend::TransposeView<
-            typename MatrixT::BackendType> BackendType;
-        typedef typename MatrixT::ScalarType ScalarType;
-
-        //note:
-        //the backend should be able to decide when to ignore any of the
-        //tags and/or arguments
-        TransposeView(BackendType backend_view)
-            : m_mat(backend_view)
-        {
-        }
-
-        /**
-         * @brief Copy constructor.
-         *
-         * @param[in] rhs   The matrix to copy.
-         */
-        TransposeView(TransposeView<MatrixT> const &rhs)
-            : m_mat(rhs.m_mat)
-        {
-        }
-
-
-        ~TransposeView() { }
-
-        IndexType nrows() const { return m_mat.nrows(); }
-        IndexType ncols() const { return m_mat.ncols(); }
-        IndexType nvals() const { return m_mat.nvals(); }
-
-        ScalarType extractElement(IndexType row, IndexType col) const
-        {
-            return m_mat.extractElement(row, col);
-        }
-
-        //other methods that may or may not belong here:
-        //
-        void print_info(std::ostream &os) const
-        {
-            os << "Frontend TransposeView of:" << std::endl;
-            m_mat.print_info(os);
-        }
-
-        /// @todo This does not need to be a friend
-        friend std::ostream &operator<<(std::ostream &os, TransposeView const &mat)
-        {
-            mat.print_info(os);
-            return os;
-        }
-
-        /// @todo need to change to mix and match internal types
-        template <typename OtherMatrixT>
-        bool operator==(OtherMatrixT const &rhs) const
-        {
-            //return (m_mat.operator==(rhs.m_mat));
-            throw 1;
-            ///@todo Not implemented yet
-            //return matrix_equal_helper(*this, rhs);
-        }
-
-        template <typename OtherMatrixT>
-        bool operator!=(OtherMatrixT const &rhs) const
-        {
-            return !(*this == rhs);
-        }
-        //end other methods
-
-
-    private:
-        BackendType m_mat;
-
-        // PUT ALL FRIEND DECLARATIONS HERE
-    };
-
-} // end namespace GraphBLAS

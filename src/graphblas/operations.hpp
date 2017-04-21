@@ -684,14 +684,14 @@ namespace GraphBLAS
 
 
     /**
-     * @brief  Return a view that complements the structure  of a matrix.
+     * @brief  Return a view that complements the structure of a matrix.
      * @param[in]  a  The matrix to complement
      *
      */
     template<typename MatrixT>
-    inline backend::ComplementView<MatrixT> complement(MatrixT const &A)
+    inline ComplementView<MatrixT> complement(MatrixT const &A)
     {
-        return backend::ComplementView<MatrixT>(backend::complement(A.m_mat));
+        return ComplementView<MatrixT>(backend::complement(A.m_mat));
     }
 
     /**
@@ -700,9 +700,9 @@ namespace GraphBLAS
      *
      */
     template<typename MatrixT>
-    inline backend::TransposeView<MatrixT> transpose(MatrixT const &A)
+    inline TransposeView<MatrixT> transpose(MatrixT const &A)
     {
-        return backend::TransposeView<MatrixT>(backend::transpose(A.m_mat));
+        return TransposeView<MatrixT>(backend::transpose(A.m_mat));
     }
 
 } // GraphBLAS

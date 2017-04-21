@@ -235,8 +235,8 @@ namespace GraphBLAS
                  typename RAIteratorJT,
                  typename RAIteratorVT,
                  typename AMatrixT>
-        inline void extractTuples(RAIteratorIT        row_indices,
-                                  RAIteratorJT        col_indices,
+        inline void extractTuples(RAIteratorIT        row_it,
+                                  RAIteratorJT        col_it,
                                   RAIteratorVT        values)
         {
             /// @todo
@@ -290,6 +290,9 @@ namespace GraphBLAS
                                AMatrixT   const &A,
                                BMatrixT   const &B,
                                bool              replace_flag);
+
+        template<typename MatrixT>
+        friend inline TransposeView<MatrixT> transpose(MatrixT const &A);
 
         // .... ADD OTHER OPERATIONS AS FRIENDS AS THEY ARE IMPLEMENTED .....
 
