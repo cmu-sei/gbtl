@@ -226,8 +226,6 @@ BOOST_AUTO_TEST_CASE(test_a_transpose)
     BOOST_CHECK_EQUAL(result, answer);
 }
 
-#if 0
-
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_b_transpose)
 {
@@ -251,7 +249,9 @@ BOOST_AUTO_TEST_CASE(test_b_transpose)
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
     answer.build(i_answer, j_answer, v_answer);
 
-    mxm(mA, transpose(mB), result);
+    GraphBLAS::mxm(result,
+                   GraphBLAS::Second<double>(),
+                   GraphBLAS::ArithmeticSemiring<double>(), mA, transpose(mB));
 
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -279,7 +279,9 @@ BOOST_AUTO_TEST_CASE(test_a_and_b_transpose)
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
     answer.build(i_answer, j_answer, v_answer);
 
-    mxm(transpose(mA), transpose(mB), result);
+    GraphBLAS::mxm(result,
+                   GraphBLAS::Second<double>(),
+                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mA), transpose(mB));
 
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -307,13 +309,17 @@ BOOST_AUTO_TEST_CASE(test_a_equals_c_transpose)
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
     answer.build(i_answer, j_answer, v_answer);
 
-    mxm(transpose(mA), mB, result);
+    GraphBLAS::mxm(result,
+                   GraphBLAS::Second<double>(),
+                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mA), mB);
 
     BOOST_CHECK_EQUAL(result, answer);
 }
 
+#if 0
+
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(test_a_negate)
+BOOST_AUTO_TEST_CASE(test_a_complement)
 {
     //GraphBLAS::IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
     //GraphBLAS::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
@@ -355,12 +361,12 @@ BOOST_AUTO_TEST_CASE(test_a_negate)
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
     answer.build(i_answer, j_answer, v_answer);
 
-    mxm(negate(mA), mB, result);
+    mxm(complement(mA), mB, result);
     BOOST_CHECK_EQUAL(result, answer);
 }
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(test_b_negate)
+BOOST_AUTO_TEST_CASE(test_b_complement)
 {
     //GraphBLAS::IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
     //GraphBLAS::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
@@ -402,12 +408,12 @@ BOOST_AUTO_TEST_CASE(test_b_negate)
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
     answer.build(i_answer, j_answer, v_answer);
 
-    mxm(mA, negate(mB), result);
+    mxm(mA, complement(mB), result);
     BOOST_CHECK_EQUAL(result, answer);
 }
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(test_a_and_b_negate)
+BOOST_AUTO_TEST_CASE(test_a_and_b_complement)
 {
     //GraphBLAS::IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
     //GraphBLAS::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
@@ -449,12 +455,12 @@ BOOST_AUTO_TEST_CASE(test_a_and_b_negate)
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
     answer.build(i_answer, j_answer, v_answer);
 
-    mxm(negate(mA), negate(mB), result);
+    mxm(complement(mA), complement(mB), result);
     BOOST_CHECK_EQUAL(result, answer);
 }
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(test_a_equals_c_negate)
+BOOST_AUTO_TEST_CASE(test_a_equals_c_complement)
 {
     //GraphBLAS::IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
     //GraphBLAS::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
@@ -496,12 +502,12 @@ BOOST_AUTO_TEST_CASE(test_a_equals_c_negate)
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
     answer.build(i_answer, j_answer, v_answer);
 
-    mxm(negate(mA), mB, result);
+    mxm(complement(mA), mB, result);
     BOOST_CHECK_EQUAL(result, answer);
 }
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(test_a_transpose_and_negate)
+BOOST_AUTO_TEST_CASE(test_a_transpose_and_complement)
 {
     //GraphBLAS::IndexArrayType i_mA = {0, 0, 0, 1, 1, 1, 2, 2, 2};
     //GraphBLAS::IndexArrayType j_mA = {0, 1, 2, 0, 1, 2, 0, 1, 2};
@@ -542,12 +548,12 @@ BOOST_AUTO_TEST_CASE(test_a_transpose_and_negate)
     std::vector<double> v_answer =       {2, 1, 1, 1, 1, 1, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
     answer.build(i_answer, j_answer, v_answer);
-    mxm(negate(transpose(mA)), mB, result);
+    mxm(complement(transpose(mA)), mB, result);
     BOOST_CHECK_EQUAL(result, answer);
 }
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(test_b_transpose_and_negate)
+BOOST_AUTO_TEST_CASE(test_b_transpose_and_complement)
 {
     //GraphBLAS::IndexArrayType i_mA = {0, 0, 0, 1, 1, 1, 2, 2, 2};
     //GraphBLAS::IndexArrayType j_mA = {0, 1, 2, 0, 1, 2, 0, 1, 2};
@@ -588,12 +594,12 @@ BOOST_AUTO_TEST_CASE(test_b_transpose_and_negate)
     std::vector<double> v_answer =       {1, 1, 1, 1, 1, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
     answer.build(i_answer, j_answer, v_answer);
-    mxm(mA, negate(transpose(mB)), result);
+    mxm(mA, complement(transpose(mB)), result);
     BOOST_CHECK_EQUAL(result, answer);
 }
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(test_a_and_b_transpose_and_negate)
+BOOST_AUTO_TEST_CASE(test_a_and_b_transpose_and_complement)
 {
     //GraphBLAS::IndexArrayType i_mA = {0, 0, 0, 1, 1, 1, 2, 2, 2};
     //GraphBLAS::IndexArrayType j_mA = {0, 1, 2, 0, 1, 2, 0, 1, 2};
@@ -634,7 +640,7 @@ BOOST_AUTO_TEST_CASE(test_a_and_b_transpose_and_negate)
     std::vector<double> v_answer =       {1, 1, 1, 1, 1, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(3, 3);
     answer.build(i_answer, j_answer, v_answer);
-    mxm(negate(transpose(mA)), negate(transpose(mB)), result);
+    mxm(complement(transpose(mA)), complement(transpose(mB)), result);
     BOOST_CHECK_EQUAL(result, answer);
 }
 #endif

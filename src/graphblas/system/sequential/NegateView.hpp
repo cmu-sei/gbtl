@@ -13,184 +13,228 @@
  * permission@sei.cmu.edu for more information.  DM-0002659
  */
 
-#ifndef GB_SEQUENTIAL_NEGATE_VIEW_HPP
-#define GB_SEQUENTIAL_NEGATE_VIEW_HPP
+#ifndef GB_SEQUENTIAL_COMPLEMENT_VIEW_HPP
+#define GB_SEQUENTIAL_COMPLEMENT_VIEW_HPP
 
 //#include <graphblas/system/sequential/ColumnView.hpp>
 #include <graphblas/system/sequential/Matrix.hpp>
 
 namespace GraphBLAS
 {
-namespace backend
-{
-    //************************************************************************
-    /**
-     * @brief View a matrix as if it were complementd (stored values and
-     *        structural zeroes are swapped).
-     *
-     * @tparam MatrixT     Implements the 2D matrix concept.
-     * @tparam SemiringT   Used to define the behaviour of the complement
-     */
-    template<typename MatrixT>
-    class ComplementView
+    namespace backend
     {
-    public:
-        typedef typename MatrixT::ScalarType ScalarType;
-
-        // CONSTRUCTORS
-
-        ComplementView(MatrixT const &matrix):
-            m_matrix(matrix)
-        {
-            /// @todo assert that matrix and semiring zero() are the same?
-        }
-
+        //************************************************************************
         /**
-         * Copy constructor.
+         * @brief View a matrix as if it were complemented (stored values become
+         *        implied zeros, and implied zeros become 'true').
          *
-         * @param[in] rhs The complement view to copy.
-         *
-         * @todo Is this const correct?
+         * @tparam MatrixT     Implements the 2D matrix concept.
+         * @tparam SemiringT   Used to define the behaviour of the complement
          */
-        ComplementView(ComplementView<MatrixT> const &rhs)
-            : m_matrix(rhs.m_matrix)
+        template<typename MatrixT>
+        class ComplementView
         {
-        }
+        public:
+            typedef bool ScalarType;
+            typedef typename MatrixT::ScalarType InternalScalarType;
+            // CONSTRUCTORS
 
-        ~ComplementView()
-        {
-        }
-
-        IndexType nrows() const
-        {
-            return m_matrix.nrows();
-        }
-
-        IndexType ncols() const
-        {
-            return m_matrix.ncols();
-        }
-
-        IndexType nvals() const
-        {
-            return (m_matrix.nrows()*m_matrix.ncols() -
-                    m_matrix.nvals());
-        }
-
-        /**
-         * @brief Equality testing for matrix. (value equality?)
-         *
-         * @param[in] rhs  The right hand side of the equality
-         *                 operation.
-         *
-         * @return true, if this matrix and rhs are identical.
-         * @todo  Not sure we need this form.  Should we do equality
-         *        with any matrix?
-         */
-        template <typename OtherMatrixT>
-        bool operator==(OtherMatrixT const &rhs) const
-        {
-            IndexType nr = nrows();
-            IndexType nc = ncols();
-
-            if ((nr != rhs.nrows()) || (nc != rhs.ncols()) ||
-                (nvals() != rhs.nvals()))
+            ComplementView(MatrixT const &matrix):
+                m_matrix(matrix)
             {
+            }
+
+            /**
+             * Copy constructor.
+             *
+             * @param[in] rhs The complement view to copy.
+             *
+             * @todo Is this const correct?
+             */
+            ComplementView(ComplementView<MatrixT> const &rhs)
+                : m_matrix(rhs.m_matrix)
+            {
+            }
+
+            ~ComplementView()
+            {
+            }
+
+            IndexType nrows() const { return m_matrix.nrows(); }
+            IndexType ncols() const { return m_matrix.ncols(); }
+            IndexType nvals() const
+            {
+                /// @todo need to detect and deal with stored 'falses' in m_matrix.
+                /// They would count for stored values in the structural complement
+                return (m_matrix.nrows()*m_matrix.ncols() -
+                        m_matrix.nvals());
+            }
+
+            /**
+             * @brief Equality testing for matrix. (value equality?)
+             *
+             * @param[in] rhs  The right hand side of the equality
+             *                 operation.
+             *
+             * @return true, if this matrix and rhs are identical.
+             * @todo  Not sure we need this form.  Should we do equality
+             *        with any matrix?
+             */
+            template <typename OtherMatrixT>
+            bool operator==(OtherMatrixT const &rhs) const
+            {
+                if ((nrows() != rhs.nrows()) || (ncols() != rhs.ncols()))
+                    //    || (nvals() != rhs.nvals())) // Comparing nvals is tricky
+                {
+                    return false;
+                }
+
+                /// @todo stored zeros need to evaluate to true in the complement
+                throw 1;  // Not implemented yet
+
+                /// @todo Not implemented yet.
+
+                return true;
+            }
+
+
+            /**
+             * @brief Inequality testing for matrix. (value equality?)
+             *
+             * @param[in] rhs  The right hand side of the inequality
+             *                 operation.
+             *
+             * @return true, if this matrix and rhs are not identical.
+             */
+            template <typename OtherMatrixT>
+            bool operator!=(OtherMatrixT const &rhs) const
+            {
+                return !(*this == rhs);
+            }
+
+
+            bool hasElement(IndexType irow, IndexType icol) const
+            {
+                if (!m_matrix.hasElement(irow, icol))
+                {
+                    return true;
+                }
+                else if (false == static_cast<bool>(m_matrix.extractElement(irow, icol)))
+                {
+                    return true;
+                }
+
                 return false;
             }
 
-            // Definitely a more efficient way than this.  Only compare
-            // non-zero elements.  Then decide if compare zero's
-            // explicitly
-            throw 1;  // Not implemented yet
-
-            /// @todo Not implemented yet.
-
-            return true;
-        }
-
-
-        /**
-         * @brief Inequality testing for matrix. (value equality?)
-         *
-         * @param[in] rhs  The right hand side of the inequality
-         *                 operation.
-         *
-         * @return true, if this matrix and rhs are not identical.
-         */
-        template <typename OtherMatrixT>
-        bool operator!=(OtherMatrixT const &rhs) const
-        {
-            return !(*this == rhs);
-        }
-
-
-        /**
-         * @brief Access the elements given row and column indexes.
-         *
-         * Function provided to access the elements given row and
-         * column indices.  The functionality is the same as that
-         * of the indexing function for a standard dense matrix.
-         *
-         * @param[in] row  The index of row to access.
-         * @param[in] col  The index of column to access.
-         *
-         * @return The complemented element at the given row and column.
-         *
-         * @todo this needs to go away
-         */
-        ScalarType extractElement(IndexType row, IndexType col) const
-        {
-            /// @todo Not implemented yet
-            return !m_matrix.extractElement(row, col);
-        }
-
-        void print_info(std::ostream &os) const
-        {
-            os << "Backend ComplementView of:" << std::endl;
-            m_matrix.print_info(os);
-        }
-
-        friend std::ostream&
-        operator<<(std::ostream                  &os,
-                   ComplementView<MatrixT> const &mat)
-        {
-            IndexType num_rows, num_cols;
-            mat.get_shape(num_rows, num_cols);
-            for (IndexType row = 0; row < num_rows; ++row)
+            /**
+             * @brief Access the elements given row and column indexes.
+             *
+             * Function provided to access the elements given row and
+             * column indices.  The functionality is the same as that
+             * of the indexing function for a standard dense matrix.
+             *
+             * @param[in] row  The index of row to access.
+             * @param[in] col  The index of column to access.
+             *
+             * @return The complemented element at the given row and column.
+             *
+             * @todo this needs to go away
+             */
+            //InternalScalarType extractElement(IndexType row, IndexType col) const
+            bool extractElement(IndexType row, IndexType col) const
             {
-                os << ((row == 0) ? "[[" : " [");
-                if (num_cols > 0)
+                if (!m_matrix.hasElement(row, col))
                 {
-                    os << mat.extractElement(row, 0);
+                    return true;
+                }
+                else if (false == static_cast<bool>(m_matrix.extractElement(row, col)))
+                {
+                    return true;
                 }
 
-                for (IndexType col = 1; col < num_cols; ++col)
-                {
-                    os << ", " << mat.extractElement(row, col);
-                }
-                os << ((row == num_rows - 1) ? "]]" : "]\n");
+                throw GraphBLAS::NoValueException();
             }
-            return os;
-        }
 
-    private:
-        /**
-         * Copy assignment not implemented.
-         *
-         * @param[in] rhs  The complement view to assign to this.
-         *
-         * @todo Assignment should be disallowed as you cannot reassign a
-         *       a reference.
-         */
-        ComplementView<MatrixT> &
-            operator=(ComplementView<MatrixT> const &rhs);
+            std::vector<std::tuple<IndexType, bool> > getRow(
+                IndexType row) const
+            {
+                std::vector<std::tuple<IndexType, InternalScalarType> > row_tuples =
+                    m_matrix.getRow(row);
+                std::vector<std::tuple<IndexType, bool> > mask_tuples;
+                throw 1; // not implemented yet
+                return mask_tuples;
 
-    private:
-        MatrixT const &m_matrix;
-    };
+            }
 
-} // backend
+            std::vector<std::tuple<IndexType, InternalScalarType> > getCol(
+                IndexType col) const
+            {
+                std::vector<std::tuple<IndexType, InternalScalarType> > col_tuples =
+                    m_matrix.getCol(col);
+                std::vector<std::tuple<IndexType, bool> > mask_tuples;
+                throw 1; // not implemented yet
+                return mask_tuples;
+            }
+
+            // Get column indices for a given row
+            void getColumnIndices(IndexType irow, IndexArrayType &v) const
+            {
+                throw 1; // not implmented yet....m_matrix.getRowIndices(irow, v);
+            }
+
+            // Get row indices for a given column
+            void getRowIndices(IndexType icol, IndexArrayType &v) const
+            {
+                throw 1; // not implmented yet....m_matrix.getColIndices(icol, v);
+            }
+
+            void printInfo(std::ostream &os) const
+            {
+                os << "Backend ComplementView of:" << std::endl;
+                m_matrix.printInfo(os);
+            }
+
+            friend std::ostream&
+            operator<<(std::ostream                  &os,
+                       ComplementView<MatrixT> const &mat)
+            {
+                IndexType num_rows, num_cols;
+                mat.get_shape(num_rows, num_cols);
+                for (IndexType row = 0; row < num_rows; ++row)
+                {
+                    os << ((row == 0) ? "[[" : " [");
+                    if (num_cols > 0)
+                    {
+                        os << mat.extractElement(row, 0);
+                    }
+
+                    for (IndexType col = 1; col < num_cols; ++col)
+                    {
+                        os << ", " << mat.extractElement(row, col);
+                    }
+                    os << ((row == num_rows - 1) ? "]]" : "]\n");
+                }
+                return os;
+            }
+
+        private:
+            /**
+             * Copy assignment not implemented.
+             *
+             * @param[in] rhs  The complement view to assign to this.
+             *
+             * @todo Assignment should be disallowed as you cannot reassign a
+             *       a reference.
+             */
+            ComplementView<MatrixT> &
+            operator=(ComplementView<MatrixT> const &rhs) = delete;
+
+        private:
+            MatrixT const &m_matrix;
+        };
+
+    } // backend
 } // GraphBLAS
 
 //****************************************************************************

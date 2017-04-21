@@ -69,18 +69,54 @@ namespace GraphBLAS
 
         ~ComplementView() { }
 
-        //void get_shape(IndexType &num_rows, IndexType &num_cols) const
-        //{
-        //    m_mat.get_shape(num_rows, num_cols);
-        //}
+        /// @todo need to change to mix and match internal types
+        template <typename OtherMatrixT>
+        bool operator==(OtherMatrixT const &rhs) const
+        {
+            //return (m_mat.operator==(rhs));
+            throw 1;
+            ///@todo Not implemented yet
+            //return matrix_equal_helper(*this, rhs);
+        }
 
-        IndexType nrows() const  { return m_mat.nrows(); }
-        IndexType ncols() const  { return m_mat.ncols(); }
-        IndexType nvals() const  { return m_mat.nvals(); }
+        template <typename OtherMatrixT>
+        bool operator!=(OtherMatrixT const &rhs) const
+        {
+            return !(*this == rhs);
+        }
+
+        IndexType nrows() const { return m_mat.nrows(); }
+        IndexType ncols() const { return m_mat.ncols(); }
+        IndexType nvals() const { return m_mat.nvals(); }
+
+        bool hasElement(IndexType row, IndexType col) const
+        {
+            return m_mat.hasElement(row, col);
+        }
 
         ScalarType extractElement(IndexType row, IndexType col) const
         {
             return m_mat.extractElement(row, col);
+        }
+
+        template<typename RAIteratorIT,
+                 typename RAIteratorJT,
+                 typename RAIteratorVT,
+                 typename AMatrixT>
+        inline void extractTuples(RAIteratorIT        row_it,
+                                  RAIteratorJT        col_it,
+                                  RAIteratorVT        values)
+        {
+            m_mat.extractTuples(row_it, col_it, values);
+        }
+
+        template<typename ValueT,
+                 typename AMatrixT>
+        inline void extractTuples(IndexArrayType            &row_indices,
+                                  IndexArrayType            &col_indices,
+                                  std::vector<ValueT>       &values)
+        {
+            m_mat.extractTuples(row_indices, col_indices, values);
         }
 
         //other methods that may or may not belong here:
@@ -98,27 +134,34 @@ namespace GraphBLAS
             return os;
         }
 
-        /// @todo need to change to mix and match internal types
-        template <typename OtherMatrixT>
-        bool operator==(OtherMatrixT const &rhs) const
-        {
-            //return (m_mat.operator==(rhs));
-            throw 1;
-            ///@todo Not implemented yet
-            //return matrix_equal_helper(*this, rhs);
-        }
-
-        template <typename OtherMatrixT>
-        bool operator!=(OtherMatrixT const &rhs) const
-        {
-            return !(*this == rhs);
-        }
-        //end other methods
-
     private:
         BackendType m_mat;
 
         // PUT ALL FRIEND DECLARATIONS HERE
+        template<typename CMatrixT,
+                 typename AccumT,
+                 typename SemiringT,
+                 typename AMatrixT,
+                 typename BMatrixT>
+        friend inline void mxm(CMatrixT         &C,
+                               AccumT            accum,
+                               SemiringT         op,
+                               AMatrixT   const &A,
+                               BMatrixT   const &B);
+
+        template<typename CMatrixT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename SemiringT,
+                 typename AMatrixT,
+                 typename BMatrixT>
+        friend inline void mxm(CMatrixT         &C,
+                               MaskT      const &Mask,
+                               AccumT            accum,
+                               SemiringT         op,
+                               AMatrixT   const &A,
+                               BMatrixT   const &B,
+                               bool              replace_flag);
     };
 
     //************************************************************************

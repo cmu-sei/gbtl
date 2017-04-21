@@ -294,6 +294,9 @@ namespace GraphBLAS
         template<typename MatrixT>
         friend inline TransposeView<MatrixT> transpose(MatrixT const &A);
 
+        template<typename MatrixT>
+        friend inline TransposeView<MatrixT> transpose(MatrixT const &A);
+
         // .... ADD OTHER OPERATIONS AS FRIENDS AS THEY ARE IMPLEMENTED .....
 
         template <typename MatrixT>
