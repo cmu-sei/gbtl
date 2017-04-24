@@ -101,6 +101,37 @@ BOOST_AUTO_TEST_CASE(test_mxm_reg)
 }
 
 //****************************************************************************
+BOOST_AUTO_TEST_CASE(test_mxm_stored_zero_result)
+{
+    // Build some matrices.
+    std::vector<std::vector<int> > A = {{1, 1, 0, 0},
+                                        {1, 2, 2, 0},
+                                        {0, 2, 3, 3},
+                                        {0, 0, 3, 4}};
+    std::vector<std::vector<int> > B = {{ 1,-2, 0,  0},
+                                        {-1, 1, 0,  0},
+                                        { 0, 0, 3, -4},
+                                        { 0, 0,-3,  3}};
+    GraphBLAS::Matrix<int, GraphBLAS::DirectedMatrixTag> mA(A, 0);
+    GraphBLAS::Matrix<int, GraphBLAS::DirectedMatrixTag> mB(B, 0);
+    GraphBLAS::Matrix<int, GraphBLAS::DirectedMatrixTag> result(4, 4);
+
+    // use a different sentinel value so that stored zeros are preserved.
+    int const NIL(666);
+    std::vector<std::vector<int> > ans = {{  0,  -1, NIL, NIL},
+                                          { -1,   0,  -6,  -8},
+                                          { -2,   2,   0,  -3},
+                                          {NIL, NIL,  -3,   0}};
+    GraphBLAS::Matrix<int, GraphBLAS::DirectedMatrixTag> answer(ans, NIL);
+
+    GraphBLAS::mxm(result,
+                   GraphBLAS::Second<int>(),
+                   GraphBLAS::ArithmeticSemiring<int>(), mA, mB);
+    BOOST_CHECK_EQUAL(result, answer);
+    BOOST_CHECK_EQUAL(result.nvals(), 12);
+}
+
+//****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_duplicate_input)
 {
     // Build some matrices.
