@@ -124,7 +124,7 @@ namespace GraphBLAS
         void printInfo(std::ostream &os) const
         {
             os << "Frontend ComplementView of:";
-            m_mat.print_info(os);
+            m_mat.printInfo(os);
         }
 
         /// @todo This does not need to be a friend

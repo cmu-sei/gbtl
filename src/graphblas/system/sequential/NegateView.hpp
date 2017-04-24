@@ -25,11 +25,14 @@ namespace GraphBLAS
     {
         //************************************************************************
         /**
-         * @brief View a matrix as if it were complemented (stored values become
-         *        implied zeros, and implied zeros become 'true').
+         * @brief View a matrix as if it were structurally complemented; that is,
+         *        stored non-zero values become implied zeros, and
+         *        implied zeros become 'true'.
+         *
+         * @note any stored value that evaluates to false will become true in the
+         *       complement
          *
          * @tparam MatrixT     Implements the 2D matrix concept.
-         * @tparam SemiringT   Used to define the behaviour of the complement
          */
         template<typename MatrixT>
         class ComplementView
@@ -37,6 +40,7 @@ namespace GraphBLAS
         public:
             typedef bool ScalarType;
             typedef typename MatrixT::ScalarType InternalScalarType;
+
             // CONSTRUCTORS
 
             ComplementView(MatrixT const &matrix):
@@ -50,6 +54,7 @@ namespace GraphBLAS
              * @param[in] rhs The complement view to copy.
              *
              * @todo Is this const correct?
+             * @todo should it complement the complement?
              */
             ComplementView(ComplementView<MatrixT> const &rhs)
                 : m_matrix(rhs.m_matrix)
@@ -64,6 +69,7 @@ namespace GraphBLAS
             IndexType ncols() const { return m_matrix.ncols(); }
             IndexType nvals() const
             {
+                throw 1; // not implemented properly yet
                 /// @todo need to detect and deal with stored 'falses' in m_matrix.
                 /// They would count for stored values in the structural complement
                 return (m_matrix.nrows()*m_matrix.ncols() -
@@ -162,59 +168,101 @@ namespace GraphBLAS
                 std::vector<std::tuple<IndexType, InternalScalarType> > row_tuples =
                     m_matrix.getRow(row);
                 std::vector<std::tuple<IndexType, bool> > mask_tuples;
-                throw 1; // not implemented yet
+                auto it = row_tuples.begin();
+                for (IndexType ix = 0; ix < ncols(); ++ix)
+                {
+                    if ((it == row_tuples.end()) || (ix < std::get<0>(*it)))
+                    {
+                        mask_tuples.push_back(std::make_tuple(ix, true));
+                    }
+                    else
+                    {
+                        if (static_cast<bool>(std::get<1>(*it)) == false)
+                        {
+                            mask_tuples.push_back(std::make_tuple(ix, true));
+                        }
+                        ++it;
+                    }
+                }
+
                 return mask_tuples;
 
             }
 
-            std::vector<std::tuple<IndexType, InternalScalarType> > getCol(
+            std::vector<std::tuple<IndexType, bool> > getCol(
                 IndexType col) const
             {
                 std::vector<std::tuple<IndexType, InternalScalarType> > col_tuples =
                     m_matrix.getCol(col);
                 std::vector<std::tuple<IndexType, bool> > mask_tuples;
-                throw 1; // not implemented yet
+                auto it = col_tuples.begin();
+                for (IndexType ix = 0; ix < nrows(); ++ix)
+                {
+                    if ((it == col_tuples.end()) || (ix < std::get<0>(*it)))
+                    {
+                        mask_tuples.push_back(std::make_tuple(ix, true));
+                    }
+                    else
+                    {
+                        if (static_cast<bool>(std::get<1>(*it)) == false)
+                        {
+                            mask_tuples.push_back(std::make_tuple(ix, true));
+                        }
+                        ++it;
+                    }
+                }
+
                 return mask_tuples;
             }
 
             // Get column indices for a given row
-            void getColumnIndices(IndexType irow, IndexArrayType &v) const
+            void getColumnIndices(IndexType irow, IndexArrayType &indices) const
             {
-                throw 1; // not implmented yet....m_matrix.getRowIndices(irow, v);
+                auto row = getRow(irow);
+                indices.clear();
+                for (auto tuple : row)
+                {
+                    indices.push_back(std::get<0>(tuple));
+                }
             }
 
             // Get row indices for a given column
-            void getRowIndices(IndexType icol, IndexArrayType &v) const
+            void getRowIndices(IndexType icol, IndexArrayType &indices) const
             {
-                throw 1; // not implmented yet....m_matrix.getColIndices(icol, v);
+                auto col = getCol(icol);
+                indices.clear();
+                for (auto tuple : col)
+                {
+                    indices.push_back(std::get<0>(tuple));
+                }
             }
 
             void printInfo(std::ostream &os) const
             {
                 os << "Backend ComplementView of:" << std::endl;
                 m_matrix.printInfo(os);
+
+                for (IndexType row = 0; row < nrows(); ++row)
+                {
+                    os << ((row == 0) ? "[[" : " [");
+                    if (ncols() > 0)
+                    {
+                        os << (hasElement(row, 0) ? "1" : "-");
+                    }
+
+                    for (IndexType col = 1; col < ncols(); ++col)
+                    {
+                        os << ", " << (hasElement(row, col) ? "1" : "-");
+                    }
+                    os << ((row == nrows() - 1) ? "]]" : "]\n");
+                }
             }
 
             friend std::ostream&
             operator<<(std::ostream                  &os,
                        ComplementView<MatrixT> const &mat)
             {
-                IndexType num_rows, num_cols;
-                mat.get_shape(num_rows, num_cols);
-                for (IndexType row = 0; row < num_rows; ++row)
-                {
-                    os << ((row == 0) ? "[[" : " [");
-                    if (num_cols > 0)
-                    {
-                        os << mat.extractElement(row, 0);
-                    }
-
-                    for (IndexType col = 1; col < num_cols; ++col)
-                    {
-                        os << ", " << mat.extractElement(row, col);
-                    }
-                    os << ((row == num_rows - 1) ? "]]" : "]\n");
-                }
+                mat.printInfo(os);
                 return os;
             }
 
