@@ -27,6 +27,7 @@
 #include <vector>
 #include <iterator>
 #include <iostream>
+#include <graphblas/types.hpp>
 #include <graphblas/accum.hpp>
 #include <graphblas/algebra.hpp>
 
@@ -241,12 +242,16 @@ namespace GraphBLAS
             // generated above, and we ASSUME ('cause we looked at the code) that
             // the ewise_or does a no-op (accum-wise) on cells that have no value, then we
             // shouldn't need to mask here as well.
+
+            // NOTE: The ewise_or_mask can take a replace flag and should do the correct work with the
+            // mask.  We could just use it, but since we have already incorporated the mask,
+            // we don't need to do it.  So, the use of the ewise_or is just an optimization.
             CColType tmp_row;
             if (replace)
             {
                 for (IndexType row_idx = 0; row_idx < nrow_C; ++row_idx)
                 {
-                    ewise_or_mask(tmp_row, C.getRow(row_idx), T.getRow(row_idx), M.getRow(row_idx), accum);
+                    ewise_or_mask(tmp_row, C.getRow(row_idx), T.getRow(row_idx), M.getRow(row_idx), accum, true);
                     C.setRow(row_idx, tmp_row);
                 }
             }

@@ -298,7 +298,8 @@ namespace GraphBLAS
                            std::vector<std::tuple<GraphBLAS::IndexType,D1> > const &vec1,
                            std::vector<std::tuple<GraphBLAS::IndexType,D2> > const &vec2,
                            std::vector<std::tuple<GraphBLAS::IndexType,M> > const  &mask,
-                           BinaryOpT                                                op)
+                           BinaryOpT                                                op,
+                           bool                                                     replace)
         {
             // DESIGN:
             // This algo is driven by the mask, so we move to a valid mask entry, then
@@ -344,11 +345,9 @@ namespace GraphBLAS
                 // Increment V2 while less than mask
                 increment_while_below(v2_it, vec2.end(), mask_idx);
 
-                // If any of the input vectors match, put their values in the ouput vectors
+                // If any of the input vectors match, put their values in the output vectors
                 // invoking the supplied binary operator if we have both values, otherwise
                 // just put in that value.
-                // @todo: Is that really valid?  Should we still call the accumulator with
-                // some "empty" value, or "zero" value?
                 if ((v1_it != vec1.end()) && (v2_it != vec2.end()))
                 {
                     std::tie(v1_idx, v1_val) = *v1_it;
@@ -363,8 +362,11 @@ namespace GraphBLAS
                     }
                     else if (v1_idx == mask_idx)
                     {
-                        ans.push_back(std::make_tuple(mask_idx, static_cast<D3>(v1_val)));
-                        //std::cerr << "Copying v1. val: " << std::to_string(v1_val) << std::endl;
+                        if (!replace)
+                        {
+                            ans.push_back(std::make_tuple(mask_idx, static_cast<D3>(v1_val)));
+                            //std::cerr << "Copying v1. val: " << std::to_string(v1_val) << std::endl;
+                        }
                     }
                     else if (v2_idx == mask_idx)
                     {
@@ -377,8 +379,11 @@ namespace GraphBLAS
                     std::tie(v1_idx, v1_val) = *v1_it;
                     if (v1_idx == mask_idx)
                     {
-                        ans.push_back(std::make_tuple(mask_idx, static_cast<D3>(v1_val)));
-                        //std::cerr << "Copying v1. val: " << std::to_string(v1_val) << std::endl;
+                        if (!replace)
+                        {
+                            ans.push_back(std::make_tuple(mask_idx, static_cast<D3>(v1_val)));
+                            //std::cerr << "Copying v1. val: " << std::to_string(v1_val) << std::endl;
+                        }
                     }
                 }
                 else if (v2_it != vec2.end())
