@@ -57,15 +57,15 @@ namespace GraphBLAS
             {
             }
 
-            ~Matrix()
-            {
-            }
+            ~Matrix() {}  // virtual?
 
+            // necessary?
             bool operator==(Matrix const &rhs) const
             {
                 return LilSparseMatrix<ScalarT>::operator==(rhs);
             }
 
+            // necessary?
             bool operator!=(Matrix const &rhs) const
             {
                 return LilSparseMatrix<ScalarT>::operator!=(rhs);

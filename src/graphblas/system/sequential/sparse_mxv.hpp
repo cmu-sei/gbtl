@@ -43,6 +43,89 @@ namespace GraphBLAS
         /// Matrix-vector multiply for LilSparseMatrix and SparseBitmapVector
         /// @todo Need to figure out how to specialize
         template<typename WVectorT,
+                 typename AccumT,
+                 typename SemiringT,
+                 typename AMatrixT,
+                 typename UVectorT>
+        inline void mxv(WVectorT        &w,
+                        AccumT           accum,
+                        SemiringT        op,
+                        AMatrixT  const &A,
+                        UVectorT  const &u)
+        {
+            // The following should not be checked by the frontend too:
+            if ((w.size() != A.nrows()) ||
+                (u.size() != A.ncols()))
+            {
+                throw DimensionException("mxv: dimensions are not compatible.");
+            }
+
+            typedef typename WVectorT::ScalarType WScalarType;
+            typedef typename AMatrixT::ScalarType AScalarType;
+            typedef typename UVectorT::ScalarType UScalarType;
+            typedef std::vector<std::tuple<IndexType,AScalarType> > ARowType;
+
+            IndexType      num_elts(w.size());
+            IndexArrayType t_indices;
+            std::vector<WScalarType> t_values;
+
+            if (u.nvals() > 0)
+            {
+                /// @todo need a heuristic for switching between two modes
+                if (u.size()/u.nvals() >= 4)
+                {
+                    auto u_contents(u.getContents());
+                    for (IndexType row_idx = 0; row_idx < num_elts; ++row_idx)
+                    {
+                        //std::cerr << "**1** PROCESSING MATRIX ROW " << row_idx
+                        //          << " *****" << std::endl;
+                        ARowType const &A_row(A.getRow(row_idx));
+
+                        if (!A_row.empty())
+                        {
+                            WScalarType t_val;
+                            if (dot(t_val, A_row, u_contents, op))
+                            {
+                                t_indices.push_back(row_idx);
+                                t_values.push_back(t_val);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    std::vector<bool> const &u_bitmap(u.get_bitmap());
+                    std::vector<UScalarType> const &u_values(u.get_vals());
+
+                    for (IndexType row_idx = 0; row_idx < num_elts; ++row_idx)
+                    {
+                        //std::cerr << "**2** PROCESSING MATRIX ROW " << row_idx
+                        //          << " *****" << std::endl;
+                        ARowType const &A_row(A.getRow(row_idx));
+
+                        if (!A_row.empty())
+                        {
+                            WScalarType t_val;
+                            if (dot2(t_val, A_row, u_bitmap, u_values, u.nvals(), op))
+                            {
+                                t_indices.push_back(row_idx);
+                                t_values.push_back(t_val);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // accum here
+            // store in w
+            w.clear();
+            w.build(t_indices.begin(), t_values.begin(), t_values.size());
+        }
+
+        //**********************************************************************
+        /// Matrix-vector multiply for LilSparseMatrix and SparseBitmapVector
+        /// @todo Need to figure out how to specialize
+        template<typename WVectorT,
                  typename MaskT,
                  typename AccumT,
                  typename SemiringT,
@@ -57,9 +140,10 @@ namespace GraphBLAS
                         bool             replace_flag = false)
         {
             // The following should be checked by the frontend only:
-            if ((w.get_size() != A.nrows()) ||
-                (u.get_size() != A.ncols()) ||
-                (w.get_size() != mask.get_size()))
+            if ((w.size() != A.nrows()) ||
+                (w.size() != A.nrows()) ||
+                (u.size() != A.ncols()) ||
+                (w.size() != mask.size()))
             {
                 throw DimensionException("mxv: dimensions are not compatible.");
             }
@@ -69,16 +153,16 @@ namespace GraphBLAS
             typedef typename UVectorT::ScalarType UScalarType;
             typedef std::vector<std::tuple<IndexType,AScalarType> > ARowType;
 
-            IndexType      num_elts(w.get_size());
+            IndexType      num_elts(w.size());
             IndexArrayType t_indices;
             std::vector<WScalarType> t_values;
 
             if (u.nvals() > 0)
             {
                 /// @todo need a heuristic for switching between two modes
-                if (u.get_size()/u.nvals() >= 4)
+                if (u.size()/u.nvals() >= 4)
                 {
-                    auto u_contents(u.get_contents());
+                    auto u_contents(u.getContents());
                     for (IndexType row_idx = 0; row_idx < num_elts; ++row_idx)
                     {
                         //std::cerr << "**1** PROCESSING MATRIX ROW " << row_idx

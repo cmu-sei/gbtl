@@ -47,6 +47,32 @@ namespace GraphBLAS
 
             Vector(IndexType const &nsize, ScalarT const &value)
                 : ParentVectorType(nsize, value) {}
+
+            Vector(std::vector<ScalarT> const &values)
+                : ParentVectorType(values) {}
+
+            Vector(std::vector<ScalarT> const &values, ScalarT const &zero)
+                : ParentVectorType(values, zero) {}
+
+            ~Vector() {}  // virtual?
+
+            // necessary?
+            bool operator==(Vector const &rhs) const
+            {
+                return BitmapSparseVector<ScalarT>::operator==(rhs);
+            }
+
+            // necessary?
+            bool operator!=(Vector const &rhs) const
+            {
+                return BitmapSparseVector<ScalarT>::operator!=(rhs);
+            }
+
+            void printInfo(std::ostream &os) const
+            {
+                os << "Sequential Backend:" << std::endl;
+                BitmapSparseVector<ScalarT>::printInfo(os);
+            }
         };
     }
 }

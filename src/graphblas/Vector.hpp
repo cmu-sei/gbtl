@@ -35,7 +35,12 @@ namespace GraphBLAS
     {
     public:
         typedef ScalarT ScalarType;
-        typedef GraphBLAS::backend::Vector<ScalarT> BackendType;
+        typedef typename detail::vector_generator::result<
+            ScalarT,
+            detail::SparsenessCategoryTag,
+            TagsT... ,
+            detail::NullTag >::type BackendType;
+        //typedef GraphBLAS::backend::Vector<ScalarT> BackendType;
 
         Vector() = delete;
 
@@ -60,12 +65,38 @@ namespace GraphBLAS
          * @param[in]  count  Number of elements in the vector.
          * @param[in]  value  The scalar value to store in each element
          */
-        template <typename SizeT>
-        Vector(SizeT const &count, ScalarT const &value)
+        Vector(IndexType const &count, ScalarT const &value)
             : m_vec(count, value)
         {
         }
 
+        /**
+         * @brief Construct a dense vector from dense data
+         *
+         * @param[in] values The dense vector from which to construct a
+         *                   sparse vector from.
+         *
+         * @todo Should we really support this interface?
+         */
+        Vector(std::vector<ScalarT> const &values)
+            : m_vec(values)
+        {
+        }
+
+        /**
+         * @brief Construct a sparse vector from dense data and a sentinel zero value.
+         *
+         * @param[in] values The dense vector from which to construct a
+         *                   sparse vector from.
+         * @param[in] zero   The "zero" value used to determine implied
+         *                   zeroes (no stored value) in the sparse structure
+         *
+         * @todo Should we really support this interface?
+         */
+        Vector(std::vector<ScalarT> const &values, ScalarT zero)
+            : m_vec(values, zero)
+        {
+        }
         /// Destructor
         ~Vector() { }
 
@@ -112,55 +143,119 @@ namespace GraphBLAS
             return !(*this == rhs);
         }
 
-    private:
-        template<typename WVectorT,
-                 typename RAIteratorIT,
-                 typename RAIteratorVT,
-                 typename BinaryOpT>
-        friend inline void vectorBuild(WVectorT           &w,
-                                       RAIteratorIT        indices,
-                                       RAIteratorVT        values,
-                                       IndexType           numVals,
-                                       BinaryOpT           dup);
+        /**
+         * Populate the vector with stored values (using iterators).
+         *
+         * @param[in]  i_it      index iterator
+         * @param[in]  v_it      Value (scalar) iterator
+         * @param[in]  num_vals  Number of elements to store
+         * @param[in]  dup       Binary function to call when value is being stored
+         *                       in a location that already has a stored value.
+         *                       stored_val = dup(stored_val, *v_it)
+         *
+         * @todo The C spec says it is an error to call build on a non-empty
+         *       vector.  Unclear if the C++ should.
+         */
+        template<typename RAIteratorI,
+                 typename RAIteratorV,
+                 typename BinaryOpT = GraphBLAS::Second<ScalarType> >
+        void build(RAIteratorI  i_it,
+                   RAIteratorV  v_it,
+                   IndexType    num_vals,
+                   BinaryOpT    dup = BinaryOpT())
+        {
+            m_vec.build(i_it, v_it, num_vals, dup);
+        }
 
-        template<typename WVectorT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename ValueT,
-                 typename BinaryOpT>
-        friend inline void vectorBuild(WVectorT                   &w,
-                                       IndexArrayType       const &indices,
-                                       std::vector<ValueT>  const &values,
-                                       BinaryOpT                   dup);
+        /**
+         * Populate the vector with stored values (using iterators).
+         *
+         * @param[in]  indices   Array of indices
+         * @param[in]  values    Array of values
+         * @param[in]  dup       binary function to call when value is being stored
+         *                       in a location that already has a stored value.
+         *                       stored_val = dup(stored_val, *v_it)
+         *
+         * @todo The C spec says it is an error to call build on a non-empty
+         *       vector.  Unclear if the C++ should.
+         */
+        template<typename ValueT,
+                 typename BinaryOpT = GraphBLAS::Second<ScalarType> >
+        inline void build(IndexArrayType       const &indices,
+                          std::vector<ValueT>  const &values,
+                          BinaryOpT                   dup = BinaryOpT())
+        {
+            if (indices.size() != values.size())
+            {
+                throw DimensionException("Vector::build");
+            }
+            m_vec.build(indices.begin(), values.begin(), values.size(), dup);
+        }
+
+        void clear() { m_vec.clear(); }
+
+        IndexType size() const   { return m_vec.size(); }
+        IndexType nvals() const  { return m_vec.nvals(); }
+
+        bool hasElement(IndexType index) const
+        {
+            return m_vec.hasElement(index);
+        }
+
+        void setElement(IndexType      index,
+                        ScalarT const &new_val)
+        {
+            m_vec.setElement(index, new_val);
+        }
+
+        /// @throw NoValueException if there is no value stored at (row,col)
+        ScalarT extractElement(IndexType index) const
+        {
+            return m_vec.extractElement(index);
+        }
 
         template<typename RAIteratorIT,
                  typename RAIteratorVT,
-                 typename WVectorT>
-        friend inline void vectorExtract(RAIteratorIT        indices,
-                                         RAIteratorVT        values,
-                                         WVectorT     const &w,
-                                         std::string        &err);
+                 typename AMatrixT>
+        inline void extractTuples(RAIteratorIT        i_it,
+                                  RAIteratorVT        v_it)
+        {
+            /// @todo
+        }
 
         template<typename ValueT,
-                 typename WVectorT>
-        friend inline void vectorExtract(IndexArrayType            &indices,
-                                         std::vector<ValueT>       &values,
-                                         WVectorT            const &w,
-                                         std::string               &err);
+                 typename AMatrixT>
+        inline void extractTuples(IndexArrayType            &indices,
+                                  std::vector<ValueT>       &values)
+        {
+            /// @todo
+        }
 
+        /// This replaces operator<< and outputs implementation specific
+        /// information.
+        void printInfo(std::ostream &os) const
+        {
+            m_vec.printInfo(os);
+        }
+
+        /// @todo This does not need to be a friend
+        friend std::ostream &operator<<(std::ostream &os, Vector const &vec)
+        {
+            vec.printInfo(os);
+            return os;
+        }
+
+    private:
         template<typename WVectorT,
-                 typename MaskT,
                  typename AccumT,
                  typename SemiringT,
-                 typename UVectorT,
-                 typename AMatrixT>
-        friend inline void vxm(WVectorT         &w,
-                               MaskT      const &mask,
-                               AccumT            accum,
-                               SemiringT         op,
-                               UVectorT   const &u,
-                               AMatrixT   const &A,
-                               bool              replace_flag);
+                 typename AMatrixT,
+                 typename UVectorT>
+        friend inline void mxv(WVectorT        &w,
+                               AccumT           accum,
+                               SemiringT        op,
+                               AMatrixT  const &A,
+                               UVectorT  const &u);
 
         template<typename WVectorT,
                  typename MaskT,
@@ -175,6 +270,31 @@ namespace GraphBLAS
                                AMatrixT  const &A,
                                UVectorT  const &u,
                                bool             replace_flag);
+
+        template<typename WVectorT,
+                 typename AccumT,
+                 typename SemiringT,
+                 typename UVectorT,
+                 typename AMatrixT>
+        friend inline void vxm(WVectorT         &w,
+                               AccumT            accum,
+                               SemiringT         op,
+                               UVectorT   const &u,
+                               AMatrixT   const &A);
+
+        template<typename WVectorT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename SemiringT,
+                 typename UVectorT,
+                 typename AMatrixT>
+        friend inline void vxm(WVectorT         &w,
+                               MaskT      const &mask,
+                               AccumT            accum,
+                               SemiringT         op,
+                               UVectorT   const &u,
+                               AMatrixT   const &A,
+                               bool              replace_flag);
 
         template<typename WVectorT,
                  typename MaskT,

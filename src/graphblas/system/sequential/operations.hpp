@@ -37,6 +37,8 @@
 //#include <graphblas/system/sequential/.hpp>
 #include <graphblas/system/sequential/sparse_mxm.hpp>
 #include <graphblas/system/sequential/sparse_mxv.hpp>
+//#include <graphblas/system/sequential/sparse_vxm.hpp>
+
 
 namespace GraphBLAS
 {

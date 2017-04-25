@@ -16,14 +16,22 @@
 //matrix tags should be strictly internal
 #include "matrix_tags.hpp"
 
-// Include matrix definitions from the appropriate backend.
+// Include matrix and vector definitions from the appropriate backend.
 #define __GB_SYSTEM_MATRIX_HEADER <graphblas/system/__GB_SYSTEM_ROOT/Matrix.hpp>
 #include __GB_SYSTEM_MATRIX_HEADER
 #undef __GB_SYSTEM_MATRIX_HEADER
 
+#define __GB_SYSTEM_VECTOR_HEADER <graphblas/system/__GB_SYSTEM_ROOT/Vector.hpp>
+#include __GB_SYSTEM_VECTOR_HEADER
+#undef __GB_SYSTEM_VECTOR_HEADER
+
 //this file contains the variadic template parameters unpacking utility.
 
-namespace graphblas
+//****************************************************************************
+//****************************************************************************
+
+
+namespace GraphBLAS
 {
     namespace detail
     {
@@ -36,13 +44,13 @@ namespace graphblas
 
 
         template<>
-        struct substitute<detail::SparsenessCategoryTag, DenseMatrixTag> {
-            using type = DenseMatrixTag;
+        struct substitute<detail::SparsenessCategoryTag, DenseTag> {
+            using type = DenseTag;
         };
 
         template<>
-        struct substitute<detail::SparsenessCategoryTag, SparseMatrixTag> {
-            using type = SparseMatrixTag;
+        struct substitute<detail::SparsenessCategoryTag, SparseTag> {
+            using type = SparseTag;
         };
 
         template<>
@@ -58,12 +66,12 @@ namespace graphblas
         template<>
         struct substitute<detail::DirectednessCategoryTag, detail::NullTag> {
             //default values
-            using type = DirectedMatrixTag;
+            using type = DirectedMatrixTag; // default directedness
         };
 
         template<>
         struct substitute<detail::SparsenessCategoryTag, detail::NullTag> {
-            using type = SparseMatrixTag;
+            using type = SparseTag; // default sparseness
         };
 
 
@@ -100,14 +108,44 @@ namespace graphblas
                       typename detail::substitute<Directedness, InputTag >::type > ;
             };
         };
+
+        /// @todo remove directedness from the vector generator
+        struct vector_generator {
+            // recursive call: shaves off one of the tags and puts it in the right
+            // place (no error checking yet)
+            template<typename ScalarT, typename Sparseness,
+                typename InputTag, typename... Tags>
+            struct result {
+                using type = typename result<ScalarT,
+                      typename detail::substitute<Sparseness, InputTag >::type,
+                      Tags... >::type;
+            };
+
+            //null tag shortcut:
+            template<typename ScalarT, typename Sparseness>
+            struct result<ScalarT, Sparseness, detail::NullTag>
+            {
+                using type = typename backend::Vector<ScalarT,
+                      typename detail::substitute<Sparseness, detail::NullTag >::type >;
+            };
+
+            // base case returns the vector from the backend
+            template<typename ScalarT, typename Sparseness, typename InputTag>
+            struct result<ScalarT, Sparseness, InputTag>
+            {
+                using type = typename backend::Vector<ScalarT,
+                      typename detail::substitute<Sparseness, InputTag >::type > ;
+            };
+        };
+
     }//end detail
 }
 
 //****************************************************************************
+// Deprecated
 //****************************************************************************
 
-
-namespace GraphBLAS
+namespace graphblas
 {
     namespace detail
     {

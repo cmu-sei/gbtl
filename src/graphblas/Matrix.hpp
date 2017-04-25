@@ -291,6 +291,62 @@ namespace GraphBLAS
                                BMatrixT   const &B,
                                bool              replace_flag);
 
+        //--------------------------------------------------------------------
+
+        template<typename WVectorT,
+                 typename AccumT,
+                 typename SemiringT,
+                 typename UVectorT,
+                 typename AMatrixT>
+        friend inline void vxm(WVectorT         &w,
+                               AccumT            accum,
+                               SemiringT         op,
+                               UVectorT   const &u,
+                               AMatrixT   const &A);
+
+        template<typename WVectorT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename SemiringT,
+                 typename UVectorT,
+                 typename AMatrixT>
+        friend inline void vxm(WVectorT         &w,
+                               MaskT      const &mask,
+                               AccumT            accum,
+                               SemiringT         op,
+                               UVectorT   const &u,
+                               AMatrixT   const &A,
+                               bool              replace_flag);
+
+        //--------------------------------------------------------------------
+
+        template<typename WVectorT,
+                 typename AccumT,
+                 typename SemiringT,
+                 typename AMatrixT,
+                 typename UVectorT>
+        friend inline void mxv(WVectorT        &w,
+                               AccumT           accum,
+                               SemiringT        op,
+                               AMatrixT  const &A,
+                               UVectorT  const &u);
+
+        template<typename WVectorT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename SemiringT,
+                 typename AMatrixT,
+                 typename UVectorT>
+        friend inline void mxv(WVectorT        &w,
+                               MaskT     const &mask,
+                               AccumT           accum,
+                               SemiringT        op,
+                               AMatrixT  const &A,
+                               UVectorT  const &u,
+                               bool             replace_flag);
+
+        //--------------------------------------------------------------------
+
         template<typename MatrixT>
         friend inline TransposeView<MatrixT> transpose(MatrixT const &A);
 

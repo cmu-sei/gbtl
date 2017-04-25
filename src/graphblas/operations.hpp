@@ -97,19 +97,27 @@ namespace GraphBLAS
         backend::mxm(C.m_mat, Mask.m_mat, accum, op, A.m_mat, B.m_mat, replace_flag);
     }
 
+    //************************************************************************
+
     template<typename WVectorT,
-             typename MaskT,
              typename AccumT,
              typename SemiringT,
-             typename UVectorT,
-             typename AMatrixT>
-    inline void vxm(WVectorT         &w,
-                    MaskT      const &mask,
-                    AccumT            accum,
-                    SemiringT         op,
-                    UVectorT   const &u,
-                    AMatrixT   const &A,
-                    bool              replace_flag = false);
+             typename AMatrixT,
+             typename UVectorT>
+    inline void mxv(WVectorT        &w,
+                    AccumT           accum,
+                    SemiringT        op,
+                    AMatrixT  const &A,
+                    UVectorT  const &u)
+    {
+        /// @todo move the dimension checks to the backend
+        if ((w.size() != A.nrows()) ||
+            (u.size() != A.ncols()))
+        {
+            throw DimensionException("mxv(nomask)");
+        }
+        backend::mxv(w.m_vec, accum, op, A.m_mat, u.m_vec);
+    }
 
     template<typename WVectorT,
              typename MaskT,
@@ -123,7 +131,63 @@ namespace GraphBLAS
                     SemiringT        op,
                     AMatrixT  const &A,
                     UVectorT  const &u,
-                    bool             replace_flag = false);
+                    bool             replace_flag = false)
+    {
+        /// @todo move the dimension checks to the backend
+        if ((w.size() != mask.size()) ||
+            (w.size() != A.nrows()) ||
+            (u.size() != A.ncols()))
+        {
+            throw DimensionException("mxv(mask)");
+        }
+        backend::mxv(w.m_vec, mask.m_vec, accum, op, A.m_mat, u.m_vec, replace_flag);
+    }
+
+    //************************************************************************
+
+    // template<typename WVectorT,
+    //          typename AccumT,
+    //          typename SemiringT,
+    //          typename UVectorT,
+    //          typename AMatrixT>
+    // inline void vxm(WVectorT         &w,
+    //                 AccumT            accum,
+    //                 SemiringT         op,
+    //                 UVectorT   const &u,
+    //                 AMatrixT   const &A)
+    // {
+    //     /// @todo move the dimension checks to the backend
+    //     if ((w.size() != A.ncols()) ||
+    //         (u.size() != A.nrows()))
+    //     {
+    //         throw DimensionException("vxm(nomask)");
+    //     }
+    //     backend::vxm(w.m_vec, accum, op, u.m_vec, A.m_mat);
+    // }
+
+    // template<typename WVectorT,
+    //          typename MaskT,
+    //          typename AccumT,
+    //          typename SemiringT,
+    //          typename UVectorT,
+    //          typename AMatrixT>
+    // inline void vxm(WVectorT         &w,
+    //                 MaskT      const &mask,
+    //                 AccumT            accum,
+    //                 SemiringT         op,
+    //                 UVectorT   const &u,
+    //                 AMatrixT   const &A,
+    //                 bool              replace_flag = false)
+    // {
+    //     /// @todo move the dimension checks to the backend
+    //     if ((w.size() != mask.size()) ||
+    //         (w.size() != A.ncols()) ||
+    //         (u.size() != A.nrows()))
+    //     {
+    //         throw DimensionException("vxm(mask)");
+    //     }
+    //     backend::vxm(w.m_vec, mask.m_vec, accum, op, u.m_vec, A.m_mat, replace_flag);
+    // }
 
     //****************************************************************************
     // eWiseAdd and eWiseMult

@@ -48,6 +48,14 @@ namespace GraphBLAS
             }
         }
 
+        BitmapSparseVector(IndexType const &nsize, ScalarT const &value)
+            : m_size(nsize),
+              m_nvals(0),
+              m_vals(nsize, value),
+              m_bitmap(nsize, true)
+        {
+        }
+
         /**
          * @brief Construct from a dense vector.
          *
@@ -147,52 +155,6 @@ namespace GraphBLAS
 
         ~BitmapSparseVector() {}
 
-        void clear()
-        {
-            m_nvals = 0;
-            //m_vals.clear();
-            m_bitmap.assign(m_size, false);
-        }
-
-        /**
-         * @todo need to handle duplicate locations.
-         */
-        template<typename RAIteratorIT,
-                 typename RAIteratorVT,
-                 typename BinaryOpT = GraphBLAS::Second<ScalarType> >
-        void build(RAIteratorIT  i_it,
-                   RAIteratorVT  v_it,
-                   IndexType     nvals,
-                   BinaryOpT     dup = BinaryOpT())
-        {
-            std::vector<ScalarType> vals(m_size);
-            std::vector<bool> bitmap(m_size);
-
-            /// @todo check for same size indices and values
-            for (IndexType idx = 0; idx < nvals; ++idx)
-            {
-                IndexType i = i_it[idx];
-                if (i >= m_size)
-                {
-                    throw IndexOutOfBoundsException();
-                }
-
-                if (bitmap[i] == true)
-                {
-                    vals[i] = dup(vals[i], v_it[idx]);
-                }
-                else
-                {
-                    vals[i] = v_it[idx];
-                    bitmap[i] = true;
-                }
-            }
-
-            m_vals.swap(vals);
-            m_bitmap.swap(bitmap);
-            m_nvals = nvals;
-        }
-
         /**
          * @brief Copy assignment.
          *
@@ -239,24 +201,6 @@ namespace GraphBLAS
             return *this;
         }
 
-        // FUNCTIONS
-
-        /**
-         * @brief Get the shape for this BitmapSparseVector.
-         * @return num_rows and num_cols.
-         */
-        IndexType get_size() const
-        {
-            return m_size;
-        }
-
-
-        /// @return the number of stored values in this
-        IndexType nvals() const
-        {
-            return m_nvals;
-        }
-
         // EQUALITY OPERATORS
         /**
          * @brief Equality testing for BitmapSparseVector.
@@ -298,6 +242,67 @@ namespace GraphBLAS
             return !(*this == rhs);
         }
 
+        // FUNCTIONS
+
+        /**
+         *
+         */
+        template<typename RAIteratorIT,
+                 typename RAIteratorVT,
+                 typename BinaryOpT = GraphBLAS::Second<ScalarType> >
+        void build(RAIteratorIT  i_it,
+                   RAIteratorVT  v_it,
+                   IndexType     nvals,
+                   BinaryOpT     dup = BinaryOpT())
+        {
+            std::vector<ScalarType> vals(m_size);
+            std::vector<bool> bitmap(m_size);
+
+            /// @todo check for same size indices and values
+            for (IndexType idx = 0; idx < nvals; ++idx)
+            {
+                IndexType i = i_it[idx];
+                if (i >= m_size)
+                {
+                    throw IndexOutOfBoundsException();
+                }
+
+                if (bitmap[i] == true)
+                {
+                    vals[i] = dup(vals[i], v_it[idx]);
+                }
+                else
+                {
+                    vals[i] = v_it[idx];
+                    bitmap[i] = true;
+                }
+            }
+
+            m_vals.swap(vals);
+            m_bitmap.swap(bitmap);
+            m_nvals = nvals;
+        }
+
+        void clear()
+        {
+            m_nvals = 0;
+            //m_vals.clear();
+            m_bitmap.assign(m_size, false);
+        }
+
+        IndexType size() const { return m_size; }
+        IndexType nvals() const { return m_nvals; }
+
+        bool hasElement(IndexType index) const
+        {
+            if (index >= m_size)
+            {
+                throw IndexOutOfBoundsException();
+            }
+
+            return m_bitmap[index];
+        }
+
         /**
          * @brief Access the elements of this BitmapSparseVector given row and
          *        column indexes.
@@ -330,7 +335,7 @@ namespace GraphBLAS
 
         // Not certain about this implementation
         void setElement(IndexType      index,
-                          ScalarT const &new_val)
+                        ScalarT const &new_val)
         {
             if (index >= m_size)
             {
@@ -345,11 +350,11 @@ namespace GraphBLAS
         }
 
         // output specific to the storage layout of this type of matrix
-        void print_info(std::ostream &os) const
+        void printInfo(std::ostream &os) const
         {
             os << "BitmapSparseVector<" << typeid(ScalarT).name() << ">" << std::endl;
-            os << "size  = " << get_size()  << std::endl;
-            os << "nvals = " << nvals() << std::endl;
+            os << "size  = " << m_size << std::endl;
+            os << "nvals = " << m_nvals << std::endl;
             os << "contents: [";
             if (m_bitmap[0]) os << m_vals[0]; else os << "-";
             for (IndexType idx = 1; idx < m_size; ++idx)
@@ -362,14 +367,14 @@ namespace GraphBLAS
         friend std::ostream &operator<<(std::ostream             &os,
                                         BitmapSparseVector<ScalarT> const &mat)
         {
-            mat.print_info(os);
+            mat.printInfo(os);
             return os;
         }
 
         std::vector<bool> const &get_bitmap() const { return m_bitmap; }
         std::vector<ScalarT> const &get_vals() const { return m_vals; }
 
-        std::vector<std::tuple<IndexType,ScalarT> > get_contents() const
+        std::vector<std::tuple<IndexType,ScalarT> > getContents() const
         {
             std::vector<std::tuple<IndexType,ScalarT> > contents;
             contents.reserve(m_nvals);
