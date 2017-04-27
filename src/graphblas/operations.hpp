@@ -39,6 +39,8 @@
 
 #define __GB_SYSTEM_HEADER <graphblas/system/__GB_SYSTEM_ROOT/operations.hpp>
 #include __GB_SYSTEM_HEADER
+#include "Matrix.hpp"
+
 #undef __GB_SYSTEM_HEADER
 
 //****************************************************************************
@@ -86,15 +88,24 @@ namespace GraphBLAS
                     bool              replace_flag = false)
     {
         /// @todo move the dimension checks to the backend
+//        if ((C.nrows() != A.nrows()) ||
+//            (A.ncols() != B.nrows()) ||
+//            (C.ncols() != B.ncols()) ||
+//            (C.nrows() != Mask.nrows()) ||
+//            (C.ncols() != Mask.ncols()))
+//        {
+//            throw DimensionException("mxm(mask)");
+//        }
+
+        // @todo - These checks need to move INTO the matrix class or helpers
         if ((C.nrows() != A.nrows()) ||
             (A.ncols() != B.nrows()) ||
-            (C.ncols() != B.ncols()) ||
-            (C.nrows() != Mask.nrows()) ||
-            (C.ncols() != Mask.ncols()))
+            (C.ncols() != B.ncols()) )
         {
             throw DimensionException("mxm(mask)");
         }
-        backend::mxm(C.m_mat, Mask.m_mat, accum, op, A.m_mat, B.m_mat, replace_flag);
+
+        backend::mxm_v3(C.m_mat, Mask.m_mat, accum, op, A.m_mat, B.m_mat, replace_flag);
     }
 
     //************************************************************************

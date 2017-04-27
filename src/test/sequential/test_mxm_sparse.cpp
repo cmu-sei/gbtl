@@ -47,11 +47,25 @@ BOOST_AUTO_TEST_CASE(mxm_reg_square)
     GraphBLAS::IndexType N = 3;
     GraphBLAS::LilSparseMatrix<double> result(M, N);
 
-    GraphBLAS::backend::mxm(result,
-                            GraphBLAS::Second<double>(),                // accum
-                            GraphBLAS::ArithmeticSemiring<double>(),    // semiring
-                            m1,
-                            m2);
+    std::vector<std::vector<bool>>   matMask = {{true,  false, true},
+                                                {false, true,  false},
+                                                {true,  false, true}};
+    GraphBLAS::LilSparseMatrix<bool> mask(matMask, 0);
+
+//    GraphBLAS::backend::mxm_v3(result,
+//                               GraphBLAS::LilSparseNoMask(),
+//                               GraphBLAS::NoAccumulate(),               // accum
+//                               GraphBLAS::ArithmeticSemiring<double>(), // op
+//                               m1,
+//                               m2);
+
+    GraphBLAS::backend::mxm_v3(result,
+                               GraphBLAS::LilSparseNoMask(),
+                               GraphBLAS::NoAccumulate(),               // accum
+                               GraphBLAS::ArithmeticSemiring<double>(), // op
+                               m1,
+                               m2);
+
     BOOST_CHECK_EQUAL(result, answer);
 }
 
@@ -77,12 +91,14 @@ BOOST_AUTO_TEST_CASE(mxm_reg_rect)
     GraphBLAS::IndexType N = 3;
     GraphBLAS::LilSparseMatrix<double> result(M, N);
 
-    // Accumulate "Second" should provide same result.
-    GraphBLAS::backend::mxm(result,
-                            GraphBLAS::Second<double>(),                // accum
-                            GraphBLAS::ArithmeticSemiring<double>(),    // semiring
-                            m1,
-                            m2);
+    GraphBLAS::backend::mxm_v3(result,
+                               GraphBLAS::LilSparseNoMask(),
+                               GraphBLAS::NoAccumulate(),                // accum
+                               GraphBLAS::ArithmeticSemiring<double>(),    // semiring
+                               m1,
+                               m2);
+
+
     BOOST_CHECK_EQUAL(result, answer);
 }
 
@@ -114,12 +130,13 @@ BOOST_AUTO_TEST_CASE(mxm_bool)
     GraphBLAS::IndexType N = 3;
     GraphBLAS::LilSparseMatrix<double> result(M, N);
 
-    GraphBLAS::backend::mxm(result,
-                            mask,
-                            GraphBLAS::Second<double>(),                // accum
-                            GraphBLAS::ArithmeticSemiring<double>(),    // semiring
-                            m1,
-                            m2);
+    GraphBLAS::backend::mxm_v3(result,
+                               mask,
+                               GraphBLAS::NoAccumulate(),                // accum
+                               GraphBLAS::ArithmeticSemiring<double>(),    // semiring
+                               m1,
+                               m2);
+
     BOOST_CHECK_EQUAL(result, answer);
 }
 
@@ -158,12 +175,13 @@ BOOST_AUTO_TEST_CASE(mxm_bool_accum)
     GraphBLAS::LilSparseMatrix<double> answer(matAnswer, 0);
     GraphBLAS::LilSparseMatrix<double> result(matExisting, 0);
 
-    GraphBLAS::backend::mxm(result,
-                            mask,
-                            GraphBLAS::Plus<double>(),                // accum
-                            GraphBLAS::ArithmeticSemiring<double>(),  // semiring
-                            m1,
-                            m2);
+    GraphBLAS::backend::mxm_v3(result,
+                               mask,
+                               GraphBLAS::Plus<double>(),                // accum
+                               GraphBLAS::ArithmeticSemiring<double>(),  // semiring
+                               m1,
+                               m2);
+
     BOOST_CHECK_EQUAL(result, answer);
 }
 
@@ -201,13 +219,14 @@ BOOST_AUTO_TEST_CASE(mxm_bool_accum_replace)
     GraphBLAS::LilSparseMatrix<double> answer(matAnswer, 0);
     GraphBLAS::LilSparseMatrix<double> result(matExisting, 0);
 
-    GraphBLAS::backend::mxm(result,
-                            mask,
-                            GraphBLAS::Plus<double>(),                // accum
-                            GraphBLAS::ArithmeticSemiring<double>(),  // semiring
-                            m1,
-                            m2,
-                            true);
+    GraphBLAS::backend::mxm_v3(result,
+                               mask,
+                               GraphBLAS::Plus<double>(),                // accum
+                               GraphBLAS::ArithmeticSemiring<double>(),  // semiring
+                               m1,
+                               m2,
+                               true);
+
     BOOST_CHECK_EQUAL(result, answer);
 
 }
@@ -240,12 +259,13 @@ BOOST_AUTO_TEST_CASE(mxm_other)
     GraphBLAS::IndexType N = 3;
     GraphBLAS::LilSparseMatrix<double> result(M, N);
 
-    GraphBLAS::backend::mxm(result,
-                            mask,
-                            GraphBLAS::Second<double>(),                // accum
-                            GraphBLAS::ArithmeticSemiring<double>(),    // semiring
-                            m1,
-                            m2);
+    GraphBLAS::backend::mxm_v3(result,
+                               mask,
+                               GraphBLAS::NoAccumulate(),                // accum
+                               GraphBLAS::ArithmeticSemiring<double>(),    // semiring
+                               m1,
+                               m2);
+
     BOOST_CHECK_EQUAL(result, answer);
 }
 
@@ -271,11 +291,14 @@ BOOST_AUTO_TEST_CASE(mxm_reg_empty)
     GraphBLAS::IndexType M = 3;
     GraphBLAS::IndexType N = 3;
     GraphBLAS::LilSparseMatrix<double> result(M, N);
-    GraphBLAS::backend::mxm(result,
-                            GraphBLAS::Second<double>(),
-                            GraphBLAS::ArithmeticSemiring<double>(),
-                            m1,
-                            m2);
+
+    GraphBLAS::backend::mxm_v3(result,
+                               GraphBLAS::LilSparseNoMask(),
+                               GraphBLAS::NoAccumulate(),
+                               GraphBLAS::ArithmeticSemiring<double>(),
+                               m1,
+                               m2);
+
     BOOST_CHECK_EQUAL(result, answer);
 }
 
@@ -300,11 +323,14 @@ BOOST_AUTO_TEST_CASE(mxm2_empty_rows_and_columns)
     GraphBLAS::IndexType M = 3;
     GraphBLAS::IndexType N = 3;
     GraphBLAS::LilSparseMatrix<double> result(M, N);
-    GraphBLAS::backend::mxm(result,
-                               GraphBLAS::Second<double>(),
+
+    GraphBLAS::backend::mxm_v3(result,
+                               GraphBLAS::LilSparseNoMask(),
+                               GraphBLAS::NoAccumulate(),
                                GraphBLAS::ArithmeticSemiring<double>(),
                                m1,
                                m2);
+
     BOOST_CHECK_EQUAL(result, answer);
 }
 
@@ -330,14 +356,15 @@ BOOST_AUTO_TEST_CASE(mxm2_accum_with_empty_rows_and_columns)
     GraphBLAS::LilSparseMatrix<double> A(mat1, 0);
     GraphBLAS::LilSparseMatrix<double> B(mat2, 0);
     GraphBLAS::LilSparseMatrix<double> answer(mat3, 0);
-    GraphBLAS::IndexType M = 3;
-    GraphBLAS::IndexType N = 3;
     GraphBLAS::LilSparseMatrix<double> C(mat0, 0);
-    GraphBLAS::backend::mxm(C,
+
+    GraphBLAS::backend::mxm_v3(C,
+                               GraphBLAS::LilSparseNoMask(),
                                GraphBLAS::Plus<double>(),
                                GraphBLAS::ArithmeticSemiring<double>(),
                                A,
                                B);
+
     BOOST_CHECK_EQUAL(C, answer);
 }
 

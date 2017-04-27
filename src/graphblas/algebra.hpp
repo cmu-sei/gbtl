@@ -106,6 +106,13 @@ namespace GraphBLAS
     // The Binary Operators
     //****************************************************************************
 
+    struct NoAccumulate
+    {
+        // It doens't really matter what the type is, it never gets executed.
+        typedef bool result_type;
+        inline bool operator()(bool lhs, bool rhs) { return true; }
+    };
+
     template <typename D1 = bool, typename D2 = D1, typename D3 = D1>
     struct LogicalOr
     {

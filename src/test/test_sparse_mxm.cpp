@@ -237,8 +237,12 @@ BOOST_AUTO_TEST_CASE(test_a_equals_c_transpose)
 
     //auto answer = GraphBLAS::transpose(mA);
 
+//    GraphBLAS::mxm(result,
+//                   GraphBLAS::Second<double>(),
+//                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mA), mB);
+
     GraphBLAS::mxm(result,
-                   GraphBLAS::Second<double>(),
+                   GraphBLAS::NoAccumulate(),
                    GraphBLAS::ArithmeticSemiring<double>(), transpose(mA), mB);
 
     BOOST_CHECK_EQUAL(result, answer);
@@ -294,6 +298,7 @@ BOOST_AUTO_TEST_CASE(test_mxm_masked_replace_reg)
                    GraphBLAS::Second<double>(),
                    GraphBLAS::ArithmeticSemiring<double>(), mA, mB,
                    true);
+
     BOOST_CHECK_EQUAL(result.nvals(), 6);
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -351,9 +356,15 @@ BOOST_AUTO_TEST_CASE(test_mxm_masked_replace_duplicate_input)
                                                           {1, 1, 1, 1}};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_4x4, 0.);
 
+//    GraphBLAS::mxm(result,
+//                   mMask,
+//                   GraphBLAS::Second<double>(),
+//                   GraphBLAS::ArithmeticSemiring<double>(), mat, mat,
+//                   true);
+
     GraphBLAS::mxm(result,
                    mMask,
-                   GraphBLAS::Second<double>(),
+                   GraphBLAS::NoAccumulate(),
                    GraphBLAS::ArithmeticSemiring<double>(), mat, mat,
                    true);
 

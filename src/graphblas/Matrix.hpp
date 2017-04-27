@@ -364,6 +364,28 @@ namespace GraphBLAS
         BackendType m_mat;
     };
 
+    // Find some better place to put this
+//    template <typename T>
+//    class NoMask
+//    {
+//    public:
+//        NoMask(T other) : m_other(other) {};
+//
+//        IndexType nrows() const  { return m_other.nrows(); }
+//        IndexType ncols() const  { return m_other.ncols(); }
+//        IndexType nvals() const  { return m_other.nvals(); }
+//
+//        T &m_other;
+//
+//        LilSparseNoMask m_mat;
+//    };
+
+    class NoMask
+    {
+    public:
+        LilSparseNoMask m_mat;
+    };
+
 } // end namespace GraphBLAS
 
 //****************************************************************************

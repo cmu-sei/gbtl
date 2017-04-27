@@ -25,6 +25,8 @@
 namespace GraphBLAS
 {
     /// @todo Need to add nested "backend" namespace
+    // namespace backend
+    // {
 
     template<typename ScalarT, typename... TagsT>
     class LilSparseMatrix
@@ -565,6 +567,19 @@ namespace GraphBLAS
         // List-of-lists storage (LIL)
         std::vector<std::vector<std::tuple<IndexType, ScalarT>>> m_data;
     };
-}
+
+    // A marker class for when we should have no mask
+    // @todo: Find somewhere else to put this
+    class LilSparseNoMask
+    {
+    public:
+        LilSparseNoMask()
+        {
+        }
+    };
+
+    // } // namespace backend
+
+} // namespace GraphBLAS
 
 #endif // GB_SEQUENTIAL_LILSPARSEMATRIX_HPP
