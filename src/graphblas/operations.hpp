@@ -27,6 +27,9 @@
 #include <graphblas/ComplementView.hpp>
 #include <graphblas/utility.hpp>
 
+#include <graphblas/Matrix.hpp>
+#include <graphblas/Vector.hpp>
+
 #include <graphblas/detail/config.hpp>
 
 #define __GB_SYSTEM_HEADER <graphblas/system/__GB_SYSTEM_ROOT/TransposeView.hpp>
@@ -44,7 +47,6 @@
 
 #define __GB_SYSTEM_HEADER <graphblas/system/__GB_SYSTEM_ROOT/operations.hpp>
 #include __GB_SYSTEM_HEADER
-#include "Matrix.hpp"
 
 #undef __GB_SYSTEM_HEADER
 
@@ -54,35 +56,9 @@
 
 namespace GraphBLAS
 {
-    template <typename ScalarT, typename... TagsT>
-    class Matrix;
-
-    template <typename ScalarT, typename... TagsT>
-    class Vector;
-
     //****************************************************************************
     // mxm, vxm, mxv
     //****************************************************************************
-    template<typename CMatrixT,
-             typename AccumT,
-             typename SemiringT,
-             typename AMatrixT,
-             typename BMatrixT>
-    inline void mxm(CMatrixT         &C,
-                    AccumT            accum,
-                    SemiringT         op,
-                    AMatrixT   const &A,
-                    BMatrixT   const &B)
-    {
-        /// @todo move the dimension checks to the backend
-        if ((C.nrows() != A.nrows()) ||
-            (A.ncols() != B.nrows()) ||
-            (C.ncols() != B.ncols()))
-        {
-            throw DimensionException("mxm(nomask)");
-        }
-        backend::mxm(C.m_mat, accum, op, A.m_mat, B.m_mat);
-    }
 
     template<typename CMatrixT,
              typename MaskT,
@@ -98,25 +74,14 @@ namespace GraphBLAS
                     BMatrixT   const &B,
                     bool              replace_flag = false)
     {
-        /// @todo move the dimension checks to the backend
-//        if ((C.nrows() != A.nrows()) ||
-//            (A.ncols() != B.nrows()) ||
-//            (C.ncols() != B.ncols()) ||
-//            (C.nrows() != Mask.nrows()) ||
-//            (C.ncols() != Mask.ncols()))
-//        {
-//            throw DimensionException("mxm(mask)");
-//        }
+        GraphBLAS::check_nrows_nrows(C, A);
+        GraphBLAS::check_ncols_nrows(A, B);
+        GraphBLAS::check_ncols_ncols(C, B);
+        GraphBLAS::check_nrows_nrows(C, Mask);
+        GraphBLAS::check_ncols_ncols(C, Mask);
 
-        // @todo - These checks need to move INTO the matrix class or helpers
-        if ((C.nrows() != A.nrows()) ||
-            (A.ncols() != B.nrows()) ||
-            (C.ncols() != B.ncols()) )
-        {
-            throw DimensionException("mxm(mask)");
-        }
-
-        backend::mxm_v3(C.m_mat, Mask.m_mat, accum, op, A.m_mat, B.m_mat, replace_flag);
+        backend::mxm(C.m_mat, Mask.m_mat, accum, op, A.m_mat, B.m_mat,
+                     replace_flag);
     }
 
     //************************************************************************
@@ -1450,6 +1415,7 @@ namespace graphblas
         //}
         backend::buildmatrix(m.m_mat, i, j, v, n, accum);
     }
+
     /**
      * @brief Populate a Matrix with stored values at specified locations
      * This wrapper is provided for IndexArrayType to iterators.

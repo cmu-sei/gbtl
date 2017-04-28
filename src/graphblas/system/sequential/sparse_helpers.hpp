@@ -37,6 +37,26 @@ namespace GraphBLAS
 {
     namespace backend
     {
+        template <typename ScalarT>
+        void print_vec(std::ostream &os, std::string label, std::vector<std::tuple<IndexType, ScalarT> > vec)
+        {
+            auto vec_it = vec.begin();
+            bool first = true;
+
+            IndexType idx;
+            ScalarT val;
+
+            os << label << " ";
+            while (vec_it != vec.end())
+            {
+                std::tie(idx, val) = *vec_it;
+                os << (!first ? "," : " ") << idx << ":" << val;
+                first = false;
+                ++vec_it;
+            }
+            os << std::endl;
+        }
+
         //**********************************************************************
 
         template <typename DstMatrixT,
@@ -592,6 +612,11 @@ namespace GraphBLAS
             MScalarT mask_val;
             GraphBLAS::IndexType c_idx, z_idx, mask_idx;
 
+            //std::cerr << "Executing apply_with_mask with mask and replace: " << replace << std::endl;
+            //print_vec(std::cerr, "c_vec", c_vec);
+            //print_vec(std::cerr, "z_vec", z_vec);
+            //print_vec(std::cerr, "m_vec", mask_vec);
+
             result.clear();
 
             // Design: This approach is driven by the mask.
@@ -604,7 +629,7 @@ namespace GraphBLAS
                 if (mask_it == mask_vec.end())
                 {
                     //std::cerr << "Mask exhausted(1)." << std::endl;
-                    return;
+                    break;
                 }
 
                 // Get the mask values
@@ -655,10 +680,16 @@ namespace GraphBLAS
                 // This is the part of (ind(C) \cap int(\not M)
                 while (c_it != c_vec.end())
                 {
+                    //std::tie(c_idx, c_val) = *c_it;
+                    //std::cerr << "Catch up= " << c_idx << ":" << c_val << std::endl;
+                    //result.push_back(std::make_tuple(c_idx, static_cast<CScalarT>(c_val)));
                     result.push_back(*c_it);
                     ++c_it;
                 }
             }
+
+            //print_vec(std::cerr, "result", result);
+
         } // apply_with_mask
 
         //**********************************************************************

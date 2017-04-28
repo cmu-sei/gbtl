@@ -18,9 +18,7 @@
 #include <cstddef>
 #include <graphblas/detail/config.hpp>
 #include <graphblas/detail/param_unpack.hpp>
-#include <graphblas/operations.hpp>
 #include <graphblas/utility.hpp>
-#include <graphblas/matrix_utils.hpp>
 #include <graphblas/View.hpp>
 #include <graphblas/ComplementView.hpp>
 
@@ -369,23 +367,7 @@ namespace GraphBLAS
         BackendType m_mat;
     };
 
-    // Find some better place to put this
-//    template <typename T>
-//    class NoMask
-//    {
-//    public:
-//        NoMask(T other) : m_other(other) {};
-//
-//        IndexType nrows() const  { return m_other.nrows(); }
-//        IndexType ncols() const  { return m_other.ncols(); }
-//        IndexType nvals() const  { return m_other.nvals(); }
-//
-//        T &m_other;
-//
-//        LilSparseNoMask m_mat;
-//    };
-
-    // this can stand in for a 1D or 2D mask
+    // Should we have a custom file for this???
     class NoMask
     {
     public:
@@ -394,6 +376,54 @@ namespace GraphBLAS
 
         backend::NoMask m_mat;  // can be const?
         backend::NoMask m_vec;
+    };
+
+    //**************************************************************************
+    // Currently these won't work because of include order.
+
+    template <typename M1, typename M2>
+    void check_nrows_nrows(M1 m1, M2 m2)
+    {
+        if (m1.nrows() != m2.nrows())
+            throw DimensionException("nroiws doesn't match nrows");
+    };
+
+    template <typename M1>
+    void check_nrows_nrows(M1 m1, NoMask mask)
+    {
+        // No op
+    };
+
+    template <typename M1, typename M2>
+    void check_ncols_ncols(M1 m1, M2 m2)
+    {
+        if (m1.ncols() != m2.ncols())
+            throw DimensionException("ncols doesn't match ncols");
+    };
+
+    template <typename M1>
+    void check_ncols_ncols(M1 m1, NoMask mask)
+    {
+        // No op
+    };
+
+    template <typename M1, typename M2>
+    void check_ncols_nrows(M1 m1, M2 m2)
+    {
+        if (m1.ncols() != m2.nrows())
+            throw DimensionException("ncols doesn't match nrows");
+    };
+
+    template <typename M>
+    void check_ncols_nrows(M m1, NoMask mask)
+    {
+        // No op
+    };
+
+    template <typename M>
+    void check_ncols_nrows(NoMask m1, M mask)
+    {
+        // No op
     };
 
 } // end namespace GraphBLAS

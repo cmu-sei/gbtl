@@ -115,7 +115,9 @@ namespace algorithms
         for (graphblas::IndexType k = 0; k < graph.nrows(); ++k)
         {
             GraphBLAS::mxm(paths,
-                           GraphBLAS::Min<T>(), GraphBLAS::MinPlusSemiring<T>(),
+                           GraphBLAS::NoMask(),
+                           GraphBLAS::Min<T>(),
+                           GraphBLAS::MinPlusSemiring<T>(),
                            paths, graph);
 
             //std::cout << "Iteration " << k << std::endl;

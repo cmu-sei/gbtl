@@ -18,7 +18,6 @@
 #include <cstddef>
 #include <graphblas/detail/config.hpp>
 #include <graphblas/detail/param_unpack.hpp>
-#include <graphblas/operations.hpp>
 #include <graphblas/utility.hpp>
 #include <graphblas/Matrix.hpp>
 
