@@ -25,6 +25,17 @@ namespace GraphBLAS
 {
     namespace backend
     {
+        // A marker class for when we should have no mask
+        // @todo: Find somewhere else to put this
+        class NoMask
+        {
+        public:
+            NoMask() {}
+        };
+
+        //********************************************************************
+
+
         template<typename ScalarT, typename... TagsT>
         class Matrix : public LilSparseMatrix<ScalarT>
         {

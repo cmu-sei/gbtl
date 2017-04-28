@@ -27,13 +27,15 @@
 #include <graphblas/algebra.hpp>
 
 #include <graphblas/Matrix.hpp>
-#include <graphblas/matrix_utils.hpp>
-#include <graphblas/linalg_utils.hpp>
-
-#include <graphblas/utility.hpp>
+#include <graphblas/Vector.hpp>
+#include <graphblas/ComplementView.hpp>
+#include <graphblas/View.hpp>
 
 #include <graphblas/operations.hpp>
-#include <graphblas/Vector.hpp>
+
+#include <graphblas/matrix_utils.hpp> // Does not belong
+#include <graphblas/linalg_utils.hpp>  // deprecated
+#include <graphblas/utility.hpp>   // deprecated
 
 #define __GB_SYSTEM_HEADER <graphblas/system/__GB_SYSTEM_ROOT/__GB_SYSTEM_ROOT.hpp>
 #include __GB_SYSTEM_HEADER

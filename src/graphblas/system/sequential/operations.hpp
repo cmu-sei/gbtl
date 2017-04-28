@@ -31,13 +31,13 @@
 #include <graphblas/accum.hpp>
 #include <graphblas/algebra.hpp>
 #include <graphblas/system/sequential/TransposeView.hpp>
-#include <graphblas/system/sequential/NegateView.hpp>
+#include <graphblas/system/sequential/ComplementView.hpp>
+#include <graphblas/system/sequential/NegateView.hpp>  // deprecated
 
 // Add individual operation files here
-//#include <graphblas/system/sequential/.hpp>
 #include <graphblas/system/sequential/sparse_mxm.hpp>
 #include <graphblas/system/sequential/sparse_mxv.hpp>
-//#include <graphblas/system/sequential/sparse_vxm.hpp>
+#include <graphblas/system/sequential/sparse_vxm.hpp>
 
 
 namespace GraphBLAS
@@ -47,10 +47,22 @@ namespace GraphBLAS
         /**
          *
          */
+        // template<typename MatrixT>
+        // inline ComplementView<MatrixT> complement(MatrixT const &A)
+        // {
+        //     return ComplementView<MatrixT>(A);
+        // }
+
         template<typename MatrixT>
-        inline ComplementView<MatrixT> complement(MatrixT const &A)
+        inline MatrixComplementView<MatrixT> matrix_complement(MatrixT const &Mask)
         {
-            return ComplementView<MatrixT>(A);
+            return MatrixComplementView<MatrixT>(Mask);
+        }
+
+        template<typename VectorT>
+        inline VectorComplementView<VectorT> vector_complement(VectorT const &mask)
+        {
+            return VectorComplementView<VectorT>(mask);
         }
 
 

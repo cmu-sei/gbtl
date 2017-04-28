@@ -699,7 +699,7 @@ namespace GraphBLAS
                    typename ZMatrixT >
         void write_with_opt_mask(CMatrixT                   &C,
                                  ZMatrixT           const   &Z,
-                                 LilSparseNoMask    const   &foo,
+                                 backend::NoMask    const   &foo,
                                  bool                       replace)
         {
             sparse_copy(C, Z);

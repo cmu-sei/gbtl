@@ -22,6 +22,7 @@
 #include <graphblas/utility.hpp>
 #include <graphblas/matrix_utils.hpp>
 #include <graphblas/View.hpp>
+#include <graphblas/ComplementView.hpp>
 
 // Include matrix definitions from the appropriate backend.
 #define __GB_SYSTEM_MATRIX_HEADER <graphblas/system/__GB_SYSTEM_ROOT/Matrix.hpp>
@@ -350,8 +351,12 @@ namespace GraphBLAS
         template<typename MatrixT>
         friend inline TransposeView<MatrixT> transpose(MatrixT const &A);
 
-        template<typename MatrixT>
-        friend inline ComplementView<MatrixT> complement(MatrixT const &A);
+        template<typename OtherScalarT, typename... OtherTagsT>
+        friend inline MatrixComplementView<Matrix<OtherScalarT, OtherTagsT...>> complement(
+            Matrix<OtherScalarT, OtherTagsT...> const &Mask);
+
+        //template<typename MatrixT>
+        //friend inline ComplementView<MatrixT> complement(MatrixT const &A);
 
         // .... ADD OTHER OPERATIONS AS FRIENDS AS THEY ARE IMPLEMENTED .....
 
@@ -380,10 +385,15 @@ namespace GraphBLAS
 //        LilSparseNoMask m_mat;
 //    };
 
+    // this can stand in for a 1D or 2D mask
     class NoMask
     {
     public:
-        LilSparseNoMask m_mat;
+        typedef bool ScalarType; // not necessary?
+        typedef backend::NoMask BackendType; // not necessary?
+
+        backend::NoMask m_mat;  // can be const?
+        backend::NoMask m_vec;
     };
 
 } // end namespace GraphBLAS

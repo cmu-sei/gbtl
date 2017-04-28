@@ -53,24 +53,29 @@ namespace GraphBLAS
                         AMatrixT  const &A,
                         UVectorT  const &u)
         {
-            // The following should not be checked by the frontend too:
             if ((w.size() != A.nrows()) ||
                 (u.size() != A.ncols()))
             {
-                throw DimensionException("mxv: dimensions are not compatible.");
+                throw DimensionException("mxv(nomask): dimensions are not compatible.");
             }
 
+
+            typedef typename AccumT::result_type AccumScalarType;
+            typedef typename SemiringT::result_type D3ScalarType;
             typedef typename WVectorT::ScalarType WScalarType;
             typedef typename AMatrixT::ScalarType AScalarType;
             typedef typename UVectorT::ScalarType UScalarType;
             typedef std::vector<std::tuple<IndexType,AScalarType> > ARowType;
+            typedef std::vector<std::tuple<IndexType,D3ScalarType> > TRowType;
+            typedef std::vector<std::tuple<IndexType,AccumScalarType> > ZRowType;
 
-            IndexType      num_elts(w.size());
-            IndexArrayType t_indices;
-            std::vector<WScalarType> t_values;
+            IndexType  num_elts(w.size());
+            TRowType   t;   // t = <D3(op), nrows(A), contents of A.op.u>
 
             if (u.nvals() > 0)
             {
+                // Two different approaches to performing the A *.+ u portion
+                // of the computation is selected by this if statement.
                 /// @todo need a heuristic for switching between two modes
                 if (u.size()/u.nvals() >= 4)
                 {
@@ -83,11 +88,10 @@ namespace GraphBLAS
 
                         if (!A_row.empty())
                         {
-                            WScalarType t_val;
+                            D3ScalarType t_val;
                             if (dot(t_val, A_row, u_contents, op))
                             {
-                                t_indices.push_back(row_idx);
-                                t_values.push_back(t_val);
+                                t.push_back(std::make_tuple(row_idx, t_val));
                             }
                         }
                     }
@@ -105,11 +109,10 @@ namespace GraphBLAS
 
                         if (!A_row.empty())
                         {
-                            WScalarType t_val;
+                            D3ScalarType t_val;
                             if (dot2(t_val, A_row, u_bitmap, u_values, u.nvals(), op))
                             {
-                                t_indices.push_back(row_idx);
-                                t_values.push_back(t_val);
+                                t.push_back(std::make_tuple(row_idx, t_val));
                             }
                         }
                     }
@@ -117,9 +120,17 @@ namespace GraphBLAS
             }
 
             // accum here
+            /// @todo  Detect if accum is GrB_NULL, and take a short cut
+            // Perform accum
+            ZRowType z;
+            ewise_or(z, w.getContents(), t, accum);
+
             // store in w
             w.clear();
-            w.build(t_indices.begin(), t_values.begin(), t_values.size());
+            for (auto tupl : z)
+            {
+                w.setElement(std::get<0>(tupl), std::get<1>(tupl));
+            }
         }
 
         //**********************************************************************
@@ -139,43 +150,48 @@ namespace GraphBLAS
                         UVectorT  const &u,
                         bool             replace_flag = false)
         {
-            // The following should be checked by the frontend only:
-            if ((w.size() != A.nrows()) ||
+            if ((w.size() != mask.size()) ||
                 (w.size() != A.nrows()) ||
-                (u.size() != A.ncols()) ||
-                (w.size() != mask.size()))
+                (u.size() != A.ncols()))
             {
-                throw DimensionException("mxv: dimensions are not compatible.");
+                throw DimensionException("mxv(mask): dimensions are not compatible.");
             }
 
+            typedef typename AccumT::result_type AccumScalarType;
+            typedef typename SemiringT::result_type D3ScalarType;
+            typedef typename MaskT::ScalarType MaskScalarType;
             typedef typename WVectorT::ScalarType WScalarType;
             typedef typename AMatrixT::ScalarType AScalarType;
             typedef typename UVectorT::ScalarType UScalarType;
             typedef std::vector<std::tuple<IndexType,AScalarType> > ARowType;
+            typedef std::vector<std::tuple<IndexType,D3ScalarType> > TRowType;
+            typedef std::vector<std::tuple<IndexType,AccumScalarType> > ZRowType;
 
-            IndexType      num_elts(w.size());
-            IndexArrayType t_indices;
-            std::vector<WScalarType> t_values;
+            IndexType  num_elts(w.size());
+            TRowType   t;
 
-            if (u.nvals() > 0)
+            if ((u.nvals() > 0) && (mask.nvals() > 0))
             {
+                // Two different approaches to performing the A *.+ u portion
+                // of the computation is selected by this if statement.
                 /// @todo need a heuristic for switching between two modes
                 if (u.size()/u.nvals() >= 4)
                 {
                     auto u_contents(u.getContents());
                     for (IndexType row_idx = 0; row_idx < num_elts; ++row_idx)
                     {
-                        //std::cerr << "**1** PROCESSING MATRIX ROW " << row_idx
+                        //std::cerr << "**1** PROCESSING VECTOR ELEMENT " << row_idx
                         //          << " *****" << std::endl;
                         ARowType const &A_row(A.getRow(row_idx));
 
-                        if (!A_row.empty())
+                        if (!A_row.empty() &&
+                            mask.hasElement(row_idx) &&
+                            (mask.extractElement(row_idx) != false))
                         {
-                            WScalarType t_val;
+                            D3ScalarType t_val;
                             if (dot(t_val, A_row, u_contents, op))
                             {
-                                t_indices.push_back(row_idx);
-                                t_values.push_back(t_val);
+                                t.push_back(std::make_tuple(row_idx, t_val));
                             }
                         }
                     }
@@ -187,17 +203,18 @@ namespace GraphBLAS
 
                     for (IndexType row_idx = 0; row_idx < num_elts; ++row_idx)
                     {
-                        //std::cerr << "**2** PROCESSING MATRIX ROW " << row_idx
+                        //std::cerr << "**2** PROCESSING VECTOR ELEMENT " << row_idx
                         //          << " *****" << std::endl;
                         ARowType const &A_row(A.getRow(row_idx));
 
-                        if (!A_row.empty())
+                        if (!A_row.empty() &&
+                            mask.hasElement(row_idx) &&
+                            (mask.extractElement(row_idx) != false))
                         {
-                            WScalarType t_val;
+                            D3ScalarType t_val;
                             if (dot2(t_val, A_row, u_bitmap, u_values, u.nvals(), op))
                             {
-                                t_indices.push_back(row_idx);
-                                t_values.push_back(t_val);
+                                t.push_back(std::make_tuple(row_idx, t_val));
                             }
                         }
                     }
@@ -205,11 +222,27 @@ namespace GraphBLAS
             }
 
             // accum here
-            // mask here
+            /// @todo  Detect if accum is GrB_NULL, and take a short cut
+            // Perform accum
+            ZRowType z;
+            if (replace_flag)
+            {
+                ewise_or_mask(z, w.getContents(), t, mask.getContents(),
+                              accum, replace_flag);
+            }
+            else // merge
+            {
+                ewise_or(z, w.getContents(), t, accum);
+            }
+
             // store in w
             w.clear();
-            w.build(t_indices.begin(), t_values.begin(), t_values.size());
+            for (auto tupl : z)
+            {
+                w.setElement(std::get<0>(tupl), std::get<1>(tupl));
+            }
         }
+
     } // backend
 } // GraphBLAS
 

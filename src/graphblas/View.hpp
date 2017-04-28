@@ -38,9 +38,9 @@
 
 namespace GraphBLAS
 {
-    template<typename MatrixT>
-    class TransposeView;
-
+    //template<typename MatrixT>
+    //class TransposeView;
+#if 0
     //************************************************************************
     template<typename MatrixT>
     class ComplementView
@@ -218,7 +218,7 @@ namespace GraphBLAS
                                bool             replace_flag);
 
     };
-
+#endif
     //************************************************************************
     template<typename MatrixT>
     class TransposeView

@@ -41,23 +41,23 @@ namespace
     std::vector<double> ans4_dense = { 3, 0, 1};
 
     //static Matrix<double, DirectedMatrixTag> mAns(mAns_dense);
-    GraphBLAS::IndexArrayType i_all3x4 = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
-    GraphBLAS::IndexArrayType j_all3x4 = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
+    //GraphBLAS::IndexArrayType i_all3x4 = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
+    //GraphBLAS::IndexArrayType j_all3x4 = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
 
     static std::vector<double> v4_ones = {1, 1, 1, 1};
     static std::vector<double> v3_ones = {1, 1, 1};
 
-    static std::vector<std::vector<double> > mOnes_3x4 = {{1, 1, 1, 1},
-                                                          {1, 1, 1, 1},
-                                                          {1, 1, 1, 1}};
+    //static std::vector<std::vector<double> > mOnes_3x4 = {{1, 1, 1, 1},
+    //                                                      {1, 1, 1, 1},
+    //                                                      {1, 1, 1, 1}};
 
-    static std::vector<std::vector<double> > mOnes_3x3 = {{1, 1, 1},
-                                                          {1, 1, 1},
-                                                          {1, 1, 1}};
+    //static std::vector<std::vector<double> > mOnes_3x3 = {{1, 1, 1},
+    //                                                      {1, 1, 1},
+    //                                                      {1, 1, 1}};
 
-    static std::vector<std::vector<double> > mIdentity_3x3 = {{1, 0, 0},
-                                                              {0, 1, 0},
-                                                              {0, 0, 1}};
+    //static std::vector<std::vector<double> > mIdentity_3x3 = {{1, 0, 0},
+    //                                                          {0, 1, 0},
+    //                                                          {0, 0, 1}};
 }
 
 //****************************************************************************
@@ -112,8 +112,6 @@ BOOST_AUTO_TEST_CASE(test_mxv_reg)
     BOOST_CHECK_EQUAL(result, ansB);
 }
 
-#if 0
-
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxv_stored_zero_result)
 {
@@ -122,140 +120,57 @@ BOOST_AUTO_TEST_CASE(test_mxv_stored_zero_result)
                                         {1, 2, 2, 0},
                                         {0, 2, 3, 3},
                                         {0, 0, 3, 4}};
-    std::vector<std::vector<int> > B = {{ 1,-2, 0,  0},
-                                        {-1, 1, 0,  0},
-                                        { 0, 0, 3, -4},
-                                        { 0, 0,-3,  3}};
+    std::vector<int> u4_dense =  { 1,-1, 0, 0};
     GraphBLAS::Matrix<int, GraphBLAS::DirectedMatrixTag> mA(A, 0);
-    GraphBLAS::Matrix<int, GraphBLAS::DirectedMatrixTag> mB(B, 0);
-    GraphBLAS::Matrix<int, GraphBLAS::DirectedMatrixTag> result(4, 4);
+    GraphBLAS::Vector<int> u(u4_dense, 0);
+    GraphBLAS::Vector<int> result(4);
 
     // use a different sentinel value so that stored zeros are preserved.
     int const NIL(666);
-    std::vector<std::vector<int> > ans = {{  0,  -1, NIL, NIL},
-                                          { -1,   0,  -6,  -8},
-                                          { -2,   2,   0,  -3},
-                                          {NIL, NIL,  -3,   0}};
-    GraphBLAS::Matrix<int, GraphBLAS::DirectedMatrixTag> answer(ans, NIL);
+    std::vector<int> ans = {  0,  -1, -2, NIL};
+    GraphBLAS::Vector<int> answer(ans, NIL);
 
     GraphBLAS::mxv(result,
                    GraphBLAS::Second<int>(),
-                   GraphBLAS::ArithmeticSemiring<int>(), mA, mB);
+                   GraphBLAS::ArithmeticSemiring<int>(), mA, u);
     BOOST_CHECK_EQUAL(result, answer);
-    BOOST_CHECK_EQUAL(result.nvals(), 12);
-}
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(test_mxv_duplicate_input)
-{
-    // Build some matrices.
-    std::vector<std::vector<double> > m = {{1, 1, 0, 0},
-                                           {1, 2, 2, 0},
-                                           {0, 2, 3, 3},
-                                           {0, 0, 3, 4}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mat(m, 0.);
-
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(4, 4);
-
-    std::vector<std::vector<double> > ans = {{2,  3,  2,  0},
-                                             {3,  9, 10,  6},
-                                             {2, 10, 22, 21},
-                                             {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
-
-    GraphBLAS::mxv(result,
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), mat, mat);
-
-    BOOST_CHECK_EQUAL(result, answer);
+    BOOST_CHECK_EQUAL(result.nvals(), 3);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_a_transpose)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(mB_dense, 0.);
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(m3x3_dense, 0.);
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m3x4_dense, 0.);
+    GraphBLAS::Vector<double> u3(u3_dense, 0.);
+    GraphBLAS::Vector<double> u4(u4_dense, 0.);
+    GraphBLAS::Vector<double> result3(3);
+    GraphBLAS::Vector<double> result4(4);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 4);
+    std::vector<double> ansAT_dense = {12, 1, 9};
+    std::vector<double> ansBT_dense = {11, 7, 1, 2};
 
-    std::vector<std::vector<double> > ans = {{112, 159,  87, 31},
-                                             { 97, 131,  94, 22},
-                                             { 87, 111, 102, 15}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
+    GraphBLAS::Vector<double> ansA(ansAT_dense, 0.);
+    GraphBLAS::Vector<double> ansB(ansBT_dense, 0.);
 
-    GraphBLAS::mxv(result,
+    GraphBLAS::mxv(result3,
                    GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mA), mB);
+                   GraphBLAS::ArithmeticSemiring<double>(),
+                   transpose(mA), u3);
+    BOOST_CHECK_EQUAL(result3, ansA);
 
-    BOOST_CHECK_EQUAL(result, answer);
-}
+    BOOST_CHECK_THROW(
+        (GraphBLAS::mxv(result4,
+                        GraphBLAS::Second<double>(),
+                        GraphBLAS::ArithmeticSemiring<double>(),
+                        transpose(mB), u4)),
+        GraphBLAS::DimensionException);
 
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(test_b_transpose)
-{
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-
-    std::vector<std::vector<double> > B = {{5, 8, 1},
-                                           {2, 6, 7},
-                                           {3, 4, 5}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(B, 0.);
-
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 3);
-
-    std::vector<std::vector<double> > ans = {{119,  87, 79},
-                                             { 66,  80, 62},
-                                             {108, 125, 98}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
-
-    GraphBLAS::mxv(result,
+    GraphBLAS::mxv(result4,
                    GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), mA, transpose(mB));
-
-    BOOST_CHECK_EQUAL(result, answer);
-}
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(test_a_and_b_transpose)
-{
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-    std::vector<std::vector<double> > B =  {{5, 8, 1},
-                                            {2, 6, 7},
-                                            {3, 4, 5}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(B, 0.);
-
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 3);
-
-    std::vector<std::vector<double> > ans =  {{99,  97, 87},
-                                              {83, 100, 81},
-                                              {72, 105, 78}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
-
-    GraphBLAS::mxv(result,
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mA), transpose(mB));
-
-    BOOST_CHECK_EQUAL(result, answer);
-}
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(test_a_equals_c_transpose)
-{
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(mIdentity_3x3, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(3, 3);
-
-    std::vector<std::vector<double> > ans = {{12, 4, 7},
-                                             { 7, 5, 8},
-                                             { 3, 6, 9}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
-
-    //auto answer = GraphBLAS::transpose(mA);
-
-    GraphBLAS::mxv(result,
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mA), mB);
-
-    BOOST_CHECK_EQUAL(result, answer);
+                   GraphBLAS::ArithmeticSemiring<double>(),
+                   transpose(mB), u3);
+    BOOST_CHECK_EQUAL(result4, ansB);
 }
 
 //****************************************************************************
@@ -265,226 +180,106 @@ BOOST_AUTO_TEST_CASE(test_a_equals_c_transpose)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxv_masked_replace_bad_dimensions)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.); // 3x3
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(mB_dense, 0.); // 3x4
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result3x4(mOnes_3x4, 0.);
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(m3x3_dense, 0.);
 
-    static std::vector<std::vector<double> > mMask_3x3 = {{1, 0, 0},
-                                                          {1, 1, 0},
-                                                          {1, 1, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_3x3, 0.);
-    BOOST_CHECK_EQUAL(mMask.nvals(), 6);
+    GraphBLAS::Vector<double, GraphBLAS::SparseTag> u3(u3_dense, 0.);
+    GraphBLAS::Vector<double, GraphBLAS::SparseTag> m4(u4_dense, 0.);
+    GraphBLAS::Vector<double, GraphBLAS::SparseTag> w3(3);
 
     // incompatible mask matrix dimensions
     BOOST_CHECK_THROW(
-        (GraphBLAS::mxv(result3x4,
-                        mMask,
+        (GraphBLAS::mxv(w3,
+                        m4,
                         GraphBLAS::Second<double>(),
-                        GraphBLAS::ArithmeticSemiring<double>(), mA, mB,
+                        GraphBLAS::ArithmeticSemiring<double>(), mA, u3,
                         true)),
         GraphBLAS::DimensionException);
 }
+
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxv_masked_replace_reg)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(mB_dense, 0.);
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(m3x3_dense, 0.);
 
-    static std::vector<std::vector<double> > mMask_3x4 = {{1, 0, 0, 0},
-                                                          {1, 1, 0, 0},
-                                                          {1, 1, 1, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_3x4, 0.);
-    BOOST_CHECK_EQUAL(mMask.nvals(), 6);
+    GraphBLAS::Vector<double, GraphBLAS::SparseTag> u3(u3_dense, 0.);
+    GraphBLAS::Vector<double, GraphBLAS::SparseTag> m3(u3_dense, 0.);
+    GraphBLAS::Vector<double> result(v3_ones, 0.);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(mOnes_3x4, 0.);
+    BOOST_CHECK_EQUAL(m3.nvals(), 2);
 
-    std::vector<std::vector<double> > ans = {{114,   0,   0,  0},
-                                             { 74,  97,   0,  0},
-                                             {119, 157, 112,  0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
+    std::vector<double> ans = {13, 0, 0};
+    GraphBLAS::Vector<double> answer(ans, 0.);
 
     GraphBLAS::mxv(result,
-                   mMask,
+                   m3,
                    GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), mA, mB,
+                   GraphBLAS::ArithmeticSemiring<double>(), mA, u3,
                    true);
-    BOOST_CHECK_EQUAL(result.nvals(), 6);
+
+    BOOST_CHECK_EQUAL(result.nvals(), 1);
     BOOST_CHECK_EQUAL(result, answer);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxv_masked_replace_reg_stored_zero)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(mB_dense, 0.);
+    // tests a computed and stored zero
+    // tests a stored zero in the mask
 
-    static std::vector<std::vector<double> > mMask_3x4 = {{1, 0, 0, 0},
-                                                          {1, 1, 0, 0},
-                                                          {1, 1, 1, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_3x4, 0.);
-    mMask.setElement(0, 1, 0.);
-    BOOST_CHECK_EQUAL(mMask.nvals(), 7);
-
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(mOnes_3x4, 0.);
-
-    std::vector<std::vector<double> > ans = {{114,   0,   0,  0},
-                                             { 74,  97,   0,  0},
-                                             {119, 157, 112,  0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
-
-    GraphBLAS::mxv(result,
-                   mMask,
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), mA, mB,
-                   true);
-    BOOST_CHECK_EQUAL(result.nvals(), 6);
-    BOOST_CHECK_EQUAL(result, answer);
-}
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(test_mxv_masked_replace_duplicate_input)
-{
     // Build some matrices.
-    std::vector<std::vector<double> > m = {{1, 1, 0, 0},
-                                           {1, 2, 2, 0},
-                                           {0, 2, 3, 3},
-                                           {0, 0, 3, 4}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mat(m, 0.);
+    std::vector<std::vector<int> > A_dense = {{1, 1, 0, 0},
+                                              {1, 2, 2, 0},
+                                              {0, 2, 3, 3},
+                                              {0, 0, 3, 4}};
+    std::vector<int> u4_dense =  { 1,-1, 1, 0};
+    std::vector<int> mask_dense =  { 1, 1, 1, 0};
+    std::vector<int> ones_dense =  { 1, 1, 1, 1};
+    GraphBLAS::Matrix<int, GraphBLAS::DirectedMatrixTag> A(A_dense, 0);
+    GraphBLAS::Vector<int> u(u4_dense, 0);
+    GraphBLAS::Vector<int> mask(mask_dense, 0);
+    GraphBLAS::Vector<int> result(ones_dense, 0);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(mOnes_4x4, 0.);
+    BOOST_CHECK_EQUAL(mask.nvals(), 3);  // [ 1 1 1 - ]
+    mask.setElement(3, 0);
+    BOOST_CHECK_EQUAL(mask.nvals(), 4);  // [ 1 1 1 0 ]
 
-    std::vector<std::vector<double> > ans = {{2,  0,  0,  0},
-                                             {3,  9,  0,  0},
-                                             {2, 10, 22,  0},
-                                             {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
-
-    static std::vector<std::vector<double> > mMask_4x4 = {{1, 0, 0, 0},
-                                                          {1, 1, 0, 0},
-                                                          {1, 1, 1, 0},
-                                                          {1, 1, 1, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_4x4, 0.);
+    int const NIL(666);
+    std::vector<int> ans = { 0, 1, 1,  NIL};
+    GraphBLAS::Vector<int> answer(ans, NIL);
 
     GraphBLAS::mxv(result,
-                   mMask,
+                   mask,
                    GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), mat, mat,
+                   GraphBLAS::ArithmeticSemiring<double>(), A, u,
                    true);
-
+    BOOST_CHECK_EQUAL(result.nvals(), 3);
     BOOST_CHECK_EQUAL(result, answer);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxv_masked_replace_a_transpose)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(mB_dense, 0.);
+    // Build some matrices.
+    std::vector<std::vector<int> > A_dense = {{1, 1, 0, 0, 1},
+                                              {1, 2, 2, 0, 1},
+                                              {0, 2, 3, 3, 1},
+                                              {0, 0, 3, 4, 1}};
+    std::vector<int> u4_dense =  { 1,-1, 1, 0};
+    std::vector<int> mask_dense =  { 1, 0, 1, 0, 1};
+    std::vector<int> ones_dense =  { 1, 1, 1, 1, 1};
+    GraphBLAS::Matrix<int, GraphBLAS::DirectedMatrixTag> A(A_dense, 0);
+    GraphBLAS::Vector<int> u(u4_dense, 0);
+    GraphBLAS::Vector<int> mask(mask_dense, 0);
+    GraphBLAS::Vector<int> result(ones_dense, 0);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(mOnes_3x4, 0.);
-
-    static std::vector<std::vector<double> > mMask_3x4 = {{1, 0, 0, 0},
-                                                          {1, 1, 0, 0},
-                                                          {1, 1, 1, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_3x4, 0.);
-
-    std::vector<std::vector<double> > ans = {{112,   0,   0,  0},
-                                             { 97, 131,   0,  0},
-                                             { 87, 111, 102,  0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
-
-    GraphBLAS::mxv(result,
-                   mMask,
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mA), mB,
-                   true);
-
-    BOOST_CHECK_EQUAL(result, answer);
-}
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(test_mxv_masked_replace_b_transpose)
-{
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-
-    std::vector<std::vector<double> > B = {{5, 8, 1},
-                                           {2, 6, 7},
-                                           {3, 4, 5}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(B, 0.);
-
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(mOnes_3x3, 0.);
-
-    static std::vector<std::vector<double> > mMask_3x3 = {{1, 0, 0},
-                                                          {1, 1, 0},
-                                                          {1, 1, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_3x3, 0.);
-
-    std::vector<std::vector<double> > ans = {{119,   0,  0},
-                                             { 66,  80,  0},
-                                             {108, 125, 98}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
+    int const NIL(666);
+    std::vector<int> ans = { 0, NIL, 1,  NIL, 1};
+    GraphBLAS::Vector<int> answer(ans, NIL);
 
     GraphBLAS::mxv(result,
-                   mMask,
+                   mask,
                    GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), mA, transpose(mB),
-                   true);
-
-    BOOST_CHECK_EQUAL(result, answer);
-}
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(test_mxv_masked_replace_a_and_b_transpose)
-{
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-    std::vector<std::vector<double> > B =  {{5, 8, 1},
-                                            {2, 6, 7},
-                                            {3, 4, 5}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(B, 0.);
-
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(mOnes_3x3, 0.);
-
-    static std::vector<std::vector<double> > mMask_3x3 = {{1, 0, 0},
-                                                          {1, 1, 0},
-                                                          {1, 1, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_3x3, 0.);
-
-    std::vector<std::vector<double> > ans =  {{99,   0,  0},
-                                              {83, 100,  0},
-                                              {72, 105, 78}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
-
-    GraphBLAS::mxv(result,
-                   mMask,
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mA), transpose(mB),
-                   true);
-
-    BOOST_CHECK_EQUAL(result, answer);
-}
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(test_mxv_masked_replace_a_equals_c_transpose)
-{
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(mIdentity_3x3, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(mOnes_3x3, 0.);
-
-    static std::vector<std::vector<double> > mMask_3x3 = {{1, 0, 0},
-                                                          {1, 1, 0},
-                                                          {1, 1, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_3x3, 0.);
-
-    std::vector<std::vector<double> > ans = {{12, 0, 0},
-                                             { 7, 5, 0},
-                                             { 3, 6, 9}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
-
-    //auto answer = GraphBLAS::transpose(mA);
-
-    GraphBLAS::mxv(result,
-                   mMask,
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mA), mB,
+                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), u,
                    true);
 
     BOOST_CHECK_EQUAL(result, answer);
@@ -497,220 +292,87 @@ BOOST_AUTO_TEST_CASE(test_mxv_masked_replace_a_equals_c_transpose)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxv_masked_bad_dimensions)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.); // 3x3
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(mB_dense, 0.); // 3x4
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result3x4(mOnes_3x4, 0.);
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(m3x3_dense, 0.);
 
-    static std::vector<std::vector<double> > mMask_3x3 = {{1, 0, 0},
-                                                          {1, 1, 0},
-                                                          {1, 1, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_3x3, 0.);
-    BOOST_CHECK_EQUAL(mMask.nvals(), 6);
+    GraphBLAS::Vector<double, GraphBLAS::SparseTag> u3(u3_dense, 0.);
+    GraphBLAS::Vector<double, GraphBLAS::SparseTag> m4(u4_dense, 0.);
+    GraphBLAS::Vector<double, GraphBLAS::SparseTag> w3(v3_ones, 0.);
 
     // incompatible mask matrix dimensions
     BOOST_CHECK_THROW(
-        (GraphBLAS::mxv(result3x4,
-                        mMask,
+        (GraphBLAS::mxv(w3,
+                        m4,
                         GraphBLAS::Second<double>(),
-                        GraphBLAS::ArithmeticSemiring<double>(), mA, mB)),
+                        GraphBLAS::ArithmeticSemiring<double>(), mA, u3)),
         GraphBLAS::DimensionException);
 }
+
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxv_masked_reg)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(mB_dense, 0.);
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(m3x3_dense, 0.);
 
-    static std::vector<std::vector<double> > mMask_3x4 = {{1, 0, 0, 0},
-                                                          {1, 1, 0, 0},
-                                                          {1, 1, 1, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_3x4, 0.);
-    BOOST_CHECK_EQUAL(mMask.nvals(), 6);
+    GraphBLAS::Vector<double, GraphBLAS::SparseTag> u3(u3_dense, 0.);
+    GraphBLAS::Vector<double, GraphBLAS::SparseTag> m3(u3_dense, 0.); // [1 1 -]
+    GraphBLAS::Vector<double> result(v3_ones, 0.);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(mOnes_3x4, 0.);
+    BOOST_CHECK_EQUAL(m3.nvals(), 2);
 
-    std::vector<std::vector<double> > ans = {{114,   1,   1,  1},
-                                             { 74,  97,   1,  1},
-                                             {119, 157, 112,  1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
+    std::vector<double> ans = {13, 1, 1}; // if accum is NULL then {13, 0, 1};
+    GraphBLAS::Vector<double> answer(ans, 0.);
 
     GraphBLAS::mxv(result,
-                   mMask,
+                   m3,
                    GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), mA, mB);
-    BOOST_CHECK_EQUAL(result.nvals(), 12);
+                   GraphBLAS::ArithmeticSemiring<double>(), mA, u3);
+
+    BOOST_CHECK_EQUAL(result.nvals(), 3); //2);
     BOOST_CHECK_EQUAL(result, answer);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxv_masked_reg_stored_zero)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(mB_dense, 0.);
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(m3x3_dense, 0.);
 
-    static std::vector<std::vector<double> > mMask_3x4 = {{1, 0, 0, 0},
-                                                          {1, 1, 0, 0},
-                                                          {1, 1, 1, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_3x4, 0.);
-    mMask.setElement(0, 1, 0.);
-    BOOST_CHECK_EQUAL(mMask.nvals(), 7);
+    GraphBLAS::Vector<double, GraphBLAS::SparseTag> u3(u3_dense, 0.);
+    GraphBLAS::Vector<double, GraphBLAS::SparseTag> m3(u3_dense); // [1 1 0]
+    GraphBLAS::Vector<double> result(v3_ones, 0.);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(mOnes_3x4, 0.);
+    BOOST_CHECK_EQUAL(m3.nvals(), 3);
 
-    std::vector<std::vector<double> > ans = {{114,   1,   1,  1},
-                                             { 74,  97,   1,  1},
-                                             {119, 157, 112,  1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
+    std::vector<double> ans = {13, 1, 1}; // if accum is NULL then {13, 0, 1};
+    GraphBLAS::Vector<double> answer(ans, 0.);
 
     GraphBLAS::mxv(result,
-                   mMask,
+                   m3,
                    GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), mA, mB);
-    BOOST_CHECK_EQUAL(result.nvals(), 12);
-    BOOST_CHECK_EQUAL(result, answer);
-}
+                   GraphBLAS::ArithmeticSemiring<double>(), mA, u3);
 
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(test_mxv_masked_duplicate_input)
-{
-    // Build some matrices.
-    std::vector<std::vector<double> > m = {{1, 1, 0, 0},
-                                           {1, 2, 2, 0},
-                                           {0, 2, 3, 3},
-                                           {0, 0, 3, 4}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mat(m, 0.);
-
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(mOnes_4x4, 0.);
-
-    std::vector<std::vector<double> > ans = {{2,  1,  1,  1},
-                                             {3,  9,  1,  1},
-                                             {2, 10, 22,  1},
-                                             {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
-
-    static std::vector<std::vector<double> > mMask_4x4 = {{1, 0, 0, 0},
-                                                          {1, 1, 0, 0},
-                                                          {1, 1, 1, 0},
-                                                          {1, 1, 1, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_4x4, 0.);
-
-    GraphBLAS::mxv(result,
-                   mMask,
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), mat, mat);
-
+    BOOST_CHECK_EQUAL(result.nvals(), 3); //2);
     BOOST_CHECK_EQUAL(result, answer);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxv_masked_a_transpose)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(mB_dense, 0.);
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(m3x3_dense, 0.);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(mOnes_3x4, 0.);
+    GraphBLAS::Vector<double, GraphBLAS::SparseTag> u3(u3_dense, 0.); // [1 1 -]
+    GraphBLAS::Vector<double, GraphBLAS::SparseTag> m3(u3_dense, 0.); // [1 1 -]
+    GraphBLAS::Vector<double> result(v3_ones, 0.);
 
-    static std::vector<std::vector<double> > mMask_3x4 = {{1, 0, 0, 0},
-                                                          {1, 1, 0, 0},
-                                                          {1, 1, 1, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_3x4, 0.);
+    BOOST_CHECK_EQUAL(m3.nvals(), 2);
 
-    std::vector<std::vector<double> > ans = {{112,   1,   1,  1},
-                                             { 97, 131,   1,  1},
-                                             { 87, 111, 102,  1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
+    std::vector<double> ans = {12, 1, 1}; // if accum is NULL then {13, 0, 1};
+    GraphBLAS::Vector<double> answer(ans, 0.);
 
     GraphBLAS::mxv(result,
-                   mMask,
+                   m3,
                    GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mA), mB);
+                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mA), u3);
 
-    BOOST_CHECK_EQUAL(result, answer);
-}
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(test_mxv_masked_b_transpose)
-{
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-
-    std::vector<std::vector<double> > B = {{5, 8, 1},
-                                           {2, 6, 7},
-                                           {3, 4, 5}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(B, 0.);
-
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(mOnes_3x3, 0.);
-
-    static std::vector<std::vector<double> > mMask_3x3 = {{1, 0, 0},
-                                                          {1, 1, 0},
-                                                          {1, 1, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_3x3, 0.);
-
-    std::vector<std::vector<double> > ans = {{119,   1,  1},
-                                             { 66,  80,  1},
-                                             {108, 125, 98}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
-
-    GraphBLAS::mxv(result,
-                   mMask,
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), mA, transpose(mB));
-
-    BOOST_CHECK_EQUAL(result, answer);
-}
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(test_mxv_masked_a_and_b_transpose)
-{
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-    std::vector<std::vector<double> > B =  {{5, 8, 1},
-                                            {2, 6, 7},
-                                            {3, 4, 5}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(B, 0.);
-
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(mOnes_3x3, 0.);
-
-    static std::vector<std::vector<double> > mMask_3x3 = {{1, 0, 0},
-                                                          {1, 1, 0},
-                                                          {1, 1, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_3x3, 0.);
-
-    std::vector<std::vector<double> > ans =  {{99,   1,  1},
-                                              {83, 100,  1},
-                                              {72, 105, 78}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
-
-    GraphBLAS::mxv(result,
-                   mMask,
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mA), transpose(mB));
-
-    BOOST_CHECK_EQUAL(result, answer);
-}
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(test_mxv_masked_a_equals_c_transpose)
-{
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(mIdentity_3x3, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(mOnes_3x3, 0.);
-
-    static std::vector<std::vector<double> > mMask_3x3 = {{1, 0, 0},
-                                                          {1, 1, 0},
-                                                          {1, 1, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_3x3, 0.);
-
-    std::vector<std::vector<double> > ans = {{12, 1, 1},
-                                             { 7, 5, 1},
-                                             { 3, 6, 9}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
-
-    //auto answer = GraphBLAS::transpose(mA);
-
-    GraphBLAS::mxv(result,
-                   mMask,
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mA), mB);
-
+    BOOST_CHECK_EQUAL(result.nvals(), 3); //2);
     BOOST_CHECK_EQUAL(result, answer);
 }
 
@@ -721,231 +383,109 @@ BOOST_AUTO_TEST_CASE(test_mxv_masked_a_equals_c_transpose)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_replace_bad_dimensions)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.); // 3x3
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(mB_dense, 0.); // 3x4
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result3x4(mOnes_3x4, 0.);
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(m3x3_dense, 0.);
 
-    static std::vector<std::vector<double> > mMask_3x3 = {{1, 0, 0},
-                                                          {1, 1, 0},
-                                                          {1, 1, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_3x3, 0.);
-    BOOST_CHECK_EQUAL(mMask.nvals(), 6);
+    GraphBLAS::Vector<double, GraphBLAS::SparseTag> u3(u3_dense, 0.);
+    GraphBLAS::Vector<double, GraphBLAS::SparseTag> m4(u4_dense, 0.);
+    GraphBLAS::Vector<double, GraphBLAS::SparseTag> w3(3);
 
     // incompatible mask matrix dimensions
     BOOST_CHECK_THROW(
-        (GraphBLAS::mxv(result3x4,
-                        GraphBLAS::complement(mMask),
+        (GraphBLAS::mxv(w3,
+                        GraphBLAS::complement(m4),
                         GraphBLAS::Second<double>(),
-                        GraphBLAS::ArithmeticSemiring<double>(), mA, mB,
+                        GraphBLAS::ArithmeticSemiring<double>(), mA, u3,
                         true)),
         GraphBLAS::DimensionException);
 }
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_replace_reg)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(mB_dense, 0.);
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(m3x3_dense, 0.);
 
-    static std::vector<std::vector<double> > mMask_3x4 = {{0, 1, 1, 1},
-                                                          {0, 0, 1, 1},
-                                                          {0, 0, 0, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_3x4, 0.);
-    BOOST_CHECK_EQUAL(mMask.nvals(), 6);
+    GraphBLAS::Vector<double, GraphBLAS::SparseTag> u3(u3_dense, 0.);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(mOnes_3x4, 0.);
+    std::vector<double> scmp_mask_dense = {0., 0., 1.};
+    GraphBLAS::Vector<double, GraphBLAS::SparseTag> m3(scmp_mask_dense, 0.);
+    GraphBLAS::Vector<double> result(v3_ones, 0.);
 
-    std::vector<std::vector<double> > ans = {{114,   0,   0,  0},
-                                             { 74,  97,   0,  0},
-                                             {119, 157, 112,  0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
+    BOOST_CHECK_EQUAL(m3.nvals(), 1);
+
+    std::vector<double> ans = {13, 0, 0};
+    GraphBLAS::Vector<double> answer(ans, 0.);
 
     GraphBLAS::mxv(result,
-                   GraphBLAS::complement(mMask),
+                   GraphBLAS::complement(m3),
                    GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), mA, mB,
+                   GraphBLAS::ArithmeticSemiring<double>(), mA, u3,
                    true);
-    BOOST_CHECK_EQUAL(result.nvals(), 6);
+
+    BOOST_CHECK_EQUAL(result.nvals(), 1);
     BOOST_CHECK_EQUAL(result, answer);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_replace_reg_stored_zero)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(mB_dense, 0.);
-
-    static std::vector<std::vector<double> > mMask_3x4 = {{0, 1, 1, 1},
-                                                          {0, 0, 1, 1},
-                                                          {0, 0, 0, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_3x4, 0.);
-    mMask.setElement(0, 0, 0.);
-    BOOST_CHECK_EQUAL(mMask.nvals(), 7);
-
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(mOnes_3x4, 0.);
-
-    std::vector<std::vector<double> > ans = {{114,   0,   0,  0},
-                                             { 74,  97,   0,  0},
-                                             {119, 157, 112,  0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
-
-    GraphBLAS::mxv(result,
-                   GraphBLAS::complement(mMask),
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), mA, mB,
-                   true);
-    BOOST_CHECK_EQUAL(result.nvals(), 6);
-    BOOST_CHECK_EQUAL(result, answer);
-}
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_replace_duplicate_input)
-{
+    // tests a computed and stored zero
+    // tests a stored zero in the mask
     // Build some matrices.
-    std::vector<std::vector<double> > m = {{1, 1, 0, 0},
-                                           {1, 2, 2, 0},
-                                           {0, 2, 3, 3},
-                                           {0, 0, 3, 4}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mat(m, 0.);
+    std::vector<std::vector<int> > A_dense = {{1, 1, 0, 0},
+                                              {1, 2, 2, 0},
+                                              {0, 2, 3, 3},
+                                              {0, 0, 3, 4}};
+    std::vector<int> u4_dense =  { 1,-1, 1, 0};
+    std::vector<int> scmp_mask_dense =  { 0, 0, 0, 1 };
+    std::vector<int> ones_dense =  { 1, 1, 1, 1};
+    GraphBLAS::Matrix<int, GraphBLAS::DirectedMatrixTag> A(A_dense, 0);
+    GraphBLAS::Vector<int> u(u4_dense, 0);
+    GraphBLAS::Vector<int> mask(scmp_mask_dense); //, 0);
+    GraphBLAS::Vector<int> result(ones_dense, 0);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(mOnes_4x4, 0.);
+    BOOST_CHECK_EQUAL(mask.nvals(), 4);  // [ 0 0 0 1 ]
 
-    std::vector<std::vector<double> > ans = {{2,  0,  0,  0},
-                                             {3,  9,  0,  0},
-                                             {2, 10, 22,  0},
-                                             {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
-
-    static std::vector<std::vector<double> > mMask_4x4 = {{0, 1, 1, 1},
-                                                          {0, 0, 1, 1},
-                                                          {0, 0, 0, 1},
-                                                          {0, 0, 0, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_4x4, 0.);
+    int const NIL(666);
+    std::vector<int> ans = { 0, 1, 1,  NIL};
+    GraphBLAS::Vector<int> answer(ans, NIL);
 
     GraphBLAS::mxv(result,
-                   GraphBLAS::complement(mMask),
+                   GraphBLAS::complement(mask),
                    GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), mat, mat,
+                   GraphBLAS::ArithmeticSemiring<double>(), A, u,
                    true);
-
+    BOOST_CHECK_EQUAL(result.nvals(), 3);
     BOOST_CHECK_EQUAL(result, answer);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_replace_a_transpose)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(mB_dense, 0.);
+    // Build some matrices.
+    std::vector<std::vector<int> > A_dense = {{1, 1, 0, 0, 1},
+                                              {1, 2, 2, 0, 1},
+                                              {0, 2, 3, 3, 1},
+                                              {0, 0, 3, 4, 1}};
+    std::vector<int> u4_dense =  { 1,-1, 1, 0};
+    std::vector<int> mask_dense =  { 0, 1, 0, 1, 0};
+    std::vector<int> ones_dense =  { 1, 1, 1, 1, 1};
+    GraphBLAS::Matrix<int, GraphBLAS::DirectedMatrixTag> A(A_dense, 0);
+    GraphBLAS::Vector<int> u(u4_dense, 0);
+    GraphBLAS::Vector<int> mask(mask_dense, 0);
+    GraphBLAS::Vector<int> result(ones_dense, 0);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(mOnes_3x4, 0.);
-
-    static std::vector<std::vector<double> > mMask_3x4 = {{0, 1, 1, 1},
-                                                          {0, 0, 1, 1},
-                                                          {0, 0, 0, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_3x4, 0.);
-
-    std::vector<std::vector<double> > ans = {{112,   0,   0,  0},
-                                             { 97, 131,   0,  0},
-                                             { 87, 111, 102,  0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
+    int const NIL(666);
+    std::vector<int> ans = { 0, NIL, 1,  NIL, 1};
+    GraphBLAS::Vector<int> answer(ans, NIL);
 
     GraphBLAS::mxv(result,
-                   GraphBLAS::complement(mMask),
+                   GraphBLAS::complement(mask),
                    GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mA), mB,
+                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), u,
                    true);
 
     BOOST_CHECK_EQUAL(result, answer);
 }
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_replace_b_transpose)
-{
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-
-    std::vector<std::vector<double> > B = {{5, 8, 1},
-                                           {2, 6, 7},
-                                           {3, 4, 5}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(B, 0.);
-
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(mOnes_3x3, 0.);
-
-    static std::vector<std::vector<double> > mMask_3x3 = {{0, 1, 1},
-                                                          {0, 0, 1},
-                                                          {0, 0, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_3x3, 0.);
-
-    std::vector<std::vector<double> > ans = {{119,   0,  0},
-                                             { 66,  80,  0},
-                                             {108, 125, 98}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
-
-    GraphBLAS::mxv(result,
-                   GraphBLAS::complement(mMask),
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), mA, transpose(mB),
-                   true);
-
-    BOOST_CHECK_EQUAL(result, answer);
-}
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_replace_a_and_b_transpose)
-{
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-    std::vector<std::vector<double> > B =  {{5, 8, 1},
-                                            {2, 6, 7},
-                                            {3, 4, 5}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(B, 0.);
-
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(mOnes_3x3, 0.);
-
-    static std::vector<std::vector<double> > mMask_3x3 = {{0, 1, 1},
-                                                          {0, 0, 1},
-                                                          {0, 0, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_3x3, 0.);
-
-    std::vector<std::vector<double> > ans =  {{99,   0,  0},
-                                              {83, 100,  0},
-                                              {72, 105, 78}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
-
-    GraphBLAS::mxv(result,
-                   GraphBLAS::complement(mMask),
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mA), transpose(mB),
-                   true);
-
-    BOOST_CHECK_EQUAL(result, answer);
-}
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_replace_a_equals_c_transpose)
-{
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(mIdentity_3x3, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(mOnes_3x3, 0.);
-
-    static std::vector<std::vector<double> > mMask_3x3 = {{0, 1, 1},
-                                                          {0, 0, 1},
-                                                          {0, 0, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_3x3, 0.);
-
-    std::vector<std::vector<double> > ans = {{12, 0, 0},
-                                             { 7, 5, 0},
-                                             { 3, 6, 9}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
-
-    //auto answer = GraphBLAS::transpose(mA);
-
-    GraphBLAS::mxv(result,
-                   GraphBLAS::complement(mMask),
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mA), mB,
-                   true);
-
-    BOOST_CHECK_EQUAL(result, answer);
-}
-
+#if 0
 //****************************************************************************
 // Tests using a complemented mask (with merge semantics)
 //****************************************************************************
@@ -1075,92 +615,6 @@ BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_a_transpose)
                                              { 97, 131,   1,  1},
                                              { 87, 111, 102,  1}};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
-
-    GraphBLAS::mxv(result,
-                   GraphBLAS::complement(mMask),
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mA), mB);
-
-    BOOST_CHECK_EQUAL(result, answer);
-}
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_b_transpose)
-{
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-
-    std::vector<std::vector<double> > B = {{5, 8, 1},
-                                           {2, 6, 7},
-                                           {3, 4, 5}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(B, 0.);
-
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(mOnes_3x3, 0.);
-
-    static std::vector<std::vector<double> > mMask_3x3 = {{0, 1, 1},
-                                                          {0, 0, 1},
-                                                          {0, 0, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_3x3, 0.);
-
-    std::vector<std::vector<double> > ans = {{119,   1,  1},
-                                             { 66,  80,  1},
-                                             {108, 125, 98}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
-
-    GraphBLAS::mxv(result,
-                   GraphBLAS::complement(mMask),
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), mA, transpose(mB));
-
-    BOOST_CHECK_EQUAL(result, answer);
-}
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_a_and_b_transpose)
-{
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-    std::vector<std::vector<double> > B =  {{5, 8, 1},
-                                            {2, 6, 7},
-                                            {3, 4, 5}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(B, 0.);
-
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(mOnes_3x3, 0.);
-
-    static std::vector<std::vector<double> > mMask_3x3 = {{0, 1, 1},
-                                                          {0, 0, 1},
-                                                          {0, 0, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_3x3, 0.);
-
-    std::vector<std::vector<double> > ans =  {{99,   1,  1},
-                                              {83, 100,  1},
-                                              {72, 105, 78}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
-
-    GraphBLAS::mxv(result,
-                   GraphBLAS::complement(mMask),
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mA), transpose(mB));
-
-    BOOST_CHECK_EQUAL(result, answer);
-}
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_a_equals_c_transpose)
-{
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(mA_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(mIdentity_3x3, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(mOnes_3x3, 0.);
-
-    static std::vector<std::vector<double> > mMask_3x3 = {{0, 1, 1},
-                                                          {0, 0, 1},
-                                                          {0, 0, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mMask(mMask_3x3, 0.);
-
-    std::vector<std::vector<double> > ans = {{12, 1, 1},
-                                             { 7, 5, 1},
-                                             { 3, 6, 9}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(ans, 0.);
-
-    //auto answer = GraphBLAS::transpose(mA);
 
     GraphBLAS::mxv(result,
                    GraphBLAS::complement(mMask),

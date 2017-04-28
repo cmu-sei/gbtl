@@ -53,14 +53,14 @@ BOOST_AUTO_TEST_CASE(mxm_reg_square)
     GraphBLAS::LilSparseMatrix<bool> mask(matMask, 0);
 
 //    GraphBLAS::backend::mxm_v3(result,
-//                               GraphBLAS::LilSparseNoMask(),
+//                               GraphBLAS::backend::NoMask(),
 //                               GraphBLAS::NoAccumulate(),               // accum
 //                               GraphBLAS::ArithmeticSemiring<double>(), // op
 //                               m1,
 //                               m2);
 
     GraphBLAS::backend::mxm_v3(result,
-                               GraphBLAS::LilSparseNoMask(),
+                               GraphBLAS::backend::NoMask(),
                                GraphBLAS::NoAccumulate(),               // accum
                                GraphBLAS::ArithmeticSemiring<double>(), // op
                                m1,
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(mxm_reg_rect)
     GraphBLAS::LilSparseMatrix<double> result(M, N);
 
     GraphBLAS::backend::mxm_v3(result,
-                               GraphBLAS::LilSparseNoMask(),
+                               GraphBLAS::backend::NoMask(),
                                GraphBLAS::NoAccumulate(),                // accum
                                GraphBLAS::ArithmeticSemiring<double>(),    // semiring
                                m1,
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(mxm_bool_accum)
                                                     {0, 0, 0},
                                                     {0, 0, 0}};
 
-    // without pre-existing but with mask                                              
+    // without pre-existing but with mask
     // std::vector<std::vector<double>> matAnswer = {{7, 0, 9},
     //                                               {0, 10, 0},
     //                                               {11, 0, 13}};
@@ -205,7 +205,7 @@ BOOST_AUTO_TEST_CASE(mxm_bool_accum_replace)
                                                     {4, 5, 6},
                                                     {7, 8, 9}};
 
-    // without pre-existing                                                
+    // without pre-existing
     // std::vector<std::vector<double>> matAnswer = {{7, 0, 9},
     //                                               {0, 10, 0},
     //                                               {11, 0, 13}};
@@ -293,7 +293,7 @@ BOOST_AUTO_TEST_CASE(mxm_reg_empty)
     GraphBLAS::LilSparseMatrix<double> result(M, N);
 
     GraphBLAS::backend::mxm_v3(result,
-                               GraphBLAS::LilSparseNoMask(),
+                               GraphBLAS::backend::NoMask(),
                                GraphBLAS::NoAccumulate(),
                                GraphBLAS::ArithmeticSemiring<double>(),
                                m1,
@@ -325,7 +325,7 @@ BOOST_AUTO_TEST_CASE(mxm2_empty_rows_and_columns)
     GraphBLAS::LilSparseMatrix<double> result(M, N);
 
     GraphBLAS::backend::mxm_v3(result,
-                               GraphBLAS::LilSparseNoMask(),
+                               GraphBLAS::backend::NoMask(),
                                GraphBLAS::NoAccumulate(),
                                GraphBLAS::ArithmeticSemiring<double>(),
                                m1,
@@ -359,7 +359,7 @@ BOOST_AUTO_TEST_CASE(mxm2_accum_with_empty_rows_and_columns)
     GraphBLAS::LilSparseMatrix<double> C(mat0, 0);
 
     GraphBLAS::backend::mxm_v3(C,
-                               GraphBLAS::LilSparseNoMask(),
+                               GraphBLAS::backend::NoMask(),
                                GraphBLAS::Plus<double>(),
                                GraphBLAS::ArithmeticSemiring<double>(),
                                A,

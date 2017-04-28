@@ -568,16 +568,6 @@ namespace GraphBLAS
         std::vector<std::vector<std::tuple<IndexType, ScalarT>>> m_data;
     };
 
-    // A marker class for when we should have no mask
-    // @todo: Find somewhere else to put this
-    class LilSparseNoMask
-    {
-    public:
-        LilSparseNoMask()
-        {
-        }
-    };
-
     // } // namespace backend
 
 } // namespace GraphBLAS

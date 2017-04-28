@@ -24,6 +24,7 @@
 #include <graphblas/accum.hpp>
 #include <graphblas/algebra.hpp>
 #include <graphblas/View.hpp>
+#include <graphblas/ComplementView.hpp>
 #include <graphblas/utility.hpp>
 
 #include <graphblas/detail/config.hpp>
@@ -32,7 +33,11 @@
 #include __GB_SYSTEM_HEADER
 #undef __GB_SYSTEM_HEADER
 
-/// @todo rename this file to ComplementView after cutover to GraphBLAS ns.
+#define __GB_SYSTEM_HEADER <graphblas/system/__GB_SYSTEM_ROOT/ComplementView.hpp>
+#include __GB_SYSTEM_HEADER
+#undef __GB_SYSTEM_HEADER
+
+/// @todo deprecated
 #define __GB_SYSTEM_HEADER <graphblas/system/__GB_SYSTEM_ROOT/NegateView.hpp>
 #include __GB_SYSTEM_HEADER
 #undef __GB_SYSTEM_HEADER
@@ -49,6 +54,12 @@
 
 namespace GraphBLAS
 {
+    template <typename ScalarT, typename... TagsT>
+    class Matrix;
+
+    template <typename ScalarT, typename... TagsT>
+    class Vector;
+
     //****************************************************************************
     // mxm, vxm, mxv
     //****************************************************************************
@@ -121,12 +132,6 @@ namespace GraphBLAS
                     AMatrixT  const &A,
                     UVectorT  const &u)
     {
-        /// @todo move the dimension checks to the backend
-        if ((w.size() != A.nrows()) ||
-            (u.size() != A.ncols()))
-        {
-            throw DimensionException("mxv(nomask)");
-        }
         backend::mxv(w.m_vec, accum, op, A.m_mat, u.m_vec);
     }
 
@@ -144,61 +149,41 @@ namespace GraphBLAS
                     UVectorT  const &u,
                     bool             replace_flag = false)
     {
-        /// @todo move the dimension checks to the backend
-        if ((w.size() != mask.size()) ||
-            (w.size() != A.nrows()) ||
-            (u.size() != A.ncols()))
-        {
-            throw DimensionException("mxv(mask)");
-        }
         backend::mxv(w.m_vec, mask.m_vec, accum, op, A.m_mat, u.m_vec, replace_flag);
     }
 
     //************************************************************************
 
-    // template<typename WVectorT,
-    //          typename AccumT,
-    //          typename SemiringT,
-    //          typename UVectorT,
-    //          typename AMatrixT>
-    // inline void vxm(WVectorT         &w,
-    //                 AccumT            accum,
-    //                 SemiringT         op,
-    //                 UVectorT   const &u,
-    //                 AMatrixT   const &A)
-    // {
-    //     /// @todo move the dimension checks to the backend
-    //     if ((w.size() != A.ncols()) ||
-    //         (u.size() != A.nrows()))
-    //     {
-    //         throw DimensionException("vxm(nomask)");
-    //     }
-    //     backend::vxm(w.m_vec, accum, op, u.m_vec, A.m_mat);
-    // }
+    template<typename WVectorT,
+             typename AccumT,
+             typename SemiringT,
+             typename UVectorT,
+             typename AMatrixT>
+    inline void vxm(WVectorT         &w,
+                    AccumT            accum,
+                    SemiringT         op,
+                    UVectorT   const &u,
+                    AMatrixT   const &A)
+    {
+        backend::vxm(w.m_vec, accum, op, u.m_vec, A.m_mat);
+    }
 
-    // template<typename WVectorT,
-    //          typename MaskT,
-    //          typename AccumT,
-    //          typename SemiringT,
-    //          typename UVectorT,
-    //          typename AMatrixT>
-    // inline void vxm(WVectorT         &w,
-    //                 MaskT      const &mask,
-    //                 AccumT            accum,
-    //                 SemiringT         op,
-    //                 UVectorT   const &u,
-    //                 AMatrixT   const &A,
-    //                 bool              replace_flag = false)
-    // {
-    //     /// @todo move the dimension checks to the backend
-    //     if ((w.size() != mask.size()) ||
-    //         (w.size() != A.ncols()) ||
-    //         (u.size() != A.nrows()))
-    //     {
-    //         throw DimensionException("vxm(mask)");
-    //     }
-    //     backend::vxm(w.m_vec, mask.m_vec, accum, op, u.m_vec, A.m_mat, replace_flag);
-    // }
+    template<typename WVectorT,
+             typename MaskT,
+             typename AccumT,
+             typename SemiringT,
+             typename UVectorT,
+             typename AMatrixT>
+    inline void vxm(WVectorT         &w,
+                    MaskT      const &mask,
+                    AccumT            accum,
+                    SemiringT         op,
+                    UVectorT   const &u,
+                    AMatrixT   const &A,
+                    bool              replace_flag = false)
+    {
+        backend::vxm(w.m_vec, mask.m_vec, accum, op, u.m_vec, A.m_mat, replace_flag);
+    }
 
     //****************************************************************************
     // eWiseAdd and eWiseMult
@@ -661,11 +646,27 @@ namespace GraphBLAS
      * @param[in]  a  The matrix to complement
      *
      */
-    template<typename MatrixT>
-    inline ComplementView<MatrixT> complement(MatrixT const &A)
+    template<typename ScalarT, typename... TagsT>
+    inline MatrixComplementView<Matrix<ScalarT, TagsT...>> complement(
+        Matrix<ScalarT, TagsT...> const &Mask)
     {
-        return ComplementView<MatrixT>(backend::complement(A.m_mat));
+        return MatrixComplementView<Matrix<ScalarT, TagsT...>>(
+            backend::matrix_complement(Mask.m_mat));
     }
+
+    template<typename ScalarT, typename... TagsT>
+    inline VectorComplementView<Vector<ScalarT, TagsT...>> complement(
+        Vector<ScalarT, TagsT...> const &mask)
+    {
+        return VectorComplementView<Vector<ScalarT, TagsT...>>(
+            backend::vector_complement(mask.m_vec));
+    }
+
+    // template<typename MatrixT>
+    // inline ComplementView<MatrixT> complement(MatrixT const &A)
+    // {
+    //     return ComplementView<MatrixT>(backend::complement(A.m_mat));
+    // }
 
     /**
      * @brief  "Flip" the rows and columns of a matrix

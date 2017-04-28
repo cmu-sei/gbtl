@@ -215,20 +215,17 @@ namespace GraphBLAS
         }
 
         template<typename RAIteratorIT,
-                 typename RAIteratorVT,
-                 typename AMatrixT>
-        inline void extractTuples(RAIteratorIT        i_it,
-                                  RAIteratorVT        v_it)
+                 typename RAIteratorVT>
+        void extractTuples(RAIteratorIT        i_it,
+                           RAIteratorVT        v_it)
         {
-            /// @todo
+            m_vec.extractTuples(i_it, v_it);
         }
 
-        template<typename ValueT,
-                 typename AMatrixT>
-        inline void extractTuples(IndexArrayType            &indices,
-                                  std::vector<ValueT>       &values)
+        void extractTuples(IndexArrayType        &indices,
+                           std::vector<ScalarT>  &values)
         {
-            /// @todo
+            m_vec.extractTuples(indices, values);
         }
 
         /// This replaces operator<< and outputs implementation specific
@@ -537,10 +534,13 @@ namespace GraphBLAS
                                   UVectorT   const &u,
                                   bool              replace_flag);
 
-        template<typename VectorT>
-        friend inline backend::ComplementView<VectorT> complement(
-            VectorT const &w);
+        //template<typename VectorT>
+        //friend inline backend::ComplementView<VectorT> complement(
+        //    VectorT const &w);
 
+        template<typename OtherScalarT, typename... OtherTagsT>
+        friend inline VectorComplementView<Vector<OtherScalarT, OtherTagsT...>> complement(
+            Vector<OtherScalarT, OtherTagsT...> const &mask);
     private:
         BackendType m_vec;
     };

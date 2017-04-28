@@ -349,6 +349,22 @@ namespace GraphBLAS
             }
         }
 
+        template<typename RAIteratorIT,
+                 typename RAIteratorVT>
+        void extractTuples(RAIteratorIT        i_it,
+                           RAIteratorVT        v_it)
+        {
+            throw 1;
+            /// @todo
+        }
+
+        void extractTuples(IndexArrayType        &indices,
+                           std::vector<ScalarT>  &values)
+        {
+            throw 1;
+            /// @todo
+        }
+
         // output specific to the storage layout of this type of matrix
         void printInfo(std::ostream &os) const
         {
