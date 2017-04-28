@@ -22,77 +22,8 @@
 
 namespace GraphBLAS
 {
-
-    namespace backend{
-        //************************************************************************
-        template <typename MatrixA, typename MatrixB>
-        void index_of(MatrixA const        &mat,
-                      MatrixB              &indexed_of_mat,
-                      graphblas::IndexType  base_index)
-        {
-            graphblas::IndexType rows, cols;
-            mat.get_shape(rows, cols);
-
-            using T = typename MatrixA::ScalarType;
-
-            for (IndexType i = 0; i < rows; ++i)
-            {
-                for (IndexType j = 0; j < cols; ++j)
-                {
-                    auto mat_ij = mat.extractElement(i, j);
-                    if (mat_ij > 0 || mat_ij == std::numeric_limits<T>::max())
-                    {
-                        indexed_of_mat.setElement(i, j, i + base_index);
-                    }
-                    else
-                    {
-                        // FIXME indexed_of_mat.get_zero()?
-                        indexed_of_mat.setElement(i, j, mat.get_zero());
-                    }
-                }
-            }
-        }
-
-        //************************************************************************
-        template<typename MatrixT>
-        void col_index_of(MatrixT &mat)
-        {
-            graphblas::IndexType rows, cols;
-            mat.get_shape(rows, cols);
-
-            for (IndexType i = 0; i < rows; ++i)
-            {
-                for (IndexType j = 0; j < cols; ++j)
-                {
-                    auto mat_ij = mat.extractElement(i, j);
-                    if (mat_ij != mat.get_zero())
-                    {
-                        mat.setElement(i, j, j);
-                    }
-                }
-            }
-        }
-
-        //************************************************************************
-        template<typename MatrixT>
-        void row_index_of(MatrixT &mat)
-        {
-            graphblas::IndexType rows, cols;
-            mat.get_shape(rows, cols);
-
-            for (IndexType i = 0; i < rows; ++i)
-            {
-                for (IndexType j = 0; j < cols; ++j)
-                {
-                    auto mat_ij = mat.extractElement(i, j);
-                    if (mat_ij != mat.get_zero())
-                    {
-                        mat.setElement(i, j, i);
-                    }
-                }
-            }
-        }
-
+    namespace backend
+    {
         /**
          *  @brief Output the matrix in array form.  Mainly for debugging
          *         small matrices.
@@ -117,7 +48,7 @@ namespace GraphBLAS
 
                 RowType const &row(mat.getRow(row_idx));
                 IndexType curr_idx = 0;
-                
+
                 if (row.empty())
                 {
                     while (curr_idx < num_cols)
@@ -131,7 +62,7 @@ namespace GraphBLAS
                     // Now walk the columns.  A sparse iter would be handy here...
                     IndexType col_idx;
                     ScalarT cell_val;
-                    
+
                     auto row_it = row.begin();
                     while (row_it != row.end())
                     {
@@ -191,12 +122,14 @@ namespace GraphBLAS
     } //backend
 }
 
+//****************************************************************************
 
 namespace graphblas
 {
     namespace backend_template_library = std;
 
-namespace backend{
+    namespace backend
+    {
     //************************************************************************
     template <typename MatrixA, typename MatrixB>
     void index_of(MatrixA const        &mat,
