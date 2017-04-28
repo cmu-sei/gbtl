@@ -69,22 +69,24 @@ namespace GraphBLAS
             IndexType nrow_A(A.nrows());
             IndexType ncol_B(B.ncols());
 
+            typedef typename SemiringT::result_type D3ScalarType;
             typedef typename AMatrixT::ScalarType AScalarType;
             typedef typename BMatrixT::ScalarType BScalarType;
             typedef typename CMatrixT::ScalarType CScalarType;
             typedef std::vector<std::tuple<IndexType,AScalarType> > ARowType;
             typedef std::vector<std::tuple<IndexType,BScalarType> > BColType;
             typedef std::vector<std::tuple<IndexType,CScalarType> > CColType;
+            typedef std::vector<std::tuple<IndexType,D3ScalarType> > TColType;
 
             // =================================================================
             // Do the basic dot-product work with the semi-ring.
-            LilSparseMatrix<typename SemiringT::result_type> T(nrow_A, ncol_B);
+            LilSparseMatrix<D3ScalarType> T(nrow_A, ncol_B);
 
             // Build this completely based on the semiring
             if ((A.nvals() > 0) && (B.nvals() > 0))
             {
                 // create a column of result at a time
-                CColType T_col;
+                TColType T_col;
                 for (IndexType col_idx = 0; col_idx < ncol_B; ++col_idx)
                 {
                     BColType B_col(B.getCol(col_idx));
@@ -96,11 +98,11 @@ namespace GraphBLAS
                             ARowType const &A_row(A.getRow(row_idx));
                             if (!A_row.empty())
                             {
-                                CScalarType C_val;
-                                if (dot(C_val, A_row, B_col, op))
+                                D3ScalarType T_val;
+                                if (dot(T_val, A_row, B_col, op))
                                 {
                                     T_col.push_back(
-                                            std::make_tuple(row_idx, C_val));
+                                            std::make_tuple(row_idx, T_val));
                                 }
                             }
                         }
@@ -117,9 +119,9 @@ namespace GraphBLAS
             //std::cerr << T << std::endl;
 
             // =================================================================
-            // Accumulate into T
+            // Accumulate into Z
 
-            LilSparseMatrix<typename SemiringT::result_type> Z(nrow_A, ncol_B);
+            LilSparseMatrix<CScalarType> Z(nrow_A, ncol_B);
             ewise_or_opt_accum(Z, C, T, accum);
 
             //std::cerr << ">>> Z <<< " << std::endl;
@@ -141,11 +143,3 @@ namespace GraphBLAS
 } // GraphBLAS
 
 #endif
-
-
-
-
-
-
-
-

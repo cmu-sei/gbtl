@@ -142,15 +142,11 @@ namespace GraphBLAS
          *                 BitmapSparseVector from.
          */
         BitmapSparseVector(BitmapSparseVector<ScalarT> const &rhs)
+            : m_size(rhs.m_size),
+              m_nvals(rhs.m_nvals),
+              m_vals(rhs.m_vals),
+              m_bitmap(rhs.m_bitmap)
         {
-            if (this != &rhs)
-            {
-                m_size = rhs.m_size;
-                m_nvals = rhs.m_nvals;
-                // TODO Copy zero?
-                m_vals = rhs.m_vals;
-                m_bitmap = rhs.m_bitmap;
-            }
         }
 
         ~BitmapSparseVector() {}
@@ -404,9 +400,21 @@ namespace GraphBLAS
             return contents;
         }
 
+        template <typename OtherScalarT>
+        void setContents(
+            std::vector<std::tuple<IndexType,OtherScalarT> > const &contents)
+        {
+            clear();
+            for (auto tupl : contents)
+            {
+                ++m_nvals;
+                m_bitmap[std::get<0>(tupl)] = true;
+                m_vals[std::get<0>(tupl)] = static_cast<ScalarT>(std::get<1>(tupl));
+            }
+        }
 
     private:
-        IndexType             m_size;
+        IndexType const       m_size;   // immutable after construction
         IndexType             m_nvals;
         std::vector<ScalarT>  m_vals;
         std::vector<bool>     m_bitmap;

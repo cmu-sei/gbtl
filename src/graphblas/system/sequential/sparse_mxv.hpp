@@ -43,100 +43,6 @@ namespace GraphBLAS
         /// Matrix-vector multiply for LilSparseMatrix and SparseBitmapVector
         /// @todo Need to figure out how to specialize
         template<typename WVectorT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename AMatrixT,
-                 typename UVectorT>
-        inline void mxv(WVectorT        &w,
-                        AccumT           accum,
-                        SemiringT        op,
-                        AMatrixT  const &A,
-                        UVectorT  const &u)
-        {
-            if ((w.size() != A.nrows()) ||
-                (u.size() != A.ncols()))
-            {
-                throw DimensionException("mxv(nomask): dimensions are not compatible.");
-            }
-
-
-            typedef typename AccumT::result_type AccumScalarType;
-            typedef typename SemiringT::result_type D3ScalarType;
-            typedef typename WVectorT::ScalarType WScalarType;
-            typedef typename AMatrixT::ScalarType AScalarType;
-            typedef typename UVectorT::ScalarType UScalarType;
-            typedef std::vector<std::tuple<IndexType,AScalarType> > ARowType;
-            typedef std::vector<std::tuple<IndexType,D3ScalarType> > TRowType;
-            typedef std::vector<std::tuple<IndexType,AccumScalarType> > ZRowType;
-
-            IndexType  num_elts(w.size());
-            TRowType   t;   // t = <D3(op), nrows(A), contents of A.op.u>
-
-            if (u.nvals() > 0)
-            {
-                // Two different approaches to performing the A *.+ u portion
-                // of the computation is selected by this if statement.
-                /// @todo need a heuristic for switching between two modes
-                if (u.size()/u.nvals() >= 4)
-                {
-                    auto u_contents(u.getContents());
-                    for (IndexType row_idx = 0; row_idx < num_elts; ++row_idx)
-                    {
-                        //std::cerr << "**1** PROCESSING MATRIX ROW " << row_idx
-                        //          << " *****" << std::endl;
-                        ARowType const &A_row(A.getRow(row_idx));
-
-                        if (!A_row.empty())
-                        {
-                            D3ScalarType t_val;
-                            if (dot(t_val, A_row, u_contents, op))
-                            {
-                                t.push_back(std::make_tuple(row_idx, t_val));
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    std::vector<bool> const &u_bitmap(u.get_bitmap());
-                    std::vector<UScalarType> const &u_values(u.get_vals());
-
-                    for (IndexType row_idx = 0; row_idx < num_elts; ++row_idx)
-                    {
-                        //std::cerr << "**2** PROCESSING MATRIX ROW " << row_idx
-                        //          << " *****" << std::endl;
-                        ARowType const &A_row(A.getRow(row_idx));
-
-                        if (!A_row.empty())
-                        {
-                            D3ScalarType t_val;
-                            if (dot2(t_val, A_row, u_bitmap, u_values, u.nvals(), op))
-                            {
-                                t.push_back(std::make_tuple(row_idx, t_val));
-                            }
-                        }
-                    }
-                }
-            }
-
-            // accum here
-            /// @todo  Detect if accum is GrB_NULL, and take a short cut
-            // Perform accum
-            ZRowType z;
-            ewise_or(z, w.getContents(), t, accum);
-
-            // store in w
-            w.clear();
-            for (auto tupl : z)
-            {
-                w.setElement(std::get<0>(tupl), std::get<1>(tupl));
-            }
-        }
-
-        //**********************************************************************
-        /// Matrix-vector multiply for LilSparseMatrix and SparseBitmapVector
-        /// @todo Need to figure out how to specialize
-        template<typename WVectorT,
                  typename MaskT,
                  typename AccumT,
                  typename SemiringT,
@@ -150,97 +56,65 @@ namespace GraphBLAS
                         UVectorT  const &u,
                         bool             replace_flag = false)
         {
-            if ((w.size() != mask.size()) ||
-                (w.size() != A.nrows()) ||
-                (u.size() != A.ncols()))
-            {
-                throw DimensionException("mxv(mask): dimensions are not compatible.");
-            }
+            check_same_vector_dimension(w, mask, "mxv: failed size(w) == size(mask) check");
+            check_size_nrows(w, A, "mxv: failed size(w) == nrows(A) check");
+            check_ncols_size(A, u, "mxv: failed nrows(A) == size(u) check");
 
-            typedef typename AccumT::result_type AccumScalarType;
+            // =================================================================
+            // Do the basic dot-product work with the semi-ring.
             typedef typename SemiringT::result_type D3ScalarType;
-            typedef typename MaskT::ScalarType MaskScalarType;
-            typedef typename WVectorT::ScalarType WScalarType;
             typedef typename AMatrixT::ScalarType AScalarType;
-            typedef typename UVectorT::ScalarType UScalarType;
-            typedef std::vector<std::tuple<IndexType,AScalarType> > ARowType;
-            typedef std::vector<std::tuple<IndexType,D3ScalarType> > TRowType;
-            typedef std::vector<std::tuple<IndexType,AccumScalarType> > ZRowType;
+            typedef std::vector<std::tuple<IndexType,AScalarType> >  ARowType;
 
-            IndexType  num_elts(w.size());
-            TRowType   t;
+            std::vector<std::tuple<IndexType, D3ScalarType> > t;
 
-            if ((u.nvals() > 0) && (mask.nvals() > 0))
+            if ((A.nvals() > 0) && (u.nvals() > 0))
             {
-                // Two different approaches to performing the A *.+ u portion
-                // of the computation is selected by this if statement.
-                /// @todo need a heuristic for switching between two modes
-                if (u.size()/u.nvals() >= 4)
+                IndexType  num_elts(w.size());
+                auto u_contents(u.getContents());
+
+                for (IndexType row_idx = 0; row_idx < num_elts; ++row_idx)
                 {
-                    auto u_contents(u.getContents());
-                    for (IndexType row_idx = 0; row_idx < num_elts; ++row_idx)
+                    ARowType const &A_row(A.getRow(row_idx));
+
+                    if (!A_row.empty())
                     {
-                        //std::cerr << "**1** PROCESSING VECTOR ELEMENT " << row_idx
-                        //          << " *****" << std::endl;
-                        ARowType const &A_row(A.getRow(row_idx));
-
-                        if (!A_row.empty() &&
-                            mask.hasElement(row_idx) &&
-                            (mask.extractElement(row_idx) != false))
+                        D3ScalarType t_val;
+                        if (dot(t_val, A_row, u_contents, op))
                         {
-                            D3ScalarType t_val;
-                            if (dot(t_val, A_row, u_contents, op))
-                            {
-                                t.push_back(std::make_tuple(row_idx, t_val));
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    std::vector<bool> const &u_bitmap(u.get_bitmap());
-                    std::vector<UScalarType> const &u_values(u.get_vals());
-
-                    for (IndexType row_idx = 0; row_idx < num_elts; ++row_idx)
-                    {
-                        //std::cerr << "**2** PROCESSING VECTOR ELEMENT " << row_idx
-                        //          << " *****" << std::endl;
-                        ARowType const &A_row(A.getRow(row_idx));
-
-                        if (!A_row.empty() &&
-                            mask.hasElement(row_idx) &&
-                            (mask.extractElement(row_idx) != false))
-                        {
-                            D3ScalarType t_val;
-                            if (dot2(t_val, A_row, u_bitmap, u_values, u.nvals(), op))
-                            {
-                                t.push_back(std::make_tuple(row_idx, t_val));
-                            }
+                            t.push_back(std::make_tuple(row_idx, t_val));
                         }
                     }
                 }
             }
 
-            // accum here
-            /// @todo  Detect if accum is GrB_NULL, and take a short cut
-            // Perform accum
-            ZRowType z;
-            if (replace_flag)
-            {
-                ewise_or_mask(z, w.getContents(), t, mask.getContents(),
-                              accum, replace_flag);
-            }
-            else // merge
-            {
-                ewise_or(z, w.getContents(), t, accum);
-            }
+            // =================================================================
+            // Accumulate into Z
+            /// @todo Do we need a type generator for z: D(w) if no accum, or D3(accum)
+            typedef typename WVectorT::ScalarType WScalarType;
+            std::vector<std::tuple<IndexType, WScalarType> > z;
+            ewise_or_opt_accum_1D(z, w, t, accum);
 
-            // store in w
-            w.clear();
-            for (auto tupl : z)
-            {
-                w.setElement(std::get<0>(tupl), std::get<1>(tupl));
-            }
+            // =================================================================
+            // Copy Z into the final output, w, considering mask and replace
+            write_with_opt_mask_1D(w, z, mask, replace_flag);
+
+            // if (replace_flag)
+            // {
+            //     ewise_or_mask(z, w.getContents(), t, mask.getContents(),
+            //                   accum, replace_flag);
+            // }
+            // else // merge
+            // {
+            //     ewise_or(z, w.getContents(), t, accum);
+            // }
+
+            // // store in w
+            // w.clear();
+            // for (auto tupl : z)
+            // {
+            //     w.setElement(std::get<0>(tupl), std::get<1>(tupl));
+            // }
         }
 
     } // backend

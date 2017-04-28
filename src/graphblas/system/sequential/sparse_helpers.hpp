@@ -303,7 +303,6 @@ namespace GraphBLAS
 
         //**********************************************************************
         /// Apply element-wise operation to union on sparse vectors.
-        // @todo: What is the bool return type for?
         template <typename D1, typename D2, typename D3, typename BinaryOpT>
         void ewise_or(std::vector<std::tuple<GraphBLAS::IndexType,D3> >       &ans,
                       std::vector<std::tuple<GraphBLAS::IndexType,D1> > const &vec1,
@@ -367,8 +366,8 @@ namespace GraphBLAS
         }
 
         //**********************************************************************
-        template < typename CMatrixT,
-                   typename ZMatrixT,
+        template < typename ZMatrixT,
+                   typename CMatrixT,
                    typename TMatrixT,
                    typename BinaryOpT >
         void ewise_or_opt_accum(ZMatrixT         &Z,
@@ -392,9 +391,9 @@ namespace GraphBLAS
         //**********************************************************************
 
         // Specialized version that gets used when we don't have an accumulator
-        template < typename CMatrixT,
-                typename ZMatrixT,
-                typename TMatrixT>
+        template < typename ZMatrixT,
+                   typename CMatrixT,
+                   typename TMatrixT>
         void ewise_or_opt_accum(ZMatrixT                    &Z,
                                 CMatrixT const              &C,
                                 TMatrixT const              &T,
@@ -403,126 +402,156 @@ namespace GraphBLAS
             sparse_copy(Z, T);
         }
 
+        //**********************************************************************
+        template <typename ZScalarT,
+                  typename WVectorT,
+                  typename TScalarT,
+                  typename BinaryOpT>
+        void ewise_or_opt_accum_1D(
+            std::vector<std::tuple<GraphBLAS::IndexType,ZScalarT>>       &z,
+            WVectorT const                                               &w,
+            std::vector<std::tuple<GraphBLAS::IndexType,TScalarT>> const &t,
+            BinaryOpT                                                     accum)
+        {
+            //z.clear();
+            ewise_or(z, w.getContents(), t, accum);
+        }
+
+        //**********************************************************************
+        // Specialized version that gets used when we don't have an accumulator
+        template <typename ZScalarT,
+                  typename WVectorT,
+                  typename TScalarT>
+        void ewise_or_opt_accum_1D(
+            std::vector<std::tuple<GraphBLAS::IndexType,ZScalarT>>       &z,
+            WVectorT const                                               &w,
+            std::vector<std::tuple<GraphBLAS::IndexType,TScalarT>> const &t,
+            GraphBLAS::NoAccumulate )
+        {
+            //sparse_copy(z, t);
+            z.setContents(t);
+        }
+
         //************************************************************************
 
         // @todo:  Remove! We won't use this when we switch to separate op/mask steps
         // @deprecated
-        template <typename D1, typename D2, typename D3, typename M, typename BinaryOpT>
-        void ewise_or_mask(std::vector<std::tuple<GraphBLAS::IndexType,D3> >       &ans,
-                           std::vector<std::tuple<GraphBLAS::IndexType,D1> > const &vec1,
-                           std::vector<std::tuple<GraphBLAS::IndexType,D2> > const &vec2,
-                           std::vector<std::tuple<GraphBLAS::IndexType,M> > const  &mask,
-                           BinaryOpT                                                op,
-                           bool                                                     replace)
-        {
-            // DESIGN:
-            // This algo is driven by the mask, so we move to a valid mask entry, then
-            // "catch up" the other iterators.  If they match the current valid mask
-            // then we process them as with the other ewise option.  Rinse, repeat.
-            ans.clear();
+        // template <typename D1, typename D2, typename D3, typename M, typename BinaryOpT>
+        // void ewise_or_mask(std::vector<std::tuple<GraphBLAS::IndexType,D3> >       &ans,
+        //                    std::vector<std::tuple<GraphBLAS::IndexType,D1> > const &vec1,
+        //                    std::vector<std::tuple<GraphBLAS::IndexType,D2> > const &vec2,
+        //                    std::vector<std::tuple<GraphBLAS::IndexType,M> > const  &mask,
+        //                    BinaryOpT                                                op,
+        //                    bool                                                     replace)
+        // {
+        //     // DESIGN:
+        //     // This algo is driven by the mask, so we move to a valid mask entry, then
+        //     // "catch up" the other iterators.  If they match the current valid mask
+        //     // then we process them as with the other ewise option.  Rinse, repeat.
+        //     ans.clear();
 
-            //std::cerr << "" << std::endl;
-            //std::cerr << "Starting ewise_or_mask on row" << std::endl;
-            if (mask.empty())
-            {
-                //std::cerr << "Mask exhausted(0)." << std::endl;
-                return;
-            }
+        //     //std::cerr << "" << std::endl;
+        //     //std::cerr << "Starting ewise_or_mask on row" << std::endl;
+        //     if (mask.empty())
+        //     {
+        //         //std::cerr << "Mask exhausted(0)." << std::endl;
+        //         return;
+        //     }
 
-            auto v1_it = vec1.begin();
-            auto v2_it = vec2.begin();
-            auto mask_it = mask.begin();
+        //     auto v1_it = vec1.begin();
+        //     auto v2_it = vec2.begin();
+        //     auto mask_it = mask.begin();
 
-            D1 v1_val;
-            D2 v2_val;
-            M  mask_val;
-            GraphBLAS::IndexType v1_idx, v2_idx, mask_idx;
+        //     D1 v1_val;
+        //     D2 v2_val;
+        //     M  mask_val;
+        //     GraphBLAS::IndexType v1_idx, v2_idx, mask_idx;
 
-            // Walk the mask.
-            while (mask_it != mask.end())
-            {
-                // Make sure the mask is on a valid value
-                increment_until_true(mask_it, mask.end());
+        //     // Walk the mask.
+        //     while (mask_it != mask.end())
+        //     {
+        //         // Make sure the mask is on a valid value
+        //         increment_until_true(mask_it, mask.end());
 
-                // If we run out of mask, we are done!
-                if (mask_it == mask.end())
-                {
-                    //std::cerr << "Mask exhausted(1)." << std::endl;
-                    return;
-                }
+        //         // If we run out of mask, we are done!
+        //         if (mask_it == mask.end())
+        //         {
+        //             //std::cerr << "Mask exhausted(1)." << std::endl;
+        //             return;
+        //         }
 
-                std::tie(mask_idx, mask_val) = *mask_it;
+        //         std::tie(mask_idx, mask_val) = *mask_it;
 
-                // Increment V1 while less than mask
-                increment_while_below(v1_it, vec1.end(), mask_idx);
+        //         // Increment V1 while less than mask
+        //         increment_while_below(v1_it, vec1.end(), mask_idx);
 
-                // Increment V2 while less than mask
-                increment_while_below(v2_it, vec2.end(), mask_idx);
+        //         // Increment V2 while less than mask
+        //         increment_while_below(v2_it, vec2.end(), mask_idx);
 
-                // If any of the input vectors match, put their values in the output vectors
-                // invoking the supplied binary operator if we have both values, otherwise
-                // just put in that value.
-                if ((v1_it != vec1.end()) && (v2_it != vec2.end()))
-                {
-                    std::tie(v1_idx, v1_val) = *v1_it;
-                    std::tie(v2_idx, v2_val) = *v2_it;
+        //         // If any of the input vectors match, put their values in the output vectors
+        //         // invoking the supplied binary operator if we have both values, otherwise
+        //         // just put in that value.
+        //         if ((v1_it != vec1.end()) && (v2_it != vec2.end()))
+        //         {
+        //             std::tie(v1_idx, v1_val) = *v1_it;
+        //             std::tie(v2_idx, v2_val) = *v2_it;
 
-                    if (v1_idx == v2_idx && v1_idx == mask_idx)
-                    {
-                        //std::cerr << "Accum: " << std::to_string(v1_val) << " op " <<
-                        //    std::to_string(v2_val) << std::endl;
-                        ans.push_back(std::make_tuple(mask_idx,
-                                                      static_cast<D3>(op(v1_val, v2_val))));
-                    }
-                    else if (v1_idx == mask_idx)
-                    {
-                        if (!replace)
-                        {
-                            ans.push_back(std::make_tuple(mask_idx, static_cast<D3>(v1_val)));
-                            //std::cerr << "Copying v1. val: " << std::to_string(v1_val) << std::endl;
-                        }
-                    }
-                    else if (v2_idx == mask_idx)
-                    {
-                        ans.push_back(std::make_tuple(mask_idx, static_cast<D3>(v2_val)));
-                        //std::cerr << "Copying v2. val: " <<  std::to_string(v2_val) << std::endl;
-                    }
-                }
-                else if (v1_it != vec1.end())
-                {
-                    std::tie(v1_idx, v1_val) = *v1_it;
-                    if (v1_idx == mask_idx)
-                    {
-                        if (!replace)
-                        {
-                            ans.push_back(std::make_tuple(mask_idx, static_cast<D3>(v1_val)));
-                            //std::cerr << "Copying v1. val: " << std::to_string(v1_val) << std::endl;
-                        }
-                    }
-                }
-                else if (v2_it != vec2.end())
-                {
-                    std::tie(v2_idx, v2_val) = *v2_it;
-                    if (v2_idx == mask_idx)
-                    {
-                        ans.push_back(std::make_tuple(mask_idx, static_cast<D3>(v2_val)));
-                        //std::cerr << "Copying v2. val: " <<  std::to_string(v2_val) << std::endl;
-                    }
-                }
-                else
-                {
-                    // We have more mask, but no more other vec
-                    //std::cerr << "Inputs (not mask) exhausted." << std::endl;
-                    return;
-                }
+        //             if (v1_idx == v2_idx && v1_idx == mask_idx)
+        //             {
+        //                 //std::cerr << "Accum: " << std::to_string(v1_val) << " op " <<
+        //                 //    std::to_string(v2_val) << std::endl;
+        //                 ans.push_back(std::make_tuple(mask_idx,
+        //                                               static_cast<D3>(op(v1_val, v2_val))));
+        //             }
+        //             else if (v1_idx == mask_idx)
+        //             {
+        //                 if (!replace)
+        //                 {
+        //                     ans.push_back(std::make_tuple(mask_idx, static_cast<D3>(v1_val)));
+        //                     //std::cerr << "Copying v1. val: " << std::to_string(v1_val) << std::endl;
+        //                 }
+        //             }
+        //             else if (v2_idx == mask_idx)
+        //             {
+        //                 ans.push_back(std::make_tuple(mask_idx, static_cast<D3>(v2_val)));
+        //                 //std::cerr << "Copying v2. val: " <<  std::to_string(v2_val) << std::endl;
+        //             }
+        //         }
+        //         else if (v1_it != vec1.end())
+        //         {
+        //             std::tie(v1_idx, v1_val) = *v1_it;
+        //             if (v1_idx == mask_idx)
+        //             {
+        //                 if (!replace)
+        //                 {
+        //                     ans.push_back(std::make_tuple(mask_idx, static_cast<D3>(v1_val)));
+        //                     //std::cerr << "Copying v1. val: " << std::to_string(v1_val) << std::endl;
+        //                 }
+        //             }
+        //         }
+        //         else if (v2_it != vec2.end())
+        //         {
+        //             std::tie(v2_idx, v2_val) = *v2_it;
+        //             if (v2_idx == mask_idx)
+        //             {
+        //                 ans.push_back(std::make_tuple(mask_idx, static_cast<D3>(v2_val)));
+        //                 //std::cerr << "Copying v2. val: " <<  std::to_string(v2_val) << std::endl;
+        //             }
+        //         }
+        //         else
+        //         {
+        //             // We have more mask, but no more other vec
+        //             //std::cerr << "Inputs (not mask) exhausted." << std::endl;
+        //             return;
+        //         }
 
-                // Now move to the next mask entry.
-                ++mask_it;
+        //         // Now move to the next mask entry.
+        //         ++mask_it;
 
-            } // while mask_it != end
+        //     } // while mask_it != end
 
-            //std::cerr << "Mask exhausted(2)." << std::endl;
-        }
+        //     //std::cerr << "Mask exhausted(2)." << std::endl;
+        // }
 
         //************************************************************************
         /// Apply element-wise operation to intersection of sparse vectors.
@@ -734,6 +763,86 @@ namespace GraphBLAS
                                  bool                       replace)
         {
             sparse_copy(C, Z);
+        }
+
+        //**********************************************************************
+        // Vector version
+
+        template <typename WVectorT,
+                  typename ZScalarT,
+                  typename MaskT>
+        void write_with_opt_mask_1D(
+            WVectorT                                           &w,
+            std::vector<std::tuple<IndexType, ZScalarT>> const &z,
+            MaskT const                                        &mask,
+            bool                                                replace)
+        {
+            typedef typename WVectorT::ScalarType WScalarType;
+            std::vector<std::tuple<IndexType, WScalarType> > tmp_row;
+
+            apply_with_mask(tmp_row, w.getContents(), z,
+                            mask.getContents(), replace);
+
+            // Now, set the new one.  Yes, we can optimize this later
+            w.setContents(tmp_row);
+        }
+
+        //**********************************************************************
+        // Vector version specialized for no mask
+
+        template <typename WVectorT,
+                  typename ZScalarT>
+        void write_with_opt_mask_1D(
+            WVectorT                                           &w,
+            std::vector<std::tuple<IndexType, ZScalarT>> const &z,
+            backend::NoMask const                              &foo,
+            bool                                                replace)
+        {
+            //sparse_copy(w, z);
+            w.setContents(z);
+        }
+
+        //**********************************************************************
+        // Put all dimension checks (especially with optional masks here
+        template <typename V1, typename V2>
+        void check_same_vector_dimension(V1 const          &w,
+                                         V2 const          &v,
+                                         std::string const &msg)
+        {
+            if (w.size() != v.size())
+            {
+                throw GraphBLAS::DimensionException(msg);
+            }
+        }
+
+        //**********************************************************************
+        // Put all dimension checks (especially with optional masks here
+        template <typename V1>
+        void check_same_vector_dimension(V1 const               &w,
+                                         backend::NoMask const  &v,
+                                         std::string const      &msg)
+        {
+            // No op
+        }
+
+        //**********************************************************************
+        template <typename V1, typename M2>
+        void check_size_nrows(V1 const &v1, M2 const &m2, std::string const &msg)
+        {
+            if (v1.size() != m2.nrows())
+            {
+                throw GraphBLAS::DimensionException(msg);
+            }
+        }
+
+        //**********************************************************************
+        template <typename M1, typename V2>
+        void check_ncols_size(M1 const &m1, V2 const &v2, std::string const &msg)
+        {
+            if (m1.ncols() != v2.size())
+            {
+                throw GraphBLAS::DimensionException(msg);
+            }
         }
 
         //**********************************************************************

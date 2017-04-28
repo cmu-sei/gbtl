@@ -87,20 +87,6 @@ namespace GraphBLAS
     //************************************************************************
 
     template<typename WVectorT,
-             typename AccumT,
-             typename SemiringT,
-             typename AMatrixT,
-             typename UVectorT>
-    inline void mxv(WVectorT        &w,
-                    AccumT           accum,
-                    SemiringT        op,
-                    AMatrixT  const &A,
-                    UVectorT  const &u)
-    {
-        backend::mxv(w.m_vec, accum, op, A.m_mat, u.m_vec);
-    }
-
-    template<typename WVectorT,
              typename MaskT,
              typename AccumT,
              typename SemiringT,
@@ -114,7 +100,8 @@ namespace GraphBLAS
                     UVectorT  const &u,
                     bool             replace_flag = false)
     {
-        backend::mxv(w.m_vec, mask.m_vec, accum, op, A.m_mat, u.m_vec, replace_flag);
+        backend::mxv(w.m_vec, mask.m_vec, accum, op, A.m_mat, u.m_vec,
+                     replace_flag);
     }
 
     //************************************************************************

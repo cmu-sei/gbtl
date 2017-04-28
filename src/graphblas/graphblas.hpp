@@ -29,7 +29,8 @@
 #include <graphblas/Matrix.hpp>
 #include <graphblas/Vector.hpp>
 #include <graphblas/ComplementView.hpp>
-#include <graphblas/View.hpp>
+#include <graphblas/TransposeView.hpp>
+#include <graphblas/View.hpp> // deprecated
 
 #include <graphblas/operations.hpp>
 

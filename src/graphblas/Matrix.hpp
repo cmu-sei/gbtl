@@ -19,8 +19,9 @@
 #include <graphblas/detail/config.hpp>
 #include <graphblas/detail/param_unpack.hpp>
 #include <graphblas/utility.hpp>
-#include <graphblas/View.hpp>
+#include <graphblas/TransposeView.hpp>
 #include <graphblas/ComplementView.hpp>
+#include <graphblas/View.hpp> // deprecated
 
 // Include matrix definitions from the appropriate backend.
 #define __GB_SYSTEM_MATRIX_HEADER <graphblas/system/__GB_SYSTEM_ROOT/Matrix.hpp>
@@ -378,34 +379,36 @@ namespace GraphBLAS
         backend::NoMask m_vec;
     };
 
+
     //**************************************************************************
     // Currently these won't work because of include order.
+    /// @todo move all these to backend::sparse_helpers
 
     template <typename M1, typename M2>
     void check_nrows_nrows(M1 m1, M2 m2)
     {
         if (m1.nrows() != m2.nrows())
-            throw DimensionException("nroiws doesn't match nrows");
-    };
+            throw DimensionException("nrows doesn't match nrows");
+    }
 
     template <typename M1>
     void check_nrows_nrows(M1 m1, NoMask mask)
     {
         // No op
-    };
+    }
 
     template <typename M1, typename M2>
     void check_ncols_ncols(M1 m1, M2 m2)
     {
         if (m1.ncols() != m2.ncols())
             throw DimensionException("ncols doesn't match ncols");
-    };
+    }
 
     template <typename M1>
     void check_ncols_ncols(M1 m1, NoMask mask)
     {
         // No op
-    };
+    }
 
     template <typename M1, typename M2>
     void check_ncols_nrows(M1 m1, M2 m2)
@@ -425,7 +428,6 @@ namespace GraphBLAS
     {
         // No op
     };
-
 } // end namespace GraphBLAS
 
 //****************************************************************************
