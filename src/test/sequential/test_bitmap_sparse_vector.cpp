@@ -184,9 +184,11 @@ BOOST_AUTO_TEST_CASE(test_mxv_sparse_nomask_noaccum)
     std::vector<double> vec = {6, 0, 0, 4};
     GraphBLAS::BitmapSparseVector<double> v1(vec, 0);
 
-    GraphBLAS::BitmapSparseVector<double> w(16), mask(16);
+    GraphBLAS::BitmapSparseVector<double> w(16);
 
-    GraphBLAS::backend::mxv(w, mask, GraphBLAS::Second<double>(),
+    GraphBLAS::backend::mxv(w,
+                            GraphBLAS::backend::NoMask(),
+                            GraphBLAS::Second<double>(),
                             GraphBLAS::ArithmeticSemiring<double>(),
                             m1, v1, true);
 

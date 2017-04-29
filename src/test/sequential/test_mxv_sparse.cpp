@@ -25,7 +25,8 @@ using namespace GraphBLAS;
 BOOST_AUTO_TEST_SUITE(mxm_suite)
 
 //****************************************************************************
-// Matrix multiply
+// Matrix-vector multiply
+/// @todo move to front end tests.
 BOOST_AUTO_TEST_CASE(mxv_reg)
 {
     std::vector<std::vector<double>> mat = {{8, 1, 6},
@@ -68,7 +69,7 @@ BOOST_AUTO_TEST_CASE(mxv_reg)
                             v1);
     BOOST_CHECK_EQUAL(result, ans1);
 
-
+    result.clear();
     GraphBLAS::backend::mxv(result,
                             m,                                          // mask
                             GraphBLAS::Second<double>(),                // accum
@@ -77,6 +78,7 @@ BOOST_AUTO_TEST_CASE(mxv_reg)
                             v2);
     BOOST_CHECK_EQUAL(result, ans2);
 
+    result.clear();
     GraphBLAS::backend::mxv(result,
                             m,                                          // mask
                             GraphBLAS::Second<double>(),                // accum
@@ -85,6 +87,7 @@ BOOST_AUTO_TEST_CASE(mxv_reg)
                             v3);
     BOOST_CHECK_EQUAL(result, ans3);
 
+    result.clear();
     GraphBLAS::backend::mxv(result,
                             m,                                          // mask
                             GraphBLAS::Second<double>(),                // accum
