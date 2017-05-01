@@ -78,6 +78,7 @@ noinst_PROGRAMS = \
 test_sequential_sparse_algebra \
 test_sequential_sparse_mxm \
 test_sequential_sparse_mxv \
+test_sequential_sparse_vxm \
 test_sequential_math \
 test_sequential_graphblas_algebra \
 test_sequential_mxm \
@@ -105,6 +106,8 @@ test_sequential_sparse_algebra_SOURCES = test_sparse_algebra.cpp
 test_sequential_sparse_mxm_SOURCES = test_sparse_mxm.cpp
 
 test_sequential_sparse_mxv_SOURCES = test_sparse_mxv.cpp
+
+test_sequential_sparse_vxm_SOURCES = test_sparse_vxm.cpp
 
 #DEPRECATED TEST CODE
 

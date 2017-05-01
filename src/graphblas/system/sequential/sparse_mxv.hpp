@@ -41,7 +41,6 @@ namespace GraphBLAS
     {
         //**********************************************************************
         /// Matrix-vector multiply for LilSparseMatrix and SparseBitmapVector
-        /// @todo Need to figure out how to specialize
         template<typename WVectorT,
                  typename MaskT,
                  typename AccumT,
@@ -56,9 +55,12 @@ namespace GraphBLAS
                         UVectorT  const &u,
                         bool             replace_flag = false)
         {
-            check_same_vector_dimension(w, mask, "mxv: failed size(w) == size(mask) check");
-            check_size_nrows(w, A, "mxv: failed size(w) == nrows(A) check");
-            check_ncols_size(A, u, "mxv: failed nrows(A) == size(u) check");
+            check_vector_size(w, mask,
+                              "mxv: failed size(w) == size(mask) check");
+            check_vector_size_nrows(w, A,
+                                    "mxv: failed size(w) == nrows(A) check");
+            check_vector_size_ncols(u, A,
+                                    "mxv: failed size(u) == ncols(A) check");
 
             // =================================================================
             // Do the basic dot-product work with the semi-ring.
@@ -70,10 +72,8 @@ namespace GraphBLAS
 
             if ((A.nvals() > 0) && (u.nvals() > 0))
             {
-                IndexType  num_elts(w.size());
                 auto u_contents(u.getContents());
-
-                for (IndexType row_idx = 0; row_idx < num_elts; ++row_idx)
+                for (IndexType row_idx = 0; row_idx < w.size(); ++row_idx)
                 {
                     ARowType const &A_row(A.getRow(row_idx));
 
@@ -90,7 +90,9 @@ namespace GraphBLAS
 
             // =================================================================
             // Accumulate into Z
-            /// @todo Do we need a type generator for z: D(w) if no accum, or D3(accum)
+            /// @todo Do we need a type generator for z: D(w) if no accum,
+            /// or D3(accum). I think that output type should be equivalent, but
+            /// still need to work the proof.
             typedef typename WVectorT::ScalarType WScalarType;
             std::vector<std::tuple<IndexType, WScalarType> > z;
             ewise_or_opt_accum_1D(z, w, t, accum);
@@ -98,23 +100,6 @@ namespace GraphBLAS
             // =================================================================
             // Copy Z into the final output, w, considering mask and replace
             write_with_opt_mask_1D(w, z, mask, replace_flag);
-
-            // if (replace_flag)
-            // {
-            //     ewise_or_mask(z, w.getContents(), t, mask.getContents(),
-            //                   accum, replace_flag);
-            // }
-            // else // merge
-            // {
-            //     ewise_or(z, w.getContents(), t, accum);
-            // }
-
-            // // store in w
-            // w.clear();
-            // for (auto tupl : z)
-            // {
-            //     w.setElement(std::get<0>(tupl), std::get<1>(tupl));
-            // }
         }
 
     } // backend

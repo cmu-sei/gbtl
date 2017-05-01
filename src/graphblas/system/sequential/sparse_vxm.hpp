@@ -40,74 +40,7 @@ namespace GraphBLAS
     namespace backend
     {
         //**********************************************************************
-        /// Matrix-vector multiply for LilSparseMatrix and SparseBitmapVector
-        /// @todo Need to figure out how to specialize
-        template<typename WVectorT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename AMatrixT,
-                 typename UVectorT>
-        inline void vxm(WVectorT        &w,
-                        AccumT           accum,
-                        SemiringT        op,
-                        UVectorT  const &u,
-                        AMatrixT  const &A)
-        {
-            if ((w.size() != A.ncols()) ||
-                (u.size() != A.nrows()))
-            {
-                throw DimensionException("vxm(nomask): dimensions are not compatible.");
-            }
-
-            typedef typename AccumT::result_type AccumScalarType;
-            typedef typename SemiringT::result_type D3ScalarType;
-            typedef typename WVectorT::ScalarType WScalarType;
-            typedef typename AMatrixT::ScalarType AScalarType;
-            typedef typename UVectorT::ScalarType UScalarType;
-            typedef std::vector<std::tuple<IndexType,AScalarType> > AColType;
-            typedef std::vector<std::tuple<IndexType,D3ScalarType> > TRowType;
-            typedef std::vector<std::tuple<IndexType,AccumScalarType> > ZRowType;
-
-            IndexType  num_elts(w.size());
-            TRowType   t;   // t = <D3(op), nrows(A), contents of A.op.u>
-
-            if (u.nvals() > 0)
-            {
-                auto u_contents(u.getContents());
-                for (IndexType col_idx = 0; col_idx < num_elts; ++col_idx)
-                {
-                    //std::cerr << "***** PROCESSING MATRIX COL " << col_idx
-                    //          << " *****" << std::endl;
-                    AColType const &A_col(A.getCol(col_idx));
-
-                    if (!A_col.empty())
-                    {
-                        D3ScalarType t_val;
-                        if (dot(t_val, u_contents, A_col, op))
-                        {
-                            t.push_back(std::make_tuple(col_idx, t_val));
-                        }
-                    }
-                }
-            }
-
-            // accum here
-            /// @todo  Detect if accum is GrB_NULL, and take a short cut
-            // Perform accum
-            ZRowType z;
-            ewise_or(z, w.getContents(), t, accum);
-
-            // store in w
-            w.clear();
-            for (auto tupl : z)
-            {
-                w.setElement(std::get<0>(tupl), std::get<1>(tupl));
-            }
-        }
-
-        //**********************************************************************
-        /// Matrix-vector multiply for LilSparseMatrix and SparseBitmapVector
-        /// @todo Need to figure out how to specialize
+        /// Vector-matrix multiply for LilSparseMatrix and SparseBitmapVector
         template<typename WVectorT,
                  typename MaskT,
                  typename AccumT,
@@ -122,42 +55,29 @@ namespace GraphBLAS
                         AMatrixT  const &A,
                         bool             replace_flag = false)
         {
-            /// @todo move the dimension checks to the backend
-            if ((w.size() != mask.size()) ||
-                (w.size() != A.ncols()) ||
-                (u.size() != A.nrows()))
-            {
-                throw DimensionException("vxm(mask): dimensions are not compatible.");
-            }
+            check_vector_size(w, mask,
+                              "vxm: failed size(w) == size(mask) check");
+            check_vector_size_ncols(w, A,
+                                    "vxm: failed size(w) == ncols(A) check");
+            check_vector_size_nrows(u, A,
+                                    "vxm: failed size(u) == nrows(A) check");
 
-            typedef typename AccumT::result_type AccumScalarType;
+            // =================================================================
+            // Do the basic dot-product work with the semi-ring.
             typedef typename SemiringT::result_type D3ScalarType;
-            typedef typename MaskT::ScalarType MaskScalarType;
-            typedef typename WVectorT::ScalarType WScalarType;
             typedef typename AMatrixT::ScalarType AScalarType;
-            typedef typename UVectorT::ScalarType UScalarType;
             typedef std::vector<std::tuple<IndexType,AScalarType> > AColType;
-            typedef std::vector<std::tuple<IndexType,D3ScalarType> > TRowType;
-            typedef std::vector<std::tuple<IndexType,AccumScalarType> > ZRowType;
 
-            IndexType  num_elts(w.size());
-            // t = <D3(op), nrows(A), contents of A.op.u>
-            TRowType   t;
-            //IndexArrayType t_indices;
-            //std::vector<D3ScalarType> t_values;
+            std::vector<std::tuple<IndexType, D3ScalarType> > t;
 
-            if ((u.nvals() > 0) && (mask.nvals() > 0))
+            if ((A.nvals() > 0) && (u.nvals() > 0))
             {
                 auto u_contents(u.getContents());
-                for (IndexType col_idx = 0; col_idx < num_elts; ++col_idx)
+                for (IndexType col_idx = 0; col_idx < w.size(); ++col_idx)
                 {
-                    //std::cerr << "***** PROCESSING MATRIX COL " << col_idx
-                    //          << " *****" << std::endl;
                     AColType const &A_col(A.getCol(col_idx));
 
-                    if (!A_col.empty() &&
-                        mask.hasElement(col_idx) &&
-                        (mask.extractElement(col_idx) != false))
+                    if (!A_col.empty())
                     {
                         D3ScalarType t_val;
                         if (dot(t_val, u_contents, A_col, op))
@@ -168,26 +88,18 @@ namespace GraphBLAS
                 }
             }
 
-            // accum here
-            /// @todo  Detect if accum is GrB_NULL, and take a short cut
-            // Perform accum
-            ZRowType z;
-            if (replace_flag)
-            {
-                ewise_or_mask(z, w.getContents(), t, mask.getContents(),
-                              accum, replace_flag);
-            }
-            else // merge
-            {
-                ewise_or(z, w.getContents(), t, accum);
-            }
-            // store in w
-            w.clear();
-            for (auto tupl : z)
-            {
-                w.setElement(std::get<0>(tupl), std::get<1>(tupl));
-            }
+            // =================================================================
+            // Accumulate into Z
+            /// @todo Do we need a type generator for z: D(w) if no accum,
+            /// or D3(accum). I think that output type should be equivalent, but
+            /// still need to work the proof.
+            typedef typename WVectorT::ScalarType WScalarType;
+            std::vector<std::tuple<IndexType, WScalarType> > z;
+            ewise_or_opt_accum_1D(z, w, t, accum);
 
+            // =================================================================
+            // Copy Z into the final output, w, considering mask and replace
+            write_with_opt_mask_1D(w, z, mask, replace_flag);
         }
 
     } // backend

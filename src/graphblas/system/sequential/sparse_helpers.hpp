@@ -429,7 +429,12 @@ namespace GraphBLAS
             GraphBLAS::NoAccumulate )
         {
             //sparse_copy(z, t);
-            z.setContents(t);
+            for (auto tupl: t)
+            {
+                z.push_back(std::make_tuple(
+                                std::get<0>(tupl),
+                                static_cast<ZScalarT>(std::get<1>(tupl))));
+            }
         }
 
         //************************************************************************
@@ -804,12 +809,12 @@ namespace GraphBLAS
 
         //**********************************************************************
         // Put all dimension checks (especially with optional masks here
-        template <typename V1, typename V2>
-        void check_same_vector_dimension(V1 const          &w,
-                                         V2 const          &v,
-                                         std::string const &msg)
+        template <typename Vector1T, typename Vector2T>
+        void check_vector_size(Vector1T const    &v1,
+                               Vector2T const    &v2,
+                               std::string const &msg)
         {
-            if (w.size() != v.size())
+            if (v1.size() != v2.size())
             {
                 throw GraphBLAS::DimensionException(msg);
             }
@@ -817,29 +822,43 @@ namespace GraphBLAS
 
         //**********************************************************************
         // Put all dimension checks (especially with optional masks here
-        template <typename V1>
-        void check_same_vector_dimension(V1 const               &w,
-                                         backend::NoMask const  &v,
-                                         std::string const      &msg)
+        template <typename VectorT>
+        void check_vector_size(VectorT const          &v1,
+                               backend::NoMask const  &v2,
+                               std::string const      &msg)
         {
             // No op
         }
 
         //**********************************************************************
-        template <typename V1, typename M2>
-        void check_size_nrows(V1 const &v1, M2 const &m2, std::string const &msg)
+        // Put all dimension checks (especially with optional masks here
+        template <typename VectorT>
+        void check_vector_size(backend::NoMask const  &v1,
+                               VectorT const          &v2,
+                               std::string const      &msg)
         {
-            if (v1.size() != m2.nrows())
+            // No op
+        }
+
+        //**********************************************************************
+        template <typename VectorT, typename MatrixT>
+        void check_vector_size_nrows(VectorT     const &vec,
+                                     MatrixT     const &mat,
+                                     std::string const &msg)
+        {
+            if (vec.size() != mat.nrows())
             {
                 throw GraphBLAS::DimensionException(msg);
             }
         }
 
         //**********************************************************************
-        template <typename M1, typename V2>
-        void check_ncols_size(M1 const &m1, V2 const &v2, std::string const &msg)
+        template <typename VectorT, typename MatrixT>
+        void check_vector_size_ncols(VectorT     const &vec,
+                                     MatrixT     const &mat,
+                                     std::string const &msg)
         {
-            if (m1.ncols() != v2.size())
+            if (vec.size() != mat.ncols())
             {
                 throw GraphBLAS::DimensionException(msg);
             }
