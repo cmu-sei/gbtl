@@ -184,7 +184,7 @@ namespace GraphBLAS
             //std::cerr << ">>> Mask <<< " << std::endl;
             //std::cerr << mask << std::endl;
 
-            // ===============================================================
+            // =================================================================
             // Extract to T
             LilSparseMatrix<CScalarType> T(C.nrows(), C.ncols());
             matrixExtract(T, A, row_indicies, col_indicies);

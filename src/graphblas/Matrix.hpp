@@ -266,6 +266,19 @@ namespace GraphBLAS
         }
 
     private:
+
+        template<typename CMatrixT,
+                typename MaskT,
+                typename AccumT,
+                typename UnaryFunctionT,
+                typename AMatrixT>
+        friend inline void apply(CMatrixT             &C,
+                          MaskT          const &mask,
+                          AccumT                accum,
+                          UnaryFunctionT        op,
+                          AMatrixT       const &A,
+                          bool                  replace_flag);
+
         template<typename CMatrixT,
                  typename AccumT,
                  typename SemiringT,

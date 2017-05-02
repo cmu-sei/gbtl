@@ -512,22 +512,24 @@ namespace GraphBLAS
     // Apply
     //****************************************************************************
 
-    // vector variant
-    template<typename WVectorT,
-             typename MaskT,
-             typename AccumT,
-             typename UnaryFunctionT,
-             typename UVectorT>
-    inline void apply(WVectorT             &w,
-                      MaskT          const &mask,
-                      AccumT                accum,
-                      UnaryFunctionT        op,
-                      UVectorT       const &u,
-                      bool                  replace_flag = false);
-
     /// @todo no way to distinguish between vector and matrix variants
+    // are we really suppose to be able to accept some other matrix or
+    // vector class?  Why can't we just say "matrix?"
+
+    // vector variant
+//    template<typename WVectorT,
+//             typename MaskT,
+//             typename AccumT,
+//             typename UnaryFunctionT,
+//             typename UVectorT>
+//    inline void apply(WVectorT             &w,
+//                      MaskT          const &mask,
+//                      AccumT                accum,
+//                      UnaryFunctionT        op,
+//                      UVectorT       const &u,
+//                      bool                  replace_flag = false);
+
     // matrix variant
-    /*
     template<typename CMatrixT,
              typename MaskT,
              typename AccumT,
@@ -538,8 +540,10 @@ namespace GraphBLAS
                       AccumT                accum,
                       UnaryFunctionT        op,
                       AMatrixT       const &A,
-                      bool                  replace_flag = false);
-    */
+                      bool                  replace_flag = false)
+    {
+        backend::apply(C.m_mat, Mask.m_mat, accum, op, A.m_mat, replace_flag);
+    };
 
     //****************************************************************************
     // reduce
