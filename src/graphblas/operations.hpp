@@ -530,17 +530,37 @@ namespace GraphBLAS
 //                      bool                  replace_flag = false);
 
     // matrix variant
+//    template<typename CMatrixT,
+//            typename MaskT,
+//            typename AccumT,
+//            typename UnaryFunctionT,
+//            typename AMatrixT>
+//    inline void apply(CMatrixT             &C,
+//                      MaskT          const &Mask,
+//                      AccumT                accum,
+//                      UnaryFunctionT        op,
+//                      AMatrixT       const &A,
+//                      bool                  replace_flag = false)
+//    {
+//        backend::apply(C.m_mat, Mask.m_mat, accum, op, A.m_mat, replace_flag);
+//    };
+
+    // matrix variant
+    // This works for the matrix apply version.  I haven't tried the
+    // vector version, but I would suspect this would work as well.
+    // Isn't Matrix part of the api??
     template<typename CMatrixT,
              typename MaskT,
              typename AccumT,
              typename UnaryFunctionT,
-             typename AMatrixT>
-    inline void apply(CMatrixT             &C,
-                      MaskT          const &Mask,
-                      AccumT                accum,
-                      UnaryFunctionT        op,
-                      AMatrixT       const &A,
-                      bool                  replace_flag = false)
+             typename AScalarT,
+             typename ...ATagsT>
+    inline void apply(CMatrixT                                         &C,
+                      MaskT                                     const  &Mask,
+                      AccumT                                            accum,
+                      UnaryFunctionT                                    op,
+                      GraphBLAS::Matrix<AScalarT, ATagsT...>    const  &A,
+                      bool                                 replace_flag = false)
     {
         backend::apply(C.m_mat, Mask.m_mat, accum, op, A.m_mat, replace_flag);
     };
