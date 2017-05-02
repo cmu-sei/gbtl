@@ -267,7 +267,11 @@ namespace GraphBLAS
                         AMatrixT       const &A,
                         IndexArrayType const &row_indices,
                         IndexArrayType const &col_indices,
-                        bool                  replace_flag = false);
+                        bool                  replace_flag = false)
+    {
+        backend::extract(C.m_mat, Mask.m_mat, accum, A.m_mat, row_indices,
+                         col_indices, replace_flag);
+    };
 
     // Extract col (or row with transpose)
     template<typename WVectorT,

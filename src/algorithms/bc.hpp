@@ -83,6 +83,7 @@ namespace algorithms
         // Placeholder for GrB_ALL where dimension is n
         //std::vector<GraphBLAS::IndexType> GrB_ALL_n;     // fill with sequence
         GraphBLAS::IndexArrayType GrB_ALL_n;
+        // @todo: Implement GrB_ALL_n support in extract
         GrB_ALL_n.reserve(n);
         for (GraphBLAS::IndexType idx = 0; idx < n; ++idx)
         {
@@ -91,58 +92,59 @@ namespace algorithms
 
         // The current frontier for all BFS's (from all roots)
         // It is initialized to the out neighbors of the specified roots
-        // GraphBLAS::Matrix<int32_t> Frontier(nsver, n);     // F is nsver x n (rows)
-        // GraphBLAS::extract(A, s, GrB_ALL_n, Frontier);
-        // GraphBLAS::print_matrix(std::cerr, Frontier, "initial frontier");
+        GraphBLAS::Matrix<int32_t> Frontier(nsver, n);     // F is nsver x n (rows)
+        GraphBLAS::extract(Frontier, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(), A, s, GrB_ALL_n);
+        GraphBLAS::print_matrix(std::cerr, Frontier, "initial frontier");
 
-        // // NumSP holds number of shortest paths to a vertex from a given root
-        // // NumSP is initialized with the each starting root in 's':
-        // // NumSP[i,s[i]] = 1 where 0 <= i < nsver; implied zero elsewhere
-        // graphblas::Matrix<int32_t> NumSP(nsver, n);
-        // graphblas::buildmatrix(NumSP, GrB_ALL_nsver, s,
-        //                        std::vector<int32_t>(nsver, 1));
-        // graphblas::print_matrix(std::cerr, NumSP, "initial NumSP");
+        // NumSP holds number of shortest paths to a vertex from a given root
+        // NumSP is initialized with the each starting root in 's':
+        // NumSP[i,s[i]] = 1 where 0 <= i < nsver; implied zero elsewhere
+        GraphBLAS::Matrix<int32_t> NumSP(nsver, n);
+        NumSP.build(GrB_ALL_nsver, s, std::vector<int32_t>(nsver, 1));
+        GraphBLAS::print_matrix(std::cerr, NumSP, "initial NumSP");
 
         // // ==================== BFS phase ====================
         // // Placeholders for GraphBLAS operators
-        // graphblas::PlusMonoid<int32_t>            Int32Add;
-        // graphblas::ArithmeticSemiring<int32_t>    Int32AddMul;
-        // graphblas::math::Identity<bool, int32_t>  GrB_IDENTITY_BOOL;
+//        graphblas::PlusMonoid<int32_t>            Int32Add;
+//        graphblas::ArithmeticSemiring<int32_t>    Int32AddMul;
+//        graphblas::math::Identity<bool, int32_t>  GrB_IDENTITY_BOOL;
 
-        // std::vector<graphblas::Matrix<bool>* > Sigmas;
-        // std::cerr << "======= START BFS phase ======" << std::endl;
-        // int32_t d = 0;
-        // while (Frontier.get_nnz() > 0)
-        // {
-        //     std::cerr << "------- BFS iteration " << d << " --------" << std::endl;
+        GraphBLAS::PlusMonoid<int32_t>            Int32Add;
+        GraphBLAS::ArithmeticSemiring<int32_t>    Int32AddMul;
 
-        //     Sigmas.push_back(new graphblas::Matrix<bool>(nsver, n, false));
-        //     // Sigma[d] = (bool)F
-        //     graphblas::apply(Frontier, *(Sigmas[d]), GrB_IDENTITY_BOOL);
-        //     graphblas::print_matrix(std::cerr, *Sigmas[d], "Sigma[d] = (bool)Frontier");
-        //     // P = F + P
-        //     graphblas::ewiseadd(NumSP, Frontier, NumSP, Int32Add);
-        //     graphblas::print_matrix(std::cerr, NumSP, "NumSP");
-        //     // F<!P> = F +.* A
+        // This is defined in the new space
+        //GraphBLAS::math::Identity<bool, int32_t>  GrB_IDENTITY_BOOL;
+        GrB_IDENTITY_BOOL identity_bool;
 
-        //     // graphblas::mxmMasked(Frontier,                                  // a
-        //     //                      A,                                         // b
-        //     //                      Frontier,                                  // c
-        //     //                      graphblas::negate(NumSP, Int32AddMul),     // m
-        //     //                      Int32AddMul);                              // op
+        std::vector<graphblas::Matrix<bool>* > Sigmas;
+        std::cerr << "======= START BFS phase ======" << std::endl;
+        int32_t d = 0;
+//        while (Frontier.nvals() > 0)
+//        {
+//            std::cerr << "------- BFS iteration " << d << " --------" << std::endl;
+//
+//            Sigmas.push_back(new graphblas::Matrix<bool>(nsver, n, false));
+            // Sigma[d] = (bool)F
+//            GraphBLAS::apply(Frontier, *(Sigmas[d]), GrB_IDENTITY_BOOL);
+//            GraphBLAS::print_matrix(std::cerr, *Sigmas[d], "Sigma[d] = (bool)Frontier");
+//            // P = F + P
+//            GraphBLAS::ewiseadd(NumSP, Frontier, NumSP, Int32Add);
+//            GraphBLAS::print_matrix(std::cerr, NumSP, "NumSP");
+//            // F<!P> = F +.* A
+//
+//            GraphBLAS::mxm(Frontier,                                        // C
+//                           graphblas::negate(NumSP, Int32AddMul),           // M
+//                           GraphBLAS::Second<double>(),                     // accum
+//                           Int32AddMul,                                     // op
+//                           Frontier,                                        // A
+//                           A);                                              // B
+//
+//            graphblas::print_matrix(std::cerr, Frontier, "New frontier");
+//
+//            ++d;
 
-        //     GraphBLAS::mxm(Frontier,                                        // C
-        //                     graphblas::negate(NumSP, Int32AddMul),          // M
-        //                     GraphBLAS::Second<double>(),                    // accum
-        //                     Int32AddMul,                                     // op
-        //                     Frontier,                                       // A
-        //                     A);                                              // B
-
-        //     graphblas::print_matrix(std::cerr, Frontier, "New frontier");
-
-        //     ++d;
-        // }
-        // std::cerr << "======= END BFS phase =======" << std::endl;
+//        }
+//        std::cerr << "======= END BFS phase =======" << std::endl;
 
         // // ================== backprop phase ==================
         // // Placeholders for GraphBLAS operators

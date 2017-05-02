@@ -190,7 +190,8 @@ BOOST_AUTO_TEST_CASE(metrics_test_vertex_betweennes_centrality_batch_alt)
 }
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(metrics_test_vertex_betweennes_centrality_batch_alt_trans)
+//BOOST_AUTO_TEST_CASE(metrics_test_vertex_betweennes_centrality_batch_alt_trans)
+BOOST_AUTO_TEST_CASE(metrics_batch_alt_trans)
 {
     Matrix<double, DirectedMatrixTag> betweenness(8,8);
     graphblas::buildmatrix(betweenness, br.begin(), bc.begin(), bv.begin(), bv.size());
@@ -237,10 +238,14 @@ BOOST_AUTO_TEST_CASE(metrics_test_vertex_betweennes_centrality_batch_alt_trans)
     BOOST_CHECK_EQUAL(result_all.size(), answer_all.size());
     for (unsigned int ix = 0; ix < result_all.size(); ++ix)
         BOOST_CHECK_CLOSE(result_all[ix], answer_all[ix], 0.0001);
+
+    std::cerr << "******************** END ALT TRANS ***********************" << std::endl;
+
 }
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(metrics_test_vertex_betweennes_centrality_batch_alt_trans_v2)
+//BOOST_AUTO_TEST_CASE(metrics_test_vertex_betweennes_centrality_batch_alt_trans_v2)
+BOOST_AUTO_TEST_CASE(metrics_batch_alt_trans_v2)
 {
 //    Matrix<double, DirectedMatrixTag> betweenness(8,8);
 //    graphblas::buildmatrix(betweenness, br.begin(), bc.begin(), bv.begin(), bv.size());
@@ -288,6 +293,8 @@ BOOST_AUTO_TEST_CASE(metrics_test_vertex_betweennes_centrality_batch_alt_trans_v
     // BOOST_CHECK_EQUAL(result_all.size(), answer_all.size());
     // for (unsigned int ix = 0; ix < result_all.size(); ++ix)
     //     BOOST_CHECK_CLOSE(result_all[ix], answer_all[ix], 0.0001);
+
+    std::cerr << "******************** END ALT ++ V2 ++ TRANS ***********************" << std::endl;
 
 }
 

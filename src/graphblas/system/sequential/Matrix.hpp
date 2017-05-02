@@ -31,6 +31,13 @@ namespace GraphBLAS
         {
         public:
             NoMask() {}
+
+            friend std::ostream &operator<<(std::ostream             &os,
+                                            NoMask          const    &mask)
+            {
+                os << "No mask" << std::endl;
+                return os;
+            }
         };
 
         //********************************************************************

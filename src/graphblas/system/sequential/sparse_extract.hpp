@@ -75,7 +75,9 @@ namespace GraphBLAS
                 {
                     std::tie(tmp_idx, tmp_value) = *A_it;
                     if (tmp_idx == wanted_idx)
-                        vec_dest.push_back(std::make_tuple(out_idx, static_cast<CScalarT>(tmp_value)));
+                        vec_dest.push_back(
+                                std::make_tuple(out_idx,
+                                                static_cast<CScalarT>(tmp_value)));
                 }
             }
         }
@@ -100,19 +102,21 @@ namespace GraphBLAS
             // NOTE!! - Backend code. We expect that all dimension checks done elsewhere.
 
             typedef std::vector<std::tuple<IndexType,AScalarT> > ARowType;
-            typedef std::vector<std::tuple<IndexType,CScalarT> > CColType;
+            typedef std::vector<std::tuple<IndexType,CScalarT> > CRowType;
 
             C.clear();
 
             // Walk the rows
-            for (IndexType out_row_index = 0; out_row_index < row_indicies.size(); ++out_row_index)
+            for (IndexType out_row_index = 0;
+                 out_row_index < row_indicies.size();
+                 ++out_row_index)
             {
                 ARowType row(A.getRow(row_indicies[out_row_index]));
                 auto row_it = row.begin();
 
                 IndexType tmp_idx;
                 AScalarT tmp_value;
-                ARowType out_row;
+                CRowType out_row;
 
                 // Extract the values from the row
                 vectorExtract(out_row, row, col_indicies);
@@ -122,20 +126,19 @@ namespace GraphBLAS
             }
         }
 
-        //*****************************************************************************************
-        //*****************************************************************************************
-        //*****************************************************************************************
-
-
+        //**********************************************************************
+        //**********************************************************************
+        //**********************************************************************
 
         // Vector variant
 
-        //*****************************************************************************************
+        //**********************************************************************
 
         /**
          * 4.3.6.2 extract: Standard matrix variant
-         * Extract a sub-matrix from a larger matrix as specied by a set of row indices and a set of column
-         *  indices. The result is a matrix whose size is equal to size of the sets of indices.
+         * Extract a sub-matrix from a larger matrix as specied by a set of row
+         *  indices and a set of column indices. The result is a matrix whose
+         *  size is equal to size of the sets of indices.
          */
         template<typename CMatrixT,
                 typename MMatrixT,
@@ -146,80 +149,65 @@ namespace GraphBLAS
                      AccumT                      accum,
                      AMatrixT           const   &A,
                      IndexArrayType     const   &row_indicies,
-                     IndexArrayType     const   &col_indicies)
+                     IndexArrayType     const   &col_indicies,
+                     bool                        replace = false)
         // Descriptor
         {
             // Add in dimensional checks
             if (row_indicies.size() != C.nrows())
             {
-                throw DimensionException("Number of ROWS in output (" + std::to_string(C.nrows()) +
-                                           ") does not indicated number of ROWS indicies (" +
-                                                 std::to_string(row_indicies.size()) + " ).");
+                throw DimensionException(
+                        "Number of ROWS in output (" +
+                        std::to_string(C.nrows()) +
+                        ") does not indicated number of ROWS indicies (" +
+                        std::to_string(row_indicies.size()) + " ).");
             }
 
             if (col_indicies.size() != C.ncols())
             {
-                throw DimensionException("Number of COLUMNS in output (" + std::to_string(C.ncols()) +
-                                           ") does not indicated number of COLUMN indicies (" +
-                                                 std::to_string(col_indicies.size()) + " ).");
+                throw DimensionException(
+                        "Number of COLUMNS in output (" +
+                        std::to_string(C.ncols()) +
+                        ") does not indicated number of COLUMN indicies (" +
+                        std::to_string(col_indicies.size()) + " ).");
             }
 
-            if (mask.nrows() != C.nrows())
-            {
-                throw DimensionException("Number of ROWS in MASK (" + std::to_string(mask.nrows()) +
-                                           ") does not indicated number of ROWS in DEST (" +
-                                                 std::to_string(C.nrows()) + " ).");
-            }
+            // Validate other inputs
+            check_dimensions(C, "C", mask, "mask");
 
-            if (mask.ncols() != C.ncols())
-            {
-                throw DimensionException("Number of COLUMNS in MASK (" + std::to_string(mask.ncols()) +
-                                           ") does not indicated number of COLUMNS in DEST (" +
-                                                 std::to_string(C.ncols()) + " ).");
-            }
-
-
-            typedef typename AMatrixT::ScalarType AScalarType;
             typedef typename CMatrixT::ScalarType CScalarType;
-            typedef typename MMatrixT::ScalarType MScalarType;
-
-            typedef std::vector<std::tuple<IndexType,AScalarType> > ARowType;
             typedef std::vector<std::tuple<IndexType,CScalarType> > CColType;
-            typedef std::vector<std::tuple<IndexType,MScalarType> > MColType;
 
-            typedef typename std::tuple<IndexType,MScalarType> MColEntryType;
+            //std::cerr << ">>> C in <<< " << std::endl;
+            //std::cerr << C << std::endl;
+
+            //std::cerr << ">>> Mask <<< " << std::endl;
+            //std::cerr << mask << std::endl;
 
             // ===============================================================
             // Extract to T
             LilSparseMatrix<CScalarType> T(C.nrows(), C.ncols());
-
             matrixExtract(T, A, row_indicies, col_indicies);
 
-            // ===============================================================
-            // Accum to ?
+            //std::cerr << ">>> T <<< " << std::endl;
+            //std::cerr << T << std::endl;
 
-            // ===============================================================
-            // Mask to ?
+            // =================================================================
+            // Accumulate into Z
 
+            LilSparseMatrix<CScalarType> Z(C.nrows(), C.ncols());
+            ewise_or_opt_accum(Z, C, T, accum);
 
+            //std::cerr << ">>> Z <<< " << std::endl;
+            //std::cerr << Z << std::endl;
 
-            // For now just copy out
+            // =================================================================
+            // Copy Z into the final output considering mask and replace
+            write_with_opt_mask(C, Z, mask, replace);
 
-            CColType tmp_row;
-            for (IndexType row_idx = 0; row_idx < C.nrows(); ++row_idx)
-            {
-                ewise_or(tmp_row, C.getRow(row_idx), T.getRow(row_idx), accum);
-                C.setRow(row_idx, tmp_row);
-            }
-
-
+            //std::cerr << ">>> C <<< " << std::endl;
+            //std::cerr << C << std::endl;
         };
-
-
-
-
-        // Column/row variant
-
 
     }
 }

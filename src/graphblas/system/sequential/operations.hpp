@@ -40,6 +40,8 @@
 #include <graphblas/system/sequential/sparse_vxm.hpp>
 #include <graphblas/system/sequential/sparse_ewisemult.hpp>
 #include <graphblas/system/sequential/sparse_ewiseadd.hpp>
+#include <graphblas/system/sequential/sparse_extract.hpp>
+
 
 
 namespace GraphBLAS

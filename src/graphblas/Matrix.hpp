@@ -346,6 +346,19 @@ namespace GraphBLAS
                                bool             replace_flag);
 
         //--------------------------------------------------------------------
+        template<typename CMatrixT,
+                typename MMatrixT,
+                typename AccumT,
+                typename AMatrixT >
+        friend inline void extract(CMatrixT &C,
+                                   MMatrixT const &mask,
+                                   AccumT accum,
+                                   AMatrixT const &A,
+                                   IndexArrayType const &row_indicies,
+                                   IndexArrayType const &col_indicies,
+                                   bool replace);
+
+        //--------------------------------------------------------------------
 
         template<typename CMatrixT,
                  typename MaskT,
