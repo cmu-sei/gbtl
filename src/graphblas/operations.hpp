@@ -209,7 +209,11 @@ namespace GraphBLAS
                          BinaryOpT         op,
                          AMatrixT   const &A,
                          BMatrixT   const &B,
-                         bool              replace_flag = false);
+                         bool              replace_flag = false)
+    {
+        backend::eWiseAdd(C.m_mat, Mask.m_mat, accum, op, A.m_mat, B.m_mat,
+                          replace_flag);
+    }
 
     //****************************************************************************
     // Extract

@@ -92,22 +92,27 @@ namespace GraphBLAS
                 TRowType T_row;
                 for (IndexType row_idx = 0; row_idx < num_rows; ++row_idx)
                 {
+                    ARowType A_row(A.getRow(row_idx));
                     BRowType B_row(B.getRow(row_idx));
 
-                    if (!B_row.empty())
+                    if (B_row.empty())
                     {
-                        ARowType A_row(A.getRow(row_idx));
-                        if (!A_row.empty())
-                        {
-                            /// @todo Need to wrap op in helper that can
-                            /// extract mult() as operator() if op is Semiring
-                            ewise_or(T_row, A_row, B_row, op);
+                        T.setRow(row_idx, A_row);
+                    }
+                    else if (A_row.empty())
+                    {
+                        T.setRow(row_idx, B_row);
+                    }
+                    else
+                    {
+                        /// @todo Need to wrap op in helper that can
+                        /// extract mult() as operator() if op is Semiring
+                        ewise_or(T_row, A_row, B_row, op);
 
-                            if (!T_row.empty())
-                            {
-                                T.setRow(row_idx, T_row);
-                                T_row.clear();
-                            }
+                        if (!T_row.empty())
+                        {
+                            T.setRow(row_idx, T_row);
+                            T_row.clear();
                         }
                     }
                 }
