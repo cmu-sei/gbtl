@@ -182,24 +182,4 @@ BOOST_AUTO_TEST_CASE(metrics_test_closeness_centrality)
 }
 
 
-BOOST_AUTO_TEST_CASE(metrics_test_triangle_counting)
-{
-    //Matrix<double, DirectedMatrixTag> testtriangle({{0,1,1,1,0},
-    //                        {1,0,1,0,1},
-    //                        {1,1,0,1,1},
-    //                        {1,0,1,0,1},
-    //                        {0,1,1,1,0}});
-
-    std::vector<double> ar={0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4};
-    std::vector<double> ac={1, 2, 3, 0, 2, 4, 0, 1, 3, 4, 0, 2, 4, 1, 2, 3};
-    std::vector<double> av={1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-    Matrix<double, DirectedMatrixTag> testtriangle(5,5);
-    graphblas::buildmatrix(testtriangle
-            , ar.begin(), ac.begin(), av.begin(), av.size());
-
-    IndexType result = triangle_count(testtriangle);
-    BOOST_CHECK_EQUAL(result, 4);
-}
-
-
 BOOST_AUTO_TEST_SUITE_END()

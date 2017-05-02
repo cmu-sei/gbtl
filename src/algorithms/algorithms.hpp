@@ -34,5 +34,6 @@
 #include <algorithms/page_rank.hpp>
 #include <algorithms/sssp.hpp>
 #include <algorithms/bc.hpp>
+#include <algorithms/triangle_count.hpp>
 
 #endif // ALGORITHMS_HPP

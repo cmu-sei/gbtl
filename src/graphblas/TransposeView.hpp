@@ -132,17 +132,6 @@ namespace GraphBLAS
 
         // PUT ALL FRIEND DECLARATIONS HERE
         template<typename CMatrixT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename AMatrixT,
-                 typename BMatrixT>
-        friend inline void mxm(CMatrixT         &C,
-                               AccumT            accum,
-                               SemiringT         op,
-                               AMatrixT   const &A,
-                               BMatrixT   const &B);
-
-        template<typename CMatrixT,
                  typename MaskT,
                  typename AccumT,
                  typename SemiringT,
@@ -157,17 +146,6 @@ namespace GraphBLAS
                                bool              replace_flag);
 
         //--------------------------------------------------------------------
-
-        template<typename WVectorT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename UVectorT,
-                 typename AMatrixT>
-        friend inline void vxm(WVectorT         &w,
-                               AccumT            accum,
-                               SemiringT         op,
-                               UVectorT   const &u,
-                               AMatrixT   const &A);
 
         template<typename WVectorT,
                  typename MaskT,
@@ -186,17 +164,6 @@ namespace GraphBLAS
         //--------------------------------------------------------------------
 
         template<typename WVectorT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename AMatrixT,
-                 typename UVectorT>
-        friend inline void mxv(WVectorT        &w,
-                               AccumT           accum,
-                               SemiringT        op,
-                               AMatrixT  const &A,
-                               UVectorT  const &u);
-
-        template<typename WVectorT,
                  typename MaskT,
                  typename AccumT,
                  typename SemiringT,
@@ -209,6 +176,36 @@ namespace GraphBLAS
                                AMatrixT  const &A,
                                UVectorT  const &u,
                                bool             replace_flag);
+
+        //--------------------------------------------------------------------
+
+        template<typename CMatrixT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename BinaryOpT,  //can be BinaryOp, Monoid (or Semiring?)
+                 typename AMatrixT,
+                 typename BMatrixT>
+        friend inline void eWiseMult(CMatrixT         &C,
+                                     MaskT      const &Mask,
+                                     AccumT            accum,
+                                     BinaryOpT         op,
+                                     AMatrixT   const &A,
+                                     BMatrixT   const &B,
+                                     bool              replace_flag);
+
+        template<typename CMatrixT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename BinaryOpT,  //can be BinaryOp, Monoid (or Semiring?)
+                 typename AMatrixT,
+                 typename BMatrixT >
+        friend inline void eWiseAdd(CMatrixT         &C,
+                                    MaskT      const &Mask,
+                                    AccumT            accum,
+                                    BinaryOpT         op,
+                                    AMatrixT   const &A,
+                                    BMatrixT   const &B,
+                                    bool              replace_flag);
 
     };
 

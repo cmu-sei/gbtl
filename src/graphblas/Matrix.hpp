@@ -347,15 +347,42 @@ namespace GraphBLAS
 
         //--------------------------------------------------------------------
 
+        template<typename CMatrixT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename BinaryOpT,  //can be BinaryOp, Monoid (or Semiring?)
+                 typename AMatrixT,
+                 typename BMatrixT>
+        friend inline void eWiseMult(CMatrixT         &C,
+                                     MaskT      const &Mask,
+                                     AccumT            accum,
+                                     BinaryOpT         op,
+                                     AMatrixT   const &A,
+                                     BMatrixT   const &B,
+                                     bool              replace_flag);
+
+        template<typename CMatrixT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename BinaryOpT,  //can be BinaryOp, Monoid (or Semiring?)
+                 typename AMatrixT,
+                 typename BMatrixT >
+        friend inline void eWiseAdd(CMatrixT         &C,
+                                    MaskT      const &Mask,
+                                    AccumT            accum,
+                                    BinaryOpT         op,
+                                    AMatrixT   const &A,
+                                    BMatrixT   const &B,
+                                    bool              replace_flag);
+
+        //--------------------------------------------------------------------
+
         template<typename MatrixT>
         friend inline TransposeView<MatrixT> transpose(MatrixT const &A);
 
         template<typename OtherScalarT, typename... OtherTagsT>
-        friend inline MatrixComplementView<Matrix<OtherScalarT, OtherTagsT...>> complement(
-            Matrix<OtherScalarT, OtherTagsT...> const &Mask);
-
-        //template<typename MatrixT>
-        //friend inline ComplementView<MatrixT> complement(MatrixT const &A);
+        friend inline MatrixComplementView<Matrix<OtherScalarT, OtherTagsT...> >
+            complement(Matrix<OtherScalarT, OtherTagsT...> const &Mask);
 
         // .... ADD OTHER OPERATIONS AS FRIENDS AS THEY ARE IMPLEMENTED .....
 
@@ -368,7 +395,8 @@ namespace GraphBLAS
         BackendType m_mat;
     };
 
-    // Should we have a custom file for this???
+    //**************************************************************************
+    // @todo We should move this to a different file (types.hpp or graphblas.hpp?)
     class NoMask
     {
     public:

@@ -28,6 +28,7 @@
 //#include <graphblas/system/sequential/RowView.hpp>
 //#include <graphblas/system/sequential/ColumnView.hpp>
 #include <graphblas/system/sequential/TransposeView.hpp>
+#include <graphblas/system/sequential/ComplementView.hpp>
 #include <graphblas/system/sequential/RowExtendedView.hpp>
 #include <graphblas/system/sequential/ColumnExtendedView.hpp>
 #include <graphblas/system/sequential/NegateView.hpp>

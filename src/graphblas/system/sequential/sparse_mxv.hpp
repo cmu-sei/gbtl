@@ -39,8 +39,8 @@ namespace GraphBLAS
 {
     namespace backend
     {
-        //**********************************************************************
-        /// Matrix-vector multiply for LilSparseMatrix and SparseBitmapVector
+        //********************************************************************
+        /// Implementation of 4.3.3 mxv: Matrix-Vector variant
         template<typename WVectorT,
                  typename MaskT,
                  typename AccumT,

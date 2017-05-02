@@ -144,6 +144,37 @@ namespace GraphBLAS
                                AMatrixT   const &A,
                                BMatrixT   const &B,
                                bool              replace_flag);
+
+        //--------------------------------------------------------------------
+
+        template<typename CMatrixT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename BinaryOpT,  //can be BinaryOp, Monoid (or Semiring?)
+                 typename AMatrixT,
+                 typename BMatrixT>
+        friend inline void eWiseMult(CMatrixT         &C,
+                                     MaskT      const &Mask,
+                                     AccumT            accum,
+                                     BinaryOpT         op,
+                                     AMatrixT   const &A,
+                                     BMatrixT   const &B,
+                                     bool              replace_flag);
+
+        template<typename CMatrixT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename BinaryOpT,  //can be BinaryOp, Monoid (or Semiring?)
+                 typename AMatrixT,
+                 typename BMatrixT >
+        friend inline void eWiseAdd(CMatrixT         &C,
+                                    MaskT      const &Mask,
+                                    AccumT            accum,
+                                    BinaryOpT         op,
+                                    AMatrixT   const &A,
+                                    BMatrixT   const &B,
+                                    bool              replace_flag);
+
     };
 
     //************************************************************************

@@ -79,6 +79,7 @@ test_sequential_sparse_algebra \
 test_sequential_sparse_mxm \
 test_sequential_sparse_mxv \
 test_sequential_sparse_vxm \
+test_sequential_sparse_ewisemult_matrix \
 test_sequential_math \
 test_sequential_graphblas_algebra \
 test_sequential_mxm \
@@ -99,7 +100,8 @@ test_sequential_mis \
 test_sequential_mst \
 test_sequential_sssp \
 test_sequential_cluster \
-test_sequential_page_rank
+test_sequential_page_rank \
+test_sequential_triangle_count
 
 test_sequential_sparse_algebra_SOURCES = test_sparse_algebra.cpp
 
@@ -109,7 +111,9 @@ test_sequential_sparse_mxv_SOURCES = test_sparse_mxv.cpp
 
 test_sequential_sparse_vxm_SOURCES = test_sparse_vxm.cpp
 
-#DEPRECATED TEST CODE
+test_sequential_sparse_ewisemult_matrix_SOURCES = test_sparse_ewisemult_matrix.cpp
+
+#"DEPRECATED" TEST CODE - in need of transition to new GBTL
 
 test_sequential_math_SOURCES = test_math.cpp
 
@@ -152,5 +156,7 @@ test_sequential_sssp_SOURCES = test_sssp.cpp
 test_sequential_cluster_SOURCES = test_cluster.cpp
 
 test_sequential_page_rank_SOURCES = test_page_rank.cpp
+
+test_sequential_triangle_count_SOURCES = test_triangle_count.cpp
 
 endif

@@ -42,6 +42,7 @@ namespace GraphBLAS
     namespace backend
     {
         //**********************************************************************
+        /// Implementation of 4.3.1 mxm: Matrix-matrix multiply
         template<typename CMatrixT,
                 typename MMatrixT,
                 typename AccumT,
@@ -50,14 +51,12 @@ namespace GraphBLAS
                 typename BMatrixT>
         inline void mxm(CMatrixT &C,
                         MMatrixT const &M,
-                        AccumT const &accum,
-                        SemiringT op,
+                        AccumT const   &accum,
+                        SemiringT       op,
                         AMatrixT const &A,
                         BMatrixT const &B,
-                        bool replace = false)
+                        bool            replace = false)
         {
-            // Implementation of 4.3.1 mxm: Matrix-matrix multiply
-
             // @todo: Make errors match the spec
 
             // ??? Do we need to make defensive copies of everything if we don't
@@ -95,6 +94,7 @@ namespace GraphBLAS
                     {
                         for (IndexType row_idx = 0; row_idx < nrow_A; ++row_idx)
                         {
+                            /// @todo With transpose(A), reference may be bad.
                             ARowType const &A_row(A.getRow(row_idx));
                             if (!A_row.empty())
                             {

@@ -438,127 +438,6 @@ namespace GraphBLAS
         }
 
         //************************************************************************
-
-        // @todo:  Remove! We won't use this when we switch to separate op/mask steps
-        // @deprecated
-        // template <typename D1, typename D2, typename D3, typename M, typename BinaryOpT>
-        // void ewise_or_mask(std::vector<std::tuple<GraphBLAS::IndexType,D3> >       &ans,
-        //                    std::vector<std::tuple<GraphBLAS::IndexType,D1> > const &vec1,
-        //                    std::vector<std::tuple<GraphBLAS::IndexType,D2> > const &vec2,
-        //                    std::vector<std::tuple<GraphBLAS::IndexType,M> > const  &mask,
-        //                    BinaryOpT                                                op,
-        //                    bool                                                     replace)
-        // {
-        //     // DESIGN:
-        //     // This algo is driven by the mask, so we move to a valid mask entry, then
-        //     // "catch up" the other iterators.  If they match the current valid mask
-        //     // then we process them as with the other ewise option.  Rinse, repeat.
-        //     ans.clear();
-
-        //     //std::cerr << "" << std::endl;
-        //     //std::cerr << "Starting ewise_or_mask on row" << std::endl;
-        //     if (mask.empty())
-        //     {
-        //         //std::cerr << "Mask exhausted(0)." << std::endl;
-        //         return;
-        //     }
-
-        //     auto v1_it = vec1.begin();
-        //     auto v2_it = vec2.begin();
-        //     auto mask_it = mask.begin();
-
-        //     D1 v1_val;
-        //     D2 v2_val;
-        //     M  mask_val;
-        //     GraphBLAS::IndexType v1_idx, v2_idx, mask_idx;
-
-        //     // Walk the mask.
-        //     while (mask_it != mask.end())
-        //     {
-        //         // Make sure the mask is on a valid value
-        //         increment_until_true(mask_it, mask.end());
-
-        //         // If we run out of mask, we are done!
-        //         if (mask_it == mask.end())
-        //         {
-        //             //std::cerr << "Mask exhausted(1)." << std::endl;
-        //             return;
-        //         }
-
-        //         std::tie(mask_idx, mask_val) = *mask_it;
-
-        //         // Increment V1 while less than mask
-        //         increment_while_below(v1_it, vec1.end(), mask_idx);
-
-        //         // Increment V2 while less than mask
-        //         increment_while_below(v2_it, vec2.end(), mask_idx);
-
-        //         // If any of the input vectors match, put their values in the output vectors
-        //         // invoking the supplied binary operator if we have both values, otherwise
-        //         // just put in that value.
-        //         if ((v1_it != vec1.end()) && (v2_it != vec2.end()))
-        //         {
-        //             std::tie(v1_idx, v1_val) = *v1_it;
-        //             std::tie(v2_idx, v2_val) = *v2_it;
-
-        //             if (v1_idx == v2_idx && v1_idx == mask_idx)
-        //             {
-        //                 //std::cerr << "Accum: " << std::to_string(v1_val) << " op " <<
-        //                 //    std::to_string(v2_val) << std::endl;
-        //                 ans.push_back(std::make_tuple(mask_idx,
-        //                                               static_cast<D3>(op(v1_val, v2_val))));
-        //             }
-        //             else if (v1_idx == mask_idx)
-        //             {
-        //                 if (!replace)
-        //                 {
-        //                     ans.push_back(std::make_tuple(mask_idx, static_cast<D3>(v1_val)));
-        //                     //std::cerr << "Copying v1. val: " << std::to_string(v1_val) << std::endl;
-        //                 }
-        //             }
-        //             else if (v2_idx == mask_idx)
-        //             {
-        //                 ans.push_back(std::make_tuple(mask_idx, static_cast<D3>(v2_val)));
-        //                 //std::cerr << "Copying v2. val: " <<  std::to_string(v2_val) << std::endl;
-        //             }
-        //         }
-        //         else if (v1_it != vec1.end())
-        //         {
-        //             std::tie(v1_idx, v1_val) = *v1_it;
-        //             if (v1_idx == mask_idx)
-        //             {
-        //                 if (!replace)
-        //                 {
-        //                     ans.push_back(std::make_tuple(mask_idx, static_cast<D3>(v1_val)));
-        //                     //std::cerr << "Copying v1. val: " << std::to_string(v1_val) << std::endl;
-        //                 }
-        //             }
-        //         }
-        //         else if (v2_it != vec2.end())
-        //         {
-        //             std::tie(v2_idx, v2_val) = *v2_it;
-        //             if (v2_idx == mask_idx)
-        //             {
-        //                 ans.push_back(std::make_tuple(mask_idx, static_cast<D3>(v2_val)));
-        //                 //std::cerr << "Copying v2. val: " <<  std::to_string(v2_val) << std::endl;
-        //             }
-        //         }
-        //         else
-        //         {
-        //             // We have more mask, but no more other vec
-        //             //std::cerr << "Inputs (not mask) exhausted." << std::endl;
-        //             return;
-        //         }
-
-        //         // Now move to the next mask entry.
-        //         ++mask_it;
-
-        //     } // while mask_it != end
-
-        //     //std::cerr << "Mask exhausted(2)." << std::endl;
-        // }
-
-        //************************************************************************
         /// Apply element-wise operation to intersection of sparse vectors.
         template <typename D1, typename D2, typename D3, typename BinaryOpT>
         void ewise_and(std::vector<std::tuple<GraphBLAS::IndexType,D3> >       &ans,
@@ -809,6 +688,37 @@ namespace GraphBLAS
 
         //**********************************************************************
         // Put all dimension checks (especially with optional masks here
+        //**********************************************************************
+        template <typename Matrix1T, typename Matrix2T>
+        void check_matrix_size(Matrix1T const    &m1,
+                               Matrix2T const    &m2,
+                               std::string const &msg)
+        {
+            if ((m1.nrows() != m2.nrows()) || (m1.ncols() != m2.ncols()))
+            {
+                throw GraphBLAS::DimensionException(msg);
+            }
+        }
+
+        //**********************************************************************
+        template <typename MatrixT>
+        void check_matrix_size(MatrixT const         &m1,
+                               backend::NoMask const &m2,
+                               std::string const     &msg)
+        {
+            // No op
+        }
+
+        //**********************************************************************
+        template <typename MatrixT>
+        void check_matrix_size(backend::NoMask const &m1,
+                               MatrixT const         &m2,
+                               std::string const     &msg)
+        {
+            // No op
+        }
+
+        //**********************************************************************
         template <typename Vector1T, typename Vector2T>
         void check_vector_size(Vector1T const    &v1,
                                Vector2T const    &v2,
@@ -821,7 +731,6 @@ namespace GraphBLAS
         }
 
         //**********************************************************************
-        // Put all dimension checks (especially with optional masks here
         template <typename VectorT>
         void check_vector_size(VectorT const          &v1,
                                backend::NoMask const  &v2,
@@ -831,7 +740,6 @@ namespace GraphBLAS
         }
 
         //**********************************************************************
-        // Put all dimension checks (especially with optional masks here
         template <typename VectorT>
         void check_vector_size(backend::NoMask const  &v1,
                                VectorT const          &v2,

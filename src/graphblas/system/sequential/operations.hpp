@@ -38,6 +38,8 @@
 #include <graphblas/system/sequential/sparse_mxm.hpp>
 #include <graphblas/system/sequential/sparse_mxv.hpp>
 #include <graphblas/system/sequential/sparse_vxm.hpp>
+#include <graphblas/system/sequential/sparse_ewisemult.hpp>
+#include <graphblas/system/sequential/sparse_ewiseadd.hpp>
 
 
 namespace GraphBLAS
@@ -393,7 +395,7 @@ namespace backend{
             throw DimensionException();
         }
 
-        mxm(a, b, c, s, accum);
+        backend::mxm(a, b, c, s, accum);
 
         for (IndexType ri = 0; ri < c_num_rows; ++ri)
         {
@@ -433,7 +435,7 @@ namespace backend{
             throw DimensionException("vxm: a and c must be vectors.");
         }
 
-        mxm(a, b, c, s, accum);
+        backend::mxm(a, b, c, s, accum);
     }
 
     /**

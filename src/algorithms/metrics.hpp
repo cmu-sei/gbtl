@@ -364,63 +364,6 @@ namespace algorithms
         return vertex_degree(graph, vid);
     }
 
-    /**
-     * @brief Compute the number of triangles in a given graph.
-     *
-     * This function expects an undirected graph.  If it is desired
-     * to count the number of edges in a digraph, just pass in the
-     * digraph, and then multiply the resulting number of triangles by 2.
-     *
-     * Given the adjacency matrix of a graph, the idea behind the
-     * triangle counting algorithm used is as follows:
-     * <ol>
-     * <li>First, split \f$A\f$ into lower and upper triangular matrices such
-     * that \f$A = L + U\f$.</li>
-     *
-     * <li>Because the multiplication of \f$L\f$ and \f$U\f$ counts all the
-     * wedges \f$(i, j, k)\f$, where \f$j\f$ is the vetex with the lowest
-     * degree, we compute the matrix \f$B = LU\f$.</li>
-     *
-     * <li>Finally, to determine whether the wedges close or not, we compute
-     * \f$C = A \circ B\f$.</li>
-     *
-     * <li>The final number of triangles is then
-     * \f$\sum\limits_i^N\sum\limits_j^N C_{ij}\f$.</li>
-     * </ol>
-     *
-     * However, when implementing the algorithm, various optimizations were
-     * made to improve performance.
-     *
-     * @param[in]  graph  The graph to compute the number of triangles in.
-     *
-     * @return The number of triangles in graph.
-     */
-    template<typename MatrixT>
-    typename MatrixT::ScalarType triangle_count(MatrixT const &graph)
-    {
-        using T = typename MatrixT::ScalarType;
-        graphblas::IndexType rows, cols;
-        graph.get_shape(rows, cols);
-
-        MatrixT L(rows, cols), U(rows, cols);
-        graphblas::split(graph, L, U);
-
-        MatrixT B(rows, cols);
-        graphblas::mxm(L, U, B);
-
-        MatrixT C(rows, cols);
-        graphblas::ewisemult(graph, B, C);
-
-        T sum = 0;
-        for (graphblas::IndexType i = 0; i< rows; ++i)
-        {
-            for (graphblas::IndexType j = 0; j < cols; ++j)
-            {
-                sum = sum + C.extractElement(i, j);
-            }
-        }
-        return sum / static_cast<T>(2);
-    }
 } // algorithms
 
 #endif // METRICS_HPP

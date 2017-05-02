@@ -134,16 +134,18 @@ namespace GraphBLAS
                     AMatrixT   const &A,
                     bool              replace_flag = false)
     {
-        backend::vxm(w.m_vec, mask.m_vec, accum, op, u.m_vec, A.m_mat, replace_flag);
+        backend::vxm(w.m_vec, mask.m_vec, accum, op, u.m_vec, A.m_mat,
+                     replace_flag);
     }
 
     //****************************************************************************
     // eWiseAdd and eWiseMult
     //****************************************************************************
+    /*
     template<typename WVectorT,
              typename MaskT,
              typename AccumT,
-             typename BinaryOpT,  //can be monoid or binaryop (not Semiring)
+             typename BinaryOpT,  //can be BinaryOp, Monoid (or Semiring?)
              typename UVectorT,
              typename VVectorT>
     inline void eWiseMult(WVectorT        &w,
@@ -153,13 +155,13 @@ namespace GraphBLAS
                           UVectorT  const &u,
                           VVectorT  const &v,
                           bool             replace_flag = false);
+    */
 
-    /// @todo no way to distinguish between vector and matrix variants
-    /*
+    /// @todo Find a way to distinguish between vector and matrix variants
     template<typename CMatrixT,
              typename MaskT,
              typename AccumT,
-             typename BinaryOpT,  //can be monoid or binaryop (not Semiring)
+             typename BinaryOpT,  //can be BinaryOp, Monoid (or Semiring?)
              typename AMatrixT,
              typename BMatrixT>
     inline void eWiseMult(CMatrixT         &C,
@@ -168,17 +170,21 @@ namespace GraphBLAS
                           BinaryOpT         op,
                           AMatrixT   const &A,
                           BMatrixT   const &B,
-                          bool              replace_flag = false);
-    */
+                          bool              replace_flag = false)
+    {
+        backend::eWiseMult(C.m_mat, Mask.m_mat, accum, op, A.m_mat, B.m_mat,
+                           replace_flag);
+    }
 
     /**
      * @brief Perform an element wise binary operation that can be optimized
      *        for "add" semantics (OR short circuit logic).
      */
+    /*
     template<typename WVectorT,
              typename MaskT,
              typename AccumT,
-             typename BinaryOpT,  //can be monoid or binaryop (not Semiring)
+             typename BinaryOpT,  //can be BinaryOp, Monoid (or Semiring?)
              typename UVectorT,
              typename VVectorT>
     inline void eWiseAdd(WVectorT         &w,
@@ -188,13 +194,13 @@ namespace GraphBLAS
                          UVectorT   const &u,
                          VVectorT   const &v,
                          bool              replace_flag = false);
+    */
 
-    /// @todo no way to distinguish between vector and matrix variants
-    /*
+    /// @todo Find a way to distinguish between vector and matrix variants
     template<typename CMatrixT,
              typename MaskT,
              typename AccumT,
-             typename BinaryOpT,
+             typename BinaryOpT,  //can be BinaryOp, Monoid (or Semiring?)
              typename AMatrixT,
              typename BMatrixT >
     inline void eWiseAdd(CMatrixT         &C,
@@ -204,7 +210,6 @@ namespace GraphBLAS
                          AMatrixT   const &A,
                          BMatrixT   const &B,
                          bool              replace_flag = false);
-    */
 
     //****************************************************************************
     // Extract

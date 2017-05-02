@@ -533,17 +533,6 @@ namespace graphblas
                                SringT       s,
                                AccumT          accum);
 
-        template<typename AMatrixT,
-                 typename BMatrixT,
-                 typename CMatrixT,
-                 typename SringT,
-                 typename AccumT >
-        friend inline void mxv(AMatrixT const &a,
-                               BMatrixT const &b,
-                               CMatrixT       &c,
-                               SringT          s,
-                               AccumT          accum);
-
 
         template<typename AMatrixT,
                  typename BMatrixT,
@@ -585,14 +574,14 @@ namespace graphblas
 
 
         template<typename AMatrixT,
-                 typename BVectorT,
-                 typename CVectorT,
+                 typename BMatrixT,
+                 typename CMatrixT,
                  typename SringT,
                  typename AccumT >
         friend inline void mxv(AMatrixT const &a,
-                               BVectorT const &b,
-                               CVectorT       &c,
-                               SringT       s,
+                               BMatrixT const &b,
+                               CMatrixT       &c,
+                               SringT          s,
                                AccumT          accum);
 
         template<typename AMatrixT,
