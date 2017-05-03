@@ -81,6 +81,8 @@ test_sequential_sparse_mxv \
 test_sequential_sparse_vxm \
 test_sequential_sparse_ewisemult_matrix \
 test_sequential_sparse_ewiseadd_matrix \
+test_sequential_sparse_extract \
+test_sequential_sparse_apply \
 test_sequential_math \
 test_sequential_graphblas_algebra \
 test_sequential_mxm \
@@ -115,6 +117,10 @@ test_sequential_sparse_vxm_SOURCES = test_sparse_vxm.cpp
 test_sequential_sparse_ewisemult_matrix_SOURCES = test_sparse_ewisemult_matrix.cpp
 
 test_sequential_sparse_ewiseadd_matrix_SOURCES = test_sparse_ewiseadd_matrix.cpp
+
+test_sequential_sparse_extract_SOURCES = test_sparse_extract.cpp
+
+test_sequential_sparse_apply_SOURCES = test_sparse_apply.cpp
 
 #"DEPRECATED" TEST CODE - in need of transition to new GBTL
 
