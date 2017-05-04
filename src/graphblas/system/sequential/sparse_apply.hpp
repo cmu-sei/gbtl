@@ -13,7 +13,7 @@
  */
 
 /**
- * Implementation of the sparse matrix extract function.
+ * Implementation of the sparse matrix apply function.
  */
 
 #ifndef GB_SEQUENTIAL_SPARSE_APPLY_HPP
@@ -59,7 +59,7 @@ namespace GraphBLAS
             check_dimensions(C, "C", A, "A");
             check_dimensions(C, "C", mask, "mask");
 
-            typedef typename CMatrixT::ScalarType                   AScalarType;
+            typedef typename AMatrixT::ScalarType                   AScalarType;
             typedef std::vector<std::tuple<IndexType,AScalarType> > ARowType;
 
             typedef typename CMatrixT::ScalarType                   CScalarType;

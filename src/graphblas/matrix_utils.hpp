@@ -41,7 +41,8 @@ namespace GraphBLAS
                       std::string const &label = "")
     {
         // The new backend doesn't have get_zero.   Should we have it???
-        //ostr << label << ": zero = " << mat.m_mat.get_zero() << std::endl;
+        // ostr << label << ": zero = " << mat.m_mat.get_zero() << std::endl;
+        ostr << label << " (" << mat.nrows() << "x" << mat.ncols() << ")" << std::endl;
         backend::pretty_print_matrix(ostr, mat.m_mat);
     }
 }

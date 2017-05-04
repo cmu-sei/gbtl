@@ -28,3 +28,5 @@ cusplibrary
 *.old
 errors.txt
 .idea/*
+test/test_sequential_*
+test/sequential/test_sequential_*

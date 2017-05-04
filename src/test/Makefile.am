@@ -76,6 +76,7 @@ SUBDIRS = sequential
 
 noinst_PROGRAMS = \
 test_sequential_sparse_algebra \
+test_sequential_sparse_assign \
 test_sequential_sparse_mxm \
 test_sequential_sparse_mxv \
 test_sequential_sparse_vxm \
@@ -107,6 +108,8 @@ test_sequential_page_rank \
 test_sequential_triangle_count
 
 test_sequential_sparse_algebra_SOURCES = test_sparse_algebra.cpp
+
+test_sequential_sparse_assign_SOURCES = test_sparse_assign.cpp
 
 test_sequential_sparse_mxm_SOURCES = test_sparse_mxm.cpp
 

@@ -109,6 +109,7 @@ namespace algorithms
 //        graphblas::ArithmeticSemiring<int32_t>    Int32AddMul;
 //        graphblas::math::Identity<bool, int32_t>  GrB_IDENTITY_BOOL;
 
+        // @todo:  Is this right?
         GraphBLAS::PlusMonoid<int32_t>            Int32Add;
         GraphBLAS::ArithmeticSemiring<int32_t>    Int32AddMul;
 
@@ -116,35 +117,47 @@ namespace algorithms
         //GraphBLAS::math::Identity<bool, int32_t>  GrB_IDENTITY_BOOL;
         GrB_IDENTITY_BOOL identity_bool;
 
-        std::vector<graphblas::Matrix<bool>* > Sigmas;
+        std::vector<GraphBLAS::Matrix<bool>* > Sigmas;
         std::cerr << "======= START BFS phase ======" << std::endl;
         int32_t d = 0;
-//        while (Frontier.nvals() > 0)
-//        {
-//            std::cerr << "------- BFS iteration " << d << " --------" << std::endl;
-//
-//            Sigmas.push_back(new graphblas::Matrix<bool>(nsver, n, false));
-            // Sigma[d] = (bool)F
-//            GraphBLAS::apply(Frontier, *(Sigmas[d]), GrB_IDENTITY_BOOL);
-//            GraphBLAS::print_matrix(std::cerr, *Sigmas[d], "Sigma[d] = (bool)Frontier");
-//            // P = F + P
-//            GraphBLAS::ewiseadd(NumSP, Frontier, NumSP, Int32Add);
-//            GraphBLAS::print_matrix(std::cerr, NumSP, "NumSP");
-//            // F<!P> = F +.* A
-//
-//            GraphBLAS::mxm(Frontier,                                        // C
-//                           graphblas::negate(NumSP, Int32AddMul),           // M
-//                           GraphBLAS::Second<double>(),                     // accum
-//                           Int32AddMul,                                     // op
-//                           Frontier,                                        // A
-//                           A);                                              // B
-//
-//            graphblas::print_matrix(std::cerr, Frontier, "New frontier");
-//
-//            ++d;
 
-//        }
-//        std::cerr << "======= END BFS phase =======" << std::endl;
+        // For testing purpose we only allow 10 iterations so it doesn't
+        // get into an infinite loop
+        while (Frontier.nvals() > 0 && d < 10)
+        {
+            std::cerr << "------- BFS iteration " << d << " --------" << std::endl;
+
+            Sigmas.push_back(new GraphBLAS::Matrix<bool>(nsver, n));
+            // Sigma[d] = (bool)
+            GraphBLAS::apply(*(Sigmas[d]),
+                             GraphBLAS::NoMask(),
+                             GraphBLAS::NoAccumulate(),
+                             GraphBLAS::Identity<bool>(),
+                             Frontier );
+            GraphBLAS::print_matrix(std::cerr, *Sigmas[d], "Sigma[d] = (bool)Frontier");
+
+            // P = F + P
+            GraphBLAS::eWiseAdd(NumSP,
+                                GraphBLAS::NoMask(),
+                                GraphBLAS::NoAccumulate(),
+                                GraphBLAS::PlusMonoid<int32_t>(),
+                                NumSP,
+                                Frontier);
+            GraphBLAS::print_matrix(std::cerr, NumSP, "NumSP");
+
+            // F<!P> = F +.* A
+            GraphBLAS::mxm(Frontier,                                        // C
+                           GraphBLAS::complement(NumSP),                    // M
+                           GraphBLAS::NoAccumulate(),                       // accum
+                           Int32AddMul,                                     // op
+                           Frontier,                                        // A
+                           A,                                               // B
+                           true);                                           // replace
+            GraphBLAS::print_matrix(std::cerr, Frontier, "New frontier");
+
+            ++d;
+        }
+        std::cerr << "======= END BFS phase =======" << std::endl;
 
         // // ================== backprop phase ==================
         // // Placeholders for GraphBLAS operators
@@ -163,6 +176,23 @@ namespace algorithms
         // graphblas::print_matrix(std::cerr, BCu, "U");
 
         // graphblas::Matrix<float> W(nsver, n);
+
+        GraphBLAS::Matrix<float> BCu(nsver, n);
+        // @todo: Implement
+//        GraphBLAS::assign(BCu,
+//                          GraphBLAS::NoMask(),
+//                          GraphBLAS::NoAccumulate(),
+//                          GrB_ALL_nsver,
+//                          nsver,
+//                          GrB_ALL_n,
+//                          n);
+
+        GraphBLAS::print_matrix(std::cerr, BCu, "U");
+
+        GraphBLAS::Matrix<float> W(nsver, n);
+
+
+
 
         // std::cerr << "======= BEGIN BACKPROP phase =======" << std::endl;
         // for (int32_t i = d - 1; i > 0; --i)

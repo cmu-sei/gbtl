@@ -58,7 +58,7 @@ namespace GraphBLAS
                            std::vector< std::tuple<IndexType, AScalarT> > const &vec_src,
                            IndexArrayType const & indicies)
         {
-            // This is expensive but the indicies can be out of duplicate and
+            // This is expensive but the indicies can be duplicates and
             // out of order.
 
             vec_dest.clear();

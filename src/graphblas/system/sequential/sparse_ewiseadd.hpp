@@ -51,7 +51,7 @@ namespace GraphBLAS
                  typename BMatrixT>
         inline void eWiseAdd(CMatrixT       &C,
                              MMatrixT const &Mask,
-                             AccumT const   &accum,
+                             AccumT const    accum,
                              BinaryOpT       op,
                              AMatrixT const &A,
                              BMatrixT const &B,

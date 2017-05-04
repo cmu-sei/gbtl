@@ -89,7 +89,7 @@ namespace GraphBLAS
                     }
 
                 }
-                ostr << ((row_idx == num_rows) ? "]]\n" : "]\n");
+                ostr << ((row_idx == num_rows - 1 ) ? "]]\n" : "]\n");
             }
 
             // IndexType rows, cols;

@@ -267,30 +267,19 @@ namespace GraphBLAS
 
     private:
 
-//        template<typename CMatrixT,
-//                typename MaskT,
-//                typename AccumT,
-//                typename UnaryFunctionT,
-//                typename AMatrixT>
-//        friend inline void apply(CMatrixT             &C,
-//                          MaskT          const &mask,
-//                          AccumT                accum,
-//                          UnaryFunctionT        op,
-//                          AMatrixT       const &A,
-//                          bool                  replace_flag);
-
-        template<typename CMatrixT,
+        template<typename CScalarT,
                 typename MaskT,
                 typename AccumT,
                 typename UnaryFunctionT,
-                typename AScalarT,
+                typename AMatrixT,
                 typename ...ATagsT>
-        friend inline void apply(CMatrixT             &C,
-                          MaskT          const &Mask,
-                          AccumT                accum,
-                          UnaryFunctionT        op,
-                          GraphBLAS::Matrix<AScalarT, ATagsT...> const &A,
-                          bool                  replace_flag);
+        friend inline void apply(
+                GraphBLAS::Matrix<CScalarT, ATagsT...>          &C,
+                MaskT                                   const   &Mask,
+                AccumT                                           accum,
+                UnaryFunctionT                                   op,
+                AMatrixT                                const   &A,
+                bool                                             replace_flag);
 
         template<typename CMatrixT,
                  typename MaskT,
@@ -361,6 +350,22 @@ namespace GraphBLAS
                                bool             replace_flag);
 
         //--------------------------------------------------------------------
+
+        template<typename CMatrixT,
+                typename MaskT,
+                typename AccumT,
+                typename BinaryOpT,  //can be BinaryOp, Monoid (or Semiring?)
+                typename AMatrixT,
+                typename BMatrixT >
+        friend inline void eWiseAdd(CMatrixT         &C,
+                             MaskT      const &Mask,
+                             AccumT            accum,
+                             BinaryOpT         op,
+                             AMatrixT   const &A,
+                             BMatrixT   const &B,
+                             bool              replace_flag);
+
+        //--------------------------------------------------------------------
         template<typename CMatrixT,
                 typename MMatrixT,
                 typename AccumT,
@@ -372,6 +377,19 @@ namespace GraphBLAS
                                    IndexArrayType const &row_indicies,
                                    IndexArrayType const &col_indicies,
                                    bool replace);
+
+        //--------------------------------------------------------------------
+        template<typename CMatrixT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename AMatrixT>
+        friend inline void assign(CMatrixT             &C,
+                                  MaskT          const &Mask,
+                                  AccumT                accum,
+                                  AMatrixT       const &A,
+                                  IndexArrayType const &row_indices,
+                                  IndexArrayType const &col_indices,
+                                  bool                  replace_flag);
 
         //--------------------------------------------------------------------
 
@@ -817,6 +835,7 @@ namespace graphblas
                                   IndexArrayType const &j,
                                   CMatrixT             &c,
                                   AccumT                accum);
+
 
 
         template<typename AMatrixT,

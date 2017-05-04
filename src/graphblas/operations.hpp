@@ -211,9 +211,8 @@ namespace GraphBLAS
                          BMatrixT   const &B,
                          bool              replace_flag = false)
     {
-        backend::eWiseAdd(C.m_mat, Mask.m_mat, accum, op, A.m_mat, B.m_mat,
-                          replace_flag);
-    }
+        backend::eWiseAdd(C.m_mat, Mask.m_mat, accum, op, A.m_mat, B.m_mat, replace_flag);
+    };
 
     //****************************************************************************
     // Extract
@@ -273,8 +272,8 @@ namespace GraphBLAS
                         IndexArrayType const &col_indices,
                         bool                  replace_flag = false)
     {
-        backend::extract(C.m_mat, Mask.m_mat, accum, A.m_mat, row_indices,
-                         col_indices, replace_flag);
+        backend::extract(C.m_mat, Mask.m_mat, accum, A.m_mat,
+                         row_indices, col_indices, replace_flag);
     };
 
     // Extract col (or row with transpose)
@@ -327,48 +326,48 @@ namespace GraphBLAS
     //****************************************************************************
     // Assign
     //****************************************************************************
-
-    // Standard Vector Variant
-    template<typename WVectorT,
-             typename MaskT,
-             typename AccumT,
-             typename UVectorT,
-             typename RAIteratorT>
-    inline void assign(WVectorT          &w,
-                       MaskT       const &mask,
-                       AccumT             accum,
-                       UVectorT    const &u,
-                       RAIteratorT const &indices,
-                       IndexType          num_indices,
-                       bool               replace_flag = false);
-
-    template<typename WVectorT,
-             typename MaskT,
-             typename AccumT,
-             typename UVectorT>
-    inline void assign(WVectorT             &w,
-                       MaskT          const &mask,
-                       AccumT                accum,
-                       UVectorT       const &u,
-                       IndexArrayType const &indices,
-                       bool                  replace_flag = false);
-
-    // Standard Matrix variant
-    template<typename CMatrixT,
-             typename MaskT,
-             typename AccumT,
-             typename AMatrixT,
-             typename RAIteratorI,
-             typename RAIteratorJ>
-    inline void assign(CMatrixT          &C,
-                       MaskT       const &Mask,
-                       AccumT             accum,
-                       AMatrixT    const &A,
-                       RAIteratorI        row_indices,
-                       IndexType          num_rows,
-                       RAIteratorJ        col_indices,
-                       IndexType          num_cols,
-                       bool               replace_flag = false);
+//
+//    // Standard Vector Variant
+//    template<typename WVectorT,
+//             typename MaskT,
+//             typename AccumT,
+//             typename UVectorT,
+//             typename RAIteratorT>
+//    inline void assign(WVectorT          &w,
+//                       MaskT       const &mask,
+//                       AccumT             accum,
+//                       UVectorT    const &u,
+//                       RAIteratorT const &indices,
+//                       IndexType          num_indices,
+//                       bool               replace_flag = false);
+//
+//    template<typename WVectorT,
+//             typename MaskT,
+//             typename AccumT,
+//             typename UVectorT>
+//    inline void assign(WVectorT             &w,
+//                       MaskT          const &mask,
+//                       AccumT                accum,
+//                       UVectorT       const &u,
+//                       IndexArrayType const &indices,
+//                       bool                  replace_flag = false);
+//
+//    // Standard Matrix variant
+//    template<typename CMatrixT,
+//             typename MaskT,
+//             typename AccumT,
+//             typename AMatrixT,
+//             typename RAIteratorI,
+//             typename RAIteratorJ>
+//    inline void assign(CMatrixT          &C,
+//                       MaskT       const &Mask,
+//                       AccumT             accum,
+//                       AMatrixT    const &A,
+//                       RAIteratorI        row_indices,
+//                       IndexType          num_rows,
+//                       RAIteratorJ        col_indices,
+//                       IndexType          num_cols,
+//                       bool               replace_flag = false);
 
     template<typename CMatrixT,
              typename MaskT,
@@ -380,137 +379,142 @@ namespace GraphBLAS
                        AMatrixT       const &A,
                        IndexArrayType const &row_indices,
                        IndexArrayType const &col_indices,
-                       bool                  replace_flag = false);
+                       bool                  replace_flag = false)
+    {
+        backend::assign(C.m_mat, Mask.m_mat, accum, A.m_mat,
+                        row_indices, col_indices, replace_flag);
+    };
 
-    // Assign Column variant
-    template<typename CMatrixT,
-             typename MaskT,
-             typename AccumT,
-             typename UVectorT,
-             typename RAIteratorT>
-    inline void assign(CMatrixT          &C,
-                       MaskT       const &mask,  // a vector
-                       AccumT             accum,
-                       UVectorT    const &u,
-                       RAIteratorT        row_indices,
-                       IndexType          num_rows,
-                       IndexType          col_index,
-                       bool               replace_flag = false);
-
-    template<typename CMatrixT,
-             typename MaskT,
-             typename AccumT,
-             typename UVectorT>
-    inline void assign(CMatrixT             &C,
-                       MaskT          const &mask,  // a vector
-                       AccumT                accum,
-                       UVectorT       const &u,
-                       IndexArrayType const &row_indices,
-                       IndexType             col_index,
-                       bool                  replace_flag = false);
-
-    // Assign row variant
-    template<typename CMatrixT,
-             typename MaskT,
-             typename AccumT,
-             typename UVectorT,
-             typename RAIteratorT>
-    inline void assign(CMatrixT          &C,
-                       MaskT       const &mask,  // a vector
-                       AccumT             accum,
-                       UVectorT    const &u,
-                       IndexType          row_index,
-                       RAIteratorT        col_indices,
-                       IndexType          num_cols,
-                       bool               replace_flag = false);
-
-    template<typename CMatrixT,
-             typename MaskT,
-             typename AccumT,
-             typename UVectorT>
-    inline void assign(CMatrixT             &C,
-                       MaskT          const &mask,  // a vector
-                       AccumT                accum,
-                       UVectorT       const &u,
-                       IndexType             row_index,
-                       IndexArrayType const &col_indices,
-                       bool                  replace_flag = false);
-
-    // Single value variants (vector and matrix)
-    template<typename WVectorT,
-             typename AccumT,
-             typename ValueT>
-    inline void assign(WVectorT             &w,
-                       AccumT                accum,
-                       ValueT                src,
-                       IndexType             index,
-                       bool                  replace_flag = false);
-
-    template<typename CMatrixT,
-             typename AccumT,
-             typename ValueT>
-    inline void assign(CMatrixT             &C,
-                       AccumT                accum,
-                       ValueT                src,
-                       IndexType             row_index,
-                       IndexType             col_index,
-                       bool                  replace_flag = false);
-
-
-    // Vector constant variant
-    template<typename WVectorT,
-             typename MaskT,
-             typename AccumT,
-             typename ValueT,
-             typename RAIteratorT>
-    inline void assign(WVectorT          &w,
-                       MaskT       const &mask,
-                       AccumT             accum,
-                       ValueT             val,
-                       RAIteratorT const &indices,
-                       IndexType          num_indices,
-                       bool               replace_flag = false);
-
-    template<typename WVectorT,
-             typename MaskT,
-             typename AccumT,
-             typename ValueT>
-    inline void assign(WVectorT             &w,
-                       MaskT          const &mask,
-                       AccumT                accum,
-                       ValueT                val,
-                       IndexArrayType const &indices,
-                       bool                  replace_flag = false);
-
-    // Matrix constant variant
-    template<typename CMatrixT,
-             typename MaskT,
-             typename AccumT,
-             typename ValueT,
-             typename RAIteratorIT,
-             typename RAIteratorJT>
-    inline void assign(CMatrixT           &C,
-                       MaskT        const &Mask,
-                       AccumT              accum,
-                       ValueT              val,
-                       RAIteratorIT const &row_indices,
-                       IndexType           num_rows,
-                       RAIteratorJT const &col_indices,
-                       IndexType           num_cols,
-                       bool                replace_flag = false);
-
-
-    template<typename CMatrixT,
-             typename MaskT,
-             typename AccumT,
-             typename ValueT>
-    inline void assign(CMatrixT             &C,
-                       MaskT          const &Mask,
-                       AccumT                accum,
-                       ValueT                val,
-                       IndexArrayType const &row_indices,
-                       IndexArrayType const &col_indices,
-                       bool                  replace_flag = false);
+//
+//    // Assign Column variant
+//    template<typename CMatrixT,
+//             typename MaskT,
+//             typename AccumT,
+//             typename UVectorT,
+//             typename RAIteratorT>
+//    inline void assign(CMatrixT          &C,
+//                       MaskT       const &mask,  // a vector
+//                       AccumT             accum,
+//                       UVectorT    const &u,
+//                       RAIteratorT        row_indices,
+//                       IndexType          num_rows,
+//                       IndexType          col_index,
+//                       bool               replace_flag = false);
+//
+//    template<typename CMatrixT,
+//             typename MaskT,
+//             typename AccumT,
+//             typename UVectorT>
+//    inline void assign(CMatrixT             &C,
+//                       MaskT          const &mask,  // a vector
+//                       AccumT                accum,
+//                       UVectorT       const &u,
+//                       IndexArrayType const &row_indices,
+//                       IndexType             col_index,
+//                       bool                  replace_flag = false);
+//
+//    // Assign row variant
+//    template<typename CMatrixT,
+//             typename MaskT,
+//             typename AccumT,
+//             typename UVectorT,
+//             typename RAIteratorT>
+//    inline void assign(CMatrixT          &C,
+//                       MaskT       const &mask,  // a vector
+//                       AccumT             accum,
+//                       UVectorT    const &u,
+//                       IndexType          row_index,
+//                       RAIteratorT        col_indices,
+//                       IndexType          num_cols,
+//                       bool               replace_flag = false);
+//
+//    template<typename CMatrixT,
+//             typename MaskT,
+//             typename AccumT,
+//             typename UVectorT>
+//    inline void assign(CMatrixT             &C,
+//                       MaskT          const &mask,  // a vector
+//                       AccumT                accum,
+//                       UVectorT       const &u,
+//                       IndexType             row_index,
+//                       IndexArrayType const &col_indices,
+//                       bool                  replace_flag = false);
+//
+//    // Single value variants (vector and matrix)
+//    template<typename WVectorT,
+//             typename AccumT,
+//             typename ValueT>
+//    inline void assign(WVectorT             &w,
+//                       AccumT                accum,
+//                       ValueT                src,
+//                       IndexType             index,
+//                       bool                  replace_flag = false);
+//
+//    template<typename CMatrixT,
+//             typename AccumT,
+//             typename ValueT>
+//    inline void assign(CMatrixT             &C,
+//                       AccumT                accum,
+//                       ValueT                src,
+//                       IndexType             row_index,
+//                       IndexType             col_index,
+//                       bool                  replace_flag = false);
+//
+//
+//    // Vector constant variant
+//    template<typename WVectorT,
+//             typename MaskT,
+//             typename AccumT,
+//             typename ValueT,
+//             typename RAIteratorT>
+//    inline void assign(WVectorT          &w,
+//                       MaskT       const &mask,
+//                       AccumT             accum,
+//                       ValueT             val,
+//                       RAIteratorT const &indices,
+//                       IndexType          num_indices,
+//                       bool               replace_flag = false);
+//
+//    template<typename WVectorT,
+//             typename MaskT,
+//             typename AccumT,
+//             typename ValueT>
+//    inline void assign(WVectorT             &w,
+//                       MaskT          const &mask,
+//                       AccumT                accum,
+//                       ValueT                val,
+//                       IndexArrayType const &indices,
+//                       bool                  replace_flag = false);
+//
+//    // Matrix constant variant
+//    template<typename CMatrixT,
+//             typename MaskT,
+//             typename AccumT,
+//             typename ValueT,
+//             typename RAIteratorIT,
+//             typename RAIteratorJT>
+//    inline void assign(CMatrixT           &C,
+//                       MaskT        const &Mask,
+//                       AccumT              accum,
+//                       ValueT              val,
+//                       RAIteratorIT const &row_indices,
+//                       IndexType           num_rows,
+//                       RAIteratorJT const &col_indices,
+//                       IndexType           num_cols,
+//                       bool                replace_flag = false);
+//
+//
+//    template<typename CMatrixT,
+//             typename MaskT,
+//             typename AccumT,
+//             typename ValueT>
+//    inline void assign(CMatrixT             &C,
+//                       MaskT          const &Mask,
+//                       AccumT                accum,
+//                       ValueT                val,
+//                       IndexArrayType const &row_indices,
+//                       IndexArrayType const &col_indices,
+//                       bool                  replace_flag = false);
 
     //****************************************************************************
     // Apply
@@ -534,37 +538,18 @@ namespace GraphBLAS
 //                      bool                  replace_flag = false);
 
     // matrix variant
-//    template<typename CMatrixT,
-//            typename MaskT,
-//            typename AccumT,
-//            typename UnaryFunctionT,
-//            typename AMatrixT>
-//    inline void apply(CMatrixT             &C,
-//                      MaskT          const &Mask,
-//                      AccumT                accum,
-//                      UnaryFunctionT        op,
-//                      AMatrixT       const &A,
-//                      bool                  replace_flag = false)
-//    {
-//        backend::apply(C.m_mat, Mask.m_mat, accum, op, A.m_mat, replace_flag);
-//    };
-
-    // matrix variant
-    // This works for the matrix apply version.  I haven't tried the
-    // vector version, but I would suspect this would work as well.
-    // Isn't Matrix part of the api??
-    template<typename CMatrixT,
+    template<typename CScalarT,
              typename MaskT,
              typename AccumT,
              typename UnaryFunctionT,
-             typename AScalarT,
+             typename AMatrixT,
              typename ...ATagsT>
-    inline void apply(CMatrixT                                         &C,
+    inline void apply(GraphBLAS::Matrix<CScalarT, ATagsT...>           &C,
                       MaskT                                     const  &Mask,
                       AccumT                                            accum,
                       UnaryFunctionT                                    op,
-                      GraphBLAS::Matrix<AScalarT, ATagsT...>    const  &A,
-                      bool                                 replace_flag = false)
+                      AMatrixT                                  const  &A,
+                      bool                                              replace_flag = false)
     {
         backend::apply(C.m_mat, Mask.m_mat, accum, op, A.m_mat, replace_flag);
     };
