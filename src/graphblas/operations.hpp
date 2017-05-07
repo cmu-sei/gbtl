@@ -562,39 +562,48 @@ namespace GraphBLAS
     template<typename WVectorT,
              typename MaskT,
              typename AccumT,
-             typename BinaryFunctionT,  // monoid or binary op only
+             typename BinaryOpT,  // monoid or binary op only
              typename AMatrixT>
-    inline void reduce(WVectorT              &u,
-                       MaskT           const &mask,
-                       AccumT                 accum,
-                       BinaryFunctionT        op,
-                       AMatrixT        const &A,
-                       bool                   replace_flag = false);
+    inline void reduce(WVectorT        &w,
+                       MaskT     const &mask,
+                       AccumT           accum,
+                       BinaryOpT        op,
+                       AMatrixT  const &A,
+                       bool             replace_flag = false)
+    {
+        backend::reduce(w.m_vec, mask.m_vec, accum, op, A.m_mat, replace_flag);
+    }
 
     // vector-scalar variant
     template<typename ValueT,
              typename AccumT,
              typename MonoidT, // monoid only
-             typename UVectorT>
-    inline void reduce(ValueT           &dst,
-                       AccumT            accum,
-                       MonoidT           op,
-                       UVectorT   const &u,
-                       bool              replace_flag = false);
+             typename UScalarT,
+             typename ...UTagsT>
+    inline void reduce(
+            ValueT                                       &val,
+            AccumT                                        accum,
+            MonoidT                                       op,
+            GraphBLAS::Vector<UScalarT, UTagsT...> const &u)
+    {
+        backend::reduce_vector_to_scalar(val, accum, op, u.m_vec);
+    }
 
     /// @todo no way to distinguish between vector and matrix variants
     // matrix-scalar variant
-    /*
     template<typename ValueT,
              typename AccumT,
              typename MonoidT, // monoid only
-             typename AMatrixT>
-    inline void reduce(ValueT           &dst,
-                       AccumT            accum,
-                       MonoidT           op,
-                       AMatrixT   const &A,
-                       bool              replace_flag = false);
-    */
+             typename AScalarT,
+             typename ...ATagsT>
+    inline void reduce(
+            ValueT                                       &val,
+            AccumT                                        accum,
+            MonoidT                                       op,
+            GraphBLAS::Matrix<AScalarT, ATagsT...> const &A)
+    {
+        backend::reduce_matrix_to_scalar(val, accum, op, A.m_mat);
+    }
 
     //****************************************************************************
     // Transpose

@@ -35,15 +35,15 @@
 #include <graphblas/system/sequential/NegateView.hpp>  // deprecated
 
 // Add individual operation files here
-#include <graphblas/system/sequential/sparse_apply.hpp>
-#include <graphblas/system/sequential/sparse_assign.hpp>
 #include <graphblas/system/sequential/sparse_mxm.hpp>
 #include <graphblas/system/sequential/sparse_mxv.hpp>
 #include <graphblas/system/sequential/sparse_vxm.hpp>
 #include <graphblas/system/sequential/sparse_ewisemult.hpp>
 #include <graphblas/system/sequential/sparse_ewiseadd.hpp>
 #include <graphblas/system/sequential/sparse_extract.hpp>
-
+#include <graphblas/system/sequential/sparse_assign.hpp>
+#include <graphblas/system/sequential/sparse_apply.hpp>
+#include <graphblas/system/sequential/sparse_reduce.hpp>
 
 
 namespace GraphBLAS
@@ -53,11 +53,6 @@ namespace GraphBLAS
         /**
          *
          */
-        // template<typename MatrixT>
-        // inline ComplementView<MatrixT> complement(MatrixT const &A)
-        // {
-        //     return ComplementView<MatrixT>(A);
-        // }
 
         template<typename MatrixT>
         inline MatrixComplementView<MatrixT> matrix_complement(MatrixT const &Mask)

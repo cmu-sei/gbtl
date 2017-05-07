@@ -513,33 +513,32 @@ namespace GraphBLAS
         template<typename WVectorT,
                  typename MaskT,
                  typename AccumT,
-                 typename BinaryFunctionT,  // monoid or binary op only
+                 typename BinaryOpT,  // monoid or binary op only
                  typename AMatrixT>
-        friend inline void reduce(WVectorT              &u,
-                                  MaskT           const &mask,
-                                  AccumT                 accum,
-                                  BinaryFunctionT        op,
-                                  AMatrixT        const &A,
-                                  bool                   replace_flag);
+        friend inline void reduce(WVectorT        &u,
+                                  MaskT     const &mask,
+                                  AccumT           accum,
+                                  BinaryOpT        op,
+                                  AMatrixT  const &A,
+                                  bool             replace_flag);
 
         // vector-scalar variant
         template<typename ValueT,
                  typename AccumT,
                  typename MonoidT, // monoid only
-                 typename UVectorT>
-        friend inline void reduce(ValueT           &dst,
-                                  AccumT            accum,
-                                  MonoidT           op,
-                                  UVectorT   const &u,
-                                  bool              replace_flag);
-
-        //template<typename VectorT>
-        //friend inline backend::ComplementView<VectorT> complement(
-        //    VectorT const &w);
+                 typename UScalarT,
+                 typename ...UTagsT>
+        friend inline void reduce(
+            ValueT                                       &dst,
+            AccumT                                        accum,
+            MonoidT                                       op,
+            GraphBLAS::Vector<UScalarT, UTagsT...> const &u);
 
         template<typename OtherScalarT, typename... OtherTagsT>
-        friend inline VectorComplementView<Vector<OtherScalarT, OtherTagsT...>> complement(
+        friend inline VectorComplementView<Vector<OtherScalarT,
+                                                  OtherTagsT...>> complement(
             Vector<OtherScalarT, OtherTagsT...> const &mask);
+
     private:
         BackendType m_vec;
     };

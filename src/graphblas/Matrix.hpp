@@ -423,6 +423,31 @@ namespace GraphBLAS
 
         //--------------------------------------------------------------------
 
+        template<typename WVectorT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename BinaryOpT,  // monoid or binary op only
+                 typename AMatrixT>
+        friend inline void reduce(WVectorT        &u,
+                                  MaskT     const &mask,
+                                  AccumT           accum,
+                                  BinaryOpT        op,
+                                  AMatrixT  const &A,
+                                  bool             replace_flag);
+
+        template<typename ValueT,
+                 typename AccumT,
+                 typename MonoidT, // monoid only
+                 typename AScalarT,
+                 typename ...ATagsT>
+        friend inline void reduce(
+            ValueT                                       &dst,
+            AccumT                                        accum,
+            MonoidT                                       op,
+            GraphBLAS::Matrix<AScalarT, ATagsT...> const &A);
+
+        //--------------------------------------------------------------------
+
         template<typename MatrixT>
         friend inline TransposeView<MatrixT> transpose(MatrixT const &A);
 

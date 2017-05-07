@@ -38,7 +38,8 @@ namespace GraphBLAS
     namespace backend
     {
         template <typename ScalarT>
-        void print_vec(std::ostream &os, std::string label, std::vector<std::tuple<IndexType, ScalarT> > vec)
+        void print_vec(std::ostream &os, std::string label,
+                       std::vector<std::tuple<IndexType, ScalarT> > vec)
         {
             auto vec_it = vec.begin();
             bool first = true;
@@ -79,14 +80,14 @@ namespace GraphBLAS
         }
 
         //**********************************************************************
-
-        /// Increments the provided iterate while the value is less than the provided index
+        /// Increments the provided iterate while the value is less
+        /// than the provided index
         template <typename I>
         void increment_until_true(
-                // std::vector<std::tuple<GraphBLAS::IndexType,D> >::const_iterator    &iter,
-                // std::vector<std::tuple<GraphBLAS::IndexType,D> >::const_iterator    &iter_end,
-                I          &iter,
-                I const    &iter_end)
+            // std::vector<std::tuple<GraphBLAS::IndexType,D> >::const_iterator    &iter,
+            // std::vector<std::tuple<GraphBLAS::IndexType,D> >::const_iterator    &iter_end,
+            I          &iter,
+            I const    &iter_end)
         {
             using value_type = typename std::iterator_traits<I>::value_type;
             using data_type = typename std::tuple_element<1, value_type>::type;
@@ -301,6 +302,43 @@ namespace GraphBLAS
             return value_set;
         }
 
+        //************************************************************************
+        /// A reduction of a sparse vector (vector<tuple(index,value)>) using a
+        /// binary op or a monoid.
+        template <typename D1, typename D3, typename BinaryOpT>
+        bool reduction(
+            D3                                                      &ans,
+            std::vector<std::tuple<GraphBLAS::IndexType,D1> > const &vec,
+            BinaryOpT                                                op)
+        {
+            if (vec.empty())
+            {
+                return false;
+            }
+
+            typedef typename BinaryOpT::result_type D3ScalarType;
+            D3ScalarType tmp;
+
+            if (vec.size() == 1)
+            {
+                tmp = static_cast<D3ScalarType>(std::get<1>(vec[0]));
+            }
+            else
+            {
+                /// @note Since op is associative and commutative left to right
+                /// ordering is not strictly required.
+                tmp = op(std::get<1>(vec[0]), std::get<1>(vec[1]));
+
+                for (size_t idx = 2; idx < vec.size(); ++idx)
+                {
+                    tmp = op(tmp, std::get<1>(vec[idx]));
+                }
+            }
+
+            ans = static_cast<D3>(tmp);
+            return true;
+        }
+
         //**********************************************************************
         /// Apply element-wise operation to union on sparse vectors.
         template <typename D1, typename D2, typename D3, typename BinaryOpT>
@@ -435,6 +473,32 @@ namespace GraphBLAS
                                 std::get<0>(tupl),
                                 static_cast<ZScalarT>(std::get<1>(tupl))));
             }
+        }
+
+        //**********************************************************************
+        template <typename ZScalarT,
+                  typename WScalarT,
+                  typename TScalarT,
+                  typename BinaryOpT>
+        void opt_accum_scalar(ZScalarT       &z,
+                              WScalarT const &w,
+                              TScalarT const &t,
+                              BinaryOpT       accum)
+        {
+            z = static_cast<ZScalarT>(accum(w, t));
+        }
+
+        //**********************************************************************
+        // Specialized version that gets used when we don't have an accumulator
+        template <typename ZScalarT,
+                  typename WScalarT,
+                  typename TScalarT>
+        void opt_accum_scalar(ZScalarT                &z,
+                              WScalarT const          &w,
+                              TScalarT const          &t,
+                              GraphBLAS::NoAccumulate  accum)
+        {
+            z = static_cast<ZScalarT>(t);
         }
 
         //************************************************************************

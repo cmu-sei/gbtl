@@ -13,8 +13,7 @@
  */
 
 /**
- * Implementations of all GraphBLAS functions optimized for the sequential
- * (CPU) backend.
+ * Implementation of all sparse mxv for the sequential (CPU) backend.
  */
 
 #ifndef GB_SEQUENTIAL_SPARSE_MXV_HPP
