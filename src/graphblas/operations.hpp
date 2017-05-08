@@ -141,36 +141,45 @@ namespace GraphBLAS
     //****************************************************************************
     // eWiseAdd and eWiseMult
     //****************************************************************************
-    /*
-    template<typename WVectorT,
+    /**
+     * @brief Perform an element wise binary operation that can be optimized
+     *        for "multiply" semantics (AND short circuit logic).
+     */
+    template<typename WScalarT,
              typename MaskT,
              typename AccumT,
-             typename BinaryOpT,  //can be BinaryOp, Monoid (or Semiring?)
+             typename BinaryOpT,  //can be BinaryOp, Monoid (not Semiring)
              typename UVectorT,
-             typename VVectorT>
-    inline void eWiseMult(WVectorT        &w,
-                          MaskT     const &mask,
-                          AccumT           accum,
-                          BinaryOpT        op,
-                          UVectorT  const &u,
-                          VVectorT  const &v,
-                          bool             replace_flag = false);
-    */
+             typename VVectorT,
+             typename ...WTagsT>
+    inline void eWiseMult(
+        GraphBLAS::Vector<WScalarT, WTagsT...> &w,
+        MaskT                            const &mask,
+        AccumT                                  accum,
+        BinaryOpT                               op,
+        UVectorT                         const &u,
+        VVectorT                         const &v,
+        bool                                    replace_flag = false)
+    {
+        backend::eWiseMult(w.m_vec, mask.m_vec, accum, op, u.m_vec, v.m_vec,
+                           replace_flag);
+    }
 
-    /// @todo Find a way to distinguish between vector and matrix variants
-    template<typename CMatrixT,
+    template<typename CScalarT,
              typename MaskT,
              typename AccumT,
-             typename BinaryOpT,  //can be BinaryOp, Monoid (or Semiring?)
+             typename BinaryOpT,  //can be BinaryOp, Monoid (not Semiring)
              typename AMatrixT,
-             typename BMatrixT>
-    inline void eWiseMult(CMatrixT         &C,
-                          MaskT      const &Mask,
-                          AccumT            accum,
-                          BinaryOpT         op,
-                          AMatrixT   const &A,
-                          BMatrixT   const &B,
-                          bool              replace_flag = false)
+             typename BMatrixT,
+             typename ...CTagsT>
+    inline void eWiseMult(
+        GraphBLAS::Matrix<CScalarT, CTagsT...> &C,
+        MaskT                            const &Mask,
+        AccumT                                  accum,
+        BinaryOpT                               op,
+        AMatrixT                         const &A,
+        BMatrixT                         const &B,
+        bool                                    replace_flag = false)
     {
         backend::eWiseMult(C.m_mat, Mask.m_mat, accum, op, A.m_mat, B.m_mat,
                            replace_flag);
@@ -180,39 +189,45 @@ namespace GraphBLAS
      * @brief Perform an element wise binary operation that can be optimized
      *        for "add" semantics (OR short circuit logic).
      */
-    /*
-    template<typename WVectorT,
+    template<typename WScalarT,
              typename MaskT,
              typename AccumT,
-             typename BinaryOpT,  //can be BinaryOp, Monoid (or Semiring?)
+             typename BinaryOpT,  //can be BinaryOp, Monoid (not Semiring)
              typename UVectorT,
-             typename VVectorT>
-    inline void eWiseAdd(WVectorT         &w,
-                         MaskT      const &mask,
-                         AccumT            accum,
-                         BinaryOpT         op,
-                         UVectorT   const &u,
-                         VVectorT   const &v,
-                         bool              replace_flag = false);
-    */
+             typename VVectorT,
+             typename ...WTagsT>
+    inline void eWiseAdd(
+        GraphBLAS::Vector<WScalarT, WTagsT...> &w,
+        MaskT                            const &mask,
+        AccumT                                  accum,
+        BinaryOpT                               op,
+        UVectorT                         const &u,
+        VVectorT                         const &v,
+        bool                                    replace_flag = false)
+    {
+        backend::eWiseAdd(w.m_vec, mask.m_vec, accum, op, u.m_vec, v.m_vec,
+                          replace_flag);
+    }
 
-    /// @todo Find a way to distinguish between vector and matrix variants
-    template<typename CMatrixT,
+    template<typename CScalarT,
              typename MaskT,
              typename AccumT,
-             typename BinaryOpT,  //can be BinaryOp, Monoid (or Semiring?)
+             typename BinaryOpT,  //can be BinaryOp, Monoid (not Semiring)
              typename AMatrixT,
-             typename BMatrixT >
-    inline void eWiseAdd(CMatrixT         &C,
-                         MaskT      const &Mask,
-                         AccumT            accum,
-                         BinaryOpT         op,
-                         AMatrixT   const &A,
-                         BMatrixT   const &B,
-                         bool              replace_flag = false)
+             typename BMatrixT,
+             typename ...CTagsT>
+    inline void eWiseAdd(
+        GraphBLAS::Matrix<CScalarT, CTagsT...> &C,
+        MaskT                            const &Mask,
+        AccumT                                  accum,
+        BinaryOpT                               op,
+        AMatrixT                         const &A,
+        BMatrixT                         const &B,
+        bool                                    replace_flag = false)
     {
-        backend::eWiseAdd(C.m_mat, Mask.m_mat, accum, op, A.m_mat, B.m_mat, replace_flag);
-    };
+        backend::eWiseAdd(C.m_mat, Mask.m_mat, accum, op, A.m_mat, B.m_mat,
+                          replace_flag);
+    }
 
     //****************************************************************************
     // Extract

@@ -179,33 +179,37 @@ namespace GraphBLAS
 
         //--------------------------------------------------------------------
 
-        template<typename CMatrixT,
+        template<typename CScalarT,
                  typename MaskT,
                  typename AccumT,
-                 typename BinaryOpT,  //can be BinaryOp, Monoid (or Semiring?)
+                 typename BinaryOpT,  //can be BinaryOp, Monoid (not Semiring)
                  typename AMatrixT,
-                 typename BMatrixT>
-        friend inline void eWiseMult(CMatrixT         &C,
-                                     MaskT      const &Mask,
-                                     AccumT            accum,
-                                     BinaryOpT         op,
-                                     AMatrixT   const &A,
-                                     BMatrixT   const &B,
-                                     bool              replace_flag);
+                 typename BMatrixT,
+                 typename... CTagsT>
+        friend inline void eWiseMult(
+            GraphBLAS::Matrix<CScalarT, CTagsT...> &C,
+            MaskT                            const &Mask,
+            AccumT                                  accum,
+            BinaryOpT                               op,
+            AMatrixT                         const &A,
+            BMatrixT                         const &B,
+            bool                                    replace_flag);
 
-        template<typename CMatrixT,
+        template<typename CScalarT,
                  typename MaskT,
                  typename AccumT,
-                 typename BinaryOpT,  //can be BinaryOp, Monoid (or Semiring?)
+                 typename BinaryOpT,  //can be BinaryOp, Monoid (not Semiring)
                  typename AMatrixT,
-                 typename BMatrixT >
-        friend inline void eWiseAdd(CMatrixT         &C,
-                                    MaskT      const &Mask,
-                                    AccumT            accum,
-                                    BinaryOpT         op,
-                                    AMatrixT   const &A,
-                                    BMatrixT   const &B,
-                                    bool              replace_flag);
+                 typename BMatrixT,
+                 typename... CTagsT>
+        friend inline void eWiseAdd(
+            GraphBLAS::Matrix<CScalarT, CTagsT...> &C,
+            MaskT                            const &Mask,
+            AccumT                                  accum,
+            BinaryOpT                               op,
+            AMatrixT                         const &A,
+            BMatrixT                         const &B,
+            bool                                    replace_flag);
 
     };
 

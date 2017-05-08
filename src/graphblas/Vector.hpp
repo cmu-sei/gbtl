@@ -27,6 +27,11 @@
 
 namespace GraphBLAS
 {
+    template<typename ScalarT, typename... TagsT>
+    class Vector;
+
+    template<typename VectorT>
+    class VectorComplementView;
 
     //**************************************************************************
     template<typename ScalarT, typename... TagsT>
@@ -292,33 +297,37 @@ namespace GraphBLAS
                                AMatrixT   const &A,
                                bool              replace_flag);
 
-        template<typename WVectorT,
+        template<typename WScalarT,
                  typename MaskT,
                  typename AccumT,
-                 typename BinaryOpT,  //can be monoid or binaryop (not Semiring)
+                 typename BinaryOpT,  //can be BinaryOp, Monoid (not Semiring)
                  typename UVectorT,
-                 typename VVectorT>
-        friend inline void eWiseMult(WVectorT        &w,
-                                     MaskT     const &mask,
-                                     AccumT           accum,
-                                     BinaryOpT        op,
-                                     UVectorT  const &u,
-                                     VVectorT  const &v,
-                                     bool             replace_flag);
+                 typename VVectorT,
+                 typename ...WTagsT>
+        friend inline void eWiseMult(
+            GraphBLAS::Vector<WScalarT, WTagsT...> &w,
+            MaskT                            const &mask,
+            AccumT                                  accum,
+            BinaryOpT                               op,
+            UVectorT                         const &u,
+            VVectorT                         const &v,
+            bool                                    replace_flag);
 
-        template<typename WVectorT,
+        template<typename WScalarT,
                  typename MaskT,
                  typename AccumT,
-                 typename BinaryOpT,  //can be monoid or binaryop (not Semiring)
+                 typename BinaryOpT,  //can be BinaryOp, Monoid (not Semiring)
                  typename UVectorT,
-                 typename VVectorT>
-        friend inline void eWiseAdd(WVectorT         &w,
-                                    MaskT      const &mask,
-                                    AccumT            accum,
-                                    BinaryOpT         op,
-                                    UVectorT   const &u,
-                                    VVectorT   const &v,
-                                    bool              replace_flag);
+                 typename VVectorT,
+                 typename ...WTagsT>
+        friend inline void eWiseAdd(
+            GraphBLAS::Vector<WScalarT, WTagsT...> &w,
+            MaskT                            const &mask,
+            AccumT                                  accum,
+            BinaryOpT                               op,
+            UVectorT                         const &u,
+            VVectorT                         const &v,
+            bool                                    replace_flag);
 
         /// Extract: Standard vector variant
         template<typename WVectorT,

@@ -76,13 +76,15 @@ SUBDIRS = sequential
 
 noinst_PROGRAMS = \
 test_sequential_sparse_algebra \
-test_sequential_sparse_assign \
 test_sequential_sparse_mxm \
 test_sequential_sparse_mxv \
 test_sequential_sparse_vxm \
+test_sequential_sparse_ewisemult_vector \
 test_sequential_sparse_ewisemult_matrix \
+test_sequential_sparse_ewiseadd_vector \
 test_sequential_sparse_ewiseadd_matrix \
 test_sequential_sparse_extract \
+test_sequential_sparse_assign \
 test_sequential_sparse_apply \
 test_sequential_sparse_reduce \
 test_sequential_math \
@@ -110,19 +112,23 @@ test_sequential_triangle_count
 
 test_sequential_sparse_algebra_SOURCES = test_sparse_algebra.cpp
 
-test_sequential_sparse_assign_SOURCES = test_sparse_assign.cpp
-
 test_sequential_sparse_mxm_SOURCES = test_sparse_mxm.cpp
 
 test_sequential_sparse_mxv_SOURCES = test_sparse_mxv.cpp
 
 test_sequential_sparse_vxm_SOURCES = test_sparse_vxm.cpp
 
+test_sequential_sparse_ewisemult_vector_SOURCES = test_sparse_ewisemult_vector.cpp
+
 test_sequential_sparse_ewisemult_matrix_SOURCES = test_sparse_ewisemult_matrix.cpp
+
+test_sequential_sparse_ewiseadd_vector_SOURCES = test_sparse_ewiseadd_vector.cpp
 
 test_sequential_sparse_ewiseadd_matrix_SOURCES = test_sparse_ewiseadd_matrix.cpp
 
 test_sequential_sparse_extract_SOURCES = test_sparse_extract.cpp
+
+test_sequential_sparse_assign_SOURCES = test_sparse_assign.cpp
 
 test_sequential_sparse_apply_SOURCES = test_sparse_apply.cpp
 

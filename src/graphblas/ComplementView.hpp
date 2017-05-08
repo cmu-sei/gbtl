@@ -147,33 +147,52 @@ namespace GraphBLAS
 
         //--------------------------------------------------------------------
 
-        template<typename CMatrixT,
+        template<typename CScalarT,
                  typename MaskT,
                  typename AccumT,
-                 typename BinaryOpT,  //can be BinaryOp, Monoid (or Semiring?)
+                 typename BinaryOpT,  //can be BinaryOp, Monoid (not Semiring)
                  typename AMatrixT,
-                 typename BMatrixT>
-        friend inline void eWiseMult(CMatrixT         &C,
-                                     MaskT      const &Mask,
-                                     AccumT            accum,
-                                     BinaryOpT         op,
-                                     AMatrixT   const &A,
-                                     BMatrixT   const &B,
-                                     bool              replace_flag);
+                 typename BMatrixT,
+                 typename... CTagsT>
+        friend inline void eWiseMult(
+            GraphBLAS::Matrix<CScalarT, CTagsT...> &C,
+            MaskT                            const &Mask,
+            AccumT                                  accum,
+            BinaryOpT                               op,
+            AMatrixT                         const &A,
+            BMatrixT                         const &B,
+            bool                                    replace_flag);
 
-        template<typename CMatrixT,
+        //--------------------------------------------------------------------
+
+        template<typename CScalarT,
                  typename MaskT,
                  typename AccumT,
-                 typename BinaryOpT,  //can be BinaryOp, Monoid (or Semiring?)
+                 typename BinaryOpT,  //can be BinaryOp, Monoid (not Semiring)
                  typename AMatrixT,
-                 typename BMatrixT >
-        friend inline void eWiseAdd(CMatrixT         &C,
-                                    MaskT      const &Mask,
-                                    AccumT            accum,
-                                    BinaryOpT         op,
-                                    AMatrixT   const &A,
-                                    BMatrixT   const &B,
-                                    bool              replace_flag);
+                 typename BMatrixT,
+                 typename... CTagsT>
+        friend inline void eWiseAdd(
+            GraphBLAS::Matrix<CScalarT, CTagsT...> &C,
+            MaskT                            const &Mask,
+            AccumT                                  accum,
+            BinaryOpT                               op,
+            AMatrixT                         const &A,
+            BMatrixT                         const &B,
+            bool                                    replace_flag);
+
+        //--------------------------------------------------------------------
+        template<typename CMatrixT,
+                 typename MMatrixT,
+                 typename AccumT,
+                 typename AMatrixT >
+        friend inline void extract(CMatrixT &C,
+                                   MMatrixT const &mask,
+                                   AccumT accum,
+                                   AMatrixT const &A,
+                                   IndexArrayType const &row_indicies,
+                                   IndexArrayType const &col_indicies,
+                                   bool replace);
 
     };
 
@@ -287,7 +306,6 @@ namespace GraphBLAS
                                AMatrixT   const &A,
                                bool              replace_flag);
 
-        //--------------------------------------------------------------------
         template<typename WVectorT,
                  typename MaskT,
                  typename AccumT,
@@ -302,188 +320,41 @@ namespace GraphBLAS
                                UVectorT  const &u,
                                bool             replace_flag);
 
-    };
-
-
-
-#if 0
-    //************************************************************************
-    template<typename MatrixT>
-    class ComplementView
-    {
-    public:
-        typedef typename backend::ComplementView<typename MatrixT::BackendType> BackendType;
-        typedef typename MatrixT::ScalarType ScalarType;
-
-        //note:
-        //the backend should be able to decide when to ignore any of the
-        //tags and/or arguments
-        ComplementView(BackendType backend_view)
-            : m_mat(backend_view)
-        {
-        }
-
-        /**
-         * @brief Copy constructor.
-         *
-         * @param[in] rhs   The matrix to copy.
-         */
-        ComplementView(ComplementView<MatrixT> const &rhs)
-            : m_mat(rhs.m_mat)
-        {
-        }
-
-        ~ComplementView() { }
-
-        /// @todo need to change to mix and match internal types
-        template <typename OtherMatrixT>
-        bool operator==(OtherMatrixT const &rhs) const
-        {
-            //return (m_mat.operator==(rhs));
-            throw 1;
-            ///@todo Not implemented yet
-            //return matrix_equal_helper(*this, rhs);
-        }
-
-        template <typename OtherMatrixT>
-        bool operator!=(OtherMatrixT const &rhs) const
-        {
-            return !(*this == rhs);
-        }
-
-        IndexType nrows() const { return m_mat.nrows(); }
-        IndexType ncols() const { return m_mat.ncols(); }
-        IndexType nvals() const { return m_mat.nvals(); }
-
-        bool hasElement(IndexType row, IndexType col) const
-        {
-            return m_mat.hasElement(row, col);
-        }
-
-        ScalarType extractElement(IndexType row, IndexType col) const
-        {
-            return m_mat.extractElement(row, col);
-        }
-
-        template<typename RAIteratorIT,
-                 typename RAIteratorJT,
-                 typename RAIteratorVT,
-                 typename AMatrixT>
-        inline void extractTuples(RAIteratorIT        row_it,
-                                  RAIteratorJT        col_it,
-                                  RAIteratorVT        values)
-        {
-            m_mat.extractTuples(row_it, col_it, values);
-        }
-
-        template<typename ValueT,
-                 typename AMatrixT>
-        inline void extractTuples(IndexArrayType            &row_indices,
-                                  IndexArrayType            &col_indices,
-                                  std::vector<ValueT>       &values)
-        {
-            m_mat.extractTuples(row_indices, col_indices, values);
-        }
-
-        //other methods that may or may not belong here:
-        //
-        void printInfo(std::ostream &os) const
-        {
-            os << "Frontend ComplementView of:";
-            m_mat.printInfo(os);
-        }
-
-        /// @todo This does not need to be a friend
-        friend std::ostream &operator<<(std::ostream &os, ComplementView const &mat)
-        {
-            mat.printInfo(os);
-            return os;
-        }
-
-    private:
-        BackendType m_mat;
-
-        // PUT ALL FRIEND DECLARATIONS HERE
-        template<typename CMatrixT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename AMatrixT,
-                 typename BMatrixT>
-        friend inline void mxm(CMatrixT         &C,
-                               AccumT            accum,
-                               SemiringT         op,
-                               AMatrixT   const &A,
-                               BMatrixT   const &B);
-
-        template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename AMatrixT,
-                 typename BMatrixT>
-        friend inline void mxm(CMatrixT         &C,
-                               MaskT      const &Mask,
-                               AccumT            accum,
-                               SemiringT         op,
-                               AMatrixT   const &A,
-                               BMatrixT   const &B,
-                               bool              replace_flag);
-
         //--------------------------------------------------------------------
 
-        template<typename WVectorT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename UVectorT,
-                 typename AMatrixT>
-        friend inline void vxm(WVectorT         &w,
-                               AccumT            accum,
-                               SemiringT         op,
-                               UVectorT   const &u,
-                               AMatrixT   const &A);
-
-        template<typename WVectorT,
+        template<typename WScalarT,
                  typename MaskT,
                  typename AccumT,
-                 typename SemiringT,
+                 typename BinaryOpT,  //can be BinaryOp, Monoid (not Semiring)
                  typename UVectorT,
-                 typename AMatrixT>
-        friend inline void vxm(WVectorT         &w,
-                               MaskT      const &mask,
-                               AccumT            accum,
-                               SemiringT         op,
-                               UVectorT   const &u,
-                               AMatrixT   const &A,
-                               bool              replace_flag);
+                 typename VVectorT,
+                 typename ...WTagsT>
+        friend inline void eWiseMult(
+            GraphBLAS::Vector<WScalarT, WTagsT...> &w,
+            MaskT                            const &mask,
+            AccumT                                  accum,
+            BinaryOpT                               op,
+            UVectorT                         const &u,
+            VVectorT                         const &v,
+            bool                                    replace_flag);
+
+        template<typename WScalarT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename BinaryOpT,  //can be BinaryOp, Monoid (not Semiring)
+                 typename UVectorT,
+                 typename VVectorT,
+                 typename ...WTagsT>
+        friend inline void eWiseAdd(
+            GraphBLAS::Vector<WScalarT, WTagsT...> &w,
+            MaskT                            const &mask,
+            AccumT                                  accum,
+            BinaryOpT                               op,
+            UVectorT                         const &u,
+            VVectorT                         const &v,
+            bool                                    replace_flag);
 
         //--------------------------------------------------------------------
-
-        template<typename WVectorT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename AMatrixT,
-                 typename UVectorT>
-        friend inline void mxv(WVectorT        &w,
-                               AccumT           accum,
-                               SemiringT        op,
-                               AMatrixT  const &A,
-                               UVectorT  const &u);
-
-        template<typename WVectorT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename AMatrixT,
-                 typename UVectorT>
-        friend inline void mxv(WVectorT        &w,
-                               MaskT     const &mask,
-                               AccumT           accum,
-                               SemiringT        op,
-                               AMatrixT  const &A,
-                               UVectorT  const &u,
-                               bool             replace_flag);
-
     };
-#endif
 
 } // end namespace GraphBLAS

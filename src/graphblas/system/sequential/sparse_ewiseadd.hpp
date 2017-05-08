@@ -42,42 +42,95 @@ namespace GraphBLAS
     namespace backend
     {
         //**********************************************************************
-        /// Implementation of 4.3.4.2 eWiseMult: Matrix variant
-        template<typename CMatrixT,
-                 typename MMatrixT,
+        /// Implementation of 4.3.5.1 eWiseAdd: Vector variant
+        template<typename WScalarT,
+                 typename MaskT,
                  typename AccumT,
-                 typename BinaryOpT,
-                 typename AMatrixT,
-                 typename BMatrixT>
-        inline void eWiseAdd(CMatrixT       &C,
-                             MMatrixT const &Mask,
-                             AccumT const    accum,
-                             BinaryOpT       op,
-                             AMatrixT const &A,
-                             BMatrixT const &B,
-                             bool            replace_flag = false)
+                 typename BinaryOpT,  //can be BinaryOp, Monoid (not Semiring)
+                 typename UVectorT,
+                 typename VVectorT,
+                 typename ...WTagsT>
+        inline void eWiseAdd(
+            GraphBLAS::backend::Vector<WScalarT, WTagsT...> &w,
+            MaskT                                     const &mask,
+            AccumT                                           accum,
+            BinaryOpT                                        op,
+            UVectorT                                  const &u,
+            VVectorT                                  const &v,
+            bool                                             replace_flag = false)
         {
             // @todo: Make errors match the spec
-            // @todo: support semiring op
+
+            // ??? Do we need to make defensive copies of everything if we don't
+            // really support NON-BLOCKING?
+            check_vector_size(w, mask,
+                              "eWiseAdd(vec): failed w == mask dimension checks");
+            check_vector_size(w, u,
+                              "eWiseAdd(vec): failed w == u dimension checks");
+            check_vector_size(u, v,
+                              "eWiseAdd(vec): failed u == v dimension checks");
+
+            // =================================================================
+            // Do the basic ewise-and work: T = A .* B
+            typedef typename BinaryOpT::result_type D3ScalarType;
+            std::vector<std::tuple<IndexType,D3ScalarType> > t_contents;
+
+            if ((u.nvals() > 0) || (v.nvals() > 0))
+            {
+                auto u_contents(u.getContents());
+                auto v_contents(v.getContents());
+
+                ewise_or(t_contents, u_contents, v_contents, op);
+            }
+
+            // =================================================================
+            // Accumulate into Z
+            std::vector<std::tuple<IndexType,WScalarT> > z_contents;
+            ewise_or_opt_accum_1D(z_contents, w, t_contents, accum);
+
+            // =================================================================
+            // Copy Z into the final output considering mask and replace
+            write_with_opt_mask_1D(w, z_contents, mask, replace_flag);
+        }
+
+        //**********************************************************************
+        /// Implementation of 4.3.5.2 eWiseAdd: Matrix variant
+        template<typename CScalarT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename BinaryOpT,  //can be BinaryOp, Monoid (not Semiring)
+                 typename AMatrixT,
+                 typename BMatrixT,
+                 typename ...CTagsT>
+        inline void eWiseAdd(
+            GraphBLAS::backend::Matrix<CScalarT, CTagsT...> &C,
+            MaskT                                     const &Mask,
+            AccumT                                           accum,
+            BinaryOpT                                        op,
+            AMatrixT                                  const &A,
+            BMatrixT                                  const &B,
+            bool                                             replace_flag = false)
+        {
+            // @todo: Make errors match the spec
 
             // ??? Do we need to make defensive copies of everything if we don't
             // really support NON-BLOCKING?
             check_matrix_size(C, Mask,
-                              "eWiseMult(mat): failed C == Mask dimension checks");
+                              "eWiseAdd(mat): failed C == Mask dimension checks");
             check_matrix_size(C, A,
-                              "eWiseMult(mat): failed C == A dimension checks");
+                              "eWiseAdd(mat): failed C == A dimension checks");
             check_matrix_size(A, B,
-                              "eWiseMult(mat): failed A == B dimension checks");
+                              "eWiseAdd(mat): failed A == B dimension checks");
 
             IndexType num_rows(A.nrows());
             IndexType num_cols(A.ncols());
 
             typedef typename AMatrixT::ScalarType AScalarType;
             typedef typename BMatrixT::ScalarType BScalarType;
-            typedef typename CMatrixT::ScalarType CScalarType;
+
             typedef std::vector<std::tuple<IndexType,AScalarType> > ARowType;
             typedef std::vector<std::tuple<IndexType,BScalarType> > BRowType;
-            typedef std::vector<std::tuple<IndexType,CScalarType> > CRowType;
+            typedef std::vector<std::tuple<IndexType,CScalarT> > CRowType;
 
             // =================================================================
             // Do the basic ewise-and work: T = A .* B
@@ -85,7 +138,6 @@ namespace GraphBLAS
             typedef std::vector<std::tuple<IndexType,D3ScalarType> > TRowType;
             LilSparseMatrix<D3ScalarType> T(num_rows, num_cols);
 
-            // Build this completely based on the semiring
             if ((A.nvals() > 0) || (B.nvals() > 0))
             {
                 // create a row of result at a time
@@ -105,8 +157,6 @@ namespace GraphBLAS
                     }
                     else
                     {
-                        /// @todo Need to wrap op in helper that can
-                        /// extract mult() as operator() if op is Semiring
                         ewise_or(T_row, A_row, B_row, op);
 
                         if (!T_row.empty())
@@ -121,7 +171,7 @@ namespace GraphBLAS
             // =================================================================
             // Accumulate into Z
 
-            LilSparseMatrix<CScalarType> Z(num_rows, num_cols);
+            LilSparseMatrix<CScalarT> Z(num_rows, num_cols);
             ewise_or_opt_accum(Z, C, T, accum);
 
             // =================================================================
