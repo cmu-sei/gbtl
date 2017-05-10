@@ -406,6 +406,18 @@ namespace GraphBLAS
                                   IndexArrayType const &col_indices,
                                   bool                  replace_flag);
 
+        template<typename CMatrixT,
+                typename MaskT,
+                typename AccumT,
+                typename ValueT>
+        friend inline void assign_constant(CMatrixT             &C,
+                                    MaskT          const &Mask,
+                                    AccumT                accum,
+                                    ValueT                val,
+                                    IndexArrayType const &row_indices,
+                                    IndexArrayType const &col_indices,
+                                    bool                  replace_flag);
+
         //--------------------------------------------------------------------
 
         template<typename CScalarT,

@@ -166,6 +166,35 @@ namespace GraphBLAS
             }
         }
 
+        template <typename ValueT >
+        void assignConstant(LilSparseMatrix<ValueT>             &T,
+                            ValueT                     const    value,
+                            IndexArrayType             const   &row_indicies,
+                            IndexArrayType             const   &col_indicies)
+        {
+            typedef std::vector<std::tuple<IndexType,ValueT> > TRowType;
+
+            for (auto row_it = row_indicies.begin();
+                 row_it != row_indicies.end();
+                 ++row_it)
+            {
+                TRowType out_row;
+                for (auto col_it = col_indicies.begin();
+                     col_it != col_indicies.end();
+                     ++col_it)
+                {
+                    // @todo: add bounds check
+                    out_row.push_back(std::make_tuple(*col_it, value));
+                }
+
+                // @todo: add bounds check
+                if (!out_row.empty())
+                    T.setRow(*row_it, out_row);
+            }
+        };
+
+        //=====================================================================
+        //=====================================================================
 
         // 4.3.7.2 assign: Standard matrix variant
         template<typename CMatrixT,
@@ -184,7 +213,7 @@ namespace GraphBLAS
 
             // This basically "expands" A into C
 
-            // TYPE CHECKS
+            // @todo Add bounds and type checks
 
             //std::cerr << ">>> C in <<< " << std::endl;
             //std::cerr << C << std::endl;
@@ -210,6 +239,98 @@ namespace GraphBLAS
             // =================================================================
             // Copy Z into the final output considering mask and replace
             write_with_opt_mask(C, Z, mask, replace);
+
+            //std::cerr << ">>> C <<< " << std::endl;
+            //std::cerr << C << std::endl;
+        };
+
+        //======================================================================
+
+        template<typename WVectorT,
+                typename MaskT,
+                typename AccumT,
+                typename ValueT>
+        inline void assign_constant(WVectorT             &w,
+                           MaskT          const &mask,
+                           AccumT                accum,
+                           ValueT                val,
+                           IndexArrayType const &indices,
+                           bool                  replace_flag = false)
+        {
+            // @todo : Added dimension and error checks
+
+            std::vector<std::tuple<IndexType, ValueT> > T;
+
+            // Set all in T
+            for (auto it = indices.begin(); it != indices.end(); ++it)
+            {
+                T.push_back(std::make_tuple(*it, val));
+            }
+
+            // =================================================================
+            // Accumulate into Z
+
+            typedef typename WVectorT::ScalarType WScalarType;
+            std::vector<std::tuple<IndexType, WScalarType> > z;
+            ewise_or_opt_accum_1D(z, w, T, accum);
+
+            // =================================================================
+            // Copy Z into the final output, w, considering mask and replace
+            write_with_opt_mask_1D(w, z, mask, replace_flag);
+        };
+
+        //======================================================================
+        // 4.3.7.6: assign: Constant Matrix Variant
+        template<typename CMatrixT,
+                typename MaskT,
+                typename AccumT,
+                typename ValueT>
+        inline void assign_constant(CMatrixT             &C,
+                           MaskT          const &Mask,
+                           AccumT                accum,
+                           ValueT                val,
+                           IndexArrayType const &row_indices,
+                           IndexArrayType const &col_indices,
+                           bool                  replace_flag = false)
+        {
+            typedef typename CMatrixT::ScalarType                   CScalarType;
+
+            // @todo Add bounds and type checks
+
+            //std::cerr << ">>> C in <<< " << std::endl;
+            //std::cerr << C << std::endl;
+
+            //std::cerr << ">>> Mask <<< " << std::endl;
+            //std::cerr << mask << std::endl;
+
+            // Sort row indicies and col_indicies
+            IndexArrayType sorted_rows(row_indices);
+            IndexArrayType sorted_cols(col_indices);
+
+            std::sort(sorted_rows.begin(), sorted_rows.end());
+            std::sort(sorted_cols.begin(), sorted_cols.end());
+
+            // =================================================================
+            // Assign spots in T
+
+            LilSparseMatrix<ValueT>         T(C.nrows(), C.ncols());
+            assignConstant(T, val, sorted_rows, sorted_cols);
+
+            //std::cerr << ">>> T <<< " << std::endl;
+            //std::cerr << T << std::endl;
+
+            // =================================================================
+            // Accumulate into Z
+
+            LilSparseMatrix<CScalarType> Z(C.nrows(), C.ncols());
+            ewise_or_opt_accum(Z, C, T, accum);
+
+            //std::cerr << ">>> Z <<< " << std::endl;
+            //std::cerr << Z << std::endl;
+
+            // =================================================================
+            // Copy Z into the final output considering mask and replace
+            write_with_opt_mask(C, Z, Mask, replace_flag);
 
             //std::cerr << ">>> C <<< " << std::endl;
             //std::cerr << C << std::endl;

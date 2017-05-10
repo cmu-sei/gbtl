@@ -498,7 +498,7 @@ namespace GraphBLAS
                  typename MaskT,
                  typename AccumT,
                  typename ValueT>
-        friend inline void assign(WVectorT             &w,
+        friend inline void assign_constant(WVectorT             &w,
                                   MaskT          const &mask,
                                   AccumT                accum,
                                   ValueT                val,

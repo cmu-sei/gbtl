@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_SUITE(sparse_assign_suite)
 
 //****************************************************************************
 
-BOOST_AUTO_TEST_CASE(sparse_assign_base)
+BOOST_AUTO_TEST_CASE(sparse_assign_matrix_base)
 {
     std::vector<std::vector<double>> matA = {{1, 6},
                                              {9, 2}};
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(sparse_assign_base)
     BOOST_CHECK_EQUAL(result, answer);
 }
 
-BOOST_AUTO_TEST_CASE(sparse_assign_mask)
+BOOST_AUTO_TEST_CASE(sparse_assign_matrix_mask)
 {
     std::vector<std::vector<double>> matA = {{1, 6},
                                              {9, 2}};
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(sparse_assign_mask)
     BOOST_CHECK_EQUAL(result, answer);
 }
 
-BOOST_AUTO_TEST_CASE(sparse_assign_accum)
+BOOST_AUTO_TEST_CASE(sparse_assign_matrix_accum)
 {
     std::vector<std::vector<double>> matA = {{1, 6},
                                              {9, 2}};
@@ -124,5 +124,27 @@ BOOST_AUTO_TEST_CASE(sparse_assign_accum)
     BOOST_CHECK_EQUAL(mC, answer);
 }
 
+
+BOOST_AUTO_TEST_CASE(sparse_assign_const_base)
+{
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mC(3, 3);
+
+    std::vector<std::vector<double>> matAnswer = {{0, 0, 0},
+                                                  {1, 0, 1},
+                                                  {1, 0, 1}};
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 0);
+
+    GraphBLAS::IndexArrayType row_indicies = {2, 1};
+    GraphBLAS::IndexArrayType col_indicies = {0, 2};
+
+    GraphBLAS::assign_constant(mC,
+                      GraphBLAS::NoMask(),
+                      GraphBLAS::NoAccumulate(),
+                      1,
+                      row_indicies,
+                      col_indicies);
+
+    BOOST_CHECK_EQUAL(mC, answer);
+}
 
 BOOST_AUTO_TEST_SUITE_END()

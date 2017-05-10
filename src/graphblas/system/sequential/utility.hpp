@@ -53,7 +53,7 @@ namespace GraphBLAS
                 {
                     while (curr_idx < num_cols)
                     {
-                        ostr << ((curr_idx == 0) ? " " : ", " );
+                        ostr << ((curr_idx == 0) ? " " : ",  " );
                         ++curr_idx;
                     }
                 }
@@ -69,7 +69,7 @@ namespace GraphBLAS
                         std::tie(col_idx, cell_val) = *row_it;
                         while (curr_idx < col_idx)
                         {
-                            ostr << ((curr_idx == 0) ? " " : ", " );
+                            ostr << ((curr_idx == 0) ? " " : ",  " );
                             ++curr_idx;
                         }
 
@@ -84,7 +84,7 @@ namespace GraphBLAS
                     // Fill in the rest to the end
                     while (curr_idx < num_cols)
                     {
-                        ostr << ", ";
+                        ostr << ",  ";
                         ++curr_idx;
                     }
 

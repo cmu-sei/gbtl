@@ -384,6 +384,7 @@ namespace GraphBLAS
 //                       IndexType          num_cols,
 //                       bool               replace_flag = false);
 
+    // 4.3.7.2 assign: Standard matrix variant
     template<typename CMatrixT,
              typename MaskT,
              typename AccumT,
@@ -490,18 +491,23 @@ namespace GraphBLAS
 //                       IndexType          num_indices,
 //                       bool               replace_flag = false);
 //
-//    template<typename WVectorT,
-//             typename MaskT,
-//             typename AccumT,
-//             typename ValueT>
-//    inline void assign(WVectorT             &w,
-//                       MaskT          const &mask,
-//                       AccumT                accum,
-//                       ValueT                val,
-//                       IndexArrayType const &indices,
-//                       bool                  replace_flag = false);
-//
-//    // Matrix constant variant
+
+    // 4.3.7.5: assign: Constant vector variant
+    template<typename WVectorT,
+             typename MaskT,
+             typename AccumT,
+             typename ValueT>
+    inline void assign_constant(WVectorT             &w,
+                       MaskT          const &mask,
+                       AccumT                accum,
+                       ValueT                val,
+                       IndexArrayType const &indices,
+                       bool                  replace_flag = false)
+    {
+        backend::assign_constant(w.m_vec, mask.m_vec, accum, val, indices, replace_flag);
+    };
+
+    // 4.3.7.6: assign: Constant Matrix Variant
 //    template<typename CMatrixT,
 //             typename MaskT,
 //             typename AccumT,
@@ -517,19 +523,25 @@ namespace GraphBLAS
 //                       RAIteratorJT const &col_indices,
 //                       IndexType           num_cols,
 //                       bool                replace_flag = false);
-//
-//
-//    template<typename CMatrixT,
-//             typename MaskT,
-//             typename AccumT,
-//             typename ValueT>
-//    inline void assign(CMatrixT             &C,
-//                       MaskT          const &Mask,
-//                       AccumT                accum,
-//                       ValueT                val,
-//                       IndexArrayType const &row_indices,
-//                       IndexArrayType const &col_indices,
-//                       bool                  replace_flag = false);
+
+
+    // 4.3.7.6: assign: Constant Matrix Variant
+    // @TODO;  Deal with overloads
+    template<typename CMatrixT,
+             typename MaskT,
+             typename AccumT,
+             typename ValueT>
+    inline void assign_constant(CMatrixT             &C,
+                       MaskT          const &Mask,
+                       AccumT                accum,
+                       ValueT                val,
+                       IndexArrayType const &row_indices,
+                       IndexArrayType const &col_indices,
+                       bool                  replace_flag = false)
+    {
+        backend::assign_constant(C.m_mat, Mask.m_mat, accum, val,
+                        row_indices, col_indices, replace_flag );
+    };
 
     //****************************************************************************
     // Apply

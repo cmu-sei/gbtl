@@ -211,6 +211,25 @@ namespace GraphBLAS
             BMatrixT                         const &B,
             bool                                    replace_flag);
 
+
+
+        //--------------------------------------------------------------------
+        template<typename WVectorT,
+                typename MaskT,
+                typename AccumT,
+                typename BinaryOpT,  // monoid or binary op only
+                typename AMatrixT>
+        friend inline void reduce(WVectorT        &w,
+                           MaskT     const &mask,
+                           AccumT           accum,
+                           BinaryOpT        op,
+                           AMatrixT  const &A,
+                           bool             replace_flag);
+
     };
+
+
+
+
 
 } // end namespace GraphBLAS

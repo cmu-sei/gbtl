@@ -68,16 +68,30 @@ namespace GraphBLAS
             typedef typename SrcMatrixT::ScalarType SrcScalarType;
             typedef typename DstMatrixT::ScalarType DstScalarType;
 
-            typedef std::vector<std::tuple<IndexType, DstScalarType> > RowType;
+            typedef std::vector<std::tuple<IndexType, SrcScalarType> > SrcRowType;
+            typedef std::vector<std::tuple<IndexType, DstScalarType> > DstRowType;
 
             IndexType nrows(dstMatrix.nrows());
-            RowType tmp_row;
             for (IndexType row_idx = 0; row_idx < nrows; ++row_idx)
             {
-                tmp_row = srcMatrix.getRow(row_idx);
-                dstMatrix.setRow(row_idx, tmp_row);
+                SrcRowType srcRow = srcMatrix.getRow(row_idx);
+                DstRowType dstRow;
+
+                // We need to construct a new row with the appropriate cast!
+                for (auto it = srcRow.begin(); it != srcRow.end(); ++it)
+                {
+                    IndexType idx;
+                    SrcScalarType srcVal;
+                    std::tie(idx, srcVal) = *it;
+                    dstRow.push_back(std::make_tuple(idx, static_cast<DstScalarType>(srcVal)));
+                }
+
+                if (!dstRow.empty())
+                    dstMatrix.setRow(row_idx, dstRow);
             }
         }
+
+        // @todo: Make a sparse copy where they are the same type for efficiency
 
         //**********************************************************************
         /// Increments the provided iterate while the value is less

@@ -103,11 +103,8 @@ namespace algorithms
         NumSP.build(GrB_ALL_nsver, s, std::vector<int32_t>(nsver, 1));
         GraphBLAS::print_matrix(std::cerr, NumSP, "initial NumSP");
 
-        // // ==================== BFS phase ====================
-        // // Placeholders for GraphBLAS operators
-//        graphblas::PlusMonoid<int32_t>            Int32Add;
-//        graphblas::ArithmeticSemiring<int32_t>    Int32AddMul;
-//        graphblas::math::Identity<bool, int32_t>  GrB_IDENTITY_BOOL;
+        // ==================== BFS phase ====================
+        // Placeholders for GraphBLAS operators
 
         // @todo:  Is this right?
         GraphBLAS::PlusMonoid<int32_t>            Int32Add;
@@ -146,99 +143,118 @@ namespace algorithms
             GraphBLAS::print_matrix(std::cerr, NumSP, "NumSP");
 
             // F<!P> = F +.* A
-            GraphBLAS::mxm(Frontier,                                        // C
-                           GraphBLAS::complement(NumSP),                    // M
-                           GraphBLAS::NoAccumulate(),                       // accum
-                           Int32AddMul,                                     // op
-                           Frontier,                                        // A
-                           A,                                               // B
-                           true);                                           // replace
+            GraphBLAS::mxm(Frontier,                             // C
+                           GraphBLAS::complement(NumSP),         // M
+                           GraphBLAS::NoAccumulate(),            // accum
+                           Int32AddMul,                          // op
+                           Frontier,                             // A
+                           A,                                    // B
+                           true);                                // replace
             GraphBLAS::print_matrix(std::cerr, Frontier, "New frontier");
 
             ++d;
         }
         std::cerr << "======= END BFS phase =======" << std::endl;
 
-        // // ================== backprop phase ==================
-        // // Placeholders for GraphBLAS operators
-        // graphblas::PlusMonoid<float>           FP32Add;
-        // graphblas::TimesMonoid<float>          FP32Mul;
-        // graphblas::ArithmeticSemiring<float>   FP32AddMul;
-        // graphblas::math::Inverse<float>        GrB_MINV_FP32;
+        // ================== backprop phase ==================
 
-        // graphblas::Matrix<float> NspInv(nsver, n);
-        // graphblas::apply(NumSP, NspInv, GrB_MINV_FP32);
-        // graphblas::print_matrix(std::cerr, NspInv, "(1 ./ P)");
-
-        // graphblas::Matrix<float> BCu = graphblas::fill<graphblas::Matrix<float>>
-        //     (1.0f, nsver, n);
-
-        // graphblas::print_matrix(std::cerr, BCu, "U");
-
-        // graphblas::Matrix<float> W(nsver, n);
+        GraphBLAS::Matrix<float> NspInv(nsver, n);
+        //                  A      C       Unary
+        // GraphBLAS::apply(NumSP, NspInv, GrB_MINV_FP32);
+        GraphBLAS::apply(NspInv,
+                         GraphBLAS::NoMask(),
+                         GraphBLAS::NoAccumulate(),
+                         GraphBLAS::MultiplicativeInverse<float>(),
+                         NumSP);
+        GraphBLAS::print_matrix(std::cerr, NspInv, "(1 ./ P)");
 
         GraphBLAS::Matrix<float> BCu(nsver, n);
-        // @todo: Implement
-//        GraphBLAS::assign(BCu,
-//                          GraphBLAS::NoMask(),
-//                          GraphBLAS::NoAccumulate(),
-//                          GrB_ALL_nsver,
-//                          nsver,
-//                          GrB_ALL_n,
-//                          n);
-
+        GraphBLAS::assign_constant(BCu,
+                          GraphBLAS::NoMask(),
+                          GraphBLAS::NoAccumulate(),
+                          1.0f,
+                          GrB_ALL_nsver,
+                          GrB_ALL_n);
         GraphBLAS::print_matrix(std::cerr, BCu, "U");
+
 
         GraphBLAS::Matrix<float> W(nsver, n);
 
+        std::cerr << "======= BEGIN BACKPROP phase =======" << std::endl;
+        for (int32_t i = d - 1; i > 0; --i)
+        {
+            std::cerr << "------- BACKPROP iteration " << i << " --------" << std::endl;
 
+            // W<Sigma[i]> = (1 ./ P) .* U
+            //                            A       B    C  M           true         op
+            // GraphBLAS::ewisemultMasked(NspInv, BCu, W, *Sigmas[i], GrB_REPLACE, FP32Mul);
+            GraphBLAS::eWiseMult(W,                            // C
+                                 *Sigmas[i],                   // Mask
+                                 GraphBLAS::NoAccumulate(),    // accum
+                                 GraphBLAS::Times<float>(),    // op
+                                 NspInv,                       // A
+                                 BCu,                          // B
+                                 true);                        // replace
+            GraphBLAS::print_matrix(std::cerr, W, "W<Sigma[i]> = (1 ./ P) .* U");
 
+            // W<Sigma[i-1]> = A +.* W
+            //                      A  B                        C  M             semiring
+            // graphblas::mxmMasked(W, graphblas::transpose(A), W, *Sigmas[i-1], FP32AddMul);
+            // TODO: Probably need to transpose
+            GraphBLAS::mxm(W,                                        // C
+                           *Sigmas[i-1],                             // M
+                           GraphBLAS::NoAccumulate(),                // accum
+                           GraphBLAS::ArithmeticSemiring<float>(),   // op
+                           W,                                        // A
+                           GraphBLAS::transpose(A),                  // B
+                           true);                                   // replace
+            GraphBLAS::print_matrix(std::cerr, W, "W<Sigma[i-1]> = A +.* W");
 
-        // std::cerr << "======= BEGIN BACKPROP phase =======" << std::endl;
-        // for (int32_t i = d - 1; i > 0; --i)
-        // {
-        //     std::cerr << "------- BACKPROP iteration " << i << " --------" << std::endl;
+            // U += W .* P
+            //                      A  B      C    monoid   accum
+            // graphblas::ewisemult(W, NumSP, BCu, FP32Mul, graphblas::math::Accum<float>());
+            GraphBLAS::eWiseMult(BCu,                          // C
+                                 GraphBLAS::NoMask(),          // Mask
+                                 GraphBLAS::Plus<float>(),     // accum
+                                 GraphBLAS::Times<float>(),    // op
+                                 W,                            // A
+                                 NumSP,                        // B
+                                 false);                       // replace
+            GraphBLAS::print_matrix(std::cerr, BCu, "U += W .* P");
 
-        //     // W<Sigma[i]> = (1 ./ P) .* U
-        //     bool const GrB_REPLACE = true;
-        //     graphblas::ewisemultMasked(NspInv, BCu, W, *Sigmas[i], GrB_REPLACE, FP32Mul);
-        //     graphblas::print_matrix(std::cerr, W, "W<Sigma[i]> = (1 ./ P) .* U");
+            --d;
+        }
+        std::cerr << "======= END BACKPROP phase =======" << std::endl;
+        GraphBLAS::print_matrix(std::cerr, BCu, "BC Updates");
 
-        //     // W<Sigma[i-1]> = A +.* W
-        //     graphblas::mxmMasked(W, graphblas::transpose(A), W,
-        //                          *Sigmas[i-1], FP32AddMul);
-        //     graphblas::print_matrix(std::cerr, W, "W<Sigma[i-1]> = A +.* W");
+        // @todo replace with GrB_All
+        GraphBLAS::Vector<float, GraphBLAS::SparseTag> result(n);
+        GraphBLAS::assign_constant(result,
+                                   GraphBLAS::NoMask(),
+                                   GraphBLAS::NoAccumulate(),
+                                   nsver * -1.0f,
+                                   GrB_ALL_n);
+        GraphBLAS::reduce(result,                          // W
+                          GraphBLAS::NoMask(),             // Mask
+                          GraphBLAS::Plus<float>(),        // Accum
+                          GraphBLAS::Plus<float>(),        // Op
+                          GraphBLAS::transpose(BCu),       // A, transpose make col reduce
+                          true);                           // replace
 
-        //     // U += W .* P
-        //     graphblas::ewisemult(W, NumSP, BCu, FP32Mul,
-        //                          graphblas::math::Accum<float>());
-        //     graphblas::print_matrix(std::cerr, BCu, "U += W .* P");
-
-        //     --d;
-        // }
-        // std::cerr << "======= END BACKPROP phase =======" << std::endl;
-        // graphblas::print_matrix(std::cerr, BCu, "BC Updates");
-
-        // graphblas::Matrix<float> result =
-        //     graphblas::fill<graphblas::Matrix<float>>(nsver * -1.0F, 1, n);
-        // graphblas::col_reduce(BCu, result, FP32Add,
-        //                       graphblas::math::Accum<float>());
-        // graphblas::print_matrix(std::cerr, result, "RESULT");
-
-        // std::vector<float> betweenness_centrality;
-        // for (graphblas::IndexType k = 0; k < n;k++)
-        // {
-        //     betweenness_centrality.push_back(result.extractElement(0, k));
-        // }
-
-        // for (auto it = Sigmas.begin(); it != Sigmas.end(); ++it)
-        // {
-        //     delete *it;
-        // }
-        // return betweenness_centrality;
-
-
+        // @todo:  Add a print vector...
+        std::cerr << "RESULT: " << result << std::endl;
+        //GraphBLAS::print_matrix(std::cerr, result, "RESULT");
         std::vector<float> betweenness_centrality;
+        for (GraphBLAS::IndexType k = 0; k < n; k++)
+        {
+            betweenness_centrality.push_back(result.extractElement(k));
+        }
+
+        for (auto it = Sigmas.begin(); it != Sigmas.end(); ++it)
+        {
+            delete *it;
+        }
+
         return betweenness_centrality;
     }
 
