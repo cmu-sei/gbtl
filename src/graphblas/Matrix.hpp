@@ -393,6 +393,18 @@ namespace GraphBLAS
                                    IndexArrayType const &col_indicies,
                                    bool replace);
 
+        template<typename WVectorT,
+                typename MaskT,
+                typename AccumT,
+                typename AMatrixT>
+        friend inline void extract(WVectorT             &w,
+                            MaskT          const &mask,
+                            AccumT                accum,
+                            AMatrixT       const &A,
+                            IndexArrayType const &row_indices,
+                            IndexType             col_index,
+                            bool                  replace_flag);
+
         //--------------------------------------------------------------------
         template<typename CMatrixT,
                  typename MaskT,

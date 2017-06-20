@@ -234,47 +234,48 @@ namespace GraphBLAS
     //****************************************************************************
 
     /// Extract: Standard vector variant
-    template<typename WVectorT,
-             typename MaskT,
-             typename AccumT,
-             typename UVectorT,
-             typename RAIteratorT>
-    inline void extract(WVectorT           &w,
-                        MaskT        const &mask,
-                        AccumT             accum,
-                        UVectorT    const &u,
-                        RAIteratorT        indices,
-                        IndexType          num_indices,
-                        bool               replace_flag = false);
+//    template<typename WVectorT,
+//             typename MaskT,
+//             typename AccumT,
+//             typename UVectorT,
+//             typename RAIteratorT>
+//    inline void extract(WVectorT           &w,
+//                        MaskT        const &mask,
+//                        AccumT             accum,
+//                        UVectorT    const &u,
+//                        RAIteratorT        indices,
+//                        IndexType          num_indices,
+//                        bool               replace_flag = false);
 
-    template<typename WVectorT,
-             typename MaskT,
-             typename AccumT,
-             typename UVectorT>
-    inline void extract(WVectorT             &w,
-                        MaskT          const &mask,
-                        AccumT                accum,
-                        UVectorT       const &u,
-                        IndexArrayType const &indices,
-                        bool                  replace_flag = false);
+//    template<typename WVectorT,
+//             typename MaskT,
+//             typename AccumT,
+//             typename UVectorT>
+//    inline void extract(WVectorT             &w,
+//                        MaskT          const &mask,
+//                        AccumT                accum,
+//                        UVectorT       const &u,
+//                        IndexArrayType const &indices,
+//                        bool                  replace_flag = false);
 
     /// Standard Matrix version
-    template<typename CMatrixT,
-             typename MaskT,
-             typename AccumT,
-             typename AMatrixT,
-             typename RAIteratorI,
-             typename RAIteratorJ>
-    inline void extract(CMatrixT             &C,
-                        MaskT          const &Mask,
-                        AccumT                accum,
-                        AMatrixT       const &A,
-                        RAIteratorI           row_indices,
-                        IndexType             nrows,
-                        RAIteratorJ           col_indices,
-                        IndexType             ncols,
-                        bool                  replace_flag = false);
+//    template<typename CMatrixT,
+//             typename MaskT,
+//             typename AccumT,
+//             typename AMatrixT,
+//             typename RAIteratorI,
+//             typename RAIteratorJ>
+//    inline void extract(CMatrixT             &C,
+//                        MaskT          const &Mask,
+//                        AccumT                accum,
+//                        AMatrixT       const &A,
+//                        RAIteratorI           row_indices,
+//                        IndexType             nrows,
+//                        RAIteratorJ           col_indices,
+//                        IndexType             ncols,
+//                        bool                  replace_flag = false);
 
+    // 4.3.6.2 - extract: Standard matrix variant
     template<typename CMatrixT,
              typename MaskT,
              typename AccumT,
@@ -291,20 +292,21 @@ namespace GraphBLAS
                          row_indices, col_indices, replace_flag);
     };
 
+    // 4.3.6.3 - extract: Column (and row) variant
     // Extract col (or row with transpose)
-    template<typename WVectorT,
-             typename MaskT,
-             typename AccumT,
-             typename AMatrixT,
-             typename RAIteratorI>
-    inline void extract(WVectorT             &w,
-                        MaskT          const &mask,
-                        AccumT                accum,
-                        AMatrixT       const &A,
-                        RAIteratorI           row_indices,
-                        IndexType             nrows,
-                        IndexType             col_index,
-                        bool                  replace_flag = false);
+//    template<typename WVectorT,
+//             typename MaskT,
+//             typename AccumT,
+//             typename AMatrixT,
+//             typename RAIteratorI>
+//    inline void extract(WVectorT             &w,
+//                        MaskT          const &mask,
+//                        AccumT                accum,
+//                        AMatrixT       const &A,
+//                        RAIteratorI           row_indices,
+//                        IndexType             nrows,
+//                        IndexType             col_index,
+//                        bool                  replace_flag = false);
 
     template<typename WVectorT,
              typename MaskT,
@@ -316,27 +318,31 @@ namespace GraphBLAS
                         AMatrixT       const &A,
                         IndexArrayType const &row_indices,
                         IndexType             col_index,
-                        bool                  replace_flag = false);
+                        bool                  replace_flag = false)
+    {
+        backend::extract(w.m_vec, mask.m_mat, accum, A.m_mat, row_indices,
+                         col_index, replace_flag);
+    }
 
     // Extract single element (vector and matrix variants
-    template <typename ValueT,
-              typename AccumT,
-              typename UVectorT>
-    inline void extract(ValueT            &dst,
-                        AccumT             accum,
-                        UVectorT    const &u,
-                        IndexType          index,
-                        std::string       &err);
+//    template <typename ValueT,
+//              typename AccumT,
+//              typename UVectorT>
+//    inline void extract(ValueT            &dst,
+//                        AccumT             accum,
+//                        UVectorT    const &u,
+//                        IndexType          index,
+//                        std::string       &err);
 
-    template <typename ValueT,
-              typename AccumT,
-              typename AMatrixT>
-    inline void extract(ValueT            &dst,
-                        AccumT             accum,
-                        AMatrixT    const &A,
-                        IndexType          row_index,
-                        IndexType          col_index,
-                        std::string       &err);
+//    template <typename ValueT,
+//              typename AccumT,
+//              typename AMatrixT>
+//    inline void extract(ValueT            &dst,
+//                        AccumT             accum,
+//                        AMatrixT    const &A,
+//                        IndexType          row_index,
+//                        IndexType          col_index,
+//                        std::string       &err);
 
     //****************************************************************************
     // Assign

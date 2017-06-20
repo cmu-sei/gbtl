@@ -24,6 +24,38 @@ namespace GraphBLAS
 {
     namespace backend
     {
+        template <typename ScalarT>
+        void pretty_print(std::ostream &ostr, std::vector<std::tuple<IndexType, ScalarT> > const &vec)
+        {
+            IndexType index;
+            ScalarT   value;
+
+            IndexType curr_idx = 0;
+
+            ostr << "[";
+
+            auto vec_it = vec.begin();
+            while (vec_it != vec.end())
+            {
+                std::tie(index, value) = *vec_it;
+                while (curr_idx < index)
+                {
+                    ostr << ((curr_idx == 0) ? " " : ",  " );
+                    ++curr_idx;
+                }
+
+                // Put out the value at index
+                ostr << ((curr_idx == 0) ? "" : ", " );
+                ostr << value;
+
+                ++vec_it;
+                ++curr_idx;
+            }
+
+            // TODO: Go to N.
+            ostr << "]" << std::endl;
+        }
+
         /**
          *  @brief Output the matrix in array form.  Mainly for debugging
          *         small matrices.

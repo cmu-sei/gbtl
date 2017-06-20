@@ -118,7 +118,7 @@ add_executable(test_sparse_reduce test/test_sparse_reduce.cpp ${GRAPHBLAS})
 add_executable(test_sssp test/test_sssp.cpp ${GRAPHBLAS})
 add_executable(test_transpose test/test_transpose.cpp ${GRAPHBLAS})
 
-add_executable(bfs_demo demo/bfs_demo.cpp ${GRAPHBLAS})
+add_executable(bfs_demo demo/bfs_demo.cpp ${GRAPHBLAS} graphblas/system/sequential/debug.h)
 add_executable(bfs_level_demo demo/bfs_level_demo.cpp ${GRAPHBLAS})
 add_executable(masked_mxm_homework demo/masked_mxm_homework.cpp ${GRAPHBLAS})
 add_executable(mxm_homework demo/mxm_homework.cpp ${GRAPHBLAS})

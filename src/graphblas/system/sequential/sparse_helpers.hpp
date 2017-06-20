@@ -71,6 +71,9 @@ namespace GraphBLAS
             typedef std::vector<std::tuple<IndexType, SrcScalarType> > SrcRowType;
             typedef std::vector<std::tuple<IndexType, DstScalarType> > DstRowType;
 
+            // Copying removes the contents of the other matrix so clear it first.
+            dstMatrix.clear();
+
             IndexType nrows(dstMatrix.nrows());
             for (IndexType row_idx = 0; row_idx < nrows; ++row_idx)
             {

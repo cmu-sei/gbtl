@@ -112,7 +112,7 @@ namespace GraphBLAS
                  ++out_row_index)
             {
                 ARowType row(A.getRow(row_indicies[out_row_index]));
-                auto row_it = row.begin();
+//                auto row_it = row.begin();
 
                 IndexType tmp_idx;
                 AScalarT tmp_value;
@@ -125,6 +125,48 @@ namespace GraphBLAS
                     C.setRow(out_row_index, out_row);
             }
         }
+
+        template < typename WScalarT, typename AScalarT>
+        void extractColumn(std::vector< std::tuple<IndexType, WScalarT> >         &vec_dest,
+                           LilSparseMatrix<AScalarT>                       const  &A,
+                           IndexArrayType                                  const  &row_indicies,
+                           IndexType                                               col_index)
+        {
+            // Walk the rows, extracting the cell if it exists
+            typedef std::vector<std::tuple<IndexType,AScalarT> > ARowType;
+
+            vec_dest.clear();
+
+            // Walk the rows
+            for (IndexType out_row_index = 0;
+                 out_row_index < row_indicies.size();
+                 ++out_row_index)
+            {
+                ARowType row(A.getRow(row_indicies[out_row_index]));
+
+                IndexType tmp_idx;
+                AScalarT tmp_value;
+
+                // Now, find the column
+                auto row_it = row.begin();
+                while (row_it != row.end())
+                {
+                    std::tie(tmp_idx, tmp_value) = *row_it;
+                    if (tmp_idx == col_index)
+                    {
+                        vec_dest.push_back(
+                                std::make_tuple(out_row_index,
+                                                static_cast<WScalarT>(tmp_value)));
+                        break;
+                    }
+                    else if (tmp_idx > col_index)
+                    {
+                        break;
+                    }
+                    ++row_it;
+                }
+            }
+        };
 
         //**********************************************************************
         //**********************************************************************
@@ -209,6 +251,59 @@ namespace GraphBLAS
             //std::cerr << C << std::endl;
         };
 
+
+        /**
+         * 4.3.6.3 extract: Column (and row) variant
+         *
+         * Extract from one column of a matrix into a vector. Note that with
+         * the transpose descriptor for the source matrix, elements of an
+         * arbitrary row of the matrix can be extracted with this function as
+         * well.
+         */
+        template<typename WVectorT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename AMatrixT>
+        void extract(WVectorT                  &w,
+                     MaskT              const  &mask,
+                     AccumT                     accum,
+                     AMatrixT           const  &A,
+                     IndexArrayType     const  &row_indices,
+                     IndexType                  col_index,
+                     bool                       replace_flag = false)
+        {
+            // @TODO: Validate inputs
+
+            // Should explicitly define the vector type, or just piggy
+            // back on WVectorT?
+            //WVectorT wTmp;
+            typedef typename WVectorT::ScalarType WScalarType;
+            typedef std::vector<std::tuple<IndexType, WScalarType>> WVectorType;
+
+            // =================================================================
+            // Extract to T
+
+            WVectorType t;
+            extractColumn(t, A, row_indices, col_index);
+
+            //std::cerr << ">>> t <<< " << std::endl;
+            //pretty_print(std::cerr, t);
+
+            // =================================================================
+            // Accumulate into Z
+            std::vector<std::tuple<IndexType, WScalarType> > z;
+            ewise_or_opt_accum_1D(z, w, t, accum);
+
+            //std::cerr << ">>> z <<< " << std::endl;
+            //pretty_print(std::cerr, z);
+
+            // =================================================================
+            // Copy Z into the final output considering mask and replace
+            write_with_opt_mask_1D(w, z, mask, replace_flag);
+
+            //std::cerr << ">>> w <<< " << std::endl;
+            //std::cerr << w << std::endl;
+        }
     }
 }
 
