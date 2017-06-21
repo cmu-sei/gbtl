@@ -182,6 +182,7 @@ namespace GraphBLAS
             bool                                    replace_flag);
 
         //--------------------------------------------------------------------
+
         template<typename CMatrixT,
                  typename MMatrixT,
                  typename AccumT,
@@ -193,6 +194,50 @@ namespace GraphBLAS
                                    IndexArrayType const &row_indicies,
                                    IndexArrayType const &col_indicies,
                                    bool replace);
+
+        //--------------------------------------------------------------------
+
+        template<typename CMatrixT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename AMatrixT>
+        friend inline void assign(CMatrixT             &C,
+                                  MaskT          const &Mask,
+                                  AccumT                accum,
+                                  AMatrixT       const &A,
+                                  IndexArrayType const &row_indices,
+                                  IndexArrayType const &col_indices,
+                                  bool                  replace_flag);
+
+        template<typename CMatrixT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename ValueT>
+        friend inline void assign_constant(CMatrixT             &C,
+                                           MaskT          const &Mask,
+                                           AccumT                accum,
+                                           ValueT                val,
+                                           IndexArrayType const &row_indices,
+                                           IndexArrayType const &col_indices,
+                                           bool                  replace_flag);
+
+        //--------------------------------------------------------------------
+
+        template<typename CScalarT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename UnaryFunctionT,
+                 typename AMatrixT,
+                 typename ...ATagsT>
+        friend inline void apply(
+            GraphBLAS::Matrix<CScalarT, ATagsT...>           &C,
+            MaskT                                     const  &Mask,
+            AccumT                                            accum,
+            UnaryFunctionT                                    op,
+            AMatrixT                                  const  &A,
+            bool                                              replace_flag);
+
+        //--------------------------------------------------------------------
 
     };
 
@@ -355,6 +400,56 @@ namespace GraphBLAS
             bool                                    replace_flag);
 
         //--------------------------------------------------------------------
+
+        template<typename WVectorT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename UVectorT>
+        friend inline void extract(WVectorT             &w,
+                                   MaskT          const &mask,
+                                   AccumT                accum,
+                                   UVectorT       const &u,
+                                   IndexArrayType const &indices,
+                                   bool                  replace_flag);
+
+        template<typename WVectorT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename AMatrixT>
+        friend inline void extract(WVectorT             &w,
+                                   MaskT          const &mask,
+                                   AccumT                accum,
+                                   AMatrixT       const &A,
+                                   IndexArrayType const &row_indices,
+                                   IndexType             col_index,
+                                   bool                  replace_flag);
+
+        //--------------------------------------------------------------------
+
+        template<typename WVectorT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename ValueT>
+        friend inline void assign_constant(WVectorT             &w,
+                                           MaskT          const &mask,
+                                           AccumT                accum,
+                                           ValueT                val,
+                                           IndexArrayType const &indices,
+                                           bool                  replace_flag);
+
+        //--------------------------------------------------------------------
+
+        template<typename WVectorT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename BinaryOpT,  // monoid or binary op only
+                 typename AMatrixT>
+        friend inline void reduce(WVectorT        &w,
+                                  MaskT     const &mask,
+                                  AccumT           accum,
+                                  BinaryOpT        op,
+                                  AMatrixT  const &A,
+                                  bool             replace_flag);
     };
 
 } // end namespace GraphBLAS

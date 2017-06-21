@@ -394,16 +394,16 @@ namespace GraphBLAS
                                    bool replace);
 
         template<typename WVectorT,
-                typename MaskT,
-                typename AccumT,
-                typename AMatrixT>
+                 typename MaskT,
+                 typename AccumT,
+                 typename AMatrixT>
         friend inline void extract(WVectorT             &w,
-                            MaskT          const &mask,
-                            AccumT                accum,
-                            AMatrixT       const &A,
-                            IndexArrayType const &row_indices,
-                            IndexType             col_index,
-                            bool                  replace_flag);
+                                   MaskT          const &mask,
+                                   AccumT                accum,
+                                   AMatrixT       const &A,
+                                   IndexArrayType const &row_indices,
+                                   IndexType             col_index,
+                                   bool                  replace_flag);
 
         //--------------------------------------------------------------------
         template<typename CMatrixT,

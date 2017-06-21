@@ -107,20 +107,6 @@ namespace GraphBLAS
     //************************************************************************
 
     template<typename WVectorT,
-             typename AccumT,
-             typename SemiringT,
-             typename UVectorT,
-             typename AMatrixT>
-    inline void vxm(WVectorT         &w,
-                    AccumT            accum,
-                    SemiringT         op,
-                    UVectorT   const &u,
-                    AMatrixT   const &A)
-    {
-        backend::vxm(w.m_vec, accum, op, u.m_vec, A.m_mat);
-    }
-
-    template<typename WVectorT,
              typename MaskT,
              typename AccumT,
              typename SemiringT,
@@ -247,17 +233,6 @@ namespace GraphBLAS
 //                        IndexType          num_indices,
 //                        bool               replace_flag = false);
 
-//    template<typename WVectorT,
-//             typename MaskT,
-//             typename AccumT,
-//             typename UVectorT>
-//    inline void extract(WVectorT             &w,
-//                        MaskT          const &mask,
-//                        AccumT                accum,
-//                        UVectorT       const &u,
-//                        IndexArrayType const &indices,
-//                        bool                  replace_flag = false);
-
     /// Standard Matrix version
 //    template<typename CMatrixT,
 //             typename MaskT,
@@ -275,6 +250,22 @@ namespace GraphBLAS
 //                        IndexType             ncols,
 //                        bool                  replace_flag = false);
 
+    // 4.3.6.1 - extract: Standard vector variant
+    template<typename WVectorT,
+             typename MaskT,
+             typename AccumT,
+             typename UVectorT>
+    inline void extract(WVectorT             &w,
+                        MaskT          const &mask,
+                        AccumT                accum,
+                        UVectorT       const &u,
+                        IndexArrayType const &indices,
+                        bool                  replace_flag = false)
+    {
+        backend::extract(w.m_vec, mask.m_vec, accum, u.m_vec,
+                         indices, replace_flag);
+    }
+
     // 4.3.6.2 - extract: Standard matrix variant
     template<typename CMatrixT,
              typename MaskT,
@@ -290,24 +281,10 @@ namespace GraphBLAS
     {
         backend::extract(C.m_mat, Mask.m_mat, accum, A.m_mat,
                          row_indices, col_indices, replace_flag);
-    };
+    }
 
     // 4.3.6.3 - extract: Column (and row) variant
     // Extract col (or row with transpose)
-//    template<typename WVectorT,
-//             typename MaskT,
-//             typename AccumT,
-//             typename AMatrixT,
-//             typename RAIteratorI>
-//    inline void extract(WVectorT             &w,
-//                        MaskT          const &mask,
-//                        AccumT                accum,
-//                        AMatrixT       const &A,
-//                        RAIteratorI           row_indices,
-//                        IndexType             nrows,
-//                        IndexType             col_index,
-//                        bool                  replace_flag = false);
-
     template<typename WVectorT,
              typename MaskT,
              typename AccumT,
@@ -320,29 +297,9 @@ namespace GraphBLAS
                         IndexType             col_index,
                         bool                  replace_flag = false)
     {
-        backend::extract(w.m_vec, mask.m_mat, accum, A.m_mat, row_indices,
+        backend::extract(w.m_vec, mask.m_vec, accum, A.m_mat, row_indices,
                          col_index, replace_flag);
     }
-
-    // Extract single element (vector and matrix variants
-//    template <typename ValueT,
-//              typename AccumT,
-//              typename UVectorT>
-//    inline void extract(ValueT            &dst,
-//                        AccumT             accum,
-//                        UVectorT    const &u,
-//                        IndexType          index,
-//                        std::string       &err);
-
-//    template <typename ValueT,
-//              typename AccumT,
-//              typename AMatrixT>
-//    inline void extract(ValueT            &dst,
-//                        AccumT             accum,
-//                        AMatrixT    const &A,
-//                        IndexType          row_index,
-//                        IndexType          col_index,
-//                        std::string       &err);
 
     //****************************************************************************
     // Assign
@@ -373,22 +330,6 @@ namespace GraphBLAS
 //                       IndexArrayType const &indices,
 //                       bool                  replace_flag = false);
 //
-//    // Standard Matrix variant
-//    template<typename CMatrixT,
-//             typename MaskT,
-//             typename AccumT,
-//             typename AMatrixT,
-//             typename RAIteratorI,
-//             typename RAIteratorJ>
-//    inline void assign(CMatrixT          &C,
-//                       MaskT       const &Mask,
-//                       AccumT             accum,
-//                       AMatrixT    const &A,
-//                       RAIteratorI        row_indices,
-//                       IndexType          num_rows,
-//                       RAIteratorJ        col_indices,
-//                       IndexType          num_cols,
-//                       bool               replace_flag = false);
 
     // 4.3.7.2 assign: Standard matrix variant
     template<typename CMatrixT,
@@ -504,11 +445,11 @@ namespace GraphBLAS
              typename AccumT,
              typename ValueT>
     inline void assign_constant(WVectorT             &w,
-                       MaskT          const &mask,
-                       AccumT                accum,
-                       ValueT                val,
-                       IndexArrayType const &indices,
-                       bool                  replace_flag = false)
+                                MaskT          const &mask,
+                                AccumT                accum,
+                                ValueT                val,
+                                IndexArrayType const &indices,
+                                bool                  replace_flag = false)
     {
         backend::assign_constant(w.m_vec, mask.m_vec, accum, val, indices, replace_flag);
     };
@@ -538,12 +479,12 @@ namespace GraphBLAS
              typename AccumT,
              typename ValueT>
     inline void assign_constant(CMatrixT             &C,
-                       MaskT          const &Mask,
-                       AccumT                accum,
-                       ValueT                val,
-                       IndexArrayType const &row_indices,
-                       IndexArrayType const &col_indices,
-                       bool                  replace_flag = false)
+                                MaskT          const &Mask,
+                                AccumT                accum,
+                                ValueT                val,
+                                IndexArrayType const &row_indices,
+                                IndexArrayType const &col_indices,
+                                bool                  replace_flag = false)
     {
         backend::assign_constant(C.m_mat, Mask.m_mat, accum, val,
                         row_indices, col_indices, replace_flag );
@@ -622,7 +563,7 @@ namespace GraphBLAS
         backend::reduce_vector_to_scalar(val, accum, op, u.m_vec);
     }
 
-    /// @todo no way to distinguish between vector and matrix variants
+    /// @todo Won't support transpose of matrix here.
     // matrix-scalar variant
     template<typename ValueT,
              typename AccumT,

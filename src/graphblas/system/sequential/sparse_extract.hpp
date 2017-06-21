@@ -34,37 +34,37 @@
 #include "LilSparseMatrix.hpp"
 
 
-//*************************************************************************************************
+//******************************************************************************
 
 namespace GraphBLAS
 {
     namespace backend
     {
-
-        //************************************************************************
+        //**********************************************************************
 
         // Move to sparse helpers
         /**
          * Extracts a series of values from the vector based on the passed in
-         * indicies.
+         * indices.
          * @tparam CScalarT The type of the output scalar.
          * @tparam AScalarT The type of the input scalar.
          * @param vec_dest The output vector.
          * @param vec_src The input vector.
-         * @param indicies The indicies to extract.
+         * @param indices The indices to extract.
          */
         template < typename CScalarT, typename AScalarT>
-        void vectorExtract(std::vector< std::tuple<IndexType, CScalarT> >  &vec_dest,
-                           std::vector< std::tuple<IndexType, AScalarT> > const &vec_src,
-                           IndexArrayType const & indicies)
+        void vectorExtract(
+            std::vector< std::tuple<IndexType, CScalarT> >  &vec_dest,
+            std::vector< std::tuple<IndexType, AScalarT> > const &vec_src,
+            IndexArrayType const & indices)
         {
-            // This is expensive but the indicies can be duplicates and
+            // This is expensive but the indices can be duplicates and
             // out of order.
 
             vec_dest.clear();
-            for (IndexType out_idx = 0; out_idx < indicies.size(); ++out_idx)
+            for (IndexType out_idx = 0; out_idx < indices.size(); ++out_idx)
             {
-                IndexType wanted_idx = indicies[out_idx];
+                IndexType wanted_idx = indices[out_idx];
                 IndexType tmp_idx;
                 AScalarT tmp_value;
 
@@ -83,21 +83,21 @@ namespace GraphBLAS
         }
 
         /**
-         * Extract a sub matrix from A to C as specified via the row indicies.
+         * Extract a sub matrix from A to C as specified via the row indices.
          * This is always destructive to C.
          * @tparam CScalarT The type of scalar in C.
          * @tparam AScalarT The type of scalar in A.
          * @param C Where to place the outputs
          * @param A The input matrix.  (Won't be changed)
-         * @param row_indicies A set of indicies indicating which rows to extract.
-         * @param col_indicies A set of indicies indicating which columns to extract.
+         * @param row_indices A set of indices indicating which rows to extract.
+         * @param col_indices A set of indices indicating which columns to extract.
          */
         template<typename CScalarT,
                  typename AScalarT>
         void matrixExtract(LilSparseMatrix<CScalarT>          &C,
                            LilSparseMatrix<AScalarT>  const   &A,
-                           IndexArrayType             const   &row_indicies,
-                           IndexArrayType             const   &col_indicies)
+                           IndexArrayType             const   &row_indices,
+                           IndexArrayType             const   &col_indices)
         {
             // NOTE!! - Backend code. We expect that all dimension checks done elsewhere.
 
@@ -108,10 +108,10 @@ namespace GraphBLAS
 
             // Walk the rows
             for (IndexType out_row_index = 0;
-                 out_row_index < row_indicies.size();
+                 out_row_index < row_indices.size();
                  ++out_row_index)
             {
-                ARowType row(A.getRow(row_indicies[out_row_index]));
+                ARowType row(A.getRow(row_indices[out_row_index]));
 //                auto row_it = row.begin();
 
                 IndexType tmp_idx;
@@ -119,18 +119,20 @@ namespace GraphBLAS
                 CRowType out_row;
 
                 // Extract the values from the row
-                vectorExtract(out_row, row, col_indicies);
+                vectorExtract(out_row, row, col_indices);
 
                 if (!out_row.empty())
                     C.setRow(out_row_index, out_row);
             }
         }
 
+        //********************************************************************
         template < typename WScalarT, typename AScalarT>
-        void extractColumn(std::vector< std::tuple<IndexType, WScalarT> >         &vec_dest,
-                           LilSparseMatrix<AScalarT>                       const  &A,
-                           IndexArrayType                                  const  &row_indicies,
-                           IndexType                                               col_index)
+        void extractColumn(
+            std::vector< std::tuple<IndexType, WScalarT> >         &vec_dest,
+            LilSparseMatrix<AScalarT>                       const  &A,
+            IndexArrayType                                  const  &row_indices,
+            IndexType                                               col_index)
         {
             // Walk the rows, extracting the cell if it exists
             typedef std::vector<std::tuple<IndexType,AScalarT> > ARowType;
@@ -139,10 +141,10 @@ namespace GraphBLAS
 
             // Walk the rows
             for (IndexType out_row_index = 0;
-                 out_row_index < row_indicies.size();
+                 out_row_index < row_indices.size();
                  ++out_row_index)
             {
-                ARowType row(A.getRow(row_indicies[out_row_index]));
+                ARowType row(A.getRow(row_indices[out_row_index]));
 
                 IndexType tmp_idx;
                 AScalarT tmp_value;
@@ -168,14 +170,101 @@ namespace GraphBLAS
             }
         };
 
+        //********************************************************************
+        // Extract a row of a matrix using TransposeView
+        template < typename WScalarT, typename AMatrixT>
+        void extractColumn(
+            std::vector< std::tuple<IndexType, WScalarT> >        &vec_dest,
+            backend::TransposeView<AMatrixT>                const &Atrans,
+            IndexArrayType                                  const &row_indices,
+            IndexType                                              col_index)
+        {
+            // Walk the row, extracting the cell if it exists and is in row_indices
+            typedef typename AMatrixT::ScalarType AScalarType;
+            typedef std::vector<std::tuple<IndexType,AScalarType> > ARowType;
+
+            vec_dest.clear();
+
+            ARowType row(Atrans.getCol(col_index));
+
+            // Walk the 'row'
+            /// @todo Perf. can be improved for in order row_indices with "continuation"
+            for (IndexType idx = 0; idx < row_indices.size(); ++idx)
+            {
+                auto row_it = row.begin();
+                while (row_it != row.end())
+                {
+                    IndexType in_row_index(std::get<0>(*row_it));
+                    if (in_row_index == row_indices[idx])
+                    {
+                        vec_dest.push_back(
+                            std::make_tuple(idx,
+                                            static_cast<WScalarT>(std::get<1>(*row_it))));
+                    }
+                    ++row_it;
+                }
+            }
+
+        }
+
         //**********************************************************************
         //**********************************************************************
         //**********************************************************************
 
         // Vector variant
 
-        //**********************************************************************
+        /**
+         * 4.3.6.1 extract: Standard vector variant
+         * Extract a sub-vector from a larger vector as specified by a set of row
+         *  indices and a set of column indices. The result is a vector whose
+         *  size is equal to size of the sets of indices.
+         */
+        template<typename WVectorT,
+                 typename MVectorT,
+                 typename AccumT,
+                 typename UVectorT >
+        void extract(WVectorT                   &w,
+                     MVectorT           const   &mask,
+                     AccumT                      accum,
+                     UVectorT           const   &u,
+                     IndexArrayType     const   &indices,
+                     bool                        replace = false)
+        {
+            // Add in dimensional checks
+            if (indices.size() != w.size())
+            {
+                throw DimensionException(
+                        "Size of output (" +
+                        std::to_string(w.size()) +
+                        ") does not equal size of indices (" +
+                        std::to_string(indices.size()) + " ).");
+            }
 
+            // Validate other inputs
+            check_vector_size(w, mask, "size(w) != size(mask)");
+
+            typedef typename WVectorT::ScalarType WScalarType;
+            typedef std::vector<std::tuple<IndexType,WScalarType> > CColType;
+
+            // =================================================================
+            // Extract to T
+            typedef typename UVectorT::ScalarType UScalarType;
+            std::vector<std::tuple<IndexType, UScalarType> > t;
+            auto u_contents(u.getContents());
+            vectorExtract(t, u_contents, indices);
+
+            // =================================================================
+            // Accumulate into Z
+            std::vector<std::tuple<IndexType, WScalarType> > z;
+            ewise_or_opt_accum_1D(z, w, t, accum);
+
+            // =================================================================
+            // Copy Z into the final output considering mask and replace
+            write_with_opt_mask_1D(w, z, mask, replace);
+        };
+
+
+        //**********************************************************************
         /**
          * 4.3.6.2 extract: Standard matrix variant
          * Extract a sub-matrix from a larger matrix as specied by a set of row
@@ -183,39 +272,38 @@ namespace GraphBLAS
          *  size is equal to size of the sets of indices.
          */
         template<typename CMatrixT,
-                typename MMatrixT,
-                typename AccumT,
-                typename AMatrixT >
+                 typename MMatrixT,
+                 typename AccumT,
+                 typename AMatrixT >
         void extract(CMatrixT                   &C,
-                     MMatrixT           const   &mask,
+                     MMatrixT           const   &Mask,
                      AccumT                      accum,
                      AMatrixT           const   &A,
-                     IndexArrayType     const   &row_indicies,
-                     IndexArrayType     const   &col_indicies,
+                     IndexArrayType     const   &row_indices,
+                     IndexArrayType     const   &col_indices,
                      bool                        replace = false)
-        // Descriptor
         {
             // Add in dimensional checks
-            if (row_indicies.size() != C.nrows())
+            if (row_indices.size() != C.nrows())
             {
                 throw DimensionException(
                         "Number of ROWS in output (" +
                         std::to_string(C.nrows()) +
-                        ") does not indicated number of ROWS indicies (" +
-                        std::to_string(row_indicies.size()) + " ).");
+                        ") does not indicated number of ROWS indices (" +
+                        std::to_string(row_indices.size()) + " ).");
             }
 
-            if (col_indicies.size() != C.ncols())
+            if (col_indices.size() != C.ncols())
             {
                 throw DimensionException(
                         "Number of COLUMNS in output (" +
                         std::to_string(C.ncols()) +
-                        ") does not indicated number of COLUMN indicies (" +
-                        std::to_string(col_indicies.size()) + " ).");
+                        ") does not indicated number of COLUMN indices (" +
+                        std::to_string(col_indices.size()) + " ).");
             }
 
             // Validate other inputs
-            check_dimensions(C, "C", mask, "mask");
+            check_dimensions(C, "C", Mask, "Mask");
 
             typedef typename CMatrixT::ScalarType CScalarType;
             typedef std::vector<std::tuple<IndexType,CScalarType> > CColType;
@@ -224,12 +312,12 @@ namespace GraphBLAS
             //std::cerr << C << std::endl;
 
             //std::cerr << ">>> Mask <<< " << std::endl;
-            //std::cerr << mask << std::endl;
+            //std::cerr << Mask << std::endl;
 
             // =================================================================
             // Extract to T
             LilSparseMatrix<CScalarType> T(C.nrows(), C.ncols());
-            matrixExtract(T, A, row_indicies, col_indicies);
+            matrixExtract(T, A, row_indices, col_indices);
 
             //std::cerr << ">>> T <<< " << std::endl;
             //std::cerr << T << std::endl;
@@ -245,13 +333,14 @@ namespace GraphBLAS
 
             // =================================================================
             // Copy Z into the final output considering mask and replace
-            write_with_opt_mask(C, Z, mask, replace);
+            write_with_opt_mask(C, Z, Mask, replace);
 
             //std::cerr << ">>> C <<< " << std::endl;
             //std::cerr << C << std::endl;
         };
 
 
+        //**********************************************************************
         /**
          * 4.3.6.3 extract: Column (and row) variant
          *

@@ -78,6 +78,34 @@ namespace
 }
 
 //****************************************************************************
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_ewisemult_matrix_overwrite_replace)
+{
+    using T = int32_t;
+
+    std::vector<std::vector<T> > tmp1_dense = {{0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0}};
+    std::vector<std::vector<T> >  a10_dense = {{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1}};
+
+    GraphBLAS::Matrix<T> tmp1(tmp1_dense, 0);
+    GraphBLAS::Matrix<T> a10(a10_dense, 0);
+
+    /// TODO: it did not work to assign back into tmp1 (got extra '1')
+    GraphBLAS::eWiseMult(tmp1, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                         GraphBLAS::Times<T>(),
+                         tmp1, a10, true);
+    BOOST_CHECK_EQUAL(0, tmp1.nvals());
+
+    GraphBLAS::print_matrix(std::cerr, tmp1, "tmp1");
+
+    T delta(0);
+    GraphBLAS::reduce(delta, GraphBLAS::Plus<T>(),
+                      GraphBLAS::PlusMonoid<T>(), tmp1);
+
+    BOOST_CHECK_EQUAL(delta, 0);
+}
+
+//****************************************************************************
 // Tests without mask
 //****************************************************************************
 
