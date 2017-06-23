@@ -40,21 +40,74 @@ namespace GraphBLAS
 {
     namespace backend
     {
-
         //**********************************************************************
-        // Implementation of 4.3.8.2 Matrix variant of Apply
-
-        template<typename CMatrixT,
+        // Implementation of 4.3.8.1 Vector variant of Apply
+        template<typename WScalarT,
                  typename MaskT,
                  typename AccumT,
                  typename UnaryFunctionT,
-                 typename AMatrixT>
-        inline void apply(CMatrixT             &C,
-                          MaskT          const &mask,
-                          AccumT                accum,
-                          UnaryFunctionT        op,
-                          AMatrixT       const &A,
-                          bool                  replace_flag = false)
+                 typename UVectorT,
+                 typename ...WTagsT>
+        inline void apply(
+            GraphBLAS::backend::Vector<WScalarT, WTagsT...> &w,
+            MaskT                                     const &mask,
+            AccumT                                           accum,
+            UnaryFunctionT                                   op,
+            UVectorT                                  const &u,
+            bool                                             replace_flag = false)
+        {
+            check_vector_size(w, mask,
+                              "apply(vec): failed w == mask dimension checks");
+            check_vector_size(w, u,
+                              "apply(vec): failed w == u dimension checks");
+
+            // =================================================================
+            // Apply the unary operator from A into T.
+            // This is really the guts of what makes this special.
+            typedef typename UVectorT::ScalarType        UScalarType;
+            typedef typename UnaryFunctionT::result_type TScalarType;
+            std::vector<std::tuple<IndexType,TScalarType> > t_contents;
+
+            if (u.nvals() > 0)
+            {
+                auto u_contents(u.getContents());
+                auto row_iter = u_contents.begin();
+                while (row_iter != u_contents.end())
+                {
+                    GraphBLAS::IndexType u_idx;
+                    UScalarType          u_val;
+                    std::tie(u_idx, u_val) = *row_iter;
+                    TScalarType t_val = static_cast<TScalarType>(op(u_val));
+                    t_contents.push_back(std::make_tuple(u_idx,t_val));
+                    ++row_iter;
+                }
+            }
+
+            // =================================================================
+            // Accumulate into Z
+            std::vector<std::tuple<IndexType,WScalarT> > z_contents;
+            ewise_or_opt_accum_1D(z_contents, w, t_contents, accum);
+
+            // =================================================================
+            // Copy Z into the final output considering mask and replace
+            write_with_opt_mask_1D(w, z_contents, mask, replace_flag);
+        }
+
+        //**********************************************************************
+        // Implementation of 4.3.8.2 Matrix variant of Apply
+        template<typename CScalarT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename UnaryFunctionT,
+                 typename AMatrixT,
+                 typename ...CTagsT>
+        inline void apply(
+            GraphBLAS::backend::Matrix<CScalarT, CTagsT...> &C,
+            MaskT                                     const &mask,
+            AccumT                                           accum,
+            UnaryFunctionT                                   op,
+            AMatrixT                                  const &A,
+            bool                                             replace_flag = false)
         {
             check_dimensions(C, "C", A, "A");
             check_dimensions(C, "C", mask, "mask");
@@ -62,7 +115,7 @@ namespace GraphBLAS
             typedef typename AMatrixT::ScalarType                   AScalarType;
             typedef std::vector<std::tuple<IndexType,AScalarType> > ARowType;
 
-            typedef typename CMatrixT::ScalarType                   CScalarType;
+            typedef CScalarT                               CScalarType;
             typedef std::vector<std::tuple<IndexType,CScalarType> > CRowType;
 
             typedef typename UnaryFunctionT::result_type            TScalarType;
@@ -128,7 +181,7 @@ namespace GraphBLAS
 
             ///std::cerr << ">>> C <<< " << std::endl;
             //std::cerr << C << std::endl;
-        };
+        }
 
     }
 }

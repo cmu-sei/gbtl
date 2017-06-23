@@ -264,7 +264,7 @@ BOOST_AUTO_TEST_CASE(sparse_extract_column)
                        GraphBLAS::NoAccumulate(),
                        mA,
                        row_indicies,
-                       1);
+                       (GraphBLAS::IndexType)1);
 
     BOOST_CHECK_EQUAL(result, answer);
 }

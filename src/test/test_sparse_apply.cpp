@@ -29,7 +29,100 @@ BOOST_AUTO_TEST_SUITE(sparse_apply_suite)
 
 //****************************************************************************
 
-BOOST_AUTO_TEST_CASE(sparse_apply)
+BOOST_AUTO_TEST_CASE(sparse_apply_vector)
+{
+    std::vector<double> vecA = {8, 0, 6, 0};
+    GraphBLAS::Vector<double> vA(vecA, 0);
+
+    std::vector<double> vecC = {1, 2, 0, 0};
+    GraphBLAS::Vector<double> vC(vecC, 0);
+
+    std::vector<double> vecAnswer = {-8, 0, -6,  0};
+    GraphBLAS::Vector<double> answer(vecAnswer, 0);
+
+    GraphBLAS::apply(vC,
+                     GraphBLAS::NoMask(),
+                     GraphBLAS::NoAccumulate(),
+                     GraphBLAS::AdditiveInverse<double>(),
+                     vA);
+
+    BOOST_CHECK_EQUAL(vC, answer);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_apply_vector_accum)
+{
+    std::vector<double> vecA = {8, 0, 6, 0};
+    GraphBLAS::Vector<double> vA(vecA, 0);
+
+    std::vector<double> vecC = {8, 2, 0, 0};
+    GraphBLAS::Vector<double> vC(vecC, 0);
+
+    // NOTE: The accum results in an explicit zero
+    std::vector<double> vecAnswer = {0, 2, -6,  666};
+    GraphBLAS::Vector<double> answer(vecAnswer, 666);
+
+    GraphBLAS::apply(vC,
+                     GraphBLAS::NoMask(),
+                     GraphBLAS::Plus<double>(),
+                     GraphBLAS::AdditiveInverse<double>(),
+                     vA);
+
+    BOOST_CHECK_EQUAL(vC, answer);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_apply_vector_mask)
+{
+    std::vector<double> vecA = {8, 8, 0, 0, 6, 6, 0, 0};
+    GraphBLAS::Vector<double> vA(vecA, 0);
+
+    std::vector<double> vecC = {1, 1, 2, 2, 0, 0, 0, 0};
+    GraphBLAS::Vector<double> vC(vecC, 0);
+
+    std::vector<bool> vecMask = {true, false, true, false, true, false, true, false};
+    GraphBLAS::Vector<bool> mask(vecMask, false);
+
+    std::vector<double> vecAnswer = {-8, 1, 0, 2, -6, 0, 0, 0};
+    GraphBLAS::Vector<double> answer(vecAnswer, 0);
+
+    GraphBLAS::apply(vC,
+                     mask,
+                     GraphBLAS::NoAccumulate(),
+                     GraphBLAS::AdditiveInverse<double>(),
+                     vA);
+
+    BOOST_CHECK_EQUAL(vC, answer);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_apply_vector_mask_replace)
+{
+    std::vector<double> vecA = {8, 8, 0, 0, 6, 6, 0, 0};
+    GraphBLAS::Vector<double> vA(vecA, 0);
+
+    std::vector<double> vecC = {1, 1, 2, 2, 0, 0, 0, 0};
+    GraphBLAS::Vector<double> vC(vecC, 0);
+
+    std::vector<bool> vecMask = {true, false, true, false, true, false, true, false};
+    GraphBLAS::Vector<bool> mask(vecMask, false);
+
+    std::vector<double> vecAnswer = {-8, 0, 0, 0, -6, 0, 0, 0};
+    GraphBLAS::Vector<double> answer(vecAnswer, 0);
+
+    GraphBLAS::apply(vC,
+                     mask,
+                     GraphBLAS::NoAccumulate(),
+                     GraphBLAS::AdditiveInverse<double>(),
+                     vA,
+                     true);
+
+    BOOST_CHECK_EQUAL(vC, answer);
+}
+
+//****************************************************************************
+
+BOOST_AUTO_TEST_CASE(sparse_apply_matrix)
 {
     std::vector<std::vector<double>> matA = {{8, 1, 6},
                                              {3, 5, 7},
@@ -56,7 +149,8 @@ BOOST_AUTO_TEST_CASE(sparse_apply)
     BOOST_CHECK_EQUAL(mC, answer);
 }
 
-BOOST_AUTO_TEST_CASE(sparse_apply_accum)
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_apply_matrix_accum)
 {
     std::vector<std::vector<double>> matA = {{8, 1, 6},
                                              {3, 5, 7},
@@ -83,7 +177,8 @@ BOOST_AUTO_TEST_CASE(sparse_apply_accum)
     BOOST_CHECK_EQUAL(mC, answer);
 }
 
-BOOST_AUTO_TEST_CASE(sparse_apply_mask)
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_apply_matrix_mask)
 {
     std::vector<std::vector<double>> matA = {{8, 1, 6},
                                              {3, 5, 7},
@@ -115,7 +210,8 @@ BOOST_AUTO_TEST_CASE(sparse_apply_mask)
     BOOST_CHECK_EQUAL(mC, answer);
 }
 
-BOOST_AUTO_TEST_CASE(sparse_apply_mask_replace)
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_apply_matrix_mask_replace)
 {
     std::vector<std::vector<double>> matA = {{8, 1, 6},
                                              {3, 5, 7},

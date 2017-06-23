@@ -499,24 +499,26 @@ namespace GraphBLAS
                  typename AccumT,
                  typename ValueT>
         friend inline void assign_constant(WVectorT             &w,
-                                  MaskT          const &mask,
-                                  AccumT                accum,
-                                  ValueT                val,
-                                  IndexArrayType const &indices,
-                                  bool                  replace_flag);
+                                           MaskT          const &mask,
+                                           AccumT                accum,
+                                           ValueT                val,
+                                           IndexArrayType const &indices,
+                                           bool                  replace_flag);
 
         // vector variant
-        template<typename WVectorT,
+        template<typename WScalarT,
                  typename MaskT,
                  typename AccumT,
                  typename UnaryFunctionT,
-                 typename UVectorT>
-        friend inline void apply(WVectorT             &w,
-                                 MaskT          const &mask,
-                                 AccumT                accum,
-                                 UnaryFunctionT        op,
-                                 UVectorT       const &u,
-                                 bool                  replace_flag);
+                 typename UVectorT,
+                 typename ...WTagsT>
+        friend inline void apply(
+            GraphBLAS::Vector<WScalarT, WTagsT...> &w,
+            MaskT                            const &mask,
+            AccumT                                  accum,
+            UnaryFunctionT                          op,
+            UVectorT                         const &u,
+            bool                                    replace_flag);
 
         // row reduce matrix to column vector (use transpose for col reduce)
         template<typename WVectorT,

@@ -494,22 +494,22 @@ namespace GraphBLAS
     // Apply
     //****************************************************************************
 
-    /// @todo no way to distinguish between vector and matrix variants
-    // are we really suppose to be able to accept some other matrix or
-    // vector class?  Why can't we just say "matrix?"
-
     // vector variant
-//    template<typename WVectorT,
-//             typename MaskT,
-//             typename AccumT,
-//             typename UnaryFunctionT,
-//             typename UVectorT>
-//    inline void apply(WVectorT             &w,
-//                      MaskT          const &mask,
-//                      AccumT                accum,
-//                      UnaryFunctionT        op,
-//                      UVectorT       const &u,
-//                      bool                  replace_flag = false);
+    template<typename WScalarT,
+             typename MaskT,
+             typename AccumT,
+             typename UnaryFunctionT,
+             typename UVectorT,
+             typename ...WTagsT>
+    inline void apply(GraphBLAS::Vector<WScalarT, WTagsT...> &w,
+                      MaskT                            const &mask,
+                      AccumT                                  accum,
+                      UnaryFunctionT                          op,
+                      UVectorT                         const &u,
+                      bool                                    replace_flag = false)
+    {
+        backend::apply(w.m_vec, mask.m_vec, accum, op, u.m_vec, replace_flag);
+    }
 
     // matrix variant
     template<typename CScalarT,
@@ -518,12 +518,12 @@ namespace GraphBLAS
              typename UnaryFunctionT,
              typename AMatrixT,
              typename ...ATagsT>
-    inline void apply(GraphBLAS::Matrix<CScalarT, ATagsT...>           &C,
-                      MaskT                                     const  &Mask,
-                      AccumT                                            accum,
-                      UnaryFunctionT                                    op,
-                      AMatrixT                                  const  &A,
-                      bool                                              replace_flag = false)
+    inline void apply(GraphBLAS::Matrix<CScalarT, ATagsT...> &C,
+                      MaskT                            const &Mask,
+                      AccumT                                  accum,
+                      UnaryFunctionT                          op,
+                      AMatrixT                         const &A,
+                      bool                                    replace_flag = false)
     {
         backend::apply(C.m_mat, Mask.m_mat, accum, op, A.m_mat, replace_flag);
     };
