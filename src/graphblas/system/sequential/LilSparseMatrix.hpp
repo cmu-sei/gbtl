@@ -286,7 +286,7 @@ namespace GraphBLAS
         {
             if (irow >= m_num_rows || icol >= m_num_cols)
             {
-                throw IndexOutOfBoundsException("set_value_at: index out of bounds");
+                throw IndexOutOfBoundsException("setElement: index out of bounds");
             }
 
             if (m_data[irow].empty())
@@ -325,7 +325,8 @@ namespace GraphBLAS
         {
             if (irow >= m_num_rows || icol >= m_num_cols)
             {
-                throw IndexOutOfBoundsException("set_value_at: index out of bounds");
+                throw IndexOutOfBoundsException(
+                    "setElement(merge): index out of bounds");
             }
 
             if (m_data[irow].empty())
