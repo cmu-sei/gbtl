@@ -51,6 +51,7 @@ set(GRAPHBLAS
         graphblas/accum.hpp
         graphblas/algebra.hpp
         graphblas/exceptions.hpp
+        graphblas/graphblas.cpp
         graphblas/graphblas.hpp
         graphblas/linalg_utils.hpp
         graphblas/Matrix.hpp

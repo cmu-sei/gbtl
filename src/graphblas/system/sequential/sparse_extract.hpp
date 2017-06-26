@@ -42,7 +42,41 @@ namespace GraphBLAS
     {
         //**********************************************************************
 
-        // Move to sparse helpers
+        template < typename CScalarT,
+                   typename AScalarT,
+                   typename IteratorT>
+        void vectorExtract(
+                std::vector< std::tuple<IndexType, CScalarT> >  &vec_dest,
+                std::vector< std::tuple<IndexType, AScalarT> > const &vec_src,
+                IteratorT           begin,
+                IteratorT           end)
+        {
+            // This is expensive but the indices can be duplicates and
+            // out of order.
+
+            vec_dest.clear();
+
+            IndexType out_idx = 0;
+            for (auto col_it = begin; col_it != end; ++col_it, ++out_idx)
+            {
+                IndexType wanted_idx = *col_it;
+                IndexType tmp_idx;
+                AScalarT tmp_value;
+
+                // Search through the outputs find one that matches.
+                auto A_it = vec_src.begin();
+                increment_while_below(A_it, vec_src.end(), wanted_idx);
+                if (A_it != vec_src.end())
+                {
+                    std::tie(tmp_idx, tmp_value) = *A_it;
+                    if (tmp_idx == wanted_idx)
+                        vec_dest.push_back(
+                                std::make_tuple(out_idx,
+                                                static_cast<CScalarT>(tmp_value)));
+                }
+            }
+        }
+
         /**
          * Extracts a series of values from the vector based on the passed in
          * indices.
@@ -82,6 +116,43 @@ namespace GraphBLAS
             }
         }
 
+        template<typename CScalarT,
+                 typename AScalarT,
+                 typename RowIteratorT,
+                 typename ColIteratorT>
+        void matrixExtract(LilSparseMatrix<CScalarT>          &C,
+                           LilSparseMatrix<AScalarT>  const   &A,
+                           RowIteratorT                        row_begin,
+                           RowIteratorT                        row_end,
+                           ColIteratorT                        col_begin,
+                           ColIteratorT                        col_end)
+        {
+            typedef std::vector<std::tuple<IndexType,AScalarT> > ARowType;
+            typedef std::vector<std::tuple<IndexType,CScalarT> > CRowType;
+
+            C.clear();
+
+            // Walk the rows
+            IndexType out_row_index = 0;
+
+            for (auto row_it = row_begin;
+                 row_it != row_end;
+                 ++row_it, ++out_row_index)
+            {
+                ARowType row(A.getRow(*row_it));
+
+                IndexType tmp_idx;
+                AScalarT tmp_value;
+                CRowType out_row;
+
+                // Extract the values from the row
+                vectorExtract(out_row, row, col_begin, col_end);
+
+                if (!out_row.empty())
+                    C.setRow(out_row_index, out_row);
+            }
+        }
+
         /**
          * Extract a sub matrix from A to C as specified via the row indices.
          * This is always destructive to C.
@@ -101,37 +172,39 @@ namespace GraphBLAS
         {
             // NOTE!! - Backend code. We expect that all dimension checks done elsewhere.
 
-            typedef std::vector<std::tuple<IndexType,AScalarT> > ARowType;
-            typedef std::vector<std::tuple<IndexType,CScalarT> > CRowType;
-
-            C.clear();
-
-            // Walk the rows
-            for (IndexType out_row_index = 0;
-                 out_row_index < row_indices.size();
-                 ++out_row_index)
+            if (&row_indices == &GrB_ALL && &col_indices == &GrB_ALL)
             {
-                ARowType row(A.getRow(row_indices[out_row_index]));
-//                auto row_it = row.begin();
-
-                IndexType tmp_idx;
-                AScalarT tmp_value;
-                CRowType out_row;
-
-                // Extract the values from the row
-                vectorExtract(out_row, row, col_indices);
-
-                if (!out_row.empty())
-                    C.setRow(out_row_index, out_row);
+                matrixExtract(C, A,
+                              index_iterator(0), index_iterator(A.nrows()),
+                              index_iterator(0), index_iterator(A.ncols()));
+            }
+            else if (&row_indices == &GrB_ALL)
+            {
+                matrixExtract(C, A,
+                              index_iterator(0), index_iterator(A.nrows()),
+                              col_indices.begin(), col_indices.end());
+            }
+            else if (&col_indices == &GrB_ALL)
+            {
+                matrixExtract(C, A,
+                              row_indices.begin(), row_indices.end(),
+                              index_iterator(0), index_iterator(A.ncols()));
+            }
+            else
+            {
+                matrixExtract(C, A,
+                              row_indices.begin(), row_indices.end(),
+                              col_indices.begin(), col_indices.end());
             }
         }
 
         //********************************************************************
-        template < typename WScalarT, typename AScalarT>
+        template < typename WScalarT, typename AScalarT, typename IteratorT>
         void extractColumn(
             std::vector< std::tuple<IndexType, WScalarT> >         &vec_dest,
             LilSparseMatrix<AScalarT>                       const  &A,
-            IndexArrayType                                  const  &row_indices,
+            IteratorT                                               row_begin,
+            IteratorT                                               row_end,
             IndexType                                               col_index)
         {
             // Walk the rows, extracting the cell if it exists
@@ -139,12 +212,12 @@ namespace GraphBLAS
 
             vec_dest.clear();
 
-            // Walk the rows
-            for (IndexType out_row_index = 0;
-                 out_row_index < row_indices.size();
-                 ++out_row_index)
+            // Walk the rows.
+
+            IndexType out_row_index = 0;
+            for (IteratorT it = row_begin; it != row_end; ++it, ++out_row_index)
             {
-                ARowType row(A.getRow(row_indices[out_row_index]));
+                ARowType row(A.getRow(*it));
 
                 IndexType tmp_idx;
                 AScalarT tmp_value;
@@ -172,7 +245,7 @@ namespace GraphBLAS
 
         //********************************************************************
         // Extract a row of a matrix using TransposeView
-        template < typename WScalarT, typename AMatrixT>
+        template < typename WScalarT, typename AMatrixT, typename IteratorT>
         void extractColumn(
             std::vector< std::tuple<IndexType, WScalarT> >        &vec_dest,
             backend::TransposeView<AMatrixT>                const &Atrans,
@@ -203,8 +276,7 @@ namespace GraphBLAS
                     }
                     ++row_it;
                 }
-            }
-
+            } // for
         }
 
         //**********************************************************************
@@ -263,7 +335,6 @@ namespace GraphBLAS
             write_with_opt_mask_1D(w, z, mask, replace);
         };
 
-
         //**********************************************************************
         /**
          * 4.3.6.2 extract: Standard matrix variant
@@ -284,7 +355,7 @@ namespace GraphBLAS
                      bool                        replace = false)
         {
             // Add in dimensional checks
-            if (row_indices.size() != C.nrows())
+            if (row_indices.size() != C.nrows() && &row_indices != &GrB_ALL)
             {
                 throw DimensionException(
                         "Number of ROWS in output (" +
@@ -293,7 +364,7 @@ namespace GraphBLAS
                         std::to_string(row_indices.size()) + " ).");
             }
 
-            if (col_indices.size() != C.ncols())
+            if (col_indices.size() != C.ncols() && &col_indices != &GrB_ALL)
             {
                 throw DimensionException(
                         "Number of COLUMNS in output (" +
@@ -371,9 +442,16 @@ namespace GraphBLAS
 
             // =================================================================
             // Extract to T
-
             WVectorType t;
-            extractColumn(t, A, row_indices, col_index);
+
+            if (&row_indices == &GrB_ALL)
+            {
+                std::cout << "!!!!==== GrB_ALL - Extract!!" << std::endl;
+                extractColumn(t, A, index_iterator(0),
+                              index_iterator(A.nrows()), col_index);
+            }
+            else
+                extractColumn(t, A, row_indices.begin(), row_indices.end(), col_index);
 
             //std::cerr << ">>> t <<< " << std::endl;
             //pretty_print(std::cerr, t);

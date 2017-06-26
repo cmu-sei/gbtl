@@ -256,7 +256,8 @@ BOOST_AUTO_TEST_CASE(metrics_batch_alt_trans_v2)
     GraphBLAS::IndexArrayType seed_set={0};
     std::vector<float> answer = {0.0, 4.0/3, 4.0/3, 4.0/3, 3.0, 0.5, 0.5, 0.0};
     std::cerr << "******************** START ALT ++ V2 ++ TRANS ***********************" << std::endl;
-    std::vector<float> result = vertex_betweenness_centrality_batch_alt_trans_v2(betweenness, seed_set);
+    std::vector<float> result = vertex_betweenness_centrality_batch_alt_trans_v2(
+            betweenness, seed_set);
 
     BOOST_CHECK_EQUAL(result.size(), answer.size());
     for (unsigned int ix = 0; ix < result.size(); ++ix)

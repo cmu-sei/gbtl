@@ -213,6 +213,7 @@ namespace GraphBLAS
             {
                 throw DimensionException("Matrix::build");
             }
+
             m_mat.build(row_indices.begin(), col_indices.begin(),
                         values.begin(), values.size(), dup);
         }

@@ -269,5 +269,34 @@ BOOST_AUTO_TEST_CASE(sparse_extract_column)
     BOOST_CHECK_EQUAL(result, answer);
 }
 
+//****************************************************************************
+
+BOOST_AUTO_TEST_CASE(sparse_extract_column_all)
+{
+    std::vector<std::vector<double>> matA = {{8, 1, 6},
+                                             {3, 5, 7},
+                                             {4, 9, 2}};
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(matA, 0);
+
+    std::vector<double> vecAnswer = {1,5,9};
+    GraphBLAS::Vector<double> answer(vecAnswer, 0);
+
+    // Output space
+    GraphBLAS::IndexType M = 2;
+
+    GraphBLAS::Vector<double> result(3);
+
+    GraphBLAS::extract(result,
+                       GraphBLAS::NoMask(),
+                       GraphBLAS::NoAccumulate(),
+                       mA,
+                       GrB_ALL,
+                       1,
+                       false);
+
+    BOOST_CHECK_EQUAL(result, answer);
+}
+    
+//****************************************************************************
 
 BOOST_AUTO_TEST_SUITE_END()

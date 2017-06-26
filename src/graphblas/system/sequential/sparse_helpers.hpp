@@ -35,6 +35,7 @@
 
 namespace GraphBLAS
 {
+
     namespace backend
     {
         template <typename ScalarT>

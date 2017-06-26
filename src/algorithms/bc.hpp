@@ -55,6 +55,7 @@ namespace algorithms
         GraphBLAS::IndexType nsver(s.size());
         if (nsver == 0)
         {
+
             throw graphblas::DimensionException();
         }
 
@@ -82,24 +83,32 @@ namespace algorithms
 
         // Placeholder for GrB_ALL where dimension is n
         //std::vector<GraphBLAS::IndexType> GrB_ALL_n;     // fill with sequence
-        GraphBLAS::IndexArrayType GrB_ALL_n;
-        // @todo: Implement GrB_ALL_n support in extract
-        GrB_ALL_n.reserve(n);
-        for (GraphBLAS::IndexType idx = 0; idx < n; ++idx)
-        {
-            GrB_ALL_n.push_back(idx);
-        }
+//        GraphBLAS::IndexArrayType GrB_ALL_n;
+//        // @todo: Implement GrB_ALL_n support in extract
+//        GrB_ALL_n.reserve(n);
+//        for (GraphBLAS::IndexType idx = 0; idx < n; ++idx)
+//        {
+//            GrB_ALL_n.push_back(idx);
+//        }
 
         // The current frontier for all BFS's (from all roots)
         // It is initialized to the out neighbors of the specified roots
         GraphBLAS::Matrix<int32_t> Frontier(nsver, n);     // F is nsver x n (rows)
-        GraphBLAS::extract(Frontier, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(), A, s, GrB_ALL_n);
+        GraphBLAS::extract(Frontier,
+                           GraphBLAS::NoMask(),
+                           GraphBLAS::NoAccumulate(),
+                           A,
+                           s,
+//                           GrB_ALL_n);
+                           GraphBLAS::GrB_ALL);
         GraphBLAS::print_matrix(std::cerr, Frontier, "initial frontier");
 
         // NumSP holds number of shortest paths to a vertex from a given root
         // NumSP is initialized with the each starting root in 's':
         // NumSP[i,s[i]] = 1 where 0 <= i < nsver; implied zero elsewhere
         GraphBLAS::Matrix<int32_t> NumSP(nsver, n);
+
+        // @TODO: We might NOT want GrB_ALL here for the rows, because we want a diagonal
         NumSP.build(GrB_ALL_nsver, s, std::vector<int32_t>(nsver, 1));
         GraphBLAS::print_matrix(std::cerr, NumSP, "initial NumSP");
 
@@ -173,8 +182,10 @@ namespace algorithms
                           GraphBLAS::NoMask(),
                           GraphBLAS::NoAccumulate(),
                           1.0f,
-                          GrB_ALL_nsver,
-                          GrB_ALL_n);
+//                          GrB_ALL_nsver,
+//                          GrB_ALL_n);
+                          GraphBLAS::GrB_ALL,
+                          GraphBLAS::GrB_ALL);
         GraphBLAS::print_matrix(std::cerr, BCu, "U");
 
 
@@ -233,7 +244,8 @@ namespace algorithms
                                    GraphBLAS::NoMask(),
                                    GraphBLAS::NoAccumulate(),
                                    nsver * -1.0f,
-                                   GrB_ALL_n);
+                                   //GrB_ALL_n);
+                                   GraphBLAS::GrB_ALL);
         GraphBLAS::reduce(result,                          // W
                           GraphBLAS::NoMask(),             // Mask
                           GraphBLAS::Plus<float>(),        // Accum

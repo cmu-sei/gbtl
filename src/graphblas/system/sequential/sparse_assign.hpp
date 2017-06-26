@@ -166,22 +166,47 @@ namespace GraphBLAS
             }
         }
 
-        template <typename ValueT >
+//        template <typename ValueT >
+//        void assignConstant(LilSparseMatrix<ValueT>             &T,
+//                            ValueT                     const    value,
+//                            IndexArrayType             const   &row_indicies,
+//                            IndexArrayType             const   &col_indicies)
+//        {
+//            typedef std::vector<std::tuple<IndexType,ValueT> > TRowType;
+//
+//            for (auto row_it = row_indicies.begin();
+//                 row_it != row_indicies.end();
+//                 ++row_it)
+//            {
+//                TRowType out_row;
+//                for (auto col_it = col_indicies.begin();
+//                     col_it != col_indicies.end();
+//                     ++col_it)
+//                {
+//                    // @todo: add bounds check
+//                    out_row.push_back(std::make_tuple(*col_it, value));
+//                }
+//
+//                // @todo: add bounds check
+//                if (!out_row.empty())
+//                    T.setRow(*row_it, out_row);
+//            }
+//        };
+
+        template <typename ValueT, typename RowIteratorT, typename ColIteratorT >
         void assignConstant(LilSparseMatrix<ValueT>             &T,
                             ValueT                     const    value,
-                            IndexArrayType             const   &row_indicies,
-                            IndexArrayType             const   &col_indicies)
+                            RowIteratorT                        row_begin,
+                            RowIteratorT                        row_end,
+                            ColIteratorT                        col_begin,
+                            ColIteratorT                        col_end)
         {
             typedef std::vector<std::tuple<IndexType,ValueT> > TRowType;
 
-            for (auto row_it = row_indicies.begin();
-                 row_it != row_indicies.end();
-                 ++row_it)
+            for (auto row_it = row_begin; row_it != row_end; ++row_it)
             {
                 TRowType out_row;
-                for (auto col_it = col_indicies.begin();
-                     col_it != col_indicies.end();
-                     ++col_it)
+                for (auto col_it = col_begin; col_it != col_end; ++col_it)
                 {
                     // @todo: add bounds check
                     out_row.push_back(std::make_tuple(*col_it, value));
@@ -192,6 +217,48 @@ namespace GraphBLAS
                     T.setRow(*row_it, out_row);
             }
         };
+
+
+        template <typename ValueT>
+        void assignConstant(LilSparseMatrix<ValueT>            &T,
+                            ValueT                     const    val,
+                            IndexArrayType             const   &row_indices,
+                            IndexArrayType             const   &col_indices)
+        {
+            // Sort row indicies and col_indicies
+
+            if (&row_indices == &GrB_ALL && &col_indices == &GrB_ALL)
+            {
+                assignConstant(T, val,
+                               index_iterator(0), index_iterator(T.nrows()),
+                               index_iterator(0), index_iterator(T.ncols()));
+            }
+            else if (&row_indices == &GrB_ALL)
+            {
+                IndexArrayType sorted_cols(col_indices);
+                std::sort(sorted_cols.begin(), sorted_cols.end());
+                assignConstant(T, val,
+                               index_iterator(0), index_iterator(T.nrows()),
+                               sorted_cols.begin(), sorted_cols.end());
+            }
+            else if (&col_indices == &GrB_ALL)
+            {
+                IndexArrayType sorted_rows(row_indices);
+                std::sort(sorted_rows.begin(), sorted_rows.end());
+                assignConstant(T, val,
+                               sorted_rows.begin(), sorted_rows.end(),
+                               index_iterator(0), index_iterator(T.ncols()));
+            }
+            else
+            {
+                IndexArrayType sorted_rows(row_indices);
+                IndexArrayType sorted_cols(col_indices);
+                std::sort(sorted_rows.begin(), sorted_rows.end());
+                std::sort(sorted_cols.begin(), sorted_cols.end());
+                assignConstant(T, val, sorted_rows.begin(), sorted_rows.end(),
+                               sorted_cols.begin(), sorted_cols.end());
+            }
+        }
 
         //=====================================================================
         //=====================================================================
@@ -246,25 +313,32 @@ namespace GraphBLAS
 
         //======================================================================
 
+        // 4.3.7.5: assign: Constant vector variant
         template<typename WVectorT,
                 typename MaskT,
                 typename AccumT,
                 typename ValueT>
         inline void assign_constant(WVectorT             &w,
-                           MaskT          const &mask,
-                           AccumT                accum,
-                           ValueT                val,
-                           IndexArrayType const &indices,
-                           bool                  replace_flag = false)
+                                    MaskT          const &mask,
+                                    AccumT                accum,
+                                    ValueT                val,
+                                    IndexArrayType const &indices,
+                                    bool                  replace_flag = false)
         {
             // @todo : Added dimension and error checks
 
             std::vector<std::tuple<IndexType, ValueT> > T;
 
             // Set all in T
-            for (auto it = indices.begin(); it != indices.end(); ++it)
+            if (&indices == &GrB_ALL)
             {
-                T.push_back(std::make_tuple(*it, val));
+                for (auto it = index_iterator(0); it != index_iterator(w.size()); ++it)
+                    T.push_back(std::make_tuple(*it, val));
+            }
+            else
+            {
+                for (auto it = indices.begin(); it != indices.end(); ++it)
+                    T.push_back(std::make_tuple(*it, val));
             }
 
             // =================================================================
@@ -286,14 +360,14 @@ namespace GraphBLAS
                 typename AccumT,
                 typename ValueT>
         inline void assign_constant(CMatrixT             &C,
-                           MaskT          const &Mask,
-                           AccumT                accum,
-                           ValueT                val,
-                           IndexArrayType const &row_indices,
-                           IndexArrayType const &col_indices,
-                           bool                  replace_flag = false)
+                                    MaskT          const &Mask,
+                                    AccumT                accum,
+                                    ValueT                val,
+                                    IndexArrayType const &row_indices,
+                                    IndexArrayType const &col_indices,
+                                    bool                  replace_flag = false)
         {
-            typedef typename CMatrixT::ScalarType                   CScalarType;
+            typedef typename CMatrixT::ScalarType CScalarType;
 
             // @todo Add bounds and type checks
 
@@ -303,18 +377,10 @@ namespace GraphBLAS
             //std::cerr << ">>> Mask <<< " << std::endl;
             //std::cerr << mask << std::endl;
 
-            // Sort row indicies and col_indicies
-            IndexArrayType sorted_rows(row_indices);
-            IndexArrayType sorted_cols(col_indices);
-
-            std::sort(sorted_rows.begin(), sorted_rows.end());
-            std::sort(sorted_cols.begin(), sorted_cols.end());
-
             // =================================================================
             // Assign spots in T
-
-            LilSparseMatrix<ValueT>         T(C.nrows(), C.ncols());
-            assignConstant(T, val, sorted_rows, sorted_cols);
+            LilSparseMatrix<ValueT> T(C.nrows(), C.ncols());
+            assignConstant(T, val, row_indices, col_indices);
 
             //std::cerr << ">>> T <<< " << std::endl;
             //std::cerr << T << std::endl;
