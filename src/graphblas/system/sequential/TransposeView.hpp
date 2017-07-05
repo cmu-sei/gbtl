@@ -179,9 +179,8 @@ namespace GraphBLAS
             //     m_matrix.setElement(icol, irow, val, merge);
             // }
 
-
-            std::vector<std::tuple<IndexType, ScalarType> > getRow(
-                IndexType row_index) const
+            typedef typename MatrixT::ColType RowType;
+            RowType getRow(IndexType row_index) const
             {
                 return m_matrix.getCol(row_index);
             }
@@ -190,11 +189,8 @@ namespace GraphBLAS
             //void setRow(IndexType row_index,
             //           std::vector<std::tuple<IndexType, ScalarType> > &row_data)
 
-
-            /// @todo can't return a const ref because not sure if transpose
-            /// of transpose of matrix is being used.
-            std::vector<std::tuple<IndexType, ScalarType> > getCol(
-                IndexType col_index) const
+            typedef typename MatrixT::RowType ColType;
+            ColType getCol(IndexType col_index) const
             {
                 return m_matrix.getRow(col_index);
             }

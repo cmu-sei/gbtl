@@ -350,15 +350,20 @@ namespace GraphBLAS
         void extractTuples(RAIteratorIT        i_it,
                            RAIteratorVT        v_it)
         {
-            throw 1;
-            /// @todo
+            for (IndexType idx = 0; idx < m_size; ++idx)
+            {
+                if (m_bitmap[idx])
+                {
+                    *i_it = idx; ++i_it;
+                    *v_it = m_vals[idx]; ++v_it;
+                }
+            }
         }
 
         void extractTuples(IndexArrayType        &indices,
                            std::vector<ScalarT>  &values)
         {
-            throw 1;
-            /// @todo
+            extractTuples(indices.begin(), values.begin());
         }
 
         // output specific to the storage layout of this type of matrix

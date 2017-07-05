@@ -16,7 +16,7 @@
 
 #include <graphblas/graphblas.hpp>
 
-using namespace GraphBLAS;
+//using namespace GraphBLAS;
 
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE lil_suite
@@ -62,9 +62,9 @@ BOOST_AUTO_TEST_CASE(lil_test_construction_dense)
 
     BOOST_CHECK_EQUAL(num_rows, M);
     BOOST_CHECK_EQUAL(num_cols, N);
-    for (graphblas::IndexType i = 0; i < M; i++)
+    for (GraphBLAS::IndexType i = 0; i < M; i++)
     {
-        for (graphblas::IndexType j = 0; j < N; j++)
+        for (GraphBLAS::IndexType j = 0; j < N; j++)
         {
             BOOST_CHECK_EQUAL(m1.extractElement(i, j), mat[i][j]);
         }
@@ -92,9 +92,9 @@ BOOST_AUTO_TEST_CASE(lil_test_construction_dense_zero)
 
     BOOST_CHECK_EQUAL(num_rows, M);
     BOOST_CHECK_EQUAL(num_cols, N);
-    for (graphblas::IndexType i = 0; i < M; i++)
+    for (GraphBLAS::IndexType i = 0; i < M; i++)
     {
-        for (graphblas::IndexType j = 0; j < N; j++)
+        for (GraphBLAS::IndexType j = 0; j < N; j++)
         {
             if (mat[i][j] != 0)
             {

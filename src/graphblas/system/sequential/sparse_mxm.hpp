@@ -26,6 +26,8 @@
 #include <vector>
 #include <iterator>
 #include <iostream>
+#include <chrono>
+
 #include <graphblas/types.hpp>
 #include <graphblas/accum.hpp>
 #include <graphblas/algebra.hpp>
@@ -71,8 +73,8 @@ namespace GraphBLAS
             typedef typename AMatrixT::ScalarType AScalarType;
             typedef typename BMatrixT::ScalarType BScalarType;
             typedef typename CMatrixT::ScalarType CScalarType;
-            typedef std::vector<std::tuple<IndexType,AScalarType> > ARowType;
-            typedef std::vector<std::tuple<IndexType,BScalarType> > BColType;
+            //typedef std::vector<std::tuple<IndexType,AScalarType> > ARowType;
+            //typedef std::vector<std::tuple<IndexType,BScalarType> > BColType;
             typedef std::vector<std::tuple<IndexType,CScalarType> > CColType;
             typedef std::vector<std::tuple<IndexType,D3ScalarType> > TColType;
 
@@ -87,14 +89,13 @@ namespace GraphBLAS
                 TColType T_col;
                 for (IndexType col_idx = 0; col_idx < ncol_B; ++col_idx)
                 {
-                    BColType B_col(B.getCol(col_idx));
+                    typename BMatrixT::ColType B_col(B.getCol(col_idx));
 
                     if (!B_col.empty())
                     {
                         for (IndexType row_idx = 0; row_idx < nrow_A; ++row_idx)
                         {
-                            /// @todo With transpose(A), reference may be bad.
-                            ARowType const &A_row(A.getRow(row_idx));
+                            typename AMatrixT::RowType A_row(A.getRow(row_idx));
                             if (!A_row.empty())
                             {
                                 D3ScalarType T_val;

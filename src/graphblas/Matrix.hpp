@@ -243,20 +243,17 @@ namespace GraphBLAS
 
         template<typename RAIteratorIT,
                  typename RAIteratorJT,
-                 typename RAIteratorVT,
-                 typename AMatrixT>
+                 typename RAIteratorVT>
         inline void extractTuples(RAIteratorIT        row_it,
                                   RAIteratorJT        col_it,
                                   RAIteratorVT        values)
         {
-            /// @todo
+            m_mat.extractTuples(row_it, col_it, values);
         }
 
-        template<typename ValueT,
-                 typename AMatrixT>
         inline void extractTuples(IndexArrayType            &row_indices,
                                   IndexArrayType            &col_indices,
-                                  std::vector<ValueT>       &values)
+                                  std::vector<ScalarT>      &values)
         {
             /// @todo
         }

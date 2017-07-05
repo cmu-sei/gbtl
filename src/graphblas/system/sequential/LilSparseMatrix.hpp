@@ -359,8 +359,8 @@ namespace GraphBLAS
             }
         }
 
-        std::vector<std::tuple<IndexType, ScalarT> > const &getRow(
-            IndexType row_index) const
+        typedef std::vector<std::tuple<IndexType, ScalarT>> const & RowType;
+        RowType getRow(IndexType row_index) const
         {
             return m_data[row_index];
         }
@@ -376,8 +376,8 @@ namespace GraphBLAS
         }
 
         /// @todo need move semantics.
-        std::vector<std::tuple<IndexType, ScalarT> > getCol(
-            IndexType col_index) const
+        typedef std::vector<std::tuple<IndexType, ScalarT> > const ColType;
+        ColType getCol(IndexType col_index) const
         {
             std::vector<std::tuple<IndexType, ScalarT> > data;
 
@@ -527,6 +527,26 @@ namespace GraphBLAS
                             break;
                         }
                     }
+                }
+            }
+        }
+
+        template<typename RAIteratorIT,
+                 typename RAIteratorJT,
+                 typename RAIteratorVT>
+        ScalarT extractTuples(RAIteratorIT        row_it,
+                              RAIteratorJT        col_it,
+                              RAIteratorVT        values) const
+        {
+            for (IndexType row = 0; row < m_data.size(); ++row)
+            {
+                for (auto it = m_data[row].begin();
+                     it != m_data[row].end();
+                     ++it)
+                {
+                    *row_it = row;              ++row_it;
+                    *col_it = std::get<0>(*it); ++col_it;
+                    *values = std::get<1>(*it); ++values;
                 }
             }
         }

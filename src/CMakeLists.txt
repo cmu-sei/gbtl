@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 2.8)
 project(src)
 
 # This seems hokey that we need to include the root as our directory
@@ -74,7 +74,10 @@ set(ALGORITHMS
         algorithms/mst.hpp
         algorithms/page_rank.hpp
         algorithms/sssp.hpp
+        algorithms/triangle_count.hpp
+#        algorithms/k_truss.hpp
         )
+
 
 add_executable(test_bitmap_sparse_vector test/sequential/test_bitmap_sparse_vector.cpp ${GRAPHBLAS})
 add_executable(test_column_extended_view test/sequential/test_column_extended_view.cpp ${GRAPHBLAS})
@@ -126,5 +129,13 @@ add_executable(mxm_homework demo/mxm_homework.cpp ${GRAPHBLAS})
 add_executable(peer_pressure_demo demo/peer_pressure_demo.cpp ${GRAPHBLAS})
 add_executable(peer_pressure_karate_demo demo/peer_pressure_karate_demo.cpp ${GRAPHBLAS})
 add_executable(sssp_demo demo/sssp_demo.cpp ${GRAPHBLAS})
+add_executable(triangle_count_demo demo/triangle_count_demo.cpp ${GRAPHBLAS})
+#add_executable(k_truss_demo demo/k_truss_demo.cpp ${GRAPHBLAS})
 
-#add_executable(bcc_demo capi/bcc_demo.c capi/bcc.c capi/bcc.h ${GRAPHBLAS} capi/graphblas.cpp capi/TypeAdapter.hpp capi/UnaryAdapter.hpp capi/graphblas_private.h capi/BinaryAdapter.hpp capi/TypeUnion.hpp capi/SemiringAdapter.hpp capi/FunctionInvocation.cpp capi/FunctionInvocation.h capi/MonoidAdapter.hpp)
+# TEMPORARY for GraphChallenge data processing.
+#add_executable(clean_data demo/clean_data.cpp ${GRAPHBLAS})
+#add_executable(snaptsv2csr demo/snaptsv2csr.cpp ${GRAPHBLAS})
+#add_executable(tsv2csr demo/tsv2csr.cpp ${GRAPHBLAS})
+#add_executable(csr2tsv demo/csr2tsv.cpp ${GRAPHBLAS})
+
+#add_executable(bcc_demo capi/bcc_demo.c capi/bcc.c capi/bcc.h ${GRAPHBLAS} capi/graphblas.cpp capi/TypeAdapter.hpp capi/UnaryAdapter.hpp capi/graphblas_private.h capi/BinaryAdapter.xhpp capi/TypeUnion.hpp capi/SemiringAdapter.hpp capi/FunctionInvocation.cpp capi/FunctionInvocation.h capi/MonoidAdapter.hpp)

@@ -487,8 +487,8 @@ namespace GraphBLAS
                                 bool                  replace_flag = false)
     {
         backend::assign_constant(C.m_mat, Mask.m_mat, accum, val,
-                        row_indices, col_indices, replace_flag );
-    };
+                                 row_indices, col_indices, replace_flag);
+    }
 
     //****************************************************************************
     // Apply

@@ -22,7 +22,7 @@ using namespace graphblas;
 using namespace algorithms;
 
 #define BOOST_TEST_MAIN
-#define BOOST_TEST_MODULE metrics_suite
+#define BOOST_TEST_MODULE bc_suite
 
 #include <boost/test/included/unit_test.hpp>
 
@@ -44,7 +44,7 @@ static std::vector<double> bv(br.size(), 1);
 //
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(metrics_test_vertex_betweenness_centrality)
+BOOST_AUTO_TEST_CASE(bc_test_vertex_betweenness_centrality)
 {
     Matrix<double, DirectedMatrixTag> betweenness(8,8);
     graphblas::buildmatrix(betweenness, br.begin(), bc.begin(), bv.begin(), bv.size());
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(metrics_test_vertex_betweenness_centrality)
 
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(metrics_test_edge_betweenness_centrality)
+BOOST_AUTO_TEST_CASE(bc_test_edge_betweenness_centrality)
 {
     Matrix<double, DirectedMatrixTag> betweenness(8,8);
     Matrix<double, DirectedMatrixTag> result(8,8);
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(metrics_test_edge_betweenness_centrality)
 }
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(metrics_test_vertex_betweennes_centrality_batch)
+BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch)
 {
     Matrix<double, DirectedMatrixTag> betweenness(8,8);
     graphblas::buildmatrix(betweenness, br.begin(), bc.begin(), bv.begin(), bv.size());
@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE(metrics_test_vertex_betweennes_centrality_batch)
 }
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(metrics_test_vertex_betweennes_centrality_batch_alt)
+BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch_alt)
 {
     // Trying the same graph where each node has self loop.     vvvvvvvvvvvvvvv
     std::vector<double> br1={0, 0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 6,0,1,2,3,4,5,6,7};
@@ -190,8 +190,8 @@ BOOST_AUTO_TEST_CASE(metrics_test_vertex_betweennes_centrality_batch_alt)
 }
 
 //****************************************************************************
-//BOOST_AUTO_TEST_CASE(metrics_test_vertex_betweennes_centrality_batch_alt_trans)
-BOOST_AUTO_TEST_CASE(metrics_batch_alt_trans)
+//BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch_alt_trans)
+BOOST_AUTO_TEST_CASE(bc_batch_alt_trans)
 {
     Matrix<double, DirectedMatrixTag> betweenness(8,8);
     graphblas::buildmatrix(betweenness, br.begin(), bc.begin(), bv.begin(), bv.size());
@@ -244,8 +244,8 @@ BOOST_AUTO_TEST_CASE(metrics_batch_alt_trans)
 }
 
 //****************************************************************************
-//BOOST_AUTO_TEST_CASE(metrics_test_vertex_betweennes_centrality_batch_alt_trans_v2)
-BOOST_AUTO_TEST_CASE(metrics_batch_alt_trans_v2)
+//BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch_alt_trans_v2)
+BOOST_AUTO_TEST_CASE(bc_test_batch_alt_trans_v2)
 {
 //    Matrix<double, DirectedMatrixTag> betweenness(8,8);
 //    graphblas::buildmatrix(betweenness, br.begin(), bc.begin(), bv.begin(), bv.size());

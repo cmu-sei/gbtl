@@ -17,6 +17,7 @@
 #define ALGORITHMS_TRIANGLE_COUNT_HPP
 
 #include <iostream>
+#include <chrono>
 
 #define GB_DEBUG
 #include <graphblas/graphblas.hpp>
@@ -308,10 +309,12 @@ namespace algorithms
 
 
     //************************************************************************
-    template<typename MatrixT>
-    typename MatrixT::ScalarType triangle_count_newGBTL(MatrixT const &L,
-                                                        MatrixT const &U)
+    template<typename LMatrixT, typename MatrixT>
+    typename MatrixT::ScalarType triangle_count_newGBTL(LMatrixT const &L,
+                                                        MatrixT  const &U)
     {
+        auto start = std::chrono::steady_clock::now();
+
         using T = typename MatrixT::ScalarType;
         GraphBLAS::IndexType rows(L.nrows());
         GraphBLAS::IndexType cols(L.ncols());
@@ -319,7 +322,15 @@ namespace algorithms
         MatrixT B(rows, cols);
         GraphBLAS::mxm(B, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                        GraphBLAS::ArithmeticSemiring<T>(),
-                       L, U, true);
+                       L,
+                       GraphBLAS::transpose(L), //U,
+                       true);
+
+        auto finish = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>
+            (finish - start);
+        start = finish;
+        std::cout << "mxm elapsed time: " << duration.count() << " msec." << std::endl;
 
         T sum = 0;
         MatrixT C(rows, cols);
@@ -329,6 +340,11 @@ namespace algorithms
 
         GraphBLAS::reduce(sum, GraphBLAS::NoAccumulate(),
                           GraphBLAS::PlusMonoid<T>(), C);
+        finish = std::chrono::steady_clock::now();
+        duration = std::chrono::duration_cast<std::chrono::milliseconds>
+            (finish - start);
+        start = finish;
+        std::cout << "count1 elapsed time: " << duration.count() << " msec." << std::endl;
 
         // for undirected graph you can stop here and return 'sum'
 
@@ -338,6 +354,10 @@ namespace algorithms
 
         GraphBLAS::reduce(sum, GraphBLAS::Plus<T>(),
                           GraphBLAS::PlusMonoid<T>(), C);
+        finish = std::chrono::steady_clock::now();
+        duration = std::chrono::duration_cast<std::chrono::milliseconds>
+            (finish - start);
+        std::cout << "count2 elapsed time: " << duration.count() << " msec." << std::endl;
 
         return sum / static_cast<T>(2);
     }
@@ -555,6 +575,169 @@ namespace algorithms
 
         return delta;
     }
+
+
+    //************************************************************************
+    /**
+     * From TzeMeng Low, the blocked FLAME approach #2 to triangle counting
+     * with masked access
+     *
+     * @param[in] graph  Must be undirected graph with no self-loops; i.e.,
+     *                   matrix is symmetric with zeros on the diagonal.
+     *                   Upper triangular portion of matrix is accessed.
+     */
+    template<typename MatrixT>
+    typename MatrixT::ScalarType triangle_count_flame2_newGBTL_blocked(
+        MatrixT const        &graph,
+        GraphBLAS::IndexType  block_size = 128)
+    {
+        using T = typename MatrixT::ScalarType;
+        T  num_triangles = 0;
+
+        GraphBLAS::IndexType rows(graph.nrows());
+        GraphBLAS::IndexType cols(graph.ncols());
+
+        // assert(rows == cols);
+
+        GraphBLAS::IndexType begin_index(0);
+        GraphBLAS::IndexType end_index(block_size);
+
+        GraphBLAS::IndexArrayType zero2begin; zero2begin.reserve(rows);
+        GraphBLAS::IndexArrayType begin2end;  begin2end.reserve(block_size);
+        GraphBLAS::IndexArrayType end2rows;   end2rows.reserve(rows);
+        GraphBLAS::IndexArrayType end2rowsMask;   end2rows.reserve(rows);
+
+
+        while (begin_index < rows)
+        {
+            GraphBLAS::IndexType bsize = end_index - begin_index;
+            std::cerr << begin_index << ":" << end_index
+                      << ", work = " << bsize << std::endl;
+
+            zero2begin.clear();
+            for (GraphBLAS::IndexType ix = 0; ix < begin_index; ++ix)
+            {
+                zero2begin.push_back(ix); // start with all indices
+            }
+
+            begin2end.clear();
+            for (GraphBLAS::IndexType ix = begin_index; ix < end_index; ++ix)
+            {
+                begin2end.push_back(ix); // start with all indices
+            }
+
+            end2rows.clear();
+            end2rowsMask.clear();
+            for (GraphBLAS::IndexType ix = end_index; ix < rows; ++ix)
+            {
+                end2rows.push_back(ix); // start with all indices
+                end2rowsMask.push_back(ix - end_index);
+            }
+            std::cerr << "0" << std::endl;
+
+            MatrixT A01(begin_index, bsize);            // n x b
+            MatrixT A02(begin_index, rows-end_index);   // n x m
+            MatrixT A11(bsize, bsize);                  // b x b
+            MatrixT A12(bsize, rows-end_index);         // b x m
+
+            GraphBLAS::Matrix<bool> DiagonalMask(rows - end_index, rows - end_index);
+            std::vector<bool> mvals(end2rowsMask.size(), true);
+            DiagonalMask.build(end2rowsMask, end2rowsMask, mvals);
+            std::cerr << "0" << std::endl;
+
+            //
+            GraphBLAS::extract(A01, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                               graph, zero2begin, begin2end, true);
+            std::cerr << "a" << std::endl;
+            GraphBLAS::extract(A11, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                               graph, begin2end, begin2end, true);
+            std::cerr << "a" << std::endl;
+            GraphBLAS::extract(A02, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                               graph, zero2begin, end2rows, true);
+            std::cerr << "a" << std::endl;
+
+            GraphBLAS::extract(A12, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                               graph, begin2end, end2rows, true);
+            std::cerr << "0" << std::endl;
+
+            // ***************************************************************
+            // STEP 1: tris += trace(A12' * A01' * A02) = trace(A02' * A01 * A12);
+            // ***************************************************************
+            MatrixT Tmp1(rows - end_index, rows - end_index);
+            if (begin_index > 0)
+            {
+                MatrixT Tmp0(begin_index, rows - end_index);
+
+                GraphBLAS::mxm(Tmp0, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                               GraphBLAS::ArithmeticSemiring<T>(),
+                               A01, A12, true);
+                // Compute just the diagonal elements
+                GraphBLAS::mxm(Tmp1, DiagonalMask, GraphBLAS::NoAccumulate(),
+                               GraphBLAS::ArithmeticSemiring<T>(),
+                               GraphBLAS::transpose(A02), Tmp0, true);
+                GraphBLAS::reduce(num_triangles, GraphBLAS::Plus<T>(),
+                                  GraphBLAS::PlusMonoid<T>(), Tmp1);
+            }
+            // ***************************************************************
+            // STEP 2: tris += trace(A12' * A11 * A12)
+            // ***************************************************************
+            std::cerr << "2" << std::endl;
+            MatrixT Tmp2(bsize, rows - end_index);
+
+            GraphBLAS::mxm(Tmp2, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                           GraphBLAS::ArithmeticSemiring<T>(),
+                           A11, A12, true);
+            // Compute just the diagonal elements
+            std::cerr << "2" << std::endl;
+            GraphBLAS::mxm(Tmp1, DiagonalMask, GraphBLAS::NoAccumulate(),
+                           GraphBLAS::ArithmeticSemiring<T>(),
+                           GraphBLAS::transpose(A12), Tmp2, true);
+            std::cerr << "2" << std::endl;
+            GraphBLAS::reduce(num_triangles, GraphBLAS::Plus<T>(),
+                              GraphBLAS::PlusMonoid<T>(), Tmp1);
+
+            // ***************************************************************
+            // STEP 3: tris += trace(A01 * A11 * A01')
+            // ***************************************************************
+            if (begin_index > 0)
+            {
+                MatrixT Tmp3(bsize, begin_index);
+                MatrixT Tmp4(begin_index, begin_index);
+
+                GraphBLAS::Matrix<bool> DiagonalMask2(begin_index, begin_index);
+                std::vector<bool> mvals2(zero2begin.size(), true);
+                DiagonalMask2.build(zero2begin, zero2begin, mvals2);
+                std::cerr << "0" << std::endl;
+
+                std::cerr << "3" << std::endl;
+                GraphBLAS::mxm(Tmp3, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                               GraphBLAS::ArithmeticSemiring<T>(),
+                               A11, GraphBLAS::transpose(A01), true);
+                // Compute just the diagonal elements
+                std::cerr << "3" << std::endl;
+                GraphBLAS::mxm(Tmp4, DiagonalMask2, GraphBLAS::NoAccumulate(),
+                               GraphBLAS::ArithmeticSemiring<T>(),
+                               A01, Tmp3, true);
+                std::cerr << "3" << std::endl;
+                GraphBLAS::reduce(num_triangles, GraphBLAS::Plus<T>(),
+                                  GraphBLAS::PlusMonoid<T>(), Tmp4);
+            }
+
+            // ***************************************************************
+            // STEP 4: Count triangles in diagonal block
+            // ***************************************************************
+            std::cerr << "4" << std::endl;
+            num_triangles += algorithms::triangle_count_newGBTL(
+                GraphBLAS::transpose(A11), A11);
+
+            std::cout << "Running count: " << num_triangles << std::endl;
+
+            // set up for next block
+            begin_index += block_size;
+            end_index = std::min(rows, begin_index + block_size);
+        }
+        return num_triangles;
+    }
 } // algorithms
 
-#endif // METRICS_HPP
+#endif // ALGORITHMS_TRIANGLE_COUNT_HPP
