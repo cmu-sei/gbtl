@@ -21,7 +21,7 @@
 
 #include <graphblas/operations.hpp>
 
-namespace graphblas
+namespace XXXgraphblas
 {
     /**
      * @brief Split a matrix into its lower and upper triangular portions

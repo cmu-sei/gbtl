@@ -119,44 +119,19 @@ namespace GraphBLAS
                         ostr << ",  ";
                         ++curr_idx;
                     }
-
                 }
                 ostr << ((row_idx == num_rows - 1 ) ? "]]\n" : "]\n");
             }
-
-            // IndexType rows, cols;
-            // mat.get_shape(rows, cols);
-            // typename MatrixT::ScalarType zero(mat.get_zero());
-            // for (IndexType row = 0; row < rows; ++row)
-            // {
-            //     ostr << ((row == 0) ? "[[" : " [");
-            //     if (cols > 0)
-            //     {
-            //         auto val = mat.extractElement(row, 0);
-            //         if (val == zero)
-            //             ostr << " ";
-            //         else
-            //             ostr << val;
-            //     }
-
-            //     for (IndexType col = 1; col < cols; ++col)
-            //     {
-            //         auto val = mat.extractElement(row, col);
-            //         if (val == zero)
-            //             ostr << ",  ";
-            //         else
-            //             ostr << ", " << val;
-            //     }
-            //     ostr << ((row == rows - 1) ? "]]\n" : "]\n");
-            // }
         }
 
     } //backend
 }
 
+#if 0
+
 //****************************************************************************
 
-namespace graphblas
+namespace XXXgraphblas
 {
     namespace backend_template_library = std;
 
@@ -272,5 +247,6 @@ namespace graphblas
 
 } //backend
 } // graphblas
+#endif
 
 #endif // GB_SEQUENTIAL_UTILITY_HPP

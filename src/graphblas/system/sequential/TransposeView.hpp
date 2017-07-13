@@ -247,12 +247,13 @@ namespace GraphBLAS
     } //backend
 } // GraphBLAS
 
+#if 0
 
 //****************************************************************************
 /// @deprecated
 //****************************************************************************
 
-namespace graphblas
+namespace XXXgraphblas
 {
 namespace backend
 {
@@ -464,6 +465,6 @@ namespace backend
 
 } //backend
 } // graphblas
-
+#endif
 
 #endif // GB_SEQUENTIAL_TRANSPOSE_VIEW_HPP

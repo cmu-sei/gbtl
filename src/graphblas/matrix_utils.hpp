@@ -25,31 +25,9 @@
 #include __GB_SYSTEM_UTILITY_HEADER
 #undef __GB_SYSTEM_UTILITY_HEADER
 
-namespace GraphBLAS
-{
-
-    /**
-     *  @brief Output the matrix in array form.  Mainly for debugging
-     *         small matrices.
-     *
-     *  @param[in] ostr  The output stream to send the contents
-     *  @param[in] mat   The matrix to output
-     *  @param[in] label Optional label to output first.
-     */
-    template <typename MatrixT>
-    void print_matrix(std::ostream &ostr, MatrixT const &mat,
-                      std::string const &label = "")
-    {
-        // The new backend doesn't have get_zero.   Should we have it???
-        // ostr << label << ": zero = " << mat.m_mat.get_zero() << std::endl;
-        ostr << label << " (" << mat.nrows() << "x" << mat.ncols() << ")" << std::endl;
-        backend::pretty_print_matrix(ostr, mat.m_mat);
-    }
-}
-
 //****************************************************************************
 
-namespace graphblas
+namespace XXXgraphblas
 {
 
     /**

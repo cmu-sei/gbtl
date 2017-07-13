@@ -18,7 +18,7 @@
 #include <cstddef>
 #include <graphblas/detail/config.hpp>
 #include <graphblas/utility.hpp>
-#include <graphblas/View.hpp>
+//#include <graphblas/View.hpp>
 
 // Include vector definitions from the appropriate backend.
 #define __GB_SYSTEM_VECTOR_HEADER <graphblas/system/__GB_SYSTEM_ROOT/Vector.hpp>
@@ -550,7 +550,28 @@ namespace GraphBLAS
                                                   OtherTagsT...>> complement(
             Vector<OtherScalarT, OtherTagsT...> const &mask);
 
+        // .... ADD OTHER OPERATIONS AS FRIENDS AS THEY ARE IMPLEMENTED .....
+
     private:
         BackendType m_vec;
     };
-} // end namespace graphblas
+
+    /**
+     *  @brief Output the vector in array form.  Mainly for debugging
+     *         small vectors.
+     *
+     *  @param[in] ostr  The output stream to send the contents
+     *  @param[in] vec   The vector to output
+     *  @param[in] label Optional label to output first.
+     */
+    template <typename VectorT>
+    void print_vector(std::ostream      &ostr,
+                      VectorT const     &vec,
+                      std::string const &label = "")
+    {
+        // The new backend doesn't have get_zero.   Should we have it???
+        // ostr << label << ": zero = " << vec.m_vec.get_zero() << std::endl;
+        ostr << label << ":" << std::endl;
+        vec.printInfo(ostr);
+    }
+} // end namespace GraphBLAS

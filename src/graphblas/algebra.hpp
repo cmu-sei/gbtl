@@ -106,13 +106,6 @@ namespace GraphBLAS
     // The Binary Operators
     //****************************************************************************
 
-    struct NoAccumulate
-    {
-        // It doens't really matter what the type is, it never gets executed.
-        typedef bool result_type;
-        inline bool operator()(bool lhs, bool rhs) { return true; }
-    };
-
     template <typename D1 = bool, typename D2 = D1, typename D3 = D1>
     struct LogicalOr
     {
@@ -330,7 +323,7 @@ namespace GraphBLAS
 } // GraphBLAS
 
 
-
+#if 0
 //****************************************************************************
 // The following is deprecated
 //****************************************************************************
@@ -342,7 +335,7 @@ namespace GraphBLAS
  *        "plus", and "times" are globally?
  */
 
-namespace graphblas
+namespace XXXgraphblas
 {
     namespace math
     {
@@ -1248,6 +1241,6 @@ namespace graphblas
         return MultiplicativeMonoidFromSemiring<SemiringT>(sr);
     }
 } // graphblas
-
+#endif
 
 #endif // GB_ALGEBRA_HPP

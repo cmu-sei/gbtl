@@ -21,11 +21,12 @@
 #include <cstddef>
 #include <vector>
 
-#include <graphblas/accum.hpp>
+//#include <graphblas/accum.hpp>
 #include <graphblas/algebra.hpp>
-#include <graphblas/View.hpp>
+//#include <graphblas/View.hpp>
+#include <graphblas/TransposeView.hpp>
 #include <graphblas/ComplementView.hpp>
-#include <graphblas/utility.hpp>
+//#include <graphblas/utility.hpp>
 
 #include <graphblas/Matrix.hpp>
 #include <graphblas/Vector.hpp>
@@ -41,9 +42,9 @@
 #undef __GB_SYSTEM_HEADER
 
 /// @todo deprecated
-#define __GB_SYSTEM_HEADER <graphblas/system/__GB_SYSTEM_ROOT/NegateView.hpp>
-#include __GB_SYSTEM_HEADER
-#undef __GB_SYSTEM_HEADER
+//#define __GB_SYSTEM_HEADER <graphblas/system/__GB_SYSTEM_ROOT/NegateView.hpp>
+//#include __GB_SYSTEM_HEADER
+//#undef __GB_SYSTEM_HEADER
 
 #define __GB_SYSTEM_HEADER <graphblas/system/__GB_SYSTEM_ROOT/operations.hpp>
 #include __GB_SYSTEM_HEADER
@@ -56,9 +57,9 @@
 
 namespace GraphBLAS
 {
-    //****************************************************************************
+    //************************************************************************
     // mxm, vxm, mxv
-    //****************************************************************************
+    //************************************************************************
 
     template<typename CMatrixT,
              typename MaskT,
@@ -639,12 +640,14 @@ namespace GraphBLAS
 } // GraphBLAS
 
 
+#if 0
+
 //****************************************************************************
 // The following signatures (and namespace) are deprecated
 //****************************************************************************
 
 /// @deprecated
-namespace graphblas
+namespace XXXgraphblas
 {
     /**
      * @brief Perform an element wise binary operation that can be optimized
@@ -1442,9 +1445,11 @@ namespace graphblas
     }
 } // graphblas
 
-#include <graphblas/detail/config.hpp>
 //#define __GB_SYSTEM_OPERATIONS_HEADER <graphblas/system/__GB_SYSTEM_ROOT/operations.hpp>
 //#include __GB_SYSTEM_OPERATIONS_HEADER
 //#undef __GB_SYSTEM_OPERATIONS_HEADER
 
+#endif
+
+#include <graphblas/detail/config.hpp>
 #endif

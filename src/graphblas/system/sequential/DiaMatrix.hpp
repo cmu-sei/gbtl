@@ -31,7 +31,7 @@
 
 #include <graphblas/system/sequential/RowView.hpp>
 
-namespace graphblas
+namespace XXXgraphblas
 {
     /**
      * @brief Class representing a diagonal sparse matrix.

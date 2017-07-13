@@ -28,7 +28,6 @@
 #include <iterator>
 #include <iostream>
 #include <graphblas/types.hpp>
-#include <graphblas/accum.hpp>
 #include <graphblas/algebra.hpp>
 
 #include "sparse_helpers.hpp"

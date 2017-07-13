@@ -141,11 +141,13 @@ namespace GraphBLAS
     }//end detail
 }
 
+#if 0
+
 //****************************************************************************
 // Deprecated
 //****************************************************************************
 
-namespace graphblas
+namespace XXXgraphblas
 {
     namespace detail
     {
@@ -224,3 +226,4 @@ namespace graphblas
         };
     }//end detail
 }
+#endif

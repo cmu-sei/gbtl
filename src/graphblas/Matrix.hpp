@@ -21,7 +21,7 @@
 #include <graphblas/utility.hpp>
 //#include <graphblas/TransposeView.hpp>
 //#include <graphblas/ComplementView.hpp>
-#include <graphblas/View.hpp> // deprecated
+//#include <graphblas/View.hpp> // deprecated
 
 // Include matrix definitions from the appropriate backend.
 #define __GB_SYSTEM_MATRIX_HEADER <graphblas/system/__GB_SYSTEM_ROOT/Matrix.hpp>
@@ -490,7 +490,7 @@ namespace GraphBLAS
     };
 
     //**************************************************************************
-    // @todo We should move this to a different file (types.hpp or graphblas.hpp?)
+    // GrB_NULL mask: should be GrB_FULL
     class NoMask
     {
     public:
@@ -500,7 +500,6 @@ namespace GraphBLAS
         backend::NoMask m_mat;  // can be const?
         backend::NoMask m_vec;
     };
-
 
     //**************************************************************************
     // Currently these won't work because of include order.
@@ -550,13 +549,37 @@ namespace GraphBLAS
     {
         // No op
     };
+
+    /**
+     *  @brief Output the matrix in array form.  Mainly for debugging
+     *         small matrices.
+     *
+     *  @param[in] ostr  The output stream to send the contents
+     *  @param[in] mat   The matrix to output
+     *  @param[in] label Optional label to output first.
+     */
+    template <typename MatrixT>
+    void print_matrix(std::ostream      &ostr,
+                      MatrixT const     &mat,
+                      std::string const &label = "")
+    {
+        // The new backend doesn't have get_zero.   Should we have it???
+        // ostr << label << ": zero = " << mat.m_mat.get_zero() << std::endl;
+        ostr << label << " (" << mat.nrows() << "x" << mat.ncols() << ")"
+             << std::endl;
+        backend::pretty_print_matrix(ostr, mat.m_mat);
+    }
 } // end namespace GraphBLAS
+
+
+#if 0
+
 
 //****************************************************************************
 // The deprecated namespace -- scroll down for the new namespace object
 //****************************************************************************
 
-namespace graphblas
+namespace XXXgraphblas
 {
 
     //************************************************************************
@@ -1010,3 +1033,4 @@ namespace graphblas
     };
 
 } // end namespace graphblas
+#endif

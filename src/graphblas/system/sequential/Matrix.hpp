@@ -16,7 +16,6 @@
 #pragma once
 
 #include <cstddef>
-#include <graphblas/system/sequential/LilMatrix.hpp>
 #include <graphblas/system/sequential/LilSparseMatrix.hpp>
 
 //****************************************************************************
@@ -98,9 +97,12 @@ namespace GraphBLAS
     }
 }
 
+#if 0
+
 //****************************************************************************
 /// @deprecated
 //****************************************************************************
+#include <graphblas/system/sequential/LilMatrix.hpp>
 
 namespace graphblas
 {
@@ -148,3 +150,4 @@ namespace graphblas
         };
     }
 }
+#endif

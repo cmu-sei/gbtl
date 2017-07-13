@@ -21,27 +21,6 @@
 #include <vector>
 #include <string>
 
-namespace graphblas
-{
-    //************************************************************************
-    class DimensionException : public std::exception
-    {
-        public:
-            DimensionException(std::string const &msg):
-                m_message(msg) {}
-            DimensionException(){}
-
-
-        private:
-            const char* what() const throw()
-            {
-                return ("DimensionException: " + m_message).c_str();
-            }
-
-            std::string m_message;
-    };
-} // graphblas
-
 namespace GraphBLAS
 {
     //************************************************************************

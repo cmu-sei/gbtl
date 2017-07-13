@@ -27,94 +27,217 @@
 
 #include <graphblas/graphblas.hpp>
 #include <graphblas/Matrix.hpp>
-#include <graphblas/utility.hpp>
+//#include <graphblas/utility.hpp>
 
+//****************************************************************************
+namespace
+{
+    //************************************************************************
+    // convert each stored entry in a matrix to its 1-based column index
+    template <typename MatrixT>
+    void col_index_of_1based(MatrixT &mat)
+    {
+        using T = typename MatrixT::ScalarType;
+
+        GraphBLAS::IndexArrayType i, j, v;
+        for (GraphBLAS::IndexType ix = 0; ix < mat.ncols(); ++ix)
+        {
+            i.push_back(ix);
+            j.push_back(ix);
+            v.push_back(ix + 1);
+        }
+
+        MatrixT identity_ramp(mat.ncols(), mat.ncols());
+
+        identity_ramp.build(i,j,v);
+
+        GraphBLAS::mxm(mat,
+                       GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                       GraphBLAS::MinSelect2ndSemiring<T>(),
+                       mat, identity_ramp, true);
+    }
+
+    //************************************************************************
+    //convert each stored entry of a vector to its 1-based index
+    template <typename VectorT>
+    void index_of_1based(VectorT &vec)
+    {
+        using T = typename VectorT::ScalarType;
+
+        GraphBLAS::IndexArrayType i, j, v;
+        for (GraphBLAS::IndexType ix = 0; ix < vec.size(); ++ix)
+        {
+            i.push_back(ix);
+            j.push_back(ix);
+            v.push_back(ix + 1);
+        }
+
+        GraphBLAS::Matrix<T> identity_ramp(vec.size(), vec.size());
+
+        identity_ramp.build(i,j,v);
+
+        GraphBLAS::vxm(vec,
+                       GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                       GraphBLAS::MinSelect2ndSemiring<T>(),
+                       vec, identity_ramp, true);
+    }
+
+    //************************************************************************
+    //does arithmetic operation by n value
+    template <typename ConstT, typename BinaryOp>
+    struct BinaryOp_Bind2nd
+    {
+        ConstT n;
+        BinaryOp op;
+        typedef typename BinaryOp::result_type result_type;
+
+        BinaryOp_Bind2nd(ConstT const &value,
+                         BinaryOp      operation = BinaryOp() ) :
+            n(value),
+            op(operation)
+        {}
+
+        result_type operator()(result_type const &value)
+        {
+            return op(value, n);
+        }
+    };
+}
+
+//****************************************************************************
 namespace algorithms
 {
     //************************************************************************
     /**
-     * @brief Perform a breadth first search (BFS) traversal on the given graph.
+     * @brief Perform a single breadth first search (BFS) traversal on the
+     *        given graph.
      *
      * @param[in]  graph        N x N adjacency matrix of the graph on which to
      *                          perform a BFS. (NOT the transpose).  The value
-     *                          1 should indicate an edge, and max<T> is the
-     *                          structural zero.
+     *                          1 should indicate an edge.
+     * @param[in]  wavefront    N-vector, initial wavefront/root to use in the
+     *                          calculation. It should have a
+     *                          single value set to '1' corresponding to the
+     *                          root.
+     * @param[out] parent_list  The list of parents for each traversal (row)
+     *                          specified in the roots array.
+     */
+    template <typename MatrixT,
+              typename WavefrontVectorT,
+              typename ParentListVectorT>
+    void bfs(MatrixT const          &graph,
+             WavefrontVectorT        wavefront,   // copy is intentional
+             ParentListVectorT      &parent_list)
+    {
+        using T = typename MatrixT::ScalarType;
+
+        // Set the roots parents to themselves using one-based indices because
+        // the mask is sensitive to stored zeros.
+        parent_list = wavefront;
+        index_of_1based(parent_list);
+
+        while (wavefront.nvals() > 0)
+        {
+            // convert all stored values to their 1-based column index
+            index_of_1based(wavefront);
+
+            // Select1st because we are left multiplying wavefront rows
+            // Masking out the parent list ensures wavefront values do not
+            // overlap values already stored in the parent list
+            GraphBLAS::vxm(wavefront,
+                           GraphBLAS::complement(parent_list),
+                           GraphBLAS::NoAccumulate(),
+                           GraphBLAS::MinSelect1stSemiring<T>(),
+                           wavefront, graph, true);
+
+            // We don't need to mask here since we did it in mxm.
+            // Merges new parents in current wavefront with existing parents
+            // parent_list<!parent_list,merge> += wavefront
+            GraphBLAS::apply(parent_list,
+                             GraphBLAS::NoMask(),
+                             GraphBLAS::Plus<T>(),
+                             GraphBLAS::Identity<T>(),
+                             wavefront,
+                             false);
+        }
+
+        // Restore zero-based indices by subtracting 1 from all stored values
+        BinaryOp_Bind2nd<unsigned int,
+                         GraphBLAS::Minus<unsigned int>> subtract_1(1);
+
+        GraphBLAS::apply(parent_list,
+                         GraphBLAS::NoMask(),
+                         GraphBLAS::NoAccumulate(),
+                         subtract_1,
+                         parent_list,
+                         true);
+    }
+
+    //************************************************************************
+    /**
+     * @brief Perform a set of breadth first search (BFS) traversals on the
+     *        given graph.
+     *
+     * @param[in]  graph        N x N adjacency matrix of the graph on which to
+     *                          perform a BFS. (NOT the transpose).  The value
+     *                          1 should indicate an edge,
      * @param[in]  wavefronts   R x N, initial wavefront(s)/root(s) to use in the
      *                          calculation. Each row (1) corresponds to a
      *                          different BFS traversal and (2) should have a
      *                          single value set to '1' corresponding to the
-     *                          root. The structural zero is <T>::max().
+     *                          root.
      * @param[out] parent_list  The list of parents for each traversal (row)
      *                          specified in the roots array.
      */
     template <typename MatrixT,
               typename WavefrontMatrixT,
               typename ParentListMatrixT>
-    void bfs(MatrixT const          &graph,
-             WavefrontMatrixT        wavefronts,   // copy is intentional
-             ParentListMatrixT      &parent_list)
+    void bfs_batch(MatrixT const          &graph,
+                   WavefrontMatrixT        wavefronts,   // copy is intentional
+                   ParentListMatrixT      &parent_list)
     {
         using T = typename MatrixT::ScalarType;
 
-        graphblas::IndexType rows, cols;
-        wavefronts.get_shape(rows, cols);
-
-        auto wf_zero = wavefronts.get_zero();
-        auto pl_zero = parent_list.get_zero();
-
-        WavefrontMatrixT next_wavefronts(rows, cols, wf_zero);
-        WavefrontMatrixT next_wavefronts_not_zeros(rows, cols, wf_zero);
-
-        ParentListMatrixT parent_list_zeros(rows, cols, pl_zero);
-
-        // Set the roots parents to themselves.
+        // Set the roots parents to themselves using one-based indices because
+        // the mask is sensitive to stored zeros.
         parent_list = wavefronts;
-        graphblas::col_index_of(parent_list);
-        while (wavefronts.get_nnz() > 0)
+        col_index_of_1based(parent_list);
+
+        while (wavefronts.nvals() > 0)
         {
-            // convert all stored values to their column index
-            graphblas::col_index_of(wavefronts);
+            // convert all stored values to their 1-based column index
+            col_index_of_1based(wavefronts);
 
             // Select1st because we are left multiplying wavefront rows
-            graphblas::mxm(wavefronts, graph, next_wavefronts,
-                           graphblas::MinSelect1stSemiring<T>());
+            // Masking out the parent list ensures wavefronts values do not
+            // overlap values already stored in the parent list
+            GraphBLAS::mxm(wavefronts,
+                           GraphBLAS::complement(parent_list),
+                           GraphBLAS::NoAccumulate(),
+                           GraphBLAS::MinSelect1stSemiring<T>(),
+                           wavefronts, graph, true);
 
-            // next_wavefronts_not_zeros = negate(negate(next_wavefronts)
-            graphblas::apply(
-                next_wavefronts,
-                next_wavefronts_not_zeros,
-                graphblas::math::IsNotStructuralZero<
-                    graphblas::MinSelect1stSemiring<T> >());
-
-            // parent_list_zeros = negate(parent_list)
-            // We should use Negate of parent_list so that we do not have
-            // to materialize the parent_list_zeros matrix (dense at first)
-            graphblas::apply(
-                parent_list,
-                parent_list_zeros,
-                graphblas::math::IsStructuralZero<
-                    graphblas::MinSelect1stSemiring<T> >());
-
-            // wavefronts = next_wavefronts_not_zeros .* parent_list_zeros
-            graphblas::ewisemult(
-                next_wavefronts_not_zeros,
-                parent_list_zeros,
-                wavefronts,
-                graphblas::math::AnnihilatorTimes<
-                    graphblas::MinSelect1stSemiring<T> >());
-
-            // parent_list += wavefronts .* next_wavefronts
-            graphblas::ewisemult(
-                wavefronts,
-                next_wavefronts,
-                parent_list,
-                graphblas::math::AnnihilatorTimes<
-                    graphblas::MinSelect1stSemiring<T> >(),
-                graphblas::math::Accum<
-                    T,
-                    graphblas::math::AnnihilatorPlus<
-                        graphblas::MinSelect1stSemiring<T> > >());
+            // We don't need to mask here since we did it in mxm.
+            // Merges new parents in current wavefront with existing parents
+            // parent_list<!parent_list,merge> += wavefronts
+            GraphBLAS::apply(parent_list,
+                             GraphBLAS::NoMask(),
+                             GraphBLAS::Plus<T>(),
+                             GraphBLAS::Identity<T>(),
+                             wavefronts,
+                             false);
         }
+
+        // Restore zero-based indices by subtracting 1 from all stored values
+        BinaryOp_Bind2nd<unsigned int,
+                         GraphBLAS::Minus<unsigned int>> subtract_1(1);
+
+        GraphBLAS::apply(parent_list,
+                         GraphBLAS::NoMask(),
+                         GraphBLAS::NoAccumulate(),
+                         subtract_1,
+                         parent_list,
+                         true);
     }
 
     //************************************************************************
@@ -133,44 +256,56 @@ namespace algorithms
               typename WavefrontMatrixT,
               typename LevelListMatrixT>
     void bfs_level(MatrixT const     &graph,
-                   WavefrontMatrixT   wavefront, //row vector, copy made
+                   WavefrontMatrixT   wavefront, //row vectors, copy made
                    LevelListMatrixT  &levels)
     {
         using T = typename MatrixT::ScalarType;
 
-        /// @todo Assert graph is square/have a compatible shape with wavefront?
-        // graph.get_shape(rows, cols);
+        /// @todo Assert graph is square
+        /// @todo Assert graph has a compatible shape with wavefront?
 
-        graphblas::IndexType rows, cols;
-        wavefront.get_shape(rows, cols);
-
-        WavefrontMatrixT not_visited(rows, cols);
+        GraphBLAS::IndexType rows(wavefront.nrows());
+        GraphBLAS::IndexType cols(wavefront.ncols());
 
         unsigned int depth = 0;
 
-        while (wavefront.get_nnz() > 0)
+        while (wavefront.nvals() > 0)
         {
             // Increment the level
             ++depth;
 
             // Apply the level to all newly visited nodes
-            graphblas::arithmetic_n<unsigned int,
-                                    graphblas::math::Times<unsigned int> >
+            BinaryOp_Bind2nd<unsigned int,
+                             GraphBLAS::Times<unsigned int> >
                     apply_depth(depth);
 
-            graphblas::apply(wavefront, levels,
+            GraphBLAS::apply(levels,
+                             GraphBLAS::NoMask(),
+                             GraphBLAS::Plus<unsigned int>(),
                              apply_depth,
-                             graphblas::math::Accum<unsigned int>());
+                             wavefront,
+                             true);
 
-            graphblas::mxm(wavefront, graph, wavefront,
-                           graphblas::IntLogicalSemiring<unsigned int>());
+            GraphBLAS::mxm(wavefront,
+                           GraphBLAS::NoMask(),
+                           GraphBLAS::NoAccumulate(),
+                           GraphBLAS::LogicalSemiring<unsigned int>(),
+                           wavefront, graph,
+                           true);
 
             // Cull previously visited nodes from the wavefront
             // Replace these lines with the negate(levels) mask
-            graphblas::apply(levels, not_visited,
-                             graphblas::math::IsZero<unsigned int>());
-            graphblas::ewisemult(not_visited, wavefront, wavefront,
-                                 graphblas::math::AndFn<unsigned int>());
+            //GraphBLAS::apply(levels, not_visited,
+            //                 GraphBLAS::math::IsZero<unsigned int>());
+            //GraphBLAS::ewisemult(not_visited, wavefront, wavefront,
+            //                     GraphBLAS::math::AndFn<unsigned int>());
+            GraphBLAS::apply(
+                wavefront,
+                GraphBLAS::complement(levels),
+                GraphBLAS::NoAccumulate(),
+                GraphBLAS::Identity<typename WavefrontMatrixT::ScalarType>(),
+                wavefront,
+                true);
         }
     }
 
@@ -200,36 +335,43 @@ namespace algorithms
         using T = typename MatrixT::ScalarType;
 
         /// Assert graph is square/have a compatible shape with wavefront
-        graphblas::IndexType grows, gcols, rows, cols;
-        graph.get_shape(grows, gcols);
-        wavefront.get_shape(rows, cols);
+        GraphBLAS::IndexType grows(graph.nrows());
+        GraphBLAS::IndexType gcols(graph.ncols());
+
+        GraphBLAS::IndexType rows(wavefront.nrows());
+        GraphBLAS::IndexType cols(wavefront.ncols());
+
         if ((grows != gcols) || (cols != grows))
         {
-            throw graphblas::DimensionException();
+            throw GraphBLAS::DimensionException();
         }
 
-        graphblas::IndexType depth = 0;
-        while (wavefront.get_nnz() > 0)
+        GraphBLAS::IndexType depth = 0;
+        while (wavefront.nvals() > 0)
         {
             // Increment the level
             ++depth;
 
             // Apply the level to all newly visited nodes
-            graphblas::arithmetic_n<graphblas::IndexType,
-                graphblas::math::Times<graphblas::IndexType> >
+            BinaryOp_Bind2nd<GraphBLAS::IndexType,
+                             GraphBLAS::Times<GraphBLAS::IndexType> >
                     apply_depth(depth);
 
-            graphblas::apply(wavefront, levels,
+            GraphBLAS::apply(levels,
+                             GraphBLAS::NoMask(),
+                             GraphBLAS::Plus<unsigned int>(),
                              apply_depth,
-                             graphblas::math::Accum<unsigned int>());
+                             wavefront,
+                             true);
 
             // Advance the wavefront and mask out nodes already assigned levels
-            graphblas::mxmMasked(
-                wavefront, graph, wavefront,
-                graphblas::negate(
-                    levels,
-                    graphblas::ArithmeticSemiring<graphblas::IndexType>()),
-                graphblas::IntLogicalSemiring<graphblas::IndexType>());
+            GraphBLAS::mxm(
+                wavefront,
+                GraphBLAS::complement(levels),
+                GraphBLAS::NoAccumulate(),
+                GraphBLAS::LogicalSemiring<GraphBLAS::IndexType>(),
+                wavefront, graph,
+                true);
         }
     }
 }

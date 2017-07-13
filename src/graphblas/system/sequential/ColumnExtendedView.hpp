@@ -19,7 +19,7 @@
 #include <graphblas/system/sequential/Matrix.hpp>
 #include <graphblas/exceptions.hpp>
 
-namespace graphblas
+namespace XXXgraphblas
 {
     /**
      * @brief View of a singluar expansion of a row vector into a

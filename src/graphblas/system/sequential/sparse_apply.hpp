@@ -28,7 +28,6 @@
 #include <iostream>
 #include <graphblas/types.hpp>
 #include <graphblas/exceptions.hpp>
-#include <graphblas/accum.hpp>
 #include <graphblas/algebra.hpp>
 
 #include "sparse_helpers.hpp"
@@ -115,7 +114,7 @@ namespace GraphBLAS
             typedef typename AMatrixT::ScalarType                   AScalarType;
             typedef std::vector<std::tuple<IndexType,AScalarType> > ARowType;
 
-            typedef CScalarT                               CScalarType;
+            typedef CScalarT                                        CScalarType;
             typedef std::vector<std::tuple<IndexType,CScalarType> > CRowType;
 
             typedef typename UnaryFunctionT::result_type            TScalarType;
@@ -138,7 +137,7 @@ namespace GraphBLAS
             LilSparseMatrix<TScalarType> T(nrows, ncols);
 
             ARowType a_row;
-            CRowType t_row;
+            TRowType t_row;
 
             IndexType a_idx;
             AScalarType a_val;

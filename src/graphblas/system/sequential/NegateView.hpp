@@ -19,7 +19,7 @@
 //#include <graphblas/system/sequential/ColumnView.hpp>
 #include <graphblas/system/sequential/Matrix.hpp>
 
-namespace GraphBLAS
+namespace XXXGraphBLAS
 {
     namespace backend
     {
@@ -290,7 +290,7 @@ namespace GraphBLAS
 //****************************************************************************
 
 
-namespace graphblas
+namespace XXXgraphblas
 {
 namespace backend
 {

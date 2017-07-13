@@ -15,11 +15,10 @@
 #include <iostream>
 
 #include <graphblas/graphblas.hpp>
-#include <graphblas/linalg_utils.hpp>
 #include <algorithms/bfs.hpp>
 
-graphblas::IndexType const num_nodes = 34;
-graphblas::IndexArrayType i = {
+GraphBLAS::IndexType const num_nodes = 34;
+GraphBLAS::IndexArrayType i = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     1,1,1,1,1,1,1,1,1,
     2,2,2,2,2,2,2,2,2,2,
@@ -55,7 +54,7 @@ graphblas::IndexArrayType i = {
     32,32,32,32,32,32,32,32,32,32,32,32,
     33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33};
 
-graphblas::IndexArrayType j = {
+GraphBLAS::IndexArrayType j = {
     1,2,3,4,5,6,7,8,10,11,12,13,19,21,23,31,
     0,2,3,7,13,17,19,21,30,
     0,1,3,7,8,9,13,27,28,32,
@@ -96,46 +95,38 @@ graphblas::IndexArrayType j = {
 int main()
 {
     // TODO Assignment from Initalizer list.
-    graphblas::Matrix<unsigned int, graphblas::DirectedMatrixTag>
-        G_karate(num_nodes, num_nodes);
+    GraphBLAS::Matrix<unsigned int>  G_karate(num_nodes, num_nodes);
     std::vector<unsigned int> weights(i.size(), 1);
 
-    graphblas::buildmatrix(G_karate, i.begin(), j.begin(), weights.begin(), i.size());
+    G_karate.build(i.begin(), j.begin(), weights.begin(), i.size());
 
     // Trying the row vector approach
-    graphblas::Matrix<unsigned int, graphblas::DirectedMatrixTag>
-        root(1, num_nodes);
+    GraphBLAS::Matrix<unsigned int>  root(1, num_nodes);
     // pick an arbitrary root:
-    std::vector<graphblas::IndexType> temp_r(1,0), temp_c(1,30);
-    std::vector<unsigned int> temp_v(1,1);
-    graphblas::buildmatrix(root, temp_r.begin(), temp_c.begin(), temp_v.begin(), 1);
+    root.setElement(0, 30, 1);
 
-    graphblas::Matrix<unsigned int,
-                      graphblas::DirectedMatrixTag> levels1(1,
-                                                           num_nodes);
-    graphblas::Matrix<unsigned int,
-                      graphblas::DirectedMatrixTag> levels(1,
-                                                           num_nodes);
+    GraphBLAS::Matrix<unsigned int> levels1(1, num_nodes);
+    GraphBLAS::Matrix<unsigned int> levels(1, num_nodes);
 
     algorithms::bfs_level(G_karate, root, levels1);
 
 //    std::cout << "Graph: " << std::endl;
-//    graphblas::print_matrix(std::cout, G_karate);
+//    GraphBLAS::print_matrix(std::cout, G_karate);
     std::cout << "bfs_level output" << std::endl;
     std::cout << "root:" << std::endl;
-    graphblas::print_matrix(std::cout, root);
+    GraphBLAS::print_matrix(std::cout, root);
     std::cout << "levels:" << std::endl;
-    graphblas::print_matrix(std::cout, levels1);
+    GraphBLAS::print_matrix(std::cout, levels1);
 
     algorithms::bfs_level_masked(G_karate, root, levels);
 
 //    std::cout << "Graph: " << std::endl;
-//    graphblas::print_matrix(std::cout, G_karate);
+//    GraphBLAS::print_matrix(std::cout, G_karate);
     std::cout << std::endl;
     std::cout << "root:" << std::endl;
-    graphblas::print_matrix(std::cout, root);
+    GraphBLAS::print_matrix(std::cout, root);
     std::cout << "levels:" << std::endl;
-    graphblas::print_matrix(std::cout, levels);
+    GraphBLAS::print_matrix(std::cout, levels);
 
     return 0;
 }

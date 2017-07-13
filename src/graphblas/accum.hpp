@@ -21,7 +21,7 @@
 
 #include <graphblas/algebra.hpp>
 
-namespace graphblas
+namespace XXXgraphblas
 {
     namespace math
     {

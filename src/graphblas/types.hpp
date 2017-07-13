@@ -23,21 +23,26 @@
 #include <exception>
 #include <vector>
 
-namespace graphblas
-{
-    typedef uint64_t IndexType;
-    typedef std::vector<IndexType> IndexArrayType;
-} // graphblas
-
 namespace GraphBLAS
 {
     typedef uint64_t IndexType;
     typedef std::vector<IndexType> IndexArrayType;
 
-    // We just keep an empty one.
+    //**************************************************************************
+    // GrB_ALL: We just keep an empty one.
     extern const IndexArrayType GrB_ALL;
 
-    // Use by GrB_ALL
+    //**************************************************************************
+    // GrB_NULL accum
+    struct NoAccumulate
+    {
+        // It doesn't really matter what the type is, it never gets executed.
+        typedef bool result_type;
+        inline bool operator()(bool lhs, bool rhs) { return true; }
+    };
+
+    //**************************************************************************
+    // Used by GrB_ALL
     // this should go somewhere else.  C++ should have something like this...
     class index_iterator
     {
@@ -80,7 +85,6 @@ namespace GraphBLAS
     private:
         IndexType m_value;
     };
-
 }
 
 #endif // GB_TYPES_HPP

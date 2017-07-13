@@ -18,7 +18,7 @@
 #include <algorithms/bc.hpp>
 #include <graphblas/graphblas.hpp>
 
-using namespace graphblas;
+using namespace GraphBLAS;
 using namespace algorithms;
 
 #define BOOST_TEST_MAIN
@@ -46,18 +46,25 @@ static std::vector<double> bv(br.size(), 1);
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(bc_test_vertex_betweenness_centrality)
 {
+    std::cerr << "test" << std::endl;
     Matrix<double, DirectedMatrixTag> betweenness(8,8);
-    graphblas::buildmatrix(betweenness, br.begin(), bc.begin(), bv.begin(), bv.size());
+    betweenness.build(br.begin(), bc.begin(), bv.begin(), bv.size());
     std::vector<double> result = vertex_betweenness_centrality(betweenness);
     std::vector<double> answer = {0.0, 4.0/3, 4.0/3, 4.0/3, 12.0, 2.5, 2.5, 0.0};
 
-    BOOST_CHECK_EQUAL_COLLECTIONS(result.begin(), result.end(), answer.begin(), answer.end());
+    BOOST_CHECK_EQUAL(result.size(), answer.size());
+    for (unsigned int ix = 0; ix < result.size(); ++ix)
+        BOOST_CHECK_CLOSE(result[ix], answer[ix], 0.0001);
+
+    /// DEBUG
+    exit(1);
 }
 
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(bc_test_edge_betweenness_centrality)
 {
+    std::cerr << "test" << std::endl;
     Matrix<double, DirectedMatrixTag> betweenness(8,8);
     Matrix<double, DirectedMatrixTag> result(8,8);
     //Matrix<double, DirectedMatrixTag> answer ({{0,  6,  6,  6,  0,  0,  0,  0},
@@ -73,9 +80,9 @@ BOOST_AUTO_TEST_CASE(bc_test_edge_betweenness_centrality)
     std::vector<double> ac={1, 2, 3, 2, 4, 4, 2, 4, 5, 6, 7, 7};
     std::vector<double> av={6,  6,  6,  1, 10, 10,  1, 10, 14, 14,  8,  8};
     Matrix<double, DirectedMatrixTag> answer(8,8);
-    graphblas::buildmatrix(answer, ar.begin(), ac.begin(), av.begin(), av.size());
+    answer.build(ar.begin(), ac.begin(), av.begin(), av.size());
 
-    graphblas::buildmatrix(betweenness, br.begin(), bc.begin(), bv.begin(), bv.size());
+    betweenness.build(br.begin(), bc.begin(), bv.begin(), bv.size());
     result = edge_betweenness_centrality(betweenness);
 
     //std::cout << result << std::endl;
@@ -85,11 +92,12 @@ BOOST_AUTO_TEST_CASE(bc_test_edge_betweenness_centrality)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch)
 {
+    std::cerr << "test" << std::endl;
     Matrix<double, DirectedMatrixTag> betweenness(8,8);
-    graphblas::buildmatrix(betweenness, br.begin(), bc.begin(), bv.begin(), bv.size());
+    betweenness.build(br.begin(), bc.begin(), bv.begin(), bv.size());
 
-    //graphblas::IndexArrayType seed_set={0, 1, 2, 3, 4, 5, 6, 7};
-    graphblas::IndexArrayType seed_set={0};
+    //IndexArrayType seed_set={0, 1, 2, 3, 4, 5, 6, 7};
+    IndexArrayType seed_set={0};
     std::vector<float> answer = {0.0, 4.0/3, 4.0/3, 4.0/3, 3.0, 0.5, 0.5, 0.0};
 
     std::vector<float> result =
@@ -100,7 +108,7 @@ BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch)
         BOOST_CHECK_CLOSE(result[ix], answer[ix], 0.0001);
 
     //==========
-    graphblas::IndexArrayType seed_set3={3};
+    IndexArrayType seed_set3={3};
     std::vector<float> answer3 = {0.0, 0.0, 0.0, 0.0, 3.0, 0.5, 0.5, 0.0};
 
     std::vector<float> result3 =
@@ -111,7 +119,7 @@ BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch)
         BOOST_CHECK_CLOSE(result3[ix], answer3[ix], 0.0001);
 
     //==========
-    graphblas::IndexArrayType seed_set03={0,3};
+    IndexArrayType seed_set03={0,3};
 
     std::vector<float> result03 =
         vertex_betweenness_centrality_batch(betweenness, seed_set03);
@@ -121,7 +129,7 @@ BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch)
         BOOST_CHECK_CLOSE(result03[ix], answer[ix] + answer3[ix], 0.0001);
 
     //==========
-    graphblas::IndexArrayType seed_set_all={0,1,2,3,4,5,6,7};
+    IndexArrayType seed_set_all={0,1,2,3,4,5,6,7};
     std::vector<double> answer_all = {0.0, 4.0/3, 4.0/3, 4.0/3, 12.0, 2.5, 2.5, 0.0};
 
     std::vector<float> result_all =
@@ -136,16 +144,17 @@ BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch_alt)
 {
+    std::cerr << "test" << std::endl;
     // Trying the same graph where each node has self loop.     vvvvvvvvvvvvvvv
     std::vector<double> br1={0, 0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 6,0,1,2,3,4,5,6,7};
     std::vector<double> bc1={1, 2, 3, 2, 4, 4, 2, 4, 5, 6, 7, 7,0,1,2,3,4,5,6,7};
     std::vector<double> bv1(br1.size(), 1);
 
     Matrix<double, DirectedMatrixTag> betweenness(8,8);
-    graphblas::buildmatrix(betweenness, br1.begin(), bc1.begin(), bv1.begin(), bv1.size());
+    betweenness.build(br1.begin(), bc1.begin(), bv1.begin(), bv1.size());
 
-    //graphblas::IndexArrayType seed_set={0, 1, 2, 3, 4, 5, 6, 7};
-    graphblas::IndexArrayType seed_set={0};
+    //IndexArrayType seed_set={0, 1, 2, 3, 4, 5, 6, 7};
+    IndexArrayType seed_set={0};
     std::vector<float> answer = {0.0, 4.0/3, 4.0/3, 4.0/3, 3.0, 0.5, 0.5, 0.0};
     std::cerr << "******************** START ALT ***********************" << std::endl;
     std::vector<float> result =
@@ -156,7 +165,7 @@ BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch_alt)
         BOOST_CHECK_CLOSE(result[ix], answer[ix], 0.0001);
 
     //==========
-    graphblas::IndexArrayType seed_set3={3};
+    IndexArrayType seed_set3={3};
     std::vector<float> answer3 = {0.0, 0.0, 0.0, 0.0, 3.0, 0.5, 0.5, 0.0};
 
     std::vector<float> result3 =
@@ -167,7 +176,7 @@ BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch_alt)
         BOOST_CHECK_CLOSE(result3[ix], answer3[ix], 0.0001);
 
     //==========
-    graphblas::IndexArrayType seed_set03={0,3};
+    IndexArrayType seed_set03={0,3};
 
     std::vector<float> result03 =
         vertex_betweenness_centrality_batch_alt(betweenness, seed_set03);
@@ -177,7 +186,7 @@ BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch_alt)
         BOOST_CHECK_CLOSE(result03[ix], answer[ix] + answer3[ix], 0.0001);
 
     //==========
-    graphblas::IndexArrayType seed_set_all={0,1,2,3,4,5,6,7};
+    IndexArrayType seed_set_all={0,1,2,3,4,5,6,7};
     std::vector<double> answer_all = {0.0, 4.0/3, 4.0/3, 4.0/3, 12.0, 2.5, 2.5, 0.0};
 
     std::vector<float> result_all =
@@ -193,11 +202,12 @@ BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch_alt)
 //BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch_alt_trans)
 BOOST_AUTO_TEST_CASE(bc_batch_alt_trans)
 {
+    std::cerr << "test" << std::endl;
     Matrix<double, DirectedMatrixTag> betweenness(8,8);
-    graphblas::buildmatrix(betweenness, br.begin(), bc.begin(), bv.begin(), bv.size());
+    betweenness.build(br.begin(), bc.begin(), bv.begin(), bv.size());
 
-    //graphblas::IndexArrayType seed_set={0, 1, 2, 3, 4, 5, 6, 7};
-    graphblas::IndexArrayType seed_set={0};
+    //IndexArrayType seed_set={0, 1, 2, 3, 4, 5, 6, 7};
+    IndexArrayType seed_set={0};
     std::vector<float> answer = {0.0, 4.0/3, 4.0/3, 4.0/3, 3.0, 0.5, 0.5, 0.0};
     std::cerr << "******************** START ALT TRANS ***********************" << std::endl;
     std::vector<float> result =
@@ -208,7 +218,7 @@ BOOST_AUTO_TEST_CASE(bc_batch_alt_trans)
         BOOST_CHECK_CLOSE(result[ix], answer[ix], 0.0001);
 
     //==========
-    graphblas::IndexArrayType seed_set3={3};
+    IndexArrayType seed_set3={3};
     std::vector<float> answer3 = {0.0, 0.0, 0.0, 0.0, 3.0, 0.5, 0.5, 0.0};
 
     std::vector<float> result3 =
@@ -219,7 +229,7 @@ BOOST_AUTO_TEST_CASE(bc_batch_alt_trans)
         BOOST_CHECK_CLOSE(result3[ix], answer3[ix], 0.0001);
 
     //==========
-    graphblas::IndexArrayType seed_set03={0,3};
+    IndexArrayType seed_set03={0,3};
 
     std::vector<float> result03 =
         vertex_betweenness_centrality_batch_alt_trans(betweenness, seed_set03);
@@ -229,7 +239,7 @@ BOOST_AUTO_TEST_CASE(bc_batch_alt_trans)
         BOOST_CHECK_CLOSE(result03[ix], answer[ix] + answer3[ix], 0.0001);
 
     //==========
-    graphblas::IndexArrayType seed_set_all={0,1,2,3,4,5,6,7};
+    IndexArrayType seed_set_all={0,1,2,3,4,5,6,7};
     std::vector<double> answer_all = {0.0, 4.0/3, 4.0/3, 4.0/3, 12.0, 2.5, 2.5, 0.0};
 
     std::vector<float> result_all =
@@ -247,13 +257,14 @@ BOOST_AUTO_TEST_CASE(bc_batch_alt_trans)
 //BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch_alt_trans_v2)
 BOOST_AUTO_TEST_CASE(bc_test_batch_alt_trans_v2)
 {
+    std::cerr << "test" << std::endl;
 //    Matrix<double, DirectedMatrixTag> betweenness(8,8);
-//    graphblas::buildmatrix(betweenness, br.begin(), bc.begin(), bv.begin(), bv.size());
-    GraphBLAS::Matrix<double, DirectedMatrixTag> betweenness(8,8);
+//    betweenness.build(br.begin(), bc.begin(), bv.begin(), bv.size());
+    Matrix<double, DirectedMatrixTag> betweenness(8,8);
     betweenness.build(br.begin(), bc.begin(), bv.begin(), bv.size());
 
-    //graphblas::IndexArrayType seed_set={0, 1, 2, 3, 4, 5, 6, 7};
-    GraphBLAS::IndexArrayType seed_set={0};
+    //IndexArrayType seed_set={0, 1, 2, 3, 4, 5, 6, 7};
+    IndexArrayType seed_set={0};
     std::vector<float> answer = {0.0, 4.0/3, 4.0/3, 4.0/3, 3.0, 0.5, 0.5, 0.0};
     std::cerr << "******************** START ALT ++ V2 ++ TRANS ***********************" << std::endl;
     std::vector<float> result = vertex_betweenness_centrality_batch_alt_trans_v2(
@@ -264,7 +275,7 @@ BOOST_AUTO_TEST_CASE(bc_test_batch_alt_trans_v2)
         BOOST_CHECK_CLOSE(result[ix], answer[ix], 0.0001);
 
     //==========
-    // graphblas::IndexArrayType seed_set3={3};
+    // IndexArrayType seed_set3={3};
     // std::vector<float> answer3 = {0.0, 0.0, 0.0, 0.0, 3.0, 0.5, 0.5, 0.0};
 
     // std::vector<float> result3 =
@@ -275,7 +286,7 @@ BOOST_AUTO_TEST_CASE(bc_test_batch_alt_trans_v2)
     //     BOOST_CHECK_CLOSE(result3[ix], answer3[ix], 0.0001);
 
     // //==========
-    // graphblas::IndexArrayType seed_set03={0,3};
+    // IndexArrayType seed_set03={0,3};
 
     // std::vector<float> result03 =
     //     vertex_betweenness_centrality_batch_alt_trans_v2(betweenness, seed_set03);
@@ -285,7 +296,7 @@ BOOST_AUTO_TEST_CASE(bc_test_batch_alt_trans_v2)
     //     BOOST_CHECK_CLOSE(result03[ix], answer[ix] + answer3[ix], 0.0001);
 
     // //==========
-    // graphblas::IndexArrayType seed_set_all={0,1,2,3,4,5,6,7};
+    // IndexArrayType seed_set_all={0,1,2,3,4,5,6,7};
     // std::vector<double> answer_all = {0.0, 4.0/3, 4.0/3, 4.0/3, 12.0, 2.5, 2.5, 0.0};
 
     // std::vector<float> result_all =

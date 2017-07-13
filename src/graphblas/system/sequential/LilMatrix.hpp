@@ -30,7 +30,7 @@
 
 //#include <graphblas/system/sequential/RowView.hpp>
 
-namespace graphblas
+namespace XXXgraphblas
 {
     /**
      * @brief Class representing a list of lists format sparse matrix.

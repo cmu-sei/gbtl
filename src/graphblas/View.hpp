@@ -36,7 +36,7 @@
 //****************************************************************************
 
 /// @deprecated
-namespace graphblas
+namespace XXXgraphblas
 {
     template<typename MatrixT>
     class TransposeView;

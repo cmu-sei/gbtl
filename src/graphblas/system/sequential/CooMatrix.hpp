@@ -23,7 +23,7 @@
 
 //#include <graphblas/system/sequential/RowView.hpp>
 
-namespace graphblas
+namespace XXXgraphblas
 {
     /**
      * @brief Class representing a coordinate format sparse matrix.

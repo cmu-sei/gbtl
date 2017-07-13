@@ -28,7 +28,6 @@
 #include <iterator>
 #include <iostream>
 #include <string>
-#include <graphblas/accum.hpp>
 #include <graphblas/algebra.hpp>
 
 //****************************************************************************

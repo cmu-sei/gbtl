@@ -28,11 +28,11 @@
 #include <vector>
 #include <iterator>
 
-#include <graphblas/accum.hpp>
+//#include <graphblas/accum.hpp>
 #include <graphblas/algebra.hpp>
 #include <graphblas/system/sequential/TransposeView.hpp>
 #include <graphblas/system/sequential/ComplementView.hpp>
-#include <graphblas/system/sequential/NegateView.hpp>  // deprecated
+//#include <graphblas/system/sequential/NegateView.hpp>  // deprecated
 
 // Add individual operation files here
 #include <graphblas/system/sequential/sparse_mxm.hpp>
@@ -79,11 +79,14 @@ namespace GraphBLAS
     } // backend
 } // GraphBLAS
 
+
+#if 0
+
 //****************************************************************************
 /// @deprecated
 //****************************************************************************
 
-namespace graphblas
+namespace XYXgraphblas
 {
 namespace backend{
     /**
@@ -926,5 +929,6 @@ namespace backend{
     }
 }//backend
 } // graphblas
+#endif
 
 #endif // GB_SEQUENTIAL_OPERATIONS_HPP

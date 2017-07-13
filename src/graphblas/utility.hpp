@@ -20,7 +20,9 @@
 #include __GB_SYSTEM_UTILITY_HEADER
 #undef __GB_SYSTEM_UTILITY_HEADER
 
-namespace graphblas
+#if 0
+
+namespace XXXgraphblas
 {
     struct LessThanOperator
     {
@@ -230,3 +232,4 @@ __device__ __host__
     };
 
 }
+#endif

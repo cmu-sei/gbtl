@@ -37,7 +37,7 @@ namespace GraphBLAS
 /// @deprecated
 //****************************************************************************
 
-namespace graphblas
+namespace XXXgraphblas
 {
     // The default is sparse directed graph, so we need tags that modify that
     struct DirectedMatrixTag {};

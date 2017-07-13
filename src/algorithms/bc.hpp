@@ -20,12 +20,11 @@
 
 #define GB_DEBUG
 #include <graphblas/graphblas.hpp>
-#include <graphblas/linalg_utils.hpp>
+//#include <graphblas/linalg_utils.hpp>
 
 
 namespace algorithms
 {
-
     /**
      * @brief Compute the vertex betweenness centrality of all vertices in the
      *        given graph from a batch of src vertices.
@@ -56,7 +55,7 @@ namespace algorithms
         if (nsver == 0)
         {
 
-            throw graphblas::DimensionException();
+            throw GraphBLAS::DimensionException();
         }
 
         std::cerr << "batch size (p): " << nsver << std::endl;
@@ -116,8 +115,8 @@ namespace algorithms
         // Placeholders for GraphBLAS operators
 
         // @todo:  Is this right?
-        GraphBLAS::PlusMonoid<int32_t>            Int32Add;
-        GraphBLAS::ArithmeticSemiring<int32_t>    Int32AddMul;
+        //GraphBLAS::PlusMonoid<int32_t>            Int32Add;
+        //GraphBLAS::ArithmeticSemiring<int32_t>    Int32AddMul;
 
         // This is defined in the new space
         //GraphBLAS::math::Identity<bool, int32_t>  GrB_IDENTITY_BOOL;
@@ -146,7 +145,7 @@ namespace algorithms
             GraphBLAS::eWiseAdd(NumSP,
                                 GraphBLAS::NoMask(),
                                 GraphBLAS::NoAccumulate(),
-                                GraphBLAS::PlusMonoid<int32_t>(),
+                                GraphBLAS::Plus<int32_t>(),
                                 NumSP,
                                 Frontier);
             GraphBLAS::print_matrix(std::cerr, NumSP, "NumSP");
@@ -155,7 +154,7 @@ namespace algorithms
             GraphBLAS::mxm(Frontier,                             // C
                            GraphBLAS::complement(NumSP),         // M
                            GraphBLAS::NoAccumulate(),            // accum
-                           Int32AddMul,                          // op
+                           GraphBLAS::ArithmeticSemiring<int32_t>(), // op
                            Frontier,                             // A
                            A,                                    // B
                            true);                                // replace
@@ -218,7 +217,7 @@ namespace algorithms
                            GraphBLAS::ArithmeticSemiring<float>(),   // op
                            W,                                        // A
                            GraphBLAS::transpose(A),                  // B
-                           true);                                   // replace
+                           true);                                    // replace
             GraphBLAS::print_matrix(std::cerr, W, "W<Sigma[i-1]> = A +.* W");
 
             // U += W .* P
@@ -235,6 +234,11 @@ namespace algorithms
 
             --d;
         }
+        for (auto it = Sigmas.begin(); it != Sigmas.end(); ++it)
+        {
+            delete *it;
+        }
+
         std::cerr << "======= END BACKPROP phase =======" << std::endl;
         GraphBLAS::print_matrix(std::cerr, BCu, "BC Updates");
 
@@ -253,18 +257,14 @@ namespace algorithms
                           GraphBLAS::transpose(BCu),       // A, transpose make col reduce
                           true);                           // replace
 
-        // @todo:  Add a print vector...
-        std::cerr << "RESULT: " << result << std::endl;
-        //GraphBLAS::print_matrix(std::cerr, result, "RESULT");
-        std::vector<float> betweenness_centrality;
+        GraphBLAS::print_vector(std::cerr, result, "RESULT");
+        std::vector<float> betweenness_centrality(n, 0.f);
         for (GraphBLAS::IndexType k = 0; k < n; k++)
         {
-            betweenness_centrality.push_back(result.extractElement(k));
-        }
-
-        for (auto it = Sigmas.begin(); it != Sigmas.end(); ++it)
-        {
-            delete *it;
+            if (result.hasElement(k))
+            {
+                betweenness_centrality[k] = result.extractElement(k);
+            }
         }
 
         return betweenness_centrality;
@@ -292,86 +292,96 @@ namespace algorithms
     std::vector<float>
     vertex_betweenness_centrality_batch_alt_trans(
         MatrixT const                   &A,
-        graphblas::IndexArrayType const &s)
+        GraphBLAS::IndexArrayType const &s)
     {
-        graphblas::print_matrix(std::cerr, A, "Graph");
+        GraphBLAS::print_matrix(std::cerr, A, "Graph");
 
         // nsver = |s| (partition size)
-        graphblas::IndexType nsver(s.size());
+        GraphBLAS::IndexType nsver(s.size());
         if (nsver == 0)
         {
-            throw graphblas::DimensionException();
+            throw GraphBLAS::DimensionException();
         }
 
         std::cerr << "batch size (p): " << nsver << std::endl;
 
         using T = typename MatrixT::ScalarType;
-        graphblas::IndexType m, n;
 
         // GrB_Matrix_nrows(&n, A)
-        A.get_shape(m, n);
+        GraphBLAS::IndexType m(A.nrows());
+        GraphBLAS::IndexType n(A.ncols());
         if (m != n)
         {
-            throw graphblas::DimensionException();
+            throw GraphBLAS::DimensionException();
         }
 
         std::cerr << "num nodes (n): " << n << std::endl;
 
         // Placeholder for GrB_ALL where dimension size is nsver=|s|
-        std::vector<graphblas::IndexType> GrB_ALL_nsver;     // fill with sequence
+        std::vector<GraphBLAS::IndexType> GrB_ALL_nsver;     // fill with sequence
         GrB_ALL_nsver.reserve(nsver);
-        for (graphblas::IndexType idx = 0; idx < nsver; ++idx)
+        for (GraphBLAS::IndexType idx = 0; idx < nsver; ++idx)
         {
             GrB_ALL_nsver.push_back(idx); // tilln
         }
 
         // Placeholder for GrB_ALL where dimension is n
-        std::vector<graphblas::IndexType> GrB_ALL_n;     // fill with sequence
+        std::vector<GraphBLAS::IndexType> GrB_ALL_n;     // fill with sequence
         GrB_ALL_n.reserve(n);
-        for (graphblas::IndexType idx = 0; idx < n; ++idx)
+        for (GraphBLAS::IndexType idx = 0; idx < n; ++idx)
         {
             GrB_ALL_n.push_back(idx);
         }
 
         // The current frontier for all BFS's (from all roots)
         // It is initialized to the out neighbors of the specified roots
-        graphblas::Matrix<int32_t> Frontier(nsver, n);     // F is nsver x n (rows)
-        graphblas::extract(A, s, GrB_ALL_n, Frontier);
-        graphblas::print_matrix(std::cerr, Frontier, "initial frontier");
+        GraphBLAS::Matrix<int32_t> Frontier(nsver, n);     // F is nsver x n (rows)
+        //GraphBLAS::extract(A, s, GrB_ALL_n, Frontier);
+        GraphBLAS::extract(Frontier,
+                           GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                           A, s, GrB_ALL_n);
+        GraphBLAS::print_matrix(std::cerr, Frontier, "initial frontier");
 
         // NumSP holds number of shortest paths to a vertex from a given root
         // NumSP is initialized with the each starting root in 's':
         // NumSP[i,s[i]] = 1 where 0 <= i < nsver; implied zero elsewhere
-        graphblas::Matrix<int32_t> NumSP(nsver, n);
-        graphblas::buildmatrix(NumSP, GrB_ALL_nsver, s,
-                               std::vector<int32_t>(nsver, 1));
-        graphblas::print_matrix(std::cerr, NumSP, "initial NumSP");
+        GraphBLAS::Matrix<int32_t> NumSP(nsver, n);
+        NumSP.build(GrB_ALL_nsver, s, std::vector<int32_t>(nsver, 1));
+        GraphBLAS::print_matrix(std::cerr, NumSP, "initial NumSP");
 
         // ==================== BFS phase ====================
         // Placeholders for GraphBLAS operators
-        graphblas::PlusMonoid<int32_t>            Int32Add;
-        graphblas::ArithmeticSemiring<int32_t>    Int32AddMul;
-        graphblas::math::Identity<bool, int32_t>  GrB_IDENTITY_BOOL;
+        //GraphBLAS::PlusMonoid<int32_t>            Int32Add;
+        //GraphBLAS::ArithmeticSemiring<int32_t>    Int32AddMul;
 
-        std::vector<graphblas::Matrix<bool>* > Sigmas;
+        std::vector<GraphBLAS::Matrix<bool>* > Sigmas;
         std::cerr << "======= START BFS phase ======" << std::endl;
         int32_t d = 0;
-        while (Frontier.get_nnz() > 0)
+        while (Frontier.nvals() > 0)
         {
             std::cerr << "------- BFS iteration " << d << " --------" << std::endl;
 
-            Sigmas.push_back(new graphblas::Matrix<bool>(nsver, n, false));
+            Sigmas.push_back(new GraphBLAS::Matrix<bool>(nsver, n));
             // Sigma[d] = (bool)F
-            graphblas::apply(Frontier, *(Sigmas[d]), GrB_IDENTITY_BOOL);
-            graphblas::print_matrix(std::cerr, *Sigmas[d], "Sigma[d] = (bool)Frontier");
+            GraphBLAS::apply(*(Sigmas[d]),
+                             GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                             GraphBLAS::Identity<int32_t, bool>(),
+                             Frontier);
+            GraphBLAS::print_matrix(std::cerr, *Sigmas[d],
+                                    "Sigma[d] = (bool)Frontier");
             // P = F + P
-            graphblas::ewiseadd(NumSP, Frontier, NumSP, Int32Add);
-            graphblas::print_matrix(std::cerr, NumSP, "NumSP");
+            GraphBLAS::eWiseAdd(NumSP,
+                                GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                                GraphBLAS::Plus<int32_t>(),
+                                NumSP, Frontier);
+            GraphBLAS::print_matrix(std::cerr, NumSP, "NumSP");
             // F<!P> = F +.* A
-            graphblas::mxmMasked(Frontier, A, Frontier,
-                                 graphblas::negate(NumSP, Int32AddMul),
-                                 Int32AddMul);
-            graphblas::print_matrix(std::cerr, Frontier, "New frontier");
+            GraphBLAS::mxm(Frontier,
+                           GraphBLAS::complement(NumSP),
+                           GraphBLAS::NoAccumulate(),
+                           GraphBLAS::ArithmeticSemiring<int32_t>(),
+                           Frontier, A, true); // Replace?
+            GraphBLAS::print_matrix(std::cerr, Frontier, "New frontier");
 
             ++d;
         }
@@ -379,21 +389,33 @@ namespace algorithms
 
         // ================== backprop phase ==================
         // Placeholders for GraphBLAS operators
-        graphblas::PlusMonoid<float>           FP32Add;
-        graphblas::TimesMonoid<float>          FP32Mul;
-        graphblas::ArithmeticSemiring<float>   FP32AddMul;
-        graphblas::math::Inverse<float>        GrB_MINV_FP32;
+        //GraphBLAS::PlusMonoid<float>            FP32Add;
+        //GraphBLAS::TimesMonoid<float>           FP32Mul;
+        //GraphBLAS::ArithmeticSemiring<float>    FP32AddMul;
+        //GraphBLAS::MultiplicativeInverse<float> GrB_MINV_FP32;
 
-        graphblas::Matrix<float> NspInv(nsver, n);
-        graphblas::apply(NumSP, NspInv, GrB_MINV_FP32);
-        graphblas::print_matrix(std::cerr, NspInv, "(1 ./ P)");
+        GraphBLAS::Matrix<float> NspInv(nsver, n);
+        GraphBLAS::apply(NspInv,
+                         GraphBLAS::NoMask(),
+                         GraphBLAS::NoAccumulate(),
+                         GraphBLAS::MultiplicativeInverse<float>(),
+                         NumSP,
+                         true);
+        GraphBLAS::print_matrix(std::cerr, NspInv, "(1 ./ P)");
 
-        graphblas::Matrix<float> BCu = graphblas::fill<graphblas::Matrix<float>>
-            (1.0f, nsver, n);
+        //GraphBLAS::Matrix<float> BCu = GraphBLAS::fill<GraphBLAS::Matrix<float>>
+        //    (1.0f, nsver, n);
+        GraphBLAS::Matrix<float> BCu(nsver, n);
+        GraphBLAS::assign_constant(BCu,
+                                   GraphBLAS::NoMask(),
+                                   GraphBLAS::NoAccumulate(),
+                                   1.0f,
+                                   GraphBLAS::GrB_ALL,
+                                   GraphBLAS::GrB_ALL, true);
 
-        graphblas::print_matrix(std::cerr, BCu, "U");
+        GraphBLAS::print_matrix(std::cerr, BCu, "U");
 
-        graphblas::Matrix<float> W(nsver, n);
+        GraphBLAS::Matrix<float> W(nsver, n);
 
         std::cerr << "======= BEGIN BACKPROP phase =======" << std::endl;
         for (int32_t i = d - 1; i > 0; --i)
@@ -401,47 +423,82 @@ namespace algorithms
             std::cerr << "------- BACKPROP iteration " << i << " --------" << std::endl;
 
             // W<Sigma[i]> = (1 ./ P) .* U
-            bool const GrB_REPLACE = true;
-            graphblas::ewisemultMasked(NspInv, BCu, W, *Sigmas[i], GrB_REPLACE, FP32Mul);
-            graphblas::print_matrix(std::cerr, W, "W<Sigma[i]> = (1 ./ P) .* U");
+            //bool const GrB_REPLACE = true;
+            //GraphBLAS::ewisemultMasked(NspInv, BCu, W, *Sigmas[i],
+            //                           GrB_REPLACE, FP32Mul);
+            GraphBLAS::eWiseMult(W,
+                                 *Sigmas[i], GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::Times<float>(),
+                                 NspInv, BCu,
+                                 true);
+
+            GraphBLAS::print_matrix(std::cerr, W, "W<Sigma[i]> = (1 ./ P) .* U");
 
             // W<Sigma[i-1]> = A +.* W
-            graphblas::mxmMasked(W, graphblas::transpose(A), W,
-                                 *Sigmas[i-1], FP32AddMul);
-            graphblas::print_matrix(std::cerr, W, "W<Sigma[i-1]> = A +.* W");
+            //GraphBLAS::mxmMasked(W, GraphBLAS::transpose(A), W,
+            //                     *Sigmas[i-1], FP32AddMul);
+            GraphBLAS::mxm(W,
+                           *Sigmas[i-1], GraphBLAS::NoAccumulate(),
+                           GraphBLAS::ArithmeticSemiring<float>(),
+                           W, GraphBLAS::transpose(A),
+                           true);
+
+            GraphBLAS::print_matrix(std::cerr, W, "W<Sigma[i-1]> = A +.* W");
 
             // U += W .* P
-            graphblas::ewisemult(W, NumSP, BCu, FP32Mul,
-                                 graphblas::math::Accum<float>());
-            graphblas::print_matrix(std::cerr, BCu, "U += W .* P");
+            //GraphBLAS::ewisemult(W, NumSP, BCu, FP32Mul,
+            //                     GraphBLAS::math::Accum<float>());
+            GraphBLAS::eWiseMult(BCu,
+                                 GraphBLAS::NoMask(), GraphBLAS::Plus<float>(),
+                                 GraphBLAS::Times<float>(),
+                                 W, NumSP); // Replace == false?
+
+            GraphBLAS::print_matrix(std::cerr, BCu, "U += W .* P");
 
             --d;
-        }
-        std::cerr << "======= END BACKPROP phase =======" << std::endl;
-        graphblas::print_matrix(std::cerr, BCu, "BC Updates");
-
-        graphblas::Matrix<float> result =
-            graphblas::fill<graphblas::Matrix<float>>(nsver * -1.0F, 1, n);
-        graphblas::col_reduce(BCu, result, FP32Add,
-                              graphblas::math::Accum<float>());
-        graphblas::print_matrix(std::cerr, result, "RESULT");
-
-        std::vector<float> betweenness_centrality;
-        for (graphblas::IndexType k = 0; k < n;k++)
-        {
-            betweenness_centrality.push_back(result.extractElement(0, k));
         }
 
         for (auto it = Sigmas.begin(); it != Sigmas.end(); ++it)
         {
             delete *it;
         }
+        std::cerr << "======= END BACKPROP phase =======" << std::endl;
+        GraphBLAS::print_matrix(std::cerr, BCu, "BC Updates");
+
+        //GraphBLAS::Matrix<float> result =
+        //    GraphBLAS::fill<GraphBLAS::Matrix<float>>(nsver * -1.0F, 1, n);
+        GraphBLAS::Vector<float> result(n);
+        GraphBLAS::assign_constant(result,
+                                   GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                                   -1.0f*nsver,
+                                   GraphBLAS::GrB_ALL);
+
+        //GraphBLAS::col_reduce(BCu, result, FP32Add,
+        //                      GraphBLAS::math::Accum<float>());
+        GraphBLAS::reduce(result,
+                          GraphBLAS::NoMask(), GraphBLAS::Plus<float>(),
+                          GraphBLAS::Plus<float>(),
+                          GraphBLAS::transpose(BCu)); // replace = dont care
+        GraphBLAS::print_vector(std::cerr, result, "RESULT");
+
+        std::vector<float> betweenness_centrality(n, 0.f);
+        for (GraphBLAS::IndexType k = 0; k < n;k++)
+        {
+            if (result.hasElement(k))
+            {
+                betweenness_centrality[k] = result.extractElement(k);
+            }
+        }
+
         return betweenness_centrality;
     }
 
     /**
      * @brief Compute the vertex betweenness centrality of all vertices in the
      *        given graph from a batch of src vertices.
+     *
+     * @note "alt" in function name means first iteration of BFS is replaced with
+     *       a call to extract.
      *
      * The betweenness centrality of a vertex measures the number of
      * times a vertex acts as a bridge along the shortest path between two
@@ -460,87 +517,108 @@ namespace algorithms
     std::vector<float>
     vertex_betweenness_centrality_batch_alt(
         MatrixT const                   &A,
-        graphblas::IndexArrayType const &s)
+        GraphBLAS::IndexArrayType const &s)
     {
-        graphblas::print_matrix(std::cerr, A, "Graph");
+        GraphBLAS::print_matrix(std::cerr, A, "Graph");
 
         // nsver = |s| (partition size)
-        graphblas::IndexType nsver(s.size());
+        GraphBLAS::IndexType nsver(s.size());
         if (nsver == 0)
         {
-            throw graphblas::DimensionException();
+            throw GraphBLAS::DimensionException();
         }
 
         std::cerr << "batch size (p): " << nsver << std::endl;
 
         using T = typename MatrixT::ScalarType;
-        graphblas::IndexType m, n;
+
+        GraphBLAS::IndexType m(A.nrows());
+        GraphBLAS::IndexType n(A.ncols());
 
         // GrB_Matrix_nrows(&n, A)
-        A.get_shape(m, n);
+        //A.get_shape(m, n);
         if (m != n)
         {
-            throw graphblas::DimensionException();
+            throw GraphBLAS::DimensionException();
         }
 
         std::cerr << "num nodes (n): " << n << std::endl;
 
         // Placeholder for GrB_ALL where dimension size is nsver=|s|
-        std::vector<graphblas::IndexType> GrB_ALL_nsver;     // fill with sequence
+        std::vector<GraphBLAS::IndexType> GrB_ALL_nsver;     // fill with sequence
         GrB_ALL_nsver.reserve(nsver);
-        for (graphblas::IndexType idx = 0; idx < nsver; ++idx)
+        for (GraphBLAS::IndexType idx = 0; idx < nsver; ++idx)
         {
             GrB_ALL_nsver.push_back(idx); // tilln
         }
 
         // Placeholder for GrB_ALL where dimension is n
-        std::vector<graphblas::IndexType> GrB_ALL_n;     // fill with sequence
+        std::vector<GraphBLAS::IndexType> GrB_ALL_n;     // fill with sequence
         GrB_ALL_n.reserve(n);
-        for (graphblas::IndexType idx = 0; idx < n; ++idx)
+        for (GraphBLAS::IndexType idx = 0; idx < n; ++idx)
         {
             GrB_ALL_n.push_back(idx);
         }
 
         // The current frontier for all BFS's (from all roots)
         // It is initialized to the out neighbors of the specified roots
-        graphblas::Matrix<int32_t> Frontier(n, nsver);         // F is n x nsver
-        graphblas::extract(graphblas::transpose(A), GrB_ALL_n, s, Frontier);
-        graphblas::print_matrix(std::cerr, Frontier, "initial frontier");
+        GraphBLAS::Matrix<int32_t> Frontier(n, nsver);         // F is n x nsver
+        //GraphBLAS::extract(GraphBLAS::transpose(A), GrB_ALL_n, s, Frontier);
+        GraphBLAS::extract(Frontier,
+                           GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                           GraphBLAS::transpose(A),
+                           GrB_ALL_n, s);
+        GraphBLAS::print_matrix(std::cerr, Frontier, "initial frontier");
 
         // NumSP holds number of shortest paths to a vertex from a given root
         // NumSP is initialized with the each starting root in 's':
         // NumSP[s[i],i] = 1 where 0 <= i < nsver; implied zero elsewhere
-        graphblas::Matrix<int32_t> NumSP(n, nsver);
-        graphblas::buildmatrix(NumSP, s, GrB_ALL_nsver,
-                               std::vector<int32_t>(nsver, 1));
-        graphblas::print_matrix(std::cerr, NumSP, "initial NumSP");
+        GraphBLAS::Matrix<int32_t> NumSP(n, nsver);
+        NumSP.build(s, GrB_ALL_nsver, std::vector<int32_t>(nsver, 1));
+        GraphBLAS::print_matrix(std::cerr, NumSP, "initial NumSP");
 
         // ==================== BFS phase ====================
         // Placeholders for GraphBLAS operators
-        graphblas::PlusMonoid<int32_t>            Int32Add;
-        graphblas::ArithmeticSemiring<int32_t>    Int32AddMul;
-        graphblas::math::Identity<bool, int32_t>  GrB_IDENTITY_BOOL;
+        //GraphBLAS::PlusMonoid<int32_t>            Int32Add;
+        //GraphBLAS::ArithmeticSemiring<int32_t>    Int32AddMul;
 
-        std::vector<graphblas::Matrix<bool>* > Sigmas;
+        std::vector<GraphBLAS::Matrix<bool>* > Sigmas;
         std::cerr << "======= START BFS phase ======" << std::endl;
         int32_t d = 0;
-        while (Frontier.get_nnz() > 0)
+        while (Frontier.nvals() > 0)
         {
             std::cerr << "------- BFS iteration " << d << " --------" << std::endl;
 
-            Sigmas.push_back(new graphblas::Matrix<bool>(n, nsver, false));
-            graphblas::apply(Frontier, *(Sigmas[d]),
-                             GrB_IDENTITY_BOOL);  // Sigma[d] = (bool)F
-            graphblas::print_matrix(std::cerr, *Sigmas[d], "Sigma[d] = (bool)Frontier");
+            Sigmas.push_back(new GraphBLAS::Matrix<bool>(n, nsver));
+            // Sigma[d] = (bool)F
+            //GraphBLAS::apply(*(Sigmas[d]),
+            //                 GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+            //                 IDENTITY_INT2BOOL, Frontier);
+            GraphBLAS::apply(*(Sigmas[d]),
+                             GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                             GraphBLAS::Identity<int32_t, bool>(),
+                             Frontier);
+            GraphBLAS::print_matrix(std::cerr, *Sigmas[d], "Sigma[d] = (bool)Frontier");
 
-            graphblas::ewiseadd(NumSP, Frontier, NumSP, Int32Add);   // P = F + P
-            graphblas::print_matrix(std::cerr, NumSP, "NumSP");
+            // P = F + P
+            //GraphBLAS::ewiseadd(NumSP, Frontier, NumSP, Int32Add);
+            GraphBLAS::eWiseAdd(NumSP,
+                                GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                                GraphBLAS::Plus<int32_t>(),
+                                NumSP, Frontier);
+            GraphBLAS::print_matrix(std::cerr, NumSP, "NumSP");
 
-            graphblas::mxmMasked(graphblas::transpose(A), Frontier,  // F<!P> = A' +.* F
-                                 Frontier,
-                                 graphblas::negate(NumSP, Int32AddMul),
-                                 Int32AddMul);
-            graphblas::print_matrix(std::cerr, Frontier, "New frontier");
+            // F<!P> = A' +.* F
+            //GraphBLAS::mxmMasked(GraphBLAS::transpose(A), Frontier,
+            //                     Frontier,
+            //                     GraphBLAS::negate(NumSP, Int32AddMul),
+            //                     Int32AddMul);
+            GraphBLAS::mxm(Frontier,
+                           GraphBLAS::complement(NumSP),
+                           GraphBLAS::NoAccumulate(),
+                           GraphBLAS::ArithmeticSemiring<int32_t>(),
+                           GraphBLAS::transpose(A), Frontier, true); // Replace?
+            GraphBLAS::print_matrix(std::cerr, Frontier, "New frontier");
 
             ++d;
         }
@@ -548,21 +626,34 @@ namespace algorithms
 
         // ================== backprop phase ==================
         // Placeholders for GraphBLAS operators
-        graphblas::PlusMonoid<float>           FP32Add;
-        graphblas::TimesMonoid<float>          FP32Mul;
-        graphblas::ArithmeticSemiring<float>   FP32AddMul;
-        graphblas::math::Inverse<float>        GrB_MINV_FP32;
+        //GraphBLAS::PlusMonoid<float>           FP32Add;
+        //GraphBLAS::TimesMonoid<float>          FP32Mul;
+        //GraphBLAS::ArithmeticSemiring<float>   FP32AddMul;
+        //GraphBLAS::math::Inverse<float>        GrB_MINV_FP32;
 
-        graphblas::Matrix<float> NspInv(n, nsver);
-        graphblas::apply(NumSP, NspInv, GrB_MINV_FP32);
-        graphblas::print_matrix(std::cerr, NspInv, "(1 ./ P)");
+        GraphBLAS::Matrix<float> NspInv(n, nsver);
+        //GraphBLAS::apply(NumSP, NspInv, GrB_MINV_FP32);
+        GraphBLAS::apply(NspInv,
+                         GraphBLAS::NoMask(),
+                         GraphBLAS::NoAccumulate(),
+                         GraphBLAS::MultiplicativeInverse<float>(),
+                         NumSP,
+                         true);
+        GraphBLAS::print_matrix(std::cerr, NspInv, "(1 ./ P)");
 
-        graphblas::Matrix<float> BCu = graphblas::fill<graphblas::Matrix<float>>
-            (1.0f, n, nsver);
+        //GraphBLAS::Matrix<float> BCu = GraphBLAS::fill<GraphBLAS::Matrix<float>>
+        //    (1.0f, n, nsver);
+        GraphBLAS::Matrix<float> BCu(n, nsver);
+        GraphBLAS::assign_constant(BCu,
+                                   GraphBLAS::NoMask(),
+                                   GraphBLAS::NoAccumulate(),
+                                   1.0f,
+                                   GraphBLAS::GrB_ALL,
+                                   GraphBLAS::GrB_ALL, true);
 
-        graphblas::print_matrix(std::cerr, BCu, "U");
+        GraphBLAS::print_matrix(std::cerr, BCu, "U");
 
-        graphblas::Matrix<float> W(n, nsver);
+        GraphBLAS::Matrix<float> W(n, nsver);
 
         std::cerr << "======= BEGIN BACKPROP phase =======" << std::endl;
         for (int32_t i = d - 1; i > 0; --i)
@@ -570,39 +661,69 @@ namespace algorithms
             std::cerr << "------- BACKPROP iteration " << i << " --------" << std::endl;
 
             // W<Sigma[i]> = (1 ./ P) .* U
-            bool const GrB_REPLACE = true;
-            graphblas::ewisemultMasked(NspInv, BCu, W, *Sigmas[i], GrB_REPLACE, FP32Mul);
-            graphblas::print_matrix(std::cerr, W, "W<Sigma[i]> = (1 ./ P) .* U");
+            //bool const GrB_REPLACE = true;
+            //GraphBLAS::ewisemultMasked(NspInv, BCu, W, *Sigmas[i],
+            //                          GrB_REPLACE, FP32Mul);
+            GraphBLAS::eWiseMult(W,
+                                 *Sigmas[i], GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::Times<float>(),
+                                 NspInv, BCu,
+                                 true);
+            GraphBLAS::print_matrix(std::cerr, W, "W<Sigma[i]> = (1 ./ P) .* U");
 
             // W<Sigma[i-1]> = A +.* W
-            graphblas::mxmMasked(A, W, W, *Sigmas[i-1], FP32AddMul);
-            graphblas::print_matrix(std::cerr, W, "W<Sigma[i-1]> = A +.* W");
+            //GraphBLAS::mxmMasked(A, W, W, *Sigmas[i-1], FP32AddMul);
+            GraphBLAS::mxm(W,
+                           *Sigmas[i-1], GraphBLAS::NoAccumulate(),
+                           GraphBLAS::ArithmeticSemiring<float>(),
+                           A, W,
+                           true);
+            GraphBLAS::print_matrix(std::cerr, W, "W<Sigma[i-1]> = A +.* W");
 
             // U += W .* P
-            graphblas::ewisemult(W, NumSP, BCu, FP32Mul,
-                                 graphblas::math::Accum<float>());
-            graphblas::print_matrix(std::cerr, BCu, "U += W .* P");
+            //GraphBLAS::ewisemult(W, NumSP, BCu, FP32Mul,
+            //                     GraphBLAS::math::Accum<float>());
+            GraphBLAS::eWiseMult(BCu,
+                                 GraphBLAS::NoMask(), GraphBLAS::Plus<float>(),
+                                 GraphBLAS::Times<float>(),
+                                 W, NumSP); // Replace == false?
+            GraphBLAS::print_matrix(std::cerr, BCu, "U += W .* P");
 
             --d;
-        }
-        std::cerr << "======= END BACKPROP phase =======" << std::endl;
-        graphblas::print_matrix(std::cerr, BCu, "BC Updates");
-        graphblas::Matrix<float> result =
-            graphblas::fill<graphblas::Matrix<float>>(nsver * -1.0F, n, 1);
-        graphblas::row_reduce(BCu, result, FP32Add,
-                              graphblas::math::Accum<float>());
-        graphblas::print_matrix(std::cerr, result, "RESULT");
-
-        std::vector<float> betweenness_centrality;
-        for (graphblas::IndexType k = 0; k < n;k++)
-        {
-            betweenness_centrality.push_back(result.extractElement(k, 0));
         }
 
         for (auto it = Sigmas.begin(); it != Sigmas.end(); ++it)
         {
             delete *it;
         }
+        std::cerr << "======= END BACKPROP phase =======" << std::endl;
+        GraphBLAS::print_matrix(std::cerr, BCu, "BC Updates");
+
+        //GraphBLAS::Matrix<float> result =
+        //    GraphBLAS::fill<GraphBLAS::Matrix<float>>(nsver * -1.0F, n, 1);
+        GraphBLAS::Vector<float> result(n);
+        GraphBLAS::assign_constant(result,
+                                   GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                                   -1.0f*nsver,
+                                   GraphBLAS::GrB_ALL);
+
+        //GraphBLAS::row_reduce(BCu, result, FP32Add,
+        //                      GraphBLAS::math::Accum<float>());
+        GraphBLAS::reduce(result,
+                          GraphBLAS::NoMask(), GraphBLAS::Plus<float>(),
+                          GraphBLAS::Plus<float>(),
+                          BCu); // replace = dont care
+        GraphBLAS::print_vector(std::cerr, result, "RESULT");
+
+        std::vector<float> betweenness_centrality(n, 0.f);
+        for (GraphBLAS::IndexType k = 0; k < n;k++)
+        {
+            if (result.hasElement(k))
+            {
+                betweenness_centrality[k] = result.extractElement(k);
+            }
+        }
+
         return betweenness_centrality;
     }
 
@@ -627,43 +748,42 @@ namespace algorithms
     std::vector<float>
     vertex_betweenness_centrality_batch(
         MatrixT const                   &A,
-        graphblas::IndexArrayType const &s)
+        GraphBLAS::IndexArrayType const &s)
     {
-        graphblas::print_matrix(std::cerr, A, "Graph");
+        GraphBLAS::print_matrix(std::cerr, A, "Graph");
 
         // nsver = |s| (partition size)
-        graphblas::IndexType nsver(s.size());
+        GraphBLAS::IndexType nsver(s.size());
         if (nsver == 0)
         {
-            throw graphblas::DimensionException();
+            throw GraphBLAS::DimensionException();
         }
 
         std::cerr << "batch size (p): " << nsver << std::endl;
 
         using T = typename MatrixT::ScalarType;
-        graphblas::IndexType m, n;
 
-        // GrB_Matrix_nrows(&n, A)
-        A.get_shape(m, n);
+        GraphBLAS::IndexType m(A.nrows());
+        GraphBLAS::IndexType n(A.ncols());
         if (m != n)
         {
-            throw graphblas::DimensionException();
+            throw GraphBLAS::DimensionException();
         }
 
         std::cerr << "num nodes (n): " << n << std::endl;
 
         // Placeholder for GrB_ALL where dimension size is nsver=|s|
-        std::vector<graphblas::IndexType> GrB_ALL_nsver;     // fill with sequence
+        std::vector<GraphBLAS::IndexType> GrB_ALL_nsver;     // fill with sequence
         GrB_ALL_nsver.reserve(nsver);
-        for (graphblas::IndexType idx = 0; idx < nsver; ++idx)
+        for (GraphBLAS::IndexType idx = 0; idx < nsver; ++idx)
         {
             GrB_ALL_nsver.push_back(idx); // tilln
         }
 
         // Placeholder for GrB_ALL where dimension is n
-        std::vector<graphblas::IndexType> GrB_ALL_n;     // fill with sequence
+        std::vector<GraphBLAS::IndexType> GrB_ALL_n;     // fill with sequence
         GrB_ALL_n.reserve(n);
-        for (graphblas::IndexType idx = 0; idx < n; ++idx)
+        for (GraphBLAS::IndexType idx = 0; idx < n; ++idx)
         {
             GrB_ALL_n.push_back(idx);
         }
@@ -671,41 +791,55 @@ namespace algorithms
         // The current frontier for all BFS's (from all roots)
         // It is initialized with the each starting root in 's':
         // F[s[i],i] = 1 where 0 <= i < nsver; implied zero elsewhere
-        graphblas::Matrix<int32_t> Frontier(n, nsver);         // F is n x nsver
-        graphblas::buildmatrix(Frontier, s, GrB_ALL_nsver,
-                               std::vector<int32_t>(nsver, 1));
-        graphblas::print_matrix(std::cerr, Frontier, "initial frontier");
+        GraphBLAS::Matrix<int32_t> Frontier(n, nsver);         // F is n x nsver
+        Frontier.build(s, GrB_ALL_nsver, std::vector<int32_t>(nsver, 1));
+        GraphBLAS::print_matrix(std::cerr, Frontier, "initial frontier");
 
         // NumSP holds number of shortest paths to a vertex from a given root
         // NumSP is initialized to a copy of Frontier. NumSP is n x nsver
-        graphblas::Matrix<int32_t> NumSP(Frontier);
-        graphblas::print_matrix(std::cerr, NumSP, "initial NumSP");
+        GraphBLAS::Matrix<int32_t> NumSP(Frontier);
+        GraphBLAS::print_matrix(std::cerr, NumSP, "initial NumSP");
 
         // ==================== BFS phase ====================
         // Placeholders for GraphBLAS operators
-        graphblas::PlusMonoid<int32_t>            Int32Add;
-        graphblas::ArithmeticSemiring<int32_t>    Int32AddMul;
-        graphblas::math::Identity<bool, int32_t>  GrB_IDENTITY_BOOL;
+        //GraphBLAS::PlusMonoid<int32_t>            Int32Add;
+        //GraphBLAS::ArithmeticSemiring<int32_t>    Int32AddMul;
+        //GraphBLAS::math::Identity<bool, int32_t>  GrB_IDENTITY_BOOL;
 
-        std::vector<graphblas::Matrix<bool>* > Sigmas;
+        std::vector<GraphBLAS::Matrix<bool>* > Sigmas;
         std::cerr << "======= START BFS phase ======" << std::endl;
         int32_t d = 0;
-        while (Frontier.get_nnz() > 0)
+        while (Frontier.nvals() > 0)
         {
             std::cerr << "------- BFS iteration " << d << " --------" << std::endl;
-            graphblas::mxmMasked(graphblas::transpose(A), Frontier,  // F<!P> = A' +.* F
-                                 Frontier,
-                                 graphblas::negate(NumSP, Int32AddMul),
-                                 Int32AddMul);
-            graphblas::print_matrix(std::cerr, Frontier, "New frontier");
+            // F<!P> = A' +.* F
+            //GraphBLAS::mxmMasked(GraphBLAS::transpose(A), Frontier,
+            //                     Frontier,
+            //                     GraphBLAS::negate(NumSP, Int32AddMul),
+            //                     Int32AddMul);
+            GraphBLAS::mxm(Frontier,
+                           GraphBLAS::complement(NumSP), GraphBLAS::NoAccumulate(),
+                           GraphBLAS::ArithmeticSemiring<int32_t>(),
+                           GraphBLAS::transpose(A), Frontier, true);
+            GraphBLAS::print_matrix(std::cerr, Frontier, "New frontier");
 
-            Sigmas.push_back(new graphblas::Matrix<bool>(n, nsver, false));
-            graphblas::apply(Frontier, *(Sigmas[d]),
-                             GrB_IDENTITY_BOOL);  // Sigma[d] = (bool)F
-            graphblas::print_matrix(std::cerr, *Sigmas[d], "Sigma[d] = (bool)Frontier");
+            // Sigma[d] = (bool)F
+            Sigmas.push_back(new GraphBLAS::Matrix<bool>(n, nsver));
+            //GraphBLAS::apply(Frontier, *(Sigmas[d]),
+            //                 GrB_IDENTITY_BOOL);
+            GraphBLAS::apply(*(Sigmas[d]),
+                             GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                             GraphBLAS::Identity<int32_t, bool>(),
+                             Frontier);
+            GraphBLAS::print_matrix(std::cerr, *Sigmas[d], "Sigma[d] = (bool)Frontier");
 
-            graphblas::ewiseadd(NumSP, Frontier, NumSP, Int32Add);   // P = F + P
-            graphblas::print_matrix(std::cerr, NumSP, "NumSP");
+            // P = F + P
+            //GraphBLAS::ewiseadd(NumSP, Frontier, NumSP, Int32Add);
+            GraphBLAS::eWiseAdd(NumSP,
+                                GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                                GraphBLAS::Plus<int32_t>(),
+                                NumSP, Frontier);
+            GraphBLAS::print_matrix(std::cerr, NumSP, "NumSP");
 
             ++d;
         }
@@ -713,21 +847,34 @@ namespace algorithms
 
         // ================== backprop phase ==================
         // Placeholders for GraphBLAS operators
-        graphblas::PlusMonoid<float>           FP32Add;
-        graphblas::TimesMonoid<float>          FP32Mul;
-        graphblas::ArithmeticSemiring<float>   FP32AddMul;
-        graphblas::math::Inverse<float>        GrB_MINV_FP32;
+        //GraphBLAS::PlusMonoid<float>           FP32Add;
+        //GraphBLAS::TimesMonoid<float>          FP32Mul;
+        //GraphBLAS::ArithmeticSemiring<float>   FP32AddMul;
+        //GraphBLAS::math::Inverse<float>        GrB_MINV_FP32;
 
-        graphblas::Matrix<float> NspInv(n, nsver);
-        graphblas::apply(NumSP, NspInv, GrB_MINV_FP32);
-        graphblas::print_matrix(std::cerr, NspInv, "(1 ./ P)");
+        GraphBLAS::Matrix<float> NspInv(n, nsver);
+        //GraphBLAS::apply(NumSP, NspInv, GrB_MINV_FP32);
+        GraphBLAS::apply(NspInv,
+                         GraphBLAS::NoMask(),
+                         GraphBLAS::NoAccumulate(),
+                         GraphBLAS::MultiplicativeInverse<float>(),
+                         NumSP,
+                         true);
+        GraphBLAS::print_matrix(std::cerr, NspInv, "(1 ./ P)");
 
-        graphblas::Matrix<float> BCu = graphblas::fill<graphblas::Matrix<float>>
-            (1.0f, n, nsver);
+        //GraphBLAS::Matrix<float> BCu = GraphBLAS::fill<GraphBLAS::Matrix<float>>
+        //    (1.0f, n, nsver);
+        GraphBLAS::Matrix<float> BCu(n, nsver);
+        GraphBLAS::assign_constant(BCu,
+                                   GraphBLAS::NoMask(),
+                                   GraphBLAS::NoAccumulate(),
+                                   1.0f,
+                                   GraphBLAS::GrB_ALL,
+                                   GraphBLAS::GrB_ALL, true);
 
-        graphblas::print_matrix(std::cerr, BCu, "U");
+        GraphBLAS::print_matrix(std::cerr, BCu, "U");
 
-        graphblas::Matrix<float> W(n, nsver);
+        GraphBLAS::Matrix<float> W(n, nsver);
 
         std::cerr << "======= BEGIN BACKPROP phase =======" << std::endl;
         for (int32_t i = d - 1; i > 0; --i)
@@ -735,40 +882,69 @@ namespace algorithms
             std::cerr << "------- BACKPROP iteration " << i << " --------" << std::endl;
 
             // W<Sigma[i]> = (1 ./ P) .* U
-            bool const GrB_REPLACE = true;
-            graphblas::ewisemultMasked(NspInv, BCu, W, *Sigmas[i], GrB_REPLACE, FP32Mul);
-            graphblas::print_matrix(std::cerr, W, "W<Sigma[i]> = (1 ./ P) .* U");
+            //bool const GrB_REPLACE = true;
+            //GraphBLAS::ewisemultMasked(NspInv, BCu, W, *Sigmas[i],
+            //                           GrB_REPLACE, FP32Mul);
+            GraphBLAS::eWiseMult(W,
+                                 *Sigmas[i], GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::Times<float>(),
+                                 NspInv, BCu,
+                                 true);
+            GraphBLAS::print_matrix(std::cerr, W, "W<Sigma[i]> = (1 ./ P) .* U");
 
             // W<Sigma[i-1]> = A +.* W
-            graphblas::mxmMasked(A, W, W, *Sigmas[i-1], FP32AddMul);
-            graphblas::print_matrix(std::cerr, W, "W<Sigma[i-1]> = A +.* W");
+            //GraphBLAS::mxmMasked(A, W, W, *Sigmas[i-1], FP32AddMul);
+            GraphBLAS::mxm(W,
+                           *Sigmas[i-1], GraphBLAS::NoAccumulate(),
+                           GraphBLAS::ArithmeticSemiring<float>(),
+                           A, W,
+                           true);
+            GraphBLAS::print_matrix(std::cerr, W, "W<Sigma[i-1]> = A +.* W");
 
             // U += W .* P
-            graphblas::ewisemult(W, NumSP, BCu, FP32Mul,
-                                 graphblas::math::Accum<float>());
-            graphblas::print_matrix(std::cerr, BCu, "U += W .* P");
+            //GraphBLAS::ewisemult(W, NumSP, BCu, FP32Mul,
+            //                     GraphBLAS::math::Accum<float>());
+            GraphBLAS::eWiseMult(BCu,
+                                 GraphBLAS::NoMask(), GraphBLAS::Plus<float>(),
+                                 GraphBLAS::Times<float>(),
+                                 W, NumSP); // Replace == false?
+            GraphBLAS::print_matrix(std::cerr, BCu, "U += W .* P");
 
             --d;
-        }
-        std::cerr << "======= END BACKPROP phase =======" << std::endl;
-        graphblas::print_matrix(std::cerr, BCu, "BC Updates");
-
-        graphblas::Matrix<float> result =
-            graphblas::fill<graphblas::Matrix<float>>(nsver * -1.0F, n, 1);
-        graphblas::row_reduce(BCu, result, FP32Add,
-                              graphblas::math::Accum<float>());
-        graphblas::print_matrix(std::cerr, result, "RESULT");
-
-        std::vector<float> betweenness_centrality;
-        for (graphblas::IndexType k = 0; k < n;k++)
-        {
-            betweenness_centrality.push_back(result.extractElement(k, 0));
         }
 
         for (auto it = Sigmas.begin(); it != Sigmas.end(); ++it)
         {
             delete *it;
         }
+        std::cerr << "======= END BACKPROP phase =======" << std::endl;
+        GraphBLAS::print_matrix(std::cerr, BCu, "BC Updates");
+
+        //GraphBLAS::Matrix<float> result =
+        //    GraphBLAS::fill<GraphBLAS::Matrix<float>>(nsver * -1.0F, n, 1);
+        GraphBLAS::Vector<float> result(n);
+        GraphBLAS::assign_constant(result,
+                                   GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                                   -1.0f*nsver,
+                                   GraphBLAS::GrB_ALL);
+
+        //GraphBLAS::row_reduce(BCu, result, FP32Add,
+        //                      GraphBLAS::math::Accum<float>());
+        GraphBLAS::reduce(result,
+                          GraphBLAS::NoMask(), GraphBLAS::Plus<float>(),
+                          GraphBLAS::Plus<float>(),
+                          BCu); // replace = dont care
+        GraphBLAS::print_vector(std::cerr, result, "RESULT");
+
+        std::vector<float> betweenness_centrality(n, 0.f);
+        for (GraphBLAS::IndexType k = 0; k < n;k++)
+        {
+            if (result.hasElement(k))
+            {
+                betweenness_centrality[k] = result.extractElement(k);
+            }
+        }
+
         return betweenness_centrality;
     }
 
@@ -795,137 +971,229 @@ namespace algorithms
     std::vector<double>
     vertex_betweenness_centrality_batch_old(
         MatrixT const                   &graph,
-        graphblas::IndexArrayType const &src_nodes)
+        GraphBLAS::IndexArrayType const &src_nodes)
     {
-        graphblas::print_matrix(std::cerr, graph, "Graph");
+        GraphBLAS::print_matrix(std::cerr, graph, "Graph");
 
         // p = nsver = |src_nodes| (partition size)
-        graphblas::IndexType p(src_nodes.size());
+        GraphBLAS::IndexType p(src_nodes.size());
         if (p == 0)
         {
-            throw graphblas::DimensionException();
+            throw GraphBLAS::DimensionException();
         }
 
         std::cerr << "batch size (p): " << p << std::endl;
 
         using T = typename MatrixT::ScalarType;
-        graphblas::IndexType N, num_cols;
+        GraphBLAS::IndexType N, num_cols;
 
         // GrB_Matrix_nrows(&N, graph)
         graph.get_shape(N, num_cols);
         if (N != num_cols)
         {
-            throw graphblas::DimensionException();
+            throw GraphBLAS::DimensionException();
         }
 
         std::cerr << "num nodes (N): " << N << std::endl;
 
         // Placeholders for GraphBLAS operators
-        graphblas::PlusMonoid<int32_t>         GrB_Int32Add;
-        graphblas::ArithmeticSemiring<int32_t> GrB_Int32AddMul;
-        graphblas::PlusMonoid<double>          GrB_Flt64Add;
-        graphblas::TimesMonoid<double>         GrB_Flt64Mul;
-        graphblas::DivMonoid<double>           GrB_Flt64Div;
-        graphblas::ArithmeticSemiring<double>  GrB_Flt64AddMul;
+        //GraphBLAS::PlusMonoid<int32_t>         GrB_Int32Add;
+        //GraphBLAS::ArithmeticSemiring<int32_t> GrB_Int32AddMul;
+        //GraphBLAS::PlusMonoid<double>          GrB_Flt64Add;
+        //GraphBLAS::TimesMonoid<double>         GrB_Flt64Mul;
+        //GraphBLAS::DivMonoid<double>           GrB_Flt64Div;
+        //GraphBLAS::ArithmeticSemiring<double>  GrB_Flt64AddMul;
 
         // Placeholder for GrB_ALL where dimension is p=|nsver|
-        std::vector<graphblas::IndexType> GrB_ALL_p;     // fill with sequence
+        std::vector<GraphBLAS::IndexType> GrB_ALL_p;     // fill with sequence
         GrB_ALL_p.reserve(p);
-        for (graphblas::IndexType idx = 0; idx < p; ++idx)
+        for (GraphBLAS::IndexType idx = 0; idx < p; ++idx)
         {
             GrB_ALL_p.push_back(idx);
         }
 
         // P holds number of shortest paths to a vertex from a given root
         // P[i,src_nodes[i]] = 1 where 0 <= i < nsver; implied zero elsewher
-        graphblas::Matrix<int32_t> P(p, N);         // P is pxN
+        GraphBLAS::Matrix<int32_t> P(p, N);         // P is pxN
         std::vector<int32_t> ones(p, 1);
-        graphblas::buildmatrix(P, GrB_ALL_p, src_nodes, ones);
-        graphblas::print_matrix(std::cerr, P, "initial P");
+        P.build(GrB_ALL_p, src_nodes, ones);
+        GraphBLAS::print_matrix(std::cerr, P, "initial P");
 
         // Placeholder for GrB_ALL where dimension is N
-        std::vector<graphblas::IndexType> GrB_ALL_N;     // fill with sequence
+        std::vector<GraphBLAS::IndexType> GrB_ALL_N;     // fill with sequence
         GrB_ALL_N.reserve(N);
-        for (graphblas::IndexType idx = 0; idx < N; ++idx)
+        for (GraphBLAS::IndexType idx = 0; idx < N; ++idx)
         {
             GrB_ALL_N.push_back(idx);
         }
 
         // F is the current frontier for all BFS's (from all roots)
         // It is initialized with the out neighbors for each root
-        graphblas::Matrix<int32_t> F(p, N);         // F is pxN
-        graphblas::extract(graph, src_nodes, GrB_ALL_N, F);
-        graphblas::print_matrix(std::cerr, F, "initial frontier");
+        GraphBLAS::Matrix<int32_t> F(p, N);         // F is pxN
+        //GraphBLAS::extract(graph, src_nodes, GrB_ALL_N, F);
+        GraphBLAS::extract(F,
+                           GraphBLAS::NoMask(),
+                           GraphBLAS::NoAccumulate(),
+                           graph,
+                           src_nodes,
+//                         GrB_ALL_N);
+                           GraphBLAS::GrB_ALL);
+        GraphBLAS::print_matrix(std::cerr, F, "initial frontier");
 
         // ==================== BFS phase ====================
-        std::vector<graphblas::Matrix<int32_t>* > Sigmas;
+        std::vector<GraphBLAS::Matrix<int32_t>* > Sigmas;
         std::cerr << "======= START BFS phase ======" << std::endl;
         int32_t d = 0;
-        while (F.get_nnz() > 0)
+        while (F.nvals() > 0)
         {
             std::cerr << "------- BFS iteration " << d << " --------" << std::endl;
-            Sigmas.push_back(new graphblas::Matrix<int32_t>(F));  // Sigma[d] = F
-            graphblas::print_matrix(std::cerr, *Sigmas[d], "Sigma[d] = F");
+            Sigmas.push_back(new GraphBLAS::Matrix<int32_t>(F));  // Sigma[d] = F
+            GraphBLAS::print_matrix(std::cerr, *Sigmas[d], "Sigma[d] = F");
 
-            graphblas::ewiseadd(P, F, P, GrB_Int32Add);           // P = F + P
-            graphblas::print_matrix(std::cerr, P, "P");
+            //GraphBLAS::ewiseadd(P, F, P, GrB_Int32Add);           // P = F + P
+            // P = F + P
+            GraphBLAS::eWiseAdd(P,
+                                GraphBLAS::NoMask(),
+                                GraphBLAS::NoAccumulate(),
+                                GraphBLAS::Plus<int32_t>(),
+                                F, P);
+            GraphBLAS::print_matrix(std::cerr, P, "P");
 
-            graphblas::mxmMasked(F, graph, F,                     // F<!P> = F +.* A
-                                 graphblas::negate(P, GrB_Int32AddMul),
-                                 GrB_Int32AddMul);
-            graphblas::print_matrix(std::cerr, F, "New frontier (F)");
+            //GraphBLAS::mxmMasked(F, graph, F,                     // F<!P> = F +.* A
+            //                     GraphBLAS::negate(P, GrB_Int32AddMul),
+            //                     GrB_Int32AddMul);
+
+            // F<!P> = F +.* A
+            GraphBLAS::mxm(F,                                    // C
+                           GraphBLAS::complement(P),             // M
+                           GraphBLAS::NoAccumulate(),            // accum
+                           GraphBLAS::ArithmeticSemiring<int32_t>(), // op
+                           F,                                    // A
+                           graph,                                // B
+                           true);                                // replace
+            GraphBLAS::print_matrix(std::cerr, F, "New frontier (F)");
             ++d;
         }
         std::cerr << "======= END BFS phase =======" << std::endl;
 
         // ================== backprop phase ==================
-        graphblas::Matrix<double> U(p, N);        // U is pxN
-        graphblas::Matrix<double> Ones =
-            graphblas::fill<graphblas::Matrix<double>>(
-                (double)1.0, p, N);  // pxN filled with 1.0
-        graphblas::print_matrix(std::cerr, Ones, "Ones");
+        GraphBLAS::Matrix<double> U(p, N);        // U is pxN
+        //GraphBLAS::Matrix<double> Ones =
+        //    GraphBLAS::fill<GraphBLAS::Matrix<double>>(
+        //        (double)1.0, p, N);  // pxN filled with 1.0
+        GraphBLAS::Matrix<double> Ones(p, N);
+        GraphBLAS::assign_constant(Ones,
+                                   GraphBLAS::NoMask(),
+                                   GraphBLAS::NoAccumulate(),
+                                   1.0f,
+                                   GraphBLAS::GrB_ALL,
+                                   GraphBLAS::GrB_ALL);
+        GraphBLAS::print_matrix(std::cerr, Ones, "Ones");
 
-        graphblas::Matrix<double> W(p, N);
-        graphblas::Matrix<double> tmp1(p, N);
-        graphblas::Matrix<double> tmp2(p, N);
+        GraphBLAS::Matrix<double> W(p, N);
+        GraphBLAS::Matrix<double> tmp1(p, N);
+        GraphBLAS::Matrix<double> tmp2(p, N);
 
         std::cerr << "======= BEGIN BACKPROP phase =======" << std::endl;
         while (d >= 2)
         {
             std::cerr << "------- BACKPROP iteration " << d << " --------" << std::endl;
             // W = Sigma[d-1].*(1 + U)./P
-            graphblas::ewiseadd(Ones, U, tmp1, GrB_Flt64Add);
-            graphblas::print_matrix(std::cerr, tmp1, "(1 + U)");
-            graphblas::ewisemult(*Sigmas[d-1], tmp1, tmp2, GrB_Flt64Mul);
-            graphblas::print_matrix(std::cerr, tmp2, "Sigma[d-1] .* (1 + U)");
-            graphblas::ewisemult(tmp2, P, W, GrB_Flt64Div);
-            graphblas::print_matrix(std::cerr, W, "W = Sigma[d-1] .* (1 + U) ./ P");
+            //GraphBLAS::ewiseadd(Ones, U, tmp1, GrB_Flt64Add);
+            GraphBLAS::eWiseAdd(tmp1,                         // C
+                                GraphBLAS::NoMask(),          // Mask
+                                GraphBLAS::NoAccumulate(),    // accum
+                                GraphBLAS::Plus<double>(),    // op
+                                Ones,                         // A
+                                U,                            // B
+                                true);                        // replace
+            GraphBLAS::print_matrix(std::cerr, tmp1, "(1 + U)");
+            //GraphBLAS::ewisemult(*Sigmas[d-1], tmp1, tmp2, GrB_Flt64Mul);
+            GraphBLAS::eWiseMult(tmp2,                         // C
+                                 GraphBLAS::NoMask(),          // Mask
+                                 GraphBLAS::NoAccumulate(),    // accum
+                                 GraphBLAS::Times<double>(),   // op
+                                 *Sigmas[d-1],                 // A
+                                 tmp1,                         // B
+                                 true);                        // replace
+            GraphBLAS::print_matrix(std::cerr, tmp2, "Sigma[d-1] .* (1 + U)");
+            //GraphBLAS::ewisemult(tmp2, P, W, GrB_Flt64Div);
+            GraphBLAS::eWiseMult(W,                            // C
+                                 GraphBLAS::NoMask(),          // Mask
+                                 GraphBLAS::NoAccumulate(),    // accum
+                                 GraphBLAS::Div<double>(),     // op
+                                 tmp2,                         // A
+                                 P,                            // B
+                                 true);                        // replace
+            GraphBLAS::print_matrix(std::cerr, W, "W = Sigma[d-1] .* (1 + U) ./ P");
 
             // W = (A +.* W')' = W +.* A'
-            graphblas::mxm(W, graphblas::transpose(graph), W, GrB_Flt64AddMul);
-            graphblas::print_matrix(std::cerr, W, "W = W A'");
+            //GraphBLAS::mxm(W, GraphBLAS::transpose(graph), W, GrB_Flt64AddMul);
+            GraphBLAS::mxm(W,                                        // C
+                           GraphBLAS::NoMask(),                      // M
+                           GraphBLAS::NoAccumulate(),                // accum
+                           GraphBLAS::ArithmeticSemiring<double>(),  // op
+                           W,                                        // A
+                           GraphBLAS::transpose(graph),              // B
+                           true);                                    // replace
+            GraphBLAS::print_matrix(std::cerr, W, "W = W A'");
 
             // W = W .* Sigma[d-2] .* P
-            graphblas::ewisemult(W, *Sigmas[d-2], W, GrB_Flt64Mul);
-            graphblas::ewisemult(W, P, W, GrB_Flt64Mul);
-            graphblas::print_matrix(std::cerr, W, "W = W .* P");
+            //GraphBLAS::ewisemult(W, *Sigmas[d-2], W, GrB_Flt64Mul);
+            GraphBLAS::eWiseMult(W,                            // C
+                                 GraphBLAS::NoMask(),          // Mask
+                                 GraphBLAS::NoAccumulate(),    // accum
+                                 GraphBLAS::Times<double>(),   // op
+                                 W,                            // A
+                                 *Sigmas[d-2],                 // B
+                                 false);                       // replace
+            //GraphBLAS::ewisemult(W, P, W, GrB_Flt64Mul);
+            GraphBLAS::eWiseMult(W,                            // C
+                                 GraphBLAS::NoMask(),          // Mask
+                                 GraphBLAS::NoAccumulate(),    // accum
+                                 GraphBLAS::Times<double>(),   // op
+                                 W,                            // A
+                                 P,                            // B
+                                 false);                       // replace
+            GraphBLAS::print_matrix(std::cerr, W, "W = W .* P");
 
             // U = U + W
-            graphblas::ewiseadd(U, W, U, GrB_Flt64Add);
-            graphblas::print_matrix(std::cerr, U, "U += W");
+            //GraphBLAS::ewiseadd(U, W, U, GrB_Flt64Add);
+            GraphBLAS::eWiseAdd(U,                            // C
+                                GraphBLAS::NoMask(),          // Mask
+                                GraphBLAS::NoAccumulate(),    // accum
+                                GraphBLAS::Plus<double>(),    // op
+                                U,                            // A
+                                W,                            // B
+                                true);                        // replace
+            GraphBLAS::print_matrix(std::cerr, U, "U += W");
 
             --d;
         }
-        std::cerr << "======= END BACKPROP phase =======" << std::endl;
-        graphblas::print_matrix(std::cerr, U, "U");
-        graphblas::Matrix<double> result(1, N);
-        graphblas::col_reduce(U, result, GrB_Flt64Add);
-        graphblas::print_matrix(std::cerr, result, "RESULT");
-
-        std::vector<double> betweenness_centrality;
-        for (graphblas::IndexType k = 0; k < N;k++)
+        for (auto it = Sigmas.begin(); it != Sigmas.end(); ++it)
         {
-            betweenness_centrality.push_back(result.extractElement(0, k));
+            delete *it;
+        }
+
+        std::cerr << "======= END BACKPROP phase =======" << std::endl;
+        GraphBLAS::print_matrix(std::cerr, U, "U");
+        GraphBLAS::Vector<double> result(N);
+        //GraphBLAS::col_reduce(U, result, GrB_Flt64Add);
+        GraphBLAS::reduce(result,                          // W
+                          GraphBLAS::NoMask(),             // Mask
+                          GraphBLAS::NoAccumulate(),       // Accum
+                          GraphBLAS::Plus<double>(),       // Op
+                          GraphBLAS::transpose(U),         // A, transpose make col reduce
+                          true);                           // replace
+        GraphBLAS::print_matrix(std::cerr, result, "RESULT");
+
+        std::vector<double> betweenness_centrality(N, 0.);
+        for (GraphBLAS::IndexType k = 0; k < N;k++)
+        {
+            if (result.hasElement(k))
+            {
+                betweenness_centrality[k] = result.extractElement(k);
+            }
         }
 
         return betweenness_centrality;
@@ -933,7 +1201,7 @@ namespace algorithms
 
     /**
      * @brief Compute the vertex betweenness centrality of all vertices in the
-     *        given graph.
+     *        given graph ("for all" one at a time).
      *
      * The betweenness centrality of a vertex measures the number of
      * times a vertex acts as a bridge along the shortest path between two
@@ -950,112 +1218,122 @@ namespace algorithms
     vertex_betweenness_centrality(MatrixT const &graph)
     {
         using T = typename MatrixT::ScalarType;
-        graphblas::IndexType num_nodes, cols, depth;
-        graph.get_shape(num_nodes, cols);
+        using VectorT = GraphBLAS::Vector<T>;
+
+        GraphBLAS::IndexType num_nodes(graph.nrows());
+        GraphBLAS::IndexType cols(graph.ncols());
+
         if (num_nodes != cols)
         {
-            throw graphblas::DimensionException();
+            throw GraphBLAS::DimensionException();
         }
 
-        MatrixT bc_mat(1, num_nodes);
-        for (graphblas::IndexType i = 0; i < num_nodes; ++i)
+        VectorT bc_vec(num_nodes);
+
+        // For each vertex in graph compute the BC updates (accumulate in bc_vec)
+        for (GraphBLAS::IndexType i = 0; i < num_nodes; ++i)
         {
-            depth = 0;
-            MatrixT search(num_nodes, num_nodes);
-            MatrixT fringe(1, num_nodes);
-            /// @todo replaced with extract?
-            for (graphblas::IndexType k = 0; k < num_nodes; ++k)
+            std::vector<GraphBLAS::Vector<bool>*> search;
+            VectorT frontier(num_nodes);
+
+            GraphBLAS::extract(frontier,
+                               GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                               GraphBLAS::transpose(graph),
+                               GraphBLAS::GrB_ALL, i, true);
+
+            VectorT n_shortest_paths(num_nodes);
+            n_shortest_paths.setElement(i, static_cast<T>(1));
+
+            GraphBLAS::IndexType depth = 0;
+            while (frontier.nvals() > 0)
             {
-                fringe.setElement(0, k, graph.extractElement(i, k));
+                search.push_back(new GraphBLAS::Vector<bool>(num_nodes));
+
+                GraphBLAS::apply(*(search[depth]),
+                                 GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::Identity<T, bool>(),
+                                 frontier);
+
+                GraphBLAS::eWiseAdd(n_shortest_paths,
+                                    GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                                    GraphBLAS::Plus<T>(),
+                                    n_shortest_paths, frontier);
+
+                GraphBLAS::vxm(frontier,
+                               GraphBLAS::complement(n_shortest_paths),
+                               GraphBLAS::NoAccumulate(),
+                               GraphBLAS::ArithmeticSemiring<T>(),
+                               frontier, graph, true);
+
+                ++depth;
             }
 
-            MatrixT n_shortest_paths(1, num_nodes);
-            n_shortest_paths.setElement(0, i, static_cast<T>(1));
+            VectorT n_shortest_paths_inv(num_nodes);
+            GraphBLAS::apply(n_shortest_paths_inv,
+                             GraphBLAS::NoMask(),
+                             GraphBLAS::NoAccumulate(),
+                             GraphBLAS::MultiplicativeInverse<T>(),
+                             n_shortest_paths);
 
-            while(fringe.get_nnz() != 0)
+            VectorT update(num_nodes);
+            GraphBLAS::assign_constant(update,
+                                       GraphBLAS::NoMask(),
+                                       GraphBLAS::NoAccumulate(),
+                                       1, GraphBLAS::GrB_ALL);
+
+            VectorT weights(num_nodes);
+            for (int32_t idx = depth - 1; idx > 0; --idx)
             {
-                depth = depth + 1;
-                graphblas::ewiseadd(n_shortest_paths,fringe,n_shortest_paths);
+                --depth;
 
-                for (graphblas::IndexType k = 0; k < num_nodes; ++k)
-                {
-                    search.setElement(
-                        depth, k,
-                        (fringe.extractElement(0, k) != 0));  // cast<T>?
-                }
+                GraphBLAS::eWiseMult(weights,
+                                     *(search[idx]), GraphBLAS::NoAccumulate(),
+                                     GraphBLAS::Times<T>(),
+                                     n_shortest_paths_inv, update,
+                                     true);
 
-                MatrixT not_in_sps = graphblas::fill<MatrixT>(1, 1, num_nodes);
-                //for (graphblas::IndexType k = 0; k < num_nodes; ++k)
-                //{
-                //    not_in_sps.setElement(0, k, 1);
-                //}
+                GraphBLAS::mxv(weights,
+                               *(search[idx - 1]), GraphBLAS::NoAccumulate(),
+                               GraphBLAS::ArithmeticSemiring<T>(),
+                               graph, weights, true);
 
-                for (graphblas::IndexType k = 0; k < num_nodes; ++k)
-                {
-                    if (n_shortest_paths.extractElement(0, k) != 0)
-                    {
-                        not_in_sps.setElement(0, k, 0); // get_zero()
-                    }
-                }
-                graphblas::mxm(fringe, graph, fringe);
-                graphblas::ewisemult(fringe, not_in_sps, fringe);
+                GraphBLAS::eWiseMult(update,
+                                     GraphBLAS::NoMask(), GraphBLAS::Plus<T>(),
+                                     GraphBLAS::Times<T>(),
+                                     weights, n_shortest_paths, true);
+
+                GraphBLAS::print_vector(std::cerr, update, "update");
             }
 
-            MatrixT update(1, num_nodes);
-            MatrixT ones = graphblas::fill<MatrixT>(1, 1, num_nodes);
-
-            while (depth >= 2)
+            for (auto it = search.begin(); it != search.end(); ++it)
             {
-                MatrixT n_shortest_paths_inv(1, num_nodes);
-                graphblas::apply(n_shortest_paths,
-                                 n_shortest_paths_inv,
-                                 graphblas::math::inverse<T>);
-
-                MatrixT weights(num_nodes, 1);
-                MatrixT temp(1, num_nodes);
-
-                graphblas::ewiseadd(ones, update, temp);
-                graphblas::ewisemult(temp, n_shortest_paths_inv, temp);
-
-                for (graphblas::IndexType k = 0; k < num_nodes; ++k)
-                {
-                    //weights[k][0] = search[depth][k] * temp[0][k];
-                    weights.setElement(
-                        k, 0,
-                        search.extractElement(depth, k) *
-                        temp.extractElement(0, k));
-                }
-
-                mxm(graph, weights, weights);
-
-                for (graphblas::IndexType k = 0; k < num_nodes; ++k)
-                {
-                    //temp[0][k] = search[depth-1][k] * n_shortest_paths[0][k];
-                    temp.setElement(
-                        0, k,
-                        search.extractElement(depth - 1, k) *
-                        n_shortest_paths.extractElement(0, k));
-                }
-
-                graphblas::ewisemult(weights,
-                                     //graphblas::TransposeView<MatrixT>(temp),
-                                     graphblas::transpose(temp),
-                                     weights);
-
-                graphblas::ewiseadd(update,
-                                    //graphblas::TransposeView<MatrixT>(weights),
-                                    graphblas::transpose(weights),
-                                    update);
-                depth = depth - 1;
+                delete *it;
             }
 
-            graphblas::ewiseadd(bc_mat, update, bc_mat);
+            GraphBLAS::eWiseAdd(bc_vec,
+                                GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                                GraphBLAS::Plus<T>(),
+                                bc_vec, update);
+
         }
 
-        std::vector <typename MatrixT::ScalarType> betweenness_centrality;
-        for (graphblas::IndexType k = 0; k<num_nodes;k++)
+        GraphBLAS::Vector<T> bias(num_nodes);
+        GraphBLAS::assign_constant(bias,
+                                   GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                                   static_cast<T>(num_nodes),
+                                   GraphBLAS::GrB_ALL);
+        GraphBLAS::eWiseAdd(bc_vec,
+                            GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                            GraphBLAS::Minus<T>(),
+                            bc_vec, bias, true);
+
+        std::vector <typename MatrixT::ScalarType> betweenness_centrality(num_nodes, 0);
+        for (GraphBLAS::IndexType k = 0; k<num_nodes;k++)
         {
-            betweenness_centrality.push_back(bc_mat.extractElement(0, k));
+            if (bc_vec.hasElement(k))
+            {
+                betweenness_centrality[k] = bc_vec.extractElement(k);
+            }
         }
 
         return betweenness_centrality;
@@ -1073,145 +1351,234 @@ namespace algorithms
      *
      * @param[in] graph The graph to compute the edge betweenness centrality
      *
-     * @return The betweenness centrality of all vertices in the graph
+     * @return The betweenness centrality of all edges in the graph
      */
     template<typename MatrixT>
     MatrixT edge_betweenness_centrality(MatrixT const &graph)
     {
         using T = typename MatrixT::ScalarType;
-        graphblas::IndexType num_nodes, cols, depth;
-        graph.get_shape(num_nodes, cols);
+        using VectorT = GraphBLAS::Vector<T>;
+
+        GraphBLAS::IndexType num_nodes(graph.nrows());
+        GraphBLAS::IndexType cols(graph.ncols());
 
         if (num_nodes != cols)
         {
-            throw graphblas::DimensionException();
+            throw GraphBLAS::DimensionException();
         }
 
         MatrixT score(num_nodes, num_nodes);
 
-        for (graphblas::IndexType root = 0; root < num_nodes; root++)
+        GraphBLAS::IndexType depth;
+        for (GraphBLAS::IndexType root = 0; root < num_nodes; root++)
         {
             depth = 0;
-            MatrixT search(num_nodes, num_nodes);
-            MatrixT fringe (1,num_nodes);
-            for (graphblas::IndexType k = 0; k < num_nodes; ++k)
-            {
-                //fringe[0][k] = graph[root][k];
-                fringe.setElement(0, k,
-                                    graph.extractElement(root, k));
-            }
-            MatrixT n_shortest_paths(1, num_nodes);
+            //MatrixT search(num_nodes, num_nodes);
+            std::vector<VectorT*> search;
+            //MatrixT fringe (1,num_nodes);
+            VectorT fringe(num_nodes);
+            //for (GraphBLAS::IndexType k = 0; k < num_nodes; ++k)
+            //{
+            //    //fringe[0][k] = graph[root][k];
+            //    fringe.setElement(0, k,
+            //                        graph.extractElement(root, k));
+            //}
+            GraphBLAS::extract(fringe,
+                               GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                               GraphBLAS::transpose(graph),
+                               GraphBLAS::GrB_ALL, root);
+
+            //MatrixT n_shortest_paths(1, num_nodes);
+            VectorT n_shortest_paths(num_nodes);
             //n_shortest_paths[0][root] = 1;
-            n_shortest_paths.setElement(0, root, 1);
+            //n_shortest_paths.setElement(0, root, 1);
+            n_shortest_paths.setElement(root, 1);
 
             MatrixT update(num_nodes, num_nodes);
-            MatrixT flow(1, num_nodes);
+            //MatrixT flow(1, num_nodes);
+            VectorT flow(num_nodes);
             //search[depth][root] = 1;
-            search.setElement(depth, root, 1);
+            //search.setElement(depth, root, 1);
+            search.push_back(new VectorT(num_nodes));
+            search[depth]->setElement(root, 1);
 
-            while (fringe.get_nnz() != 0)
+            while (fringe.nvals() != 0)
             {
                 depth = depth + 1;
-                graphblas::ewiseadd(n_shortest_paths,
-                                    fringe,
-                                    n_shortest_paths);
-                for (graphblas::IndexType i = 0; i < num_nodes; ++i)
-                {
-                    //search[depth][i] = (fringe[0][i] != 0);
-                    search.setElement(depth, i,
-                                        (fringe.extractElement(0, i) != 0));
-                }
 
-                MatrixT not_in_sps = graphblas::fill<MatrixT>(1, 1, num_nodes);
-                //for (graphblas::IndexType k = 0; k < num_nodes; k++)
+                //for (GraphBLAS::IndexType i = 0; i < num_nodes; ++i)
+                //{
+                //    //search[depth][i] = (fringe[0][i] != 0);
+                //    search.setElement(depth, i,
+                //                        (fringe.extractElement(0, i) != 0));
+                //}
+                search.push_back(new VectorT(num_nodes));
+                GraphBLAS::apply(*(search[depth]),
+                                 GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::Identity<int32_t, bool>(),
+                                 fringe);
+
+                //GraphBLAS::ewiseadd(n_shortest_paths,
+                //                    fringe,
+                //                    n_shortest_paths);
+                GraphBLAS::eWiseAdd(n_shortest_paths,
+                                    GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                                    GraphBLAS::Plus<T>(),
+                                    n_shortest_paths, fringe);
+
+                //MatrixT not_in_sps = GraphBLAS::fill<MatrixT>(1, 1, num_nodes);
+                //for (GraphBLAS::IndexType k = 0; k < num_nodes; k++)
                 //{
                 //    not_in_sps[0][k] = 1;
                 //}
 
-                for (graphblas::IndexType k = 0; k < num_nodes; ++k)
-                {
-                    if (n_shortest_paths.extractElement(0, k) != 0)
-                    {
-                        not_in_sps.setElement(0, k, 0);  // get_zero()?
-                    }
-                }
+                //for (GraphBLAS::IndexType k = 0; k < num_nodes; ++k)
+                //{
+                //    if (n_shortest_paths.extractElement(0, k) != 0)
+                //    {
+                //        not_in_sps.setElement(0, k, 0);  // get_zero()?
+                //    }
+                //}
 
-                graphblas::mxm(fringe, graph, fringe);
-                graphblas::ewisemult(fringe, not_in_sps, fringe);
+                //GraphBLAS::mxm(fringe, graph, fringe);
+                //GraphBLAS::ewisemult(fringe, not_in_sps, fringe);
+
+                GraphBLAS::vxm(fringe,
+                               GraphBLAS::complement(n_shortest_paths),
+                               GraphBLAS::NoAccumulate(),
+                               GraphBLAS::ArithmeticSemiring<T>(),
+                               fringe, graph);
             }
 
             while (depth >= 1)
             {
-                MatrixT n_shortest_paths_inv(1, num_nodes);
-                graphblas::apply(n_shortest_paths,
-                                 n_shortest_paths_inv,
-                                 graphblas::math::inverse<T>);
-                MatrixT weights(1, num_nodes);
+                //MatrixT n_shortest_paths_inv(1, num_nodes);
+                VectorT n_shortest_paths_inv(num_nodes);
+                //GraphBLAS::apply(n_shortest_paths,
+                //                 n_shortest_paths_inv,
+                //                 GraphBLAS::math::inverse<T>);
+                GraphBLAS::apply(n_shortest_paths_inv,
+                                 GraphBLAS::NoMask(),
+                                 GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::MultiplicativeInverse<T>(),
+                                 n_shortest_paths);
 
-                for (graphblas::IndexType k = 0; k < num_nodes; ++k)
+                //MatrixT weights(1, num_nodes);
+                VectorT weights(num_nodes);
+
+                // for (GraphBLAS::IndexType k = 0; k < num_nodes; ++k)
+                // {
+                //     //weights[0][k] =
+                //     //    search[depth][k] * n_shortest_paths_inv[0][k];
+                //     weights.setElement(
+                //         0, k,
+                //         search.extractElement(depth, k) *
+                //         n_shortest_paths_inv.extractElement(0, k));
+                // }
+                GraphBLAS::eWiseMult(weights,
+                                     GraphBLAS::NoMask(),
+                                     GraphBLAS::NoAccumulate(),
+                                     GraphBLAS::Times<T>(),
+                                     *(search[depth]),
+                                     n_shortest_paths_inv);
+
+                //GraphBLAS::ewisemult(weights, flow, weights);
+                GraphBLAS::eWiseMult(weights,
+                                     GraphBLAS::NoMask(),
+                                     GraphBLAS::NoAccumulate(),
+                                     GraphBLAS::Times<T>(),
+                                     weights, flow);
+
+                // for (GraphBLAS::IndexType k = 0; k < num_nodes; ++k)
+                // {
+                //     //weights[0][k] = weights[0][k] + search[depth][k];
+                //     weights.setElement(
+                //         0, k,
+                //         weights.extractElement(0, k) +
+                //         search.extractElement(depth, k));
+                // }
+                GraphBLAS::eWiseAdd(weights,
+                                    GraphBLAS::NoMask(),
+                                    GraphBLAS::NoAccumulate(),
+                                    GraphBLAS::Plus<T>(),
+                                    weights, *(search[depth]));
+
+                // for (GraphBLAS::IndexType i = 0; i < num_nodes; i++)
+                // {
+                //     for (GraphBLAS::IndexType k=0;k<num_nodes; k++)
+                //     {
+                //         //update[i][k] = graph[i][k] * weights[0][k];
+                //         update.setElement(
+                //             i, k,
+                //             graph.extractElement(i, k) *
+                //             weights.extractElement(0, k));
+                //     }
+                // }
                 {
-                    //weights[0][k] =
-                    //    search[depth][k] * n_shortest_paths_inv[0][k];
-                    weights.setElement(
-                        0, k,
-                        search.extractElement(depth, k) *
-                        n_shortest_paths_inv.extractElement(0, k));
+                    std::vector<T> w(weights.nvals());
+                    GraphBLAS::IndexArrayType widx(weights.nvals());
+                    weights.extractTuples(widx, w);
+                    MatrixT wmat(num_nodes, num_nodes);
+                    wmat.build(widx, widx, w);
+                    GraphBLAS::mxm(update,
+                                   GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                                   GraphBLAS::ArithmeticSemiring<T>(),
+                                   graph, wmat);
+                }
+                // for (GraphBLAS::IndexType k=0;k<num_nodes; k++)
+                // {
+                //     //weights[0][k] =
+                //     //    search[depth-1][k] * n_shortest_paths[0][k];
+                //     weights.setElement(
+                //         0, k,
+                //         search.extractElement(depth - 1, k) *
+                //         n_shortest_paths.extractElement(0, k));
+                // }
+                GraphBLAS::eWiseMult(weights,
+                                     GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                                     GraphBLAS::Times<T>(),
+                                     *(search[depth - 1]), n_shortest_paths);
+
+                // for (GraphBLAS::IndexType i = 0; i < num_nodes; ++i)
+                // {
+                //     for (GraphBLAS::IndexType k = 0; k < num_nodes; ++k)
+                //     {
+                //         //update[k][i] = weights[0][k] * update[k][i];
+                //         update.setElement(
+                //             k, i,
+                //             weights.extractElement(0, k) *
+                //             update.extractElement(k, i));
+                //     }
+                // }
+                {
+                    std::vector<T> w(weights.nvals());
+                    GraphBLAS::IndexArrayType widx(weights.nvals());
+                    weights.extractTuples(widx, w);
+                    MatrixT wmat(num_nodes, num_nodes);
+                    wmat.build(widx, widx, w);
+                    GraphBLAS::mxm(update,
+                                   GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                                   GraphBLAS::ArithmeticSemiring<T>(),
+                                   wmat, update);
                 }
 
-                graphblas::ewisemult(weights, flow, weights);
+                //GraphBLAS::ewiseadd(score, update, score);
+                GraphBLAS::eWiseAdd(score,
+                                    GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                                    GraphBLAS::Plus<T>(),
+                                    update, score);
 
-                for (graphblas::IndexType k = 0; k < num_nodes; ++k)
-                {
-                    //weights[0][k] = weights[0][k] + search[depth][k];
-                    weights.setElement(
-                        0, k,
-                        weights.extractElement(0, k) +
-                        search.extractElement(depth, k));
-                }
-
-
-                for (graphblas::IndexType i = 0; i < num_nodes; i++)
-                {
-                    for (graphblas::IndexType k=0;k<num_nodes; k++)
-                    {
-                        //update[i][k] = graph[i][k] * weights[0][k];
-                        update.setElement(
-                            i, k,
-                            graph.extractElement(i, k) *
-                            weights.extractElement(0, k));
-                    }
-                }
-
-                for (graphblas::IndexType k=0;k<num_nodes; k++)
-                {
-                    //weights[0][k] =
-                    //    search[depth-1][k] * n_shortest_paths[0][k];
-                    weights.setElement(
-                        0, k,
-                        search.extractElement(depth - 1, k) *
-                        n_shortest_paths.extractElement(0, k));
-                }
-
-                for (graphblas::IndexType i = 0; i < num_nodes; ++i)
-                {
-                    for (graphblas::IndexType k = 0; k < num_nodes; ++k)
-                    {
-                        //update[k][i] = weights[0][k] * update[k][i];
-                        update.setElement(
-                            k, i,
-                            weights.extractElement(0, k) *
-                            update.extractElement(k, i));
-                    }
-                }
-                graphblas::ewiseadd(score, update, score);
-
-                MatrixT temp(num_nodes, 1);
-                row_reduce(update, temp);
-                for (graphblas::IndexType k = 0; k < num_nodes; ++k)
-                {
-                    //flow[0][k] = temp[k][0];
-                    flow.setElement(0, k, temp.extractElement(k, 0));
-                }
+                // MatrixT temp(num_nodes, 1);
+                // row_reduce(update, temp);
+                // for (GraphBLAS::IndexType k = 0; k < num_nodes; ++k)
+                // {
+                //     //flow[0][k] = temp[k][0];
+                //     flow.setElement(0, k, temp.extractElement(k, 0));
+                // }
+                GraphBLAS::reduce(flow,
+                                  GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                                  GraphBLAS::Plus<T>(),
+                                  update);
 
                 depth = depth - 1;
             }
