@@ -1,72 +1,87 @@
+/*
+ * Copyright (c) 2015 Carnegie Mellon University and The Trustees of Indiana
+ * University.
+ * All Rights Reserved.
+ *
+ * THIS SOFTWARE IS PROVIDED "AS IS," WITH NO WARRANTIES WHATSOEVER. CARNEGIE
+ * MELLON UNIVERSITY AND THE TRUSTEES OF INDIANA UNIVERSITY EXPRESSLY DISCLAIM
+ * TO THE FULLEST EXTENT PERMITTED BY LAW ALL EXPRESS, IMPLIED, AND STATUTORY
+ * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT OF PROPRIETARY RIGHTS.
+ *
+ * This Program is distributed under a BSD license.  Please see LICENSE file or
+ * permission@sei.cmu.edu for more information.  DM-0002659
+ */
+
 #include <cstdlib>
 #include <iostream>
 #include <algorithm>
 #include <vector>
 
 #include <graphblas/graphblas.hpp>
+using namespace GraphBLAS;
 
+//****************************************************************************
 int main(int, char**)
 {
     // syntatic sugar
-    typedef double ScalarType;
-    graphblas::IndexType const NUM_ROWS = 3;
-    graphblas::IndexType const NUM_COLS = 3;
+    using ScalarType = double;
+
+    IndexType const NUM_ROWS = 3;
+    IndexType const NUM_COLS = 3;
 
     // Note: size of dimensions require at ccnstruction
-    graphblas::Matrix<ScalarType, graphblas::DirectedMatrixTag> a(NUM_ROWS,
-                                                                  NUM_COLS);
-    graphblas::Matrix<ScalarType, graphblas::DirectedMatrixTag> b(NUM_ROWS,
-                                                                  NUM_COLS);
-    graphblas::Matrix<ScalarType, graphblas::DirectedMatrixTag> c(NUM_ROWS,
-                                                                  NUM_COLS);
+    Matrix<ScalarType> a(NUM_ROWS, NUM_COLS);
+    Matrix<ScalarType> b(NUM_ROWS, NUM_COLS);
+    Matrix<ScalarType> c(NUM_ROWS, NUM_COLS);
 
     // initialize matrices
-    graphblas::IndexArrayType i = {0,  1,  2};
-    graphblas::IndexArrayType j = {0,  1,  2};
+    IndexArrayType i = {0,  1,  2};
+    IndexArrayType j = {0,  1,  2};
     std::vector<ScalarType>   v = {1., 1., 1.};
 
-    graphblas::buildmatrix(a, i.begin(), j.begin(), v.begin(), i.size());
-    graphblas::buildmatrix(b, i.begin(), j.begin(), v.begin(), i.size());
+    a.build(i.begin(), j.begin(), v.begin(), i.size());
+    b.build(i.begin(), j.begin(), v.begin(), i.size());
 
-    std::cout << "A = " << std::endl;
-    graphblas::print_matrix(std::cout, a);
-    std::cout << "B = " << std::endl;
-    graphblas::print_matrix(std::cout, b);
+    print_matrix(std::cout, a, "Matrix A");
+    print_matrix(std::cout, b, "Matrix B");
 
     // matrix multiply (default parameter values used for some)
-    graphblas::mxm(a, b, c);
+    mxm(c, NoMask(), NoAccumulate(), ArithmeticSemiring<ScalarType>(), a, b);
 
-    std::cout << "A * B = " << std::endl;
-    graphblas::print_matrix(std::cout, c);
+    print_matrix(std::cout, c, "A +.* B");
 
-    // extract the results: get_nnz() method tells us how big
-    graphblas::IndexType nnz = c.get_nnz();
-    graphblas::IndexArrayType rows(nnz), cols(nnz);
-    std::vector<ScalarType> vals(nnz);
+    // extract the results: nvals() method tells us how big
+    IndexType nvals = c.nvals();
+    IndexArrayType rows(nvals), cols(nvals);
+    std::vector<ScalarType> result(nvals);
 
-    graphblas::extracttuples(c, rows, cols, vals);
+    c.extractTuples(rows, cols, result);
 
-    graphblas::IndexArrayType i_res = {0,  1,  2};
-    graphblas::IndexArrayType j_res = {0,  1,  2};
-    std::vector<ScalarType>   v_res = {1., 1., 1.};
+    IndexArrayType i_ans = {0,  1,  2};
+    IndexArrayType j_ans = {0,  1,  2};
+    std::vector<ScalarType>   v_ans = {1., 1., 1.};
 
     bool success = true;
-    for (graphblas::IndexType ix = 0; ix < vals.size(); ++ix)
+    for (IndexType ix = 0; ix < result.size(); ++ix)
     {
         // Note: no semantics defined for extractTuples regarding the
         // order of returned values, so using an O(N^2) approach
         // without sorting:
         bool found = false;
-        for (graphblas::IndexType iy = 0; iy < v_res.size(); ++iy)
+        for (IndexType iy = 0; iy < v_ans.size(); ++iy)
         {
-            if ((i_res[iy] == rows[ix]) && (j_res[iy] == cols[ix]))
+            if ((i_ans[iy] == rows[ix]) && (j_ans[iy] == cols[ix]))
             {
-                std::cout << "Found result: result, ans index = "
-                          << ix << ", " << iy << ": " << vals[ix]
-                          << " ?= " << v_res[iy] << std::endl;
+                std::cout << "Found result: result index, answer index = "
+                          << ix << ", " << iy
+                          << ": res("    << rows[ix] << "," << cols[ix]
+                          << ") ?= ans(" << i_ans[iy] << "," << j_ans[iy] << "), "
+                          << result[ix] << " ?= " << v_ans[iy] << std::endl;
                 found = true;
-                if (v_res[iy] != vals[ix])
+                if (v_ans[iy] != result[ix])
                 {
+                    std::cerr << "ERROR" << std::endl;
                     success = false;
                 }
                 break;

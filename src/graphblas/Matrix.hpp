@@ -255,7 +255,9 @@ namespace GraphBLAS
                                   IndexArrayType            &col_indices,
                                   std::vector<ScalarT>      &values)
         {
-            /// @todo
+            m_mat.extractTuples(row_indices.begin(),
+                                col_indices.begin(),
+                                values.begin());
         }
 
         /// This replaces operator<< and outputs implementation specific
