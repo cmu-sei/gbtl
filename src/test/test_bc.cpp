@@ -46,7 +46,6 @@ static std::vector<double> bv(br.size(), 1);
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(bc_test_vertex_betweenness_centrality)
 {
-    std::cerr << "test" << std::endl;
     Matrix<double, DirectedMatrixTag> betweenness(8,8);
     betweenness.build(br.begin(), bc.begin(), bv.begin(), bv.size());
     std::vector<double> result = vertex_betweenness_centrality(betweenness);
@@ -55,19 +54,16 @@ BOOST_AUTO_TEST_CASE(bc_test_vertex_betweenness_centrality)
     BOOST_CHECK_EQUAL(result.size(), answer.size());
     for (unsigned int ix = 0; ix < result.size(); ++ix)
         BOOST_CHECK_CLOSE(result[ix], answer[ix], 0.0001);
-
-    /// DEBUG
-    exit(1);
 }
 
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(bc_test_edge_betweenness_centrality)
 {
-    std::cerr << "test" << std::endl;
     Matrix<double, DirectedMatrixTag> betweenness(8,8);
     Matrix<double, DirectedMatrixTag> result(8,8);
-    //Matrix<double, DirectedMatrixTag> answer ({{0,  6,  6,  6,  0,  0,  0,  0},
+    //Matrix<double, DirectedMatrixTag> answer ({
+    //                            {0,  6,  6,  6,  0,  0,  0,  0},
     //                            {0,  0,  1,  0, 10,  0,  0,  0},
     //                            {0,  0,  0,  0, 10,  0,  0,  0},
     //                            {0,  0,  1,  0, 10,  0,  0,  0},
@@ -85,14 +81,12 @@ BOOST_AUTO_TEST_CASE(bc_test_edge_betweenness_centrality)
     betweenness.build(br.begin(), bc.begin(), bv.begin(), bv.size());
     result = edge_betweenness_centrality(betweenness);
 
-    //std::cout << result << std::endl;
     BOOST_CHECK_EQUAL(result, answer);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch)
 {
-    std::cerr << "test" << std::endl;
     Matrix<double, DirectedMatrixTag> betweenness(8,8);
     betweenness.build(br.begin(), bc.begin(), bv.begin(), bv.size());
 

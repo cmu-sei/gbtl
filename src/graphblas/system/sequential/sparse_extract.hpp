@@ -562,13 +562,14 @@ namespace GraphBLAS
 
             if (&row_indices == &GrB_ALL)
             {
-                std::cout << "!!!!==== GrB_ALL - Extract!!" << std::endl;
+                //std::cout << "!!!!==== GrB_ALL - Extract!!" << std::endl;
                 extractColumn(t, A, index_iterator(0),
                               index_iterator(A.nrows()), col_index);
             }
             else
+            {
                 extractColumn(t, A, row_indices.begin(), row_indices.end(), col_index);
-
+            }
             //std::cerr << ">>> t <<< " << std::endl;
             //pretty_print(std::cerr, t);
 

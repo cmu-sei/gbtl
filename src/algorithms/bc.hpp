@@ -1301,8 +1301,6 @@ namespace algorithms
                                      GraphBLAS::NoMask(), GraphBLAS::Plus<T>(),
                                      GraphBLAS::Times<T>(),
                                      weights, n_shortest_paths, true);
-
-                GraphBLAS::print_vector(std::cerr, update, "update");
             }
 
             for (auto it = search.begin(); it != search.end(); ++it)
@@ -1339,6 +1337,7 @@ namespace algorithms
         return betweenness_centrality;
     }
 
+    //************************************************************************
     /**
      * @brief Compute the edge betweenness centrality of all vertices in the
      *        given graph.
@@ -1372,149 +1371,68 @@ namespace algorithms
         GraphBLAS::IndexType depth;
         for (GraphBLAS::IndexType root = 0; root < num_nodes; root++)
         {
-            depth = 0;
-            //MatrixT search(num_nodes, num_nodes);
-            std::vector<VectorT*> search;
-            //MatrixT fringe (1,num_nodes);
-            VectorT fringe(num_nodes);
-            //for (GraphBLAS::IndexType k = 0; k < num_nodes; ++k)
-            //{
-            //    //fringe[0][k] = graph[root][k];
-            //    fringe.setElement(0, k,
-            //                        graph.extractElement(root, k));
-            //}
-            GraphBLAS::extract(fringe,
+            VectorT frontier(num_nodes);
+            GraphBLAS::extract(frontier,
                                GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                                GraphBLAS::transpose(graph),
                                GraphBLAS::GrB_ALL, root);
 
-            //MatrixT n_shortest_paths(1, num_nodes);
             VectorT n_shortest_paths(num_nodes);
-            //n_shortest_paths[0][root] = 1;
-            //n_shortest_paths.setElement(0, root, 1);
             n_shortest_paths.setElement(root, 1);
 
             MatrixT update(num_nodes, num_nodes);
-            //MatrixT flow(1, num_nodes);
             VectorT flow(num_nodes);
-            //search[depth][root] = 1;
-            //search.setElement(depth, root, 1);
-            search.push_back(new VectorT(num_nodes));
+
+            depth = 0;
+
+            std::vector<GraphBLAS::Vector<bool>*> search;
+            search.push_back(new GraphBLAS::Vector<bool>(num_nodes));
             search[depth]->setElement(root, 1);
 
-            while (fringe.nvals() != 0)
+            while (frontier.nvals() != 0)
             {
-                depth = depth + 1;
+                ++depth;
+                search.push_back(new GraphBLAS::Vector<bool>(num_nodes));
 
-                //for (GraphBLAS::IndexType i = 0; i < num_nodes; ++i)
-                //{
-                //    //search[depth][i] = (fringe[0][i] != 0);
-                //    search.setElement(depth, i,
-                //                        (fringe.extractElement(0, i) != 0));
-                //}
-                search.push_back(new VectorT(num_nodes));
+                // search[depth] = (bool)frontier
                 GraphBLAS::apply(*(search[depth]),
                                  GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                                  GraphBLAS::Identity<int32_t, bool>(),
-                                 fringe);
+                                 frontier);
 
-                //GraphBLAS::ewiseadd(n_shortest_paths,
-                //                    fringe,
-                //                    n_shortest_paths);
+                // n_shortest_paths += frontier
                 GraphBLAS::eWiseAdd(n_shortest_paths,
                                     GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                                     GraphBLAS::Plus<T>(),
-                                    n_shortest_paths, fringe);
+                                    n_shortest_paths, frontier, true);
 
-                //MatrixT not_in_sps = GraphBLAS::fill<MatrixT>(1, 1, num_nodes);
-                //for (GraphBLAS::IndexType k = 0; k < num_nodes; k++)
-                //{
-                //    not_in_sps[0][k] = 1;
-                //}
-
-                //for (GraphBLAS::IndexType k = 0; k < num_nodes; ++k)
-                //{
-                //    if (n_shortest_paths.extractElement(0, k) != 0)
-                //    {
-                //        not_in_sps.setElement(0, k, 0);  // get_zero()?
-                //    }
-                //}
-
-                //GraphBLAS::mxm(fringe, graph, fringe);
-                //GraphBLAS::ewisemult(fringe, not_in_sps, fringe);
-
-                GraphBLAS::vxm(fringe,
+                // frontier<!n_shortest_paths>{z} = frontier *.+ graph
+                GraphBLAS::vxm(frontier,
                                GraphBLAS::complement(n_shortest_paths),
                                GraphBLAS::NoAccumulate(),
                                GraphBLAS::ArithmeticSemiring<T>(),
-                               fringe, graph);
+                               frontier, graph, true);
             }
 
             while (depth >= 1)
             {
-                //MatrixT n_shortest_paths_inv(1, num_nodes);
-                VectorT n_shortest_paths_inv(num_nodes);
-                //GraphBLAS::apply(n_shortest_paths,
-                //                 n_shortest_paths_inv,
-                //                 GraphBLAS::math::inverse<T>);
-                GraphBLAS::apply(n_shortest_paths_inv,
-                                 GraphBLAS::NoMask(),
-                                 GraphBLAS::NoAccumulate(),
-                                 GraphBLAS::MultiplicativeInverse<T>(),
-                                 n_shortest_paths);
-
-                //MatrixT weights(1, num_nodes);
                 VectorT weights(num_nodes);
 
-                // for (GraphBLAS::IndexType k = 0; k < num_nodes; ++k)
-                // {
-                //     //weights[0][k] =
-                //     //    search[depth][k] * n_shortest_paths_inv[0][k];
-                //     weights.setElement(
-                //         0, k,
-                //         search.extractElement(depth, k) *
-                //         n_shortest_paths_inv.extractElement(0, k));
-                // }
+                // weights = <search[depth]>(flow ./ n_shortest_paths) + search[depth]
                 GraphBLAS::eWiseMult(weights,
-                                     GraphBLAS::NoMask(),
-                                     GraphBLAS::NoAccumulate(),
-                                     GraphBLAS::Times<T>(),
                                      *(search[depth]),
-                                     n_shortest_paths_inv);
-
-                //GraphBLAS::ewisemult(weights, flow, weights);
-                GraphBLAS::eWiseMult(weights,
-                                     GraphBLAS::NoMask(),
                                      GraphBLAS::NoAccumulate(),
-                                     GraphBLAS::Times<T>(),
-                                     weights, flow);
-
-                // for (GraphBLAS::IndexType k = 0; k < num_nodes; ++k)
-                // {
-                //     //weights[0][k] = weights[0][k] + search[depth][k];
-                //     weights.setElement(
-                //         0, k,
-                //         weights.extractElement(0, k) +
-                //         search.extractElement(depth, k));
-                // }
+                                     GraphBLAS::Div<T>(),
+                                     flow,
+                                     n_shortest_paths);
                 GraphBLAS::eWiseAdd(weights,
                                     GraphBLAS::NoMask(),
                                     GraphBLAS::NoAccumulate(),
                                     GraphBLAS::Plus<T>(),
                                     weights, *(search[depth]));
 
-                // for (GraphBLAS::IndexType i = 0; i < num_nodes; i++)
-                // {
-                //     for (GraphBLAS::IndexType k=0;k<num_nodes; k++)
-                //     {
-                //         //update[i][k] = graph[i][k] * weights[0][k];
-                //         update.setElement(
-                //             i, k,
-                //             graph.extractElement(i, k) *
-                //             weights.extractElement(0, k));
-                //     }
-                // }
                 {
+                    // update = A *.+ diag(weights)
                     std::vector<T> w(weights.nvals());
                     GraphBLAS::IndexArrayType widx(weights.nvals());
                     weights.extractTuples(widx, w);
@@ -1525,32 +1443,15 @@ namespace algorithms
                                    GraphBLAS::ArithmeticSemiring<T>(),
                                    graph, wmat);
                 }
-                // for (GraphBLAS::IndexType k=0;k<num_nodes; k++)
-                // {
-                //     //weights[0][k] =
-                //     //    search[depth-1][k] * n_shortest_paths[0][k];
-                //     weights.setElement(
-                //         0, k,
-                //         search.extractElement(depth - 1, k) *
-                //         n_shortest_paths.extractElement(0, k));
-                // }
-                GraphBLAS::eWiseMult(weights,
-                                     GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                                     GraphBLAS::Times<T>(),
-                                     *(search[depth - 1]), n_shortest_paths);
 
-                // for (GraphBLAS::IndexType i = 0; i < num_nodes; ++i)
-                // {
-                //     for (GraphBLAS::IndexType k = 0; k < num_nodes; ++k)
-                //     {
-                //         //update[k][i] = weights[0][k] * update[k][i];
-                //         update.setElement(
-                //             k, i,
-                //             weights.extractElement(0, k) *
-                //             update.extractElement(k, i));
-                //     }
-                // }
+                // weights<search[depth-1]>{z} = n_shortest_paths
+                GraphBLAS::apply(weights,
+                                 *search[depth-1], GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::Identity<T>(),
+                                 n_shortest_paths, true);
+
                 {
+                    // update = diag(weights) *.+ update
                     std::vector<T> w(weights.nvals());
                     GraphBLAS::IndexArrayType widx(weights.nvals());
                     weights.extractTuples(widx, w);
@@ -1562,19 +1463,13 @@ namespace algorithms
                                    wmat, update);
                 }
 
-                //GraphBLAS::ewiseadd(score, update, score);
+                // score += update
                 GraphBLAS::eWiseAdd(score,
                                     GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                                     GraphBLAS::Plus<T>(),
-                                    update, score);
+                                    score, update);
 
-                // MatrixT temp(num_nodes, 1);
-                // row_reduce(update, temp);
-                // for (GraphBLAS::IndexType k = 0; k < num_nodes; ++k)
-                // {
-                //     //flow[0][k] = temp[k][0];
-                //     flow.setElement(0, k, temp.extractElement(k, 0));
-                // }
+                // flow = update +.
                 GraphBLAS::reduce(flow,
                                   GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                                   GraphBLAS::Plus<T>(),
