@@ -48,18 +48,7 @@ namespace GraphBLAS
 
         Vector() = delete;
 
-        /**
-         * @brief Construct a copy of a vector
-         *
-         * @note Calls backend constructor.
-         *
-         * @param[in]  vec  The vector to copy.
-         */
-        template <typename OtherVectorT>
-        Vector(OtherVectorT const &vec)
-            : m_vec(vec)
-        {
-        }
+        Vector(IndexType const & nsize) : m_vec(nsize) {}
 
         /**
          * @brief Construct a dense vector with 'count' copies of 'value'
@@ -221,13 +210,13 @@ namespace GraphBLAS
         template<typename RAIteratorIT,
                  typename RAIteratorVT>
         void extractTuples(RAIteratorIT        i_it,
-                           RAIteratorVT        v_it)
+                           RAIteratorVT        v_it) const
         {
             m_vec.extractTuples(i_it, v_it);
         }
 
         void extractTuples(IndexArrayType        &indices,
-                           std::vector<ScalarT>  &values)
+                           std::vector<ScalarT>  &values) const
         {
             m_vec.extractTuples(indices, values);
         }

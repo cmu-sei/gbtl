@@ -26,7 +26,59 @@
 #undef __GB_SYSTEM_UTILITY_HEADER
 
 //****************************************************************************
+// Miscellaneous matrix convenience functions
+//****************************************************************************
+namespace GraphBLAS
+{
+    //************************************************************************
+    /**
+     * @brief Constuct and return a matrix with elements on the diagonal.
+     *
+     * @param[in] v    The elements to put on the diagonal of a matrix.
+     * @param[in] zero The value of the structural zero.
+     */
+    template<typename MatrixT, typename VectorT>
+    MatrixT diag(VectorT const &v)
+    {
+        IndexArrayType indices(v.nvals());
+        std::vector<typename VectorT::ScalarType> vals(v.nvals());
+        v.extractTuples(indices.begin(), vals.begin());
 
+        //populate diagnals:
+        MatrixT diag(v.size(), v.size());
+        diag.build(indices.begin(), indices.begin(), vals.begin(), vals.size());
+        return diag;
+    }
+
+    //************************************************************************
+    /**
+     * @brief Construct and retrun a scaled identity matrix of the given size.
+     *
+     * @param[in] mat_size The size of the identiy matrix to construct.
+     * @param[in] val      The value to store along the diagonal
+     */
+    template<typename MatrixT>
+    MatrixT scaled_identity(IndexType                    mat_size,
+                            typename MatrixT::ScalarType val =
+                                static_cast<typename MatrixT::ScalarType>(1))
+    {
+        using T = typename MatrixT::ScalarType;
+        IndexArrayType indices;
+        std::vector<T> vals(mat_size, val);
+        for (IndexType ix = 0; ix < mat_size; ++ix)
+        {
+            indices.push_back(ix);
+        }
+
+        MatrixT identity(mat_size, mat_size);
+        identity.build(indices, indices, vals);
+        GraphBLAS::print_matrix(std::cerr, identity, "SCALED IDENTITY");
+        return identity;
+    }
+}
+
+//****************************************************************************
+#if 0
 namespace XXXgraphblas
 {
 
@@ -229,7 +281,7 @@ namespace XXXgraphblas
     {
         return a.m_mat.operator==(b.m_mat);
     }
-
-
 } // graphblas
+#endif
+
 #endif // GB_MATRIX_UTILS_HPP

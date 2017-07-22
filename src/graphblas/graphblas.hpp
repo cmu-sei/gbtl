@@ -32,9 +32,9 @@
 #include <graphblas/TransposeView.hpp>
 //#include <graphblas/View.hpp> // deprecated
 
+#include <graphblas/matrix_utils.hpp>
 #include <graphblas/operations.hpp>
 
-//#include <graphblas/matrix_utils.hpp> // Does not belong
 //#include <graphblas/linalg_utils.hpp>  // deprecated
 //#include <graphblas/utility.hpp>   // deprecated
 

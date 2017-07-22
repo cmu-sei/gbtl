@@ -40,9 +40,6 @@ namespace GraphBLAS
 
             Vector() = delete;
 
-            template<typename OtherVectorT>
-            Vector(OtherVectorT const &vec) : ParentVectorType(vec) {}
-
             Vector(IndexType nsize) : ParentVectorType(nsize) {}
 
             Vector(IndexType const &nsize, ScalarT const &value)

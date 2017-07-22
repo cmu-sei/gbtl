@@ -311,26 +311,26 @@ namespace algorithms
 
     //************************************************************************
     /**
-     * @brief Perform a breadth first search (BFS) on the given graph.
+     * @brief Perform a single breadth first searches (BFS) on the given graph.
      *
      * @param[in]  graph      NxN adjacency matrix of the graph on which to
      *                        perform a BFS (not the transpose).  A value of
      *                        1 indicates an edge (structural zero = 0).
-     * @param[in]  wavefront  RxN initial wavefronts to use in the calculation
+     * @param[in]  wavefront  N-vector initial wavefront to use in the calculation
      *                        of R simultaneous traversals.  A value of 1 in a
-     *                        given row indicates a root for the corresponding
-     *                        traversal. (structural zero = 0).
+     *                        given position indicates a root for the
+     *                        traversal..
      * @param[out] levels     The level (distance in unweighted graphs) from
      *                        the corresponding root of that BFS.  Roots are
      *                        assigned a value of 1. (a value of 0 implies not
      *                        reachable.
      */
     template <typename MatrixT,
-              typename WavefrontMatrixT,
-              typename LevelListMatrixT>
-    void bfs_level_masked(MatrixT const     &graph,
-                          WavefrontMatrixT   wavefront, //row vector, copy made
-                          LevelListMatrixT  &levels)
+              typename WavefrontT,
+              typename LevelListT>
+    void bfs_level_masked(MatrixT const  &graph,
+                          WavefrontT      wavefront, //row vector, copy made
+                          LevelListT     &levels)
     {
         using T = typename MatrixT::ScalarType;
 
@@ -338,10 +338,9 @@ namespace algorithms
         GraphBLAS::IndexType grows(graph.nrows());
         GraphBLAS::IndexType gcols(graph.ncols());
 
-        GraphBLAS::IndexType rows(wavefront.nrows());
-        GraphBLAS::IndexType cols(wavefront.ncols());
+        GraphBLAS::IndexType wsize(wavefront.size());
 
-        if ((grows != gcols) || (cols != grows))
+        if ((grows != gcols) || (wsize != grows))
         {
             throw GraphBLAS::DimensionException();
         }
@@ -365,12 +364,78 @@ namespace algorithms
                              true);
 
             // Advance the wavefront and mask out nodes already assigned levels
-            GraphBLAS::mxm(
+            GraphBLAS::vxm(
                 wavefront,
                 GraphBLAS::complement(levels),
                 GraphBLAS::NoAccumulate(),
                 GraphBLAS::LogicalSemiring<GraphBLAS::IndexType>(),
                 wavefront, graph,
+                true);
+        }
+    }
+
+    //************************************************************************
+    /**
+     * @brief Perform multiple breadth first searches (BFS) on the given graph.
+     *
+     * @param[in]  graph      NxN adjacency matrix of the graph on which to
+     *                        perform a BFS (not the transpose).  A value of
+     *                        1 indicates an edge (structural zero = 0).
+     * @param[in]  wavefronts RxN initial wavefronts to use in the calculation
+     *                        of R simultaneous traversals.  A value of 1 in a
+     *                        given row indicates a root for the corresponding
+     *                        traversal. (structural zero = 0).
+     * @param[out] levels     The level (distance in unweighted graphs) from
+     *                        the corresponding root of that BFS.  Roots are
+     *                        assigned a value of 1. (a value of 0 implies not
+     *                        reachable.
+     */
+    template <typename MatrixT,
+              typename WavefrontsMatrixT,
+              typename LevelListMatrixT>
+    void batch_bfs_level_masked(MatrixT const     &graph,
+                                WavefrontsMatrixT  wavefronts, //row vectors, copy
+                                LevelListMatrixT  &levels)
+    {
+        using T = typename MatrixT::ScalarType;
+
+        /// Assert graph is square/have a compatible shape with wavefronts
+        GraphBLAS::IndexType grows(graph.nrows());
+        GraphBLAS::IndexType gcols(graph.ncols());
+
+        GraphBLAS::IndexType rows(wavefronts.nrows());
+        GraphBLAS::IndexType cols(wavefronts.ncols());
+
+        if ((grows != gcols) || (cols != grows))
+        {
+            throw GraphBLAS::DimensionException();
+        }
+
+        GraphBLAS::IndexType depth = 0;
+        while (wavefronts.nvals() > 0)
+        {
+            // Increment the level
+            ++depth;
+
+            // Apply the level to all newly visited nodes
+            BinaryOp_Bind2nd<GraphBLAS::IndexType,
+                             GraphBLAS::Times<GraphBLAS::IndexType> >
+                    apply_depth(depth);
+
+            GraphBLAS::apply(levels,
+                             GraphBLAS::NoMask(),
+                             GraphBLAS::Plus<unsigned int>(),
+                             apply_depth,
+                             wavefronts,
+                             true);
+
+            // Advance the wavefronts and mask out nodes already assigned levels
+            GraphBLAS::mxm(
+                wavefronts,
+                GraphBLAS::complement(levels),
+                GraphBLAS::NoAccumulate(),
+                GraphBLAS::LogicalSemiring<GraphBLAS::IndexType>(),
+                wavefronts, graph,
                 true);
         }
     }

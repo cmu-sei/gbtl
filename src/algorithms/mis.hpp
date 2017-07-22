@@ -29,72 +29,67 @@ namespace
     std::uniform_real_distribution<double> distribution;
 
     // Return a random value that is scaled by the inverse of the degree.
+    template <typename T=float>
     class SetRandom
     {
     public:
-        typedef double result_type;
+        typedef T result_type;
         SetRandom() {}
 
+        template <typename DegreeT>
         __device__ __host__ inline result_type operator()(
-            double candidate_flag,
-            double degree)
+            bool,   // candidate_flag,
+            DegreeT degree)
         {
-            double prob = 0.0;
-            if (candidate_flag != 0.0)
-            {
-                //prob = 0.0001 + distribution(generator);
-                // set probability of selecting node based on 1/degree
-                prob =
-                    (0.0001 + distribution(generator))/(1.0 + 2.0 * degree);
-            }
-            return prob;
+            return static_cast<T>(0.0001 +
+                                  distribution(generator)/(1. + 2.*degree));
         }
     };
 
     //************************************************************************
     // select source node if its probability is greater than max neighbor
     /// @todo Consider moving this to algebra.hpp
-    template <typename T>
-    class GreaterThan
-    {
-    public:
-        typedef T result_type;
+    // template <typename T>
+    // class GreaterThan
+    // {
+    // public:
+    //     typedef T result_type;
 
-        __device__ __host__ inline result_type operator()(T const &source,
-                                                          T const &max_neighbor)
-        {
-            if (source == 0)
-                return 0;
-            else if (max_neighbor == 0)
-                return 1;
-            else
-                return ((source > max_neighbor) ?
-                        static_cast<T>(1) :
-                        static_cast<T>(0));
-        }
-    };
+    //     __device__ __host__ inline result_type operator()(T const &source,
+    //                                                       T const &max_neighbor)
+    //     {
+    //         if (source == 0)
+    //             return 0;
+    //         else if (max_neighbor == 0)
+    //             return 1;
+    //         else
+    //             return ((source > max_neighbor) ?
+    //                     static_cast<T>(1) :
+    //                     static_cast<T>(0));
+    //     }
+    // };
 }
 
 //****************************************************************************
 namespace algorithms
 {
     /**
-     * @brief Convert the selection flags returned by mis into a set of
+     * @brief Convert the selection flags returned by MIS into a set of
      *        vertex ID's (based on index position).
+     *
+     * @param[in] independent_set  Assumes a stored value in this vector
+     *                             implies the corresponding vertex is selected.
      */
-    template <typename MatrixT>
-    graphblas::IndexArrayType get_vertex_IDs(MatrixT const &independent_set)
+    template <typename VectorT>
+    GraphBLAS::IndexArrayType get_vertex_IDs(VectorT const &independent_set)
     {
-        graphblas::IndexArrayType ans;
-        graphblas::IndexType rows, cols;
-        independent_set.get_shape(rows, cols);
-        for (graphblas::IndexType i = 0; i < rows; ++i)
-        {
-            if (independent_set.extractElement(i, 0) != independent_set.get_zero())
-            {
-                ans.push_back(i);
-            }
-        }
+        using T = typename VectorT::ScalarType;
+        GraphBLAS::IndexType set_size(independent_set.nvals());
+        GraphBLAS::IndexArrayType ans(set_size);
+        std::vector<T> vals(set_size);
+
+        independent_set.extractTuples(ans.begin(), vals.begin());
+
         return ans;
     }
 
@@ -123,421 +118,132 @@ namespace algorithms
      *                              structural zero needs to be '0' and edges
      *                              are indicated by '1' to support use of the
      *                              Arithmetic semiring.
-     * @param[out] independent_set  Nx1 vector of flags, '1' indicates vertex
+     * @param[out] independent_set  N-vector of flags, 'true' indicates vertex
      *                              is selected.  Must be empty on call.
      * @param[in]  seed             The seed for the random number generator
      *
      */
     template <typename MatrixT>
-    void mis(MatrixT const &graph,
-             MatrixT       &independent_set,
-             double         seed = 0)
+    void mis(MatrixT const            &graph,
+             GraphBLAS::Vector<bool>  &independent_set,
+             double                    seed = 0)
     {
-        graphblas::IndexType rows, cols, r, c;
-        graph.get_shape(rows, cols);
-        independent_set.get_shape(r, c);
-        if ((rows != cols) || (rows != r))
+        GraphBLAS::IndexType num_vertices(graph.nrows());
+        GraphBLAS::IndexType cols(graph.ncols());
+        GraphBLAS::IndexType r(independent_set.size());
+
+        if ((num_vertices != cols) || (num_vertices != r))
         {
-            throw graphblas::DimensionException();
+            throw GraphBLAS::DimensionException();
         }
 
-        //graphblas::print_matrix(std::cout, graph, "Graph");
+        //GraphBLAS::print_matrix(std::cout, graph, "Graph");
 
         generator.seed(seed);
 
-        typedef graphblas::Matrix<double,
-                                  graphblas::DirectedMatrixTag> RealMatrix;
         using T = typename MatrixT::ScalarType;
+        using RealT = float;
+        typedef GraphBLAS::Vector<RealT> RealVector;
+        typedef GraphBLAS::Vector<bool> BoolVector;
 
-        // This will hold the set (non-zero implies part of the set
-        //RealMatrix independent_set(rows, 1);
-        RealMatrix neighbor_max(rows, 1);
-        RealMatrix new_members(rows, 1);
-        RealMatrix new_neighbors(rows, 1);
-        RealMatrix prob(rows, 1);
+        RealVector prob(num_vertices);
+        RealVector neighbor_max(num_vertices);
+        BoolVector new_members(num_vertices);
+        BoolVector new_neighbors(num_vertices);
 
-        RealMatrix candidates(graphblas::fill<RealMatrix>(1.0, rows, 1, 0));
+        // Start with all vertices as candidates (NOTE: dense!)
+        BoolVector candidates(num_vertices);
+        GraphBLAS::assign_constant(candidates,
+                                   GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                                   true, GraphBLAS::GrB_ALL);
 
-        // Compute the degree of each node, add 1 to prevent divide by zero
-        // on isolated nodes.
-        RealMatrix degrees(candidates);
-        graphblas::row_reduce(
-            graph,
-            degrees,
-            graphblas::math::Plus<T>());
-        //graphblas::print_matrix(std::cout, degrees, "degrees");
 
-        while (candidates.get_nnz() > 0)
+        // Compute the degree of each node,
+        GraphBLAS::Vector<RealT> degrees(num_vertices);
+        GraphBLAS::reduce(degrees,
+                          GraphBLAS::NoMask(), GraphBLAS::Plus<RealT>(),
+                          GraphBLAS::PlusMonoid<RealT>(),
+                          graph);
+        //GraphBLAS::print_vector(std::cout, degrees, "degrees");
+
+        while (candidates.nvals() > 0)
         {
             //std::cout << "************* ITERATION ************* nnz = "
-            //          << candidates.get_nnz() << std::endl;
-            //graphblas::print_matrix(std::cout, candidates, "candidates");
+            //          << candidates.nvals() << std::endl;
+            //GraphBLAS::print_vector(std::cout, candidates, "candidates");
 
             // assign new random values to all non-zero elements (ensures
             // that any ties that may occur between neighbors will eventually
             // be broken.
-            graphblas::ewisemult(candidates, degrees, prob, SetRandom());
-            //graphblas::print_matrix(std::cout, prob, "prob");
+            GraphBLAS::eWiseMult(prob,
+                                 GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                                 SetRandom<RealT>(),
+                                 candidates, degrees);
+            //GraphBLAS::print_vector(std::cout, prob, "prob");
 
             // find the neighbor of each source node with the max random number
-            graphblas::mxm(graph, prob, neighbor_max,
-                           graphblas::MaxSelect2ndSemiring<double>());
-            //graphblas::print_matrix(std::cout, neighbor_max, "neighbor_max");
+            GraphBLAS::mxv(neighbor_max,
+                           candidates, GraphBLAS::NoAccumulate(),
+                           GraphBLAS::MaxSelect2ndSemiring<RealT>(),
+                           graph, prob, true);
+            //GraphBLAS::print_vector(std::cout, neighbor_max, "neighbor_max");
 
             // Select source node if its probability is > neighbor_max
-            graphblas::ewiseadd(prob, neighbor_max, new_members,
-                                GreaterThan<double>());
-            //graphblas::print_matrix(std::cout, new_members, "new_members");
+            GraphBLAS::eWiseAdd(new_members,
+                                GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                                GraphBLAS::GreaterThan<RealT>(),
+                                prob, neighbor_max);
+            // Note the result above IS DENSE, I can add the following apply (or
+            // many other operations to make it sparse (just add itself as the
+            // mask).
+            GraphBLAS::apply(new_members,
+                             new_members, GraphBLAS::NoAccumulate(),
+                             GraphBLAS::Identity<bool>(),
+                             new_members, true);
+            //GraphBLAS::print_vector(std::cout, new_members, "new_members");
 
             // Add new members to independent set.
-            graphblas::ewiseadd(independent_set, new_members, independent_set,
-                                graphblas::math::OrFn<double>());
-            //graphblas::print_matrix(std::cout, independent_set, "IS");
+            GraphBLAS::eWiseAdd(independent_set,
+                                GraphBLAS::NoMask(), //new_members, //
+                                GraphBLAS::NoAccumulate(),
+                                GraphBLAS::LogicalOr<bool>(),
+                                independent_set, new_members);
+            //GraphBLAS::print_vector(std::cout, independent_set, "IS");
 
-            // Zero out candidates of new_members selected for independent set
-            graphblas::ewisemult(
-                graphblas::negate(new_members), candidates, candidates);
-            //graphblas::print_matrix(std::cout, candidates,
+            // Remove new_members selected for independent set from candidates
+            GraphBLAS::eWiseMult(candidates,
+                                 GraphBLAS::complement(new_members),
+                                 GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::LogicalAnd<bool>(),
+                                 candidates, candidates, true);
+            //GraphBLAS::print_vector(std::cout, candidates,
             //                        "candidates (sans new_members)");
 
-            if (candidates.get_nnz() == 0)
+            if (candidates.nvals() == 0)
             {
                 break;
             }
 
             // Neighbors of new members can also be removed
-            graphblas::mxm(graph, new_members, new_neighbors,
-                           graphblas::MaxSelect2ndSemiring<double>());
-            //graphblas::print_matrix(std::cout, new_neighbors,
+            GraphBLAS::mxv(new_neighbors,
+                           candidates, GraphBLAS::NoAccumulate(),
+                           GraphBLAS::LogicalSemiring<bool>(),
+                           graph, new_members);  // REPLACE doesn't seem needed
+            //GraphBLAS::print_vector(std::cout, new_neighbors,
             //                        "new_member neighbors");
 
             // Zero out candidates of new member neighbors
-            graphblas::ewisemult(
-                graphblas::negate(new_neighbors), candidates, candidates);
-            //graphblas::print_matrix(std::cout, candidates,
+            GraphBLAS::eWiseMult(candidates,
+                                 GraphBLAS::complement(new_neighbors),
+                                 GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::LogicalAnd<bool>(),
+                                 candidates, candidates, true);
+            //GraphBLAS::print_vector(std::cout, candidates,
             //                        "candidates (sans new_members' neighbors)");
         }
 
     }
 
-//****************************************************************************
-
-    // Return a random value that is scaled by the inverse of the degree.
-    class SetRandom2
-    {
-    public:
-        typedef float result_type;
-        SetRandom2() {}
-
-        __device__ __host__ inline float operator()(
-            uint32_t candidate,
-            uint32_t degree)
-        {
-            float prob = 0.f;
-            if (candidate)
-            {
-                prob =
-                    (0.0001f + distribution(generator))/(1.f + 2.f * degree);
-            }
-            return prob;
-        }
-    };
-
-    template <typename LhsT, typename RhsT, typename ResultT>
-    class MaxSelect2ndTest
-    {
-    public:
-        //typedef ScalarT ScalarType;
-        typedef ResultT result_type;
-
-        //template<typename LhsT, typename RhsT>
-        __host__ __device__ result_type add(result_type const &a,
-                                            result_type const &b) const
-        {
-            //annihilator_max
-            if (a == static_cast<result_type>(0))
-            {
-                return b;
-            }
-            else if (b == static_cast<result_type>(0))
-            {
-                return a;
-            }
-            else
-            {
-                return (a > b) ? a : b;
-            }
-        }
-
-        //template<typename LhsT, typename RhsT>
-        __host__ __device__ result_type mult(LhsT first,
-                                             RhsT second) const
-        {
-            // select2ndZero
-            return (first != static_cast<LhsT>(0)) ?
-                    static_cast<result_type>(second) : zero();
-        }
-
-        __host__ __device__ result_type zero() const
-        {
-            return static_cast<result_type>(0);
-        }
-
-        __host__ __device__ result_type one() const
-        {
-            return static_cast<result_type>(1);
-        }
-    };
-
-
-    /**
-     * @brief Compute the Maximal Independent Set for a given graph.
-     *
-     * A variant of Luby's randomized algorithm (Luby 1985) is used:
-     *  - A random number scaled by the inverse of the node's degree is assigned
-     *    to each candidate node in the graph (algorithm starts with all nodes
-     *    in the candidate set).
-     *  - Each node's neighbor with the maximum random value is determined.
-     *  - If the node has a larger random number than any of its neighbors,
-     *    it is added to the independent set (IS).  This has the tendency to
-     *    prefer selecting lower degree nodes.
-     *  - Each selected node and all of their neighbors are removed from
-     *    candidate set
-     *  - The process is repeated
-     *
-     * @note Because of the random component of this algorithm, the MIS
-     *       calculated across various calls to <code>mis</code> may vary.
-     *
-     * @param[in]  graph            NxN adjacency matrix of graph to compute
-     *                              the maximal independent set on. This
-     *                              must be an unweighted and undirected graph
-     *                              (meaning the matrix is symmetric).  The
-     *                              structural zero needs to be '0' and edges
-     *                              are indicated by '1' to support use of the
-     *                              Arithmetic semiring.
-     * @param[out] independent_set  Nx1 vector of flags, '1' indicates vertex
-     *                              is selected.  Must be empty on call.
-     * @param[in]  seed             The seed for the random number generator
-     *
-     */
-    template <typename MatrixT>
-    void mis2(MatrixT const &graph,
-              MatrixT       &independent_set,
-              double         seed = 0)
-    {
-        graphblas::IndexType rows, cols, r, c;
-        graph.get_shape(rows, cols);
-        independent_set.get_shape(r, c);
-        if ((rows != cols) || (rows != r))
-        {
-            throw graphblas::DimensionException();
-        }
-
-        //graphblas::print_matrix(std::cout, graph, "Graph");
-
-        generator.seed(seed);
-
-        typedef graphblas::Matrix<uint32_t,
-                                  graphblas::DirectedMatrixTag> IntMatrix;
-        typedef graphblas::Matrix<float,
-                                  graphblas::DirectedMatrixTag> RealMatrix;
-        using T = typename MatrixT::ScalarType;
-
-        // This will hold the set (non-zero implies part of the set)
-        //IntMatrix independent_set(rows, 1);
-        RealMatrix prob(rows, 1);
-        RealMatrix neighbor_max(rows, 1);
-
-        IntMatrix new_members(rows, 1);
-        IntMatrix new_neighbors(rows, 1);
-        IntMatrix candidates(graphblas::fill<IntMatrix>(1, rows, 1, 0));
-        IntMatrix degrees(rows, 1);
-
-        // Compute the degree of each node, add 1 to prevent divide by zero
-        // on isolated nodes.
-        graphblas::row_reduce(
-            graph,
-            degrees,
-            graphblas::math::Plus<T>());
-        //graphblas::print_matrix(std::cout, degrees, "degrees");
-
-        MaxSelect2ndTest<uint32_t, float, float> maxSelect2ndIFF;
-
-        while (candidates.get_nnz() > 0)
-        {
-            //std::cout << "************* ITERATION ************* nnz = "
-            //          << candidates.get_nnz() << std::endl;
-            //graphblas::print_matrix(std::cout, candidates, "candidates");
-
-            // assign new random values to all non-zero elements (ensures
-            // that any ties that may occur between neighbors will eventually
-            // be broken.
-            // Can be replaced with apply masked by candidates.
-            graphblas::ewisemult(candidates, degrees, prob, SetRandom2());
-            //graphblas::print_matrix(std::cout, prob, "prob");
-
-            // find the neighbor of each source node with the max random number
-            graphblas::mxv(graph, prob, neighbor_max, maxSelect2ndIFF);
-            //graphblas::print_matrix(std::cout, neighbor_max, "neighbor_max");
-
-            // Select source node if its probability is > neighbor_max
-            graphblas::ewiseadd(prob, neighbor_max, new_members,
-                                GreaterThan<double>());
-            //graphblas::print_matrix(std::cout, new_members, "new_members");
-
-            // Add new members to independent set.
-            graphblas::ewiseadd(independent_set, new_members, independent_set,
-                                graphblas::math::OrFn<double>());
-            //graphblas::print_matrix(std::cout, independent_set, "IS");
-
-            // Zero out candidates of new_members selected for independent set
-            graphblas::ewisemult(
-                graphblas::negate(new_members), candidates, candidates);
-            //graphblas::print_matrix(std::cout, candidates,
-            //                        "candidates (sans new_members)");
-
-            if (candidates.get_nnz() == 0)
-            {
-                break;
-            }
-
-            // Neighbors of new members can also be removed
-            graphblas::mxm(graph, new_members, new_neighbors, maxSelect2ndIFF);
-            //graphblas::print_matrix(std::cout, new_neighbors,
-            //                        "new_member neighbors");
-
-            // Zero out candidates of new member neighbors
-            graphblas::ewisemult(
-                graphblas::negate(new_neighbors), candidates, candidates);
-            //graphblas::print_matrix(std::cout, candidates,
-            //                        "candidates (sans new_members' neighbors)");
-        }
-    }
-
-    /**
-     * @brief Compute the Maximal Independent Set for a given graph.
-     *
-     * A variant of Luby's randomized algorithm (Luby 1985) is used:
-     *  - A random number scaled by the inverse of the node's degree is assigned
-     *    to each candidate node in the graph (algorithm starts with all nodes
-     *    in the candidate set).
-     *  - Each node's neighbor with the maximum random value is determined.
-     *  - If the node has a larger random number than any of its neighbors,
-     *    it is added to the independent set (IS).  This has the tendency to
-     *    prefer selecting lower degree nodes.
-     *  - Each selected node and all of their neighbors are removed from
-     *    candidate set
-     *  - The process is repeated
-     *
-     * @note Because of the random component of this algorithm, the MIS
-     *       calculated across various calls to <code>mis</code> may vary.
-     *
-     * @param[in]  graph            NxN adjacency matrix of graph to compute
-     *                              the maximal independent set on. This
-     *                              must be an unweighted and undirected graph
-     *                              (meaning the matrix is symmetric).  The
-     *                              structural zero needs to be '0' and edges
-     *                              are indicated by '1' to support use of the
-     *                              Arithmetic semiring.
-     * @param[out] independent_set  Nx1 vector of flags, '1' indicates vertex
-     *                              is selected.  Must be empty on call.
-     * @param[in]  seed             The seed for the random number generator
-     *
-     */
-    template <typename MatrixT>
-    void mis3_masked(MatrixT const &graph,
-                     MatrixT       &independent_set,
-                     double         seed = 0)
-    {
-        graphblas::IndexType rows, cols, r, c;
-        graph.get_shape(rows, cols);
-        independent_set.get_shape(r, c);
-        if ((rows != cols) || (rows != r))
-        {
-            throw graphblas::DimensionException();
-        }
-
-        //graphblas::print_matrix(std::cout, graph, "Graph");
-
-        generator.seed(seed);
-
-        typedef graphblas::Matrix<uint32_t,
-                                  graphblas::DirectedMatrixTag> IntMatrix;
-        typedef graphblas::Matrix<float,
-                                  graphblas::DirectedMatrixTag> RealMatrix;
-        using T = typename MatrixT::ScalarType;
-
-        // This will hold the set (non-zero implies part of the set)
-        //IntMatrix independent_set(rows, 1);
-        RealMatrix prob(rows, 1);
-        RealMatrix neighbor_max(rows, 1);
-
-        IntMatrix new_members(rows, 1);
-        IntMatrix new_neighbors(rows, 1);
-        IntMatrix candidates(graphblas::fill<IntMatrix>(1, rows, 1, 0));
-        IntMatrix degrees(rows, 1);
-
-        // Compute the degree of each node, add 1 to prevent divide by zero
-        // on isolated nodes.
-        graphblas::row_reduce(
-            graph,
-            degrees,
-            graphblas::math::Plus<T>());
-        //graphblas::print_matrix(std::cout, degrees, "degrees");
-
-        MaxSelect2ndTest<uint32_t, float, float> maxSelect2ndIFF;
-
-        while (candidates.get_nnz() > 0)
-        {
-            //std::cout << "************* ITERATION ************* nnz = "
-            //          << candidates.get_nnz() << std::endl;
-            //graphblas::print_matrix(std::cout, candidates, "candidates");
-
-            // assign new random values to all non-zero elements (ensures
-            // that any ties that may occur between neighbors will eventually
-            // be broken.
-            // Can be replaced with apply masked by candidates.
-            graphblas::ewisemult(candidates, degrees, prob, SetRandom2());
-            //graphblas::print_matrix(std::cout, prob, "prob");
-
-            // find the neighbor of each source node with the max random number
-            graphblas::mxmMasked(graph, prob, neighbor_max, candidates, maxSelect2ndIFF);
-            //graphblas::print_matrix(std::cout, neighbor_max, "neighbor_max");
-
-            // Select source node if its probability is > neighbor_max
-            graphblas::ewiseadd(prob, neighbor_max, new_members,
-                                GreaterThan<double>());
-            //graphblas::print_matrix(std::cout, new_members, "new_members");
-
-            // Add new members to independent set.
-            graphblas::ewiseadd(independent_set, new_members, independent_set,
-                                graphblas::math::OrFn<double>());
-            //graphblas::print_matrix(std::cout, independent_set, "IS");
-
-            // Zero out candidates of new_members selected for independent set
-            graphblas::ewisemult(
-                graphblas::negate(new_members), candidates, candidates);
-            //graphblas::print_matrix(std::cout, candidates,
-            //                        "candidates (sans new_members)");
-
-            if (candidates.get_nnz() == 0)
-            {
-                break;
-            }
-
-            // Neighbors of new members can also be removed
-            graphblas::mxmMasked(graph, new_members, new_neighbors, candidates, maxSelect2ndIFF);
-            //graphblas::print_matrix(std::cout, new_neighbors,
-            //                        "new_member neighbors");
-
-            // Zero out candidates of new member neighbors
-            graphblas::ewisemult(
-                graphblas::negate(new_neighbors), candidates, candidates);
-            //graphblas::print_matrix(std::cout, candidates,
-            //                        "candidates (sans new_members' neighbors)");
-        }
-
-    }
 } // algorithms
 
 #endif // MIS_HPP

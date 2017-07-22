@@ -30,6 +30,21 @@ namespace GraphBLAS
     public:
         typedef ScalarT ScalarType;
 
+        // Ambiguous with size constructor
+        // template <typename OtherVectorT>
+        // BitmapSparseVector(OtherVectorT const &rhs)
+        //     : m_size(rhs.m_size),
+        //       m_nvals(rhs.m_nvals),
+        //       m_vals(rhs.m_vals.size()),
+        //       m_bitmap(rhs.m_bitmap)
+        // {
+        //     for (size_t ix = 0; ix < rhs.m_vals.size(); ++ix)
+        //     {
+        //         m_vals[ix] =
+        //             static_cast<ScalarType>(rhs.m_vals[ix]);
+        //     }
+        // }
+
         /**
          * @brief Construct an empty list of lists sparse matrix with
          *        the given shape.
@@ -348,7 +363,7 @@ namespace GraphBLAS
         template<typename RAIteratorIT,
                  typename RAIteratorVT>
         void extractTuples(RAIteratorIT        i_it,
-                           RAIteratorVT        v_it)
+                           RAIteratorVT        v_it) const
         {
             for (IndexType idx = 0; idx < m_size; ++idx)
             {
@@ -361,7 +376,7 @@ namespace GraphBLAS
         }
 
         void extractTuples(IndexArrayType        &indices,
-                           std::vector<ScalarT>  &values)
+                           std::vector<ScalarT>  &values) const
         {
             extractTuples(indices.begin(), values.begin());
         }

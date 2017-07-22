@@ -118,7 +118,7 @@ int main()
     std::cout << "levels:" << std::endl;
     GraphBLAS::print_matrix(std::cout, levels1);
 
-    algorithms::bfs_level_masked(G_karate, root, levels);
+    algorithms::batch_bfs_level_masked(G_karate, root, levels);
 
 //    std::cout << "Graph: " << std::endl;
 //    GraphBLAS::print_matrix(std::cout, G_karate);
