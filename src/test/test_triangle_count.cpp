@@ -18,7 +18,7 @@
 #include <graphblas/graphblas.hpp>
 #include <algorithms/triangle_count.hpp>
 
-using namespace graphblas;
+using namespace GraphBLAS;
 using namespace algorithms;
 
 #define BOOST_TEST_MAIN
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(test_triangle_counting_v1)
     std::vector<double> ac={1, 2, 3, 0, 2, 4, 0, 1, 3, 4, 0, 2, 4, 1, 2, 3};
     std::vector<double> av={1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> testtriangle(5,5);
-    graphblas::buildmatrix(testtriangle, ar.begin(), ac.begin(), av.begin(), av.size());
+    testtriangle.build(ar.begin(), ac.begin(), av.begin(), av.size());
 
     IndexType result = triangle_count(testtriangle);
     BOOST_CHECK_EQUAL(result, 4);
@@ -99,9 +99,50 @@ BOOST_AUTO_TEST_CASE(test_triangle_counting_flame1)
     std::vector<double> ac={1, 2, 3, 0, 2, 4, 0, 1, 3, 4, 0, 2, 4, 1, 2, 3};
     std::vector<double> av={1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> testtriangle(5,5);
-    graphblas::buildmatrix(testtriangle, ar.begin(), ac.begin(), av.begin(), av.size());
+    testtriangle.build(ar.begin(), ac.begin(), av.begin(), av.size());
 
     IndexType result = triangle_count_flame1(testtriangle);
+    BOOST_CHECK_EQUAL(result, 4);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_triangle_counting_flame1_newGBTL)
+{
+    //Matrix<double, DirectedMatrixTag> testtriangle(
+    //                       {{0,1,1,1,0},
+    //                        {1,0,1,0,1},
+    //                        {1,1,0,1,1},
+    //                        {1,0,1,0,1},
+    //                        {0,1,1,1,0}});
+
+    std::vector<double> ar={0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4};
+    std::vector<double> ac={1, 2, 3, 0, 2, 4, 0, 1, 3, 4, 0, 2, 4, 1, 2, 3};
+    std::vector<double> av={1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    Matrix<double, DirectedMatrixTag> testtriangle(5,5);
+    testtriangle.build(ar.begin(), ac.begin(), av.begin(), av.size());
+
+    IndexType result = triangle_count_flame1_newGBTL(testtriangle);
+    BOOST_CHECK_EQUAL(result, 4);
+}
+
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_triangle_counting_flame1a)
+{
+    //Matrix<double, DirectedMatrixTag> testtriangle(
+    //                       {{0,1,1,1,0},
+    //                        {1,0,1,0,1},
+    //                        {1,1,0,1,1},
+    //                        {1,0,1,0,1},
+    //                        {0,1,1,1,0}});
+
+    std::vector<double> ar={0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4};
+    std::vector<double> ac={1, 2, 3, 0, 2, 4, 0, 1, 3, 4, 0, 2, 4, 1, 2, 3};
+    std::vector<double> av={1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    Matrix<double, DirectedMatrixTag> testtriangle(5,5);
+    testtriangle.build(ar.begin(), ac.begin(), av.begin(), av.size());
+
+    IndexType result = triangle_count_flame1a(testtriangle);
     BOOST_CHECK_EQUAL(result, 4);
 }
 
@@ -120,9 +161,90 @@ BOOST_AUTO_TEST_CASE(test_triangle_counting_flame2)
     std::vector<double> ac={1, 2, 3, 0, 2, 4, 0, 1, 3, 4, 0, 2, 4, 1, 2, 3};
     std::vector<double> av={1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> testtriangle(5,5);
-    graphblas::buildmatrix(testtriangle, ar.begin(), ac.begin(), av.begin(), av.size());
+    testtriangle.build(ar.begin(), ac.begin(), av.begin(), av.size());
 
     IndexType result = triangle_count_flame2(testtriangle);
+    BOOST_CHECK_EQUAL(result, 4);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_triangle_counting_flame2_newGBTL)
+{
+    //Matrix<double, DirectedMatrixTag> testtriangle(
+    //                       {{0,1,1,1,0},
+    //                        {1,0,1,0,1},
+    //                        {1,1,0,1,1},
+    //                        {1,0,1,0,1},
+    //                        {0,1,1,1,0}});
+
+    std::vector<double> ar={0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4};
+    std::vector<double> ac={1, 2, 3, 0, 2, 4, 0, 1, 3, 4, 0, 2, 4, 1, 2, 3};
+    std::vector<double> av={1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    Matrix<double, DirectedMatrixTag> testtriangle(5,5);
+    testtriangle.build(ar.begin(), ac.begin(), av.begin(), av.size());
+
+    IndexType result = triangle_count_flame2_newGBTL(testtriangle);
+    BOOST_CHECK_EQUAL(result, 4);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_triangle_counting_flame2_newGBTL_masked)
+{
+    //Matrix<double, DirectedMatrixTag> testtriangle(
+    //                       {{0,1,1,1,0},
+    //                        {1,0,1,0,1},
+    //                        {1,1,0,1,1},
+    //                        {1,0,1,0,1},
+    //                        {0,1,1,1,0}});
+
+    std::vector<double> ar={0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4};
+    std::vector<double> ac={1, 2, 3, 0, 2, 4, 0, 1, 3, 4, 0, 2, 4, 1, 2, 3};
+    std::vector<double> av={1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    Matrix<double, DirectedMatrixTag> testtriangle(5,5);
+    testtriangle.build(ar.begin(), ac.begin(), av.begin(), av.size());
+
+    IndexType result = triangle_count_flame2_newGBTL_masked(testtriangle);
+    BOOST_CHECK_EQUAL(result, 4);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_triangle_counting_flame2_newGBTL_blocked)
+{
+    //Matrix<double, DirectedMatrixTag> testtriangle(
+    //                       {{0,1,1,1,0},
+    //                        {1,0,1,0,1},
+    //                        {1,1,0,1,1},
+    //                        {1,0,1,0,1},
+    //                        {0,1,1,1,0}});
+
+    std::vector<double> ar={0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4};
+    std::vector<double> ac={1, 2, 3, 0, 2, 4, 0, 1, 3, 4, 0, 2, 4, 1, 2, 3};
+    std::vector<double> av={1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    Matrix<double, DirectedMatrixTag> testtriangle(5,5);
+    testtriangle.build(ar.begin(), ac.begin(), av.begin(), av.size());
+
+    IndexType result = triangle_count_flame2_newGBTL_blocked(testtriangle);
+    BOOST_CHECK_EQUAL(result, 4);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_triangle_counting_newGBTL)
+{
+    //Matrix<double, DirectedMatrixTag> testtriangle(
+    //                       {{0,1,1,1,0},
+    //                        {1,0,1,0,1},
+    //                        {1,1,0,1,1},
+    //                        {1,0,1,0,1},
+    //                        {0,1,1,1,0}});
+
+    std::vector<double> ar={0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4};
+    std::vector<double> ac={1, 2, 3, 0, 2, 4, 0, 1, 3, 4, 0, 2, 4, 1, 2, 3};
+    std::vector<double> av={1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    Matrix<double, DirectedMatrixTag> testtriangle(5,5), L(5,5), U(5,5);
+    testtriangle.build(ar.begin(), ac.begin(), av.begin(), av.size());
+    GraphBLAS::split(testtriangle, L, U);
+
+    IndexType result = triangle_count_newGBTL(L, U);
     BOOST_CHECK_EQUAL(result, 4);
 }
 

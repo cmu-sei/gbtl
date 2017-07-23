@@ -44,11 +44,11 @@ namespace GraphBLAS
         //**********************************************************************
         /// Implementation of 4.3.1 mxm: Matrix-matrix multiply
         template<typename CMatrixT,
-                typename MMatrixT,
-                typename AccumT,
-                typename SemiringT,
-                typename AMatrixT,
-                typename BMatrixT>
+                 typename MMatrixT,
+                 typename AccumT,
+                 typename SemiringT,
+                 typename AMatrixT,
+                 typename BMatrixT>
         inline void mxm(CMatrixT &C,
                         MMatrixT const &M,
                         AccumT const   &accum,

@@ -246,14 +246,14 @@ namespace GraphBLAS
                  typename RAIteratorVT>
         inline void extractTuples(RAIteratorIT        row_it,
                                   RAIteratorJT        col_it,
-                                  RAIteratorVT        values)
+                                  RAIteratorVT        values) const
         {
             m_mat.extractTuples(row_it, col_it, values);
         }
 
         inline void extractTuples(IndexArrayType            &row_indices,
                                   IndexArrayType            &col_indices,
-                                  std::vector<ScalarT>      &values)
+                                  std::vector<ScalarT>      &values) const
         {
             m_mat.extractTuples(row_indices.begin(),
                                 col_indices.begin(),

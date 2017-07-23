@@ -75,6 +75,52 @@ namespace GraphBLAS
         GraphBLAS::print_matrix(std::cerr, identity, "SCALED IDENTITY");
         return identity;
     }
+
+
+    /**
+     * @brief Split a matrix into its lower and upper triangular portions
+     *        Diagonal entries got to L.
+     *
+     * @param[in]  A  The matrix to split
+     * @param[out] L  The lower triangular portion with the diagonal
+     * @param[out] U  The upper triangular portion (no diagonal).
+     */
+    template<typename MatrixT>
+    void split(MatrixT const &A, MatrixT &L, MatrixT &U)
+    {
+        /// @todo assert A, L, and U are same size.
+
+        using T = typename MatrixT::ScalarType;
+
+        GraphBLAS::IndexType rows(A.nrows());
+        GraphBLAS::IndexType cols(A.ncols());
+        GraphBLAS::IndexType nvals(A.nvals());
+
+        GraphBLAS::IndexArrayType i(nvals), j(nvals);
+        std::vector<T> v(nvals);
+        A.extractTuples(i, j, v);
+
+        IndexArrayType iL,jL, iU,jU;
+        std::vector<T> vL, vU;
+
+        for (GraphBLAS::IndexType idx = 0; idx < nvals; ++idx)
+        {
+            if (i[idx] < j[idx])
+            {
+                iU.push_back(i[idx]);
+                jU.push_back(j[idx]);
+                vU.push_back(v[idx]);
+            }
+            else
+            {
+                iL.push_back(i[idx]);
+                jL.push_back(j[idx]);
+                vL.push_back(v[idx]);
+            }
+        }
+        L.build(iL.begin(), jL.begin(), vL.begin(), vL.size());
+        U.build(iU.begin(), jU.begin(), vU.begin(), vU.size());
+    }
 }
 
 //****************************************************************************

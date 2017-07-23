@@ -121,6 +121,7 @@ add_executable(test_sparse_vxm test/test_sparse_vxm.cpp ${GRAPHBLAS})
 add_executable(test_sparse_reduce test/test_sparse_reduce.cpp ${GRAPHBLAS})
 add_executable(test_sssp test/test_sssp.cpp ${GRAPHBLAS})
 add_executable(test_transpose test/test_transpose.cpp ${GRAPHBLAS})
+add_executable(test_triangle_count test/test_triangle_count.cpp ${GRAPHBLAS})
 
 add_executable(bfs_demo demo/bfs_demo.cpp ${GRAPHBLAS} graphblas/system/sequential/debug.h)
 add_executable(bfs_level_demo demo/bfs_level_demo.cpp ${GRAPHBLAS})
@@ -139,3 +140,7 @@ add_executable(triangle_count_demo demo/triangle_count_demo.cpp ${GRAPHBLAS})
 #add_executable(csr2tsv demo/csr2tsv.cpp ${GRAPHBLAS})
 
 #add_executable(bcc_demo capi/bcc_demo.c capi/bcc.c capi/bcc.h ${GRAPHBLAS} capi/graphblas.cpp capi/TypeAdapter.hpp capi/UnaryAdapter.hpp capi/graphblas_private.h capi/BinaryAdapter.xhpp capi/TypeUnion.hpp capi/SemiringAdapter.hpp capi/FunctionInvocation.cpp capi/FunctionInvocation.h capi/MonoidAdapter.hpp)
+
+#Finished port of
+# bfs_demo, test_bfs
+# test_bc

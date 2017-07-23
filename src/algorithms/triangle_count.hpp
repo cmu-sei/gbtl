@@ -21,7 +21,7 @@
 
 #define GB_DEBUG
 #include <graphblas/graphblas.hpp>
-#include <graphblas/linalg_utils.hpp>
+//#include <graphblas/linalg_utils.hpp>
 
 
 namespace algorithms
@@ -61,26 +61,38 @@ namespace algorithms
     typename MatrixT::ScalarType triangle_count(MatrixT const &graph)
     {
         using T = typename MatrixT::ScalarType;
-        graphblas::IndexType rows, cols;
-        graph.get_shape(rows, cols);
+        GraphBLAS::IndexType rows(graph.nrows());
+        GraphBLAS::IndexType cols(graph.ncols());
 
         MatrixT L(rows, cols), U(rows, cols);
-        graphblas::split(graph, L, U);
+        GraphBLAS::split(graph, L, U);
 
         MatrixT B(rows, cols);
-        graphblas::mxm(L, U, B);
+        //GraphBLAS::mxm(L, U, B);
+        GraphBLAS::mxm(B,
+                       GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                       GraphBLAS::ArithmeticSemiring<T>(),
+                       L, GraphBLAS::transpose(L)); //U);
 
         MatrixT C(rows, cols);
-        graphblas::ewisemult(graph, B, C);
+        //GraphBLAS::ewisemult(graph, B, C);
+        GraphBLAS::eWiseMult(C,
+                             GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                             GraphBLAS::Times<T>(),
+                             graph, B);
 
         T sum = 0;
-        for (graphblas::IndexType i = 0; i< rows; ++i)
-        {
-            for (graphblas::IndexType j = 0; j < cols; ++j)
-            {
-                sum = sum + C.extractElement(i, j);
-            }
-        }
+        // for (GraphBLAS::IndexType i = 0; i< rows; ++i)
+        // {
+        //     for (GraphBLAS::IndexType j = 0; j < cols; ++j)
+        //     {
+        //         sum = sum + C.extractElement(i, j);
+        //     }
+        // }
+        GraphBLAS::reduce(sum,
+                          GraphBLAS::NoAccumulate(),
+                          GraphBLAS::PlusMonoid<T>(),
+                          C);
         return sum / static_cast<T>(2);
     }
 
@@ -95,11 +107,14 @@ namespace algorithms
     typename MatrixT::ScalarType triangle_count_flame1(MatrixT const &graph)
     {
         using T = typename MatrixT::ScalarType;
-        graphblas::IndexType rows, cols;
-        graph.get_shape(rows, cols);
+        using VectorT = GraphBLAS::Vector<T>;
+
+        GraphBLAS::IndexType rows(graph.nrows());
+        GraphBLAS::IndexType cols(graph.ncols());
+
         if (rows != cols)
         {
-            throw graphblas::DimensionException(
+            throw GraphBLAS::DimensionException(
                 "triangle_count_flame1 matrix is not square");
         }
 
@@ -112,30 +127,52 @@ namespace algorithms
         // "split" is not part of GraphBLAS...placeholder because Masking not
         // completely implemented
         MatrixT L(rows, cols), U(rows, cols);
-        graphblas::split(graph, L, U);
+        GraphBLAS::split(graph, L, U);
 
-        graphblas::IndexArrayType indices = {0};
+        GraphBLAS::IndexArrayType indices = {0};
 
         T delta(0UL);
-        for (graphblas::IndexType idx = 2; idx < rows; ++idx)
+        for (GraphBLAS::IndexType idx = 2; idx < rows; ++idx)
         {
             MatrixT A00(idx, idx);
-            MatrixT a01(idx, 1);   // old GBTL does not have Vectors
-            MatrixT tmp1(idx, 1);  // old GBTL does not have Vectors
-            MatrixT tmp2(1, 1);    // a matrix of one element != scalar
+            VectorT a01(idx);
+            VectorT tmp1(idx);
 
-            graphblas::IndexArrayType column_index = {idx};
             indices.push_back(idx - 1);   // [0, 1, ... i - 1]
 
-            graphblas::extract(U, indices, indices, A00);
-            graphblas::extract(U, indices, column_index, a01);
+            //GraphBLAS::extract(U, indices, indices, A00);
+            GraphBLAS::extract(A00,
+                               GraphBLAS::NoMask(),
+                               GraphBLAS::NoAccumulate(),
+                               U, indices, indices);
 
-            graphblas::mxv(A00, a01, tmp1,
-                           graphblas::ArithmeticSemiring<T>());
-            graphblas::vxm(transpose(a01), tmp1, tmp2,
-                           graphblas::ArithmeticSemiring<T>());
+            //GraphBLAS::extract(U, indices, column_index, a01);
+            GraphBLAS::extract(a01,
+                               GraphBLAS::NoMask(),
+                               GraphBLAS::NoAccumulate(),
+                               U, indices, idx); ///@todo try row extract
 
-            delta += tmp2.extractElement(0,0);
+            //GraphBLAS::mxv(A00, a01, tmp1,
+            //               GraphBLAS::ArithmeticSemiring<T>());
+            GraphBLAS::mxv(tmp1,
+                           GraphBLAS::NoMask(),
+                           GraphBLAS::NoAccumulate(),
+                           GraphBLAS::ArithmeticSemiring<T>(),
+                           A00, a01);
+
+            //GraphBLAS::vxm(transpose(a01), tmp1, tmp2,
+            //               GraphBLAS::ArithmeticSemiring<T>());
+            //delta += tmp2.extractElement(0,0);
+            GraphBLAS::eWiseMult(tmp1,
+                                 GraphBLAS::NoMask(),
+                                 GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::Times<T>(),
+                                 a01, tmp1);
+            GraphBLAS::reduce(delta,
+                              GraphBLAS::Plus<T>(),
+                              GraphBLAS::PlusMonoid<T>(),
+                              tmp1);
+
             std::cout << "Processed row " << idx << " of " << rows
                       << ", Running count: " << delta << std::endl;
         }
@@ -156,11 +193,14 @@ namespace algorithms
     typename MatrixT::ScalarType triangle_count_flame1a(MatrixT const &graph)
     {
         using T = typename MatrixT::ScalarType;
-        graphblas::IndexType rows, cols;
-        graph.get_shape(rows, cols);
+        using VectorT = GraphBLAS::Vector<T>;
+
+        GraphBLAS::IndexType rows(graph.nrows());
+        GraphBLAS::IndexType cols(graph.ncols());
+
         if (rows != cols)
         {
-            throw graphblas::DimensionException(
+            throw GraphBLAS::DimensionException(
                 "triangle_count_flame1 matrix is not square");
         }
 
@@ -173,53 +213,96 @@ namespace algorithms
         // "split" is not part of GraphBLAS...placeholder because Masking not
         // completely implemented
         MatrixT L(rows, cols), U(rows, cols);
-        graphblas::split(graph, L, U);
+        GraphBLAS::split(graph, L, U);
 
-        graphblas::IndexArrayType indices = {0};
+        GraphBLAS::IndexArrayType indices = {0};
 
         T delta(0UL);
-        for (graphblas::IndexType idx = 2; idx < rows/2; ++idx)
+        for (GraphBLAS::IndexType idx = 2; idx < rows/2; ++idx)
         {
             MatrixT A00(idx, idx);
-            MatrixT a01(idx, 1);   // old GBTL does not have Vectors
-            MatrixT tmp1(idx, 1);  // old GBTL does not have Vectors
-            MatrixT tmp2(1, 1);    // a matrix of one element != scalar
+            VectorT a01(idx);
+            VectorT tmp1(idx);
 
-            graphblas::IndexArrayType column_index = {idx};
             indices.push_back(idx - 1);   // [0, 1, ... i - 1]
 
-            graphblas::extract(U, indices, indices, A00);
-            graphblas::extract(U, indices, column_index, a01);
+            //GraphBLAS::extract(U, indices, indices, A00);
+            GraphBLAS::extract(A00,
+                               GraphBLAS::NoMask(),
+                               GraphBLAS::NoAccumulate(),
+                               U, indices, indices);
+            //GraphBLAS::extract(U, indices, column_index, a01);
+            GraphBLAS::extract(a01,
+                               GraphBLAS::NoMask(),
+                               GraphBLAS::NoAccumulate(),
+                               U, indices, idx);
 
-            graphblas::mxv(A00, a01, tmp1,
-                           graphblas::ArithmeticSemiring<T>());
-            graphblas::vxm(transpose(a01), tmp1, tmp2,
-                           graphblas::ArithmeticSemiring<T>());
+            //GraphBLAS::mxv(A00, a01, tmp1,
+            //               GraphBLAS::ArithmeticSemiring<T>());
+            GraphBLAS::mxv(tmp1,
+                           GraphBLAS::NoMask(),
+                           GraphBLAS::NoAccumulate(),
+                           GraphBLAS::ArithmeticSemiring<T>(),
+                           A00, a01);
 
-            delta += tmp2.extractElement(0,0);
+            //GraphBLAS::vxm(transpose(a01), tmp1, tmp2,
+            //               GraphBLAS::ArithmeticSemiring<T>());
+            //delta += tmp2.extractElement(0,0);
+            GraphBLAS::eWiseMult(tmp1,
+                                 GraphBLAS::NoMask(),
+                                 GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::Times<T>(),
+                                 a01, tmp1);
+            GraphBLAS::reduce(delta,
+                              GraphBLAS::Plus<T>(),
+                              GraphBLAS::PlusMonoid<T>(),
+                              tmp1);
+
             std::cout << "Processed row " << idx << " of " << rows
                       << ", Running count: " << delta << std::endl;
         }
 
-        for (graphblas::IndexType idx = rows/2; idx < rows; ++idx)
+        for (GraphBLAS::IndexType idx = rows/2; idx < rows; ++idx)
         {
             MatrixT A00(idx, idx);
-            MatrixT a01(idx, 1);   // old GBTL does not have Vectors
-            MatrixT tmp1(1, idx);  // old GBTL does not have Vectors
-            MatrixT tmp2(1, 1);    // a matrix of one element != scalar
+            VectorT a01(idx);
+            VectorT tmp1(idx);
 
-            graphblas::IndexArrayType column_index = {idx};
             indices.push_back(idx - 1);   // [0, 1, ... i - 1]
 
-            graphblas::extract(U, indices, indices, A00);
-            graphblas::extract(U, indices, column_index, a01);
+            //GraphBLAS::extract(U, indices, indices, A00);
+            GraphBLAS::extract(A00,
+                               GraphBLAS::NoMask(),
+                               GraphBLAS::NoAccumulate(),
+                               U, indices, indices);
 
-            graphblas::vxm(transpose(a01), A00, tmp1,
-                           graphblas::ArithmeticSemiring<T>());
-            graphblas::vxm(tmp1, a01, tmp2,
-                           graphblas::ArithmeticSemiring<T>());
+            //GraphBLAS::extract(U, indices, column_index, a01);
+            GraphBLAS::extract(a01,
+                               GraphBLAS::NoMask(),
+                               GraphBLAS::NoAccumulate(),
+                               U, indices, idx);
 
-            delta += tmp2.extractElement(0,0);
+            //GraphBLAS::vxm(transpose(a01), A00, tmp1,
+            //               GraphBLAS::ArithmeticSemiring<T>());
+            GraphBLAS::vxm(tmp1,
+                           GraphBLAS::NoMask(),
+                           GraphBLAS::NoAccumulate(),
+                           GraphBLAS::ArithmeticSemiring<T>(),
+                           a01, A00);
+
+            //GraphBLAS::vxm(tmp1, a01, tmp2,
+            //               GraphBLAS::ArithmeticSemiring<T>());
+            //delta += tmp2.extractElement(0,0);
+            GraphBLAS::eWiseMult(tmp1,
+                                 GraphBLAS::NoMask(),
+                                 GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::Times<T>(),
+                                 a01, tmp1);
+            GraphBLAS::reduce(delta,
+                              GraphBLAS::Plus<T>(),
+                              GraphBLAS::PlusMonoid<T>(),
+                              tmp1);
+
             std::cout << "Processed row " << idx << " of " << rows
                       << ", Running count: " << delta << std::endl;
         }
@@ -238,11 +321,14 @@ namespace algorithms
     typename MatrixT::ScalarType triangle_count_flame2(MatrixT const &graph)
     {
         using T = typename MatrixT::ScalarType;
-        graphblas::IndexType rows, cols;
-        graph.get_shape(rows, cols);
+        using VectorT = GraphBLAS::Vector<T>;
+
+        GraphBLAS::IndexType rows(graph.nrows());
+        GraphBLAS::IndexType cols(graph.ncols());
+
         if (rows != cols)
         {
-            throw graphblas::DimensionException(
+            throw GraphBLAS::DimensionException(
                 "triangle_count_flame2 matrix is not square");
         }
 
@@ -253,51 +339,77 @@ namespace algorithms
         }
 
         // the rows that a01 and A02 extract from (they grow)
-        graphblas::IndexArrayType row_indices;
+        GraphBLAS::IndexArrayType row_indices;
         row_indices.reserve(rows);
 
         // the cols that a12 and A02 extract from (they shrink)
-        graphblas::IndexArrayType col_indices;
+        GraphBLAS::IndexArrayType col_indices;
         col_indices.reserve(cols);
-        for (graphblas::IndexType idx = 1; idx < cols; ++idx)
+        for (GraphBLAS::IndexType idx = 1; idx < cols; ++idx)
         {
             col_indices.push_back(idx);
         }
 
         T delta(0UL);
-        for (graphblas::IndexType idx = 1; idx < rows - 1; ++idx)
+        for (GraphBLAS::IndexType idx = 1; idx < rows - 1; ++idx)
         {
             // extract from the upper triangular portion of the adj. matrix only
             MatrixT A02(idx, cols - idx - 1);
-            MatrixT a01(idx, 1);              // old GBTL does not have Vectors
-            MatrixT a12(1, cols - idx - 1);   // old GBTL does not have Vectors
-            MatrixT tmp1(cols - idx - 1, 1);  // old GBTL does not have Vectors
-            MatrixT tmp2(1, 1);    // a matrix of one element != scalar
+            VectorT a01(idx);
+            VectorT a12(cols - idx - 1);
+            VectorT tmp1(cols - idx - 1);
 
-            graphblas::IndexArrayType pivot_index = {idx};
+            //GraphBLAS::IndexArrayType pivot_index = {idx};
             row_indices.push_back(idx - 1);   // [0, 1, ... i - 1]
             col_indices.erase(col_indices.begin());
 
-            graphblas::extract(graph, row_indices, col_indices, A02);
-            graphblas::extract(graph, row_indices, pivot_index, a01);
-            graphblas::extract(graph, pivot_index, col_indices, a12);
+            //GraphBLAS::extract(graph, row_indices, col_indices, A02);
+            GraphBLAS::extract(A02,
+                               GraphBLAS::NoMask(),
+                               GraphBLAS::NoAccumulate(),
+                               graph, row_indices, col_indices);
 
-            graphblas::mxv(transpose(A02), a01, tmp1,
-                           graphblas::ArithmeticSemiring<T>());
+            //GraphBLAS::extract(graph, row_indices, pivot_index, a01);
+            GraphBLAS::extract(a01,
+                               GraphBLAS::NoMask(),
+                               GraphBLAS::NoAccumulate(),
+                               graph, row_indices, idx); ///@todo try row extract
 
-            /// @todo replace vxm+extractElement with eWiseMult(vec)+reduce(scalar)
-            graphblas::vxm(a12, tmp1, tmp2,
-                           graphblas::ArithmeticSemiring<T>());
-            delta += tmp2.extractElement(0,0);
+            //GraphBLAS::extract(graph, pivot_index, col_indices, a12);
+            GraphBLAS::extract(a12,
+                               GraphBLAS::NoMask(),
+                               GraphBLAS::NoAccumulate(),
+                               GraphBLAS::transpose(graph), col_indices, idx);
+
+            //GraphBLAS::mxv(transpose(A02), a01, tmp1,
+            //               GraphBLAS::ArithmeticSemiring<T>());
+            GraphBLAS::mxv(tmp1,
+                           GraphBLAS::NoMask(),
+                           GraphBLAS::NoAccumulate(),
+                           GraphBLAS::ArithmeticSemiring<T>(),
+                           GraphBLAS::transpose(A02), a01);
+
+            //GraphBLAS::vxm(a12, tmp1, tmp2,
+            //               GraphBLAS::ArithmeticSemiring<T>());
+            //delta += tmp2.extractElement(0,0);
+            GraphBLAS::eWiseMult(tmp1,
+                                 GraphBLAS::NoMask(),
+                                 GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::Times<T>(),
+                                 a12, tmp1);
+            GraphBLAS::reduce(delta,
+                              GraphBLAS::Plus<T>(),
+                              GraphBLAS::PlusMonoid<T>(),
+                              tmp1);
 
             // DEBUG
             //std::cerr << "************** Iteration " << idx << " **************"
             //          << std::endl;
             //std::cerr << "A02 dimensions = " << idx << " x " << (cols-idx-1)
             //          << std::endl;
-            //graphblas::print_matrix(std::cerr, a01, "a01");
-            //graphblas::print_matrix(std::cerr, A02, "A02");
-            //graphblas::print_matrix(std::cerr, a12, "a12");
+            //GraphBLAS::print_matrix(std::cerr, a01, "a01");
+            //GraphBLAS::print_matrix(std::cerr, A02, "A02");
+            //GraphBLAS::print_matrix(std::cerr, a12, "a12");
             //std::cerr << "delta = " << delta << std::endl;
 
             std::cout << "Processed row " << idx << " of " << rows
@@ -323,8 +435,8 @@ namespace algorithms
         GraphBLAS::mxm(B, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                        GraphBLAS::ArithmeticSemiring<T>(),
                        L,
-                       GraphBLAS::transpose(L), //U,
-                       true);
+                       U);  /// @todo can't use transpose(L) here as LMatrix may
+                            /// already be a TransposeView (nesting not supported)
 
         auto finish = std::chrono::steady_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>
@@ -388,6 +500,11 @@ namespace algorithms
             return 0;
         }
 
+        // "split" is not part of GraphBLAS...placeholder because Masking not
+        // completely implemented
+        MatrixT L(rows, cols), U(rows, cols);
+        GraphBLAS::split(graph, L, U);
+
         GraphBLAS::IndexArrayType indices = {0};
 
         T delta(0UL);
@@ -397,18 +514,21 @@ namespace algorithms
             GraphBLAS::Vector<T> a01(idx);
             GraphBLAS::Vector<T> tmp1(idx);
 
-            GraphBLAS::IndexArrayType column_index = {idx};
             indices.push_back(idx - 1);   // [0, 1, ... i - 1]
 
-            GraphBLAS::extract(A00, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                               graph, indices, indices, true);
-            GraphBLAS::extract(a01, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                               graph, indices, idx, true);
+            GraphBLAS::extract(A00,
+                               GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                               U, indices, indices);
+            GraphBLAS::extract(a01,
+                               GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                               U, indices, idx);
 
-            GraphBLAS::mxv(tmp1, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+            GraphBLAS::mxv(tmp1,
+                           GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                            GraphBLAS::ArithmeticSemiring<T>(),
-                           A00, a01, true);
-            GraphBLAS::eWiseMult(tmp1, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                           A00, a01);
+            GraphBLAS::eWiseMult(tmp1,
+                                 GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                                  GraphBLAS::Times<T>(),
                                  tmp1, a01, true);
             GraphBLAS::reduce(delta, GraphBLAS::Plus<T>(),
@@ -598,6 +718,17 @@ namespace algorithms
         GraphBLAS::IndexType cols(graph.ncols());
 
         // assert(rows == cols);
+
+        // A graph less than three vertices cannot have any triangles
+        if (rows < 3)
+        {
+            return 0;
+        }
+
+        if (rows < 2*block_size)
+        {
+            return triangle_count_flame2_newGBTL(graph);
+        }
 
         GraphBLAS::IndexType begin_index(0);
         GraphBLAS::IndexType end_index(block_size);
