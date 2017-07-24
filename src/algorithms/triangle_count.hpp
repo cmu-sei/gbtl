@@ -68,27 +68,18 @@ namespace algorithms
         GraphBLAS::split(graph, L, U);
 
         MatrixT B(rows, cols);
-        //GraphBLAS::mxm(L, U, B);
         GraphBLAS::mxm(B,
                        GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                        GraphBLAS::ArithmeticSemiring<T>(),
                        L, GraphBLAS::transpose(L)); //U);
 
         MatrixT C(rows, cols);
-        //GraphBLAS::ewisemult(graph, B, C);
         GraphBLAS::eWiseMult(C,
                              GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                              GraphBLAS::Times<T>(),
                              graph, B);
 
         T sum = 0;
-        // for (GraphBLAS::IndexType i = 0; i< rows; ++i)
-        // {
-        //     for (GraphBLAS::IndexType j = 0; j < cols; ++j)
-        //     {
-        //         sum = sum + C.extractElement(i, j);
-        //     }
-        // }
         GraphBLAS::reduce(sum,
                           GraphBLAS::NoAccumulate(),
                           GraphBLAS::PlusMonoid<T>(),
@@ -140,29 +131,23 @@ namespace algorithms
 
             indices.push_back(idx - 1);   // [0, 1, ... i - 1]
 
-            //GraphBLAS::extract(U, indices, indices, A00);
             GraphBLAS::extract(A00,
                                GraphBLAS::NoMask(),
                                GraphBLAS::NoAccumulate(),
                                U, indices, indices);
 
-            //GraphBLAS::extract(U, indices, column_index, a01);
             GraphBLAS::extract(a01,
                                GraphBLAS::NoMask(),
                                GraphBLAS::NoAccumulate(),
                                U, indices, idx); ///@todo try row extract
 
-            //GraphBLAS::mxv(A00, a01, tmp1,
-            //               GraphBLAS::ArithmeticSemiring<T>());
             GraphBLAS::mxv(tmp1,
                            GraphBLAS::NoMask(),
                            GraphBLAS::NoAccumulate(),
                            GraphBLAS::ArithmeticSemiring<T>(),
                            A00, a01);
 
-            //GraphBLAS::vxm(transpose(a01), tmp1, tmp2,
-            //               GraphBLAS::ArithmeticSemiring<T>());
-            //delta += tmp2.extractElement(0,0);
+            // vector dot product
             GraphBLAS::eWiseMult(tmp1,
                                  GraphBLAS::NoMask(),
                                  GraphBLAS::NoAccumulate(),
@@ -173,8 +158,8 @@ namespace algorithms
                               GraphBLAS::PlusMonoid<T>(),
                               tmp1);
 
-            std::cout << "Processed row " << idx << " of " << rows
-                      << ", Running count: " << delta << std::endl;
+            //std::cout << "Processed row " << idx << " of " << rows
+            //          << ", Running count: " << delta << std::endl;
         }
 
         return delta;
@@ -226,28 +211,22 @@ namespace algorithms
 
             indices.push_back(idx - 1);   // [0, 1, ... i - 1]
 
-            //GraphBLAS::extract(U, indices, indices, A00);
             GraphBLAS::extract(A00,
                                GraphBLAS::NoMask(),
                                GraphBLAS::NoAccumulate(),
                                U, indices, indices);
-            //GraphBLAS::extract(U, indices, column_index, a01);
             GraphBLAS::extract(a01,
                                GraphBLAS::NoMask(),
                                GraphBLAS::NoAccumulate(),
                                U, indices, idx);
 
-            //GraphBLAS::mxv(A00, a01, tmp1,
-            //               GraphBLAS::ArithmeticSemiring<T>());
             GraphBLAS::mxv(tmp1,
                            GraphBLAS::NoMask(),
                            GraphBLAS::NoAccumulate(),
                            GraphBLAS::ArithmeticSemiring<T>(),
                            A00, a01);
 
-            //GraphBLAS::vxm(transpose(a01), tmp1, tmp2,
-            //               GraphBLAS::ArithmeticSemiring<T>());
-            //delta += tmp2.extractElement(0,0);
+            // vector dot product
             GraphBLAS::eWiseMult(tmp1,
                                  GraphBLAS::NoMask(),
                                  GraphBLAS::NoAccumulate(),
@@ -258,8 +237,8 @@ namespace algorithms
                               GraphBLAS::PlusMonoid<T>(),
                               tmp1);
 
-            std::cout << "Processed row " << idx << " of " << rows
-                      << ", Running count: " << delta << std::endl;
+            //std::cout << "Processed row " << idx << " of " << rows
+            //          << ", Running count: " << delta << std::endl;
         }
 
         for (GraphBLAS::IndexType idx = rows/2; idx < rows; ++idx)
@@ -270,29 +249,23 @@ namespace algorithms
 
             indices.push_back(idx - 1);   // [0, 1, ... i - 1]
 
-            //GraphBLAS::extract(U, indices, indices, A00);
             GraphBLAS::extract(A00,
                                GraphBLAS::NoMask(),
                                GraphBLAS::NoAccumulate(),
                                U, indices, indices);
 
-            //GraphBLAS::extract(U, indices, column_index, a01);
             GraphBLAS::extract(a01,
                                GraphBLAS::NoMask(),
                                GraphBLAS::NoAccumulate(),
                                U, indices, idx);
 
-            //GraphBLAS::vxm(transpose(a01), A00, tmp1,
-            //               GraphBLAS::ArithmeticSemiring<T>());
             GraphBLAS::vxm(tmp1,
                            GraphBLAS::NoMask(),
                            GraphBLAS::NoAccumulate(),
                            GraphBLAS::ArithmeticSemiring<T>(),
                            a01, A00);
 
-            //GraphBLAS::vxm(tmp1, a01, tmp2,
-            //               GraphBLAS::ArithmeticSemiring<T>());
-            //delta += tmp2.extractElement(0,0);
+            // vector dot product
             GraphBLAS::eWiseMult(tmp1,
                                  GraphBLAS::NoMask(),
                                  GraphBLAS::NoAccumulate(),
@@ -303,8 +276,8 @@ namespace algorithms
                               GraphBLAS::PlusMonoid<T>(),
                               tmp1);
 
-            std::cout << "Processed row " << idx << " of " << rows
-                      << ", Running count: " << delta << std::endl;
+            //std::cout << "Processed row " << idx << " of " << rows
+            //          << ", Running count: " << delta << std::endl;
         }
 
         return delta;
@@ -359,39 +332,31 @@ namespace algorithms
             VectorT a12(cols - idx - 1);
             VectorT tmp1(cols - idx - 1);
 
-            //GraphBLAS::IndexArrayType pivot_index = {idx};
             row_indices.push_back(idx - 1);   // [0, 1, ... i - 1]
             col_indices.erase(col_indices.begin());
-
-            //GraphBLAS::extract(graph, row_indices, col_indices, A02);
+;
             GraphBLAS::extract(A02,
                                GraphBLAS::NoMask(),
                                GraphBLAS::NoAccumulate(),
                                graph, row_indices, col_indices);
 
-            //GraphBLAS::extract(graph, row_indices, pivot_index, a01);
             GraphBLAS::extract(a01,
                                GraphBLAS::NoMask(),
                                GraphBLAS::NoAccumulate(),
                                graph, row_indices, idx); ///@todo try row extract
 
-            //GraphBLAS::extract(graph, pivot_index, col_indices, a12);
             GraphBLAS::extract(a12,
                                GraphBLAS::NoMask(),
                                GraphBLAS::NoAccumulate(),
                                GraphBLAS::transpose(graph), col_indices, idx);
 
-            //GraphBLAS::mxv(transpose(A02), a01, tmp1,
-            //               GraphBLAS::ArithmeticSemiring<T>());
             GraphBLAS::mxv(tmp1,
                            GraphBLAS::NoMask(),
                            GraphBLAS::NoAccumulate(),
                            GraphBLAS::ArithmeticSemiring<T>(),
                            GraphBLAS::transpose(A02), a01);
 
-            //GraphBLAS::vxm(a12, tmp1, tmp2,
-            //               GraphBLAS::ArithmeticSemiring<T>());
-            //delta += tmp2.extractElement(0,0);
+            // vector dot product
             GraphBLAS::eWiseMult(tmp1,
                                  GraphBLAS::NoMask(),
                                  GraphBLAS::NoAccumulate(),
@@ -407,13 +372,13 @@ namespace algorithms
             //          << std::endl;
             //std::cerr << "A02 dimensions = " << idx << " x " << (cols-idx-1)
             //          << std::endl;
-            //GraphBLAS::print_matrix(std::cerr, a01, "a01");
+            //GraphBLAS::print_vector(std::cerr, a01, "a01");
             //GraphBLAS::print_matrix(std::cerr, A02, "A02");
-            //GraphBLAS::print_matrix(std::cerr, a12, "a12");
+            //GraphBLAS::print_vector(std::cerr, a12, "a12");
             //std::cerr << "delta = " << delta << std::endl;
 
-            std::cout << "Processed row " << idx << " of " << rows
-                      << ", Running count: " << delta << std::endl;
+            //std::cout << "Processed row " << idx << " of " << rows
+            //          << ", Running count: " << delta << std::endl;
         }
 
         return delta;
@@ -442,7 +407,7 @@ namespace algorithms
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>
             (finish - start);
         start = finish;
-        std::cout << "mxm elapsed time: " << duration.count() << " msec." << std::endl;
+        //std::cout << "mxm elapsed time: " << duration.count() << " msec." << std::endl;
 
         T sum = 0;
         MatrixT C(rows, cols);
@@ -456,7 +421,7 @@ namespace algorithms
         duration = std::chrono::duration_cast<std::chrono::milliseconds>
             (finish - start);
         start = finish;
-        std::cout << "count1 elapsed time: " << duration.count() << " msec." << std::endl;
+        //std::cout << "count1 elapsed time: " << duration.count() << " msec." << std::endl;
 
         // for undirected graph you can stop here and return 'sum'
 
@@ -469,7 +434,7 @@ namespace algorithms
         finish = std::chrono::steady_clock::now();
         duration = std::chrono::duration_cast<std::chrono::milliseconds>
             (finish - start);
-        std::cout << "count2 elapsed time: " << duration.count() << " msec." << std::endl;
+        //std::cout << "count2 elapsed time: " << duration.count() << " msec." << std::endl;
 
         return sum / static_cast<T>(2);
     }
@@ -534,8 +499,8 @@ namespace algorithms
             GraphBLAS::reduce(delta, GraphBLAS::Plus<T>(),
                               GraphBLAS::PlusMonoid<T>(), tmp1);
 
-            std::cout << "Processed row " << idx << " of " << rows
-                      << ", Running count: " << delta << std::endl;
+            //std::cout << "Processed row " << idx << " of " << rows
+            //          << ", Running count: " << delta << std::endl;
         }
 
         return delta;
@@ -608,8 +573,8 @@ namespace algorithms
             GraphBLAS::reduce(delta, GraphBLAS::Plus<T>(),
                               GraphBLAS::PlusMonoid<T>(), tmp1);
 
-            std::cout << "Processed row " << idx << " of " << rows
-                      << ", Running count: " << delta << std::endl;
+            //std::cout << "Processed row " << idx << " of " << rows
+            //          << ", Running count: " << delta << std::endl;
         }
 
         return delta;
@@ -625,7 +590,8 @@ namespace algorithms
      *                   Entire matrix is accessed.
      */
     template<typename MatrixT>
-    typename MatrixT::ScalarType triangle_count_flame2_newGBTL_masked(MatrixT const &graph)
+    typename MatrixT::ScalarType triangle_count_flame2_newGBTL_masked(
+        MatrixT const &graph)
     {
         using T = typename MatrixT::ScalarType;
         GraphBLAS::IndexType rows(graph.nrows());
@@ -673,24 +639,27 @@ namespace algorithms
 
             mask.setElement(idx, true);
             GraphBLAS::extract(a12,
-                               GraphBLAS::complement(mask), GraphBLAS::NoAccumulate(),
+                               GraphBLAS::complement(mask),
+                               GraphBLAS::NoAccumulate(),
                                a, all_indices, true);
 
             GraphBLAS::mxv(tmp,
-                           GraphBLAS::NoMask(),// mask,
+                           GraphBLAS::NoMask(),
                            GraphBLAS::NoAccumulate(),
                            GraphBLAS::ArithmeticSemiring<T>(),
                            graph, a12, true);
 
-            GraphBLAS::eWiseMult(tmp, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+            GraphBLAS::eWiseMult(tmp,
+                                 GraphBLAS::NoMask(),
+                                 GraphBLAS::NoAccumulate(),
                                  GraphBLAS::Times<T>(),
                                  tmp, a10, true);
 
             GraphBLAS::reduce(delta, GraphBLAS::Plus<T>(),
                               GraphBLAS::PlusMonoid<T>(), tmp);
 
-            std::cout << "Processed row " << idx << " of " << rows
-                      << ", Running count: " << delta << std::endl;
+            //std::cout << "Processed row " << idx << " of " << rows
+            //          << ", Running count: " << delta << std::endl;
         }
 
         return delta;
@@ -764,7 +733,6 @@ namespace algorithms
                 end2rows.push_back(ix); // start with all indices
                 end2rowsMask.push_back(ix - end_index);
             }
-            std::cerr << "0" << std::endl;
 
             MatrixT A01(begin_index, bsize);            // n x b
             MatrixT A02(begin_index, rows-end_index);   // n x m
@@ -774,22 +742,17 @@ namespace algorithms
             GraphBLAS::Matrix<bool> DiagonalMask(rows - end_index, rows - end_index);
             std::vector<bool> mvals(end2rowsMask.size(), true);
             DiagonalMask.build(end2rowsMask, end2rowsMask, mvals);
-            std::cerr << "0" << std::endl;
 
             //
             GraphBLAS::extract(A01, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                                graph, zero2begin, begin2end, true);
-            std::cerr << "a" << std::endl;
             GraphBLAS::extract(A11, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                                graph, begin2end, begin2end, true);
-            std::cerr << "a" << std::endl;
             GraphBLAS::extract(A02, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                                graph, zero2begin, end2rows, true);
-            std::cerr << "a" << std::endl;
 
             GraphBLAS::extract(A12, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                                graph, begin2end, end2rows, true);
-            std::cerr << "0" << std::endl;
 
             // ***************************************************************
             // STEP 1: tris += trace(A12' * A01' * A02) = trace(A02' * A01 * A12);
@@ -812,18 +775,15 @@ namespace algorithms
             // ***************************************************************
             // STEP 2: tris += trace(A12' * A11 * A12)
             // ***************************************************************
-            std::cerr << "2" << std::endl;
             MatrixT Tmp2(bsize, rows - end_index);
 
             GraphBLAS::mxm(Tmp2, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                            GraphBLAS::ArithmeticSemiring<T>(),
                            A11, A12, true);
             // Compute just the diagonal elements
-            std::cerr << "2" << std::endl;
             GraphBLAS::mxm(Tmp1, DiagonalMask, GraphBLAS::NoAccumulate(),
                            GraphBLAS::ArithmeticSemiring<T>(),
                            GraphBLAS::transpose(A12), Tmp2, true);
-            std::cerr << "2" << std::endl;
             GraphBLAS::reduce(num_triangles, GraphBLAS::Plus<T>(),
                               GraphBLAS::PlusMonoid<T>(), Tmp1);
 
@@ -838,18 +798,14 @@ namespace algorithms
                 GraphBLAS::Matrix<bool> DiagonalMask2(begin_index, begin_index);
                 std::vector<bool> mvals2(zero2begin.size(), true);
                 DiagonalMask2.build(zero2begin, zero2begin, mvals2);
-                std::cerr << "0" << std::endl;
 
-                std::cerr << "3" << std::endl;
                 GraphBLAS::mxm(Tmp3, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                                GraphBLAS::ArithmeticSemiring<T>(),
                                A11, GraphBLAS::transpose(A01), true);
                 // Compute just the diagonal elements
-                std::cerr << "3" << std::endl;
                 GraphBLAS::mxm(Tmp4, DiagonalMask2, GraphBLAS::NoAccumulate(),
                                GraphBLAS::ArithmeticSemiring<T>(),
                                A01, Tmp3, true);
-                std::cerr << "3" << std::endl;
                 GraphBLAS::reduce(num_triangles, GraphBLAS::Plus<T>(),
                                   GraphBLAS::PlusMonoid<T>(), Tmp4);
             }
@@ -857,7 +813,6 @@ namespace algorithms
             // ***************************************************************
             // STEP 4: Count triangles in diagonal block
             // ***************************************************************
-            std::cerr << "4" << std::endl;
             num_triangles += algorithms::triangle_count_newGBTL(
                 GraphBLAS::transpose(A11), A11);
 
