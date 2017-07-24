@@ -72,7 +72,7 @@ namespace GraphBLAS
 
         MatrixT identity(mat_size, mat_size);
         identity.build(indices, indices, vals);
-        GraphBLAS::print_matrix(std::cerr, identity, "SCALED IDENTITY");
+        //GraphBLAS::print_matrix(std::cerr, identity, "SCALED IDENTITY");
         return identity;
     }
 

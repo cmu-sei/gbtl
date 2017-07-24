@@ -26,6 +26,71 @@ namespace algorithms
 {
     /**
      * @brief Compute the lenghts of the single source shortest path(s) of
+     *        one specified starting vertex in the given graph.
+     *
+     * The algorithm used in the implementation is the Floyd-Warshall
+     * algorithm.  It is a dynamic programming solution (similar to the
+     * Bellman-Ford algorithm).  The algorithm (like Bellman-Ford) is
+     * based off of relaxation.  At each iteration in the algorithm, the
+     * approximate lengths of the paths are always overestimates.  The
+     * edges are relaxed at each iteration, until the lenghts are no
+     * longer overestimates, at which point the algorithm terminates and
+     * the path lengths are returned.
+     *
+     * The start can be specified multiple ways.  It can be in one
+     * of the following three formats:
+     *
+     * <ol>
+     * <li>The vertex itself (to specify only one vertex).</li>
+     * <li>As a \f$N\f$ by \f$1\f$ column vector, where if the \f$i^{th}\f$
+     * index is \f$1\f$, include that vertex in the set of vertices to
+     * compute single source shortest paths for.</li>
+     * <li>As a \f$N\f$ by \f$N\f$ matrix (say, \f$M\f$), where if
+     * \f$M_{ii} = 1\f$, include vertex \f$i\f$ in the set of vertices to
+     * compute single source shortest paths for.</li>
+     * </ol>
+     *
+     * @param[in]  graph     The adjacency matrix of the graph for which SSSP
+     *                       will be computed.  The implied zero will be
+     *                       infinity.
+     * @param[in,out] path   On input, the root vertex of the SSSP is set to zero.
+     *                       On output, contains the shortest path for this
+     *                       specified starting vertex, specified in terms of
+     *                       length from the source vertex.
+     */
+    template<typename MatrixT,
+             typename PathVectorT>
+    void sssp(MatrixT const     &graph,
+              PathVectorT       &path)
+    {
+        using T = typename MatrixT::ScalarType;
+
+        if ((graph.nrows() != path.size()) ||
+            (graph.ncols() != path.size()))
+        {
+            throw GraphBLAS::DimensionException();
+        }
+
+        /// @todo why num_rows iterations? (REALLY should be bounded by diameter)
+        /// or detection of no change in paths matrix
+        for (GraphBLAS::IndexType k = 0; k < graph.nrows(); ++k)
+        {
+            GraphBLAS::vxm(path,
+                           GraphBLAS::NoMask(), GraphBLAS::Min<T>(),
+                           GraphBLAS::MinPlusSemiring<T>(),
+                           path, graph);
+
+            //std::cout << "Iteration " << k << std::endl;
+            //GraphBLAS::print_vector(std::cout, path, "Path");
+            //std::cout << std::endl;
+        }
+        // paths holds return value
+    }
+
+    //****************************************************************************
+
+    /**
+     * @brief Compute the lenghts of the single source shortest path(s) of
      *        the specified starting vertex (vertices) in the given graph.
      *
      * The algorithm used in the implementation is the Floyd-Warshall
@@ -50,69 +115,31 @@ namespace algorithms
      * compute single source shortest paths for.</li>
      * </ol>
      *
-     * @param[in]  graph  The adjacency matrix of the graph for which SSSP
-     *                    will be computed.  The structural zero will be
-     *                    infinity.
-     * @param[in]  start  A P x M matrix (for computing P different sources)
-     *                    where each row of P has a single stored 0 value
-     *                    indicating the source of one SSSP and the rest of
-     *                    would contain the structural zero (i.e. infinity)
-     * @param[out] paths  Each row contains the lengths of single source
-     *                    shortest path(s) for the specified starting vertex
-     *                    specified in the start matrix for the same row.
+     * @param[in]  graph     The adjacency matrix of the graph for which SSSP
+     *                       will be computed.  The implied zero will be
+     *                       infinity.
+     * @param[in,out] paths  Each row contains the lengths of single source
+     *                       shortest path(s) for each the specified starting
+     *                       vertices. These roots are specified, in this matrix
+     *                       on input, by setting the source vertex to zero in the
+     *                       corresponding row.
      */
     template<typename MatrixT,
              typename PathMatrixT>
-    void sssp(MatrixT const     &graph,
-              PathMatrixT const &start,
-              PathMatrixT       &paths)
-    {
-        using T = typename MatrixT::ScalarType;
-        using MinAccum =
-            graphblas::math::Accum<T, graphblas::math::ArithmeticMin<T> >;
-
-        paths = start;
-
-        graphblas::IndexType rows, cols, prows, pcols, rrows, rcols;
-        graph.get_shape(rows, cols);
-        start.get_shape(prows, pcols);
-        paths.get_shape(rrows, rcols);
-
-        if ((rows != pcols) || (prows != rrows) || (pcols != rcols))
-        {
-            throw graphblas::DimensionException();
-        }
-
-        /// @todo why num_rows iterations?
-        for (graphblas::IndexType k = 0; k < rows; ++k)
-        {
-            graphblas::mxm<MatrixT, PathMatrixT, PathMatrixT,
-                           graphblas::MinPlusSemiring<T>,
-                           MinAccum>(paths, graph, paths);
-            //std::cout << "Iteration " << k << std::endl;
-            //graphblas::backend::pretty_print_matrix(std::cout, paths);
-            //std::cout << std::endl;
-        }
-        // paths holds return value
-    }
-
-    //****************************************************************************
-    template<typename MatrixT,
-             typename PathMatrixT>
-    void GrB_sssp(MatrixT const     &graph,
-                  PathMatrixT       &paths)  // paths are initialized to start
+    void batch_sssp(MatrixT const     &graph,
+                    PathMatrixT       &paths)  // paths are initialized to start
     {
         using T = typename MatrixT::ScalarType;
 
         if ((graph.nrows() != paths.ncols()) ||
             (graph.ncols() != paths.ncols()))
         {
-            throw graphblas::DimensionException();
+            throw GraphBLAS::DimensionException();
         }
 
         /// @todo why num_rows iterations?  Should be the diameter or terminate
         /// when there are no changes?
-        for (graphblas::IndexType k = 0; k < graph.nrows(); ++k)
+        for (GraphBLAS::IndexType k = 0; k < graph.nrows(); ++k)
         {
             GraphBLAS::mxm(paths,
                            GraphBLAS::NoMask(),

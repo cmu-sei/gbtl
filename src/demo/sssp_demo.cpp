@@ -34,35 +34,30 @@ void run_demo()
     //    {-, -, -, -, -, -, -, -, -},
     //    {-, -, 1, -, 1, -, -, -, -};
 
-    T const INF(std::numeric_limits<T>::max());
-
-    graphblas::IndexType const NUM_NODES = 9;
-    graphblas::IndexArrayType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
+    GraphBLAS::IndexType const NUM_NODES = 9;
+    GraphBLAS::IndexArrayType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
                                    4, 4, 4, 5, 6, 6, 6, 8, 8};
-    graphblas::IndexArrayType j = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
+    GraphBLAS::IndexArrayType j = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
                                    2, 3, 8, 2, 1, 2, 3, 2, 4};
     std::vector<T> v(i.size(), 1);
 
-    graphblas::Matrix<T, graphblas::DirectedMatrixTag>
-        G_tn(NUM_NODES, NUM_NODES, INF);
+    GraphBLAS::Matrix<T> G_tn(NUM_NODES, NUM_NODES);
 
-    graphblas::buildmatrix(G_tn, i.begin(), j.begin(), v.begin(), i.size());
+    G_tn.build(i.begin(), j.begin(), v.begin(), i.size());
+    GraphBLAS::print_matrix(std::cout, G_tn, "Graph");
 
-    std::cout << "G_tn: zero = " << G_tn.get_zero() << std::endl;
-    graphblas::print_matrix(std::cout, G_tn);
-
-    auto ident = graphblas::identity<
-        graphblas::Matrix<T, graphblas::DirectedMatrixTag > >(NUM_NODES,INF,0);
-    std::cout << "ident: zero = " << ident.get_zero() << std::endl;
-    graphblas::print_matrix(std::cout, ident);
+    // compute one shortest paths
+    GraphBLAS::Vector<T> path(NUM_NODES);
+    path.setElement(0, 0);
+    GraphBLAS::print_vector(std::cout, path, "Source");
+    algorithms::sssp(G_tn, path);
+    GraphBLAS::print_vector(std::cout, path, "single SSSP results");
 
     // compute all shortest paths
-    graphblas::Matrix<T, graphblas::DirectedMatrixTag>
-        G_tn_res(NUM_NODES, NUM_NODES, INF);
-    algorithms::sssp(G_tn, ident, G_tn_res);
-
-    std::cout << "Results:" << std::endl;
-    graphblas::print_matrix(std::cout, G_tn_res);
+    auto paths = GraphBLAS::scaled_identity<GraphBLAS::Matrix<T>>(NUM_NODES, 0);
+    GraphBLAS::print_matrix(std::cout, paths, "Sources");
+    algorithms::batch_sssp(G_tn, paths);
+    GraphBLAS::print_matrix(std::cout, paths, "batch SSSP results");
 }
 
 //****************************************************************************
