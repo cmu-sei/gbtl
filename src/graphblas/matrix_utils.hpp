@@ -35,7 +35,6 @@ namespace GraphBLAS
      * @brief Constuct and return a matrix with elements on the diagonal.
      *
      * @param[in] v    The elements to put on the diagonal of a matrix.
-     * @param[in] zero The value of the structural zero.
      */
     template<typename MatrixT, typename VectorT>
     MatrixT diag(VectorT const &v)
@@ -77,6 +76,7 @@ namespace GraphBLAS
     }
 
 
+    //************************************************************************
     /**
      * @brief Split a matrix into its lower and upper triangular portions
      *        Diagonal entries got to L.
@@ -120,6 +120,81 @@ namespace GraphBLAS
         }
         L.build(iL.begin(), jL.begin(), vL.begin(), vL.size());
         U.build(iU.begin(), jU.begin(), vU.begin(), vU.size());
+    }
+
+    //************************************************************************
+    /**
+     * @brief Normalize the rows of a matrix
+     *
+     * @param[in,out] A Matrix to normalize (in place)
+     *
+     */
+    template<typename MatrixT>
+    void normalize_rows(MatrixT &A)
+    {
+        using T = typename MatrixT::ScalarType;
+
+        GraphBLAS::Vector<T> w(A.nrows());
+        GraphBLAS::reduce(w,
+                          GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                          GraphBLAS::Plus<T>(),
+                          A);
+        GraphBLAS::apply(w,
+                         GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                         GraphBLAS::MultiplicativeInverse<T>(),
+                         w);
+
+        IndexArrayType indices(w.nvals());
+        std::vector<typename MatrixT::ScalarType> vals(w.nvals());
+        w.extractTuples(indices.begin(), vals.begin());
+
+        //populate diagnal:
+        MatrixT Adiag(w.size(), w.size());
+        Adiag.build(indices.begin(), indices.begin(), vals.begin(), vals.size());
+
+        //Perform matrix multiply to scale rows
+        GraphBLAS::mxm(A,
+                       GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                       GraphBLAS::ArithmeticSemiring<T>(),
+                       Adiag, A);
+    }
+
+
+    //************************************************************************
+    /**
+     * @brief Normalize the columns of a matrix
+     *
+     * @param[in,out] A Matrix to normalize (in place)
+     *
+     */
+    template<typename MatrixT>
+    void normalize_cols(MatrixT &A)
+    {
+        using T = typename MatrixT::ScalarType;
+
+        GraphBLAS::Vector<T> w(A.nrows());
+        GraphBLAS::reduce(w,
+                          GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                          GraphBLAS::Plus<T>(),
+                          GraphBLAS::transpose(A));
+        GraphBLAS::apply(w,
+                         GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                         GraphBLAS::MultiplicativeInverse<T>(),
+                         w);
+
+        IndexArrayType indices(w.nvals());
+        std::vector<typename MatrixT::ScalarType> vals(w.nvals());
+        w.extractTuples(indices.begin(), vals.begin());
+
+        //populate diagnal:
+        MatrixT Adiag(w.size(), w.size());
+        Adiag.build(indices.begin(), indices.begin(), vals.begin(), vals.size());
+
+        //Perform matrix multiply to scale rows
+        GraphBLAS::mxm(A,
+                       GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                       GraphBLAS::ArithmeticSemiring<T>(),
+                       A, Adiag);
     }
 }
 

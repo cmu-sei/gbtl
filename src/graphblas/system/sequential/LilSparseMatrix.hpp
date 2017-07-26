@@ -131,38 +131,10 @@ namespace GraphBLAS
          */
         bool operator==(LilSparseMatrix<ScalarT> const &rhs) const
         {
-            if ((m_num_rows != rhs.m_num_rows) ||
-                (m_num_cols != rhs.m_num_cols) ||
-                (m_nvals != rhs.m_nvals))
-            {
-                return false;
-            }
-            IndexArrayType thisIndex;
-            IndexArrayType rhsIndex;
-            for (IndexType ii = 0; ii < m_num_rows; ii++)
-            {
-                getColumnIndices(ii, thisIndex);
-                rhs.getColumnIndices(ii, rhsIndex);
-                if (thisIndex != rhsIndex)
-                {
-                    return false;
-                }
-                else
-                {
-                    if (thisIndex.empty())
-                    {
-                        for (IndexType jj = 0; jj < thisIndex.size(); jj++)
-                        {
-                            if (extractElement(ii, thisIndex[jj]) !=
-                                rhs.extractElement(ii, thisIndex[jj]))
-                            {
-                                return false;
-                            }
-                        }
-                    }
-                }
-            }
-            return true;
+            return ((m_num_rows == rhs.m_num_rows) &&
+                    (m_num_cols == rhs.m_num_cols) &&
+                    (m_nvals == rhs.m_nvals) &&
+                    (m_data == rhs.m_data));
         }
 
         /**

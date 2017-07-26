@@ -19,9 +19,9 @@
 
 #include <graphblas/graphblas.hpp>
 #include <algorithms/cluster.hpp>
-#include <graphblas/linalg_utils.hpp>
+//#include <graphblas/linalg_utils.hpp>
 
-using namespace graphblas;
+using namespace GraphBLAS;
 using namespace algorithms;
 
 #define BOOST_TEST_MAIN
@@ -32,10 +32,32 @@ using namespace algorithms;
 BOOST_AUTO_TEST_SUITE(cluster_suite)
 
 //****************************************************************************
+namespace
+{
+    //************************************************************************
+    /// @todo merge with bind2nd functor found in bfs.hpp
+    template <typename BinaryComparatorT,
+              typename T>
+    struct Threshold_Bind2nd
+    {
+        typedef typename BinaryComparatorT::result_type result_type;
+
+        T m_threshold;
+
+        Threshold_Bind2nd(T const &val) : m_threshold(val) {}
+
+        result_type operator()(T const &lhs)
+        {
+            return BinaryComparatorT()(lhs, m_threshold);
+        }
+    };
+}
+
+//****************************************************************************
 BOOST_AUTO_TEST_CASE(cluster_test_markov)
 {
     IndexType num_nodes = 52;
-    graphblas::IndexArrayType i = {
+    GraphBLAS::IndexArrayType i = {
         0, 0, 0, 0, 0,
         1, 1, 1, 1,
         2, 2, 2, 2,
@@ -49,7 +71,7 @@ BOOST_AUTO_TEST_CASE(cluster_test_markov)
         10,10,10,10,10,
         11,11,11};
 
-    graphblas::IndexArrayType j = {
+    GraphBLAS::IndexArrayType j = {
         0, 1, 5, 6, 9,
         0, 1, 2, 4,
         1, 2, 3, 4,
@@ -63,15 +85,39 @@ BOOST_AUTO_TEST_CASE(cluster_test_markov)
         3, 7, 8, 10, 11,
         8, 10, 11};
     std::vector<double> v(num_nodes, 1.0);
-    Matrix<double, DirectedMatrixTag> m1(12, 12);
-    buildmatrix(m1, i, j, v);
+    Matrix<double> m1(12, 12);
 
-    auto cluster_matrix = markov_cluster(m1);
-    //std::cout << cluster_matrix << std::endl;
+    // Build matrix containing self loops
+    m1.build(i, j, v);
+    GraphBLAS::print_matrix(std::cout, m1, "Graph + self loops");
+
+    auto cluster_matrix = markov_cluster(m1, 2, 2, 30);
+    GraphBLAS::print_matrix(std::cout, cluster_matrix,
+                            "Cluster matrix (before threshold)");
+
+
+    GraphBLAS::Matrix<bool> mask(12, 12);
+    GraphBLAS::apply(
+        mask,
+        GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+        Threshold_Bind2nd<GraphBLAS::GreaterThan<double>,double>(1.0e-8),
+        cluster_matrix);
+    GraphBLAS::print_matrix(std::cout, mask,
+                            "Threshold mask");
+    GraphBLAS::apply(cluster_matrix,
+                     mask, GraphBLAS::NoAccumulate(),
+                     GraphBLAS::Identity<double>(),
+                     cluster_matrix, true);
+    GraphBLAS::print_matrix(std::cout, cluster_matrix,
+                            "Cluster matrix (after threshold)");
 
     // Compare with the example here:
     // https://www.cs.umd.edu/class/fall2009/cmsc858l/lecs/Lec12-mcl.pdf
     auto cluster_assignments = get_cluster_assignments(cluster_matrix);
+    std::cout << "Cluster assignments: ";
+    for (auto it : cluster_assignments)
+        std::cout << it << " ";
+    std::cout << std::endl;
 
     BOOST_CHECK_EQUAL(cluster_assignments[0], cluster_assignments[5]);
     BOOST_CHECK_EQUAL(cluster_assignments[0], cluster_assignments[6]);
@@ -85,20 +131,20 @@ BOOST_AUTO_TEST_CASE(cluster_test_markov)
     BOOST_CHECK_EQUAL(cluster_assignments[3], cluster_assignments[10]);
     BOOST_CHECK_EQUAL(cluster_assignments[3], cluster_assignments[11]);
 }
-
+#if 0
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure1)
 {
-    graphblas::IndexArrayType i_m1 = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2,
+    GraphBLAS::IndexArrayType i_m1 = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2,
                                       3, 3, 3, 3, 4, 4, 4, 4,
                                       5, 5, 5, 5, 5, 6, 6, 6, 7, 7, 7, 7};
-    graphblas::IndexArrayType j_m1 = {0, 2, 3, 6, 1, 2, 3, 7, 0, 2, 4, 6,
+    GraphBLAS::IndexArrayType j_m1 = {0, 2, 3, 6, 1, 2, 3, 7, 0, 2, 4, 6,
                                       0, 1, 3, 5, 0, 2, 4, 6,
                                       1, 3, 5, 6, 7, 0, 4, 6, 1, 3, 5, 7};
     std::vector<double>       v_m1 = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                                       1, 1, 1, 1, 1, 1, 1, 1,
                                       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-    Matrix<double, DirectedMatrixTag> m1(8, 8);
+    Matrix<double> m1(8, 8);
     buildmatrix(m1, i_m1, j_m1, v_m1);
 
     auto ans = algorithms::peer_pressure_cluster(m1);
@@ -117,13 +163,13 @@ BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure1)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure2)
 {
-    graphblas::IndexArrayType i_m2 = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2,
+    GraphBLAS::IndexArrayType i_m2 = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2,
                                       3, 3, 4, 4};
-    graphblas::IndexArrayType j_m2 = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2,
+    GraphBLAS::IndexArrayType j_m2 = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2,
                                       3, 4, 3, 4};
     std::vector<double>       v_m2 = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                                       1, 1, 1, 1};
-    Matrix<double, DirectedMatrixTag> m2(5, 5);
+    Matrix<double> m2(5, 5);
     buildmatrix(m2, i_m2, j_m2, v_m2);
 
     auto ans2 = algorithms::peer_pressure_cluster(m2);
@@ -140,7 +186,7 @@ BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure2)
 BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure_karate)
 {
     IndexType num_nodes = 34;
-    graphblas::IndexArrayType i = {
+    GraphBLAS::IndexArrayType i = {
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         1,1,1,1,1,1,1,1,1,
         2,2,2,2,2,2,2,2,2,2,
@@ -176,7 +222,7 @@ BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure_karate)
         32,32,32,32,32,32,32,32,32,32,32,32,
         33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33};
 
-    graphblas::IndexArrayType j = {
+    GraphBLAS::IndexArrayType j = {
         1,2,3,4,5,6,7,8,10,11,12,13,19,21,23,31,
         0,2,3,7,13,17,19,21,30,
         0,1,3,7,8,9,13,27,28,32,
@@ -214,14 +260,14 @@ BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure_karate)
 
     std::vector<double> v(i.size(), 1.0);
 
-    Matrix<double, DirectedMatrixTag> m1(num_nodes, num_nodes);
+    Matrix<double> m1(num_nodes, num_nodes);
     buildmatrix(m1, i, j, v);
 
     // add the elements along the diagonal as required for convergence
     auto i34 =
-        graphblas::identity<Matrix<double, DirectedMatrixTag> >(num_nodes);
+        GraphBLAS::identity<Matrix<double> >(num_nodes);
 
-    Matrix<double, DirectedMatrixTag> m1i(num_nodes, num_nodes);
+    Matrix<double> m1i(num_nodes, num_nodes);
     ewiseadd(m1, i34, m1i);
 
     auto ans = algorithms::peer_pressure_cluster(m1i);
@@ -236,5 +282,5 @@ BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure_karate)
     }
     std::cout << "]" << std::endl;
 }
-
+#endif
 BOOST_AUTO_TEST_SUITE_END()
