@@ -320,6 +320,7 @@ namespace GraphBLAS
     GEN_GRAPHBLAS_SEMIRING(MaxSelect2ndSemiring, MaxMonoid, Second)
 
     GEN_GRAPHBLAS_SEMIRING(MinSelect1stSemiring, MinMonoid, First)
+    GEN_GRAPHBLAS_SEMIRING(MaxSelect1stSemiring, MaxMonoid, First)
 } // GraphBLAS
 
 

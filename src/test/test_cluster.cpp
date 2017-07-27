@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(cluster_test_markov)
     GraphBLAS::print_matrix(std::cout, cluster_matrix,
                             "Cluster matrix (before threshold)");
 
-
+    // Optional: Apply a threshold to annihilate REALLY small numbers
     GraphBLAS::Matrix<bool> mask(12, 12);
     GraphBLAS::apply(
         mask,
@@ -131,38 +131,11 @@ BOOST_AUTO_TEST_CASE(cluster_test_markov)
     BOOST_CHECK_EQUAL(cluster_assignments[3], cluster_assignments[10]);
     BOOST_CHECK_EQUAL(cluster_assignments[3], cluster_assignments[11]);
 }
-#if 0
+
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure1)
 {
-    GraphBLAS::IndexArrayType i_m1 = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2,
-                                      3, 3, 3, 3, 4, 4, 4, 4,
-                                      5, 5, 5, 5, 5, 6, 6, 6, 7, 7, 7, 7};
-    GraphBLAS::IndexArrayType j_m1 = {0, 2, 3, 6, 1, 2, 3, 7, 0, 2, 4, 6,
-                                      0, 1, 3, 5, 0, 2, 4, 6,
-                                      1, 3, 5, 6, 7, 0, 4, 6, 1, 3, 5, 7};
-    std::vector<double>       v_m1 = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                                      1, 1, 1, 1, 1, 1, 1, 1,
-                                      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-    Matrix<double> m1(8, 8);
-    buildmatrix(m1, i_m1, j_m1, v_m1);
-
-    auto ans = algorithms::peer_pressure_cluster(m1);
-    auto cluster_assignments = get_cluster_assignments(ans);
-
-    //std::cout << ans << std::endl;
-    BOOST_CHECK_EQUAL(cluster_assignments[0], cluster_assignments[2]);
-    BOOST_CHECK_EQUAL(cluster_assignments[0], cluster_assignments[4]);
-    BOOST_CHECK_EQUAL(cluster_assignments[0], cluster_assignments[6]);
-
-    BOOST_CHECK_EQUAL(cluster_assignments[1], cluster_assignments[3]);
-    BOOST_CHECK_EQUAL(cluster_assignments[1], cluster_assignments[5]);
-    BOOST_CHECK_EQUAL(cluster_assignments[1], cluster_assignments[7]);
-}
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure2)
-{
+    std::cout << "============== Peer Pressure 1 ================" << std::endl;
     GraphBLAS::IndexArrayType i_m2 = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2,
                                       3, 3, 4, 4};
     GraphBLAS::IndexArrayType j_m2 = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2,
@@ -170,16 +143,72 @@ BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure2)
     std::vector<double>       v_m2 = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                                       1, 1, 1, 1};
     Matrix<double> m2(5, 5);
-    buildmatrix(m2, i_m2, j_m2, v_m2);
+    m2.build(i_m2, j_m2, v_m2);
 
     auto ans2 = algorithms::peer_pressure_cluster(m2);
-    auto cluster_assignments = get_cluster_assignments(ans2);
+    auto cluster_assignments = get_cluster_assignments_v2(ans2);
+    GraphBLAS::print_vector(std::cout, cluster_assignments, "CLUSTER ASSIGNMENTS");
 
-    //std::cout << ans << std::endl;
-    BOOST_CHECK_EQUAL(cluster_assignments[0], cluster_assignments[1]);
-    BOOST_CHECK_EQUAL(cluster_assignments[0], cluster_assignments[2]);
+    BOOST_CHECK_EQUAL(cluster_assignments.extractElement(0),
+                      cluster_assignments.extractElement(1));
+    BOOST_CHECK_EQUAL(cluster_assignments.extractElement(0),
+                      cluster_assignments.extractElement(1));
 
-    BOOST_CHECK_EQUAL(cluster_assignments[3], cluster_assignments[4]);
+    BOOST_CHECK_EQUAL(cluster_assignments.extractElement(3),
+                      cluster_assignments.extractElement(4));
+
+    BOOST_CHECK(cluster_assignments.extractElement(0) !=
+                cluster_assignments.extractElement(3));
+}
+
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure2)
+{
+    std::cout << "============== Peer Pressure 2 ================" << std::endl;
+    GraphBLAS::IndexArrayType i_m1 = {0, 0, 0, 0,
+                                      1, 1, 1, 1,
+                                      2, 2, 2, 2,
+                                      3, 3, 3, 3,
+                                      4, 4, 4, 4,
+                                      5, 5, 5, 5, 5,
+                                      6, 6, 6,
+                                      7, 7, 7, 7};
+    GraphBLAS::IndexArrayType j_m1 = {0, 2, 3, 6,
+                                      1, 2, 3, 7,
+                                      0, 2, 4, 6,
+                                      0, 1, 3, 5,
+                                      0, 2, 4, 6,
+                                      1, 3, 5, 6, 7,
+                                      0, 4, 6,
+                                      1, 3, 5, 7};
+    std::vector<double>       v_m1 = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                                      1, 1, 1, 1, 1, 1, 1, 1,
+                                      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    Matrix<double> m1(8, 8);
+    m1.build(i_m1, j_m1, v_m1);
+
+    auto ans = algorithms::peer_pressure_cluster(m1);
+
+    auto cluster_assignments = get_cluster_assignments_v2(ans);
+    GraphBLAS::print_vector(std::cout, cluster_assignments, "CLUSTER ASSIGNMENTS");
+
+    BOOST_CHECK_EQUAL(cluster_assignments.extractElement(0),
+                      cluster_assignments.extractElement(2));
+    BOOST_CHECK_EQUAL(cluster_assignments.extractElement(0),
+                      cluster_assignments.extractElement(4));
+    BOOST_CHECK_EQUAL(cluster_assignments.extractElement(0),
+                      cluster_assignments.extractElement(6));
+
+    BOOST_CHECK_EQUAL(cluster_assignments.extractElement(1),
+                      cluster_assignments.extractElement(3));
+    BOOST_CHECK_EQUAL(cluster_assignments.extractElement(1),
+                      cluster_assignments.extractElement(5));
+    BOOST_CHECK_EQUAL(cluster_assignments.extractElement(1),
+                      cluster_assignments.extractElement(7));
+
+    BOOST_CHECK(cluster_assignments.extractElement(0) !=
+                cluster_assignments.extractElement(1));
 }
 
 //****************************************************************************
@@ -260,27 +289,36 @@ BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure_karate)
 
     std::vector<double> v(i.size(), 1.0);
 
-    Matrix<double> m1(num_nodes, num_nodes);
-    buildmatrix(m1, i, j, v);
+    Matrix<double> A(num_nodes, num_nodes);
+    A.build(i, j, v);
 
     // add the elements along the diagonal as required for convergence
-    auto i34 =
-        GraphBLAS::identity<Matrix<double> >(num_nodes);
+    //ewiseadd(A, I34, Ai);
+    Matrix<double> Ai(num_nodes, num_nodes);
+    auto I34 = GraphBLAS::scaled_identity<Matrix<double> >(num_nodes);
+    GraphBLAS::eWiseAdd(Ai,
+                        GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                        GraphBLAS::Plus<double>(),
+                        A, I34);
 
-    Matrix<double> m1i(num_nodes, num_nodes);
-    ewiseadd(m1, i34, m1i);
+    auto ans = algorithms::peer_pressure_cluster(Ai);
+    auto cluster_assignments = get_cluster_assignments_v2(ans);
+    GraphBLAS::print_vector(std::cout, cluster_assignments,
+                            "LOUSY KARATE CLUSTER ASSIGNMENTS");
 
-    auto ans = algorithms::peer_pressure_cluster(m1i);
-    auto cluster_assignments = get_cluster_assignments(ans);
+    auto ans2 = algorithms::markov_cluster(Ai);
+    auto cl2 = get_cluster_assignments_v2(ans2);
+    GraphBLAS::print_vector(std::cout, cl2,
+                            "MARKOV KARATE CLUSTER ASSIGNMENTS");
 
-    std::cout << "[lousy karate clusters";
-    for (auto it = cluster_assignments.begin();
-         it != cluster_assignments.end();
-         ++it)
-    {
-        std::cout << ", " << *it;
-    }
-    std::cout << "]" << std::endl;
+    // auto cluster_assignments = get_cluster_assignments(ans);
+    // std::cout << "[lousy karate clusters";
+    // for (auto it = cluster_assignments.begin();
+    //      it != cluster_assignments.end();
+    //      ++it)
+    // {
+    //     std::cout << ", " << *it;
+    // }
+    // std::cout << "]" << std::endl;
 }
-#endif
 BOOST_AUTO_TEST_SUITE_END()

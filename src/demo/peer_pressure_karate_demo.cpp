@@ -17,11 +17,12 @@
 #include <iostream>
 
 #include <graphblas/graphblas.hpp>
-#include <algorithms/algorithms.hpp>
+#include <algorithms/cluster.hpp>
 
 //****************************************************************************
-graphblas::IndexType const NUM_NODES = 34;
-graphblas::IndexArrayType i = {
+GraphBLAS::IndexType const NUM_NODES = 34;
+
+GraphBLAS::IndexArrayType i = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     1,1,1,1,1,1,1,1,1,
     2,2,2,2,2,2,2,2,2,2,
@@ -57,7 +58,7 @@ graphblas::IndexArrayType i = {
     32,32,32,32,32,32,32,32,32,32,32,32,
     33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33};
 
-graphblas::IndexArrayType j = {
+GraphBLAS::IndexArrayType j = {
     1,2,3,4,5,6,7,8,10,11,12,13,19,21,23,31,
     0,2,3,7,13,17,19,21,30,
     0,1,3,7,8,9,13,27,28,32,
@@ -96,33 +97,37 @@ graphblas::IndexArrayType j = {
 //****************************************************************************
 int main(int, char**)
 {
-    graphblas::Matrix<double, graphblas::DirectedMatrixTag> A_karate(NUM_NODES,
-                                                                     NUM_NODES);
-    graphblas::Matrix<double, graphblas::DirectedMatrixTag> G_karate(NUM_NODES,
-                                                                     NUM_NODES);
-    std::vector<double> weights(i.size(), 1.0);
-    graphblas::buildmatrix(A_karate, i.begin(), j.begin(), weights.begin(), i.size());
+    GraphBLAS::Matrix<uint32_t> A_karate(NUM_NODES, NUM_NODES);
+    GraphBLAS::Matrix<uint32_t> G_karate(NUM_NODES, NUM_NODES);
+    std::vector<double> weights(NUM_NODES, 1.0);
+    G_karate.build(i.begin(), j.begin(), weights.begin(), i.size());
 
-    auto cluster_approx = graphblas::identity<
-        graphblas::Matrix<double,
-                          graphblas::DirectedMatrixTag> >(NUM_NODES);
+    auto Clusters =
+        GraphBLAS::scaled_identity<GraphBLAS::Matrix<bool>>(NUM_NODES);
 
-    graphblas::ewiseadd(A_karate, cluster_approx, G_karate);
+    // Add self-loops to graph
+    GraphBLAS::eWiseAdd(A_karate,
+                        GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                        GraphBLAS::Plus<uint32_t>(),
+                        G_karate, Clusters);
 
-    auto ans = algorithms::peer_pressure_cluster_v2(G_karate,
-                                                    cluster_approx,
-                                                    100);
-    //auto ans = algorithms::peer_pressure_cluster(G_karate, cluster_approx);
-    auto clusters = algorithms::get_cluster_assignments(ans);
-    std::cout << "cluster assignments:     ";
+    algorithms::peer_pressure_cluster_v2(A_karate, Clusters, 100);
+
+    auto clusters = algorithms::get_cluster_assignments(Clusters);
+    std::cout << "p.p. cluster assignments (no normalization): ";
     for (auto it = clusters.begin(); it != clusters.end(); ++it)
     {
         std::cout << " " << *it;
     }
     std::cout << std::endl;
 
-    auto clusters2 = algorithms::get_cluster_assignments_v2(ans);
-    std::cout << "cluster assignments (v2):";
+    auto Clusters2 =
+        GraphBLAS::scaled_identity<GraphBLAS::Matrix<bool>>(NUM_NODES);
+
+    algorithms::peer_pressure_cluster(A_karate, Clusters2, 100);
+
+    auto clusters2 = algorithms::get_cluster_assignments(Clusters2);
+    std::cout << "cluster assignments (with normalization):    ";
     for (auto it = clusters2.begin(); it != clusters2.end(); ++it)
     {
         std::cout << " " << *it;

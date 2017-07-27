@@ -283,10 +283,10 @@ namespace XXXgraphblas
      */
     template<typename MatrixT>
     MatrixT identity_sparse(graphblas::IndexType          mat_size,
-                     typename MatrixT::ScalarType  zero =
-                         static_cast<typename MatrixT::ScalarType>(0),
-                     typename MatrixT::ScalarType  one =
-                         static_cast<typename MatrixT::ScalarType>(1))
+                            typename MatrixT::ScalarType  zero =
+                                static_cast<typename MatrixT::ScalarType>(0),
+                            typename MatrixT::ScalarType  one =
+                                static_cast<typename MatrixT::ScalarType>(1))
     {
         //init identity:
         MatrixT id(mat_size, mat_size);

@@ -337,8 +337,30 @@ namespace GraphBLAS
             return m_data[row_index];
         }
 
-        void setRow(IndexType row_index,
-                     std::vector<std::tuple<IndexType, ScalarT> > &row_data)
+        // Allow casting
+        template <typename OtherScalarT>
+        void setRow(
+            IndexType row_index,
+            std::vector<std::tuple<IndexType, OtherScalarT> > const &row_data)
+        {
+            IndexType old_nvals = m_data[row_index].size();
+            IndexType new_nvals = row_data.size();
+
+            m_nvals = m_nvals + new_nvals - old_nvals;
+            //m_data[row_index] = row_data;   // swap here?
+            m_data[row_index].clear();
+            for (auto &tupl : row_data)
+            {
+                m_data[row_index].push_back(
+                    std::make_tuple(std::get<0>(tupl),
+                                    static_cast<ScalarT>(std::get<1>(tupl))));
+            }
+        }
+
+        // When not casting vector assignment used
+        void setRow(
+            IndexType row_index,
+            std::vector<std::tuple<IndexType, ScalarT> > const &row_data)
         {
             IndexType old_nvals = m_data[row_index].size();
             IndexType new_nvals = row_data.size();
@@ -372,8 +394,10 @@ namespace GraphBLAS
 
         // col_data must be in increasing index order
         /// @todo this could be vastly improved.
-        void setCol(IndexType col_index,
-                     std::vector<std::tuple<IndexType, ScalarT> > &col_data)
+        template <typename OtherScalarT>
+        void setCol(
+            IndexType col_index,
+            std::vector<std::tuple<IndexType, OtherScalarT> > const &col_data)
         {
             auto it = col_data.begin();
             for (IndexType row_index = 0; row_index < m_num_rows; row_index++)
@@ -411,7 +435,8 @@ namespace GraphBLAS
                         {
                             //std::cerr << "Found row element to replace" << std::endl;
                             // replace
-                            std::get<1>(*row_it) = std::get<1>(*it);
+                            std::get<1>(*row_it) =
+                                static_cast<ScalarT>(std::get<1>(*it));
                             ++it;
                             inserted = true;
                             break;
@@ -419,7 +444,11 @@ namespace GraphBLAS
                         else if (std::get<0>(*row_it) > col_index)
                         {
                             //std::cerr << "Inserting new row element" << std::endl;
-                            m_data[row_index].insert(row_it, *it);
+                            m_data[row_index].insert(
+                                row_it,
+                                std::make_tuple(
+                                    col_index,
+                                    static_cast<ScalarT>(std::get<1>(*it))));
                             ++m_nvals;
                             ++it;
                             inserted = true;
@@ -429,9 +458,11 @@ namespace GraphBLAS
                     if (!inserted)
                     {
                         //std::cerr << "Appending new row element" << std::endl;
-                        m_data[row_index].insert(m_data[row_index].end(),
-                                                 std::make_tuple(col_index,
-                                                                 std::get<1>(*it)));
+                        m_data[row_index].insert(
+                            m_data[row_index].end(),
+                            std::make_tuple(
+                                col_index,
+                                static_cast<ScalarT>(std::get<1>(*it))));
                         ++m_nvals;
                         ++it;
                     }

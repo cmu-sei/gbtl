@@ -400,8 +400,8 @@ namespace GraphBLAS
                     else
                     {
                         //std::cerr << "Copying v2, Advancing v2_it" << std::endl;
-                        // @todo: Should these static_cast??
-                        ans.push_back(std::make_tuple(v2_idx, v2_val));
+                        ans.push_back(std::make_tuple(v2_idx,
+                                                      static_cast<D3>(v2_val)));
                         ++v2_it;
                     }
                 }
