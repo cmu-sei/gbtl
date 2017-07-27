@@ -21,8 +21,6 @@
 
 #define GB_DEBUG
 #include <graphblas/graphblas.hpp>
-//#include <graphblas/linalg_utils.hpp>
-
 
 namespace algorithms
 {

@@ -22,9 +22,6 @@ using namespace GraphBLAS;
 
 #include <boost/test/included/unit_test.hpp>
 
-// @todo:  Why do I have to do this??
-//#include <graphblas/system/sequential/sparse_extract.hpp>
-
 BOOST_AUTO_TEST_SUITE(sparse_extract_suite)
 
 //****************************************************************************
@@ -296,7 +293,7 @@ BOOST_AUTO_TEST_CASE(sparse_extract_column_all)
 
     BOOST_CHECK_EQUAL(result, answer);
 }
-    
+
 //****************************************************************************
 
 BOOST_AUTO_TEST_SUITE_END()

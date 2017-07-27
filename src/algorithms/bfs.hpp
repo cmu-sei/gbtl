@@ -26,8 +26,6 @@
 #include <tuple>
 
 #include <graphblas/graphblas.hpp>
-#include <graphblas/Matrix.hpp>
-//#include <graphblas/utility.hpp>
 
 //****************************************************************************
 namespace

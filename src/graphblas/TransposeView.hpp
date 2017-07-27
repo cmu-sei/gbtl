@@ -16,10 +16,7 @@
 #pragma once
 
 #include <cstddef>
-//#include <graphblas/detail/config.hpp>
-//#include <graphblas/detail/param_unpack.hpp>
 #include <graphblas/Matrix.hpp>
-//#include <graphblas/utility.hpp>
 
 #define __GB_SYSTEM_TRANSPOSEVIEW_HEADER <graphblas/system/__GB_SYSTEM_ROOT/TransposeView.hpp>
 #include __GB_SYSTEM_TRANSPOSEVIEW_HEADER
@@ -253,9 +250,5 @@ namespace GraphBLAS
                                   bool             replace_flag);
 
     };
-
-
-
-
 
 } // end namespace GraphBLAS

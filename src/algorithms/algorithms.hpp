@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include <algorithms/bc.hpp>
 #include <algorithms/bfs.hpp>
 #include <algorithms/cluster.hpp>
 #include <algorithms/maxflow.hpp>
@@ -33,7 +34,6 @@
 #include <algorithms/mst.hpp>
 #include <algorithms/page_rank.hpp>
 #include <algorithms/sssp.hpp>
-#include <algorithms/bc.hpp>
 #include <algorithms/triangle_count.hpp>
 
 #endif // ALGORITHMS_HPP

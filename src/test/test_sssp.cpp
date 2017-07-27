@@ -18,7 +18,6 @@
 
 #include <algorithms/sssp.hpp>
 #include <graphblas/graphblas.hpp>
-//#include <graphblas/linalg_utils.hpp>
 
 using namespace algorithms;
 

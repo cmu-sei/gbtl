@@ -23,20 +23,15 @@
 #include <graphblas/types.hpp>
 #include <graphblas/exceptions.hpp>
 
-//#include <graphblas/accum.hpp>
 #include <graphblas/algebra.hpp>
 
 #include <graphblas/Matrix.hpp>
 #include <graphblas/Vector.hpp>
 #include <graphblas/ComplementView.hpp>
 #include <graphblas/TransposeView.hpp>
-//#include <graphblas/View.hpp> // deprecated
 
 #include <graphblas/operations.hpp>
 #include <graphblas/matrix_utils.hpp>
-
-//#include <graphblas/linalg_utils.hpp>  // deprecated
-//#include <graphblas/utility.hpp>   // deprecated
 
 #define __GB_SYSTEM_HEADER <graphblas/system/__GB_SYSTEM_ROOT/__GB_SYSTEM_ROOT.hpp>
 #include __GB_SYSTEM_HEADER

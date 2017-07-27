@@ -19,9 +19,8 @@
 
 #include <graphblas/graphblas.hpp>
 #include <algorithms/page_rank.hpp>
-#include <graphblas/linalg_utils.hpp>
 
-using namespace graphblas;
+using namespace GraphBLAS;
 using namespace algorithms;
 
 #define BOOST_TEST_MAIN
@@ -34,44 +33,44 @@ BOOST_AUTO_TEST_SUITE(page_rank_suite)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(page_rank_test_tn_isolated_node)
 {
-    graphblas::IndexType const NUM_NODES(9);
-    graphblas::IndexArrayType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
+    IndexType const NUM_NODES(9);
+    IndexArrayType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
                                    4, 4, 4, 5, 6, 6, 6, 8, 8};
 
-    graphblas::IndexArrayType j = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
+    IndexArrayType j = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
                                    2, 3, 8, 2, 1, 2, 3, 2, 4};
     std::vector<double> v(i.size(), 1.0);
     Matrix<double, DirectedMatrixTag> m1(NUM_NODES, NUM_NODES);
-    buildmatrix(m1, i, j, v);
+    m1.build(i, j, v);
     print_matrix(std::cout, m1, "Graph:");
 
     Matrix<double> page_rank(1, NUM_NODES);
     algorithms::page_rank(m1, page_rank);
-    graphblas::print_matrix(std::cout, page_rank, "Technote page rank:");
+    print_matrix(std::cout, page_rank, "Technote page rank:");
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(page_rank_test_gilbert_directed)
 {
-    graphblas::IndexType const NUM_NODES(7);
-    graphblas::IndexArrayType i = {0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6};
+    IndexType const NUM_NODES(7);
+    IndexArrayType i = {0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6};
 
-    graphblas::IndexArrayType j = {1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4};
+    IndexArrayType j = {1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4};
     std::vector<double> v(i.size(), 1.0);
     Matrix<double, DirectedMatrixTag> m1(NUM_NODES, NUM_NODES);
-    buildmatrix(m1, i, j, v);
+    m1.build(i, j, v);
     print_matrix(std::cout, m1, "Graph:");
 
     Matrix<double> page_rank(1, NUM_NODES);
     algorithms::page_rank(m1, page_rank);
-    graphblas::print_matrix(std::cout, page_rank, "Gilbert page rank:");
+    print_matrix(std::cout, page_rank, "Gilbert page rank:");
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(page_rank_test_001)
 {
     IndexType num_nodes = 12;
-    graphblas::IndexArrayType i = {
+    IndexArrayType i = {
         0, 0, 0, 0,
         1, 1, 1,
         2, 2, 2,
@@ -85,7 +84,7 @@ BOOST_AUTO_TEST_CASE(page_rank_test_001)
         10,10,10,10,
         11,11};
 
-    graphblas::IndexArrayType j = {
+    IndexArrayType j = {
         1, 5, 6, 9,
         0, 2, 4,
         1, 3, 4,
@@ -100,19 +99,19 @@ BOOST_AUTO_TEST_CASE(page_rank_test_001)
         8, 10};
     std::vector<double> v(i.size(), 1.0);
     Matrix<double, DirectedMatrixTag> m1(num_nodes, num_nodes);
-    buildmatrix(m1, i, j, v);
+    m1.build(i, j, v);
     print_matrix(std::cout, m1, "Graph:");
 
     Matrix<double> page_rank(1, num_nodes);
     algorithms::page_rank(m1, page_rank);
-    graphblas::print_matrix(std::cout, page_rank, "Page rank:");
+    print_matrix(std::cout, page_rank, "Page rank:");
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(page_rank_test_karate)
 {
     IndexType num_nodes = 34;
-    graphblas::IndexArrayType i = {
+    IndexArrayType i = {
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         1,1,1,1,1,1,1,1,1,
         2,2,2,2,2,2,2,2,2,2,
@@ -148,7 +147,7 @@ BOOST_AUTO_TEST_CASE(page_rank_test_karate)
         32,32,32,32,32,32,32,32,32,32,32,32,
         33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33};
 
-    graphblas::IndexArrayType j = {
+    IndexArrayType j = {
         1,2,3,4,5,6,7,8,10,11,12,13,19,21,23,31,
         0,2,3,7,13,17,19,21,30,
         0,1,3,7,8,9,13,27,28,32,
@@ -187,10 +186,10 @@ BOOST_AUTO_TEST_CASE(page_rank_test_karate)
     std::vector<double> v(i.size(), 1.0);
     Matrix<double> page_rank(1, num_nodes);
     Matrix<double> k_graph(num_nodes, num_nodes);
-    buildmatrix(k_graph, i, j, v);
+    k_graph.build(i, j, v);
 
     algorithms::page_rank(k_graph, page_rank);
-    graphblas::print_matrix(std::cout, page_rank, "Page rank:");
+    print_matrix(std::cout, page_rank, "Page rank:");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -17,7 +17,6 @@
 
 #include <graphblas/graphblas.hpp>
 #include <algorithms/cluster.hpp>
-//#include <algorithms/algorithms.hpp>
 
 using namespace GraphBLAS;
 

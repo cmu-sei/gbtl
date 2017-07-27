@@ -34,24 +34,3 @@ namespace GraphBLAS
 }//end GraphBLAS
 
 //****************************************************************************
-/// @deprecated
-//****************************************************************************
-
-namespace XXXgraphblas
-{
-    // The default is sparse directed graph, so we need tags that modify that
-    struct DirectedMatrixTag {};
-    struct UndirectedMatrixTag {};
-    struct DenseMatrixTag {};
-    struct SparseMatrixTag {};
-
-    namespace detail
-    {
-        // add category tags in the detail namespace
-        struct SparsenessCategoryTag {};
-        struct DirectednessCategoryTag {};
-        struct NullTag {};
-    } //end detail
-}//end graphblas
-
-//****************************************************************************

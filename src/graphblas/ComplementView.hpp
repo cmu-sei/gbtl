@@ -16,9 +16,6 @@
 #pragma once
 
 #include <cstddef>
-//#include <graphblas/detail/config.hpp>
-//#include <graphblas/detail/param_unpack.hpp>
-//#include <graphblas/utility.hpp>
 #include <graphblas/Matrix.hpp>
 
 // Include matrix definitions from the appropriate backend.

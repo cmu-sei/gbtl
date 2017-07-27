@@ -22,9 +22,6 @@ using namespace GraphBLAS;
 
 #include <boost/test/included/unit_test.hpp>
 
-// @todo:  Why do I have to do this??
-//#include <graphblas/system/sequential/sparse_extract.hpp>
-
 BOOST_AUTO_TEST_SUITE(sparse_apply_suite)
 
 //****************************************************************************
