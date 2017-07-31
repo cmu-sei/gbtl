@@ -134,7 +134,8 @@ namespace GraphBLAS
                           IndexArrayType             const   &row_indicies,
                           IndexArrayType             const   &col_indicies)
         {
-            // NOTE!! - Backend code. We expect that all dimension checks done elsewhere.
+            // NOTE!! - Backend code. We expect that all dimension
+            // checks done elsewhere.
 
             typedef std::vector<std::tuple<IndexType,AScalarT> > ARowType;
             typedef std::vector<std::tuple<IndexType,TScalarT> > TRowType;
@@ -280,6 +281,15 @@ namespace GraphBLAS
             // This basically "expands" A into C
 
             // @todo Add bounds and type checks
+            check_matrix_size(C, mask, "assign(matrix) mask dimension check");
+            check_index_array_dimension(row_indices, A.nrows(),
+                                        "assign row_indices dimension check");
+            check_index_array_dimension(col_indices, A.ncols(),
+                                        "assign col_indices dimension check");
+            check_index_array_content(row_indices, C.nrows(),
+                                      "assign row_indices content check");
+            check_index_array_content(col_indices, C.ncols(),
+                                      "assign col_indices content check");
 
             //std::cerr << ">>> C in <<< " << std::endl;
             //std::cerr << C << std::endl;

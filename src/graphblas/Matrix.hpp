@@ -19,10 +19,8 @@
 #include <graphblas/detail/config.hpp>
 #include <graphblas/detail/param_unpack.hpp>
 
-// Include matrix definitions from the appropriate backend.
-#define __GB_SYSTEM_MATRIX_HEADER <graphblas/system/__GB_SYSTEM_ROOT/Matrix.hpp>
-#include __GB_SYSTEM_MATRIX_HEADER
-#undef __GB_SYSTEM_MATRIX_HEADER
+#define GB_INCLUDE_BACKEND_MATRIX 1
+#include <graphblas/backend_include.hpp>
 
 //****************************************************************************
 // The new namespace
@@ -466,6 +464,18 @@ namespace GraphBLAS
             AccumT                                        accum,
             MonoidT                                       op,
             GraphBLAS::Matrix<AScalarT, ATagsT...> const &A);
+
+        //--------------------------------------------------------------------
+
+        template<typename CMatrixT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename AMatrixT>
+        friend inline void transpose(CMatrixT       &C,
+                                     MaskT    const &Mask,
+                                     AccumT          accum,
+                                     AMatrixT const &A,
+                                     bool            replace_flag);
 
         //--------------------------------------------------------------------
 

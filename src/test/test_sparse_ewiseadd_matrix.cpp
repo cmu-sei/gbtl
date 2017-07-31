@@ -150,15 +150,15 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_stored_zero_result)
 {
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> A(m3x3_dense, 0.);
 
-    // Add a stored zero on the diagonal
-    A.setElement(1, 1, 0);
+    // Add a stored zero
+    A.setElement(1, 2, 0);
     BOOST_CHECK_EQUAL(A.nvals(), 7);
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> B2(eye3x3_dense, 0.);
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans2(
         ans_eye3x3_dense, 0.);
-    // Add a stored zero on the diagonal
-    Ans2.setElement(1, 1, 0);
+    // Add a stored zero
+    Ans2.setElement(1, 2, 0);
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(3,3);
 
@@ -166,8 +166,8 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_stored_zero_result)
                         GraphBLAS::NoMask(),
                         GraphBLAS::NoAccumulate(),
                         GraphBLAS::Plus<double>(), A, B2);
+    BOOST_CHECK_EQUAL(Result.nvals(), 8);
     BOOST_CHECK_EQUAL(Result, Ans2);
-    BOOST_CHECK_EQUAL(Result.nvals(), 7);
 }
 
 //****************************************************************************
@@ -330,10 +330,10 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_replace_reg)
     {
         GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
-        std::vector<std::vector<double> > ans_dense = {{10, 12,  8},
-                                                       {0,  14, 10},
-                                                       {0,   0,  2},
-                                                       {0,   0,  0}};
+        std::vector<std::vector<double> > ans_dense = {{7, 8,  6},
+                                                       {0, 9,  7},
+                                                       {0, 0,  2},
+                                                       {0, 0,  0}};
         GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
 
         GraphBLAS::eWiseAdd(Result,
@@ -384,10 +384,10 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_replace_reg_stored_zero)
     {
         GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
-        std::vector<std::vector<double> > ans_dense = {{10, 12,  8},
-                                                       {0,  14, 10},
-                                                       {0,   0,  2},
-                                                       {0,   0,  0}};
+        std::vector<std::vector<double> > ans_dense = {{7,  8,  6},
+                                                       {0,  9,  7},
+                                                       {0,  0,  2},
+                                                       {0,  0,  0}};
         GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
 
         GraphBLAS::eWiseAdd(Result,

@@ -68,16 +68,25 @@ namespace GraphBLAS
             IndexType ncols() const { return m_matrix.ncols(); }
             IndexType nvals() const
             {
+                IndexType num_vals = (m_matrix.nrows()*m_matrix.ncols() -
+                                      m_matrix.nvals());
+
                 // THIS IS COSTLY
-                IndexType num_vals(0);
+                // Need to detect and deal with stored 'falses' in m_matrix.
+                // They count for stored values in the structural complement
                 for (IndexType ix = 0; ix < nrows(); ++ix)
                 {
-                    num_vals += getRow(ix).size();
+                    auto row = getRow(ix);
+                    for (auto &ix : row)
+                    {
+                        if (false == static_cast<bool>(std::get<1>(ix)))
+                        {
+                            ++num_vals;
+                        }
+                    }
                 }
-                /// @todo need to detect and deal with stored 'falses' in m_matrix.
-                /// They would count for stored values in the structural complement
-                //return (m_matrix.nrows()*m_matrix.ncols() -
-                //        m_matrix.nvals());
+
+                return num_vals;
             }
 
             /**
@@ -93,16 +102,29 @@ namespace GraphBLAS
             template <typename OtherMatrixT>
             bool operator==(OtherMatrixT const &rhs) const
             {
-                if ((nrows() != rhs.nrows()) || (ncols() != rhs.ncols()))
-                    //    || (nvals() != rhs.nvals())) // Comparing nvals is tricky
+                if ((rhs.nrows() != nrows()) &&
+                    (rhs.ncols() != ncols()) &&
+                    (rhs.nvals() != nvals()))
                 {
                     return false;
                 }
 
-                /// @todo stored zeros need to evaluate to true in the complement
-                throw 1;  // Not implemented yet
+                std::vector<IndexType> i(nvals());
+                std::vector<IndexType> j(nvals());
+                std::vector<typename OtherMatrixT::ScalarType> v(nvals());
+                rhs.extractTuples(i.begin(), j.begin(), v.begin());
 
-                /// @todo Not implemented yet.
+                for (IndexType ix = 0; ix < nvals(); ++ix)
+                {
+                    if (!hasElement(i[ix], j[ix]))
+                    {
+                        return false;
+                    }
+                    if (extractElement(i[ix], j[ix]) != v[ix])
+                    {
+                        return false;
+                    }
+                }
 
                 return true;
             }
@@ -129,7 +151,8 @@ namespace GraphBLAS
                 {
                     return true;
                 }
-                else if (false == static_cast<bool>(m_matrix.extractElement(irow, icol)))
+                else if (false ==
+                         static_cast<bool>(m_matrix.extractElement(irow, icol)))
                 {
                     return true;
                 }
@@ -158,7 +181,8 @@ namespace GraphBLAS
                 {
                     return true;
                 }
-                else if (false == static_cast<bool>(m_matrix.extractElement(row, col)))
+                else if (false ==
+                         static_cast<bool>(m_matrix.extractElement(row, col)))
                 {
                     return true;
                 }

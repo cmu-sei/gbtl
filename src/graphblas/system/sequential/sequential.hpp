@@ -17,6 +17,9 @@
 
 #pragma once
 
+#include <graphblas/system/sequential/Matrix.hpp>
+#include <graphblas/system/sequential/Vector.hpp>
+
 #include <graphblas/system/sequential/utility.hpp>
 
 #include <graphblas/system/sequential/TransposeView.hpp>

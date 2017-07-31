@@ -18,10 +18,8 @@
 #include <cstddef>
 #include <graphblas/Matrix.hpp>
 
-#define __GB_SYSTEM_TRANSPOSEVIEW_HEADER <graphblas/system/__GB_SYSTEM_ROOT/TransposeView.hpp>
-#include __GB_SYSTEM_TRANSPOSEVIEW_HEADER
-#undef __GB_SYSTEM_TRANSPOSEVIEW_HEADER
-
+#define GB_INCLUDE_BACKEND_TRANSPOSE_VIEW 1
+#include <graphblas/backend_include.hpp>
 
 //****************************************************************************
 //****************************************************************************
@@ -63,10 +61,7 @@ namespace GraphBLAS
         template <typename OtherMatrixT>
         bool operator==(OtherMatrixT const &rhs) const
         {
-            //return (m_mat.operator==(rhs.m_mat));
-            throw 1;
-            ///@todo Not implemented yet
-            //return matrix_equal_helper(*this, rhs);
+            return (m_mat == rhs);
         }
 
         template <typename OtherMatrixT>

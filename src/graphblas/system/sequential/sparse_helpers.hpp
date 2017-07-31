@@ -34,7 +34,6 @@
 
 namespace GraphBLAS
 {
-
     namespace backend
     {
         template <typename ScalarT>
@@ -921,6 +920,37 @@ namespace GraphBLAS
                         "Matrix COL vs COL counts (outer) are not the same. " +
                         m2Name + " col = " + std::to_string(m2.ncols()) + ", " +
                         m3Name + " col = " + std::to_string(m3.ncols()));
+            }
+        }
+
+        //********************************************************************
+        void check_index_array_dimension(IndexArrayType const &array,
+                                         IndexType dim,
+                                         std::string const &msg)
+        {
+            if (&array != &GrB_ALL)
+            {
+                if (array.size() != dim)
+                {
+                    throw DimensionException(msg);
+                }
+            }
+        }
+
+        //********************************************************************
+        void check_index_array_content(IndexArrayType const &array,
+                                       IndexType dim,
+                                       std::string const &msg)
+        {
+            if (&array != &GrB_ALL)
+            {
+                for (auto ix : array)
+                {
+                    if (ix >= dim)
+                    {
+                        throw IndexOutOfBoundsException(msg);
+                    }
+                }
             }
         }
 

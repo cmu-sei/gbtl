@@ -16,39 +16,82 @@
 #ifndef MST_HPP
 #define MST_HPP
 
-
 #include <utility>
 #include <vector>
-
 #include <iostream>
 
 #include <graphblas/graphblas.hpp>
+
 //****************************************************************************
-namespace
-{
-
-    //************************************************************************
-    /// @todo Consider moving this to algebra.hpp
-    template <typename T>
-    class LessThan
-    {
-    public:
-        typedef T result_type;
-
-        __device__ __host__ inline result_type operator()(T const &a,
-                                                          T const &b)
-        {
-            return ((a < b) ?
-                    static_cast<T>(1) :
-                    static_cast<T>(0));
-        }
-    };
-}
-
 namespace algorithms
 {
+    //************************************************************************
+    template <typename T>
+    using MSTType = std::pair<GraphBLAS::IndexType, T>;
+
+    template <typename T>
+    std::ostream &operator<<(std::ostream &ostr, MSTType<T> const &mst)
+    {
+        ostr << "(" << mst.first << "," << mst.second << ")";
+        return ostr;
+    }
+
+    //************************************************************************
+    template<typename D1, typename D2 = D1, typename D3 = D1>
+    struct MSTPlus
+    {
+        typedef D3 result_type;
+        inline D3 operator()(D1 const &lhs, MSTType<D2> const &rhs)
+        {
+            return lhs + rhs.second;
+        }
+    };
+
+    //************************************************************************
+    template<typename D1>
+    struct MSTMin
+    {
+        typedef MSTType<D1> result_type;
+        inline MSTType<D1> operator()(MSTType<D1> const &lhs,
+                                      MSTType<D1> const &rhs)
+        {
+            return (rhs.second > lhs.second) ? lhs : rhs;
+        }
+    };
+
+
+    //************************************************************************
+    /// position of a single minimum element in vector
+    /// @todo Need to find a more GraphBLAS-like way to do this
+    template <typename T>
+    GraphBLAS::IndexType argmin(GraphBLAS::Vector<T> const &v)
+    {
+        if (v.nvals() == 0)
+        {
+            throw GraphBLAS::PanicException();
+        }
+
+        std::vector<T> vals(v.nvals());
+        GraphBLAS::IndexArrayType idx(v.nvals());
+        v.extractTuples(idx.begin(), vals.begin());
+
+        GraphBLAS::IndexType idx_min = idx[0];
+        T val_min = vals[0];
+
+        for (GraphBLAS::IndexType i = 1; i < vals.size(); ++i)
+        {
+            if (vals[i] < val_min)
+            {
+                val_min = vals[i];
+                idx_min = idx[i];
+            }
+        }
+        return idx_min;
+    }
+
     /**
-     * @brief Compute the of the minimal spanning tree for the given graph.
+     * @brief Compute the weight of the minimal spanning tree for the given
+     *        graph.
      *
      * This function takes in the adjacency matrix representation of a
      * graph, and computes the weight of the minimal spanning tree of
@@ -57,116 +100,122 @@ namespace algorithms
      * Prim's algorithm works by growing a single set of vertices
      * (call it S) which belong to the spanning tree.  On each iteration,
      * we add the closest vertex to S not already in S, and add the
-     * weight of that vertex and its parent to the weight of the minimal
-     * spanning tree.
+     * weight of the edge between that vertex and its parent to the weight
+     * of the minimal spanning tree.
      *
-     * For our algorithm, this weight is what is returned when the algorithm
-     * terminates.
-     *
-     * @param[in]  graph  The graph to perform the computation on.
+     * @param[in]  graph        The graph to perform the computation on.
+     * @param[out] mst_parents  Parent list
      *
      * @return The weight of the minimum spanning tree of the graph,
-     *         followed by a tuple list containing the vertices in the
-     *         minimum spanning tree (of the form (row, col, val)).
+     *         followed by a parent list containing the edges in the
+     *         minimum spanning tree.
      */
     template<typename MatrixT>
-    std::pair<typename MatrixT::ScalarType,
-              std::vector<std::tuple<graphblas::IndexType,
-                                     graphblas::IndexType,
-                                     typename MatrixT::ScalarType> > >
-    mst(MatrixT const &graph)
+    typename MatrixT::ScalarType mst(
+        MatrixT const                           &graph,
+        GraphBLAS::Vector<GraphBLAS::IndexType> &mst_parents)
     {
         using T = typename MatrixT::ScalarType;
-        graphblas::IndexType cols, rows;
-        graph.get_shape(rows, cols);
 
-        MatrixT A(graph);
-        A.set_zero(std::numeric_limits<T>::max());
+        GraphBLAS::IndexType rows(graph.nrows());
+        GraphBLAS::IndexType cols(graph.ncols());
 
-        MatrixT seen(rows,1);
-        T weight = static_cast<T>(0);
-        std::vector<graphblas::IndexType> seen_r={1}, seen_c={0};
-        std::vector<T> seen_v = {std::numeric_limits<T>::max()};
-        graphblas::buildmatrix(seen, seen_r.begin(), seen_c.begin(),
-                seen_v.begin(), seen_r.size());
-
-        //seen.setElement(1, 0, std::numeric_limits<T>::max());
-
-        MatrixT sources = graphblas::fill<MatrixT>(1, rows, 1);
-
-        MatrixT d(rows, 1);
-        MatrixT mask(cols, 1);
-
-        std::vector<T> mask_v = {1};
-        graphblas::buildmatrix(mask, seen_r.begin(), seen_c.begin(),
-                mask_v.begin(), mask_v.size());
-        //mask.setElement(1,0,1);
-
-        graphblas::mxv(A, mask, d);
-
-        std::vector<std::tuple<graphblas::IndexType,
-                               graphblas::IndexType, T> > edges;
-
-        while (seen.get_nnz() < rows)
+        if ((rows != cols) || (rows != mst_parents.size()))
         {
-            MatrixT temp(rows, 1);
-            graphblas::ewiseadd(seen, d, temp);
+            throw GraphBLAS::DimensionException();
+        }
+        //GraphBLAS::print_matrix(std::cout, graph, "GRAPH***");
 
-            //position of a single minimum element in vector
-            //this is not really how loops should be used in graphblas, though....
-            graphblas::IndexType u = 0;
-            for (graphblas::IndexType i = 1; i < rows; ++i)
-            {
-                if (temp.extractElement(i, 0) < temp.extractElement(u, 0))
-                {
-                    u = i;
-                }
-            }
+        // Create an adjacency matrix of the correct type (combining
+        // source vertex ID with edge weight
+        GraphBLAS::IndexArrayType i(graph.nvals());
+        GraphBLAS::IndexArrayType j(graph.nvals());
+        std::vector<T> vals(graph.nvals());
+        graph.extractTuples(i.begin(), j.begin(), vals.begin());
+        std::vector<MSTType<T>> new_vals;
+        for (GraphBLAS::IndexType ix = 0; ix < i.size(); ++ix)
+        {
+            new_vals.push_back(std::make_pair(i[ix], vals[ix]));
+        }
+        GraphBLAS::Matrix<MSTType<T>> A(rows, cols);
+        A.build(i, j, new_vals);
+        //GraphBLAS::print_matrix(std::cout, A, "Hybrid A matrix");
 
-            seen.setElement(u, 0, std::numeric_limits<T>::max());
-            weight += d.extractElement(u,0);
+        // chose some arbitrary vertex to start
+        GraphBLAS::IndexType const START_NODE = 0;
 
-            edges.push_back(
-                std::make_tuple(
-                    sources.extractElement(u, 0),
-                    u,
-                    A.extractElement(sources.extractElement(u,0),u)));
+        T weight = static_cast<T>(0);
 
-            /*for (graphblas::IndexType i = 1; i < rows; ++i)
-            {
-                if (A.extractElement(u,i) < d.extractElement(i,0))
-                {
-                    d.setElement(i,0, A.extractElement(u, i));
-                    sources.setElement(i, 0, u);
-                }
-            }*/
+        GraphBLAS::Vector<MSTType<T>> d(rows);
+        GraphBLAS::Vector<bool> mask(rows);
+        mask.setElement(START_NODE, true);
+        //GraphBLAS::print_vector(std::cout, mask, "Initial mask");
 
-            // A[u][:]
-            MatrixT slice(cols, 1);
-            MatrixT slice_mask(cols, 1);
-            slice_mask.setElement(u,0,1);
+        // Using complement of mask so we don't deal with max()
+        GraphBLAS::Vector<T> s(rows);
+        GraphBLAS::assign_constant(s,
+                                   GraphBLAS::complement(mask),
+                                   GraphBLAS::NoAccumulate(),
+                                   0, GraphBLAS::GrB_ALL, true);
+        //GraphBLAS::print_vector(std::cout, s, "Initial s");
 
-            graphblas::mxv(A, slice_mask, slice);
+        mst_parents.clear();
 
-            //if A[u][:] < d
-            MatrixT assign_mask(cols, 1);
-            ewiseadd(slice, d, assign_mask, LessThan<T>());
-            
-            //set values of d from d or slice according to mask
-            ewisemult(slice, assign_mask, slice);
-            ewisemult(d, negate(assign_mask), d);
-            ewiseadd(d, slice, d);
+        // Get the START NODE's neighbors
+        GraphBLAS::extract(d,
+                           GraphBLAS::NoMask(), // complement(mask)?
+                           GraphBLAS::NoAccumulate(),
+                           GraphBLAS::transpose(A),
+                           GraphBLAS::GrB_ALL, START_NODE);
+        //GraphBLAS::print_vector(std::cout, d, "Initial d");
 
-            //set values of sources to u according to mask
-            MatrixT src_this_step = graphblas::fill<MatrixT>(u, cols, 1);
-            ewisemult(src_this_step, assign_mask, src_this_step);
-            ewisemult(sources, negate(assign_mask), sources);
-            ewiseadd(src_this_step, sources, sources);
-           
+        while (mask.nvals() < rows)
+        {
+            //std::cout << "===================== ITERATION === s.nvals() = "
+            //          << s.nvals() << std::endl;
+            GraphBLAS::Vector<T> temp(rows);
 
+            // Note that eWiseMult is used with Plus b/c implied value is infinity
+            GraphBLAS::eWiseMult(temp,
+                                 GraphBLAS::NoMask(),
+                                 GraphBLAS::NoAccumulate(),
+                                 MSTPlus<T>(),
+                                 s, d);
+
+            GraphBLAS::IndexType u = argmin(temp);
+            //GraphBLAS::print_vector(std::cout, temp, "-------- s + d.second");
+            //std::cout << "argmin(s + d.second) = " << u << std::endl;
+
+            mask.setElement(u, true);
+            //GraphBLAS::print_vector(std::cout, mask, "-------- mask");
+            GraphBLAS::apply(s,
+                             GraphBLAS::complement(mask),
+                             GraphBLAS::NoAccumulate(),
+                             GraphBLAS::Identity<T>(),
+                             s, true);
+            //GraphBLAS::print_vector(std::cout, s, "-------- Seen vector");
+            auto idx_weight = d.extractElement(u);
+            weight += idx_weight.second;
+            mst_parents.setElement(u, idx_weight.first);
+
+            //GraphBLAS::print_vector(std::cout, mst_parents, "-------- Parent list");
+            GraphBLAS::Vector<MSTType<T>> Arow(cols);
+            GraphBLAS::extract(Arow,
+                               GraphBLAS::NoMask(), // complement(mask)?
+                               GraphBLAS::NoAccumulate(),
+                               GraphBLAS::transpose(A),
+                               GraphBLAS::GrB_ALL, u);
+            //GraphBLAS::print_vector(std::cout, Arow, "-------- A(u,:)");
+
+            GraphBLAS::eWiseAdd(d,
+                                GraphBLAS::NoMask(), //mask,?
+                                GraphBLAS::NoAccumulate(),
+                                MSTMin<T>(),
+                                d, Arow);
+            //GraphBLAS::print_vector(std::cout, d, "-------- d = d .min A(u,:)");
         }
 
-        return std::make_pair(weight, edges);
+        return weight;
     }
 
 } // algorithms

@@ -17,19 +17,20 @@
 
 #include <graphblas/graphblas.hpp>
 
-using namespace graphblas;
+using namespace GraphBLAS;
 
 #define BOOST_TEST_MAIN
-#define BOOST_TEST_MODULE buildmatrix_suite
+#define BOOST_TEST_MODULE matrix_build_suite
 
 #include <boost/test/included/unit_test.hpp>
 
-BOOST_AUTO_TEST_SUITE(buildmatrix_suite)
+BOOST_AUTO_TEST_SUITE(matrix_build_suite)
 
-BOOST_AUTO_TEST_CASE(buildmatrix_test)
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(matrix_build_test)
 {
-    graphblas::IndexArrayType i = {0, 0, 0, 1, 1, 1, 2, 2};
-    graphblas::IndexArrayType j = {1, 2, 3, 0, 2, 3, 0, 1};
+    IndexArrayType i = {0, 0, 0, 1, 1, 1, 2, 2};
+    IndexArrayType j = {1, 2, 3, 0, 2, 3, 0, 1};
     std::vector<double>       v = {1, 2, 3, 4, 6, 7, 8, 9};
 
     std::vector<std::vector<double> > mat = {{0, 1, 2, 3},
@@ -37,15 +38,15 @@ BOOST_AUTO_TEST_CASE(buildmatrix_test)
                                              {8, 9, 0, 0}};
 
     Matrix<double, DirectedMatrixTag> m1(3, 4);
-    graphblas::buildmatrix(m1, i, j, v);
+    m1.build(i, j, v);
 
     //std::cerr << m1 << std::endl;
-    IndexType nnz = m1.get_nnz();
+    IndexType nnz = m1.nvals();
     BOOST_CHECK_EQUAL(nnz, i.size());
 
     IndexArrayType ii(nnz), jj(nnz);
     std::vector<double> val(nnz);
-    graphblas::extracttuples(m1, ii, jj, val);
+    m1.extractTuples(ii, jj, val);
     BOOST_CHECK_EQUAL(nnz, ii.size());
     BOOST_CHECK_EQUAL(nnz, jj.size());
     BOOST_CHECK_EQUAL(nnz, val.size());
@@ -56,10 +57,11 @@ BOOST_AUTO_TEST_CASE(buildmatrix_test)
     }
 }
 
-BOOST_AUTO_TEST_CASE(buildmatrix_test_iterators)
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(matrix_build_test_iterators)
 {
-    graphblas::IndexArrayType i = {0, 0, 0, 1, 1, 1, 2, 2};
-    graphblas::IndexArrayType j = {1, 2, 3, 0, 2, 3, 0, 1};
+    IndexArrayType i = {0, 0, 0, 1, 1, 1, 2, 2};
+    IndexArrayType j = {1, 2, 3, 0, 2, 3, 0, 1};
     std::vector<double>       v = {1, 2, 3, 4, 6, 7, 8, 9};
 
     std::vector<std::vector<double> > mat = {{0, 1, 2, 3},
@@ -67,15 +69,15 @@ BOOST_AUTO_TEST_CASE(buildmatrix_test_iterators)
                                              {8, 9, 0, 0}};
 
     Matrix<double, DirectedMatrixTag> m1(3, 4);
-    graphblas::buildmatrix(m1, i.begin(), j.begin(), v.begin(), i.size());
+    m1.build(i.begin(), j.begin(), v.begin(), i.size());
 
     //std::cerr << m1 << std::endl;
-    IndexType nnz = m1.get_nnz();
+    IndexType nnz = m1.nvals();
     BOOST_CHECK_EQUAL(nnz, i.size());
 
     IndexArrayType ii(nnz), jj(nnz);
     std::vector<double> val(nnz);
-    graphblas::extracttuples(m1, ii, jj, val);
+    m1.extractTuples(ii, jj, val);
     BOOST_CHECK_EQUAL(nnz, ii.size());
     BOOST_CHECK_EQUAL(nnz, jj.size());
     BOOST_CHECK_EQUAL(nnz, val.size());

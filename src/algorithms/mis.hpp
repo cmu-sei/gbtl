@@ -151,13 +151,6 @@ namespace algorithms
         BoolVector new_members(num_vertices);
         BoolVector new_neighbors(num_vertices);
 
-        // Start with all vertices as candidates (NOTE: dense!)
-        BoolVector candidates(num_vertices);
-        GraphBLAS::assign_constant(candidates,
-                                   GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                                   true, GraphBLAS::GrB_ALL);
-
-
         // Compute the degree of each node,
         GraphBLAS::Vector<RealT> degrees(num_vertices);
         GraphBLAS::reduce(degrees,
@@ -165,6 +158,19 @@ namespace algorithms
                           GraphBLAS::PlusMonoid<RealT>(),
                           graph);
         //GraphBLAS::print_vector(std::cout, degrees, "degrees");
+
+        // Start with all vertices except isolated ones as candidates (NOTE: dense!)
+        BoolVector candidates(num_vertices);
+        GraphBLAS::assign_constant(candidates,
+                                   degrees,
+                                   GraphBLAS::NoAccumulate(),
+                                   true, GraphBLAS::GrB_ALL, true);
+
+        // Courtesy of Tim Davis: singletons are not candidates.  Add to iset
+        GraphBLAS::assign_constant(independent_set,
+                                   GraphBLAS::complement(degrees),
+                                   GraphBLAS::NoAccumulate(),
+                                   true, GraphBLAS::GrB_ALL, true);
 
         while (candidates.nvals() > 0)
         {

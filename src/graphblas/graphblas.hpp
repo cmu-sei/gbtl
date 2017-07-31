@@ -33,8 +33,7 @@
 #include <graphblas/operations.hpp>
 #include <graphblas/matrix_utils.hpp>
 
-#define __GB_SYSTEM_HEADER <graphblas/system/__GB_SYSTEM_ROOT/__GB_SYSTEM_ROOT.hpp>
-#include __GB_SYSTEM_HEADER
-#undef __GB_SYSTEM_HEADER
+#define GB_INCLUDE_BACKEND_ALL 1
+#include <graphblas/backend_include.hpp>
 
 #endif // GRAPHBLAS_HPP

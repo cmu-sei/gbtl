@@ -14,18 +14,6 @@
  */
 #pragma once
 
-/**
-*	@todo We need to differentiate between cusp cpu and cusp gpu
-*/	
-#if defined(GB_USE_CUSP_GPU)
-#    define __GB_SYSTEM_ROOT cusp
-#elif defined(GB_USE_SEQUENTIAL)
-#    define __GB_SYSTEM_ROOT sequential
-// ....
-#else
-#    error GraphBLAS library type unspecified at compile time!
-#endif
-
 #if !defined(__CUDACC__)
 #ifndef __host__
 #define __host__

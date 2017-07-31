@@ -18,6 +18,8 @@
 #include <algorithms/maxflow.hpp>
 #include <graphblas/graphblas.hpp>
 
+using namespace GraphBLAS;
+
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE maxflow_suite
 
@@ -28,11 +30,11 @@ BOOST_AUTO_TEST_SUITE(maxflow_suite)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(maxflow_test)
 {
-    graphblas::IndexArrayType i = {0, 0, 1, 2, 2, 3, 4, 4};
-    graphblas::IndexArrayType j = {1, 3, 2, 3, 5, 4, 1, 5};
+    IndexArrayType i = {0, 0, 1, 2, 2, 3, 4, 4};
+    IndexArrayType j = {1, 3, 2, 3, 5, 4, 1, 5};
     std::vector<double>       v = {15, 4, 12, 3, 7, 10, 5, 10};
-    graphblas::Matrix<double, graphblas::DirectedMatrixTag> m1(6, 6);
-    graphblas::buildmatrix(m1, i, j, v);
+    Matrix<double, DirectedMatrixTag> m1(6, 6);
+    m1.build(i, j, v);
 
     auto result = algorithms::maxflow(m1, 0, 5);
     BOOST_CHECK_EQUAL(result, 14);
@@ -51,11 +53,11 @@ BOOST_AUTO_TEST_CASE(maxflow_test2)
     //      {0,  0, 6, 0, 0, 0, 0,10}, //7
     //      {0,  0, 0, 0, 0, 0, 0, 0}});
 
-    graphblas::IndexArrayType i = {0, 0, 0, 1, 1, 1, 2, 2, 3, 4, 4, 5, 5, 6, 6};
-    graphblas::IndexArrayType j = {1, 2, 3, 2, 4, 5, 3, 5, 6, 5, 7, 6, 7, 2, 7};
+    IndexArrayType i = {0, 0, 0, 1, 1, 1, 2, 2, 3, 4, 4, 5, 5, 6, 6};
+    IndexArrayType j = {1, 2, 3, 2, 4, 5, 3, 5, 6, 5, 7, 6, 7, 2, 7};
     std::vector<double>       v = {10,5,15, 4, 9,15, 4, 8,30,15,10,15,10, 6,10};
-    graphblas::Matrix<double, graphblas::DirectedMatrixTag> m1(8, 8);
-    graphblas::buildmatrix(m1, i, j, v);
+    Matrix<double, DirectedMatrixTag> m1(8, 8);
+    m1.build(i, j, v);
 
     auto result = algorithms::maxflow(m1, 0, 7);
     BOOST_CHECK_EQUAL(result, 28);

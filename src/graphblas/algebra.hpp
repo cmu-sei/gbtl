@@ -59,6 +59,32 @@ namespace GraphBLAS
             return static_cast<D2>(1) / input;
         }
     };
+
+    //************************************************************************
+    // Turn a binary op into a unary op by binding the 2nd term to a constant
+    //
+    /// @todo BinaryOps need typedefs for RHS arg so that ConstT
+    /// can be defaulted (and ConstT is moved after BinaryOpT
+    template <typename ConstT, typename BinaryOpT>
+    struct BinaryOp_Bind2nd
+    {
+        ConstT n;
+        BinaryOpT op;
+        typedef typename BinaryOpT::result_type result_type;
+
+        BinaryOp_Bind2nd(ConstT const &value,
+                         BinaryOpT     operation = BinaryOpT() ) :
+            n(value),
+            op(operation)
+        {}
+
+        /// @todo value type should be BinaryOpT::D1
+        /// @todo n should be cast to BinaryOpT::D2
+        result_type operator()(result_type const &value)
+        {
+            return op(value, n);
+        }
+    };
 }
 
 /// @todo Remove or move to GraphBLAS namespace?
@@ -228,6 +254,20 @@ namespace GraphBLAS
     {
         typedef D3 result_type;
         inline D3 operator()(D1 lhs, D2 rhs) { return lhs / rhs; }
+    };
+
+    template<typename D1, typename D2 = D1, typename D3 = D1>
+    struct Power
+    {
+        typedef D3 result_type;
+        inline D3 operator()(D1 lhs, D2 rhs) { return std::pow(lhs, rhs); }
+    };
+
+    template<typename D1, typename D2 = D1, typename D3 = D1>
+    struct Xor
+    {
+        typedef D3 result_type;
+        inline D3 operator()(D1 lhs, D2 rhs) { return (lhs ^ rhs); }
     };
 
 } // namespace GraphBLAS

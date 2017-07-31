@@ -80,26 +80,6 @@ namespace
                        vec, identity_ramp, true);
     }
 
-    //************************************************************************
-    //does arithmetic operation by n value
-    template <typename ConstT, typename BinaryOp>
-    struct BinaryOp_Bind2nd
-    {
-        ConstT n;
-        BinaryOp op;
-        typedef typename BinaryOp::result_type result_type;
-
-        BinaryOp_Bind2nd(ConstT const &value,
-                         BinaryOp      operation = BinaryOp() ) :
-            n(value),
-            op(operation)
-        {}
-
-        result_type operator()(result_type const &value)
-        {
-            return op(value, n);
-        }
-    };
 }
 
 //****************************************************************************
@@ -160,8 +140,9 @@ namespace algorithms
         }
 
         // Restore zero-based indices by subtracting 1 from all stored values
-        BinaryOp_Bind2nd<unsigned int,
-                         GraphBLAS::Minus<unsigned int>> subtract_1(1);
+        GraphBLAS::BinaryOp_Bind2nd<unsigned int,
+                                    GraphBLAS::Minus<unsigned int>>
+            subtract_1(1);
 
         GraphBLAS::apply(parent_list,
                          GraphBLAS::NoMask(),
@@ -227,8 +208,9 @@ namespace algorithms
         }
 
         // Restore zero-based indices by subtracting 1 from all stored values
-        BinaryOp_Bind2nd<unsigned int,
-                         GraphBLAS::Minus<unsigned int>> subtract_1(1);
+        GraphBLAS::BinaryOp_Bind2nd<unsigned int,
+                                    GraphBLAS::Minus<unsigned int>>
+            subtract_1(1);
 
         GraphBLAS::apply(parent_list,
                          GraphBLAS::NoMask(),
@@ -273,8 +255,8 @@ namespace algorithms
             ++depth;
 
             // Apply the level to all newly visited nodes
-            BinaryOp_Bind2nd<unsigned int,
-                             GraphBLAS::Times<unsigned int> >
+            GraphBLAS::BinaryOp_Bind2nd<unsigned int,
+                                        GraphBLAS::Times<unsigned int> >
                     apply_depth(depth);
 
             GraphBLAS::apply(levels,
@@ -350,8 +332,8 @@ namespace algorithms
             ++depth;
 
             // Apply the level to all newly visited nodes
-            BinaryOp_Bind2nd<GraphBLAS::IndexType,
-                             GraphBLAS::Times<GraphBLAS::IndexType> >
+            GraphBLAS::BinaryOp_Bind2nd<GraphBLAS::IndexType,
+                                        GraphBLAS::Times<GraphBLAS::IndexType> >
                     apply_depth(depth);
 
             GraphBLAS::apply(levels,
@@ -416,8 +398,8 @@ namespace algorithms
             ++depth;
 
             // Apply the level to all newly visited nodes
-            BinaryOp_Bind2nd<GraphBLAS::IndexType,
-                             GraphBLAS::Times<GraphBLAS::IndexType> >
+            GraphBLAS::BinaryOp_Bind2nd<GraphBLAS::IndexType,
+                                        GraphBLAS::Times<GraphBLAS::IndexType> >
                     apply_depth(depth);
 
             GraphBLAS::apply(levels,

@@ -16,7 +16,7 @@
 
 #include <graphblas/graphblas.hpp>
 
-//using namespace GraphBLAS;
+using namespace GraphBLAS;
 
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE lil_suite
@@ -29,12 +29,12 @@ BOOST_AUTO_TEST_SUITE(lil_suite)
 // LIL basic constructor
 BOOST_AUTO_TEST_CASE(lil_test_construction_basic)
 {
-    GraphBLAS::IndexType M = 7;
-    GraphBLAS::IndexType N = 4;
-    GraphBLAS::LilSparseMatrix<double> m1(M, N);
+    IndexType M = 7;
+    IndexType N = 4;
+    backend::LilSparseMatrix<double> m1(M, N);
 
-    GraphBLAS::IndexType num_rows(m1.nrows());
-    GraphBLAS::IndexType num_cols(m1.ncols());
+    IndexType num_rows(m1.nrows());
+    IndexType num_cols(m1.ncols());
 
     BOOST_CHECK_EQUAL(num_rows, M);
     BOOST_CHECK_EQUAL(num_cols, N);
@@ -53,18 +53,18 @@ BOOST_AUTO_TEST_CASE(lil_test_construction_dense)
                                             {0, 0, 0, 0},
                                             {0, 1, 0, 2}};
 
-    GraphBLAS::LilSparseMatrix<double> m1(mat);
+    backend::LilSparseMatrix<double> m1(mat);
 
-    GraphBLAS::IndexType M = mat.size();
-    GraphBLAS::IndexType N = mat[0].size();
-    GraphBLAS::IndexType num_rows(m1.nrows());
-    GraphBLAS::IndexType num_cols(m1.ncols());
+    IndexType M = mat.size();
+    IndexType N = mat[0].size();
+    IndexType num_rows(m1.nrows());
+    IndexType num_cols(m1.ncols());
 
     BOOST_CHECK_EQUAL(num_rows, M);
     BOOST_CHECK_EQUAL(num_cols, N);
-    for (GraphBLAS::IndexType i = 0; i < M; i++)
+    for (IndexType i = 0; i < M; i++)
     {
-        for (GraphBLAS::IndexType j = 0; j < N; j++)
+        for (IndexType j = 0; j < N; j++)
         {
             BOOST_CHECK_EQUAL(m1.extractElement(i, j), mat[i][j]);
         }
@@ -83,18 +83,18 @@ BOOST_AUTO_TEST_CASE(lil_test_construction_dense_zero)
                                             {0, 0, 0, 0},
                                             {0, 1, 0, 2}};
 
-    GraphBLAS::LilSparseMatrix<double> m1(mat, 0);
+    backend::LilSparseMatrix<double> m1(mat, 0);
 
-    GraphBLAS::IndexType M = mat.size();
-    GraphBLAS::IndexType N = mat[0].size();
-    GraphBLAS::IndexType num_rows(m1.nrows());
-    GraphBLAS::IndexType num_cols(m1.ncols());
+    IndexType M = mat.size();
+    IndexType N = mat[0].size();
+    IndexType num_rows(m1.nrows());
+    IndexType num_cols(m1.ncols());
 
     BOOST_CHECK_EQUAL(num_rows, M);
     BOOST_CHECK_EQUAL(num_cols, N);
-    for (GraphBLAS::IndexType i = 0; i < M; i++)
+    for (IndexType i = 0; i < M; i++)
     {
-        for (GraphBLAS::IndexType j = 0; j < N; j++)
+        for (IndexType j = 0; j < N; j++)
         {
             if (mat[i][j] != 0)
             {
@@ -116,9 +116,9 @@ BOOST_AUTO_TEST_CASE(lil_test_construction_copy)
                                             {0, 0, 0, 0},
                                             {0, 1, 0, 2}};
 
-    GraphBLAS::LilSparseMatrix<double> m1(mat, 0);
+    backend::LilSparseMatrix<double> m1(mat, 0);
 
-    GraphBLAS::LilSparseMatrix<double> m2(m1);
+    backend::LilSparseMatrix<double> m2(m1);
 
     BOOST_CHECK_EQUAL(m1, m2);
 }
@@ -135,13 +135,13 @@ BOOST_AUTO_TEST_CASE(lil_test_assign_to_implied_zero)
                                             {0, 0, 0, 0},
                                             {0, 1, 0, 2}};
 
-    GraphBLAS::LilSparseMatrix<double> m1(mat, 0);
+    backend::LilSparseMatrix<double> m1(mat, 0);
 
     mat[0][1] = 8;
     m1.setElement(0, 1, 8);
     BOOST_CHECK_EQUAL(m1.extractElement(0, 1), mat[0][1]);
 
-    GraphBLAS::LilSparseMatrix<double> m2(mat, 0);
+    backend::LilSparseMatrix<double> m2(mat, 0);
     BOOST_CHECK_EQUAL(m1, m2);
 }
 
@@ -157,13 +157,13 @@ BOOST_AUTO_TEST_CASE(lil_test_assign_to_nonzero_element)
                                             {0, 0, 0, 0},
                                             {0, 1, 0, 2}};
 
-    GraphBLAS::LilSparseMatrix<double> m1(mat, 0);
+    backend::LilSparseMatrix<double> m1(mat, 0);
 
     mat[0][0] = 8;
     m1.setElement(0, 0, 8);
     BOOST_CHECK_EQUAL(m1.extractElement(0, 0), mat[0][0]);
 
-    GraphBLAS::LilSparseMatrix<double> m2(mat, 0);
+    backend::LilSparseMatrix<double> m2(mat, 0);
     BOOST_CHECK_EQUAL(m1, m2);
 }
 
@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE(lil_test_get_set_col)
                                             {0, 0, 0, 0},
                                             {0, 1, 0, 2}};
 
-    GraphBLAS::LilSparseMatrix<double> m1(mat, 0);
+    backend::LilSparseMatrix<double> m1(mat, 0);
 
     auto col = m1.getCol(0);
     BOOST_CHECK_EQUAL(4UL, col.size());
@@ -215,16 +215,16 @@ BOOST_AUTO_TEST_CASE(lil_test_get_set_col)
                                             {0, 0, 0, 0, 4, 5, 6, 7, 0, 0, 0, 0, 4, 5, 6, 7},
                                             {0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 8, 8, 8, 8, 8}};
 
-    GraphBLAS::LilSparseMatrix<double> m2(mat2, 0);
-    GraphBLAS::LilSparseMatrix<double> m3(4, 1);
-    for (GraphBLAS::IndexType ci = 0; ci < 16; ++ci)
+    backend::LilSparseMatrix<double> m2(mat2, 0);
+    backend::LilSparseMatrix<double> m3(4, 1);
+    for (IndexType ci = 0; ci < 16; ++ci)
     {
-        GraphBLAS::IndexType nz(0);
+        IndexType nz(0);
         //m3.setCol(0, m2.getCol(ci));
         auto c = m2.getCol(ci);
         m3.setCol(0, c);
 
-        for (GraphBLAS::IndexType ri = 0; ri < 4; ++ri)
+        for (IndexType ri = 0; ri < 4; ++ri)
         {
             if (mat2[ri][ci] == 0)
             {
@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(lil_test_get_set_row)
                                             {0, 0, 9, 0, 0, 0, 0},
                                             {4, 0, 4, 3, 1, 0, 2}};
 
-    GraphBLAS::LilSparseMatrix<double> m1(mat, 0);
+    backend::LilSparseMatrix<double> m1(mat, 0);
 
     auto row = m1.getRow(0);
     BOOST_CHECK_EQUAL(4UL, row.size());
@@ -295,15 +295,15 @@ BOOST_AUTO_TEST_CASE(lil_test_get_set_row)
                                             {8, 4, 2, 0},
                                             {8, 4, 2, 1}};
 
-    GraphBLAS::LilSparseMatrix<double> m2(mat2, 0);
-    GraphBLAS::LilSparseMatrix<double> m3(1, 4);
-    for (GraphBLAS::IndexType row_idx = 0; row_idx < 16; ++row_idx)
+    backend::LilSparseMatrix<double> m2(mat2, 0);
+    backend::LilSparseMatrix<double> m3(1, 4);
+    for (IndexType row_idx = 0; row_idx < 16; ++row_idx)
     {
-        GraphBLAS::IndexType nz(0);
+        IndexType nz(0);
         auto c = m2.getRow(row_idx);
         m3.setRow(0, c);
 
-        for (GraphBLAS::IndexType col_idx = 0; col_idx < 4; ++col_idx)
+        for (IndexType col_idx = 0; col_idx < 4; ++col_idx)
         {
             if (mat2[row_idx][col_idx] == 0)
             {

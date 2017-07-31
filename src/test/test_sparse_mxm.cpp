@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE(mxm_reg_empty)
                                                 {1, 0, 1, 1},
                                                 {0, 0, 1, 1}};
 
-    std::vector<std::vector<double>> answer_vals = {{1, 0, 7, 5},
+    std::vector<std::vector<double>> answer_vals = {{1, 0, 7, 15},
                                                     {0, 0, 0, 0},
                                                     {9, 0, 11, 15}};
 
@@ -182,7 +182,18 @@ BOOST_AUTO_TEST_CASE(test_mxm_reg_sparse)
                    GraphBLAS::NoMask(),
                    GraphBLAS::NoAccumulate(),
                    GraphBLAS::ArithmeticSemiring<double>(), mA, mB);
-    BOOST_CHECK_EQUAL(mC, answer);
+    for (GraphBLAS::IndexType ix = 0; ix < answer.nrows(); ++ix)
+    {
+        for (GraphBLAS::IndexType iy = 0; iy < answer.ncols(); ++iy)
+        {
+            BOOST_CHECK_EQUAL(mC.hasElement(ix, iy), answer.hasElement(ix, iy));
+            if (mC.hasElement(ix, iy))
+            {
+                BOOST_CHECK_CLOSE(mC.extractElement(ix,iy),
+                                  answer.extractElement(ix,iy), 0.0001);
+            }
+        }
+    }
 }
 
 //****************************************************************************
@@ -204,7 +215,7 @@ BOOST_AUTO_TEST_CASE(test_mxm_stored_zero_result)
     // use a different sentinel value so that stored zeros are preserved.
     int const NIL(666);
     std::vector<std::vector<int> > ans = {{  0,  -1, NIL, NIL},
-                                          { -1,   0,  -6,  -8},
+                                          { -1,   0,   6,  -8},
                                           { -2,   2,   0,  -3},
                                           {NIL, NIL,  -3,   0}};
     GraphBLAS::Matrix<int, GraphBLAS::DirectedMatrixTag> answer(ans, NIL);

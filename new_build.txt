@@ -1,0 +1,16 @@
+This project is designed to use cmake to build and use an "out of source" style build to make it easy to clean up. We build in to a "build" directory by following these steps:
+
+mkdir build
+cd build
+cmake ../src
+make
+
+I ususally do: "make -i -j 8" to ignore errors (try to build every test) and to use all my cores.
+
+There is a convenience script to do this from scratch called rebuild.sh that also removes all the old content from a previous use of clean_build.sh.
+
+For CLion support in the cmake project settings "Build, Execution, Deployment > CMake > Generation path:" I set it to ../build.  This sets it to use the same make files as that created by the clean build process so that there aren't two different build trees.
+
+There is also a script called "clean_cmake.sh" that removes all the files, if cmake is run in the src directory or in the root (gbtl) directory.
+
+

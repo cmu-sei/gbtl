@@ -16,17 +16,17 @@
 #include <iostream>
 #include <limits>
 
-#include <algorithms/sssp.hpp>
+#include <algorithms/apsp.hpp>
 #include <graphblas/graphblas.hpp>
 
 using namespace algorithms;
 
 #define BOOST_TEST_MAIN
-#define BOOST_TEST_MODULE sssp_suite
+#define BOOST_TEST_MODULE apsp_suite
 
 #include <boost/test/included/unit_test.hpp>
 
-BOOST_AUTO_TEST_SUITE(sssp_suite)
+BOOST_AUTO_TEST_SUITE(apsp_suite)
 
 //****************************************************************************
 template <typename T>
@@ -97,43 +97,7 @@ GraphBLAS::Matrix<T> get_gilbert_answer()
 
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(sssp_basic_double_one_root)
-{
-    GraphBLAS::IndexType const NUM_NODES(9);
-    GraphBLAS::IndexType const start_index(3);
-
-    GraphBLAS::IndexArrayType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
-                                   4, 4, 4, 5, 6, 6, 6, 8, 8};
-    GraphBLAS::IndexArrayType j = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
-                                   2, 3, 8, 2, 1, 2, 3, 2, 4};
-    std::vector<double>       v(i.size(), 1);
-    GraphBLAS::Matrix<double> G_tn(NUM_NODES, NUM_NODES);
-    G_tn.build(i, j, v);
-
-    GraphBLAS::Vector<double> path(NUM_NODES);
-    path.setElement(start_index, 0);
-
-    sssp(G_tn, path);
-
-    auto G_tn_answer(get_tn_answer<double>());
-
-    for (GraphBLAS::IndexType ix = 0; ix < NUM_NODES; ++ix)
-    {
-        if (G_tn_answer.hasElement(start_index, ix))
-        {
-            BOOST_CHECK_EQUAL(path.hasElement(ix), true);
-            BOOST_CHECK_EQUAL(path.extractElement(ix),
-                              G_tn_answer.extractElement(start_index, ix));
-        }
-        else
-        {
-            BOOST_CHECK_EQUAL(path.hasElement(ix), false);
-        }
-    }
-}
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(sssp_basic_double_batch)
+BOOST_AUTO_TEST_CASE(apsp_basic_double_batch)
 {
     GraphBLAS::IndexType const NUM_NODES(9);
     GraphBLAS::IndexArrayType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
@@ -145,19 +109,14 @@ BOOST_AUTO_TEST_CASE(sssp_basic_double_batch)
     G_tn.build(i, j, v);
 
     // Perform for all roots simultaneously
-    auto paths =
-        GraphBLAS::scaled_identity<GraphBLAS::Matrix<double> >(NUM_NODES, 0);
-    batch_sssp(G_tn, paths);
-
+    auto distances = apsp(G_tn);
     auto G_tn_answer(get_tn_answer<double>());
 
-    //print_matrix(std::cout, paths, "result");
-    //print_matrix(std::cout, G_tn_answer, "correct answer");
-    BOOST_CHECK_EQUAL(paths, G_tn_answer);
+    BOOST_CHECK_EQUAL(distances, G_tn_answer);
 }
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(sssp_basic_uint_batch)
+BOOST_AUTO_TEST_CASE(apsp_basic_uint_batch)
 {
     GraphBLAS::IndexType const NUM_NODES(9);
     GraphBLAS::IndexArrayType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
@@ -169,17 +128,14 @@ BOOST_AUTO_TEST_CASE(sssp_basic_uint_batch)
     G_tn.build(i, j, v);
 
     // Perform for all roots simultaneously
-    auto paths =
-        GraphBLAS::scaled_identity<GraphBLAS::Matrix<unsigned int> >(NUM_NODES, 0);
-    batch_sssp(G_tn, paths);
-
+    auto distances = apsp(G_tn);
     auto G_tn_answer(get_tn_answer<unsigned int>());
 
-    BOOST_CHECK_EQUAL(paths, G_tn_answer);
+    BOOST_CHECK_EQUAL(distances, G_tn_answer);
 }
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(sssp_gilbert_double_batch)
+BOOST_AUTO_TEST_CASE(apsp_gilbert_double_batch)
 {
     GraphBLAS::IndexType const NUM_NODES(7);
     GraphBLAS::IndexArrayType i = {0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6};
@@ -187,19 +143,19 @@ BOOST_AUTO_TEST_CASE(sssp_gilbert_double_batch)
     std::vector<double>       v(i.size(), 1);
     GraphBLAS::Matrix<double> G_gilbert(NUM_NODES, NUM_NODES);
     G_gilbert.build(i, j, v);
+    //print_matrix(std::cout, G_gilbert, "Graph");
 
     // Perform for all roots simultaneously
-    auto paths =
-        GraphBLAS::scaled_identity<GraphBLAS::Matrix<double> >(NUM_NODES, 0);
-    batch_sssp(G_gilbert, paths);
-
+    auto distances = apsp(G_gilbert);
     auto G_gilbert_answer(get_gilbert_answer<double>());
 
-    BOOST_CHECK_EQUAL(paths, G_gilbert_answer);
+    //print_matrix(std::cout, distances, "result");
+    //print_matrix(std::cout, G_gilbert_answer, "correct answer");
+    BOOST_CHECK_EQUAL(distances, G_gilbert_answer);
 }
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(sssp_gilbert_uint)
+BOOST_AUTO_TEST_CASE(apsp_gilbert_uint_batch)
 {
     GraphBLAS::IndexType const NUM_NODES(7);
     GraphBLAS::IndexArrayType i = {0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6};
@@ -208,18 +164,14 @@ BOOST_AUTO_TEST_CASE(sssp_gilbert_uint)
     GraphBLAS::Matrix<unsigned int> G_gilbert(NUM_NODES, NUM_NODES);
     G_gilbert.build(i, j, v);
 
-    // Perform for all roots simultaneously
-    auto paths =
-        GraphBLAS::scaled_identity<GraphBLAS::Matrix<unsigned int> >(NUM_NODES, 0);
-    batch_sssp(G_gilbert, paths);
-
+    auto distances = apsp(G_gilbert);
     auto G_gilbert_answer(get_gilbert_answer<unsigned int>());
 
-    BOOST_CHECK_EQUAL(paths, G_gilbert_answer);
+    BOOST_CHECK_EQUAL(distances, G_gilbert_answer);
 }
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(new_sssp_gilbert_uint)
+BOOST_AUTO_TEST_CASE(new_apsp_gilbert_uint)
 {
     unsigned int const INF = 666666;
     // The correct answer for all starting points (in order)
@@ -241,15 +193,7 @@ BOOST_AUTO_TEST_CASE(new_sssp_gilbert_uint)
     GraphBLAS::Matrix<unsigned int> G_gilbert(NUM_NODES, NUM_NODES);
     G_gilbert.build(i.begin(), j.begin(), v.begin(), i.size());
 
-    //auto identity_7x7 =
-    //    GraphBLAS::identity<GraphBLAS::Matrix<unsigned int> >(
-    //        NUM_NODES, INF, 0);
-    GraphBLAS::IndexArrayType ii = {0, 1, 2, 3, 4, 5, 6};
-    std::vector<unsigned int> vi(ii.size(), 0);
-    GraphBLAS::Matrix<unsigned int> G_gilbert_res(NUM_NODES, NUM_NODES);
-    G_gilbert_res.build(ii.begin(), ii.begin(), vi.begin(), ii.size());
-
-    batch_sssp(G_gilbert, G_gilbert_res);
+    auto G_gilbert_res = apsp(G_gilbert);
 
     BOOST_CHECK_EQUAL(G_gilbert_res, G_gilbert_answer);
 }

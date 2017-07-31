@@ -18,10 +18,8 @@
 #include <cstddef>
 #include <graphblas/Matrix.hpp>
 
-// Include matrix definitions from the appropriate backend.
-#define __GB_SYSTEM_COMPLEMENTVIEW_HEADER <graphblas/system/__GB_SYSTEM_ROOT/ComplementView.hpp>
-#include __GB_SYSTEM_COMPLEMENTVIEW_HEADER
-#undef __GB_SYSTEM_COMPLEMENTVIEW_HEADER
+#define GB_INCLUDE_BACKEND_COMPLEMENT_VIEW 1
+#include <graphblas/backend_include.hpp>
 
 //****************************************************************************
 //****************************************************************************
@@ -61,10 +59,7 @@ namespace GraphBLAS
         template <typename OtherMatrixT>
         bool operator==(OtherMatrixT const &rhs) const
         {
-            ///@todo Not implemented yet
-            //return matrix_equal_helper(*this, rhs);
-            //return (m_mat.operator==(rhs));
-            throw 1;
+            return (m_mat == rhs);
         }
 
         template <typename OtherMatrixT>
@@ -79,7 +74,7 @@ namespace GraphBLAS
 
         bool hasElement(IndexType row, IndexType col) const
         {
-            return m_mat.hasElement(row, col);
+            return (m_mat.hasElement(row,col));
         }
 
         ScalarType extractElement(IndexType row, IndexType col) const
@@ -433,6 +428,20 @@ namespace GraphBLAS
                                            ValueT                val,
                                            IndexArrayType const &indices,
                                            bool                  replace_flag);
+
+        //--------------------------------------------------------------------
+        template<typename WScalarT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename UnaryFunctionT,
+                 typename UVectorT,
+                 typename ...WTagsT>
+        friend inline void apply(GraphBLAS::Vector<WScalarT, WTagsT...> &w,
+                                 MaskT                            const &mask,
+                                 AccumT                                  accum,
+                                 UnaryFunctionT                          op,
+                                 UVectorT                         const &u,
+                                 bool                                    replace_flag);
 
         //--------------------------------------------------------------------
 

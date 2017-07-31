@@ -18,10 +18,8 @@
 #include <cstddef>
 #include <graphblas/detail/config.hpp>
 
-// Include vector definitions from the appropriate backend.
-#define __GB_SYSTEM_VECTOR_HEADER <graphblas/system/__GB_SYSTEM_ROOT/Vector.hpp>
-#include __GB_SYSTEM_VECTOR_HEADER
-#undef __GB_SYSTEM_VECTOR_HEADER
+#define GB_INCLUDE_BACKEND_VECTOR 1
+#include <graphblas/backend_include.hpp>
 
 namespace GraphBLAS
 {

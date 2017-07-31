@@ -26,7 +26,6 @@
 
 namespace algorithms
 {
-
     /**
      * @brief Compute the page rank for each node in a graph.
      *
@@ -41,124 +40,131 @@ namespace algorithms
      *                              the page rank.  The structural zero needs
      *                              to be '0' and edges are indicated by '1'
      *                              to support use of the Arithmetic semiring.
-     * @param[out] result           1xN vector of page ranks
+     * @param[out] result           N vector of page ranks
      * @param[in]  damping_factor   The constant to ensure stability in cyclic
      *                              graphs
      * @param[in]  threshold        The sum of squared errors termination
      *                              threshold.
      *
      */
-    template<typename MatrixT, typename PRMatrixT>
-    void page_rank(MatrixT const  &graph,
-                   PRMatrixT      &page_rank,
-                   double          damping_factor = 0.85,
-                   double          threshold = 1.e-4)
+    template<typename MatrixT, typename RealT = double>
+    void page_rank(
+        MatrixT const             &graph,
+        GraphBLAS::Vector<RealT>  &page_rank,
+        RealT                      damping_factor = 0.85,
+        RealT                      threshold = 1.e-5,
+        unsigned int max_iters = std::numeric_limits<unsigned int>::max())
     {
-        using T = typename PRMatrixT::ScalarType;
-        graphblas::IndexType rows, cols, pr_rows, pr_cols;
-        graph.get_shape(rows, cols);
-        page_rank.get_shape(pr_rows, pr_cols);
+        using T = typename MatrixT::ScalarType;
 
-        if ((rows != cols) || (pr_rows != 1) || (pr_cols != rows))
+        GraphBLAS::IndexType rows(graph.nrows());
+        GraphBLAS::IndexType cols(graph.ncols());
+
+        if ((rows != cols) || (page_rank.size() != rows))
         {
-            throw graphblas::DimensionException();
+            throw GraphBLAS::DimensionException();
         }
 
         // Compute the scaled graph matrix
-        graphblas::Matrix<T> m(rows, cols);
-        {
-            // Normalize the edge weights of the graph by the vertices out-degree
-            graphblas::Matrix<T> out_degree(rows, 1);
-            graphblas::Matrix<T> norm_graph(rows, cols);
-            graphblas::Matrix<T> scaling_mat(rows, cols);
+        GraphBLAS::Matrix<RealT> m(rows, cols);
 
-            graphblas::row_reduce(graph, out_degree);
-            graphblas::IndexType nnz = out_degree.get_nnz();
-            graphblas::apply(out_degree, out_degree,
-                             graphblas::math::Inverse<T>());
+        // cast graph scalar type to RealT
+        GraphBLAS::apply(m,
+                         GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                         GraphBLAS::Identity<T,RealT>(),
+                         graph);
 
-            graphblas::IndexArrayType i(nnz), j(nnz);
-            std::vector<T> v(nnz);
-            graphblas::extracttuples(out_degree, i, j, v);
-            graphblas::buildmatrix(scaling_mat, i, i, v);
-            graphblas::mxm(scaling_mat, graph, norm_graph);
-            //graphblas::print_matrix(std::cout, norm_graph, "Normalized Graph");
+        // Normalize the edge weights of the graph by the vertices out-degree
+        GraphBLAS::normalize_rows(m);
+        //GraphBLAS::print_matrix(std::cout, m, "Normalized Graph");
 
-            // scale the normalized edge weights by the damping factor
-            i.clear();
-            for (graphblas::IndexType ix = 0; ix < rows; ++ix)
-            {
-                i.push_back(ix);
-            }
-            graphblas::Matrix<T> damping_mat(rows, rows);
-            std::vector<T> val(rows, damping_factor);
-            graphblas::buildmatrix(damping_mat, i, i, val);
-            graphblas::mxm(norm_graph, damping_mat, m);
-            //graphblas::print_matrix(std::cout, m, "Scaled Graph");
-        }
+        // scale the normalized edge weights by the damping factor
+        GraphBLAS::apply(
+            m,
+            GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+            GraphBLAS::BinaryOp_Bind2nd<RealT,
+                                        GraphBLAS::Times<RealT>>(damping_factor),
+            m);
+        //GraphBLAS::print_matrix(std::cout, m, "Scaled Graph");
 
-        // Scaling matrix
-        //graphblas::ConstantMatrix<T> scaling_matrix(rows, 1,
-        //                                            (1.0 - damping_factor),
-        //                                            0.0);
-        //graphblas::print_matrix(std::cout, scaling_matrix, "scaling_matrix");
+        GraphBLAS::BinaryOp_Bind2nd<RealT, GraphBLAS::Plus<RealT> >
+            add_scaled_teleport((1.0 - damping_factor)/
+                                static_cast<T>(rows));
 
-        // teleporation probability is uniform across all vertices
-        //graphblas::ConstantMatrix<T> teleportation(1, rows, 1.0/T(rows), 0.0);
-        //graphblas::print_matrix(std::cout, teleportation, "teleportation");
+        GraphBLAS::assign_constant(page_rank,
+                                   GraphBLAS::NoMask(),
+                                   GraphBLAS::NoAccumulate(),
+                                   1.0/static_cast<RealT>(rows),
+                                   GraphBLAS::GrB_ALL);
 
-        //graphblas::ConstantMatrix<T> scaled_teleport(
-        //    1, rows, (1.0 - damping_factor)/static_cast<T>(rows), 0.0);
-        //
-        graphblas::arithmetic_n <T, graphblas::math::Plus<T> > scaled_teleport(
-            (1.0 - damping_factor)/static_cast<T>(rows));
 
-        //graphblas::print_matrix(std::cout, scaled_teleport,
-        //                        "scaled_teleportation");
-
-        page_rank = (graphblas::fill<graphblas::Matrix<T> >(
-                         (1.0/T(rows)), 1, rows));
-
-        graphblas::Matrix<T> new_rank(1, rows);
-        graphblas::Matrix<T> delta(1, rows);
-        graphblas::Matrix<T> r2(1, 1);
-        for (graphblas::IndexType i = 0; i < cols; ++i)
+        GraphBLAS::Vector<RealT> new_rank(rows);
+        GraphBLAS::Vector<RealT> delta(rows);
+        for (GraphBLAS::IndexType i = 0; i < max_iters; ++i)
         {
             //std::cout << "============= ITERATION " << i << " ============"
             //          << std::endl;
-            //print_matrix(std::cout, page_rank, "rank");
+            //print_vector(std::cout, page_rank, "rank");
 
             // Compute the new rank: [1 x M][M x N] = [1 x N]
-            graphblas::mxm(page_rank, m, new_rank);
-            //print_matrix(std::cout, new_rank, "step 1:");
+            GraphBLAS::vxm(new_rank,
+                           GraphBLAS::NoMask(),
+                           GraphBLAS::Second<RealT>(),
+                           GraphBLAS::ArithmeticSemiring<RealT>(),
+                           page_rank, m);
+            //print_vector(std::cout, new_rank, "step 1:");
 
             // [1 x M][M x 1] = [1 x 1] = always (1 - damping_factor)
-            //graphblas::mxm(page_rank, scaling_matrix, r2);
-            //print_matrix(std::cout, r2, "step 2:");
-
             // rank*(m + scaling_mat*teleport): [1 x 1][1 x M] + [1 x N] = [1 x M]
-            //graphblas::mxm(r2, teleportation, new_rank,
-            //               graphblas::ArithmeticSemiring<T>(),
-            //               graphblas::math::Accum<T>());
-            //graphblas::ewiseadd(scaled_teleport, new_rank, new_rank);
             //use apply:
-            graphblas::apply(new_rank, new_rank, scaled_teleport);
-            //graphblas::print_matrix(std::cout, new_rank, "new_rank");
+            GraphBLAS::apply(new_rank,
+                             GraphBLAS::NoMask(),
+                             GraphBLAS::NoAccumulate(),
+                             add_scaled_teleport,
+                             new_rank);
+            //GraphBLAS::print_vector(std::cout, new_rank, "new_rank");
 
-            // Test for convergence - we really need dot-product here so that
-            // we don't need to use extractElement(0,0) to get the result of
-            // delta * delta'.
-            graphblas::ewiseadd(page_rank, new_rank, delta,
-                                graphblas::math::Sub<T>());
-            graphblas::mxm(delta, graphblas::transpose(delta), r2);
-            //graphblas::print_matrix(std::cout, r2, "Squared error");
+            // Test for convergence - compute squared error
+            /// @todo should be mean squared error. (divide r2/N)
+            RealT squared_error(0);
+            GraphBLAS::eWiseAdd(delta,
+                                GraphBLAS::NoMask(),
+                                GraphBLAS::NoAccumulate(),
+                                GraphBLAS::Minus<RealT>(),
+                                page_rank, new_rank);
+            GraphBLAS::eWiseMult(delta,
+                                 GraphBLAS::NoMask(),
+                                 GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::Times<RealT>(),
+                                 delta, delta);
+            GraphBLAS::reduce(squared_error,
+                              GraphBLAS::NoAccumulate(),
+                              GraphBLAS::PlusMonoid<RealT>(),
+                              delta);
+
+            //std::cout << "Squared error = " << r2 << std::endl;
 
             page_rank = new_rank;
-            if (r2.extractElement(0, 0) < threshold)
+            // check mean-squared error
+            if (squared_error/((RealT)rows) < threshold)
             {
                 break;
             }
         }
+
+        // for any elements missing from page rank vector we need to set
+        // to scaled teleport.
+        GraphBLAS::assign_constant(new_rank,
+                                   GraphBLAS::NoMask(),
+                                   GraphBLAS::NoAccumulate(),
+                                   (1.0 - damping_factor)/static_cast<T>(rows),
+                                   GraphBLAS::GrB_ALL);
+        GraphBLAS::eWiseAdd(page_rank,
+                            GraphBLAS::complement(page_rank),
+                            GraphBLAS::NoAccumulate(),
+                            GraphBLAS::Plus<RealT>(),
+                            page_rank,
+                            new_rank);
     }
 } // algorithms
 

@@ -22,80 +22,80 @@
 #include <graphblas/graphblas.hpp>
 
 //****************************************************************************
-template <typename MatrixT>
+template <typename MatrixT, typename VectorT>
 static void push(MatrixT const &C,
                  MatrixT       &F,
-                 MatrixT       &excess,
-                 graphblas::IndexType u,
-                 graphblas::IndexType v)
+                 VectorT       &excess,
+                 GraphBLAS::IndexType u,
+                 GraphBLAS::IndexType v)
 {
     using T = typename MatrixT::ScalarType;
-    T a = excess.extractElement(0, u);
+    T a = excess.extractElement(u);
     T b = C.extractElement(u, v) - F.extractElement(u, v);
     T send = std::min(a, b);
 
     F.setElement(u, v, F.extractElement(u, v) + send);
     F.setElement(v, u, F.extractElement(v, u) - send);
 
-    excess.setElement(0, u, excess.extractElement(0, u) - send);
-    excess.setElement(0, v, excess.extractElement(0, v) + send);
+    excess.setElement(u, excess.extractElement(u) - send);
+    excess.setElement(v, excess.extractElement(v) + send);
 }
 
 //****************************************************************************
-template <typename MatrixT>
+template <typename MatrixT, typename VectorT>
 static void relabel(MatrixT const &C,
                     MatrixT const &F,
-                    MatrixT       &height,
-                    graphblas::IndexType u)
+                    VectorT       &height,
+                    GraphBLAS::IndexType u)
 {
     using T = typename MatrixT::ScalarType;
-    graphblas::IndexType num_nodes, cols;
-    C.get_shape(num_nodes, cols);
+    GraphBLAS::IndexType num_nodes(C.nrows());
+    GraphBLAS::IndexType cols(C.ncols());
 
     T min_height = std::numeric_limits<T>::max();
-    for (graphblas::IndexType v = 0; v < num_nodes; ++v)
+    for (GraphBLAS::IndexType v = 0; v < num_nodes; ++v)
     {
         if ((C.extractElement(u, v) - F.extractElement(u, v)) > 0)
         {
-            T a = height.extractElement(0, v);
+            T a = height.extractElement(v);
             min_height = std::min(min_height, a);
-            height.setElement(0, u, min_height + 1);
+            height.setElement(u, min_height + 1);
         }
     }
 }
 
 //****************************************************************************
 /// @todo Does seen have a different scalar type (IndexType)
-template <typename MatrixT>
+template <typename MatrixT, typename VectorT>
 static void discharge(MatrixT const &C,
                       MatrixT       &F,
-                      MatrixT       &excess,
-                      MatrixT       &height,
-                      MatrixT       &seen,
-                      graphblas::IndexType u)
+                      VectorT       &excess,
+                      VectorT       &height,
+                      VectorT       &seen,
+                      GraphBLAS::IndexType u)
 {
-    graphblas::IndexType num_nodes, cols;
-    C.get_shape(num_nodes, cols);
+    GraphBLAS::IndexType num_nodes(C.nrows());
+    GraphBLAS::IndexType cols(C.ncols());
 
-    while (excess.extractElement(0, u) > 0)
+    while (excess.extractElement(u) > 0)
     {
-        if (seen.extractElement(0, u) < num_nodes)
+        if (seen.extractElement(u) < num_nodes)
         {
-            graphblas::IndexType v = seen.extractElement(0, u);
+            GraphBLAS::IndexType v = seen.extractElement(u);
             if (((C.extractElement(u, v) - F.extractElement(u, v)) > 0) &&
-                (height.extractElement(0, u) > height.extractElement(0, v)))
+                (height.extractElement(u) > height.extractElement(v)))
             {
                 push(C, F, excess, u, v);
             }
             else
             {
-                seen.setElement(0, u, seen.extractElement(0, u) + 1);
+                seen.setElement(u, seen.extractElement(u) + 1);
             }
         }
         else
         {
             relabel(C, F, height, u);
-            seen.setElement(0, u, 0);
+            seen.setElement(u, 0);
         }
     }
 }
@@ -139,23 +139,27 @@ namespace algorithms
      */
     template<typename MatrixT>
     typename MatrixT::ScalarType maxflow(MatrixT const        &capacity,
-                                         graphblas::IndexType  source,
-                                         graphblas::IndexType  sink)
+                                         GraphBLAS::IndexType  source,
+                                         GraphBLAS::IndexType  sink)
     {
         using T = typename MatrixT::ScalarType;
-        graphblas::IndexType rows, cols;
-        capacity.get_shape(rows,cols);
-        graphblas::IndexType num_nodes = rows;
+        GraphBLAS::IndexType rows(capacity.nrows());
+        GraphBLAS::IndexType cols(capacity.ncols());
+
+        GraphBLAS::IndexType num_nodes = rows;
 
         MatrixT flow(rows,cols);
 
-        MatrixT height(1, num_nodes);
-        MatrixT excess(1, num_nodes);
-        MatrixT seen(1, num_nodes);
+        //MatrixT height(1, num_nodes);
+        //MatrixT excess(1, num_nodes);
+        //MatrixT seen(1, num_nodes);
+        GraphBLAS::Vector<T> height(num_nodes);
+        GraphBLAS::Vector<T> excess(num_nodes);
+        GraphBLAS::Vector<T> seen(num_nodes);
 
-        std::vector<graphblas::IndexType> list;
+        std::vector<GraphBLAS::IndexType> list;
 
-        for (graphblas::IndexType i = 0; i < num_nodes; ++i)
+        for (GraphBLAS::IndexType i = 0; i < num_nodes; ++i)
         {
             if ((i != source) && (i != sink))
             {
@@ -163,23 +167,23 @@ namespace algorithms
             }
         }
 
-        height.setElement(0, source, num_nodes);
-        excess.setElement(0, source,
-                            std::numeric_limits<T>::max());
-        for (graphblas::IndexType i = 0; i < num_nodes; ++i)
+        height.setElement(source, num_nodes);
+        excess.setElement(source,
+                          std::numeric_limits<T>::max());
+        for (GraphBLAS::IndexType i = 0; i < num_nodes; ++i)
         {
             push(capacity, flow, excess, source, i);
         }
 
-        graphblas::IndexType  p = 0;
+        GraphBLAS::IndexType  p = 0;
         while (p < (num_nodes - 2))
         {
-            graphblas::IndexType u = list[p];
-            T old_height = height.extractElement(0, u);
+            GraphBLAS::IndexType u = list[p];
+            T old_height = height.extractElement(u);
             discharge(capacity, flow, excess, height, seen, u);
-            if (height.extractElement(0, u) > old_height)
+            if (height.extractElement(u) > old_height)
             {
-                graphblas::IndexType t = list[p];
+                GraphBLAS::IndexType t = list[p];
 
                 list.erase(list.begin() + p);
                 list.insert(list.begin() + 0, t);
@@ -193,7 +197,7 @@ namespace algorithms
         }
 
         T maxflow = static_cast<T>(0);
-        for (graphblas::IndexType i = 0; i < num_nodes; ++i)
+        for (GraphBLAS::IndexType i = 0; i < num_nodes; ++i)
         {
             maxflow += flow.extractElement(source, i);
         }

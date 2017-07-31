@@ -15,7 +15,7 @@
 
 #include <graphblas/graphblas.hpp>
 
-using namespace graphblas;
+using namespace GraphBLAS;
 
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE extract_suite
@@ -27,74 +27,45 @@ BOOST_AUTO_TEST_SUITE(extract_suite)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(extract_test_bad_dimensions)
 {
-    graphblas::IndexArrayType i    = {0, 0, 0, 1, 1, 1, 2, 2};
-    graphblas::IndexArrayType j    = {1, 2, 3, 0, 2, 3, 0, 1};
+    IndexArrayType i    = {0, 0, 0, 1, 1, 1, 2, 2};
+    IndexArrayType j    = {1, 2, 3, 0, 2, 3, 0, 1};
     std::vector<double> v = {1, 2, 3, 4, 6, 7, 8, 9};
-    graphblas::Matrix<double, DirectedMatrixTag> m1(3, 4);
-    buildmatrix(m1, i, j, v);
+    Matrix<double, DirectedMatrixTag> m1(3, 4);
+    m1.build(i, j, v);
 
-    graphblas::Matrix<double, DirectedMatrixTag> c(2,3);
+    Matrix<double, DirectedMatrixTag> c(2,3);
 
-    graphblas::IndexArrayType vect_I({0, 2});
-    graphblas::IndexArrayType vect_J({0, 4, 1, 2});
+    IndexArrayType vect_I({0, 2});
+    IndexArrayType vect_J({0, 4, 1, 2});
 
     // nvcc requires that the acccumulator be explicitly specified to compile.
-    BOOST_CHECK_THROW(graphblas::extract(m1, vect_I, vect_J, c,
-                                         graphblas::math::Assign<double>()),
-                      graphblas::DimensionException);
+    BOOST_CHECK_THROW(extract(c, NoMask(), NoAccumulate(), m1, vect_I, vect_J),
+                      DimensionException);
 }
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(extract_test_default_accum)
+BOOST_AUTO_TEST_CASE(extract_test_no_accum)
 {
-    graphblas::IndexArrayType i_m1    = {0, 0, 0, 1, 1, 1, 2, 2};
-    graphblas::IndexArrayType j_m1    = {1, 2, 3, 0, 2, 3, 0, 1};
+    IndexArrayType i_m1    = {0, 0, 0, 1, 1, 1, 2, 2};
+    IndexArrayType j_m1    = {1, 2, 3, 0, 2, 3, 0, 1};
     std::vector<double> v_m1 = {1, 2, 3, 4, 6, 7, 8, 9};
-    graphblas::Matrix<double, DirectedMatrixTag> m1(3, 4);
-    buildmatrix(m1, i_m1, j_m1, v_m1);
+    Matrix<double, DirectedMatrixTag> m1(3, 4);
+    m1.build(i_m1, j_m1, v_m1);
 
 
-    graphblas::IndexArrayType vect_I({0,2});
-    graphblas::IndexArrayType vect_J({0,1,3});
+    IndexArrayType vect_I({0,2});
+    IndexArrayType vect_J({0,1,3});
 
-    graphblas::Matrix<double, DirectedMatrixTag> c(2,3);
+    Matrix<double, DirectedMatrixTag> c(2,3);
 
-    graphblas::IndexArrayType i_result    = {0, 0, 1, 1};
-    graphblas::IndexArrayType j_result    = {1, 2, 0, 1};
+    IndexArrayType i_result    = {0, 0, 1, 1};
+    IndexArrayType j_result    = {1, 2, 0, 1};
     std::vector<double> v_result = {1, 3, 8, 9};
-    graphblas::Matrix<double, DirectedMatrixTag> result(2, 3);
-    buildmatrix(result, i_result, j_result, v_result);
+    Matrix<double, DirectedMatrixTag> result(2, 3);
+    result.build(i_result, j_result, v_result);
 
     // nvcc requires that the acccumulator be explicitly specified to compile.
-    graphblas::extract(m1, vect_I, vect_J, c,
-                       graphblas::math::Assign<double>());
-
-    BOOST_CHECK_EQUAL(c, result);
-}
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(extract_test_assign_accum)
-{
-    graphblas::IndexArrayType i_m1    = {0, 0, 0, 1, 1, 1, 2, 2};
-    graphblas::IndexArrayType j_m1    = {1, 2, 3, 0, 2, 3, 0, 1};
-    std::vector<double> v_m1 = {1, 2, 3, 4, 6, 7, 8, 9};
-    graphblas::Matrix<double, DirectedMatrixTag> m1(3, 4);
-    buildmatrix(m1, i_m1, j_m1, v_m1);
-
-
-    graphblas::IndexArrayType vect_I({0,2});
-    graphblas::IndexArrayType vect_J({0,1,3});
-
-    graphblas::Matrix<double, DirectedMatrixTag> c(2,3);
-
-    graphblas::IndexArrayType i_result    = {0, 0, 1, 1};
-    graphblas::IndexArrayType j_result    = {1, 2, 0, 1};
-    std::vector<double> v_result = {1, 3, 8, 9};
-    graphblas::Matrix<double, DirectedMatrixTag> result(2, 3);
-    buildmatrix(result, i_result, j_result, v_result);
-
-    graphblas::extract(m1, vect_I, vect_J, c,
-                       graphblas::math::Assign<double>());
+    extract(c, NoMask(), NoAccumulate(), m1, vect_I, vect_J);
 
     BOOST_CHECK_EQUAL(c, result);
 }
@@ -102,28 +73,29 @@ BOOST_AUTO_TEST_CASE(extract_test_assign_accum)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(extract_test_accum)
 {
-    graphblas::IndexArrayType i_A    = {0, 0, 0, 1, 1, 1, 2, 2};
-    graphblas::IndexArrayType j_A    = {1, 2, 3, 0, 2, 3, 0, 1};
+    IndexArrayType i_A    = {0, 0, 0, 1, 1, 1, 2, 2};
+    IndexArrayType j_A    = {1, 2, 3, 0, 2, 3, 0, 1};
     std::vector<double> v_A = {1, 2, 3, 4, 6, 7, 8, 9};
-    graphblas::Matrix<double, DirectedMatrixTag> A(3, 4);
-    buildmatrix(A, i_A, j_A, v_A);
+    Matrix<double, DirectedMatrixTag> A(3, 4);
+    A.build(i_A, j_A, v_A);
 
-    graphblas::IndexArrayType i_C    = {0, 0, 1, 1};
-    graphblas::IndexArrayType j_C    = {1, 2, 0, 1};
+    IndexArrayType i_C    = {0, 0, 1, 1};
+    IndexArrayType j_C    = {1, 2, 0, 1};
     std::vector<double> v_C = {1, 3, 8, 9};
-    graphblas::Matrix<double, DirectedMatrixTag> C(2, 3);
-    buildmatrix(C, i_C, j_C, v_C);
+    Matrix<double, DirectedMatrixTag> C(2, 3);
+    C.build(i_C, j_C, v_C);
 
-    graphblas::IndexArrayType i_result    = {0, 0, 1, 1};
-    graphblas::IndexArrayType j_result    = {1, 2, 0, 1};
+    IndexArrayType i_result    = {0, 0, 1, 1};
+    IndexArrayType j_result    = {1, 2, 0, 1};
     std::vector<double> v_result = {2, 6, 16, 18};
-    graphblas::Matrix<double, DirectedMatrixTag> result(2, 3);
-    buildmatrix(result, i_result, j_result, v_result);
+    Matrix<double, DirectedMatrixTag> result(2, 3);
+    result.build(i_result, j_result, v_result);
 
-    graphblas::IndexArrayType vect_I({0,2});
-    graphblas::IndexArrayType vect_J({0,1,3});
+    IndexArrayType vect_I({0,2});
+    IndexArrayType vect_J({0,1,3});
 
-    graphblas::extract(A, vect_I, vect_J, C, graphblas::math::Accum<double>());
+    //extract(A, vect_I, vect_J, C, math::Accum<double>());
+    extract(C, NoMask(), Plus<double>(), A, vect_I, vect_J);
     BOOST_CHECK_EQUAL(C, result);
 }
 

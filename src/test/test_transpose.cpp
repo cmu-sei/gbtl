@@ -17,7 +17,7 @@
 
 #include <graphblas/graphblas.hpp>
 
-using namespace graphblas;
+using namespace GraphBLAS;
 
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE transpose_suite
@@ -29,75 +29,73 @@ BOOST_AUTO_TEST_SUITE(transpose_suite)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_two_argument_transpose_bad_dim)
 {
-    graphblas::IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double>       v_mA    = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     Matrix<double, DirectedMatrixTag> mA(3, 3);
-    buildmatrix(mA, i_mA, j_mA, v_mA);
+    mA.build(i_mA, j_mA, v_mA);
 
     Matrix<double, DirectedMatrixTag> mC(3, 4);
 
     BOOST_CHECK_THROW(
-        (transpose(mA, mC)),
+        (transpose(mC, NoMask(), NoAccumulate(), mA)),
         DimensionException);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_two_argument_transpose_square)
 {
-    graphblas::IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double>       v_mA    = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     Matrix<double, DirectedMatrixTag> mA(3, 3);
-    buildmatrix(mA, i_mA, j_mA, v_mA);
+    mA.build(i_mA, j_mA, v_mA);
 
     Matrix<double, DirectedMatrixTag> answer(3, 3);
-    buildmatrix(answer, j_mA, i_mA, v_mA);
+    answer.build(j_mA, i_mA, v_mA);
 
     Matrix<double, DirectedMatrixTag> mC(3, 3);
 
-    transpose(mA, mC);
-
+    transpose(mC, NoMask(), NoAccumulate(), mA);
     BOOST_CHECK_EQUAL(mC, answer);
-
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_two_argument_transpose_nonsquare)
 {
-    graphblas::IndexArrayType i_mA    = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_mA    = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2};
+    IndexArrayType i_mA    = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_mA    = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2};
     std::vector<double>       v_mA    = {1, 2, 3,-2, 4, 5, 6, 7, 8, 9};
     Matrix<double, DirectedMatrixTag> mA(3, 4);
-    buildmatrix(mA, i_mA, j_mA, v_mA);
+    mA.build(i_mA, j_mA, v_mA);
 
     Matrix<double, DirectedMatrixTag> answer(4, 3);
-    buildmatrix(answer, j_mA, i_mA, v_mA);
+    answer.build(j_mA, i_mA, v_mA);
 
     Matrix<double, DirectedMatrixTag> mC(4, 3);
 
-    transpose(mA, mC);
+    transpose(mC, NoMask(), NoAccumulate(), mA);
 
     BOOST_CHECK_EQUAL(mC, answer);
-
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_single_argument_transpose_square)
 {
-    graphblas::IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double>       v_mA    = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     Matrix<double, DirectedMatrixTag> mA(3, 3);
-    buildmatrix(mA, i_mA, j_mA, v_mA);
+    mA.build(i_mA, j_mA, v_mA);
 
     Matrix<double, DirectedMatrixTag> answer(3, 3);
-    buildmatrix(answer, j_mA, i_mA, v_mA);
+    answer.build(j_mA, i_mA, v_mA);
 
     auto result = transpose(mA);
 
-    IndexType r, c;
-    result.get_shape(r, c);
+    IndexType r(result.nrows());
+    IndexType c(result.ncols());
+
     BOOST_CHECK_EQUAL(r, 3);
     BOOST_CHECK_EQUAL(c, 3);
     BOOST_CHECK_EQUAL(result, answer);
@@ -106,19 +104,20 @@ BOOST_AUTO_TEST_CASE(test_single_argument_transpose_square)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_single_argument_transpose_nonsquare)
 {
-    graphblas::IndexArrayType i_mA    = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2};
-    graphblas::IndexArrayType j_mA    = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2};
+    IndexArrayType i_mA    = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_mA    = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2};
     std::vector<double>       v_mA    = {1, 2, 3,-2, 4, 5, 6, 7, 8, 9};
     Matrix<double, DirectedMatrixTag> mA(3, 4);
-    buildmatrix(mA, i_mA, j_mA, v_mA);
+    mA.build(i_mA, j_mA, v_mA);
 
     Matrix<double, DirectedMatrixTag> answer(4, 3);
-    buildmatrix(answer, j_mA, i_mA, v_mA);
+    answer.build(j_mA, i_mA, v_mA);
 
     auto result = transpose(mA);
 
-    IndexType r, c;
-    result.get_shape(r, c);
+    IndexType r(result.nrows());
+    IndexType c(result.ncols());
+
     BOOST_CHECK_EQUAL(r, 4);
     BOOST_CHECK_EQUAL(c, 3);
     BOOST_CHECK_EQUAL(result, answer);

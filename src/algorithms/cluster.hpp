@@ -135,7 +135,7 @@ namespace algorithms
      *                           On output contains the cluster assignments.
      *                           If element (i,j) == 1, then vertex j belongs
      *                           to cluster i.
-     * @param[in]     max_iter   The maximum number of iterations to run if
+     * @param[in]     max_iters  The maximum number of iterations to run if
      *                           convergence doesn't occur first.
      *
      */

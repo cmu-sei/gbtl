@@ -255,6 +255,7 @@ namespace GraphBLAS
             // Set value at index
             void setElement(IndexType irow, IndexType icol, ScalarT const &val)
             {
+                m_data[irow].reserve(m_data[irow].capacity() + 10);
                 if (irow >= m_num_rows || icol >= m_num_cols)
                 {
                     throw IndexOutOfBoundsException("setElement: index out of bounds");
@@ -263,12 +264,18 @@ namespace GraphBLAS
                 if (m_data[irow].empty())
                 {
                     m_data[irow].push_back(std::make_tuple(icol, val));
-                    m_nvals = m_nvals + 1;
+                    ++m_nvals;
+                }
+                if (std::get<0>(*m_data[irow].begin()) > icol)
+                {
+                    m_data[irow].insert(m_data[irow].begin(),
+                                        std::make_tuple(icol, val));
+                    ++m_nvals;
                 }
                 else
                 {
                     typename std::vector<std::tuple<IndexType, ScalarT>>::iterator it;
-                    for (it = m_data[irow].begin(); it != m_data[irow].end(); it++)
+                    for (it = m_data[irow].begin(); it != m_data[irow].end(); ++it)
                     {
                         if (std::get<0>(*it) == icol)
                         {
@@ -279,7 +286,7 @@ namespace GraphBLAS
                         else if (std::get<0>(*it) > icol)
                         {
                             m_data[irow].insert(it, std::make_tuple(icol, val));
-                            m_nvals = m_nvals + 1;
+                            ++m_nvals;
                             return;
                         }
                     }
@@ -288,8 +295,8 @@ namespace GraphBLAS
                 }
             }
 
-            // Set value at index + 'merge' with any existing value according to the
-            // BinaryOp passed.
+            // Set value at index + 'merge' with any existing value
+            // according to the BinaryOp passed.
             template <typename BinaryOpT>
             void setElement(IndexType irow, IndexType icol, ScalarT const &val,
                             BinaryOpT merge)

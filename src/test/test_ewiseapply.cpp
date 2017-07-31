@@ -19,7 +19,7 @@
 
 #include <graphblas/graphblas.hpp>
 
-using namespace graphblas;
+using namespace GraphBLAS;
 
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE ewiseaddmult_suite
@@ -33,89 +33,93 @@ BOOST_AUTO_TEST_SUITE(ewiseaddmult_suite)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(ewiseadd_bad_dimensions)
 {
-    graphblas::IndexArrayType i_m1    = {0, 0, 1, 1, 2, 2, 3};
-    graphblas::IndexArrayType j_m1    = {0, 1, 1, 2, 2, 3, 3};
+    IndexArrayType i_m1    = {0, 0, 1, 1, 2, 2, 3};
+    IndexArrayType j_m1    = {0, 1, 1, 2, 2, 3, 3};
     std::vector<double> v_m1 = {1, 2, 2, 3, 3, 4, 4};
     Matrix<double, DirectedMatrixTag> m1(4, 4);
-    buildmatrix(m1, i_m1, j_m1, v_m1);
+    m1.build(i_m1, j_m1, v_m1);
 
-    graphblas::IndexArrayType i_m2    = {0, 0, 1, 1, 1, 2, 2, 3};
-    graphblas::IndexArrayType j_m2    = {0, 1, 0, 1, 2, 1, 2, 2};
-    std::vector<double> v_m2 = {2, 2, 1, 4, 4, 4, 6, 6};
+    IndexArrayType i_m2    = {0, 0, 1, 1, 1, 2, 2};
+    IndexArrayType j_m2    = {0, 1, 0, 1, 2, 1, 2};
+    std::vector<double> v_m2 = {2, 2, 1, 4, 4, 4, 6};
     Matrix<double, DirectedMatrixTag> m2(3, 4);
-    buildmatrix(m1, i_m2, j_m2, v_m2);
+    m2.build(i_m2, j_m2, v_m2);
 
     Matrix<double, DirectedMatrixTag> m3(4, 4);
 
     BOOST_CHECK_THROW(
-        ewiseadd(m1, m2, m3, graphblas::PlusMonoid<double>()),
-        graphblas::DimensionException);
+        eWiseAdd(m3, NoMask(), NoAccumulate(),
+                 Plus<double>(), m1, m2),
+        DimensionException);
 }
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(ewiseadd_normal)
+BOOST_AUTO_TEST_CASE(eWiseAdd_normal)
 {
     // Build some sparse matrices.
-    graphblas::IndexArrayType i_mat    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    graphblas::IndexArrayType j_mat    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    IndexArrayType i_mat    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_mat    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v_mat = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
     Matrix<double, DirectedMatrixTag> mat(4, 4);
-    buildmatrix(mat, i_mat, j_mat, v_mat);
+    mat.build(i_mat, j_mat, v_mat);
 
     Matrix<double, DirectedMatrixTag> m3(4, 4);
 
-    graphblas::IndexArrayType i_answer    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    graphblas::IndexArrayType j_answer    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    IndexArrayType i_answer    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_answer    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v_answer = {2, 2, 2, 4, 4, 4, 6, 6, 6, 8};
     Matrix<double, DirectedMatrixTag> answer(4, 4);
-    buildmatrix(answer, i_answer, j_answer, v_answer);
+    answer.build(i_answer, j_answer, v_answer);
 
     // Now try simple's ewiseapply.
-    ewiseadd(mat, mat, m3, graphblas::PlusMonoid<double>());
+    eWiseAdd(m3, NoMask(), NoAccumulate(), Plus<double>(), mat, mat);
 
     BOOST_CHECK_EQUAL(m3, answer);
 }
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(ewisemult_bad_dimensions)
+BOOST_AUTO_TEST_CASE(eWiseMult_bad_dimensions)
 {
-    graphblas::IndexArrayType i_m1    = {0, 0, 1, 1, 2, 2, 3};
-    graphblas::IndexArrayType j_m1    = {0, 1, 1, 2, 2, 3, 3};
+    IndexArrayType i_m1    = {0, 0, 1, 1, 2, 2, 3};
+    IndexArrayType j_m1    = {0, 1, 1, 2, 2, 3, 3};
     std::vector<double> v_m1 = {1, 2, 2, 3, 3, 4, 4};
     Matrix<double, DirectedMatrixTag> m1(4, 4);
-    buildmatrix(m1, i_m1, j_m1, v_m1);
+    m1.build(i_m1, j_m1, v_m1);
 
-    graphblas::IndexArrayType i_m2    = {0, 0, 1, 1, 1, 2, 2, 3};
-    graphblas::IndexArrayType j_m2    = {0, 1, 0, 1, 2, 1, 2, 2};
-    std::vector<double> v_m2 = {2, 2, 1, 4, 4, 4, 6, 6};
+    IndexArrayType i_m2    = {0, 0, 1, 1, 1, 2, 2};
+    IndexArrayType j_m2    = {0, 1, 0, 1, 2, 1, 2};
+    std::vector<double> v_m2 = {2, 2, 1, 4, 4, 4, 6};
     Matrix<double, DirectedMatrixTag> m2(3, 4);
-    buildmatrix(m1, i_m2, j_m2, v_m2);
+    m2.build(i_m2, j_m2, v_m2);
 
     Matrix<double, DirectedMatrixTag> m3(4, 4);
 
     BOOST_CHECK_THROW(
-        ewisemult(m1, m2, m3, graphblas::TimesMonoid<double>()),
-        graphblas::DimensionException);
+        eWiseMult(m3, NoMask(), NoAccumulate(),
+                  Times<double>(), m1, m2),
+        DimensionException);
 }
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(ewisemult_normal)
+BOOST_AUTO_TEST_CASE(eWiseMult_normal)
 {
-    graphblas::IndexArrayType i_mat    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    graphblas::IndexArrayType j_mat    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    IndexArrayType i_mat    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_mat    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v_mat = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
     Matrix<double, DirectedMatrixTag> mat(4, 4);
-    buildmatrix(mat, i_mat, j_mat, v_mat);
+    mat.build(i_mat, j_mat, v_mat);
 
     Matrix<double, DirectedMatrixTag> m3(4, 4);
 
-    graphblas::IndexArrayType i_answer    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    graphblas::IndexArrayType j_answer    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    IndexArrayType i_answer    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_answer    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v_answer = {1, 1, 1, 4, 4, 4, 9, 9, 9, 16};
     Matrix<double, DirectedMatrixTag> answer(4, 4);
-    buildmatrix(answer, i_answer, j_answer, v_answer);
+    answer.build(i_answer, j_answer, v_answer);
 
-    ewisemult(mat, mat, m3, graphblas::TimesMonoid<double>());
+    eWiseMult(m3, NoMask(), NoAccumulate(),
+              Times<double>(),
+              mat, mat);
 
     BOOST_CHECK_EQUAL(m3, answer);
 }

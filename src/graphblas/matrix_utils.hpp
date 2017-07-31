@@ -21,9 +21,8 @@
 
 #include <graphblas/graphblas.hpp>
 
-#define __GB_SYSTEM_UTILITY_HEADER <graphblas/system/__GB_SYSTEM_ROOT/utility.hpp>
-#include __GB_SYSTEM_UTILITY_HEADER
-#undef __GB_SYSTEM_UTILITY_HEADER
+#define GB_INCLUDE_BACKEND_UTILITY 1
+#include <graphblas/backend_include.hpp>
 
 //****************************************************************************
 // Miscellaneous matrix convenience functions

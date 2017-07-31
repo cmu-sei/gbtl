@@ -470,27 +470,27 @@ namespace GraphBLAS
                      IndexArrayType     const   &col_indices,
                      bool                        replace = false)
         {
+            // Validate inputs
+            check_matrix_size(C, Mask, "extract(matrix) Mask dimension check");
+
             // Add in dimensional checks
-            if (row_indices.size() != C.nrows() && &row_indices != &GrB_ALL)
-            {
-                throw DimensionException(
-                        "Number of ROWS in output (" +
-                        std::to_string(C.nrows()) +
-                        ") does not indicated number of ROWS indices (" +
-                        std::to_string(row_indices.size()) + " ).");
-            }
+            check_index_array_dimension(
+                row_indices, C.nrows(),
+                "extract row_indices dimension: Number of ROWS in output (" +
+                std::to_string(C.nrows()) +
+                ") does not indicated number of ROWS indices (" +
+                std::to_string(row_indices.size()) + " ).");
+            check_index_array_dimension(
+                col_indices, C.ncols(),
+                "extract col_indices dimension: Number of COLUMNS in output (" +
+                std::to_string(C.ncols()) +
+                ") does not indicated number of COLUMN indices (" +
+                std::to_string(col_indices.size()) + " ).");
 
-            if (col_indices.size() != C.ncols() && &col_indices != &GrB_ALL)
-            {
-                throw DimensionException(
-                        "Number of COLUMNS in output (" +
-                        std::to_string(C.ncols()) +
-                        ") does not indicated number of COLUMN indices (" +
-                        std::to_string(col_indices.size()) + " ).");
-            }
-
-            // Validate other inputs
-            check_dimensions(C, "C", Mask, "Mask");
+            check_index_array_content(row_indices, A.nrows(),
+                                      "extract row_indices content check");
+            check_index_array_content(col_indices, A.ncols(),
+                                      "extract col_indices content check");
 
             typedef typename CMatrixT::ScalarType CScalarType;
             typedef std::vector<std::tuple<IndexType,CScalarType> > CColType;

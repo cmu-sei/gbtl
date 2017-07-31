@@ -9,6 +9,16 @@ GraphBLAS implementation.  Two backends are provided: a GPU backend built on
 cusp/thrust libraries (called cusp_gpu), and a simple CPU backend (called
 sequential).
 
+Cmake instructions (from src dir)
+
+> mkdir build
+> cd build
+> cmake ..
+> make
+> then what?
+
+****  The following is deprecated and/or needs a drastic rewrite
+
 Building
 --------
 

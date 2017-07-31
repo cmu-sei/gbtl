@@ -19,7 +19,7 @@
 
 #include <graphblas/graphblas.hpp>
 
-using namespace graphblas;
+using namespace GraphBLAS;
 
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE cpu_simple_reduce_suite
@@ -32,76 +32,45 @@ BOOST_AUTO_TEST_SUITE(cpu_simple_reduce_suite)
 BOOST_AUTO_TEST_CASE(row_reduce_test_bad_dimension)
 {
     // Build some matrices.
-    graphblas::IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    graphblas::IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v_A = {1, 1, 1, 2, 2, 1, 3, 5, 3, 4};
     Matrix<double, DirectedMatrixTag> A(4, 4);
-    buildmatrix(A, i_A, j_A, v_A);
+    A.build(i_A, j_A, v_A);
 
-    graphblas::IndexArrayType i_C    = {0, 1, 2};
-    graphblas::IndexArrayType j_C    = {0, 0, 0};
+    IndexArrayType i_C    = {0, 1, 2};
     std::vector<double> v_C = {1, 1, 1};
-    Matrix<double, DirectedMatrixTag> C(3, 1);
-    buildmatrix(C, i_C, j_C, v_C);
+    Vector<double> C(3);
+    C.build(i_C, v_C);
 
     BOOST_CHECK_THROW(
-        (row_reduce(A, C)),
-        graphblas::DimensionException);
+        (reduce(C, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                GraphBLAS::PlusMonoid<double>(), A)),
+        DimensionException);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(row_reduce_test_default_accum)
 {
     // Build some matrices.
-    graphblas::IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    graphblas::IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v_A = {1, 1, 1, 2, 2, 1, 3, 5, 3, 4};
     Matrix<double, DirectedMatrixTag> A(4, 4);
-    buildmatrix(A, i_A, j_A, v_A);
+    A.build(i_A, j_A, v_A);
 
-    graphblas::IndexArrayType i_C    = {0, 1, 2, 3};
-    graphblas::IndexArrayType j_C    = {0, 0, 0, 0};
+    IndexArrayType i_C    = {0, 1, 2, 3};
     std::vector<double> v_C = {1, 1, 1, 1};
-    Matrix<double, DirectedMatrixTag> C(4, 1);
-    buildmatrix(C, i_C, j_C, v_C);
+    Vector<double> C(4);
+    C.build(i_C, v_C);
 
-    graphblas::IndexArrayType i_answer    = {0, 1, 2, 3};
-    graphblas::IndexArrayType j_answer    = {0, 0, 0, 0};
+    IndexArrayType i_answer    = {0, 1, 2, 3};
     std::vector<double> v_answer = {2, 5, 9, 7};
-    Matrix<double, DirectedMatrixTag> answer(4, 1);
-    buildmatrix(answer, i_answer, j_answer, v_answer);
+    Vector<double> answer(4);
+    answer.build(i_answer, v_answer);
 
-    row_reduce(A, C);
-
-    BOOST_CHECK_EQUAL(C, answer);
-}
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(row_reduce_test_assign)
-{
-    // Build some matrices.
-    graphblas::IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    graphblas::IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
-    std::vector<double> v_A = {1, 1, 1, 2, 2, 1, 3, 5, 3, 4};
-    Matrix<double, DirectedMatrixTag> A(4, 4);
-    buildmatrix(A, i_A, j_A, v_A);
-
-    graphblas::IndexArrayType i_C    = {0, 1, 2, 3};
-    graphblas::IndexArrayType j_C    = {0, 0, 0, 0};
-    std::vector<double> v_C = {1, 1, 1, 1};
-    Matrix<double, DirectedMatrixTag> C(4, 1);
-    buildmatrix(C, i_C, j_C, v_C);
-
-    graphblas::IndexArrayType i_answer    = {0, 1, 2, 3};
-    graphblas::IndexArrayType j_answer    = {0, 0, 0, 0};
-    std::vector<double> v_answer = {2, 5, 9, 7};
-    Matrix<double, DirectedMatrixTag> answer(4, 1);
-    buildmatrix(answer, i_answer, j_answer, v_answer);
-
-    row_reduce(A, C,
-               graphblas::PlusMonoid<double>(),
-               graphblas::math::Assign<double>());
-
+    reduce(C, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+           GraphBLAS::PlusMonoid<double>(), A);
     BOOST_CHECK_EQUAL(C, answer);
 }
 
@@ -109,27 +78,24 @@ BOOST_AUTO_TEST_CASE(row_reduce_test_assign)
 BOOST_AUTO_TEST_CASE(row_reduce_test_accum)
 {
     // Build some matrices.
-    graphblas::IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    graphblas::IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v_A = {1, 1, 1, 2, 2, 1, 3, 5, 3, 4};
     Matrix<double, DirectedMatrixTag> A(4, 4);
-    buildmatrix(A, i_A, j_A, v_A);
+    A.build(i_A, j_A, v_A);
 
-    graphblas::IndexArrayType i_C    = {0, 1, 2, 3};
-    graphblas::IndexArrayType j_C    = {0, 0, 0, 0};
+    IndexArrayType i_C    = {0, 1, 2, 3};
     std::vector<double> v_C = {1, 1, 1, 1};
-    Matrix<double, DirectedMatrixTag> C(4, 1);
-    buildmatrix(C, i_C, j_C, v_C);
+    Vector<double> C(4);
+    C.build(i_C, v_C);
 
-    graphblas::IndexArrayType i_answer    = {0, 1, 2, 3};
-    graphblas::IndexArrayType j_answer    = {0, 0, 0, 0};
+    IndexArrayType i_answer    = {0, 1, 2, 3};
     std::vector<double> v_answer = {3, 6, 10, 8};
-    Matrix<double, DirectedMatrixTag> answer(4, 1);
-    buildmatrix(answer, i_answer, j_answer, v_answer);
+    Vector<double> answer(4);
+    answer.build(i_answer, v_answer);
 
-    row_reduce(A, C,
-               graphblas::PlusMonoid<double>(),
-               graphblas::math::Accum<double>());
+    reduce(C, GraphBLAS::NoMask(), GraphBLAS::Plus<double>(),
+           GraphBLAS::PlusMonoid<double>(), A);
 
     BOOST_CHECK_EQUAL(C, answer);
 }
@@ -138,46 +104,46 @@ BOOST_AUTO_TEST_CASE(row_reduce_test_accum)
 BOOST_AUTO_TEST_CASE(col_reduce_test_bad_dimensions)
 {
     // Build some matrices.
-    graphblas::IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    graphblas::IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v_A = {1, 1, 1, 2, 2, 1, 3, 5, 3, 4};
     Matrix<double, DirectedMatrixTag> A(4, 4);
-    buildmatrix(A, i_A, j_A, v_A);
+    A.build(i_A, j_A, v_A);
 
-    graphblas::IndexArrayType i_C    = {0, 0, 0, 0, 0};
-    graphblas::IndexArrayType j_C    = {0, 1, 2, 3, 4};
+    IndexArrayType j_C    = {0, 1, 2, 3, 4};
     std::vector<double> v_C = {1, 1, 1, 1, 1};
-    Matrix<double, DirectedMatrixTag> C(1, 5);
-    buildmatrix(C, i_C, j_C, v_C);
+    Vector<double> C(5);
+    C.build(j_C, v_C);
 
     BOOST_CHECK_THROW(
-        (col_reduce(A, C)),
-        graphblas::DimensionException);
+        (reduce(C, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                GraphBLAS::PlusMonoid<double>(), GraphBLAS::transpose(A))),
+        DimensionException);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(col_reduce_test_default_accum)
 {
     // Build some matrices.
-    graphblas::IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    graphblas::IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v_A = {1, 1, 1, 2, 2, 1, 3, 5, 3, 4};
     Matrix<double, DirectedMatrixTag> A(4, 4);
-    buildmatrix(A, i_A, j_A, v_A);
+    A.build(i_A, j_A, v_A);
 
-    graphblas::IndexArrayType i_C    = {0, 0, 0, 0};
-    graphblas::IndexArrayType j_C    = {0, 1, 2, 3};
+    IndexArrayType j_C    = {0, 1, 2, 3};
     std::vector<double> v_C = {1, 1, 1, 1};
-    Matrix<double, DirectedMatrixTag> C(1, 4);
-    buildmatrix(C, i_C, j_C, v_C);
+    Vector<double> C(4);
+    C.build(j_C, v_C);
 
-    graphblas::IndexArrayType i_answer    = {0, 0, 0, 0};
-    graphblas::IndexArrayType j_answer    = {0, 1, 2, 3};
+    IndexArrayType j_answer    = {0, 1, 2, 3};
     std::vector<double> v_answer = {2, 4, 8, 9};
-    Matrix<double, DirectedMatrixTag> answer(1, 4);
-    buildmatrix(answer, i_answer, j_answer, v_answer);
+    Vector<double> answer(4);
+    answer.build(j_answer, v_answer);
 
-    col_reduce(A, C);
+    //col_reduce(A, C);
+    reduce(C, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+           GraphBLAS::PlusMonoid<double>(), GraphBLAS::transpose(A));
 
     BOOST_CHECK_EQUAL(C, answer);
 }
@@ -186,25 +152,25 @@ BOOST_AUTO_TEST_CASE(col_reduce_test_default_accum)
 BOOST_AUTO_TEST_CASE(col_reduce_test_assign)
 {
     // Build some matrices.
-    graphblas::IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    graphblas::IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v_A = {1, 1, 1, 2, 2, 1, 3, 5, 3, 4};
     Matrix<double, DirectedMatrixTag> A(4, 4);
-    buildmatrix(A, i_A, j_A, v_A);
+    A.build(i_A, j_A, v_A);
 
-    graphblas::IndexArrayType i_C    = {0, 0, 0, 0};
-    graphblas::IndexArrayType j_C    = {0, 1, 2, 3};
+    IndexArrayType j_C    = {0, 1, 2, 3};
     std::vector<double> v_C = {1, 1, 1, 1};
-    Matrix<double, DirectedMatrixTag> C(1, 4);
-    buildmatrix(C, i_C, j_C, v_C);
+    Vector<double> C(4);
+    C.build(j_C, v_C);
 
-    graphblas::IndexArrayType i_answer    = {0, 0, 0, 0};
-    graphblas::IndexArrayType j_answer    = {0, 1, 2, 3};
+    IndexArrayType j_answer    = {0, 1, 2, 3};
     std::vector<double> v_answer = {2, 4, 8, 9};
-    Matrix<double, DirectedMatrixTag> answer(1, 4);
-    buildmatrix(answer, i_answer, j_answer, v_answer);
+    Vector<double> answer(4);
+    answer.build(j_answer, v_answer);
 
-    col_reduce(A, C);
+    //col_reduce(A, C);
+    reduce(C, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+           GraphBLAS::PlusMonoid<double>(), GraphBLAS::transpose(A));
 
     BOOST_CHECK_EQUAL(C, answer);
 }
@@ -213,27 +179,25 @@ BOOST_AUTO_TEST_CASE(col_reduce_test_assign)
 BOOST_AUTO_TEST_CASE(col_reduce_test_accum)
 {
     // Build some matrices.
-    graphblas::IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    graphblas::IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v_A = {1, 1, 1, 2, 2, 1, 3, 5, 3, 4};
     Matrix<double, DirectedMatrixTag> A(4, 4);
-    buildmatrix(A, i_A, j_A, v_A);
+    A.build(i_A, j_A, v_A);
 
-    graphblas::IndexArrayType i_C    = {0, 0, 0, 0};
-    graphblas::IndexArrayType j_C    = {0, 1, 2, 3};
+    IndexArrayType j_C    = {0, 1, 2, 3};
     std::vector<double> v_C = {1, 1, 1, 1};
-    Matrix<double, DirectedMatrixTag> C(1, 4);
-    buildmatrix(C, i_C, j_C, v_C);
+    Vector<double> C(4);
+    C.build(j_C, v_C);
 
-    graphblas::IndexArrayType i_answer    = {0, 0, 0, 0};
-    graphblas::IndexArrayType j_answer    = {0, 1, 2, 3};
+    IndexArrayType j_answer    = {0, 1, 2, 3};
     std::vector<double> v_answer = {3, 5, 9, 10};
-    Matrix<double, DirectedMatrixTag> answer(1, 4);
-    buildmatrix(answer, i_answer, j_answer, v_answer);
+    Vector<double> answer(4);
+    answer.build(j_answer, v_answer);
 
-    col_reduce(A, C,
-               graphblas::PlusMonoid<double>(),
-               graphblas::math::Accum<double>());
+    reduce(C, GraphBLAS::NoMask(), GraphBLAS::Plus<double>(),
+           GraphBLAS::PlusMonoid<double>(), GraphBLAS::transpose(A));
+
 
     BOOST_CHECK_EQUAL(C, answer);
 }
@@ -242,31 +206,30 @@ BOOST_AUTO_TEST_CASE(col_reduce_test_accum)
 BOOST_AUTO_TEST_CASE(masked_col_reduce_test_default_accum)
 {
     // Build some matrices.
-    graphblas::IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    graphblas::IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v_A = {1, 1, 1, 2, 2, 1, 3, 5, 3, 4};
     Matrix<double, DirectedMatrixTag> A(4, 4);
-    buildmatrix(A, i_A, j_A, v_A);
+    A.build(i_A, j_A, v_A);
 
-    graphblas::IndexArrayType i_C    = {0, 0, 0, 0};
-    graphblas::IndexArrayType j_C    = {0, 1, 2, 3};
+    IndexArrayType j_C    = {0, 1, 2, 3};
     std::vector<double> v_C = {1, 1, 1, 1};
-    Matrix<double, DirectedMatrixTag> C(1, 4);
-    buildmatrix(C, i_C, j_C, v_C);
+    Vector<double> C(4);
+    C.build(j_C, v_C);
 
-    graphblas::IndexArrayType i_mask    = {0, 0, 0, 0};
-    graphblas::IndexArrayType j_mask    = {0, 1, 2, 3};
+    IndexArrayType j_mask    = {0, 1, 2, 3};
     std::vector<double> v_mask = {1, 0, 1, 0};
-    Matrix<double, DirectedMatrixTag> mask(1, 4);
-    buildmatrix(mask, i_mask, j_mask, v_mask);
+    Vector<bool> mask(4);
+    mask.build(j_mask, v_mask);
 
-    graphblas::IndexArrayType i_answer    = {0, 0, 0, 0};
-    graphblas::IndexArrayType j_answer    = {0, 1, 2, 3};
+    IndexArrayType j_answer    = {0, 1, 2, 3};
     std::vector<double> v_answer = {2, 1, 8, 1};
-    Matrix<double, DirectedMatrixTag> answer(1, 4);
-    buildmatrix(answer, i_answer, j_answer, v_answer);
+    Vector<double> answer(4);
+    answer.build(j_answer, v_answer);
 
-    colReduceMasked(A, C, mask);
+    //colReduceMasked(A, C, mask);
+    reduce(C, mask, GraphBLAS::NoAccumulate(),
+           GraphBLAS::PlusMonoid<double>(), GraphBLAS::transpose(A));
 
     BOOST_CHECK_EQUAL(C, answer);
 }
@@ -276,32 +239,30 @@ BOOST_AUTO_TEST_CASE(masked_col_reduce_test_default_accum)
 BOOST_AUTO_TEST_CASE(masked_row_reduce_test_default_accum)
 {
     // Build some matrices.
-    graphblas::IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    graphblas::IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v_A = {1, 1, 1, 2, 2, 1, 3, 5, 3, 4};
     Matrix<double, DirectedMatrixTag> A(4, 4);
-    buildmatrix(A, i_A, j_A, v_A);
+    A.build(i_A, j_A, v_A);
 
-    graphblas::IndexArrayType i_C    = {0, 1, 2, 3};
-    graphblas::IndexArrayType j_C    = {0, 0, 0, 0};
+    IndexArrayType i_C    = {0, 1, 2, 3};
     std::vector<double> v_C = {1, 1, 1, 1};
-    Matrix<double, DirectedMatrixTag> C(4, 1);
-    buildmatrix(C, i_C, j_C, v_C);
+    Vector<double> C(4);
+    C.build(i_C, v_C);
 
-    graphblas::IndexArrayType i_mask    = {0, 1, 2, 3};
-    graphblas::IndexArrayType j_mask    = {0, 0, 0, 0};
+    IndexArrayType i_mask    = {0, 1, 2, 3};
     std::vector<double> v_mask = {1, 0, 1, 0};
-    Matrix<double, DirectedMatrixTag> mask(4, 1);
-    buildmatrix(mask, i_mask, j_mask, v_mask);
+    Vector<bool> mask(4);
+    mask.build(i_mask, v_mask);
 
-
-    graphblas::IndexArrayType i_answer    = {0, 1, 2, 3};
-    graphblas::IndexArrayType j_answer    = {0, 0, 0, 0};
+    IndexArrayType i_answer    = {0, 1, 2, 3};
     std::vector<double> v_answer = {2, 1, 9, 1};
-    Matrix<double, DirectedMatrixTag> answer(4, 1);
-    buildmatrix(answer, i_answer, j_answer, v_answer);
+    Vector<double> answer(4);
+    answer.build(i_answer, v_answer);
 
-    rowReduceMasked(A, C, mask);
+    //rowReduceMasked(A, C, mask);
+    reduce(C, mask, GraphBLAS::NoAccumulate(),
+           GraphBLAS::PlusMonoid<double>(), A);
 
     BOOST_CHECK_EQUAL(C, answer);
 }

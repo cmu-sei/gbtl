@@ -20,75 +20,38 @@
 
 #define GB_DEBUG
 #include <graphblas/graphblas.hpp>
-#include <graphblas/linalg_utils.hpp>
 #include <algorithms/sssp.hpp>
 
 
 namespace algorithms
 {
     /**
-     * @brief Calculate the number of vertices in the graph.
-     *
-     * @todo This is taken from the number of rows in the matrix.  This needs
-     *       work, the matrix dimension may not be indicative of the number
-     *       of vertices in use.
-     *
-     * @param[in] graph The graph to calculate the number of vertices in.
-     *
-     * @return The number of vertices in <code>graph</code>.
-     */
-    template<typename MatrixT>
-    int vertex_count(MatrixT const &graph)
-    {
-        graphblas::IndexType rows, cols;
-        graph.get_shape(rows,cols);
-        return rows;
-    }
-
-
-    /**
-     * @brief Calculate the number of edges in the graph.
-     *
-     * @param[in] graph The graph to calculate the number of vertices in.
-     *
-     * @return The number of edges in <code>graph</code>.
-     */
-    template<typename MatrixT>
-    graphblas::IndexType edge_count(MatrixT const &graph)
-    {
-        return graph.get_nnz();
-    }
-
-
-    /**
      * @brief Compute the in-degree of a vertex in the given graph.
      *
      * @param[in] graph  The graph to compute the in-degree of a vertex in.
      * @param[in] vid    The vertex to compute the in-degree of.
      *
-     * @return The in-degree of vertex vid
+     * @return The in-degree of vertex vid (G(:,vid).nvals())
      */
     template<typename MatrixT>
     typename MatrixT::ScalarType vertex_in_degree(MatrixT const        &graph,
-                                                  graphblas::IndexType  vid)
+                                                  GraphBLAS::IndexType  vid)
     {
-        graphblas::IndexType rows, cols;
-        graph.get_shape(rows, cols);
+        using T = typename MatrixT::ScalarType;
 
-        if (vid >= rows)
+        if (vid >= graph.ncols())
         {
-            throw graphblas::DimensionException();
+            throw GraphBLAS::DimensionException();
         }
 
-        graphblas::IndexType in_degree = 0;
-        for (graphblas::IndexType i = 0; i < cols; ++i)
-        {
-            if (graph.extractElement(vid, i) != graph.get_zero())
-            {
-                ++in_degree;
-            }
-        }
-        return in_degree;
+        GraphBLAS::Vector<T> in_edges(graph.nrows());
+        GraphBLAS::extract(in_edges,
+                           GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                           graph,
+                           GraphBLAS::GrB_ALL,
+                           vid);
+
+        return in_edges.nvals();
     }
 
 
@@ -98,29 +61,27 @@ namespace algorithms
      * @param[in] graph  The graph to compute the out-degree of a vertex in.
      * @param[in] vid    The vertex to compute the out-degree of.
      *
-     * @return The out-degree of vertex vid
+     * @return The out-degree of vertex vid (G(vid,:).nvals())
      */
     template<typename MatrixT>
     typename MatrixT::ScalarType vertex_out_degree(MatrixT const        &graph,
-                                                   graphblas::IndexType  vid)
+                                                   GraphBLAS::IndexType  vid)
     {
-        graphblas::IndexType rows, cols;
-        graph.get_shape(rows, cols);
+        using T = typename MatrixT::ScalarType;
 
-        if (vid >= cols)
+        if (vid >= graph.nrows())
         {
-            throw graphblas::DimensionException();
+            throw GraphBLAS::DimensionException();
         }
 
-        graphblas::IndexType out_degree = 0;
-        for (graphblas::IndexType i = 0; i < rows; ++i)
-        {
-            if (graph.extractElement(i, vid) != graph.get_zero())
-            {
-                out_degree++;
-            }
-        }
-        return out_degree;
+        GraphBLAS::Vector<T> out_edges(graph.nrows());
+        GraphBLAS::extract(out_edges,
+                           GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                           GraphBLAS::transpose(graph),
+                           GraphBLAS::GrB_ALL,
+                           vid);
+
+        return out_edges.nvals();
     }
 
 
@@ -134,7 +95,7 @@ namespace algorithms
      */
     template<typename MatrixT>
     typename MatrixT::ScalarType vertex_degree(MatrixT const        &graph,
-                                               graphblas::IndexType  vid)
+                                               GraphBLAS::IndexType  vid)
     {
         return vertex_in_degree(graph, vid) + vertex_out_degree(graph, vid);
     }
@@ -149,29 +110,29 @@ namespace algorithms
      *
      * @param[in]  graph   The graph to compute the distances in.
      * @param[in]  sid     The starting vertex.
-     * @param[out] result  The distance from s to all other
+     * @param[out] result  The distances from s to all other
      *                     vertices in graph.
      *
      * @note Uses SSSP algorithm to compute the result
      */
-    template<typename MatrixT>
+    template<typename MatrixT, typename VectorT>
     void graph_distance(MatrixT const        &graph,
-                        graphblas::IndexType  sid,
-                        MatrixT              &result)
+                        GraphBLAS::IndexType  sid,
+                        VectorT              &result)
     {
         using T = typename MatrixT::ScalarType;
-        graphblas::IndexType rows, cols;
-        graph.get_shape(rows, cols);
+        GraphBLAS::IndexType rows(graph.nrows());
+        GraphBLAS::IndexType cols(graph.ncols());
 
-        if (rows != cols)
+        if ((rows != cols) || (rows != result.size()))
         {
-            throw graphblas::DimensionException();
+            throw GraphBLAS::DimensionException();
         }
 
-        MatrixT start(rows, rows, std::numeric_limits<T>::max());
-        start.setElement(sid, sid, static_cast<T>(0));
+        result.clear();
+        result.setElement(sid, static_cast<T>(0));
 
-        sssp(graph, start, result);
+        sssp(graph, result);
     }
 
 
@@ -188,22 +149,23 @@ namespace algorithms
     void graph_distance_matrix(MatrixT const &graph, MatrixT &result)
     {
         using T = typename MatrixT::ScalarType;
-        graphblas::IndexType rows, cols;
-        graph.get_shape(rows, cols);
+        GraphBLAS::IndexType rows(graph.nrows());
+        GraphBLAS::IndexType cols(graph.ncols());
 
-        if (rows != cols)
+        if ((rows != cols) ||
+            (result.nrows() != rows) ||
+            (result.ncols() != cols))
         {
-            throw graphblas::DimensionException();
+            throw GraphBLAS::DimensionException();
         }
 
-        MatrixT start = graphblas::identity<MatrixT>(
+        result.clear();
+        result = GraphBLAS::scaled_identity<MatrixT>(
             rows,
-            std::numeric_limits<T>::max(),
             static_cast<T>(0));
 
-        sssp(graph, start, result);
+        batch_sssp(graph, result);
     }
-
 
     /**
      * @brief Calculate the vertex eccentricity for a vertex in the given
@@ -223,31 +185,27 @@ namespace algorithms
     template<typename MatrixT>
     typename MatrixT::ScalarType vertex_eccentricity(
         MatrixT const        &graph,
-        graphblas::IndexType  vid)
+        GraphBLAS::IndexType  vid)
     {
         using T = typename MatrixT::ScalarType;
-        graphblas::IndexType rows, cols;
-        graph.get_shape(rows, cols);
+        GraphBLAS::IndexType rows(graph.nrows());
+        GraphBLAS::IndexType cols(graph.ncols());
 
         if (rows != cols)
         {
-            throw graphblas::DimensionException();
+            throw GraphBLAS::DimensionException();
         }
 
-        MatrixT start(rows, rows,
-                      std::numeric_limits<T>::max());
-        start.setElement(vid, vid, static_cast<T>(0));
+        GraphBLAS::Vector<T> result(rows);
+        result.setElement(vid, static_cast<T>(0));
+        sssp(graph, result);
 
-        MatrixT result(rows, rows);
-        sssp(graph, start, result);
+        T max_sp(0);
+        GraphBLAS::reduce(max_sp, GraphBLAS::NoAccumulate(),
+                          GraphBLAS::MaxMonoid<T>(),
+                          result);
 
-        T current_max = result.extractElement(vid, 0);
-        for (graphblas::IndexType i = 1; i < rows; ++i)
-        {
-            current_max = std::max(current_max,
-                                   result.extractElement(vid, i));
-        }
-        return current_max;
+        return max_sp;
     }
 
 
@@ -265,16 +223,26 @@ namespace algorithms
     typename MatrixT::ScalarType graph_radius(MatrixT const &graph)
     {
         using T = typename MatrixT::ScalarType;
-        graphblas::IndexType rows, cols;
-        graph.get_shape(rows, cols);
 
-        T current_min = vertex_eccentricity(graph, 0);
-        for (graphblas::IndexType i = 1; i < rows; ++i)
-        {
-            current_min = std::min(current_min,
-                                   vertex_eccentricity(graph, i));
-        }
-        return current_min;
+        MatrixT result(graph.nrows(), graph.ncols());
+        graph_distance_matrix(graph, result);
+        //print_matrix(std::cout, result, "GRAPH DISTANCE MATRIX");
+
+        // Max Reduce across the rows for eccentricity
+        GraphBLAS::Vector<T> eccentricity(graph.nrows());
+        GraphBLAS::reduce(eccentricity,
+                          GraphBLAS::NoMask(),
+                          GraphBLAS::NoAccumulate(),
+                          GraphBLAS::Max<T>(),
+                          result);
+
+        // Min Reduce the maximums to get the radius scalar
+        T radius(0);
+        GraphBLAS::reduce(radius, GraphBLAS::NoAccumulate(),
+                          GraphBLAS::MinMonoid<T>(),
+                          eccentricity);
+
+        return radius;
     }
 
 
@@ -292,16 +260,17 @@ namespace algorithms
     typename MatrixT::ScalarType graph_diameter(MatrixT const &graph)
     {
         using T = typename MatrixT::ScalarType;
-        graphblas::IndexType rows, cols;
-        graph.get_shape(rows, cols);
 
-        T current_max = vertex_eccentricity(graph, 0);
-        for (graphblas::IndexType i = 1; i < rows; i++)
-        {
-            current_max = std::max(current_max,
-                                   vertex_eccentricity(graph, i));
-        }
-        return current_max;
+        MatrixT result(graph.nrows(), graph.ncols());
+        graph_distance_matrix(graph, result);
+        //print_matrix(std::cout, result, "GRAPH DISTANCE MATRIX");
+
+        // Max Reduce to scalar the distance matrix
+        T diameter(0);
+        GraphBLAS::reduce(diameter, GraphBLAS::NoAccumulate(),
+                          GraphBLAS::MaxMonoid<T>(),
+                          result);
+        return diameter;
     }
 
 
@@ -329,39 +298,19 @@ namespace algorithms
     template<typename MatrixT>
     typename MatrixT::ScalarType closeness_centrality(
         MatrixT const        &graph,
-        graphblas::IndexType  vid)
+        GraphBLAS::IndexType  vid)
     {
         using T = typename MatrixT::ScalarType;
-        graphblas::IndexType rows, cols;
-        graph.get_shape(rows, cols);
 
-        MatrixT result(rows, cols);
-        graph_distance(graph, vid, result);
+        GraphBLAS::Vector<T> distances(graph.nrows());
+        graph_distance(graph, vid, distances);
 
-        T sum = result.extractElement(vid, 0);
-        for (graphblas::IndexType i = 1; i < cols; ++i)
-        {
-            sum += result.extractElement(vid, i);
-        }
+        // Accumulate the distances
+        T sum(0);
+        GraphBLAS::reduce(sum, GraphBLAS::NoAccumulate(),
+                          GraphBLAS::PlusMonoid<T>(),
+                          distances);
         return sum;
-    }
-
-    /**
-     * @brief Compute the degree centrality of a vertex in the given graph.
-     *
-     * Given a vertex, vid, its degree centrality is its degree.
-     *
-     * @param[in]  graph  The graph containing vid
-     * @param[in]  vid    The vertex to compute the degree centrality of.
-     *
-     * @return The degree centrality of vid
-     */
-    template<typename MatrixT>
-    typename MatrixT::ScalarType degree_centrality(
-        MatrixT const        &graph,
-        graphblas::IndexType  vid)
-    {
-        return vertex_degree(graph, vid);
     }
 
 } // algorithms

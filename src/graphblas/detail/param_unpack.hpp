@@ -16,14 +16,17 @@
 //matrix tags should be strictly internal
 #include "matrix_tags.hpp"
 
-// Include matrix and vector definitions from the appropriate backend.
-#define __GB_SYSTEM_MATRIX_HEADER <graphblas/system/__GB_SYSTEM_ROOT/Matrix.hpp>
-#include __GB_SYSTEM_MATRIX_HEADER
-#undef __GB_SYSTEM_MATRIX_HEADER
+#define GB_INCLUDE_BACKEND_MATRIX 1
+#define GB_INCLUDE_BACKEND_VECTOR 1
+#include <graphblas/backend_include.hpp>
 
-#define __GB_SYSTEM_VECTOR_HEADER <graphblas/system/__GB_SYSTEM_ROOT/Vector.hpp>
-#include __GB_SYSTEM_VECTOR_HEADER
-#undef __GB_SYSTEM_VECTOR_HEADER
+//#define __GB_SYSTEM_MATRIX_HEADER <graphblas/system/__GB_SYSTEM_ROOT/Matrix.hpp>
+//#include __GB_SYSTEM_MATRIX_HEADER
+//#undef __GB_SYSTEM_MATRIX_HEADER
+//
+//#define __GB_SYSTEM_VECTOR_HEADER <graphblas/system/__GB_SYSTEM_ROOT/Vector.hpp>
+//#include __GB_SYSTEM_VECTOR_HEADER
+//#undef __GB_SYSTEM_VECTOR_HEADER
 
 //this file contains the variadic template parameters unpacking utility.
 
