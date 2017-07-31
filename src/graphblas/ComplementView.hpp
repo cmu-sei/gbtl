@@ -94,9 +94,11 @@ namespace GraphBLAS
         }
 
         template<typename ValueT,
-                 typename AMatrixT>
-        inline void extractTuples(IndexArrayType            &row_indices,
-                                  IndexArrayType            &col_indices,
+                 typename AMatrixT,
+                 typename RowSequenceT,
+                 typename ColSequenceT>
+        inline void extractTuples(RowSequenceT              &row_indices,
+                                  ColSequenceT              &col_indices,
                                   std::vector<ValueT>       &values)
         {
             m_mat.extractTuples(row_indices, col_indices, values);
@@ -175,46 +177,57 @@ namespace GraphBLAS
 
         //--------------------------------------------------------------------
 
+        // 4.3.6.2
         template<typename CMatrixT,
-                 typename MMatrixT,
-                 typename AccumT,
-                 typename AMatrixT >
-        friend inline void extract(CMatrixT &C,
-                                   MMatrixT const &mask,
-                                   AccumT accum,
-                                   AMatrixT const &A,
-                                   IndexArrayType const &row_indicies,
-                                   IndexArrayType const &col_indicies,
-                                   bool replace);
+                typename MaskT,
+                typename AccumT,
+                typename AMatrixT,
+                typename RowSequenceT,
+                typename ColSequenceT>
+        friend inline void extract(CMatrixT         &C,
+                                   MaskT             const &Mask,
+                                   AccumT                   accum,
+                                   AMatrixT          const &A,
+                                   RowSequenceT      const &row_indices,
+                                   ColSequenceT      const &col_indices,
+                                   bool                     replace_flag);
 
         //--------------------------------------------------------------------
 
+        // 4.3.7.2
         template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename AMatrixT>
+                typename MaskT,
+                typename AccumT,
+                typename AMatrixT,
+                typename RowSequenceT,
+                typename ColSequenceT>
         friend inline void assign(CMatrixT             &C,
                                   MaskT          const &Mask,
                                   AccumT                accum,
                                   AMatrixT       const &A,
-                                  IndexArrayType const &row_indices,
-                                  IndexArrayType const &col_indices,
+                                  RowSequenceT   const &row_indices,
+                                  ColSequenceT   const &col_indices,
                                   bool                  replace_flag);
 
+
+        // 4.3.7.6
         template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename ValueT>
+                typename MaskT,
+                typename AccumT,
+                typename ValueT,
+                typename RowSequenceT,
+                typename ColSequenceT>
         friend inline void assign_constant(CMatrixT             &C,
                                            MaskT          const &Mask,
                                            AccumT                accum,
                                            ValueT                val,
-                                           IndexArrayType const &row_indices,
-                                           IndexArrayType const &col_indices,
+                                           RowSequenceT   const &row_indices,
+                                           ColSequenceT   const &col_indices,
                                            bool                  replace_flag);
 
         //--------------------------------------------------------------------
 
+        // 4.3.8.2
         template<typename CScalarT,
                  typename MaskT,
                  typename AccumT,
@@ -300,8 +313,10 @@ namespace GraphBLAS
             m_vec.extractTuples(i_it, v_it);
         }
 
-        template<typename ValueT>
-        inline void extractTuples(IndexArrayType            &indices,
+        // @TODO: Should this be const Indices
+        template<typename ValueT,
+                 typename SequenceT>
+        inline void extractTuples(SequenceT                 &indices,
                                   std::vector<ValueT>       &values)
         {
             m_vec.extractTuples(indices, values);
@@ -393,41 +408,47 @@ namespace GraphBLAS
 
         //--------------------------------------------------------------------
 
+        // 4.3.6.1
         template<typename WVectorT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename UVectorT>
+                typename MaskT,
+                typename AccumT,
+                typename UVectorT,
+                typename SequenceT>
         friend inline void extract(WVectorT             &w,
                                    MaskT          const &mask,
                                    AccumT                accum,
                                    UVectorT       const &u,
-                                   IndexArrayType const &indices,
+                                   SequenceT      const &indices,
                                    bool                  replace_flag);
 
+        // 4.3.6.3
         template<typename WVectorT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename AMatrixT>
+                typename MaskT,
+                typename AccumT,
+                typename AMatrixT,
+                typename SequenceT>
         friend inline void extract(WVectorT             &w,
                                    MaskT          const &mask,
                                    AccumT                accum,
                                    AMatrixT       const &A,
-                                   IndexArrayType const &row_indices,
+                                   SequenceT      const &row_indices,
                                    IndexType             col_index,
                                    bool                  replace_flag);
 
         //--------------------------------------------------------------------
 
+        // 4.3.7.5:
         template<typename WVectorT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename ValueT>
-        friend inline void assign_constant(WVectorT             &w,
-                                           MaskT          const &mask,
-                                           AccumT                accum,
-                                           ValueT                val,
-                                           IndexArrayType const &indices,
-                                           bool                  replace_flag);
+                typename MaskT,
+                typename AccumT,
+                typename ValueT,
+                typename SequenceT>
+        friend inline void assign(WVectorT &w,
+                                  MaskT const &mask,
+                                  AccumT accum,
+                                  ValueT val,
+                                  SequenceT const &indices,
+                                  bool replace_flag);
 
         //--------------------------------------------------------------------
         template<typename WScalarT,

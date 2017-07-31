@@ -20,6 +20,8 @@
 #include <exception>
 #include <vector>
 #include <string>
+#include <sstream>
+#include <graphblas/detail/logging.h>
 
 namespace GraphBLAS
 {
@@ -46,7 +48,11 @@ namespace GraphBLAS
     {
     public:
         DimensionException(std::string const &msg)
-            : m_message(msg) {}
+            : m_message(msg)
+        {
+            GRB_LOG_VERBOSE("!!! DimenssionException: " << msg);
+        }
+
 
         DimensionException(){}
 

@@ -53,7 +53,7 @@ namespace GraphBLAS
             }
 
             // TODO: Go to N.
-            ostr << "]" << std::endl;
+            ostr << "]";
         }
 
         /**
@@ -64,10 +64,10 @@ namespace GraphBLAS
          *  @param[in] mat   The matrix to output
          *
          */
+        // @deprecated - use stream print-info/stream inserter
         template <typename MatrixT >
         void pretty_print_matrix(std::ostream &ostr, MatrixT const &mat)
         {
-//          using scalar_type = typename MatrixT::ScalarT;
             typedef typename MatrixT::ScalarType ScalarT;
             typedef std::vector<std::tuple<GraphBLAS::IndexType, ScalarT> > RowType;
 
@@ -120,8 +120,15 @@ namespace GraphBLAS
                         ++curr_idx;
                     }
                 }
-                ostr << ((row_idx == num_rows - 1 ) ? "]]\n" : "]\n");
+                ostr << ((row_idx == num_rows - 1 ) ? "]]" : "]\n");
             }
+        }
+
+        template<typename ScalarT>
+        std::ostream &operator<<(std::ostream &os, std::vector<std::tuple<IndexType, ScalarT> > &vec)
+        {
+            pretty_print(os, vec);
+            return os;
         }
 
     } //backend

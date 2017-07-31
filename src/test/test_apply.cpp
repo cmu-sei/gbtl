@@ -30,8 +30,8 @@ BOOST_AUTO_TEST_SUITE(apply_suite)
 BOOST_AUTO_TEST_CASE(apply_test_bad_dimension)
 {
     // Build some sparse matrices.
-    GraphBLAS::IndexArrayType i    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    GraphBLAS::IndexArrayType j    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    GraphBLAS::VectorIndexType i    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    GraphBLAS::VectorIndexType j    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> A(4, 4);
     A.build(i, j, v);
@@ -51,8 +51,8 @@ BOOST_AUTO_TEST_CASE(apply_test_bad_dimension)
 BOOST_AUTO_TEST_CASE(apply_test_default_accum)
 {
     // Build some matrices.
-    GraphBLAS::IndexArrayType i = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    GraphBLAS::IndexArrayType j = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    GraphBLAS::VectorIndexType i = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    GraphBLAS::VectorIndexType j = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> A(4, 4);
     A.build(i, j, v);
@@ -76,8 +76,8 @@ BOOST_AUTO_TEST_CASE(apply_test_default_accum)
 BOOST_AUTO_TEST_CASE(apply_test_assign_accum)
 {
     // Build some matrices.
-    GraphBLAS::IndexArrayType i = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    GraphBLAS::IndexArrayType j = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    GraphBLAS::VectorIndexType i = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    GraphBLAS::VectorIndexType j = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> A(4, 4);
     A.build(i, j, v);
@@ -101,21 +101,21 @@ BOOST_AUTO_TEST_CASE(apply_test_assign_accum)
 BOOST_AUTO_TEST_CASE(apply_test_accum)
 {
     // Build some matrices.
-    GraphBLAS::IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    GraphBLAS::IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    GraphBLAS::VectorIndexType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    GraphBLAS::VectorIndexType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v_A = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> A(4, 4);
     A.build(i_A, j_A, v_A);
 
-    GraphBLAS::IndexArrayType i_C    = {3, 3, 3};
-    GraphBLAS::IndexArrayType j_C    = {0, 2, 3};
+    GraphBLAS::VectorIndexType i_C    = {3, 3, 3};
+    GraphBLAS::VectorIndexType j_C    = {0, 2, 3};
     std::vector<double> v_C = {9, 1, 1};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> C(4, 4);
     C.build(i_C, j_C, v_C);
 
 
-    GraphBLAS::IndexArrayType i_answer = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3};
-    GraphBLAS::IndexArrayType j_answer = {0, 1, 0, 1, 2, 1, 2, 3, 0, 2, 3};
+    GraphBLAS::VectorIndexType i_answer = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3};
+    GraphBLAS::VectorIndexType j_answer = {0, 1, 0, 1, 2, 1, 2, 3, 0, 2, 3};
     std::vector<double> v_answer = {1, 1, 1, 1./2, 1./2,
                                     1./2, 1./3, 1./3, 9, 4./3, 5./4};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(4, 4);

@@ -32,10 +32,10 @@ BOOST_AUTO_TEST_SUITE(page_rank_suite)
 BOOST_AUTO_TEST_CASE(page_rank_test_tn_isolated_node)
 {
     IndexType const NUM_NODES(9);
-    IndexArrayType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
+    VectorIndexType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
                         4, 4, 4, 5, 6, 6, 6, 8, 8};
 
-    IndexArrayType j = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
+    VectorIndexType j = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
                         2, 3, 8, 2, 1, 2, 3, 2, 4};
     std::vector<double> v(i.size(), 1.0);
     Matrix<double> m1(NUM_NODES, NUM_NODES);
@@ -66,9 +66,9 @@ BOOST_AUTO_TEST_CASE(page_rank_test_tn_isolated_node)
 BOOST_AUTO_TEST_CASE(page_rank_test_gilbert_directed)
 {
     IndexType const NUM_NODES(7);
-    IndexArrayType i = {0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6};
+    VectorIndexType i = {0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6};
 
-    IndexArrayType j = {1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4};
+    VectorIndexType j = {1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4};
     std::vector<double> v(i.size(), 1.0);
     Matrix<double> m1(NUM_NODES, NUM_NODES);
     m1.build(i, j, v);
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(page_rank_test_gilbert_directed)
 BOOST_AUTO_TEST_CASE(page_rank_test_001)
 {
     IndexType NUM_NODES = 12;
-    IndexArrayType i = {
+    VectorIndexType i = {
         0, 0, 0, 0,
         1, 1, 1,
         2, 2, 2,
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(page_rank_test_001)
         10,10,10,10,
         11,11};
 
-    IndexArrayType j = {
+    VectorIndexType j = {
         1, 5, 6, 9,
         0, 2, 4,
         1, 3, 4,
@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE(page_rank_test_001)
 BOOST_AUTO_TEST_CASE(page_rank_test_karate)
 {
     IndexType NUM_NODES = 34;
-    IndexArrayType i = {
+    VectorIndexType i = {
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         1,1,1,1,1,1,1,1,1,
         2,2,2,2,2,2,2,2,2,2,
@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_CASE(page_rank_test_karate)
         32,32,32,32,32,32,32,32,32,32,32,32,
         33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33};
 
-    IndexArrayType j = {
+    VectorIndexType j = {
         1,2,3,4,5,6,7,8,10,11,12,13,19,21,23,31,
         0,2,3,7,13,17,19,21,30,
         0,1,3,7,8,9,13,27,28,32,

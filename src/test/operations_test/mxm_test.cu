@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(mxm)
     //c<-a*b
     graphblas::mxm(a,b,c);
     //extracttuples:
-    IndexArrayType rows(6), cols(6);
+    VectorIndexType rows(6), cols(6);
     std::vector<int> vals(6);
     extracttuples(c, rows, cols, vals);
 

@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(build_matrix_using_iterators)
     graphblas::buildmatrix(stuff, i.begin(), j.begin(), v.begin(), count);
             //AccumT() );
     //extracttuples:
-    IndexArrayType r(5), c(5);
+    VectorIndexType r(5), c(5);
     std::vector<int> vals(5);
     //&c or just c?
     extracttuples(stuff, r.begin(), c.begin(), vals.begin());

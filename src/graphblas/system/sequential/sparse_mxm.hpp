@@ -28,6 +28,7 @@
 #include <iostream>
 #include <chrono>
 
+#include <graphblas/detail/logging.h>
 #include <graphblas/types.hpp>
 #include <graphblas/algebra.hpp>
 
@@ -49,21 +50,26 @@ namespace GraphBLAS
                  typename SemiringT,
                  typename AMatrixT,
                  typename BMatrixT>
-        inline void mxm(CMatrixT &C,
-                        MMatrixT const &M,
-                        AccumT const   &accum,
-                        SemiringT       op,
-                        AMatrixT const &A,
-                        BMatrixT const &B,
-                        bool            replace = false)
+        inline void mxm(CMatrixT            &C,
+                        MMatrixT    const   &M,
+                        AccumT      const   &accum,
+                        SemiringT            op,
+                        AMatrixT    const   &A,
+                        BMatrixT    const   &B,
+                        bool                 replace_flag = false)
         {
-            // @todo: Make errors match the spec
+            // Dimension checkss happenned in front end
+            GRB_LOG_FN_BEGIN("SEQUENTIAL mxm - 4.3.1 - matrix-matrix multiply");
 
-            // ??? Do we need to make defensive copies of everything if we don't
-            // really support NON-BLOCKING?
+            GRB_LOG_VERBOSE("C in :" << C);
+            GRB_LOG_VERBOSE("Mask in : " << M);
+            GRB_LOG_VERBOSE_ACCUM(accum);
+            GRB_LOG_VERBOSE_OP(op);
+            GRB_LOG_VERBOSE("A in :" << A);
+            GRB_LOG_VERBOSE("B in :" << B);
+            GRB_LOG_VERBOSE_REPLACE(replace_flag);
 
-            // @todo: Check shape compatibility.  Should we assume this to be
-            // done by the front end?
+            // @TODO: Do we need domain checks?  Won't templates make that work?
 
             IndexType nrow_A(A.nrows());
             IndexType ncol_B(B.ncols());
@@ -72,8 +78,6 @@ namespace GraphBLAS
             typedef typename AMatrixT::ScalarType AScalarType;
             typedef typename BMatrixT::ScalarType BScalarType;
             typedef typename CMatrixT::ScalarType CScalarType;
-            //typedef std::vector<std::tuple<IndexType,AScalarType> > ARowType;
-            //typedef std::vector<std::tuple<IndexType,BScalarType> > BColType;
             typedef std::vector<std::tuple<IndexType,CScalarType> > CColType;
             typedef std::vector<std::tuple<IndexType,D3ScalarType> > TColType;
 
@@ -114,8 +118,7 @@ namespace GraphBLAS
                 }
             }
 
-            //std::cerr << ">>> T <<< " << std::endl;
-            //std::cerr << T << std::endl;
+            GRB_LOG_VERBOSE("T: " << T);
 
             // =================================================================
             // Accumulate into Z
@@ -123,16 +126,14 @@ namespace GraphBLAS
             LilSparseMatrix<CScalarType> Z(nrow_A, ncol_B);
             ewise_or_opt_accum(Z, C, T, accum);
 
-            //std::cerr << ">>> Z <<< " << std::endl;
-            //std::cerr << Z << std::endl;
+            GRB_LOG_VERBOSE("Z: " << Z);
 
             // =================================================================
             // Copy Z into the final output considering mask and replace
-            write_with_opt_mask(C, Z, M, replace);
+            write_with_opt_mask(C, Z, M, replace_flag);
 
-            //std::cerr << ">>> C <<< " << std::endl;
-            //std::cerr << C << std::endl;
-
+            GRB_LOG_VERBOSE("C (Result): " << C);
+            GRB_LOG_FN_END("SEQUENTIAL mxm - 4.3.1 - matrix-matrix multiply");
         } // mxm
 
 

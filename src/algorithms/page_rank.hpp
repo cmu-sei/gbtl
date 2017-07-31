@@ -91,11 +91,11 @@ namespace algorithms
             add_scaled_teleport((1.0 - damping_factor)/
                                 static_cast<T>(rows));
 
-        GraphBLAS::assign_constant(page_rank,
-                                   GraphBLAS::NoMask(),
-                                   GraphBLAS::NoAccumulate(),
-                                   1.0/static_cast<RealT>(rows),
-                                   GraphBLAS::GrB_ALL);
+        GraphBLAS::assign(page_rank,
+                          GraphBLAS::NoMask(),
+                          GraphBLAS::NoAccumulate(),
+                          1.0 / static_cast<RealT>(rows),
+                          GraphBLAS::AllIndices());
 
 
         GraphBLAS::Vector<RealT> new_rank(rows);
@@ -154,11 +154,11 @@ namespace algorithms
 
         // for any elements missing from page rank vector we need to set
         // to scaled teleport.
-        GraphBLAS::assign_constant(new_rank,
-                                   GraphBLAS::NoMask(),
-                                   GraphBLAS::NoAccumulate(),
-                                   (1.0 - damping_factor)/static_cast<T>(rows),
-                                   GraphBLAS::GrB_ALL);
+        GraphBLAS::assign(new_rank,
+                          GraphBLAS::NoMask(),
+                          GraphBLAS::NoAccumulate(),
+                          (1.0 - damping_factor) / static_cast<T>(rows),
+                          GraphBLAS::AllIndices());
         GraphBLAS::eWiseAdd(page_rank,
                             GraphBLAS::complement(page_rank),
                             GraphBLAS::NoAccumulate(),

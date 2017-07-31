@@ -54,7 +54,7 @@ namespace
 BOOST_AUTO_TEST_CASE(cluster_test_markov)
 {
     IndexType num_nodes = 52;
-    GraphBLAS::IndexArrayType i = {
+    GraphBLAS::VectorIndexType i = {
         0, 0, 0, 0, 0,
         1, 1, 1, 1,
         2, 2, 2, 2,
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(cluster_test_markov)
         10,10,10,10,10,
         11,11,11};
 
-    GraphBLAS::IndexArrayType j = {
+    GraphBLAS::VectorIndexType j = {
         0, 1, 5, 6, 9,
         0, 1, 2, 4,
         1, 2, 3, 4,
@@ -133,9 +133,9 @@ BOOST_AUTO_TEST_CASE(cluster_test_markov)
 BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure1)
 {
     std::cout << "============== Peer Pressure 1 ================" << std::endl;
-    GraphBLAS::IndexArrayType i_m2 = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2,
+    GraphBLAS::VectorIndexType i_m2 = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2,
                                       3, 3, 4, 4};
-    GraphBLAS::IndexArrayType j_m2 = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2,
+    GraphBLAS::VectorIndexType j_m2 = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2,
                                       3, 4, 3, 4};
     std::vector<double>       v_m2 = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                                       1, 1, 1, 1};
@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure1)
 BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure2)
 {
     std::cout << "============== Peer Pressure 2 ================" << std::endl;
-    GraphBLAS::IndexArrayType i_m1 = {0, 0, 0, 0,
+    GraphBLAS::VectorIndexType i_m1 = {0, 0, 0, 0,
                                       1, 1, 1, 1,
                                       2, 2, 2, 2,
                                       3, 3, 3, 3,
@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure2)
                                       5, 5, 5, 5, 5,
                                       6, 6, 6,
                                       7, 7, 7, 7};
-    GraphBLAS::IndexArrayType j_m1 = {0, 2, 3, 6,
+    GraphBLAS::VectorIndexType j_m1 = {0, 2, 3, 6,
                                       1, 2, 3, 7,
                                       0, 2, 4, 6,
                                       0, 1, 3, 5,
@@ -213,7 +213,7 @@ BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure_karate)
 {
     IndexType num_nodes = 34;
 
-GraphBLAS::IndexArrayType i = {
+GraphBLAS::VectorIndexType i = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     1,1,1,1,1,1,1,1,1,
     2,2,2,2,2,2,2,2,2,2,
@@ -249,7 +249,7 @@ GraphBLAS::IndexArrayType i = {
     32,32,32,32,32,32,32,32,32,32,32,32,
     33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33};
 
-GraphBLAS::IndexArrayType j = {
+GraphBLAS::VectorIndexType j = {
     1,2,3,4,5,6,7,8,10,11,12,13,17,19,21,31,     //1,2,3,4,5,6,7,8,10,11,12,13,19,21,23,31,
     0,2,3,7,13,17,19,21,30,
     0,1,3,7,8,9,13,27,28,32,

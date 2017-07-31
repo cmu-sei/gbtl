@@ -33,9 +33,9 @@ BOOST_AUTO_TEST_CASE(mis_test)
     typedef GraphBLAS::Vector<double> GBVector;
 
     GraphBLAS::IndexType const NUM_NODES(7);
-    GraphBLAS::IndexArrayType i = {0, 0, 1, 1, 2, 2, 3, 3, 3,
+    GraphBLAS::VectorIndexType i = {0, 0, 1, 1, 2, 2, 3, 3, 3,
                                    4, 4, 5, 5, 5, 6, 6};
-    GraphBLAS::IndexArrayType j = {1, 2, 0, 3, 0, 5, 1, 4, 6,
+    GraphBLAS::VectorIndexType j = {1, 2, 0, 3, 0, 5, 1, 4, 6,
                                    3, 5, 2, 4, 6, 3, 5};
     std::vector<double> v(i.size(), 1);
     GBMatrix graph(NUM_NODES, NUM_NODES);
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(mis_test)
         //GraphBLAS::print_vector(std::cout, independent_set,
         //                        "independent_set (flags)");
 
-        //GraphBLAS::IndexArrayType result(
+        //GraphBLAS::VectorIndexType result(
         //    algorithms::get_vertex_IDs(independent_set));
         //std::cout << "Seed=" << seed << ": ";
         //for (auto it = result.begin(); it != result.end(); ++it)
@@ -111,9 +111,9 @@ BOOST_AUTO_TEST_CASE(mis_test_isolated_vertex)
     typedef GraphBLAS::Matrix<T, GraphBLAS::DirectedMatrixTag> GBMatrix;
 
     GraphBLAS::IndexType const NUM_NODES = 9;
-    GraphBLAS::IndexArrayType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
+    GraphBLAS::VectorIndexType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
                                    4, 4, 4, 5, 6, 6, 6, 8, 8};
-    GraphBLAS::IndexArrayType j = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
+    GraphBLAS::VectorIndexType j = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
                                    2, 3, 8, 2, 1, 2, 3, 2, 4};
     std::vector<T> v(i.size(), 1);
 
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(mis_test_isolated_vertex)
         GraphBLAS::Vector<bool> independent_set(NUM_NODES);
         algorithms::mis(G_tn, independent_set, float(seed));
 
-        //GraphBLAS::IndexArrayType result(
+        //GraphBLAS::VectorIndexType result(
         //    algorithms::get_vertex_IDs(independent_set));
         //std::cout << "Seed=" << seed << ": ";
         //for (auto it = result.begin(); it != result.end(); ++it)

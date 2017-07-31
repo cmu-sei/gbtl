@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE(extracttuples_arrayTypes)
     graphblas::IndexType count = 5;
     graphblas::buildmatrix(stuff, i.begin(), j.begin(), v.begin(), count );
     //extracttuples:
-    IndexArrayType r(5), c(5);
+    VectorIndexType r(5), c(5);
     std::vector<int> vals(5);
     //&c or just c?
     graphblas::extracttuples(stuff, r, c, vals);
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(extracttuples_iterators)
     graphblas::IndexType count = 5;
     graphblas::buildmatrix(stuff, i.begin(), j.begin(), v.begin(), count );
     //extracttuples:
-    IndexArrayType r(5), c(5);
+    VectorIndexType r(5), c(5);
     std::vector<int> vals(5);
     //&c or just c?
     graphblas::extracttuples(stuff, r.begin(), c.begin(), vals.begin());

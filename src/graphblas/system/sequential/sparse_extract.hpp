@@ -25,13 +25,15 @@
 #include <vector>
 #include <iterator>
 #include <iostream>
+
+#include "graphblas/detail/logging.h"
 #include <graphblas/types.hpp>
 #include <graphblas/exceptions.hpp>
 #include <graphblas/algebra.hpp>
 
+#include "iterator_support.hpp"
 #include "sparse_helpers.hpp"
 #include "LilSparseMatrix.hpp"
-
 
 //******************************************************************************
 
@@ -85,11 +87,13 @@ namespace GraphBLAS
          * @param vec_src The input vector.
          * @param indices The indices to extract.
          */
-        template < typename CScalarT, typename AScalarT>
+        template < typename CScalarT,
+                   typename AScalarT,
+                   typename SequenceT>
         void vectorExtract(
             std::vector< std::tuple<IndexType, CScalarT> >  &vec_dest,
             std::vector< std::tuple<IndexType, AScalarT> > const &vec_src,
-            IndexArrayType const & indices)
+            SequenceT const & indices)
         {
             // This is expensive but the indices can be duplicates and
             // out of order.
@@ -203,76 +207,23 @@ namespace GraphBLAS
          * @param col_indices A set of indices indicating which columns to extract.
          */
         template<typename CMatrixT,
-                 typename AMatrixT>
+                 typename AMatrixT,
+                 typename RowSequenceT,
+                 typename ColSequenceT>
         void matrixExtract(CMatrixT                           &C,
                            AMatrixT                   const   &A,
-                           IndexArrayType             const   &row_indices,
-                           IndexArrayType             const   &col_indices)
+                           RowSequenceT               const   &row_indices,
+                           ColSequenceT               const   &col_indices)
         {
             // NOTE!! - Backend code. We expect that all dimension checks done elsewhere.
 
-            if (&row_indices == &GrB_ALL && &col_indices == &GrB_ALL)
-            {
-                matrixExtract(C, A,
-                              index_iterator(0), index_iterator(A.nrows()),
-                              index_iterator(0), index_iterator(A.ncols()));
-            }
-            else if (&row_indices == &GrB_ALL)
-            {
-                matrixExtract(C, A,
-                              index_iterator(0), index_iterator(A.nrows()),
-                              col_indices.begin(), col_indices.end());
-            }
-            else if (&col_indices == &GrB_ALL)
-            {
-                matrixExtract(C, A,
-                              row_indices.begin(), row_indices.end(),
-                              index_iterator(0), index_iterator(A.ncols()));
-            }
-            else
-            {
-                matrixExtract(C, A,
-                              row_indices.begin(), row_indices.end(),
-                              col_indices.begin(), col_indices.end());
-            }
-        }
-#if 0
-        /// deprecated
-        template<typename CScalarT,
-                 typename AScalarT>
-        void matrixExtract(LilSparseMatrix<CScalarT>          &C,
-                           LilSparseMatrix<AScalarT>  const   &A,
-                           IndexArrayType             const   &row_indices,
-                           IndexArrayType             const   &col_indices)
-        {
-            // NOTE!! - Backend code. We expect that all dimension checks done elsewhere.
+            matrixExtract(C, A,
+                          row_indices.begin(), row_indices.end(),
+                          col_indices.begin(), col_indices.end());
 
-            if (&row_indices == &GrB_ALL && &col_indices == &GrB_ALL)
-            {
-                matrixExtract(C, A,
-                              index_iterator(0), index_iterator(A.nrows()),
-                              index_iterator(0), index_iterator(A.ncols()));
-            }
-            else if (&row_indices == &GrB_ALL)
-            {
-                matrixExtract(C, A,
-                              index_iterator(0), index_iterator(A.nrows()),
-                              col_indices.begin(), col_indices.end());
-            }
-            else if (&col_indices == &GrB_ALL)
-            {
-                matrixExtract(C, A,
-                              row_indices.begin(), row_indices.end(),
-                              index_iterator(0), index_iterator(A.ncols()));
-            }
-            else
-            {
-                matrixExtract(C, A,
-                              row_indices.begin(), row_indices.end(),
-                              col_indices.begin(), col_indices.end());
-            }
+
         }
-#endif
+
         //********************************************************************
         template < typename WScalarT, typename AScalarT, typename IteratorT>
         void extractColumn(
@@ -365,7 +316,7 @@ namespace GraphBLAS
         void extractColumn(
             std::vector< std::tuple<IndexType, WScalarT> >        &vec_dest,
             backend::TransposeView<AMatrixT>                const &Atrans,
-            IndexArrayType                                  const &row_indices,
+            IndexSequence                                  const &row_indices,
             IndexType                                              col_index)
         {
             // Walk the row, extracting the cell if it exists and is in row_indices
@@ -410,14 +361,24 @@ namespace GraphBLAS
         template<typename WVectorT,
                  typename MVectorT,
                  typename AccumT,
-                 typename UVectorT >
-        void extract(WVectorT                   &w,
-                     MVectorT           const   &mask,
-                     AccumT                      accum,
-                     UVectorT           const   &u,
-                     IndexArrayType     const   &indices,
-                     bool                        replace = false)
+                 typename UVectorT,
+                 typename SequenceT>
+        void extract(WVectorT                 &w,
+                     MVectorT           const &mask,
+                     AccumT                    accum,
+                     UVectorT           const &u,
+                     SequenceT          const &indices,
+                     bool                      replace_flag = false)
         {
+            GRB_LOG_FN_BEGIN("SEQUENTIAL extract - 4.3.6.1 - standard vector variant");
+
+            GRB_LOG_VERBOSE("w:    " << w);
+            GRB_LOG_VERBOSE("mask: " << mask);
+            GRB_LOG_VERBOSE("u:    " << u);
+            GRB_LOG_VERBOSE_ACCUM(accum);
+            GRB_LOG_VERBOSE("Indices: " << indices);
+            GRB_LOG_VERBOSE_REPLACE(replace_flag);
+
             // Add in dimensional checks
             if (indices.size() != w.size())
             {
@@ -441,14 +402,21 @@ namespace GraphBLAS
             auto u_contents(u.getContents());
             vectorExtract(t, u_contents, indices);
 
+            GRB_LOG_VERBOSE("T: " << t);
+
             // =================================================================
             // Accumulate into Z
             std::vector<std::tuple<IndexType, WScalarType> > z;
             ewise_or_opt_accum_1D(z, w, t, accum);
 
+            GRB_LOG_VERBOSE("Z: " << z);
+
             // =================================================================
             // Copy Z into the final output considering mask and replace
-            write_with_opt_mask_1D(w, z, mask, replace);
+            write_with_opt_mask_1D(w, z, mask, replace_flag);
+
+            GRB_LOG_VERBOSE("W (Result): " << w);
+            GRB_LOG_FN_END("SEQUENTIAL extract - 4.3.6.1 - standard vector variant");
         };
 
         //**********************************************************************
@@ -461,15 +429,27 @@ namespace GraphBLAS
         template<typename CMatrixT,
                  typename MMatrixT,
                  typename AccumT,
-                 typename AMatrixT >
+                 typename AMatrixT,
+                 typename RowSequenceT,
+                 typename ColSequenceT>
         void extract(CMatrixT                   &C,
                      MMatrixT           const   &Mask,
                      AccumT                      accum,
                      AMatrixT           const   &A,
-                     IndexArrayType     const   &row_indices,
-                     IndexArrayType     const   &col_indices,
-                     bool                        replace = false)
+                     RowSequenceT       const   &row_indices,
+                     ColSequenceT       const   &col_indices,
+                     bool                        replace_flag = false)
         {
+            GRB_LOG_FN_BEGIN("SEQUENTIAL extract - 4.3.6.2 - standard matrix variant");
+
+            GRB_LOG_VERBOSE("C: " << C);
+            GRB_LOG_VERBOSE("Mask: " << Mask);
+            GRB_LOG_VERBOSE_ACCUM(accum);
+            GRB_LOG_VERBOSE("A: " << A);
+            GRB_LOG_VERBOSE("row_Indices: " << row_indices);
+            GRB_LOG_VERBOSE("col_Indices: " << col_indices);
+            GRB_LOG_VERBOSE_REPLACE(replace_flag);
+
             // Validate inputs
             check_matrix_size(C, Mask, "extract(matrix) Mask dimension check");
 
@@ -495,19 +475,15 @@ namespace GraphBLAS
             typedef typename CMatrixT::ScalarType CScalarType;
             typedef std::vector<std::tuple<IndexType,CScalarType> > CColType;
 
-            //std::cerr << ">>> C in <<< " << std::endl;
-            //std::cerr << C << std::endl;
-
-            //std::cerr << ">>> Mask <<< " << std::endl;
-            //std::cerr << Mask << std::endl;
 
             // =================================================================
             // Extract to T
             LilSparseMatrix<CScalarType> T(C.nrows(), C.ncols());
-            matrixExtract(T, A, row_indices, col_indices);
+            matrixExtract(T, A,
+                          setupIndices(row_indices, A.nrows()),
+                          setupIndices(col_indices, A.ncols()));
 
-            //std::cerr << ">>> T <<< " << std::endl;
-            //std::cerr << T << std::endl;
+            GRB_LOG_VERBOSE("T: " << T);
 
             // =================================================================
             // Accumulate into Z
@@ -515,15 +491,14 @@ namespace GraphBLAS
             LilSparseMatrix<CScalarType> Z(C.nrows(), C.ncols());
             ewise_or_opt_accum(Z, C, T, accum);
 
-            //std::cerr << ">>> Z <<< " << std::endl;
-            //std::cerr << Z << std::endl;
+            GRB_LOG_VERBOSE("Z: " << Z);
 
             // =================================================================
             // Copy Z into the final output considering mask and replace
-            write_with_opt_mask(C, Z, Mask, replace);
+            write_with_opt_mask(C, Z, Mask, replace_flag);
 
-            //std::cerr << ">>> C <<< " << std::endl;
-            //std::cerr << C << std::endl;
+            GRB_LOG_VERBOSE("C (Result): " << C);
+            GRB_LOG_FN_END("SEQUENTIAL extract - 4.3.6.2 - standard matrix variant");
         };
 
 
@@ -539,15 +514,26 @@ namespace GraphBLAS
         template<typename WVectorT,
                  typename MaskT,
                  typename AccumT,
-                 typename AMatrixT>
-        void extract(WVectorT                  &w,
-                     MaskT              const  &mask,
-                     AccumT                     accum,
-                     AMatrixT           const  &A,
-                     IndexArrayType     const  &row_indices,
-                     IndexType                  col_index,
-                     bool                       replace_flag = false)
+                 typename AMatrixT,
+                 typename SequenceT>
+        void extract(WVectorT                 &w,
+                     MaskT              const &mask,
+                     AccumT                    accum,
+                     AMatrixT           const &A,
+                     SequenceT          const &row_indices,
+                     IndexType                 col_index,
+                     bool                      replace_flag = false)
         {
+            GRB_LOG_FN_BEGIN("SEQUENTIAL extract - 4.3.6.3 - column (and row) variant");
+
+            GRB_LOG_VERBOSE("w:    " << w);
+            GRB_LOG_VERBOSE("mask: " << mask);
+            GRB_LOG_VERBOSE_ACCUM(accum);
+            GRB_LOG_VERBOSE("A:    " << A);
+            GRB_LOG_VERBOSE("row_Indices: " << row_indices);
+            GRB_LOG_VERBOSE("col_index:    " << col_index);
+            GRB_LOG_VERBOSE_REPLACE(replace_flag);
+
             // @TODO: Validate inputs
 
             // Should explicitly define the vector type, or just piggy
@@ -560,33 +546,24 @@ namespace GraphBLAS
             // Extract to T
             WVectorType t;
 
-            if (&row_indices == &GrB_ALL)
-            {
-                //std::cout << "!!!!==== GrB_ALL - Extract!!" << std::endl;
-                extractColumn(t, A, index_iterator(0),
-                              index_iterator(A.nrows()), col_index);
-            }
-            else
-            {
-                extractColumn(t, A, row_indices.begin(), row_indices.end(), col_index);
-            }
-            //std::cerr << ">>> t <<< " << std::endl;
-            //pretty_print(std::cerr, t);
+            auto seq = setupIndices(row_indices, w.size());
+            extractColumn(t, A, seq.begin(), seq.end(), col_index);
+
+            GRB_LOG_VERBOSE("t: " << t);
 
             // =================================================================
             // Accumulate into Z
             std::vector<std::tuple<IndexType, WScalarType> > z;
             ewise_or_opt_accum_1D(z, w, t, accum);
 
-            //std::cerr << ">>> z <<< " << std::endl;
-            //pretty_print(std::cerr, z);
+            GRB_LOG_VERBOSE("z: " << z);
 
             // =================================================================
             // Copy Z into the final output considering mask and replace
             write_with_opt_mask_1D(w, z, mask, replace_flag);
 
-            //std::cerr << ">>> w <<< " << std::endl;
-            //std::cerr << w << std::endl;
+            GRB_LOG_VERBOSE("w (Result): " << w);
+            GRB_LOG_FN_END("SEQUENTIAL extract - 4.3.6.3 - column (and row) variant");
         }
     }
 }

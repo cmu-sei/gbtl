@@ -71,9 +71,9 @@ int main()
     unsigned int const INF(std::numeric_limits<unsigned int>::max());
 
     graphblas::IndexType const NUM_NODES(9);
-    graphblas::IndexArrayType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
+    graphblas::VectorIndexType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
                                    4, 4, 4, 5, 6, 6, 6, 8, 8};
-    graphblas::IndexArrayType j = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
+    graphblas::VectorIndexType j = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
                                    2, 3, 8, 2, 1, 2, 3, 2, 4};
     std::vector<unsigned int> v(i.size(), 1);
     Matrix<unsigned int, DirectedMatrixTag> G_tn(NUM_NODES, NUM_NODES, i.size());

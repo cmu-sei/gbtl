@@ -377,7 +377,7 @@ namespace GraphBLAS
                 }
             }
 
-            void extractTuples(IndexArrayType        &indices,
+            void extractTuples(VectorIndexType        &indices,
                                std::vector<ScalarT>  &values) const
             {
                 extractTuples(indices.begin(), values.begin());
@@ -386,16 +386,17 @@ namespace GraphBLAS
             // output specific to the storage layout of this type of matrix
             void printInfo(std::ostream &os) const
             {
-                os << "BitmapSparseVector<" << typeid(ScalarT).name() << ">" << std::endl;
-                os << "size  = " << m_size << std::endl;
-                os << "nvals = " << m_nvals << std::endl;
-                os << "contents: [";
+                //os << "BitmapSparseVector<" << typeid(ScalarT).name() << ">" << std::endl;
+                //os << "size  = " << m_size;
+                //os << ", nvals = " << m_nvals << std::endl;
+                //os << "contents: [";
+                os << "[";
                 if (m_bitmap[0]) os << m_vals[0]; else os << "-";
                 for (IndexType idx = 1; idx < m_size; ++idx)
                 {
                     if (m_bitmap[idx]) os << ", " << m_vals[idx]; else os << ", -";
                 }
-                os << "]" << std::endl;
+                os << "]";
             }
 
             friend std::ostream &operator<<(std::ostream             &os,

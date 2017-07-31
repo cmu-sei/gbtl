@@ -95,11 +95,14 @@ namespace GraphBLAS
             m_mat.extractTuples(row_it, col_it, values);
         }
 
+        // @TODO: Should these be const referneces to the sequence
         template<typename ValueT,
-                 typename AMatrixT>
-        inline void extractTuples(IndexArrayType            &row_indices,
-                                  IndexArrayType            &col_indices,
-                                  std::vector<ValueT>       &values)
+                 typename AMatrixT,
+                 typename RowSequenceT,
+                 typename ColSequenceT>
+        inline void extractTuples(RowSequenceT            &row_indices,
+                                  ColSequenceT            &col_indices,
+                                  std::vector<ValueT>     &values)
         {
             m_mat.extractTuples(row_indices, col_indices, values);
         }
@@ -205,29 +208,69 @@ namespace GraphBLAS
 
 
         //--------------------------------------------------------------------
-        template<typename CMatrixT,
-                 typename MMatrixT,
-                 typename AccumT,
-                 typename AMatrixT >
-        friend inline void extract(CMatrixT &C,
-                                   MMatrixT const &mask,
-                                   AccumT accum,
-                                   AMatrixT const &A,
-                                   IndexArrayType const &row_indicies,
-                                   IndexArrayType const &col_indicies,
-                                   bool replace);
+        // 4.3.6.2
+//        template<typename CMatrixT,
+//                typename MaskT,
+//                typename AccumT,
+//                typename AMatrixT,
+//                typename RowSequenceT,
+//                typename ColSequenceT>
+//        friend inline void extract(CMatrixT             &C,
+//                                   MaskT          const &Mask,
+//                                   AccumT                accum,
+//                                   AMatrixT       const &A,
+//                                   RowSequenceT      const   &row_indices,
+//                                   ColSequenceT      const   &col_indices,
+//                                   bool                  replace_flag);
 
-        template<typename WVectorT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename AMatrixT>
-        friend inline void extract(WVectorT             &w,
-                                   MaskT          const &mask,
-                                   AccumT                accum,
-                                   AMatrixT       const &A,
-                                   IndexArrayType const &row_indices,
-                                   IndexType             col_index,
-                                   bool                  replace_flag);
+        template<
+                typename CScalarT,
+                typename MaskT,
+                typename AccumT,
+                typename AMatrixT,
+                typename RowSequenceT,
+                typename ColSequenceT,
+                typename ...CTags
+        >
+        friend inline void extract(
+                GraphBLAS::Matrix<CScalarT, CTags...>   &C,
+                MaskT          const &Mask,
+                AccumT                accum,
+                AMatrixT       const &A,
+                RowSequenceT      const   &row_indices,
+                ColSequenceT      const   &col_indices,
+                bool                  replace_flag);
+
+        // 4.3.6.3
+//        template<typename WVectorT,
+//                typename MaskT,
+//                typename AccumT,
+//                typename AMatrixT,
+//                typename SequenceT>
+//        friend inline void extract(WVectorT             &w,
+//                                   MaskT          const &mask,
+//                                   AccumT                accum,
+//                                   AMatrixT       const &A,
+//                                   SequenceT      const &row_indices,
+//                                   IndexType             col_index,
+//                                   bool                  replace_flag);
+
+        template<
+                typename WScalarT,
+                typename MaskT,
+                typename AccumT,
+                typename AMatrixT,
+                typename SequenceT,
+                typename ...WTags
+        >
+        friend inline void extract(
+                GraphBLAS::Vector<WScalarT, WTags...> &w,
+                MaskT          const &mask,
+                AccumT                accum,
+                AMatrixT       const &A,
+                SequenceT      const &row_indices,
+                IndexType             col_index,
+                bool                  replace_flag);
 
 
         //--------------------------------------------------------------------

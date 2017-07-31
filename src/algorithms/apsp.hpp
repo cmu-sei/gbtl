@@ -54,9 +54,9 @@ namespace algorithms
                             GraphBLAS::Plus<T>(),
                             Distances,
                             graph);
-        GraphBLAS::Matrix<T> row_k(1, num_vertices);
         GraphBLAS::Matrix<T> col_k(num_vertices, 1);
-        GraphBLAS::IndexArrayType row_indices(1);
+        GraphBLAS::VectorIndexType row_indices(1);
+        GraphBLAS::Matrix<T> row_k(1, num_vertices);
 
         for (GraphBLAS::IndexType k = 0; k < num_vertices; ++k)
         {
@@ -65,13 +65,13 @@ namespace algorithms
                                GraphBLAS::NoMask(),
                                GraphBLAS::NoAccumulate(),
                                Distances,
-                               row_indices, GraphBLAS::GrB_ALL);
+                               row_indices, GraphBLAS::AllIndices());
 
             GraphBLAS::extract(col_k,
                                GraphBLAS::NoMask(),
                                GraphBLAS::NoAccumulate(),
                                Distances,
-                               GraphBLAS::GrB_ALL, row_indices);
+                               GraphBLAS::AllIndices(), row_indices);
 
             GraphBLAS::mxm(Distances,
                            GraphBLAS::NoMask(),

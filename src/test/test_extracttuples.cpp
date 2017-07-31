@@ -27,14 +27,14 @@ BOOST_AUTO_TEST_SUITE(extracttuples_suite)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(extracttuples_test_simple)
 {
-    IndexArrayType rows    = {0, 0, 0, 1, 1, 1, 2, 2};
-    IndexArrayType columns = {1, 2, 3, 0, 2, 3, 0, 1};
+    VectorIndexType rows    = {0, 0, 0, 1, 1, 1, 2, 2};
+    VectorIndexType columns = {1, 2, 3, 0, 2, 3, 0, 1};
     std::vector<double> values        = {1, 2, 3, 4, 6, 7, 8, 9};
     Matrix<double, DirectedMatrixTag> m1(3, 4);
     m1.build(rows, columns, values);
 
     IndexType nnz = m1.nvals();
-    IndexArrayType r(nnz), c(nnz);
+    VectorIndexType r(nnz), c(nnz);
     std::vector<double> v(nnz);
 
     m1.extractTuples(r, c, v);

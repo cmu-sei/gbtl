@@ -18,7 +18,7 @@
 #include <algorithms/bfs.hpp>
 
 GraphBLAS::IndexType const num_nodes = 34;
-GraphBLAS::IndexArrayType i = {
+GraphBLAS::VectorIndexType i = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     1,1,1,1,1,1,1,1,1,
     2,2,2,2,2,2,2,2,2,2,
@@ -54,7 +54,7 @@ GraphBLAS::IndexArrayType i = {
     32,32,32,32,32,32,32,32,32,32,32,32,
     33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33};
 
-GraphBLAS::IndexArrayType j = {
+GraphBLAS::VectorIndexType j = {
     1,2,3,4,5,6,7,8,10,11,12,13,19,21,23,31,
     0,2,3,7,13,17,19,21,30,
     0,1,3,7,8,9,13,27,28,32,

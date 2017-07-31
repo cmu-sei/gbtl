@@ -33,8 +33,7 @@
 #include "sparse_helpers.hpp"
 #include "LilSparseMatrix.hpp"
 
-#define GRAPHBLAS_DEBUG 0
-#include "debug.h"
+#include "graphblas/detail/logging.h"
 
 //****************************************************************************
 
@@ -164,8 +163,8 @@ namespace GraphBLAS
                 }
             }
 
-            GRB_LOG_E(">>> T <<<");
-            GRB_LOG_E(T);
+//            GRB_LOG_E(">>> T <<<");
+//            GRB_LOG_E(T);
 
             // =================================================================
             // Accumulate into Z
@@ -173,15 +172,15 @@ namespace GraphBLAS
             LilSparseMatrix<CScalarT> Z(num_rows, num_cols);
             ewise_or_opt_accum(Z, C, T, accum);
 
-            GRB_LOG_E(">>> Z <<< ");
-            GRB_LOG_E(Z);
+//            GRB_LOG_E(">>> Z <<< ");
+//            GRB_LOG_E(Z);
 
             // =================================================================
             // Copy Z into the final output considering mask and replace
             write_with_opt_mask(C, Z, Mask, replace_flag);
 
-            GRB_LOG_E(">>> C <<< ");
-            GRB_LOG_E(C);
+//            GRB_LOG_E(">>> C <<< ");
+//            GRB_LOG_E(C);
 
         } // ewisemult
 

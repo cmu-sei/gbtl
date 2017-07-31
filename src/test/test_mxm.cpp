@@ -13,6 +13,8 @@
  * permission@sei.cmu.edu for more information.  DM-0002659
  */
 
+#define GRAPHBLAS_LOGGING_LEVEL 2
+
 #include <graphblas/graphblas.hpp>
 
 using namespace GraphBLAS;
@@ -43,22 +45,22 @@ BOOST_AUTO_TEST_SUITE(mxm_suite)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(mxm_bad_dimensions)
 {
-    IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    VectorIndexType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    VectorIndexType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_mA = {12, 7, 3, 4, 5, 6, 7, 8, 9};
     Matrix<double, DirectedMatrixTag> mA(3, 3);
     mA.build(i_mA, j_mA, v_mA);
 
-    IndexArrayType i_mB    = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2};
-    IndexArrayType j_mB    = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2, 3};
+    VectorIndexType i_mB    = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2};
+    VectorIndexType j_mB    = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2, 3};
     std::vector<double> v_mB = {5, 8, 1, 2, 6, 7, 3, 4, 5, 9, 1};
     Matrix<double, DirectedMatrixTag> mB(3, 4);
     mB.build(i_mB, j_mB, v_mB);
 
     Matrix<double, DirectedMatrixTag> result(3, 4);
 
-    IndexArrayType i_answer = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
-    IndexArrayType j_answer = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
+    VectorIndexType i_answer = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
+    VectorIndexType j_answer = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
     std::vector<double> v_answer = {114, 160, 60, 27, 74, 97,
                                     73, 14, 119, 157, 112, 23};
     Matrix<double, DirectedMatrixTag> answer(3, 4);
@@ -75,22 +77,22 @@ BOOST_AUTO_TEST_CASE(mxm_bad_dimensions)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(mxm_reg)
 {
-    IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    VectorIndexType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    VectorIndexType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_mA = {12, 7, 3, 4, 5, 6, 7, 8, 9};
     Matrix<double, DirectedMatrixTag> mA(3, 3);
     mA.build(i_mA, j_mA, v_mA);
 
-    IndexArrayType i_mB    = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2};
-    IndexArrayType j_mB    = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2, 3};
+    VectorIndexType i_mB    = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2};
+    VectorIndexType j_mB    = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2, 3};
     std::vector<double> v_mB = {5, 8, 1, 2, 6, 7, 3, 4, 5, 9, 1};
     Matrix<double, DirectedMatrixTag> mB(3, 4);
     mB.build(i_mB, j_mB, v_mB);
 
     Matrix<double, DirectedMatrixTag> result(3, 4);
 
-    IndexArrayType i_answer = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
-    IndexArrayType j_answer = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
+    VectorIndexType i_answer = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
+    VectorIndexType j_answer = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
     std::vector<double> v_answer = {114, 160, 60, 27, 74, 97,
                                     73, 14, 119, 157, 112, 23};
     Matrix<double, DirectedMatrixTag> answer(3, 4);
@@ -108,17 +110,17 @@ BOOST_AUTO_TEST_CASE(mxm_reg)
 BOOST_AUTO_TEST_CASE(mxm_accum)
 {
     // Build some matrices.
-    IndexArrayType i = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    IndexArrayType j = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    VectorIndexType i = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    VectorIndexType j = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double>       v = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
     Matrix<double, DirectedMatrixTag> mat(4, 4);
     mat.build(i, j, v);
 
     Matrix<double, DirectedMatrixTag> m3(4, 4);
 
-    IndexArrayType i_answer = {0, 0, 0,  1, 1, 1, 1,
+    VectorIndexType i_answer = {0, 0, 0,  1, 1, 1, 1,
                                           2, 2, 2, 2,  3, 3, 3};
-    IndexArrayType j_answer = {0, 1, 2,  0, 1, 2, 3,
+    VectorIndexType j_answer = {0, 1, 2,  0, 1, 2, 3,
                                           0, 1, 2, 3,  1, 2, 3};
     std::vector<double> v_answer = {2, 3, 2,  3, 9, 10, 6,
                                     2, 10, 22, 21,  6, 21, 25};
@@ -136,22 +138,22 @@ BOOST_AUTO_TEST_CASE(mxm_accum)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_masked)
 {
-    IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    VectorIndexType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    VectorIndexType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_mA = {12, 7, 3, 4, 5, 6, 7, 8, 9};
     Matrix<double, DirectedMatrixTag> mA(3, 3);
     mA.build(i_mA, j_mA, v_mA);
 
-    IndexArrayType i_mB    = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2};
-    IndexArrayType j_mB    = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2, 3};
+    VectorIndexType i_mB    = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2};
+    VectorIndexType j_mB    = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2, 3};
     std::vector<double> v_mB = {5, 8, 1, 2, 6, 7, 3, 4, 5, 9, 1};
     Matrix<double, DirectedMatrixTag> mB(3, 4);
     mB.build(i_mB, j_mB, v_mB);
 
     Matrix<double, DirectedMatrixTag> result(3, 4);
 
-    IndexArrayType i_answer = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
-    IndexArrayType j_answer = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
+    VectorIndexType i_answer = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
+    VectorIndexType j_answer = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
     std::vector<double> v_answer = {114, 160, 60, 27, 74, 97,
                                     73, 14, 119, 157, 112, 23};
     Matrix<double, DirectedMatrixTag> answer(3, 4);
@@ -173,22 +175,22 @@ BOOST_AUTO_TEST_CASE(test_mxm_masked)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_not_all_one_masked)
 {
-    IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    VectorIndexType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    VectorIndexType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_mA = {12, 7, 3, 4, 5, 6, 7, 8, 9};
     Matrix<double, DirectedMatrixTag> mA(3, 3);
     mA.build(i_mA, j_mA, v_mA);
 
-    IndexArrayType i_mB    = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2};
-    IndexArrayType j_mB    = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2, 3};
+    VectorIndexType i_mB    = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2};
+    VectorIndexType j_mB    = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2, 3};
     std::vector<double> v_mB = {5, 8, 1, 2, 6, 7, 3, 4, 5, 9, 1};
     Matrix<double, DirectedMatrixTag> mB(3, 4);
     mB.build(i_mB, j_mB, v_mB);
 
     Matrix<double, DirectedMatrixTag> result(3, 4);
 
-    IndexArrayType i_answer = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2};
-    IndexArrayType j_answer = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2};
+    VectorIndexType i_answer = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2};
+    VectorIndexType j_answer = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2};
     std::vector<double> v_answer = {114, 160, 60, 27, 74, 97,
                                     73, 14, 119, 157, 112};
     Matrix<double, DirectedMatrixTag> answer(3, 4);
@@ -210,22 +212,22 @@ BOOST_AUTO_TEST_CASE(test_mxm_not_all_one_masked)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_a_transpose)
 {
-    IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    VectorIndexType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    VectorIndexType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_mA = {12, 7, 3, 4, 5, 6, 7, 8, 9};
     Matrix<double, DirectedMatrixTag> mA(3, 3);
     mA.build(i_mA, j_mA, v_mA);
 
-    IndexArrayType i_mB    = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2};
-    IndexArrayType j_mB    = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2, 3};
+    VectorIndexType i_mB    = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2};
+    VectorIndexType j_mB    = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2, 3};
     std::vector<double> v_mB = {5, 8, 1, 2, 6, 7, 3, 4, 5, 9, 1};
     Matrix<double, DirectedMatrixTag> mB(3, 4);
     mB.build(i_mB, j_mB, v_mB);
 
     Matrix<double, DirectedMatrixTag> result(3, 4);
 
-    IndexArrayType i_answer = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
-    IndexArrayType j_answer = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
+    VectorIndexType i_answer = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
+    VectorIndexType j_answer = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
     std::vector<double> v_answer = {112, 159, 87, 31, 97, 131,
                                     94, 22, 87, 111, 102, 15};
     Matrix<double, DirectedMatrixTag> answer(3, 4);
@@ -242,22 +244,22 @@ BOOST_AUTO_TEST_CASE(test_a_transpose)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_b_transpose)
 {
-    IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    VectorIndexType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    VectorIndexType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_mA = {12, 7, 3, 4, 5, 6, 7, 8, 9};
     Matrix<double, DirectedMatrixTag> mA(3, 3);
     mA.build(i_mA, j_mA, v_mA);
 
-    IndexArrayType i_mB    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    IndexArrayType j_mB    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    VectorIndexType i_mB    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    VectorIndexType j_mB    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_mB = {5, 8, 1, 2, 6, 7, 3, 4, 5};
     Matrix<double, DirectedMatrixTag> mB(3, 3);
     mB.build(i_mB, j_mB, v_mB);
 
     Matrix<double, DirectedMatrixTag> result(3, 3);
 
-    IndexArrayType i_answer = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    VectorIndexType i_answer = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    VectorIndexType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_answer = {119, 87, 79, 66, 80, 62, 108, 125, 98};
     Matrix<double, DirectedMatrixTag> answer(3, 3);
     answer.build(i_answer, j_answer, v_answer);
@@ -273,22 +275,22 @@ BOOST_AUTO_TEST_CASE(test_b_transpose)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_a_and_b_transpose)
 {
-    IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    VectorIndexType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    VectorIndexType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_mA = {12, 7, 3, 4, 5, 6, 7, 8, 9};
     Matrix<double, DirectedMatrixTag> mA(3, 3);
     mA.build(i_mA, j_mA, v_mA);
 
-    IndexArrayType i_mB    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    IndexArrayType j_mB    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    VectorIndexType i_mB    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    VectorIndexType j_mB    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_mB = {5, 8, 1, 2, 6, 7, 3, 4, 5};
     Matrix<double, DirectedMatrixTag> mB(3, 3);
     mB.build(i_mB, j_mB, v_mB);
 
     Matrix<double, DirectedMatrixTag> result(3, 3);
 
-    IndexArrayType i_answer = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    VectorIndexType i_answer = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    VectorIndexType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_answer = {99, 97, 87, 83, 100, 81, 72, 105, 78};
     Matrix<double, DirectedMatrixTag> answer(3, 3);
     answer.build(i_answer, j_answer, v_answer);
@@ -304,22 +306,22 @@ BOOST_AUTO_TEST_CASE(test_a_and_b_transpose)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_a_equals_c_transpose)
 {
-    IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    VectorIndexType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    VectorIndexType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_mA = {12, 7, 3, 4, 5, 6, 7, 8, 9};
     Matrix<double, DirectedMatrixTag> mA(3, 3);
     mA.build(i_mA, j_mA, v_mA);
 
-    IndexArrayType i_mB    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    IndexArrayType j_mB    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    VectorIndexType i_mB    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    VectorIndexType j_mB    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_mB = {1, 0, 0, 0, 1, 0, 0, 0, 1};
     Matrix<double, DirectedMatrixTag> mB(3, 3);
     mB.build(i_mB, j_mB, v_mB);
 
     Matrix<double, DirectedMatrixTag> result(3, 3);
 
-    IndexArrayType i_answer = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    IndexArrayType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    VectorIndexType i_answer = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    VectorIndexType j_answer = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> v_answer = {12, 4, 7, 7, 5, 8, 3, 6, 9};
     Matrix<double, DirectedMatrixTag> answer(3, 3);
     answer.build(i_answer, j_answer, v_answer);

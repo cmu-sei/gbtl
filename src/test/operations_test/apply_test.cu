@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(apply)
     graphblas::apply(stuff, transposed_stuff, op);
 
     //extracttuples:
-    IndexArrayType r(5), c(5);
+    VectorIndexType r(5), c(5);
     std::vector<int> vals(5);
     extracttuples(transposed_stuff, r.begin(), c.begin(), vals.begin());
 

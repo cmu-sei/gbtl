@@ -72,7 +72,7 @@ namespace algorithms
         }
 
         std::vector<T> vals(v.nvals());
-        GraphBLAS::IndexArrayType idx(v.nvals());
+        GraphBLAS::VectorIndexType idx(v.nvals());
         v.extractTuples(idx.begin(), vals.begin());
 
         GraphBLAS::IndexType idx_min = idx[0];
@@ -128,8 +128,8 @@ namespace algorithms
 
         // Create an adjacency matrix of the correct type (combining
         // source vertex ID with edge weight
-        GraphBLAS::IndexArrayType i(graph.nvals());
-        GraphBLAS::IndexArrayType j(graph.nvals());
+        GraphBLAS::VectorIndexType i(graph.nvals());
+        GraphBLAS::VectorIndexType j(graph.nvals());
         std::vector<T> vals(graph.nvals());
         graph.extractTuples(i.begin(), j.begin(), vals.begin());
         std::vector<MSTType<T>> new_vals;
@@ -153,10 +153,10 @@ namespace algorithms
 
         // Using complement of mask so we don't deal with max()
         GraphBLAS::Vector<T> s(rows);
-        GraphBLAS::assign_constant(s,
-                                   GraphBLAS::complement(mask),
-                                   GraphBLAS::NoAccumulate(),
-                                   0, GraphBLAS::GrB_ALL, true);
+        GraphBLAS::assign(s,
+                          GraphBLAS::complement(mask),
+                          GraphBLAS::NoAccumulate(),
+                          0, GraphBLAS::AllIndices(), true);
         //GraphBLAS::print_vector(std::cout, s, "Initial s");
 
         mst_parents.clear();
@@ -166,7 +166,7 @@ namespace algorithms
                            GraphBLAS::NoMask(), // complement(mask)?
                            GraphBLAS::NoAccumulate(),
                            GraphBLAS::transpose(A),
-                           GraphBLAS::GrB_ALL, START_NODE);
+                           GraphBLAS::AllIndices(), START_NODE);
         //GraphBLAS::print_vector(std::cout, d, "Initial d");
 
         while (mask.nvals() < rows)
@@ -204,7 +204,7 @@ namespace algorithms
                                GraphBLAS::NoMask(), // complement(mask)?
                                GraphBLAS::NoAccumulate(),
                                GraphBLAS::transpose(A),
-                               GraphBLAS::GrB_ALL, u);
+                               GraphBLAS::AllIndices(), u);
             //GraphBLAS::print_vector(std::cout, Arow, "-------- A(u,:)");
 
             GraphBLAS::eWiseAdd(d,

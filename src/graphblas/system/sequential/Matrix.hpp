@@ -34,7 +34,7 @@ namespace GraphBLAS
             friend std::ostream &operator<<(std::ostream             &os,
                                             NoMask          const    &mask)
             {
-                os << "No mask" << std::endl;
+                os << "No mask";
                 return os;
             }
         };
@@ -86,12 +86,6 @@ namespace GraphBLAS
             bool operator!=(Matrix const &rhs) const
             {
                 return LilSparseMatrix<ScalarT>::operator!=(rhs);
-            }
-
-            void printInfo(std::ostream &os) const
-            {
-                os << "Sequential Backend:" << std::endl;
-                LilSparseMatrix<ScalarT>::printInfo(os);
             }
         };
     }

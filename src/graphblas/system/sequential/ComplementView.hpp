@@ -16,6 +16,8 @@
 #ifndef GB_SEQUENTIAL_NEW_COMPLEMENT_VIEW_HPP
 #define GB_SEQUENTIAL_NEW_COMPLEMENT_VIEW_HPP
 
+#include <graphblas/system/sequential/types.hpp>
+
 #include <graphblas/system/sequential/Matrix.hpp>
 
 namespace GraphBLAS
@@ -244,7 +246,7 @@ namespace GraphBLAS
             }
 
             // Get column indices for a given row
-            void getColumnIndices(IndexType irow, IndexArrayType &indices) const
+            void getColumnIndices(IndexType irow, VectorIndexType &indices) const
             {
                 auto row = getRow(irow);
                 indices.clear();
@@ -255,7 +257,7 @@ namespace GraphBLAS
             }
 
             // Get row indices for a given column
-            void getRowIndices(IndexType icol, IndexArrayType &indices) const
+            void getRowIndices(IndexType icol, VectorIndexType &indices) const
             {
                 auto col = getCol(icol);
                 indices.clear();

@@ -18,6 +18,8 @@
 #include <cstddef>
 #include <graphblas/detail/config.hpp>
 
+#include <graphblas/system/sequential/types.hpp>
+
 #define GB_INCLUDE_BACKEND_VECTOR 1
 #include <graphblas/backend_include.hpp>
 
@@ -170,7 +172,7 @@ namespace GraphBLAS
          */
         template<typename ValueT,
                  typename BinaryOpT = GraphBLAS::Second<ScalarType> >
-        inline void build(IndexArrayType       const &indices,
+        inline void build(VectorIndexType       const &indices,
                           std::vector<ValueT>  const &values,
                           BinaryOpT                   dup = BinaryOpT())
         {
@@ -211,7 +213,7 @@ namespace GraphBLAS
             m_vec.extractTuples(i_it, v_it);
         }
 
-        void extractTuples(IndexArrayType        &indices,
+        void extractTuples(VectorIndexType        &indices,
                            std::vector<ScalarT>  &values) const
         {
             m_vec.extractTuples(indices, values);
@@ -224,25 +226,24 @@ namespace GraphBLAS
             m_vec.printInfo(os);
         }
 
-        /// @todo This does not need to be a friend
-        friend std::ostream &operator<<(std::ostream &os, Vector const &vec)
-        {
-            vec.printInfo(os);
-            return os;
-        }
-
     private:
-        template<typename WVectorT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename AMatrixT,
-                 typename UVectorT>
-        friend inline void mxv(WVectorT        &w,
-                               AccumT           accum,
-                               SemiringT        op,
-                               AMatrixT  const &A,
-                               UVectorT  const &u);
 
+        // 4.3.2
+        template<typename WVectorT,
+                typename MaskT,
+                typename AccumT,
+                typename SemiringT,
+                typename UVectorT,
+                typename AMatrixT>
+        friend inline void vxm(WVectorT         &w,
+                               MaskT      const &mask,
+                               AccumT            accum,
+                               SemiringT         op,
+                               UVectorT   const &u,
+                               AMatrixT   const &A,
+                               bool              replace_flag);
+
+        // 4.3.3
         template<typename WVectorT,
                  typename MaskT,
                  typename AccumT,
@@ -257,31 +258,7 @@ namespace GraphBLAS
                                UVectorT  const &u,
                                bool             replace_flag);
 
-        template<typename WVectorT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename UVectorT,
-                 typename AMatrixT>
-        friend inline void vxm(WVectorT         &w,
-                               AccumT            accum,
-                               SemiringT         op,
-                               UVectorT   const &u,
-                               AMatrixT   const &A);
-
-        template<typename WVectorT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename UVectorT,
-                 typename AMatrixT>
-        friend inline void vxm(WVectorT         &w,
-                               MaskT      const &mask,
-                               AccumT            accum,
-                               SemiringT         op,
-                               UVectorT   const &u,
-                               AMatrixT   const &A,
-                               bool              replace_flag);
-
+        // 4.3.4.1
         template<typename WScalarT,
                  typename MaskT,
                  typename AccumT,
@@ -298,6 +275,7 @@ namespace GraphBLAS
             VVectorT                         const &v,
             bool                                    replace_flag);
 
+        // 4.3.5.1
         template<typename WScalarT,
                  typename MaskT,
                  typename AccumT,
@@ -314,183 +292,49 @@ namespace GraphBLAS
             VVectorT                         const &v,
             bool                                    replace_flag);
 
-        /// Extract: Standard vector variant
+        // 4.3.6.1
         template<typename WVectorT,
                  typename MaskT,
                  typename AccumT,
                  typename UVectorT,
-                 typename RAIteratorT>
-        friend inline void extract(WVectorT           &w,
-                                   MaskT        const &mask,
-                                   AccumT             accum,
-                                   UVectorT    const &u,
-                                   RAIteratorT        indices,
-                                   IndexType          num_indices,
-                                   bool               replace_flag);
-
-        template<typename WVectorT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename UVectorT>
+                 typename SequenceT>
         friend inline void extract(WVectorT             &w,
                                    MaskT          const &mask,
                                    AccumT                accum,
                                    UVectorT       const &u,
-                                   IndexArrayType const &indices,
+                                   SequenceT      const &indices,
                                    bool                  replace_flag);
 
-        // Extract col (or row with transpose)
-        template<typename WVectorT,
+        // 4.3.6.3
+        template<typename WScalarT,
                  typename MaskT,
                  typename AccumT,
                  typename AMatrixT,
-                 typename RAIteratorI>
-        friend inline void extract(WVectorT             &w,
-                                   MaskT          const &mask,
-                                   AccumT                accum,
-                                   AMatrixT       const &A,
-                                   RAIteratorI           row_indices,
-                                   IndexType             nrows,
-                                   IndexType             col_index,
-                                   bool                  replace_flag);
+                  typename SequenceT,
+                 typename ...WTags>
+        friend inline void extract(
+                GraphBLAS::Vector<WScalarT, WTags...> &w,
+                MaskT          const &mask,
+                AccumT                accum,
+                AMatrixT       const &A,
+                SequenceT      const &row_indices,
+                IndexType             col_index,
+                bool                  replace_flag);
 
-        template<typename WVectorT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename AMatrixT>
-        friend inline void extract(WVectorT             &w,
-                                   MaskT          const &mask,
-                                   AccumT                accum,
-                                   AMatrixT       const &A,
-                                   IndexArrayType const &row_indices,
-                                   IndexType             col_index,
-                                   bool                  replace_flag);
-
-        // Extract single element (vector)
-        template <typename ValueT,
-                  typename AccumT,
-                  typename UVectorT>
-        friend inline void extract(ValueT            &dst,
-                                   AccumT             accum,
-                                   UVectorT    const &u,
-                                   IndexType          index,
-                                   std::string       &err);
-
-        // Standard Vector Variant
-        template<typename WVectorT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename UVectorT,
-                 typename RAIteratorT>
-        friend inline void assign(WVectorT          &w,
-                                  MaskT       const &mask,
-                                  AccumT             accum,
-                                  UVectorT    const &u,
-                                  RAIteratorT const &indices,
-                                  IndexType          num_indices,
-                                  bool               replace_flag);
-
-        template<typename WVectorT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename UVectorT>
-        friend inline void assign(WVectorT             &w,
-                                  MaskT          const &mask,
-                                  AccumT                accum,
-                                  UVectorT       const &u,
-                                  IndexArrayType const &indices,
-                                  bool                  replace_flag);
-
-        // Assign Column variant
-        template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename UVectorT,
-                 typename RAIteratorT>
-        friend inline void assign(CMatrixT          &C,
-                                  MaskT       const &mask,  // a vector
-                                  AccumT             accum,
-                                  UVectorT    const &u,
-                                  RAIteratorT        row_indices,
-                                  IndexType          num_rows,
-                                  IndexType          col_index,
-                                  bool               replace_flag);
-
-        template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename UVectorT>
-        friend inline void assign(CMatrixT             &C,
-                                  MaskT          const &mask,  // a vector
-                                  AccumT                accum,
-                                  UVectorT       const &u,
-                                  IndexArrayType const &row_indices,
-                                  IndexType             col_index,
-                                  bool                  replace_flag);
-
-        // Assign row variant
-        template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename UVectorT,
-                 typename RAIteratorT>
-        friend inline void assign(CMatrixT          &C,
-                                  MaskT       const &mask,  // a vector
-                                  AccumT             accum,
-                                  UVectorT    const &u,
-                                  IndexType          row_index,
-                                  RAIteratorT        col_indices,
-                                  IndexType          num_cols,
-                                  bool               replace_flag);
-
-        template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename UVectorT>
-        friend inline void assign(CMatrixT             &C,
-                                  MaskT          const &mask,  // a vector
-                                  AccumT                accum,
-                                  UVectorT       const &u,
-                                  IndexType             row_index,
-                                  IndexArrayType const &col_indices,
-                                  bool                  replace_flag);
-
-        // Single value variant (vector)
-        template<typename WVectorT,
-                 typename AccumT,
-                 typename ValueT>
-        friend inline void assign(WVectorT             &w,
-                                  AccumT                accum,
-                                  ValueT                src,
-                                  IndexType             index,
-                                  bool                  replace_flag);
-
-        // Vector constant variant
+        // 4.3.7.5:
         template<typename WVectorT,
                  typename MaskT,
                  typename AccumT,
                  typename ValueT,
-                 typename RAIteratorT>
-        friend inline void assign(WVectorT          &w,
-                                  MaskT       const &mask,
-                                  AccumT             accum,
-                                  ValueT             val,
-                                  RAIteratorT const &indices,
-                                  IndexType          num_indices,
-                                  bool               replace_flag);
+                 typename SequenceT>
+        friend inline void assign(WVectorT &w,
+                                  MaskT const &mask,
+                                  AccumT accum,
+                                  ValueT val,
+                                  SequenceT const &indices,
+                                  bool replace_flag);
 
-        template<typename WVectorT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename ValueT>
-        friend inline void assign_constant(WVectorT             &w,
-                                           MaskT          const &mask,
-                                           AccumT                accum,
-                                           ValueT                val,
-                                           IndexArrayType const &indices,
-                                           bool                  replace_flag);
-
-        // vector variant
+        // 4.3.8.1:
         template<typename WScalarT,
                  typename MaskT,
                  typename AccumT,
@@ -505,7 +349,7 @@ namespace GraphBLAS
             UVectorT                         const &u,
             bool                                    replace_flag);
 
-        // row reduce matrix to column vector (use transpose for col reduce)
+        // 4.3.9.1
         template<typename WVectorT,
                  typename MaskT,
                  typename AccumT,
@@ -517,8 +361,7 @@ namespace GraphBLAS
                                   BinaryOpT        op,
                                   AMatrixT  const &A,
                                   bool             replace_flag);
-
-        // vector-scalar variant
+        // 4.3.9.2
         template<typename ValueT,
                  typename AccumT,
                  typename MonoidT, // monoid only
@@ -530,10 +373,14 @@ namespace GraphBLAS
             MonoidT                                       op,
             GraphBLAS::Vector<UScalarT, UTagsT...> const &u);
 
+        //*********************************************************************
+
         template<typename OtherScalarT, typename... OtherTagsT>
         friend inline VectorComplementView<Vector<OtherScalarT,
                                                   OtherTagsT...>> complement(
             Vector<OtherScalarT, OtherTagsT...> const &mask);
+
+        //*********************************************************************
 
         // .... ADD OTHER OPERATIONS AS FRIENDS AS THEY ARE IMPLEMENTED .....
 
@@ -559,4 +406,13 @@ namespace GraphBLAS
         ostr << label << ":" << std::endl;
         vec.printInfo(ostr);
     }
+
+    /// @todo This does not need to be a friend
+    template<typename ScalarT, typename... TagsT>
+    std::ostream &operator<<(std::ostream &os, const Vector<ScalarT, TagsT...> &vec)
+    {
+        vec.printInfo(os);
+        return os;
+    }
+
 } // end namespace GraphBLAS

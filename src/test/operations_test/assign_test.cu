@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(assign_to_empty_matrix)
     //call assign (matrix version)
     graphblas::assign(a,ia.begin(), ja.begin(), cm);
     //should only be five values:
-    IndexArrayType r(5), c(5);
+    VectorIndexType r(5), c(5);
     std::vector<int> vals(5);
     extracttuples(cm, r.begin(), c.begin(), vals.begin());
     int r_answers[5] ={0,0,2,2,3};

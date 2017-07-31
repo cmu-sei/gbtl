@@ -30,6 +30,8 @@
 #include <string>
 #include <graphblas/algebra.hpp>
 
+#include "iterator_support.hpp"
+
 //****************************************************************************
 
 namespace GraphBLAS
@@ -769,6 +771,7 @@ namespace GraphBLAS
         //**********************************************************************
         // Put all dimension checks (especially with optional masks here
         //**********************************************************************
+        // @TODO; This does the same thing as check_dimensions - de-duplicate
         template <typename Matrix1T, typename Matrix2T>
         void check_matrix_size(Matrix1T const    &m1,
                                Matrix2T const    &m2,
@@ -924,11 +927,13 @@ namespace GraphBLAS
         }
 
         //********************************************************************
-        void check_index_array_dimension(IndexArrayType const &array,
+        //********************************************************************
+        template <typename SequenceT>
+        void check_index_array_dimension(SequenceT const &array,
                                          IndexType dim,
                                          std::string const &msg)
         {
-            if (&array != &GrB_ALL)
+            if (!IsAllSequence(array))
             {
                 if (array.size() != dim)
                 {
@@ -938,11 +943,12 @@ namespace GraphBLAS
         }
 
         //********************************************************************
-        void check_index_array_content(IndexArrayType const &array,
+        template <typename SequenceT>
+        void check_index_array_content(SequenceT const &array,
                                        IndexType dim,
                                        std::string const &msg)
         {
-            if (&array != &GrB_ALL)
+            if (!IsAllSequence(array))
             {
                 for (auto ix : array)
                 {
@@ -952,6 +958,22 @@ namespace GraphBLAS
                     }
                 }
             }
+        }
+
+
+        //********************************************************************
+        // ALL SUPPORT
+        // This is where we turns alls into the correct range
+
+        template <typename SequenceT>
+        SequenceT setupIndices(SequenceT seq, IndexType n)
+        {
+            return seq;
+        }
+
+        IndexSequenceRange setupIndices(AllIndices seq, IndexType n)
+        {
+            return IndexSequenceRange(0, n);
         }
 
     } // backend

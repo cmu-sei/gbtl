@@ -81,11 +81,11 @@ namespace algorithms
      *                             implies the corresponding vertex is selected.
      */
     template <typename VectorT>
-    GraphBLAS::IndexArrayType get_vertex_IDs(VectorT const &independent_set)
+    GraphBLAS::VectorIndexType get_vertex_IDs(VectorT const &independent_set)
     {
         using T = typename VectorT::ScalarType;
         GraphBLAS::IndexType set_size(independent_set.nvals());
-        GraphBLAS::IndexArrayType ans(set_size);
+        GraphBLAS::VectorIndexType ans(set_size);
         std::vector<T> vals(set_size);
 
         independent_set.extractTuples(ans.begin(), vals.begin());
@@ -161,16 +161,16 @@ namespace algorithms
 
         // Start with all vertices except isolated ones as candidates (NOTE: dense!)
         BoolVector candidates(num_vertices);
-        GraphBLAS::assign_constant(candidates,
-                                   degrees,
-                                   GraphBLAS::NoAccumulate(),
-                                   true, GraphBLAS::GrB_ALL, true);
+        GraphBLAS::assign(candidates,
+                          degrees,
+                          GraphBLAS::NoAccumulate(),
+                          true, GraphBLAS::AllIndices(), true);
 
         // Courtesy of Tim Davis: singletons are not candidates.  Add to iset
-        GraphBLAS::assign_constant(independent_set,
-                                   GraphBLAS::complement(degrees),
-                                   GraphBLAS::NoAccumulate(),
-                                   true, GraphBLAS::GrB_ALL, true);
+        GraphBLAS::assign(independent_set,
+                          GraphBLAS::complement(degrees),
+                          GraphBLAS::NoAccumulate(),
+                          true, GraphBLAS::AllIndices(), true);
 
         while (candidates.nvals() > 0)
         {

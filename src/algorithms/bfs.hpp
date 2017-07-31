@@ -37,7 +37,7 @@ namespace
     {
         using T = typename MatrixT::ScalarType;
 
-        GraphBLAS::IndexArrayType i, j, v;
+        GraphBLAS::VectorIndexType i, j, v;
         for (GraphBLAS::IndexType ix = 0; ix < mat.ncols(); ++ix)
         {
             i.push_back(ix);
@@ -62,7 +62,7 @@ namespace
     {
         using T = typename VectorT::ScalarType;
 
-        GraphBLAS::IndexArrayType i, j, v;
+        GraphBLAS::VectorIndexType i, j, v;
         for (GraphBLAS::IndexType ix = 0; ix < vec.size(); ++ix)
         {
             i.push_back(ix);

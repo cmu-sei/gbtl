@@ -18,7 +18,7 @@ include_directories(${CMAKE_SOURCE_DIR})
 set(CMAKE_CXX_STANDARD 11)
 
 # First we build a "library" that we include with each test.
-set(GRAPHBLAS_SOURCES graphblas/graphblas.cpp)
+set(GRAPHBLAS_SOURCES graphblas/graphblas.cpp graphblas/system/sequential/iterator_support.hpp)
 file(GLOB GRAPHBLAS_HEADERS graphblas/*.hpp)
 add_library(GraphBLASLib ${GRAPHBLAS_SOURCES} ${GRAPHBLAS_HEADERS})
 

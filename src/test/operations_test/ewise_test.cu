@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(ewisemult)
     //c<-a*b
     graphblas::ewisemult(a,b,c);
     //extracttuples:
-    IndexArrayType rows(5), cols(5);
+    VectorIndexType rows(5), cols(5);
     std::vector<int> vals(5);
     extracttuples(c, rows, cols, vals);
 
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(ewiseadd)
     //c<-a+b
     graphblas::ewiseadd(a,b,c);
     //extracttuples:
-    IndexArrayType rows(5), cols(5);
+    VectorIndexType rows(5), cols(5);
     std::vector<int> vals(5);
     extracttuples(c, rows, cols, vals);
 

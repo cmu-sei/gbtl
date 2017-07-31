@@ -18,7 +18,6 @@
 
 #include <iostream>
 
-#define GB_DEBUG
 #include <graphblas/graphblas.hpp>
 #include <algorithms/sssp.hpp>
 
@@ -48,7 +47,7 @@ namespace algorithms
         GraphBLAS::extract(in_edges,
                            GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                            graph,
-                           GraphBLAS::GrB_ALL,
+                           GraphBLAS::AllIndices(),
                            vid);
 
         return in_edges.nvals();
@@ -78,7 +77,7 @@ namespace algorithms
         GraphBLAS::extract(out_edges,
                            GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                            GraphBLAS::transpose(graph),
-                           GraphBLAS::GrB_ALL,
+                           GraphBLAS::AllIndices(),
                            vid);
 
         return out_edges.nvals();

@@ -224,9 +224,9 @@ int main(){
     graphblas::IndexType const NUM_NODES(9);
     graphblas::IndexType const START_INDEX(5);
 
-    graphblas::IndexArrayType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
+    graphblas::VectorIndexType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
                                    4, 4, 4, 5, 6, 6, 6, 8, 8};
-    graphblas::IndexArrayType j = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
+    graphblas::VectorIndexType j = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
                                    2, 3, 8, 2, 1, 2, 3, 2, 4};
     std::vector<T> v(i.size(), 1);
 
@@ -235,8 +235,8 @@ int main(){
 
     GrBMatrix root(1, NUM_NODES, 0);
 
-    graphblas::IndexArrayType x = {0};
-    graphblas::IndexArrayType y = {START_INDEX};
+    graphblas::VectorIndexType x = {0};
+    graphblas::VectorIndexType y = {START_INDEX};
     std::vector<T> z(x.size(), 1);
 
     graphblas::buildmatrix(root, x.begin(),y.begin(),z.begin(), x.size());
@@ -273,8 +273,8 @@ int main(int argc, char ** argv){
 
     GrBMatrix root(1, NUM_NODES, 0);
 
-    graphblas::IndexArrayType x = {0};
-    graphblas::IndexArrayType y = {0};
+    graphblas::VectorIndexType x = {0};
+    graphblas::VectorIndexType y = {0};
     std::vector<T> z(x.size(), 1);
 
     graphblas::buildmatrix(root, x.begin(),y.begin(),z.begin(), x.size());

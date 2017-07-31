@@ -36,8 +36,8 @@ int main(int, char**)
     Matrix<ScalarType> c(NUM_ROWS, NUM_COLS);
 
     // initialize matrices
-    IndexArrayType i = {0,  1,  2};
-    IndexArrayType j = {0,  1,  2};
+    VectorIndexType i = {0,  1,  2};
+    VectorIndexType j = {0,  1,  2};
     std::vector<ScalarType>   v = {1., 1., 1.};
 
     a.build(i.begin(), j.begin(), v.begin(), i.size());
@@ -53,13 +53,13 @@ int main(int, char**)
 
     // extract the results: nvals() method tells us how big
     IndexType nvals = c.nvals();
-    IndexArrayType rows(nvals), cols(nvals);
+    VectorIndexType rows(nvals), cols(nvals);
     std::vector<ScalarType> result(nvals);
 
     c.extractTuples(rows, cols, result);
 
-    IndexArrayType i_ans = {0,  1,  2};
-    IndexArrayType j_ans = {0,  1,  2};
+    VectorIndexType i_ans = {0,  1,  2};
+    VectorIndexType j_ans = {0,  1,  2};
     std::vector<ScalarType>   v_ans = {1., 1., 1.};
 
     bool success = true;
