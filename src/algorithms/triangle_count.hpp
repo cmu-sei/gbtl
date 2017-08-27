@@ -86,6 +86,28 @@ namespace algorithms
     }
 
     //************************************************************************
+    template<typename MatrixT>
+    typename MatrixT::ScalarType triangle_count_masked(MatrixT const &L)
+    {
+        using T = typename MatrixT::ScalarType;
+        GraphBLAS::IndexType rows(L.nrows());
+        GraphBLAS::IndexType cols(L.ncols());
+
+        MatrixT B(rows, cols);
+        GraphBLAS::mxm(B,
+                       L, GraphBLAS::NoAccumulate(),
+                       GraphBLAS::ArithmeticSemiring<T>(),
+                       L, GraphBLAS::transpose(L));
+
+        T sum = 0;
+        GraphBLAS::reduce(sum,
+                          GraphBLAS::NoAccumulate(),
+                          GraphBLAS::PlusMonoid<T>(),
+                          B);
+        return sum;
+    }
+
+    //************************************************************************
     /**
      * From TzeMeng Low, the FLAME approach #1 to triangle counting
      *

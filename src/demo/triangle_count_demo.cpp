@@ -99,6 +99,15 @@ int main(int argc, char **argv)
     std::cout << "# triangles = " << count << std::endl;
     std::cout << "Elapsed time: " << duration.count() << " msec." << std::endl;
 
+    start = std::chrono::steady_clock::now();
+
+    count = algorithms::triangle_count_masked(L);
+
+    duration = std::chrono::duration_cast<std::chrono::milliseconds>
+        (std::chrono::steady_clock::now() - start);
+    std::cout << "# triangles (masked) = " << count << std::endl;
+    std::cout << "Elapsed time: " << duration.count() << " msec." << std::endl;
+
     //count = algorithms::triangle_count_flame1_newGBTL(U);
     //std::cout << "# triangles = " << count << std::endl;
 
