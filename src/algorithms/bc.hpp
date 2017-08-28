@@ -281,8 +281,8 @@ namespace algorithms
 
         using T = typename MatrixT::ScalarType;
 
-        GraphBLAS::IndexType m(A.nrows());
-        GraphBLAS::IndexType n(A.ncols());
+        GraphBLAS::IndexType m = A.nrows();
+        GraphBLAS::IndexType n = A.ncols();
         if (m != n)
         {
             throw GraphBLAS::DimensionException();

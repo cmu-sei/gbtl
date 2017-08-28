@@ -1,3 +1,17 @@
+#
+# Copyright (c) 2017 Carnegie Mellon University.
+# All Rights Reserved.
+#
+# THIS SOFTWARE IS PROVIDED "AS IS," WITH NO WARRANTIES WHATSOEVER. CARNEGIE
+# MELLON UNIVERSITY EXPRESSLY DISCLAIMS TO THE FULLEST EXTENT PERMITTED BY
+# LAW ALL EXPRESS, IMPLIED, AND STATUTORY WARRANTIES, INCLUDING, WITHOUT
+# LIMITATION, THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+# PURPOSE, AND NON-INFRINGEMENT OF PROPRIETARY RIGHTS.
+#
+# This Program is distributed under a BSD license.  Please see LICENSE file or
+# permission@sei.cmu.edu for more information.  DM-0002659
+#
+
 cmake_minimum_required(VERSION 2.8)
 
 project(SPIRALGRAPH)
@@ -17,10 +31,8 @@ include_directories(${CMAKE_SOURCE_DIR})
 # Compiler flags
 set(CMAKE_CXX_STANDARD 11)
 
-# First we build a "library" that we include with each test.
-set(GRAPHBLAS_SOURCES graphblas/graphblas.cpp graphblas/system/sequential/iterator_support.hpp)
+# Build a list of all the graphblas headers.
 file(GLOB GRAPHBLAS_HEADERS graphblas/*.hpp)
-add_library(GraphBLASLib ${GRAPHBLAS_SOURCES} ${GRAPHBLAS_HEADERS})
 
 # Build tests and demos into a separate bin directory so it doesn't get mixed in
 # with settings and config files. Note the library dependency is not in here.
@@ -32,8 +44,7 @@ foreach( testsourcefile ${TEST_SOURCES} )
     get_filename_component(justname ${testsourcefile} NAME)
     string( REPLACE ".cpp" "" testname ${justname} )
     message("Adding: ${testname}")
-    add_executable( ${testname} ${testsourcefile} )
-    target_link_libraries( ${testname} GraphBLASLib )
+    add_executable( ${testname} ${testsourcefile} ${GRAPHBLAS_HEADERS})
 endforeach( testsourcefile ${TEST_SOURCES} )
 
 ### Make extra sequential tests
@@ -42,8 +53,7 @@ foreach( testsourcefile ${TEST_SOURCES} )
     get_filename_component(justname ${testsourcefile} NAME)
     string( REPLACE ".cpp" "" testname ${justname} )
     message("Adding: ${testname}_sequential ")
-    add_executable( ${testname}_sequential ${testsourcefile} )
-    target_link_libraries( ${testname}_sequential GraphBLASLib )
+    add_executable( ${testname}_sequential ${testsourcefile} ${GRAPHBLAS_HEADERS})
 endforeach( testsourcefile ${TEST_SOURCES} )
 
 ## Make demos
@@ -52,8 +62,7 @@ foreach( testsourcefile ${TEST_SOURCES} )
     get_filename_component(justname ${testsourcefile} NAME)
     string( REPLACE ".cpp" "" testname ${justname} )
     message("Adding: ${testname}")
-    add_executable( ${testname} ${testsourcefile} )
-    target_link_libraries( ${testname} GraphBLASLib )
+    add_executable( ${testname} ${testsourcefile} ${GRAPHBLAS_HEADERS})
 endforeach( testsourcefile ${TEST_SOURCES} )
 
 # TODO: Make capi tests

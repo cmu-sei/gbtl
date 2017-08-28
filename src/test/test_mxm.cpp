@@ -13,7 +13,7 @@
  * permission@sei.cmu.edu for more information.  DM-0002659
  */
 
-#define GRAPHBLAS_LOGGING_LEVEL 2
+#define GRAPHBLAS_LOGGING_LEVEL 0
 
 #include <graphblas/graphblas.hpp>
 
