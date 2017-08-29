@@ -60,7 +60,7 @@ namespace algorithms
     std::vector<float>
     vertex_betweenness_centrality_batch_alt_trans_v2(
         MatrixT const                   &A,
-        GraphBLAS::VectorIndexType const &s)
+        GraphBLAS::IndexArrayType const &s)
     {
         //GRB_BC_LOG(GraphBLAS::print_matrix(std::cerr, A, "Graph"));
         GRB_BC_LOG("Graph " << A);
@@ -100,7 +100,7 @@ namespace algorithms
         // NumSP is initialized with the each starting root in 's':
         // NumSP[i,s[i]] = 1 where 0 <= i < nsver; implied zero elsewhere
         GraphBLAS::Matrix<int32_t> NumSP(nsver, n);
-        GraphBLAS::VectorIndexType GrB_ALL_nsver;     // fill with sequence
+        GraphBLAS::IndexArrayType GrB_ALL_nsver;     // fill with sequence
         GrB_ALL_nsver.reserve(nsver);
         for (GraphBLAS::IndexType idx = 0; idx < nsver; ++idx)
         {
@@ -270,7 +270,7 @@ namespace algorithms
     std::vector<float>
     vertex_betweenness_centrality_batch_alt_trans(
         MatrixT const                   &A,
-        GraphBLAS::VectorIndexType const &s)
+        GraphBLAS::IndexArrayType const &s)
     {
         // nsver = |s| (partition size)
         GraphBLAS::IndexType nsver(s.size());
@@ -302,7 +302,7 @@ namespace algorithms
         // NumSP is initialized with the each starting root in 's':
         // NumSP[i,s[i]] = 1 where 0 <= i < nsver; implied zero elsewhere
         GraphBLAS::Matrix<int32_t> NumSP(nsver, n);
-        GraphBLAS::VectorIndexType GrB_ALL_nsver;     // fill with sequence
+        GraphBLAS::IndexArrayType GrB_ALL_nsver;     // fill with sequence
         GrB_ALL_nsver.reserve(nsver);
         for (GraphBLAS::IndexType idx = 0; idx < nsver; ++idx)
         {
@@ -445,7 +445,7 @@ namespace algorithms
     std::vector<float>
     vertex_betweenness_centrality_batch_alt(
         MatrixT const                   &A,
-        GraphBLAS::VectorIndexType const &s)
+        GraphBLAS::IndexArrayType const &s)
     {
         // nsver = |s| (partition size)
         GraphBLAS::IndexType nsver(s.size());
@@ -466,7 +466,7 @@ namespace algorithms
         // The current frontier for all BFS's (from all roots)
         // It is initialized to the out neighbors of the specified roots
         GraphBLAS::Matrix<int32_t> Frontier(n, nsver);         // F is n x nsver
-        GraphBLAS::VectorIndexType GrB_ALL_nsver;     // fill with sequence
+        GraphBLAS::IndexArrayType GrB_ALL_nsver;     // fill with sequence
         GrB_ALL_nsver.reserve(nsver);
         for (GraphBLAS::IndexType idx = 0; idx < nsver; ++idx)
         {
@@ -622,7 +622,7 @@ namespace algorithms
     std::vector<float>
     vertex_betweenness_centrality_batch(
         MatrixT const                   &A,
-        GraphBLAS::VectorIndexType const &s)
+        GraphBLAS::IndexArrayType const &s)
     {
         // nsver = |s| (partition size)
         GraphBLAS::IndexType nsver(s.size());
@@ -644,7 +644,7 @@ namespace algorithms
         // It is initialized with the each starting root in 's':
         // F[s[i],i] = 1 where 0 <= i < nsver; implied zero elsewhere
         GraphBLAS::Matrix<int32_t> Frontier(n, nsver);         // F is n x nsver
-        GraphBLAS::VectorIndexType GrB_ALL_nsver;     // fill with sequence
+        GraphBLAS::IndexArrayType GrB_ALL_nsver;     // fill with sequence
         GrB_ALL_nsver.reserve(nsver);
         for (GraphBLAS::IndexType idx = 0; idx < nsver; ++idx)
         {
@@ -804,7 +804,7 @@ namespace algorithms
     std::vector<double>
     vertex_betweenness_centrality_batch_old(
         MatrixT const                   &graph,
-        GraphBLAS::VectorIndexType const &src_nodes)
+        GraphBLAS::IndexArrayType const &src_nodes)
     {
         //GraphBLAS::print_matrix(std::cerr, graph, "Graph");
 
@@ -829,7 +829,7 @@ namespace algorithms
         // P holds number of shortest paths to a vertex from a given root
         // P[i,src_nodes[i]] = 1 where 0 <= i < nsver; implied zero elsewher
         GraphBLAS::Matrix<int32_t> P(p, N);         // P is pxN
-        GraphBLAS::VectorIndexType GrB_ALL_p;     // fill with sequence
+        GraphBLAS::IndexArrayType GrB_ALL_p;     // fill with sequence
         GrB_ALL_p.reserve(p);
         for (GraphBLAS::IndexType idx = 0; idx < p; ++idx)
         {
@@ -1227,7 +1227,7 @@ namespace algorithms
                 {
                     // update = A *.+ diag(weights)
                     std::vector<T> w(weights.nvals());
-                    GraphBLAS::VectorIndexType widx(weights.nvals());
+                    GraphBLAS::IndexArrayType widx(weights.nvals());
                     weights.extractTuples(widx, w);
                     MatrixT wmat(num_nodes, num_nodes);
                     wmat.build(widx, widx, w);
@@ -1248,7 +1248,7 @@ namespace algorithms
                 {
                     // update = diag(weights) *.+ update
                     std::vector<T> w(weights.nvals());
-                    GraphBLAS::VectorIndexType widx(weights.nvals());
+                    GraphBLAS::IndexArrayType widx(weights.nvals());
                     weights.extractTuples(widx, w);
                     MatrixT wmat(num_nodes, num_nodes);
                     wmat.build(widx, widx, w);

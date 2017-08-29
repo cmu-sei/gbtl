@@ -29,8 +29,8 @@ BOOST_AUTO_TEST_SUITE(matrix_build_suite)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(matrix_build_test)
 {
-    VectorIndexType i = {0, 0, 0, 1, 1, 1, 2, 2};
-    VectorIndexType j = {1, 2, 3, 0, 2, 3, 0, 1};
+    IndexArrayType i = {0, 0, 0, 1, 1, 1, 2, 2};
+    IndexArrayType j = {1, 2, 3, 0, 2, 3, 0, 1};
     std::vector<double>       v = {1, 2, 3, 4, 6, 7, 8, 9};
 
     std::vector<std::vector<double> > mat = {{0, 1, 2, 3},
@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(matrix_build_test)
     IndexType nnz = m1.nvals();
     BOOST_CHECK_EQUAL(nnz, i.size());
 
-    VectorIndexType ii(nnz), jj(nnz);
+    IndexArrayType ii(nnz), jj(nnz);
     std::vector<double> val(nnz);
     m1.extractTuples(ii, jj, val);
     BOOST_CHECK_EQUAL(nnz, ii.size());
@@ -60,8 +60,8 @@ BOOST_AUTO_TEST_CASE(matrix_build_test)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(matrix_build_test_iterators)
 {
-    VectorIndexType i = {0, 0, 0, 1, 1, 1, 2, 2};
-    VectorIndexType j = {1, 2, 3, 0, 2, 3, 0, 1};
+    IndexArrayType i = {0, 0, 0, 1, 1, 1, 2, 2};
+    IndexArrayType j = {1, 2, 3, 0, 2, 3, 0, 1};
     std::vector<double>       v = {1, 2, 3, 4, 6, 7, 8, 9};
 
     std::vector<std::vector<double> > mat = {{0, 1, 2, 3},
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(matrix_build_test_iterators)
     IndexType nnz = m1.nvals();
     BOOST_CHECK_EQUAL(nnz, i.size());
 
-    VectorIndexType ii(nnz), jj(nnz);
+    IndexArrayType ii(nnz), jj(nnz);
     std::vector<double> val(nnz);
     m1.extractTuples(ii, jj, val);
     BOOST_CHECK_EQUAL(nnz, ii.size());

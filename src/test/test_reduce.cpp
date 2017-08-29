@@ -32,13 +32,13 @@ BOOST_AUTO_TEST_SUITE(cpu_simple_reduce_suite)
 BOOST_AUTO_TEST_CASE(row_reduce_test_bad_dimension)
 {
     // Build some matrices.
-    VectorIndexType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    VectorIndexType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v_A = {1, 1, 1, 2, 2, 1, 3, 5, 3, 4};
     Matrix<double, DirectedMatrixTag> A(4, 4);
     A.build(i_A, j_A, v_A);
 
-    VectorIndexType i_C    = {0, 1, 2};
+    IndexArrayType i_C    = {0, 1, 2};
     std::vector<double> v_C = {1, 1, 1};
     Vector<double> C(3);
     C.build(i_C, v_C);
@@ -53,18 +53,18 @@ BOOST_AUTO_TEST_CASE(row_reduce_test_bad_dimension)
 BOOST_AUTO_TEST_CASE(row_reduce_test_default_accum)
 {
     // Build some matrices.
-    VectorIndexType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    VectorIndexType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v_A = {1, 1, 1, 2, 2, 1, 3, 5, 3, 4};
     Matrix<double, DirectedMatrixTag> A(4, 4);
     A.build(i_A, j_A, v_A);
 
-    VectorIndexType i_C    = {0, 1, 2, 3};
+    IndexArrayType i_C    = {0, 1, 2, 3};
     std::vector<double> v_C = {1, 1, 1, 1};
     Vector<double> C(4);
     C.build(i_C, v_C);
 
-    VectorIndexType i_answer    = {0, 1, 2, 3};
+    IndexArrayType i_answer    = {0, 1, 2, 3};
     std::vector<double> v_answer = {2, 5, 9, 7};
     Vector<double> answer(4);
     answer.build(i_answer, v_answer);
@@ -78,18 +78,18 @@ BOOST_AUTO_TEST_CASE(row_reduce_test_default_accum)
 BOOST_AUTO_TEST_CASE(row_reduce_test_accum)
 {
     // Build some matrices.
-    VectorIndexType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    VectorIndexType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v_A = {1, 1, 1, 2, 2, 1, 3, 5, 3, 4};
     Matrix<double, DirectedMatrixTag> A(4, 4);
     A.build(i_A, j_A, v_A);
 
-    VectorIndexType i_C    = {0, 1, 2, 3};
+    IndexArrayType i_C    = {0, 1, 2, 3};
     std::vector<double> v_C = {1, 1, 1, 1};
     Vector<double> C(4);
     C.build(i_C, v_C);
 
-    VectorIndexType i_answer    = {0, 1, 2, 3};
+    IndexArrayType i_answer    = {0, 1, 2, 3};
     std::vector<double> v_answer = {3, 6, 10, 8};
     Vector<double> answer(4);
     answer.build(i_answer, v_answer);
@@ -104,13 +104,13 @@ BOOST_AUTO_TEST_CASE(row_reduce_test_accum)
 BOOST_AUTO_TEST_CASE(col_reduce_test_bad_dimensions)
 {
     // Build some matrices.
-    VectorIndexType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    VectorIndexType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v_A = {1, 1, 1, 2, 2, 1, 3, 5, 3, 4};
     Matrix<double, DirectedMatrixTag> A(4, 4);
     A.build(i_A, j_A, v_A);
 
-    VectorIndexType j_C    = {0, 1, 2, 3, 4};
+    IndexArrayType j_C    = {0, 1, 2, 3, 4};
     std::vector<double> v_C = {1, 1, 1, 1, 1};
     Vector<double> C(5);
     C.build(j_C, v_C);
@@ -125,18 +125,18 @@ BOOST_AUTO_TEST_CASE(col_reduce_test_bad_dimensions)
 BOOST_AUTO_TEST_CASE(col_reduce_test_default_accum)
 {
     // Build some matrices.
-    VectorIndexType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    VectorIndexType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v_A = {1, 1, 1, 2, 2, 1, 3, 5, 3, 4};
     Matrix<double, DirectedMatrixTag> A(4, 4);
     A.build(i_A, j_A, v_A);
 
-    VectorIndexType j_C    = {0, 1, 2, 3};
+    IndexArrayType j_C    = {0, 1, 2, 3};
     std::vector<double> v_C = {1, 1, 1, 1};
     Vector<double> C(4);
     C.build(j_C, v_C);
 
-    VectorIndexType j_answer    = {0, 1, 2, 3};
+    IndexArrayType j_answer    = {0, 1, 2, 3};
     std::vector<double> v_answer = {2, 4, 8, 9};
     Vector<double> answer(4);
     answer.build(j_answer, v_answer);
@@ -152,18 +152,18 @@ BOOST_AUTO_TEST_CASE(col_reduce_test_default_accum)
 BOOST_AUTO_TEST_CASE(col_reduce_test_assign)
 {
     // Build some matrices.
-    VectorIndexType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    VectorIndexType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v_A = {1, 1, 1, 2, 2, 1, 3, 5, 3, 4};
     Matrix<double, DirectedMatrixTag> A(4, 4);
     A.build(i_A, j_A, v_A);
 
-    VectorIndexType j_C    = {0, 1, 2, 3};
+    IndexArrayType j_C    = {0, 1, 2, 3};
     std::vector<double> v_C = {1, 1, 1, 1};
     Vector<double> C(4);
     C.build(j_C, v_C);
 
-    VectorIndexType j_answer    = {0, 1, 2, 3};
+    IndexArrayType j_answer    = {0, 1, 2, 3};
     std::vector<double> v_answer = {2, 4, 8, 9};
     Vector<double> answer(4);
     answer.build(j_answer, v_answer);
@@ -179,18 +179,18 @@ BOOST_AUTO_TEST_CASE(col_reduce_test_assign)
 BOOST_AUTO_TEST_CASE(col_reduce_test_accum)
 {
     // Build some matrices.
-    VectorIndexType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    VectorIndexType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v_A = {1, 1, 1, 2, 2, 1, 3, 5, 3, 4};
     Matrix<double, DirectedMatrixTag> A(4, 4);
     A.build(i_A, j_A, v_A);
 
-    VectorIndexType j_C    = {0, 1, 2, 3};
+    IndexArrayType j_C    = {0, 1, 2, 3};
     std::vector<double> v_C = {1, 1, 1, 1};
     Vector<double> C(4);
     C.build(j_C, v_C);
 
-    VectorIndexType j_answer    = {0, 1, 2, 3};
+    IndexArrayType j_answer    = {0, 1, 2, 3};
     std::vector<double> v_answer = {3, 5, 9, 10};
     Vector<double> answer(4);
     answer.build(j_answer, v_answer);
@@ -206,23 +206,23 @@ BOOST_AUTO_TEST_CASE(col_reduce_test_accum)
 BOOST_AUTO_TEST_CASE(masked_col_reduce_test_default_accum)
 {
     // Build some matrices.
-    VectorIndexType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    VectorIndexType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v_A = {1, 1, 1, 2, 2, 1, 3, 5, 3, 4};
     Matrix<double, DirectedMatrixTag> A(4, 4);
     A.build(i_A, j_A, v_A);
 
-    VectorIndexType j_C    = {0, 1, 2, 3};
+    IndexArrayType j_C    = {0, 1, 2, 3};
     std::vector<double> v_C = {1, 1, 1, 1};
     Vector<double> C(4);
     C.build(j_C, v_C);
 
-    VectorIndexType j_mask    = {0, 1, 2, 3};
+    IndexArrayType j_mask    = {0, 1, 2, 3};
     std::vector<double> v_mask = {1, 0, 1, 0};
     Vector<bool> mask(4);
     mask.build(j_mask, v_mask);
 
-    VectorIndexType j_answer    = {0, 1, 2, 3};
+    IndexArrayType j_answer    = {0, 1, 2, 3};
     std::vector<double> v_answer = {2, 1, 8, 1};
     Vector<double> answer(4);
     answer.build(j_answer, v_answer);
@@ -239,23 +239,23 @@ BOOST_AUTO_TEST_CASE(masked_col_reduce_test_default_accum)
 BOOST_AUTO_TEST_CASE(masked_row_reduce_test_default_accum)
 {
     // Build some matrices.
-    VectorIndexType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    VectorIndexType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    IndexArrayType i_A    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_A    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
     std::vector<double> v_A = {1, 1, 1, 2, 2, 1, 3, 5, 3, 4};
     Matrix<double, DirectedMatrixTag> A(4, 4);
     A.build(i_A, j_A, v_A);
 
-    VectorIndexType i_C    = {0, 1, 2, 3};
+    IndexArrayType i_C    = {0, 1, 2, 3};
     std::vector<double> v_C = {1, 1, 1, 1};
     Vector<double> C(4);
     C.build(i_C, v_C);
 
-    VectorIndexType i_mask    = {0, 1, 2, 3};
+    IndexArrayType i_mask    = {0, 1, 2, 3};
     std::vector<double> v_mask = {1, 0, 1, 0};
     Vector<bool> mask(4);
     mask.build(i_mask, v_mask);
 
-    VectorIndexType i_answer    = {0, 1, 2, 3};
+    IndexArrayType i_answer    = {0, 1, 2, 3};
     std::vector<double> v_answer = {2, 1, 9, 1};
     Vector<double> answer(4);
     answer.build(i_answer, v_answer);

@@ -27,7 +27,7 @@
 namespace GraphBLAS
 {
     typedef uint64_t IndexType;
-    typedef std::vector<IndexType> VectorIndexType;
+    typedef std::vector<IndexType> IndexArrayType;
 
     //**************************************************************************
     struct NoAccumulate

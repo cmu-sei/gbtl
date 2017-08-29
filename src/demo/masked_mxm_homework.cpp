@@ -152,8 +152,8 @@ int main(int, char**)
 
     // Create an adjacency matrix for "Gilbert's" directed graph
     IndexType const NUM_NODES(7);
-    VectorIndexType i = {0, 0, 1, 1, 2, 3, 3, 3, 4, 5, 6, 6, 6};
-    VectorIndexType j = {1, 3, 4, 6, 5, 0, 2, 6, 5, 2, 2, 3, 4};
+    IndexArrayType i = {0, 0, 1, 1, 2, 3, 3, 3, 4, 5, 6, 6, 6};
+    IndexArrayType j = {1, 3, 4, 6, 5, 0, 2, 6, 5, 2, 2, 3, 4};
     std::vector<ScalarType>   v(i.size(), 1.0);
 
     Matrix<ScalarType> graph(NUM_NODES, NUM_NODES);

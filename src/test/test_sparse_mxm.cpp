@@ -62,8 +62,8 @@ namespace
              {71.0, 59.5,  0.0,    -3.0}};
 
     //static Matrix<double, DirectedMatrixTag> mAns(mAns_dense);
-    GraphBLAS::VectorIndexType i_all3x4 = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
-    GraphBLAS::VectorIndexType j_all3x4 = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
+    GraphBLAS::IndexArrayType i_all3x4 = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
+    GraphBLAS::IndexArrayType j_all3x4 = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
 
     static std::vector<std::vector<double> > mOnes_4x4 =
             {{1, 1, 1, 1},

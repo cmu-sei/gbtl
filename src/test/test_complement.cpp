@@ -29,8 +29,8 @@ BOOST_AUTO_TEST_SUITE(complement_suite)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_complement_square)
 {
-    //VectorIndexType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    //VectorIndexType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    //IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    //IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     //std::vector<double>       v_mA    = {1, 0, 0, 0, 1, 0, 0, 0, 1};
     //Matrix<double, DirectedMatrixTag> mA(3, 3);
     //mA.build(i_mA, j_mA, v_mA);
@@ -39,14 +39,14 @@ BOOST_AUTO_TEST_CASE(test_complement_square)
     //Matrix<double, DirectedMatrixTag> answer(3, 3);
     //answer.build(i_mA, j_mA, v_answer);
 
-    VectorIndexType i_mA    = {0, 1, 2};
-    VectorIndexType j_mA    = {0, 1, 2};
+    IndexArrayType i_mA    = {0, 1, 2};
+    IndexArrayType j_mA    = {0, 1, 2};
     std::vector<double>       v_mA    = {1, 1, 1};
     Matrix<double, DirectedMatrixTag> mA(3, 3);
     mA.build(i_mA, j_mA, v_mA);
 
-    VectorIndexType i_mA_n    = {0, 0, 1, 1, 2, 2 };
-    VectorIndexType j_mA_n    = {1, 2, 0, 2, 0, 1 };
+    IndexArrayType i_mA_n    = {0, 0, 1, 1, 2, 2 };
+    IndexArrayType j_mA_n    = {1, 2, 0, 2, 0, 1 };
     std::vector<double>   v_answer    = {1, 1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> answer(3, 3);
     answer.build(i_mA_n, j_mA_n, v_answer);
@@ -59,8 +59,8 @@ BOOST_AUTO_TEST_CASE(test_complement_square)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_complementview_square)
 {
-    //VectorIndexType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    //VectorIndexType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    //IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    //IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     //std::vector<double>       v_mA    = {1, 0, 0, 0, 1, 0, 0, 0, 1};
     //Matrix<double, DirectedMatrixTag> mA(3, 3);
     //mA.build(i_mA, j_mA, v_mA);
@@ -69,14 +69,14 @@ BOOST_AUTO_TEST_CASE(test_complementview_square)
     //Matrix<double, DirectedMatrixTag> answer(3, 3);
     //answer.build(i_mA, j_mA, v_answer);
 
-    VectorIndexType i_mA    = {0, 1, 2};
-    VectorIndexType j_mA    = {0, 1, 2};
+    IndexArrayType i_mA    = {0, 1, 2};
+    IndexArrayType j_mA    = {0, 1, 2};
     std::vector<double>       v_mA    = {1, 1, 1};
     Matrix<double, DirectedMatrixTag> mA(3, 3);
     mA.build(i_mA, j_mA, v_mA);
 
-    VectorIndexType i_mA_n    = {0, 0, 1, 1, 2, 2 };
-    VectorIndexType j_mA_n    = {1, 2, 0, 2, 0, 1 };
+    IndexArrayType i_mA_n    = {0, 0, 1, 1, 2, 2 };
+    IndexArrayType j_mA_n    = {1, 2, 0, 2, 0, 1 };
     std::vector<double>   v_answer    = {1, 1, 1,1, 1, 1};
     Matrix<double, DirectedMatrixTag> answer(3, 3);
     answer.build(i_mA_n, j_mA_n, v_answer);
@@ -90,8 +90,8 @@ BOOST_AUTO_TEST_CASE(test_complementview_square)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_complement_nonsquare)
 {
-    //VectorIndexType i_mA    = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
-    //VectorIndexType j_mA    = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
+    //IndexArrayType i_mA    = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
+    //IndexArrayType j_mA    = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
     //std::vector<double>       v_mA    = {1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1};
     //Matrix<double, DirectedMatrixTag> mA(3, 4);
     //mA.build(i_mA, j_mA, v_mA);
@@ -100,14 +100,14 @@ BOOST_AUTO_TEST_CASE(test_complement_nonsquare)
     //Matrix<double, DirectedMatrixTag> answer(3, 4);
     //answer.build(i_mA, j_mA, v_answer);
 
-    VectorIndexType i_mA    = {0, 0, 1, 1, 2, 2};
-    VectorIndexType j_mA    = {0, 2, 1, 3, 2, 3};
+    IndexArrayType i_mA    = {0, 0, 1, 1, 2, 2};
+    IndexArrayType j_mA    = {0, 2, 1, 3, 2, 3};
     std::vector<double>       v_mA    = {1, 1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> mA(3, 4);
     mA.build(i_mA, j_mA, v_mA);
 
-    VectorIndexType i_mA_n    = {0, 0, 1, 1, 2, 2};
-    VectorIndexType j_mA_n   =  {1, 3, 0, 2, 0, 1};
+    IndexArrayType i_mA_n    = {0, 0, 1, 1, 2, 2};
+    IndexArrayType j_mA_n   =  {1, 3, 0, 2, 0, 1};
     std::vector<double>   v_answer    =   {1, 1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> answer(3, 4);
     answer.build(i_mA_n, j_mA_n, v_answer);
@@ -119,8 +119,8 @@ BOOST_AUTO_TEST_CASE(test_complement_nonsquare)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_complementview_nonsquare)
 {
-    //VectorIndexType i_mA    = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
-    //VectorIndexType j_mA    = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
+    //IndexArrayType i_mA    = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
+    //IndexArrayType j_mA    = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
     //std::vector<double>       v_mA    = {1, 0, 2, 0, 0, 3, 0,-1, 0, 0,-2, 6};
     //Matrix<double, DirectedMatrixTag> mA(3, 4);
     //mA.build(i_mA, j_mA, v_mA);
@@ -129,14 +129,14 @@ BOOST_AUTO_TEST_CASE(test_complementview_nonsquare)
     //Matrix<double, DirectedMatrixTag> answer(3, 4);
     //answer.build(i_mA, j_mA, v_answer);
 
-    VectorIndexType i_mA    = {0, 0, 1, 1, 2, 2};
-    VectorIndexType j_mA    = {0, 2, 1, 3, 2, 3};
+    IndexArrayType i_mA    = {0, 0, 1, 1, 2, 2};
+    IndexArrayType j_mA    = {0, 2, 1, 3, 2, 3};
     std::vector<double>       v_mA    = {1, 1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> mA(3, 4);
     mA.build(i_mA, j_mA, v_mA);
 
-    VectorIndexType i_mA_n    = {0, 0, 1, 1, 2, 2};
-    VectorIndexType j_mA_n   =  {1, 3, 0, 2, 0, 1};
+    IndexArrayType i_mA_n    = {0, 0, 1, 1, 2, 2};
+    IndexArrayType j_mA_n   =  {1, 3, 0, 2, 0, 1};
     std::vector<double>   v_answer    =   {1, 1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> answer(3, 4);
     answer.build(i_mA_n, j_mA_n, v_answer);
@@ -153,8 +153,8 @@ BOOST_AUTO_TEST_CASE(test_complementview_nonsquare)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_complement_transpose_nonsquare)
 {
-    //VectorIndexType i_mA    = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
-    //VectorIndexType j_mA    = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
+    //IndexArrayType i_mA    = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
+    //IndexArrayType j_mA    = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
     //std::vector<double>       v_mA    = {1, 0, 2, 0, 0, 3, 0,-1, 0, 0,-2, 6};
     //Matrix<double, DirectedMatrixTag> mA(3, 4);
     //mA.build(i_mA, j_mA, v_mA);
@@ -166,14 +166,14 @@ BOOST_AUTO_TEST_CASE(test_complement_transpose_nonsquare)
     /// @todo This currently does not work (TransposeView is destructed)
     //auto result = complement(transpose(mA));
 
-    VectorIndexType i_mA    = {0, 0, 1, 1, 2, 2};
-    VectorIndexType j_mA    = {0, 2, 1, 3, 2, 3};
+    IndexArrayType i_mA    = {0, 0, 1, 1, 2, 2};
+    IndexArrayType j_mA    = {0, 2, 1, 3, 2, 3};
     std::vector<double>       v_mA    = {1,  2,   3, -1,  -2, 6};
     Matrix<double, DirectedMatrixTag> mA(3, 4);
     mA.build(i_mA, j_mA, v_mA);
 
-    VectorIndexType i_mA_n    = {0, 0, 1, 1, 2, 2};
-    VectorIndexType j_mA_n   =  {1, 3, 0, 2, 0, 1};
+    IndexArrayType i_mA_n    = {0, 0, 1, 1, 2, 2};
+    IndexArrayType j_mA_n   =  {1, 3, 0, 2, 0, 1};
     std::vector<double>   v_answer    =   {1, 1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> answer(4, 3);
     answer.build(j_mA_n, i_mA_n, v_answer);
@@ -186,8 +186,8 @@ BOOST_AUTO_TEST_CASE(test_complement_transpose_nonsquare)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_transpose_complement_nonsquare)
 {
-    //VectorIndexType i_mA    = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
-    //VectorIndexType j_mA    = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
+    //IndexArrayType i_mA    = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
+    //IndexArrayType j_mA    = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
     //std::vector<double>       v_mA    = {1, 0, 2, 0, 0, 3, 0,-1, 0, 0,-2, 6};
     //Matrix<double, DirectedMatrixTag> mA(3, 4);
     //mA.build(i_mA, j_mA, v_mA);
@@ -198,14 +198,14 @@ BOOST_AUTO_TEST_CASE(test_transpose_complement_nonsquare)
 
     /// @todo This currently does not work (ComplementView is destructed)
     //auto result = transpose(complement(mA));
-    VectorIndexType i_mA    = {0, 0, 1, 1, 2, 2};
-    VectorIndexType j_mA    = {0, 2, 1, 3, 2, 3};
+    IndexArrayType i_mA    = {0, 0, 1, 1, 2, 2};
+    IndexArrayType j_mA    = {0, 2, 1, 3, 2, 3};
     std::vector<double>       v_mA    = {1, 2, 3,-1,-2, 6};
     Matrix<double, DirectedMatrixTag> mA(3, 4);
     mA.build(i_mA, j_mA, v_mA);
 
-    VectorIndexType i_mA_n    = {0, 0, 1, 1, 2, 2};
-    VectorIndexType j_mA_n   =  {1, 3, 0, 2, 0, 1};
+    IndexArrayType i_mA_n    = {0, 0, 1, 1, 2, 2};
+    IndexArrayType j_mA_n   =  {1, 3, 0, 2, 0, 1};
     std::vector<double>   v_answer    =   {1, 1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> answer(4, 3);
     answer.build(j_mA_n, i_mA_n, v_answer);

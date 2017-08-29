@@ -378,15 +378,15 @@ namespace GraphBLAS
             typename MaskT,
             typename AccumT,
             typename ValueT,
-            typename RowIndicesT,
-            typename ColIndicesT,
+            typename RowSequenceT,
+            typename ColSequenceT,
             typename std::enable_if<std::is_convertible<ValueT, typename CMatrixT::ScalarType>::value, int>::type = 0>
     inline void assign(CMatrixT             &C,
                        MaskT          const &Mask,
                        AccumT                accum,
                        ValueT                val,
-                       RowIndicesT   const &row_indices,
-                       ColIndicesT   const &col_indices,
+                       RowSequenceT   const &row_indices,
+                       ColSequenceT   const &col_indices,
                        bool                  replace_flag = false)
     {
         backend::assign_constant(C.m_mat, Mask.m_mat, accum, val,

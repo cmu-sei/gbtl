@@ -206,8 +206,8 @@ namespace GraphBLAS
          */
         template<typename ValueT,
                  typename BinaryOpT = GraphBLAS::Second<ScalarType> >
-        inline void build(VectorIndexType       const &row_indices,
-                          VectorIndexType       const &col_indices,
+        inline void build(IndexArrayType       const &row_indices,
+                          IndexArrayType       const &col_indices,
                           std::vector<ValueT>  const &values,
                           BinaryOpT                   dup = BinaryOpT())
         {

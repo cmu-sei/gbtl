@@ -33,8 +33,8 @@ int main(int argc, char **argv)
     // Read the edgelist and create the tuple arrays
     std::string pathname(argv[1]);
     std::ifstream infile(pathname);
-    GraphBLAS::VectorIndexType iL, iU, iA;
-    GraphBLAS::VectorIndexType jL, jU, jA;
+    GraphBLAS::IndexArrayType iL, iU, iA;
+    GraphBLAS::IndexArrayType jL, jU, jA;
     int64_t num_rows = 0;
     int64_t max_id = 0;
     uint64_t src, dst;

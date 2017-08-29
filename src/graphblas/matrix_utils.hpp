@@ -38,7 +38,7 @@ namespace GraphBLAS
     template<typename MatrixT, typename VectorT>
     MatrixT diag(VectorT const &v)
     {
-        VectorIndexType indices(v.nvals());
+        IndexArrayType indices(v.nvals());
         std::vector<typename VectorT::ScalarType> vals(v.nvals());
         v.extractTuples(indices.begin(), vals.begin());
 
@@ -61,7 +61,7 @@ namespace GraphBLAS
                                 static_cast<typename MatrixT::ScalarType>(1))
     {
         using T = typename MatrixT::ScalarType;
-        VectorIndexType indices;
+        IndexArrayType indices;
         std::vector<T> vals(mat_size, val);
         for (IndexType ix = 0; ix < mat_size; ++ix)
         {
@@ -95,11 +95,11 @@ namespace GraphBLAS
         GraphBLAS::IndexType cols(A.ncols());
         GraphBLAS::IndexType nvals(A.nvals());
 
-        GraphBLAS::VectorIndexType i(nvals), j(nvals);
+        GraphBLAS::IndexArrayType i(nvals), j(nvals);
         std::vector<T> v(nvals);
         A.extractTuples(i, j, v);
 
-        VectorIndexType iL,jL, iU,jU;
+        IndexArrayType iL,jL, iU,jU;
         std::vector<T> vL, vU;
 
         for (GraphBLAS::IndexType idx = 0; idx < nvals; ++idx)
@@ -143,7 +143,7 @@ namespace GraphBLAS
                          GraphBLAS::MultiplicativeInverse<T>(),
                          w);
 
-        VectorIndexType indices(w.nvals());
+        IndexArrayType indices(w.nvals());
         std::vector<typename MatrixT::ScalarType> vals(w.nvals());
         w.extractTuples(indices.begin(), vals.begin());
 
@@ -181,7 +181,7 @@ namespace GraphBLAS
                          GraphBLAS::MultiplicativeInverse<T>(),
                          w);
 
-        VectorIndexType indices(w.nvals());
+        IndexArrayType indices(w.nvals());
         std::vector<typename MatrixT::ScalarType> vals(w.nvals());
         w.extractTuples(indices.begin(), vals.begin());
 

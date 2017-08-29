@@ -172,7 +172,7 @@ namespace GraphBLAS
          */
         template<typename ValueT,
                  typename BinaryOpT = GraphBLAS::Second<ScalarType> >
-        inline void build(VectorIndexType       const &indices,
+        inline void build(IndexArrayType       const &indices,
                           std::vector<ValueT>  const &values,
                           BinaryOpT                   dup = BinaryOpT())
         {
@@ -213,7 +213,7 @@ namespace GraphBLAS
             m_vec.extractTuples(i_it, v_it);
         }
 
-        void extractTuples(VectorIndexType        &indices,
+        void extractTuples(IndexArrayType        &indices,
                            std::vector<ScalarT>  &values) const
         {
             m_vec.extractTuples(indices, values);

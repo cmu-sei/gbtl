@@ -72,7 +72,7 @@ namespace algorithms
         }
 
         std::vector<T> vals(v.nvals());
-        GraphBLAS::VectorIndexType idx(v.nvals());
+        GraphBLAS::IndexArrayType idx(v.nvals());
         v.extractTuples(idx.begin(), vals.begin());
 
         GraphBLAS::IndexType idx_min = idx[0];
@@ -128,8 +128,8 @@ namespace algorithms
 
         // Create an adjacency matrix of the correct type (combining
         // source vertex ID with edge weight
-        GraphBLAS::VectorIndexType i(graph.nvals());
-        GraphBLAS::VectorIndexType j(graph.nvals());
+        GraphBLAS::IndexArrayType i(graph.nvals());
+        GraphBLAS::IndexArrayType j(graph.nvals());
         std::vector<T> vals(graph.nvals());
         graph.extractTuples(i.begin(), j.begin(), vals.begin());
         std::vector<MSTType<T>> new_vals;

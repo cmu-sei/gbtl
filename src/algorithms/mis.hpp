@@ -81,11 +81,11 @@ namespace algorithms
      *                             implies the corresponding vertex is selected.
      */
     template <typename VectorT>
-    GraphBLAS::VectorIndexType get_vertex_IDs(VectorT const &independent_set)
+    GraphBLAS::IndexArrayType get_vertex_IDs(VectorT const &independent_set)
     {
         using T = typename VectorT::ScalarType;
         GraphBLAS::IndexType set_size(independent_set.nvals());
-        GraphBLAS::VectorIndexType ans(set_size);
+        GraphBLAS::IndexArrayType ans(set_size);
         std::vector<T> vals(set_size);
 
         independent_set.extractTuples(ans.begin(), vals.begin());

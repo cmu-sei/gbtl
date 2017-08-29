@@ -377,7 +377,7 @@ namespace GraphBLAS
                 }
             }
 
-            void extractTuples(VectorIndexType        &indices,
+            void extractTuples(IndexArrayType        &indices,
                                std::vector<ScalarT>  &values) const
             {
                 extractTuples(indices.begin(), values.begin());

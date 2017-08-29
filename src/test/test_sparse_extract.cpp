@@ -40,8 +40,8 @@ BOOST_AUTO_TEST_CASE(sparse_extract_4_3_6_1_base)
     // Output space
     GraphBLAS::IndexType M = 3;
 
-    VectorIndexType vec_indices = {0, 2, 4};
-    GraphBLAS::VectorIndexType indices(vec_indices);
+    IndexArrayType vec_indices = {0, 2, 4};
+    GraphBLAS::IndexArrayType indices(vec_indices);
 
     GraphBLAS::Vector<double> result(M);
 
@@ -65,8 +65,8 @@ BOOST_AUTO_TEST_CASE(sparse_extract_4_3_6_1_bounds_check1)
     // Output space
     GraphBLAS::IndexType M = 3;
 
-    VectorIndexType vec_indices = {0, 2, 4};
-    GraphBLAS::VectorIndexType indices(vec_indices);
+    IndexArrayType vec_indices = {0, 2, 4};
+    GraphBLAS::IndexArrayType indices(vec_indices);
 
     GraphBLAS::Vector<double> result(M);
 
@@ -89,8 +89,8 @@ BOOST_AUTO_TEST_CASE(sparse_extract_4_3_6_1_bounds_check1)
     // =======
 
     // Also check nindices mismatch
-    VectorIndexType bad_vec_indices = {2, 4};
-    GraphBLAS::VectorIndexType bad_indices(bad_vec_indices);
+    IndexArrayType bad_vec_indices = {2, 4};
+    GraphBLAS::IndexArrayType bad_indices(bad_vec_indices);
 
     BOOST_CHECK_THROW(
             (GraphBLAS::extract(result,
@@ -117,10 +117,10 @@ BOOST_AUTO_TEST_CASE(sparse_extract_base)
     GraphBLAS::IndexType M = 2;
     GraphBLAS::IndexType N = 2;
 
-    VectorIndexType vec_row_indices = {0, 2};
-    VectorIndexType vec_col_indices = {1, 2};
-    GraphBLAS::VectorIndexType row_indices(vec_row_indices);
-    GraphBLAS::VectorIndexType col_indices(vec_col_indices);
+    IndexArrayType vec_row_indices = {0, 2};
+    IndexArrayType vec_col_indices = {1, 2};
+    GraphBLAS::IndexArrayType row_indices(vec_row_indices);
+    GraphBLAS::IndexArrayType col_indices(vec_col_indices);
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(M, N);
 
@@ -153,10 +153,10 @@ BOOST_AUTO_TEST_CASE(sparse_extract_duplicate)
 
     GraphBLAS::Matrix<bool, GraphBLAS::DirectedMatrixTag> mask(M, N);
 
-    VectorIndexType vec_row_indices = {0, 2, 2};
-    VectorIndexType vec_col_indices = {1, 1, 2};
-    GraphBLAS::VectorIndexType row_indices(vec_row_indices);
-    GraphBLAS::VectorIndexType col_indices(vec_col_indices);
+    IndexArrayType vec_row_indices = {0, 2, 2};
+    IndexArrayType vec_col_indices = {1, 1, 2};
+    GraphBLAS::IndexArrayType row_indices(vec_row_indices);
+    GraphBLAS::IndexArrayType col_indices(vec_col_indices);
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(M, N);
 
@@ -190,10 +190,10 @@ BOOST_AUTO_TEST_CASE(sparse_extract_permute)
     GraphBLAS::IndexType N = 3;
 
 
-    VectorIndexType vec_row_indices = {2, 0, 1};
-    VectorIndexType vec_col_indices = {1, 2, 0};
-    GraphBLAS::VectorIndexType row_indices(vec_row_indices);
-    GraphBLAS::VectorIndexType col_indices(vec_col_indices);
+    IndexArrayType vec_row_indices = {2, 0, 1};
+    IndexArrayType vec_col_indices = {1, 2, 0};
+    GraphBLAS::IndexArrayType row_indices(vec_row_indices);
+    GraphBLAS::IndexArrayType col_indices(vec_col_indices);
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(M, N);
 
@@ -220,10 +220,10 @@ BOOST_AUTO_TEST_CASE(sparse_extract_mask)
                                                   {9, 2}};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 0);
 
-    VectorIndexType vec_row_indices = {0, 2};
-    VectorIndexType vec_col_indices = {1, 2};
-    GraphBLAS::VectorIndexType row_indices(vec_row_indices);
-    GraphBLAS::VectorIndexType col_indices(vec_col_indices);
+    IndexArrayType vec_row_indices = {0, 2};
+    IndexArrayType vec_col_indices = {1, 2};
+    GraphBLAS::IndexArrayType row_indices(vec_row_indices);
+    GraphBLAS::IndexArrayType col_indices(vec_col_indices);
 
     // Output space
     GraphBLAS::IndexType M = 2;
@@ -258,10 +258,10 @@ BOOST_AUTO_TEST_CASE(sparse_extract_mask_replace)
                                                   {9, 0}};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 0);
 
-    VectorIndexType vec_row_indices = {0, 2};
-    VectorIndexType vec_col_indices = {1, 2};
-    GraphBLAS::VectorIndexType row_indices(vec_row_indices);
-    GraphBLAS::VectorIndexType col_indices(vec_col_indices);
+    IndexArrayType vec_row_indices = {0, 2};
+    IndexArrayType vec_col_indices = {1, 2};
+    GraphBLAS::IndexArrayType row_indices(vec_row_indices);
+    GraphBLAS::IndexArrayType col_indices(vec_col_indices);
 
     // Output space
     GraphBLAS::IndexType M = 2;
@@ -305,10 +305,10 @@ BOOST_AUTO_TEST_CASE(sparse_extract_accum)
     GraphBLAS::IndexType M = 2;
     GraphBLAS::IndexType N = 2;
 
-    VectorIndexType vec_row_indices = {0, 2};
-    VectorIndexType vec_col_indices = {1, 2};
-    GraphBLAS::VectorIndexType row_indices(vec_row_indices);
-    GraphBLAS::VectorIndexType col_indices(vec_col_indices);
+    IndexArrayType vec_row_indices = {0, 2};
+    IndexArrayType vec_col_indices = {1, 2};
+    GraphBLAS::IndexArrayType row_indices(vec_row_indices);
+    GraphBLAS::IndexArrayType col_indices(vec_col_indices);
 
     std::vector<std::vector<double>> matResult = {{20, 20},
                                                   {20, 20}};
@@ -340,8 +340,8 @@ BOOST_AUTO_TEST_CASE(sparse_extract_column)
     // Output space
     GraphBLAS::IndexType M = 2;
 
-    VectorIndexType vec_row_indices = {0, 2};
-    GraphBLAS::VectorIndexType row_indices(vec_row_indices);
+    IndexArrayType vec_row_indices = {0, 2};
+    GraphBLAS::IndexArrayType row_indices(vec_row_indices);
 
     GraphBLAS::Vector<double> result(M);
 

@@ -50,9 +50,8 @@ namespace GraphBLAS
         DimensionException(std::string const &msg)
             : m_message(msg)
         {
-            GRB_LOG_VERBOSE("!!! DimenssionException: " << msg);
+            GRB_LOG_VERBOSE("!!! DimensionException: " << msg);
         }
-
 
         DimensionException(){}
 

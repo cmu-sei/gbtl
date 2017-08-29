@@ -41,7 +41,7 @@ namespace algorithms
      *         assigned.
      */
     template <typename MatrixT>
-    GraphBLAS::VectorIndexType get_cluster_assignments(MatrixT cluster_matrix)
+    GraphBLAS::IndexArrayType get_cluster_assignments(MatrixT cluster_matrix)
     {
         using T = typename MatrixT::ScalarType;
 
@@ -49,14 +49,14 @@ namespace algorithms
         GraphBLAS::IndexType num_clusters(cluster_matrix.ncols());
 
         GraphBLAS::IndexType nnz = cluster_matrix.nvals();
-        GraphBLAS::VectorIndexType cluster_ids(nnz), vertex_ids(nnz);
+        GraphBLAS::IndexArrayType cluster_ids(nnz), vertex_ids(nnz);
         std::vector<T> vals(nnz);
         cluster_matrix.extractTuples(cluster_ids.begin(),
                                      vertex_ids.begin(),
                                      vals.begin());
 
         std::vector<double> max_vals(num_nodes, -1.0);
-        GraphBLAS::VectorIndexType cluster_assignments(
+        GraphBLAS::IndexArrayType cluster_assignments(
             num_nodes,
             std::numeric_limits<GraphBLAS::IndexType>::max());
 

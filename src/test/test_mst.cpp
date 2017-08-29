@@ -32,9 +32,9 @@ BOOST_AUTO_TEST_SUITE(mst_suite)
 BOOST_AUTO_TEST_CASE(mst_test_with_weight_one)
 {
     IndexType const NUM_NODES = 6;
-    VectorIndexType i_m1 = {0, 0, 0, 1, 1, 1, 2, 2, 3, 3, 3,
+    IndexArrayType i_m1 = {0, 0, 0, 1, 1, 1, 2, 2, 3, 3, 3,
                            4, 4, 4, 4, 4, 5, 5};
-    VectorIndexType j_m1 = {1, 3, 4, 0, 3, 4, 4, 5, 0, 1, 4,
+    IndexArrayType j_m1 = {1, 3, 4, 0, 3, 4, 4, 5, 0, 1, 4,
                            0, 1, 2, 3, 5, 2, 4};
     std::vector<double> v_m1(i_m1.size(), 1);
     Matrix<double> m1(NUM_NODES, NUM_NODES);
@@ -58,9 +58,9 @@ BOOST_AUTO_TEST_CASE(mst_test_with_weight_one)
 BOOST_AUTO_TEST_CASE(mst_test_with_weight_various)
 {
     IndexType const NUM_NODES = 6;
-    VectorIndexType i_m1 =      {0, 0, 0, 1, 1, 1, 2, 2, 3, 3, 3,
+    IndexArrayType i_m1 =      {0, 0, 0, 1, 1, 1, 2, 2, 3, 3, 3,
                                 4, 4, 4, 4, 4, 5, 5};
-    VectorIndexType j_m1 =      {1, 3, 4, 0, 3, 4, 4, 5, 0, 1, 4,
+    IndexArrayType j_m1 =      {1, 3, 4, 0, 3, 4, 4, 5, 0, 1, 4,
                                 0, 1, 2, 3, 5, 2, 4};
     std::vector<double> v_m1 = {2, 2, 1, 2, 2, 1, 1, 2, 2, 2, 1,
                                 1, 1, 1, 1, 1, 2, 1};
@@ -94,10 +94,10 @@ BOOST_AUTO_TEST_CASE(mst_test_with_weights)
     //                       {8,11, 0, 0, 0, 0, 1, 0, 7},
     //                       {0, 0, 2, 0, 0, 0, 6, 7, 0}});
     IndexType const NUM_NODES = 9;
-    VectorIndexType i_m1 = {0, 0, 1, 1, 1, 2, 2, 2, 2,
+    IndexArrayType i_m1 = {0, 0, 1, 1, 1, 2, 2, 2, 2,
                            3, 3, 3, 4, 4, 5, 5, 5, 5,
                            6, 6, 6, 7, 7, 7, 7, 8, 8, 8};
-    VectorIndexType j_m1 = {1, 7, 0, 2, 7, 1, 3, 5, 8,
+    IndexArrayType j_m1 = {1, 7, 0, 2, 7, 1, 3, 5, 8,
                            2, 4, 5, 3, 5, 2, 3, 4, 6,
                            5, 7, 8, 0, 1, 6, 8, 2, 6, 7};
     std::vector<double> v_m1 = {4, 8, 4, 8,11, 8, 7, 4, 2,

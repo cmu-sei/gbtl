@@ -29,8 +29,8 @@ BOOST_AUTO_TEST_SUITE(transpose_suite)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_two_argument_transpose_bad_dim)
 {
-    VectorIndexType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    VectorIndexType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double>       v_mA    = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     Matrix<double, DirectedMatrixTag> mA(3, 3);
     mA.build(i_mA, j_mA, v_mA);
@@ -45,8 +45,8 @@ BOOST_AUTO_TEST_CASE(test_two_argument_transpose_bad_dim)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_two_argument_transpose_square)
 {
-    VectorIndexType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    VectorIndexType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double>       v_mA    = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     Matrix<double, DirectedMatrixTag> mA(3, 3);
     mA.build(i_mA, j_mA, v_mA);
@@ -63,8 +63,8 @@ BOOST_AUTO_TEST_CASE(test_two_argument_transpose_square)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_two_argument_transpose_nonsquare)
 {
-    VectorIndexType i_mA    = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2};
-    VectorIndexType j_mA    = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2};
+    IndexArrayType i_mA    = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_mA    = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2};
     std::vector<double>       v_mA    = {1, 2, 3,-2, 4, 5, 6, 7, 8, 9};
     Matrix<double, DirectedMatrixTag> mA(3, 4);
     mA.build(i_mA, j_mA, v_mA);
@@ -82,8 +82,8 @@ BOOST_AUTO_TEST_CASE(test_two_argument_transpose_nonsquare)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_single_argument_transpose_square)
 {
-    VectorIndexType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    VectorIndexType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double>       v_mA    = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     Matrix<double, DirectedMatrixTag> mA(3, 3);
     mA.build(i_mA, j_mA, v_mA);
@@ -104,8 +104,8 @@ BOOST_AUTO_TEST_CASE(test_single_argument_transpose_square)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_single_argument_transpose_nonsquare)
 {
-    VectorIndexType i_mA    = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2};
-    VectorIndexType j_mA    = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2};
+    IndexArrayType i_mA    = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_mA    = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2};
     std::vector<double>       v_mA    = {1, 2, 3,-2, 4, 5, 6, 7, 8, 9};
     Matrix<double, DirectedMatrixTag> mA(3, 4);
     mA.build(i_mA, j_mA, v_mA);

@@ -44,8 +44,8 @@ BOOST_AUTO_TEST_CASE(sparse_assign_matrix_base)
     GraphBLAS::IndexType M = 3;
     GraphBLAS::IndexType N = 3;
 
-    GraphBLAS::VectorIndexType row_indices = {2, 1};
-    GraphBLAS::VectorIndexType col_indices = {0, 2};
+    GraphBLAS::IndexArrayType row_indices = {2, 1};
+    GraphBLAS::IndexArrayType col_indices = {0, 2};
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(M, N);
 
@@ -80,8 +80,8 @@ BOOST_AUTO_TEST_CASE(sparse_assign_matrix_mask)
     GraphBLAS::IndexType M = 3;
     GraphBLAS::IndexType N = 3;
 
-    GraphBLAS::VectorIndexType row_indices = {2, 1};
-    GraphBLAS::VectorIndexType col_indices = {0, 2};
+    GraphBLAS::IndexArrayType row_indices = {2, 1};
+    GraphBLAS::IndexArrayType col_indices = {0, 2};
 
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(M, N);
 
@@ -111,8 +111,8 @@ BOOST_AUTO_TEST_CASE(sparse_assign_matrix_accum)
                                                   {8,  8, 15}};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 0);
 
-    GraphBLAS::VectorIndexType row_indices = {2, 1};
-    GraphBLAS::VectorIndexType col_indices = {0, 2};
+    GraphBLAS::IndexArrayType row_indices = {2, 1};
+    GraphBLAS::IndexArrayType col_indices = {0, 2};
 
     GraphBLAS::assign(mC,
                       GraphBLAS::NoMask(),
@@ -134,8 +134,8 @@ BOOST_AUTO_TEST_CASE(sparse_assign_const_base)
                                                   {1, 0, 1}};
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 0);
 
-    GraphBLAS::VectorIndexType row_indices = {2, 1};
-    GraphBLAS::VectorIndexType col_indices = {0, 2};
+    GraphBLAS::IndexArrayType row_indices = {2, 1};
+    GraphBLAS::IndexArrayType col_indices = {0, 2};
 
 //    GraphBLAS::assign_constant(mC,
     GraphBLAS::assign(mC,

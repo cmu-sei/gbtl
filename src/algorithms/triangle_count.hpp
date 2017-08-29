@@ -139,7 +139,7 @@ namespace algorithms
         MatrixT L(rows, cols), U(rows, cols);
         GraphBLAS::split(graph, L, U);
 
-        GraphBLAS::VectorIndexType indices = {0};
+        GraphBLAS::IndexArrayType indices = {0};
 
         T delta(0UL);
         for (GraphBLAS::IndexType idx = 2; idx < rows; ++idx)
@@ -219,7 +219,7 @@ namespace algorithms
         MatrixT L(rows, cols), U(rows, cols);
         GraphBLAS::split(graph, L, U);
 
-        GraphBLAS::VectorIndexType indices = {0};
+        GraphBLAS::IndexArrayType indices = {0};
 
         T delta(0UL);
         for (GraphBLAS::IndexType idx = 2; idx < rows/2; ++idx)
@@ -331,11 +331,11 @@ namespace algorithms
         }
 
         // the rows that a01 and A02 extract from (they grow)
-        GraphBLAS::VectorIndexType row_indices;
+        GraphBLAS::IndexArrayType row_indices;
         row_indices.reserve(rows);
 
         // the cols that a12 and A02 extract from (they shrink)
-        GraphBLAS::VectorIndexType col_indices;
+        GraphBLAS::IndexArrayType col_indices;
         col_indices.reserve(cols);
         for (GraphBLAS::IndexType idx = 1; idx < cols; ++idx)
         {
@@ -489,7 +489,7 @@ namespace algorithms
         MatrixT L(rows, cols), U(rows, cols);
         GraphBLAS::split(graph, L, U);
 
-        GraphBLAS::VectorIndexType indices = {0};
+        GraphBLAS::IndexArrayType indices = {0};
 
         T delta(0UL);
         for (GraphBLAS::IndexType idx = 2; idx < rows; ++idx)
@@ -552,11 +552,11 @@ namespace algorithms
         }
 
         // the rows that a01 and A02 extract from (they grow)
-        GraphBLAS::VectorIndexType row_indices;
+        GraphBLAS::IndexArrayType row_indices;
         row_indices.reserve(rows);
 
         // the cols that a12 and A02 extract from (they shrink)
-        GraphBLAS::VectorIndexType col_indices;
+        GraphBLAS::IndexArrayType col_indices;
         col_indices.reserve(cols);
         for (GraphBLAS::IndexType idx = 1; idx < cols; ++idx)
         {
@@ -627,7 +627,7 @@ namespace algorithms
             return 0;
         }
 
-        GraphBLAS::VectorIndexType all_indices;
+        GraphBLAS::IndexArrayType all_indices;
         all_indices.reserve(rows);
         for (GraphBLAS::IndexType ix = 0; ix < rows; ++ix)
         {
@@ -721,10 +721,10 @@ namespace algorithms
         GraphBLAS::IndexType begin_index(0);
         GraphBLAS::IndexType end_index(block_size);
 
-        GraphBLAS::VectorIndexType zero2begin; zero2begin.reserve(rows);
-        GraphBLAS::VectorIndexType begin2end;  begin2end.reserve(block_size);
-        GraphBLAS::VectorIndexType end2rows;   end2rows.reserve(rows);
-        GraphBLAS::VectorIndexType end2rowsMask;   end2rows.reserve(rows);
+        GraphBLAS::IndexArrayType zero2begin; zero2begin.reserve(rows);
+        GraphBLAS::IndexArrayType begin2end;  begin2end.reserve(block_size);
+        GraphBLAS::IndexArrayType end2rows;   end2rows.reserve(rows);
+        GraphBLAS::IndexArrayType end2rowsMask;   end2rows.reserve(rows);
 
 
         while (begin_index < rows)

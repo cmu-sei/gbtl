@@ -55,7 +55,7 @@ namespace algorithms
                             Distances,
                             graph);
         GraphBLAS::Matrix<T> col_k(num_vertices, 1);
-        GraphBLAS::VectorIndexType row_indices(1);
+        GraphBLAS::IndexArrayType row_indices(1);
         GraphBLAS::Matrix<T> row_k(1, num_vertices);
 
         for (GraphBLAS::IndexType k = 0; k < num_vertices; ++k)

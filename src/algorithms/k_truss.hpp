@@ -74,7 +74,7 @@ namespace algorithms
 
         // Build a mask for the diagonal of A
         GraphBLAS::Matrix<bool> DiagMask(num_vertices, num_vertices);
-        GraphBLAS::VectorIndexType I_n;
+        GraphBLAS::IndexArrayType I_n;
         std::vector<bool> v_n(num_vertices, true);
         I_n.reserve(num_vertices);
         for (GraphBLAS::IndexType ix = 0; ix < num_vertices; ++ix)
@@ -141,8 +141,8 @@ namespace algorithms
             //          << std::endl;
 
             // Step 0a: Get the indices of 'falses' in x
-            GraphBLAS::VectorIndexType x_indices(x->nvals());
-            GraphBLAS::VectorIndexType x_vals(x->nvals());
+            GraphBLAS::IndexArrayType x_indices(x->nvals());
+            GraphBLAS::IndexArrayType x_vals(x->nvals());
             x->extractTuples(x_indices.begin(), x_vals.begin());
 
             //std::cout << "x_indices: ";
@@ -161,7 +161,7 @@ namespace algorithms
                              xc, true);
             //GraphBLAS::print_vector(std::cout, xc, "complement(x)");
 
-            GraphBLAS::VectorIndexType xc_indices(xc.nvals());
+            GraphBLAS::IndexArrayType xc_indices(xc.nvals());
             std::vector<bool>         xc_vals(xc.nvals());
             xc.extractTuples(xc_indices.begin(), xc_vals.begin());
 

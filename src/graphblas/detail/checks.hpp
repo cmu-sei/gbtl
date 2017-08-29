@@ -13,8 +13,8 @@
  * permission@sei.cmu.edu for more information.  DM-0002659
  */
 
-#ifndef GRAPHBLAS_CHECKS_HPP
-#define GRAPHBLAS_CHECKS_HPP
+#ifndef GB_CHECKS_HPP
+#define GB_CHECKS_HPP
 
 #define GB_INCLUDE_BACKEND_MATRIX 1
 #define GB_INCLUDE_BACKEND_VECTOR 1
@@ -189,4 +189,4 @@ namespace GraphBLAS
 
 } // end namespace GraphBLAS
 
-#endif //GRAPHBLAS_CHECKS_HPP
+#endif //GB_CHECKS_HPP

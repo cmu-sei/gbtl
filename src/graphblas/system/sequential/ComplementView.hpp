@@ -246,7 +246,7 @@ namespace GraphBLAS
             }
 
             // Get column indices for a given row
-            void getColumnIndices(IndexType irow, VectorIndexType &indices) const
+            void getColumnIndices(IndexType irow, IndexArrayType &indices) const
             {
                 auto row = getRow(irow);
                 indices.clear();
@@ -257,7 +257,7 @@ namespace GraphBLAS
             }
 
             // Get row indices for a given column
-            void getRowIndices(IndexType icol, VectorIndexType &indices) const
+            void getRowIndices(IndexType icol, IndexArrayType &indices) const
             {
                 auto col = getCol(icol);
                 indices.clear();

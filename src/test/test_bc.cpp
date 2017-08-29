@@ -93,8 +93,8 @@ BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch_old)
     Matrix<double, DirectedMatrixTag> betweenness(8,8);
     betweenness.build(br.begin(), bc.begin(), bv.begin(), bv.size());
 
-    //VectorIndexType seed_set={0, 1, 2, 3, 4, 5, 6, 7};
-    VectorIndexType seed_set={0};
+    //IndexArrayType seed_set={0, 1, 2, 3, 4, 5, 6, 7};
+    IndexArrayType seed_set={0};
     std::vector<double> answer = {0.0, 4.0/3, 4.0/3, 4.0/3, 3.0, 0.5, 0.5, 0.0};
 
     std::vector<double> result =
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch_old)
         BOOST_CHECK_CLOSE(result[ix], answer[ix], 0.0001);
 
     //==========
-    VectorIndexType seed_set3={3};
+    IndexArrayType seed_set3={3};
     std::vector<double> answer3 = {0.0, 0.0, 0.0, 0.0, 3.0, 0.5, 0.5, 0.0};
 
     std::vector<double> result3 =
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch_old)
         BOOST_CHECK_CLOSE(result3[ix], answer3[ix], 0.0001);
 
     //==========
-    VectorIndexType seed_set03={0,3};
+    IndexArrayType seed_set03={0,3};
 
     std::vector<double> result03 =
         vertex_betweenness_centrality_batch_old(betweenness, seed_set03);
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch_old)
         BOOST_CHECK_CLOSE(result03[ix], answer[ix] + answer3[ix], 0.0001);
 
     //==========
-    VectorIndexType seed_set_all={0,1,2,3,4,5,6,7};
+    IndexArrayType seed_set_all={0,1,2,3,4,5,6,7};
     std::vector<double> answer_all = {0.0, 4.0/3, 4.0/3, 4.0/3, 12.0, 2.5, 2.5, 0.0};
 
     std::vector<double> result_all =
@@ -144,8 +144,8 @@ BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch)
     Matrix<double, DirectedMatrixTag> betweenness(8,8);
     betweenness.build(br.begin(), bc.begin(), bv.begin(), bv.size());
 
-    //VectorIndexType seed_set={0, 1, 2, 3, 4, 5, 6, 7};
-    VectorIndexType seed_set={0};
+    //IndexArrayType seed_set={0, 1, 2, 3, 4, 5, 6, 7};
+    IndexArrayType seed_set={0};
     std::vector<float> answer = {0.0, 4.0/3, 4.0/3, 4.0/3, 3.0, 0.5, 0.5, 0.0};
 
     std::vector<float> result =
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch)
         BOOST_CHECK_CLOSE(result[ix], answer[ix], 0.0001);
 
     //==========
-    VectorIndexType seed_set3={3};
+    IndexArrayType seed_set3={3};
     std::vector<float> answer3 = {0.0, 0.0, 0.0, 0.0, 3.0, 0.5, 0.5, 0.0};
 
     std::vector<float> result3 =
@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch)
         BOOST_CHECK_CLOSE(result3[ix], answer3[ix], 0.0001);
 
     //==========
-    VectorIndexType seed_set03={0,3};
+    IndexArrayType seed_set03={0,3};
 
     std::vector<float> result03 =
         vertex_betweenness_centrality_batch(betweenness, seed_set03);
@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch)
         BOOST_CHECK_CLOSE(result03[ix], answer[ix] + answer3[ix], 0.0001);
 
     //==========
-    VectorIndexType seed_set_all={0,1,2,3,4,5,6,7};
+    IndexArrayType seed_set_all={0,1,2,3,4,5,6,7};
     std::vector<double> answer_all = {0.0, 4.0/3, 4.0/3, 4.0/3, 12.0, 2.5, 2.5, 0.0};
 
     std::vector<float> result_all =
@@ -200,8 +200,8 @@ BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch_alt)
     Matrix<double, DirectedMatrixTag> betweenness(8,8);
     betweenness.build(br1.begin(), bc1.begin(), bv1.begin(), bv1.size());
 
-    //VectorIndexType seed_set={0, 1, 2, 3, 4, 5, 6, 7};
-    VectorIndexType seed_set={0};
+    //IndexArrayType seed_set={0, 1, 2, 3, 4, 5, 6, 7};
+    IndexArrayType seed_set={0};
     std::vector<float> answer = {0.0, 4.0/3, 4.0/3, 4.0/3, 3.0, 0.5, 0.5, 0.0};
 
     std::vector<float> result =
@@ -212,7 +212,7 @@ BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch_alt)
         BOOST_CHECK_CLOSE(result[ix], answer[ix], 0.0001);
 
     //==========
-    VectorIndexType seed_set3={3};
+    IndexArrayType seed_set3={3};
     std::vector<float> answer3 = {0.0, 0.0, 0.0, 0.0, 3.0, 0.5, 0.5, 0.0};
 
     std::vector<float> result3 =
@@ -223,7 +223,7 @@ BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch_alt)
         BOOST_CHECK_CLOSE(result3[ix], answer3[ix], 0.0001);
 
     //==========
-    VectorIndexType seed_set03={0,3};
+    IndexArrayType seed_set03={0,3};
 
     std::vector<float> result03 =
         vertex_betweenness_centrality_batch_alt(betweenness, seed_set03);
@@ -233,7 +233,7 @@ BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch_alt)
         BOOST_CHECK_CLOSE(result03[ix], answer[ix] + answer3[ix], 0.0001);
 
     //==========
-    VectorIndexType seed_set_all={0,1,2,3,4,5,6,7};
+    IndexArrayType seed_set_all={0,1,2,3,4,5,6,7};
     std::vector<double> answer_all = {0.0, 4.0/3, 4.0/3, 4.0/3, 12.0, 2.5, 2.5, 0.0};
 
     std::vector<float> result_all =
@@ -252,8 +252,8 @@ BOOST_AUTO_TEST_CASE(bc_batch_alt_trans)
     Matrix<double, DirectedMatrixTag> betweenness(8,8);
     betweenness.build(br.begin(), bc.begin(), bv.begin(), bv.size());
 
-    //VectorIndexType seed_set={0, 1, 2, 3, 4, 5, 6, 7};
-    VectorIndexType seed_set={0};
+    //IndexArrayType seed_set={0, 1, 2, 3, 4, 5, 6, 7};
+    IndexArrayType seed_set={0};
     std::vector<float> answer = {0.0, 4.0/3, 4.0/3, 4.0/3, 3.0, 0.5, 0.5, 0.0};
 
     std::vector<float> result =
@@ -264,7 +264,7 @@ BOOST_AUTO_TEST_CASE(bc_batch_alt_trans)
         BOOST_CHECK_CLOSE(result[ix], answer[ix], 0.0001);
 
     //==========
-    VectorIndexType seed_set3={3};
+    IndexArrayType seed_set3={3};
     std::vector<float> answer3 = {0.0, 0.0, 0.0, 0.0, 3.0, 0.5, 0.5, 0.0};
 
     std::vector<float> result3 =
@@ -275,7 +275,7 @@ BOOST_AUTO_TEST_CASE(bc_batch_alt_trans)
         BOOST_CHECK_CLOSE(result3[ix], answer3[ix], 0.0001);
 
     //==========
-    VectorIndexType seed_set03={0,3};
+    IndexArrayType seed_set03={0,3};
 
     std::vector<float> result03 =
         vertex_betweenness_centrality_batch_alt_trans(betweenness, seed_set03);
@@ -285,7 +285,7 @@ BOOST_AUTO_TEST_CASE(bc_batch_alt_trans)
         BOOST_CHECK_CLOSE(result03[ix], answer[ix] + answer3[ix], 0.0001);
 
     //==========
-    VectorIndexType seed_set_all={0,1,2,3,4,5,6,7};
+    IndexArrayType seed_set_all={0,1,2,3,4,5,6,7};
     std::vector<double> answer_all = {0.0, 4.0/3, 4.0/3, 4.0/3, 12.0, 2.5, 2.5, 0.0};
 
     std::vector<float> result_all =
@@ -303,8 +303,8 @@ BOOST_AUTO_TEST_CASE(bc_test_batch_alt_trans_v2)
     Matrix<double, DirectedMatrixTag> betweenness(8,8);
     betweenness.build(br.begin(), bc.begin(), bv.begin(), bv.size());
 
-    //VectorIndexType seed_set={0, 1, 2, 3, 4, 5, 6, 7};
-    VectorIndexType seed_set={0};
+    //IndexArrayType seed_set={0, 1, 2, 3, 4, 5, 6, 7};
+    IndexArrayType seed_set={0};
     std::vector<float> answer = {0.0, 4.0/3, 4.0/3, 4.0/3, 3.0, 0.5, 0.5, 0.0};
 
     std::vector<float> result = vertex_betweenness_centrality_batch_alt_trans_v2(
@@ -315,7 +315,7 @@ BOOST_AUTO_TEST_CASE(bc_test_batch_alt_trans_v2)
         BOOST_CHECK_CLOSE(result[ix], answer[ix], 0.0001);
 
     //==========
-    VectorIndexType seed_set3={3};
+    IndexArrayType seed_set3={3};
     std::vector<float> answer3 = {0.0, 0.0, 0.0, 0.0, 3.0, 0.5, 0.5, 0.0};
 
     std::vector<float> result3 =
@@ -326,7 +326,7 @@ BOOST_AUTO_TEST_CASE(bc_test_batch_alt_trans_v2)
         BOOST_CHECK_CLOSE(result3[ix], answer3[ix], 0.0001);
 
     //==========
-    VectorIndexType seed_set03={0,3};
+    IndexArrayType seed_set03={0,3};
 
     std::vector<float> result03 =
         vertex_betweenness_centrality_batch_alt_trans_v2(betweenness, seed_set03);
@@ -336,7 +336,7 @@ BOOST_AUTO_TEST_CASE(bc_test_batch_alt_trans_v2)
         BOOST_CHECK_CLOSE(result03[ix], answer[ix] + answer3[ix], 0.0001);
 
     //==========
-    VectorIndexType seed_set_all={0,1,2,3,4,5,6,7};
+    IndexArrayType seed_set_all={0,1,2,3,4,5,6,7};
     std::vector<double> answer_all = {0.0, 4.0/3, 4.0/3, 4.0/3, 12.0, 2.5, 2.5, 0.0};
 
     std::vector<float> result_all =

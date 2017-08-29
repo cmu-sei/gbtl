@@ -200,13 +200,13 @@ namespace GraphBLAS
 
 
             // Get column indices for a given row
-            void getColumnIndices(IndexType irow, VectorIndexType &v) const
+            void getColumnIndices(IndexType irow, IndexArrayType &v) const
             {
                 m_matrix.getRowIndices(irow, v);
             }
 
             // Get row indices for a given column
-            void getRowIndices(IndexType icol, VectorIndexType &v) const
+            void getRowIndices(IndexType icol, IndexArrayType &v) const
             {
                 m_matrix.getColIndices(icol, v);
             }

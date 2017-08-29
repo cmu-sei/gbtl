@@ -32,11 +32,11 @@ int main()
     //  {1, 0, 0, 0, 1, 0, 1, 0},
     //  {0, 1, 0, 1, 0, 1, 0, 1}}
 
-    VectorIndexType i1 = {0, 0, 0, 0, 1, 1, 1, 1,
+    IndexArrayType i1 = {0, 0, 0, 0, 1, 1, 1, 1,
                          2, 2, 2, 2, 3, 3, 3, 3,
                          4, 4, 4, 4, 5, 5, 5, 5, 5,
                          6, 6, 6, 7, 7, 7, 7};
-    VectorIndexType j1 = {0, 2, 3, 6, 1, 2, 3, 7,
+    IndexArrayType j1 = {0, 2, 3, 6, 1, 2, 3, 7,
                          0, 2, 4, 6, 0, 1, 3, 5,
                          0, 2, 4, 6, 1, 3, 5, 6, 7,
                          0, 4, 6, 1, 3, 5, 7};
@@ -61,8 +61,8 @@ int main()
     //  {0, 0, 0, 1, 1},
     //  {0, 0, 0, 1, 1}}
 
-    VectorIndexType i2 = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4};
-    VectorIndexType j2 = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2, 3, 4, 3, 4};
+    IndexArrayType i2 = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4};
+    IndexArrayType j2 = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2, 3, 4, 3, 4};
     std::vector<float> v2(i2.size(), 1.0);
     Matrix<float> G_m2(5, 5);
     G_m2.build(i2.begin(), j2.begin(), v2.begin(), i2.size());

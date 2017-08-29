@@ -12,8 +12,8 @@
  * permission@sei.cmu.edu for more information.  DM-0002659
  */
 
-#ifndef GRB_SEQUENTIAL_LOGGING_H
-#define GRB_SEQUENTIAL_LOGGING_H
+#ifndef GB_LOGGING_H
+#define GB_LOGGING_H
 
 // Basic debugging
 #if GRAPHBLAS_LOGGING_LEVEL > 0
@@ -52,4 +52,4 @@
 
 #endif
 
-#endif //GRB_SEQUENTIAL_LOGGING_H
+#endif //GB_LOGGING_H

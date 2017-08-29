@@ -488,7 +488,7 @@ namespace GraphBLAS
             }
 
             // Get column indices for a given row
-            void getColumnIndices(IndexType irow, VectorIndexType &v) const
+            void getColumnIndices(IndexType irow, IndexArrayType &v) const
             {
                 if (irow >= m_num_rows)
                 {
@@ -511,7 +511,7 @@ namespace GraphBLAS
             }
 
             // Get row indices for a given column
-            void getRowIndices(IndexType icol, VectorIndexType &v) const
+            void getRowIndices(IndexType icol, IndexArrayType &v) const
             {
                 if (icol >= m_num_cols)
                 {
