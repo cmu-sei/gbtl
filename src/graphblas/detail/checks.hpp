@@ -50,14 +50,26 @@ namespace GraphBLAS
             throw DimensionException(make_message(msg1, msg2, val1, val2));
     };
 
-    inline void check_val_lt(IndexType val1, IndexType val2,
-                                 const std::string &msg1,
-                                 const std::string &msg2)
+    inline void check_index_val_lt(IndexType val1, IndexType val2,
+                                   const std::string &msg1,
+                                   const std::string &msg2)
     {
         if (val1 >= val2)
         {
             std::ostringstream ss;
             ss << msg1 << ", " << msg2 << ", (" << val1 << " >= " << val2 << ")";
+            throw InvalidIndexException(ss.str());
+        }
+    };
+
+    inline void check_index_val_leq(IndexType val1, IndexType val2,
+                                    const std::string &msg1,
+                                    const std::string &msg2)
+    {
+        if (val1 > val2)
+        {
+            std::ostringstream ss;
+            ss << msg1 << ", " << msg2 << ", (" << val1 << " > " << val2 << ")";
             throw DimensionException(ss.str());
         }
     };
@@ -166,6 +178,26 @@ namespace GraphBLAS
         // No op
     };
 
+    // =========================================================================
+
+    template <typename V, typename M>
+    void check_size_nrows(const V &v, const M &A, const std::string &msg)
+    {
+        check_val_equals(v.size(), A.nrows(), "size != nrows", msg);
+    };
+
+    // Note: no NoMask support
+
+    // =========================================================================
+
+    template <typename V, typename M>
+    void check_size_ncols(const V &v, const M &A, const std::string &msg)
+    {
+        check_val_equals(v.size(), A.ncols(), "size != nrows", msg);
+    };
+
+    // Note: no NoMask support
+
     // ================================================
 
     template <typename V, typename S>
@@ -182,9 +214,59 @@ namespace GraphBLAS
     // ================================================
 
     template <typename M>
-    void check_within_ncols(IndexType val, const M &m, const std::string &msg)
+    void check_index_within_ncols(IndexType val, const M &m,
+                                  const std::string &msg)
     {
-        check_val_lt(val, m.ncols(), "value < ncols", msg);
+        check_index_val_lt(val, m.ncols(), "value < ncols", msg);
+    }
+
+    // ================================================
+
+    template <typename S, typename V>
+    void check_nindices_within_size(const S &seq, const V &vec,
+                                    const std::string &msg)
+    {
+        check_index_val_leq(seq.size(), vec.size(), "seq.size < vec.size", msg);
+    }
+
+    template <typename V>
+    void check_nindices_within_size(const GraphBLAS::AllIndices &seq,
+                                    const V &vec,
+                                    const std::string &msg)
+    {
+    }
+
+    // ================================================
+
+    template <typename S, typename M>
+    void check_nindices_within_ncols(const S &seq, const M &mat,
+                                     const std::string &msg)
+    {
+        check_index_val_leq(seq.size(), mat.ncols(), "seq.size < mat.ncols", msg);
+    }
+
+    template <typename M>
+    void check_nindices_within_ncols(const GraphBLAS::AllIndices &seq,
+                                     const M &mat,
+                                     const std::string &msg)
+    {
+    }
+
+    // ================================================
+
+    template <typename S, typename M>
+    void check_nindices_within_nrows(const S &seq,
+                                     const M &mat,
+                                     const std::string &msg)
+    {
+        check_index_val_leq(seq.size(), mat.nrows(), "seq.size < mat.nrows", msg);
+    }
+
+    template <typename M>
+    void check_nindices_within_nrows(const GraphBLAS::AllIndices &seq,
+                                     const M &mat,
+                                     const std::string &msg)
+    {
     }
 
 } // end namespace GraphBLAS

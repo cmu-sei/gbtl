@@ -50,11 +50,6 @@ namespace GraphBLAS
                            AMatrixT  const &A,
                            bool             replace_flag = false)
         {
-            check_vector_size(w, mask,
-                              "reduce: failed size(w) == size(mask) check");
-            check_vector_size_nrows(w, A,
-                                    "reduce: failed size(w) == nrows(A) check");
-
             // =================================================================
             // Do the basic reduction work with the binary op
             typedef typename BinaryOpT::result_type D3ScalarType;

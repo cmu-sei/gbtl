@@ -226,13 +226,36 @@ namespace GraphBLAS
         //=====================================================================
         //=====================================================================
 
+        // 4.3.7.1: assign - standard vector variant
+        template<typename WVectorT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename UVectorT,
+                 typename SequenceT>
+        inline void assign(WVectorT           &w,
+                           MaskT        const &mask,
+                           AccumT              accum,
+                           UVectorT     const &u,
+                           SequenceT    const &indices,
+                           bool                replace_flag)
+        {
+            // execution error checks
+            check_index_array_content(indices, w.size(),
+                                      "assign(std vec): indices content check");
+            // NOT Implemented yet.
+            throw 1;
+        }
+
+        //=====================================================================
+        //=====================================================================
+
         // 4.3.7.2 assign: Standard matrix variant
         template<typename CMatrixT,
-                typename MaskT,
-                typename AccumT,
-                typename AMatrixT,
-                typename RowSequenceT,
-                typename ColSequenceT>
+                 typename MaskT,
+                 typename AccumT,
+                 typename AMatrixT,
+                 typename RowSequenceT,
+                 typename ColSequenceT>
         inline void assign(CMatrixT                 &C,
                            MaskT            const   &mask,
                            AccumT                    accum,
@@ -241,21 +264,17 @@ namespace GraphBLAS
                            ColSequenceT     const &col_indices,
                            bool                     replace = false)
         {
-            typedef typename CMatrixT::ScalarType                   CScalarType;
+            typedef typename CMatrixT::ScalarType  CScalarType;
+
+            // execution error checks
+            check_index_array_content(row_indices, C.nrows(),
+                                      "assign(std mat): row_indices content check");
+            check_index_array_content(col_indices, C.ncols(),
+                                      "assign(std mat): col_indices content check");
 
             // This basically "expands" A into C
 
-            // @todo Add bounds and type checks
-            check_matrix_size(C, mask, "assign(matrix) mask dimension check");
-            check_index_array_dimension(row_indices, A.nrows(),
-                                        "assign row_indices dimension check");
-            check_index_array_dimension(col_indices, A.ncols(),
-                                        "assign col_indices dimension check");
-            check_index_array_content(row_indices, C.nrows(),
-                                      "assign row_indices content check");
-            check_index_array_content(col_indices, C.ncols(),
-                                      "assign col_indices content check");
-
+            // dimension checks in the front end
             //std::cerr << ">>> C in <<< " << std::endl;
             //std::cerr << C << std::endl;
 
@@ -289,10 +308,10 @@ namespace GraphBLAS
 
         // 4.3.7.5: assign: Constant vector variant
         template<typename WVectorT,
-                typename MaskT,
-                typename AccumT,
-                typename ValueT,
-                typename SequenceT>
+                 typename MaskT,
+                 typename AccumT,
+                 typename ValueT,
+                 typename SequenceT>
         inline void assign_constant(WVectorT             &w,
                                     MaskT          const &mask,
                                     AccumT                accum,
@@ -300,7 +319,9 @@ namespace GraphBLAS
                                     SequenceT      const &indices,
                                     bool                  replace_flag = false)
         {
-            // @todo : Added dimension and error checks
+            // execution error checks
+            check_index_array_content(indices, w.size(),
+                                      "assign(const vec): indices content check");
 
             std::vector<std::tuple<IndexType, ValueT> > T;
 
@@ -339,7 +360,11 @@ namespace GraphBLAS
         {
             typedef typename CMatrixT::ScalarType CScalarType;
 
-            // @todo Add bounds and type checks
+            // execution error checks
+            check_index_array_content(row_indices, C.nrows(),
+                                      "assign(std mat): row_indices content check");
+            check_index_array_content(col_indices, C.ncols(),
+                                      "assign(std mat): col_indices content check");
 
             //std::cerr << ">>> C in <<< " << std::endl;
             //std::cerr << C << std::endl;

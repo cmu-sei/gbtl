@@ -404,14 +404,17 @@ namespace GraphBLAS
                  typename AMatrixT,
                  typename RowSequenceT,
                  typename ColSequenceT,
-                 typename std::enable_if<std::is_same<matrix_tag, typename AMatrixT::tag_type>::value, int>::type>
-        friend inline void assign(CMatrixT                                &C,
-                           MaskT                                    const &Mask,
-                           AccumT                                          accum,
-                           AMatrixT                                 const &A,
-                           RowSequenceT                             const &row_indices,
-                           ColSequenceT                             const &col_indices,
-                           bool                                            replace_flag);
+                 typename std::enable_if<
+                     std::is_same<matrix_tag,
+                                  typename AMatrixT::tag_type>::value,
+                     int>::type>
+        friend inline void assign(CMatrixT              &C,
+                                  MaskT           const &Mask,
+                                  AccumT                 accum,
+                                  AMatrixT        const &A,
+                                  RowSequenceT    const &row_indices,
+                                  ColSequenceT    const &col_indices,
+                                  bool                   replace_flag);
 
         // 4.3.7.6
         template<typename CMatrixT,
@@ -420,7 +423,10 @@ namespace GraphBLAS
                  typename ValueT,
                  typename RowSequenceT,
                  typename ColSequenceT,
-                 typename std::enable_if<std::is_convertible<ValueT, typename CMatrixT::ScalarType>::value, int>::type>
+                 typename std::enable_if<
+                     std::is_convertible<ValueT,
+                                         typename CMatrixT::ScalarType>::value,
+                     int>::type>
         friend inline void assign(CMatrixT             &C,
                                   MaskT          const &Mask,
                                   AccumT                accum,

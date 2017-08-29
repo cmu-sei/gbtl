@@ -768,6 +768,8 @@ namespace GraphBLAS
             w.setContents(z);
         }
 
+#if 0
+        /// @todo All checks moving to front end (detail/checks.hpp)
         //**********************************************************************
         // Put all dimension checks (especially with optional masks here
         //**********************************************************************
@@ -959,7 +961,27 @@ namespace GraphBLAS
                 }
             }
         }
+#endif
 
+        //********************************************************************
+        // Index-out-of-bounds is an execution error and a responsibility of
+        // the backend.
+        template <typename SequenceT>
+        void check_index_array_content(SequenceT const   &array,
+                                       IndexType          dim,
+                                       std::string const &msg)
+        {
+            if (!IsAllSequence(array))
+            {
+                for (auto ix : array)
+                {
+                    if (ix >= dim)
+                    {
+                        throw IndexOutOfBoundsException(msg);
+                    }
+                }
+            }
+        }
 
         //********************************************************************
         // ALL SUPPORT

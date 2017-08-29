@@ -97,7 +97,7 @@ namespace GraphBLAS
     public:
         typedef IndexType difference_type;
 
-        IndexType operator*() const                             { return 0; }
+        IndexType operator*() const                            { return 0; }
 
         const AllIndicesIterator &operator++()                 { return *this; }
         AllIndicesIterator operator++(int)                     { return *this; }
@@ -108,7 +108,10 @@ namespace GraphBLAS
         bool operator==(const AllIndicesIterator &other) const { return false; }
         bool operator!=(const AllIndicesIterator &other) const { return false; }
 
-        AllIndicesIterator &operator=(const AllIndicesIterator &other) { return * this; }
+        AllIndicesIterator &operator=(const AllIndicesIterator &other)
+        {
+            return *this;
+        }
     };
 
     class AllIndices
@@ -117,21 +120,21 @@ namespace GraphBLAS
 
         AllIndices() {}
 
-        bool empty() const                          { return false; }
+        bool empty() const                      { return false; }
 
-        AllIndicesIterator begin() const           { return AllIndicesIterator(); }
-        AllIndicesIterator end() const             { return AllIndicesIterator(); }
+        AllIndicesIterator begin() const        { return AllIndicesIterator(); }
+        AllIndicesIterator end() const          { return AllIndicesIterator(); }
 
-        IndexType size() const                      { return 0; }
+        IndexType size() const                  { return 0; }
 
-        IndexType operator[](IndexType n) const     { return 0; }
+        IndexType operator[](IndexType n) const { return 0; }
     };
 
 
     // This is the "Matrix" class for this example
     struct matrix_tag {};
 
-    // This is the "Matrix" class for this example
+    // This is the "Vector" class for this example
     struct vector_tag {};
 
     // For logging

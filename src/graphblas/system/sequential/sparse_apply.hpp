@@ -55,11 +55,6 @@ namespace GraphBLAS
             UVectorT                                  const &u,
             bool                                             replace_flag = false)
         {
-            check_vector_size(w, mask,
-                              "apply(vec): failed w == mask dimension checks");
-            check_vector_size(w, u,
-                              "apply(vec): failed w == u dimension checks");
-
             // =================================================================
             // Apply the unary operator from A into T.
             // This is really the guts of what makes this special.
@@ -108,9 +103,6 @@ namespace GraphBLAS
             AMatrixT                                  const &A,
             bool                                             replace_flag = false)
         {
-            check_dimensions(C, "C", A, "A");
-            check_dimensions(C, "C", mask, "mask");
-
             typedef typename AMatrixT::ScalarType                   AScalarType;
             typedef std::vector<std::tuple<IndexType,AScalarType> > ARowType;
 

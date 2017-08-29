@@ -59,17 +59,6 @@ namespace GraphBLAS
             VVectorT                                  const &v,
             bool                                             replace_flag = false)
         {
-            // @todo: Make errors match the spec
-
-            // ??? Do we need to make defensive copies of everything if we don't
-            // really support NON-BLOCKING?
-            check_vector_size(w, mask,
-                              "eWiseMult(vec): failed w == mask dimension checks");
-            check_vector_size(w, u,
-                              "eWiseMult(vec): failed w == u dimension checks");
-            check_vector_size(u, v,
-                              "eWiseMult(vec): failed u == v dimension checks");
-
             // =================================================================
             // Do the basic ewise-and work: t = u .* v
             typedef typename BinaryOpT::result_type D3ScalarType;
@@ -111,17 +100,6 @@ namespace GraphBLAS
             BMatrixT                                  const &B,
             bool                                             replace_flag = false)
         {
-            // @todo: Make errors match the spec
-
-            // ??? Do we need to make defensive copies of everything if we don't
-            // really support NON-BLOCKING?
-            check_matrix_size(C, Mask,
-                              "eWiseMult(mat): failed C == Mask dimension checks");
-            check_matrix_size(C, A,
-                              "eWiseMult(mat): failed C == A dimension checks");
-            check_matrix_size(A, B,
-                              "eWiseMult(mat): failed A == B dimension checks");
-
             IndexType num_rows(A.nrows());
             IndexType num_cols(A.ncols());
 

@@ -379,18 +379,8 @@ namespace GraphBLAS
             GRB_LOG_VERBOSE("Indices: " << indices);
             GRB_LOG_VERBOSE_REPLACE(replace_flag);
 
-            // Add in dimensional checks
-            if (indices.size() != w.size())
-            {
-                throw DimensionException(
-                        "Size of output (" +
-                        std::to_string(w.size()) +
-                        ") does not equal size of indices (" +
-                        std::to_string(indices.size()) + " ).");
-            }
-
-            // Validate other inputs
-            check_vector_size(w, mask, "size(w) != size(mask)");
+            check_index_array_content(indices, u.size(),
+                                      "extract(std vec): indices >= u.size");
 
             typedef typename WVectorT::ScalarType WScalarType;
             typedef std::vector<std::tuple<IndexType,WScalarType> > CColType;
@@ -450,27 +440,10 @@ namespace GraphBLAS
             GRB_LOG_VERBOSE("col_Indices: " << col_indices);
             GRB_LOG_VERBOSE_REPLACE(replace_flag);
 
-            // Validate inputs
-            check_matrix_size(C, Mask, "extract(matrix) Mask dimension check");
-
-            // Add in dimensional checks
-            check_index_array_dimension(
-                row_indices, C.nrows(),
-                "extract row_indices dimension: Number of ROWS in output (" +
-                std::to_string(C.nrows()) +
-                ") does not indicated number of ROWS indices (" +
-                std::to_string(row_indices.size()) + " ).");
-            check_index_array_dimension(
-                col_indices, C.ncols(),
-                "extract col_indices dimension: Number of COLUMNS in output (" +
-                std::to_string(C.ncols()) +
-                ") does not indicated number of COLUMN indices (" +
-                std::to_string(col_indices.size()) + " ).");
-
             check_index_array_content(row_indices, A.nrows(),
-                                      "extract row_indices content check");
+                                      "extract(std mat): row_indices >= A.nrows");
             check_index_array_content(col_indices, A.ncols(),
-                                      "extract col_indices content check");
+                                      "extract(std mat): col_indices >= A.ncols");
 
             typedef typename CMatrixT::ScalarType CScalarType;
             typedef std::vector<std::tuple<IndexType,CScalarType> > CColType;
@@ -534,7 +507,8 @@ namespace GraphBLAS
             GRB_LOG_VERBOSE("col_index:    " << col_index);
             GRB_LOG_VERBOSE_REPLACE(replace_flag);
 
-            // @TODO: Validate inputs
+            check_index_array_content(row_indices, A.nrows(),
+                                      "extract(col): row_indices >= A.nrows");
 
             // Should explicitly define the vector type, or just piggy
             // back on WVectorT?

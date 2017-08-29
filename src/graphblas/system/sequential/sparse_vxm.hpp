@@ -38,7 +38,7 @@ namespace GraphBLAS
     namespace backend
     {
         //********************************************************************
-        /// Implementation of 4.3.1 vxm: Vector-Matrix multiply
+        /// Implementation of 4.3.2 vxm: Vector-Matrix multiply
         template<typename WVectorT,
                  typename MaskT,
                  typename AccumT,
@@ -53,13 +53,6 @@ namespace GraphBLAS
                         AMatrixT  const &A,
                         bool             replace_flag = false)
         {
-            check_vector_size(w, mask,
-                              "vxm: failed size(w) == size(mask) check");
-            check_vector_size_ncols(w, A,
-                                    "vxm: failed size(w) == ncols(A) check");
-            check_vector_size_nrows(u, A,
-                                    "vxm: failed size(u) == nrows(A) check");
-
             // =================================================================
             // Do the basic dot-product work with the semi-ring.
             typedef typename SemiringT::result_type D3ScalarType;

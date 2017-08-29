@@ -16,9 +16,11 @@
 #pragma once
 
 #include <cstddef>
+#include <type_traits>
 #include <graphblas/detail/config.hpp>
+#include <graphblas/detail/param_unpack.hpp>
 
-#include <graphblas/system/sequential/types.hpp>
+//#include <graphblas/system/sequential/types.hpp>
 
 #define GB_INCLUDE_BACKEND_VECTOR 1
 #include <graphblas/backend_include.hpp>
@@ -36,6 +38,7 @@ namespace GraphBLAS
     class Vector
     {
     public:
+        typedef vector_tag          tag_type;
         typedef ScalarT ScalarType;
         typedef typename detail::vector_generator::result<
             ScalarT,
@@ -310,7 +313,7 @@ namespace GraphBLAS
                  typename MaskT,
                  typename AccumT,
                  typename AMatrixT,
-                  typename SequenceT,
+                 typename SequenceT,
                  typename ...WTags>
         friend inline void extract(
                 GraphBLAS::Vector<WScalarT, WTags...> &w,
@@ -321,12 +324,33 @@ namespace GraphBLAS
                 IndexType             col_index,
                 bool                  replace_flag);
 
+        // 4.3.7.1: assign - standard vector variant
+        template<typename WVectorT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename UVectorT,
+                 typename SequenceT,
+                 typename std::enable_if<
+                     std::is_same<vector_tag,
+                                  typename UVectorT::tag_type>::value,
+                     int>::type>
+        friend inline void assign(WVectorT           &w,
+                                  MaskT        const &mask,
+                                  AccumT              accum,
+                                  UVectorT     const &u,
+                                  SequenceT    const &indices,
+                                  bool                replace_flag);
+
         // 4.3.7.5:
         template<typename WVectorT,
                  typename MaskT,
                  typename AccumT,
                  typename ValueT,
-                 typename SequenceT>
+                 typename SequenceT,
+                 typename std::enable_if<
+                     std::is_convertible<ValueT,
+                                         typename WVectorT::ScalarType>::value,
+                     int>::type>
         friend inline void assign(WVectorT &w,
                                   MaskT const &mask,
                                   AccumT accum,

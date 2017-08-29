@@ -125,6 +125,7 @@ namespace GraphBLAS
 
         // PUT ALL FRIEND DECLARATIONS (that use matrix masks) HERE
 
+        // 4.3.1:
         template<typename CMatrixT,
                  typename MaskT,
                  typename AccumT,
@@ -141,6 +142,7 @@ namespace GraphBLAS
 
         //--------------------------------------------------------------------
 
+        // 4.3.4.2:
         template<typename CScalarT,
                  typename MaskT,
                  typename AccumT,
@@ -159,6 +161,7 @@ namespace GraphBLAS
 
         //--------------------------------------------------------------------
 
+        // 4.3.5.2
         template<typename CScalarT,
                  typename MaskT,
                  typename AccumT,
@@ -178,52 +181,60 @@ namespace GraphBLAS
         //--------------------------------------------------------------------
 
         // 4.3.6.2
-        template<typename CMatrixT,
-                typename MaskT,
-                typename AccumT,
-                typename AMatrixT,
-                typename RowSequenceT,
-                typename ColSequenceT>
-        friend inline void extract(CMatrixT         &C,
-                                   MaskT             const &Mask,
-                                   AccumT                   accum,
-                                   AMatrixT          const &A,
-                                   RowSequenceT      const &row_indices,
-                                   ColSequenceT      const &col_indices,
-                                   bool                     replace_flag);
+        template<typename CScalarT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename AMatrixT,
+                 typename RowSequenceT,
+                 typename ColSequenceT,
+                 typename ...CTags>
+        friend inline void extract(
+                GraphBLAS::Matrix<CScalarT, CTags...>   &C,
+                MaskT               const   &Mask,
+                AccumT                       accum,
+                AMatrixT            const   &A,
+                RowSequenceT        const   &row_indices,
+                ColSequenceT        const   &col_indices,
+                bool                         replace_flag);
 
         //--------------------------------------------------------------------
-
         // 4.3.7.2
         template<typename CMatrixT,
-                typename MaskT,
-                typename AccumT,
-                typename AMatrixT,
-                typename RowSequenceT,
-                typename ColSequenceT>
-        friend inline void assign(CMatrixT             &C,
-                                  MaskT          const &Mask,
-                                  AccumT                accum,
-                                  AMatrixT       const &A,
-                                  RowSequenceT   const &row_indices,
-                                  ColSequenceT   const &col_indices,
-                                  bool                  replace_flag);
-
+                 typename MaskT,
+                 typename AccumT,
+                 typename AMatrixT,
+                 typename RowSequenceT,
+                 typename ColSequenceT,
+                 typename std::enable_if<
+                     std::is_same<matrix_tag,
+                                  typename AMatrixT::tag_type>::value,
+                     int>::type>
+        friend inline void assign(CMatrixT              &C,
+                                  MaskT           const &Mask,
+                                  AccumT                 accum,
+                                  AMatrixT        const &A,
+                                  RowSequenceT    const &row_indices,
+                                  ColSequenceT    const &col_indices,
+                                  bool                   replace_flag);
 
         // 4.3.7.6
         template<typename CMatrixT,
-                typename MaskT,
-                typename AccumT,
-                typename ValueT,
-                typename RowSequenceT,
-                typename ColSequenceT>
-        friend inline void assign_constant(CMatrixT             &C,
-                                           MaskT          const &Mask,
-                                           AccumT                accum,
-                                           ValueT                val,
-                                           RowSequenceT   const &row_indices,
-                                           ColSequenceT   const &col_indices,
-                                           bool                  replace_flag);
+                 typename MaskT,
+                 typename AccumT,
+                 typename ValueT,
+                 typename RowSequenceT,
+                 typename ColSequenceT,
+                 typename std::enable_if<
+                     std::is_convertible<ValueT,
+                                         typename CMatrixT::ScalarType>::value,
+                     int>::type>
+        friend inline void assign(CMatrixT             &C,
+                                  MaskT          const &Mask,
+                                  AccumT                accum,
+                                  ValueT                val,
+                                  RowSequenceT   const &row_indices,
+                                  ColSequenceT   const &col_indices,
+                                  bool                  replace_flag);
 
         //--------------------------------------------------------------------
 
@@ -241,6 +252,19 @@ namespace GraphBLAS
             UnaryFunctionT                                    op,
             AMatrixT                                  const  &A,
             bool                                              replace_flag);
+
+        //--------------------------------------------------------------------
+
+        // 4.3.10
+        template<typename CMatrixT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename AMatrixT>
+        friend inline void transpose(CMatrixT       &C,
+                                     MaskT    const &Mask,
+                                     AccumT          accum,
+                                     AMatrixT const &A,
+                                     bool            replace_flag);
 
         //--------------------------------------------------------------------
 
@@ -410,10 +434,10 @@ namespace GraphBLAS
 
         // 4.3.6.1
         template<typename WVectorT,
-                typename MaskT,
-                typename AccumT,
-                typename UVectorT,
-                typename SequenceT>
+                 typename MaskT,
+                 typename AccumT,
+                 typename UVectorT,
+                 typename SequenceT>
         friend inline void extract(WVectorT             &w,
                                    MaskT          const &mask,
                                    AccumT                accum,
@@ -422,27 +446,50 @@ namespace GraphBLAS
                                    bool                  replace_flag);
 
         // 4.3.6.3
-        template<typename WVectorT,
-                typename MaskT,
-                typename AccumT,
-                typename AMatrixT,
-                typename SequenceT>
-        friend inline void extract(WVectorT             &w,
-                                   MaskT          const &mask,
-                                   AccumT                accum,
-                                   AMatrixT       const &A,
-                                   SequenceT      const &row_indices,
-                                   IndexType             col_index,
-                                   bool                  replace_flag);
+        template<typename WScalarT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename AMatrixT,
+                 typename SequenceT,
+                 typename ...WTags>
+        friend inline void extract(
+                GraphBLAS::Vector<WScalarT, WTags...> &w,
+                MaskT          const &mask,
+                AccumT                accum,
+                AMatrixT       const &A,
+                SequenceT      const &row_indices,
+                IndexType             col_index,
+                bool                  replace_flag);
 
         //--------------------------------------------------------------------
 
+        // 4.3.7.1: assign - standard vector variant
+        template<typename WVectorT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename UVectorT,
+                 typename SequenceT,
+                 typename std::enable_if<
+                     std::is_same<vector_tag,
+                                  typename UVectorT::tag_type>::value,
+                     int>::type>
+        friend inline void assign(WVectorT           &w,
+                                  MaskT        const &mask,
+                                  AccumT              accum,
+                                  UVectorT     const &u,
+                                  SequenceT    const &indices,
+                                  bool                replace_flag);
+
         // 4.3.7.5:
         template<typename WVectorT,
-                typename MaskT,
-                typename AccumT,
-                typename ValueT,
-                typename SequenceT>
+                 typename MaskT,
+                 typename AccumT,
+                 typename ValueT,
+                 typename SequenceT,
+                 typename std::enable_if<
+                     std::is_convertible<ValueT,
+                                         typename WVectorT::ScalarType>::value,
+                     int>::type>
         friend inline void assign(WVectorT &w,
                                   MaskT const &mask,
                                   AccumT accum,
@@ -451,6 +498,7 @@ namespace GraphBLAS
                                   bool replace_flag);
 
         //--------------------------------------------------------------------
+        // 4.3.8.1:
         template<typename WScalarT,
                  typename MaskT,
                  typename AccumT,
@@ -466,6 +514,7 @@ namespace GraphBLAS
 
         //--------------------------------------------------------------------
 
+        // 4.3.9.1
         template<typename WVectorT,
                  typename MaskT,
                  typename AccumT,

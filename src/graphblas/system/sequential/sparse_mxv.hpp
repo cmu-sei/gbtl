@@ -53,13 +53,6 @@ namespace GraphBLAS
                         UVectorT  const &u,
                         bool             replace_flag = false)
         {
-            check_vector_size(w, mask,
-                              "mxv: failed size(w) == size(mask) check");
-            check_vector_size_nrows(w, A,
-                                    "mxv: failed size(w) == nrows(A) check");
-            check_vector_size_ncols(u, A,
-                                    "mxv: failed size(u) == ncols(A) check");
-
             // =================================================================
             // Do the basic dot-product work with the semi-ring.
             typedef typename SemiringT::result_type D3ScalarType;

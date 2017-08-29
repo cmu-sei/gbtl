@@ -25,8 +25,8 @@
 
 namespace graphblas
 {
-    typedef uint64_t IndexType;
-    typedef std::vector<IndexType> IndexArrayType;
+    //typedef uint64_t IndexType;
+    //typedef std::vector<IndexType> IndexArrayType;
 } // graphblas
 
 #endif // GRAPHBLAS_SEQUENTIAL_HPP

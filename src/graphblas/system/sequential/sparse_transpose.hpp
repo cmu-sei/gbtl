@@ -51,12 +51,6 @@ namespace GraphBLAS
                               AMatrixT const &A,
                               bool            replace_flag = false)
         {
-            check_dimensions(C, "C", mask, "mask");
-            if ((C.nrows() != A.ncols()) || (C.ncols() != A.nrows()))
-            {
-                throw DimensionException("Transpose input dimension");
-            }
-
             typedef typename AMatrixT::ScalarType                   AScalarType;
             typedef std::vector<std::tuple<IndexType,AScalarType> > ARowType;
 

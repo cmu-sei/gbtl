@@ -26,6 +26,30 @@
 namespace GraphBLAS
 {
     //************************************************************************
+    // Execution Errors, Table 2.5(b) of Spec version 1.0.2
+    //************************************************************************
+
+    // out of memory handled by language
+
+    //************************************************************************
+    class IndexOutOfBoundsException : public std::exception
+    {
+    public:
+        IndexOutOfBoundsException(std::string const &msg)
+            : m_message(msg) {}
+
+        IndexOutOfBoundsException() {}
+
+    private:
+        const char* what() const throw()
+        {
+            return ("IndexOutOfBoundsException: " + m_message).c_str();
+        }
+
+        std::string m_message;
+    };
+
+    //************************************************************************
     class PanicException : public std::exception
     {
     public:
@@ -38,6 +62,46 @@ namespace GraphBLAS
         const char* what() const throw()
         {
             return ("PanicException: " + m_message).c_str();
+        }
+
+        std::string m_message;
+    };
+
+    //************************************************************************
+    // API Errors, Table 2.5(a) of Spec version 1.0.2
+    //************************************************************************
+
+    //************************************************************************
+    class InvalidValueException : public std::exception
+    {
+    public:
+        InvalidValueException(std::string const &msg)
+            : m_message(msg) {}
+
+        InvalidValueException() {}
+
+    private:
+        const char* what() const throw()
+        {
+            return ("InvalidValueException: " + m_message).c_str();
+        }
+
+        std::string m_message;
+    };
+
+    //************************************************************************
+    class InvalidIndexException : public std::exception
+    {
+    public:
+        InvalidIndexException(std::string const &msg)
+            : m_message(msg) {}
+
+        InvalidIndexException() {}
+
+    private:
+        const char* what() const throw()
+        {
+            return ("InvalidIndexException: " + m_message).c_str();
         }
 
         std::string m_message;
@@ -65,36 +129,21 @@ namespace GraphBLAS
     };
 
     //************************************************************************
-    class InvalidValueException : public std::exception
+    class OutputNotEmptyException : public std::exception
     {
     public:
-        InvalidValueException(std::string const &msg)
-            : m_message(msg) {}
-
-        InvalidValueException() {}
-
-    private:
-        const char* what() const throw()
+        OutputNotEmptyException(std::string const &msg)
+            : m_message(msg)
         {
-            return ("InvalidValueException: " + m_message).c_str();
+            GRB_LOG_VERBOSE("!!! OutputNotEmptyException: " << msg);
         }
 
-        std::string m_message;
-    };
-
-    //************************************************************************
-    class IndexOutOfBoundsException : public std::exception
-    {
-    public:
-        IndexOutOfBoundsException(std::string const &msg)
-            : m_message(msg) {}
-
-        IndexOutOfBoundsException() {}
+        OutputNotEmptyException(){}
 
     private:
         const char* what() const throw()
         {
-            return ("IndexOutOfBoundsException: " + m_message).c_str();
+            return ("OutputNotEmptyException: " + m_message).c_str();
         }
 
         std::string m_message;
