@@ -256,13 +256,13 @@ namespace GraphBLAS
                  typename AMatrixT,
                  typename RowSequenceT,
                  typename ColSequenceT>
-        inline void assign(CMatrixT                 &C,
-                           MaskT            const   &mask,
-                           AccumT                    accum,
-                           AMatrixT         const   &A,
+        inline void assign(CMatrixT               &C,
+                           MaskT            const &mask,
+                           AccumT                  accum,
+                           AMatrixT         const &A,
                            RowSequenceT     const &row_indices,
                            ColSequenceT     const &col_indices,
-                           bool                     replace = false)
+                           bool                    replace = false)
         {
             typedef typename CMatrixT::ScalarType  CScalarType;
 
@@ -289,9 +289,9 @@ namespace GraphBLAS
 
             // =================================================================
             // Accumulate into Z
-
+            std::cerr << "calling ewise_or_stencil_opt_accum\n";
             LilSparseMatrix<CScalarType> Z(C.nrows(), C.ncols());
-            ewise_or_opt_accum(Z, C, T, accum);
+            ewise_or_stencil_opt_accum(Z, C, T, row_indices, col_indices, accum);
 
             //std::cerr << ">>> Z <<< " << std::endl;
             //std::cerr << Z << std::endl;
@@ -397,8 +397,7 @@ namespace GraphBLAS
 
             //std::cerr << ">>> C <<< " << std::endl;
             //std::cerr << C << std::endl;
-        };
-
+        }
     }
 }
 

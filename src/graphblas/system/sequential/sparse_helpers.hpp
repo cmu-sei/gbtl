@@ -422,6 +422,191 @@ namespace GraphBLAS
         }
 
         //**********************************************************************
+        /// Apply element-wise operation to union on sparse vectors.
+        /// Indices in the stencil indicate where elements of vec1 should be
+        /// annihilated.
+        template <typename D1, typename D2, typename D3, typename SequenceT>
+        void ewise_or_stencil(
+            std::vector<std::tuple<GraphBLAS::IndexType,D3> >       &ans,
+            std::vector<std::tuple<GraphBLAS::IndexType,D1> > const &vec1,
+            std::vector<std::tuple<GraphBLAS::IndexType,D2> > const &vec2,
+            SequenceT                                                stencil_indices)
+        {
+            ans.clear();
+            auto v1_it = vec1.begin();
+            auto v2_it = vec2.begin();
+
+            auto stencil_it = stencil_indices.begin();
+            while ((stencil_it != stencil_indices.end()) &&
+                   (*stencil_it < std::get<0>(*v1_it)))
+            {
+                ++stencil_it;
+            }
+
+            D1 v1_val;
+            D2 v2_val;
+            GraphBLAS::IndexType v1_idx, v2_idx;
+
+            // loop through both ordered sets to compute ewise_or
+            while ((v1_it != vec1.end()) || (v2_it != vec2.end()))
+            {
+                if ((v1_it != vec1.end()) && (v2_it != vec2.end()))
+                {
+                    std::tie(v1_idx, v1_val) = *v1_it;
+                    std::tie(v2_idx, v2_val) = *v2_it;
+
+                    if (v2_idx == v1_idx)
+                    {
+                        while ((stencil_it != stencil_indices.end()) &&
+                               (*stencil_it <= v1_idx))
+                        {
+                            ++stencil_it;
+                        }
+
+                        ans.push_back(std::make_tuple(
+                                          v1_idx,
+                                          static_cast<D3>(v2_val)));
+
+                        ++v2_it;
+                        ++v1_it;
+                    }
+                    else if (v2_idx > v1_idx) // advance v1 and annihilate
+                    {
+                        while ((stencil_it != stencil_indices.end()) &&
+                               (*stencil_it < v1_idx))
+                        {
+                            ++stencil_it;
+                        }
+
+                        if ((stencil_it != stencil_indices.end()) &&
+                            (*stencil_it == v1_idx))
+                        {
+                            // annihilate entry in v1
+                            ++stencil_it;
+                            ++v1_it;
+                        }
+                        else
+                        {
+                            // @todo: Should these static_cast??
+                            //std::cerr << "Copying v1, Advancing v1_it" << std::endl;
+                            ans.push_back(std::make_tuple(v1_idx, v1_val));
+                            ++v1_it;
+                        }
+                    }
+                    else
+                    {
+                        //std::cerr << "Copying v2, Advancing v2_it" << std::endl;
+                        ans.push_back(std::make_tuple(v2_idx,
+                                                      static_cast<D3>(v2_val)));
+                        ++v2_it;
+                    }
+                }
+                else if (v1_it != vec1.end())  // vec2 exhausted
+                {
+                    std::tie(v1_idx, v1_val) = *v1_it;
+
+                    while ((stencil_it != stencil_indices.end()) &&
+                           (*stencil_it < v1_idx))
+                    {
+                        ++stencil_it;
+                    }
+
+                    if ((stencil_it != stencil_indices.end()) &&
+                        (*stencil_it == v1_idx))
+                    {
+                        // annihilate entry in v1
+                        ++stencil_it;
+                    }
+                    else
+                    {
+                        // @todo: Should these static_cast??
+                        //std::cerr << "Copying v1, Advancing v1_it" << std::endl;
+                        ans.push_back(std::make_tuple(v1_idx, static_cast<D3>(v1_val)));
+                    }
+                    ++v1_it;
+                }
+                else // v2_it != vec2.end()) and vec1 exhausted
+                {
+                    std::tie(v2_idx, v2_val) = *v2_it;
+                    ans.push_back(std::make_tuple(v2_idx, static_cast<D3>(v2_val)));
+                    ++v2_it;
+                }
+            }
+        }
+
+        //**********************************************************************
+        template < typename ZMatrixT,
+                   typename CMatrixT,
+                   typename TMatrixT,
+                   typename RowSequenceT,
+                   typename ColSequenceT,
+                   typename BinaryOpT >
+        void ewise_or_stencil_opt_accum(ZMatrixT           &Z,
+                                        CMatrixT const     &C,
+                                        TMatrixT const     &T,
+                                        RowSequenceT const &row_indices,
+                                        ColSequenceT const &col_indices,
+                                        BinaryOpT           accum)
+        {
+            // If there is an accumulate operations, do nothing with the stencil
+            typedef typename ZMatrixT::ScalarType ZScalarType;
+
+            typedef std::vector<std::tuple<IndexType,ZScalarType> > ZRowType;
+
+            ZRowType tmp_row;
+            IndexType nRows(Z.nrows());
+            for (IndexType row_idx = 0; row_idx < nRows; ++row_idx)
+            {
+                ewise_or(tmp_row, C.getRow(row_idx), T.getRow(row_idx), accum);
+                Z.setRow(row_idx, tmp_row);
+            }
+        }
+
+        //**********************************************************************
+        template < typename ZMatrixT,
+                   typename CMatrixT,
+                   typename TMatrixT,
+                   typename RowSequenceT,
+                   typename ColSequenceT>
+        void ewise_or_stencil_opt_accum(ZMatrixT           &Z,
+                                        CMatrixT const     &C,
+                                        TMatrixT const     &T,
+                                        RowSequenceT const &row_indices,
+                                        ColSequenceT const &col_indices,
+                                        GraphBLAS::NoAccumulate)
+        {
+            // If there is no accumulate we need to annihilate stored values
+            // in C that fall in the stencil
+            typedef typename ZMatrixT::ScalarType ZScalarType;
+
+            typedef std::vector<std::tuple<IndexType,ZScalarType> > ZRowType;
+
+            std::cerr << "In ewise_or_stencil_opt_accum\n";
+            ZRowType tmp_row;
+            IndexType nRows(Z.nrows());
+            auto row_stencil_it = row_indices.begin();
+            for (IndexType row_idx = 0; row_idx < nRows; ++row_idx)
+            {
+                std::cerr << "Row: " << row_idx << std::endl;
+                if ((row_stencil_it != row_indices.end()) &&
+                    (*row_stencil_it == row_idx))
+                {
+                    std::cerr << "Row Stenciled. merge C, T, and col stencil\n";
+                    ewise_or_stencil(tmp_row, C.getRow(row_idx), T.getRow(row_idx),
+                                     col_indices);
+                    Z.setRow(row_idx, tmp_row);
+                    ++row_stencil_it;
+                }
+                else
+                {
+                    std::cerr << "Not stenciled.  Take row from C" << std::endl;
+                    // There should be nothing in T for this row
+                    Z.setRow(row_idx, C.getRow(row_idx));
+                }
+            }
+        }
+
+        //**********************************************************************
         template < typename ZMatrixT,
                    typename CMatrixT,
                    typename TMatrixT,
@@ -429,7 +614,7 @@ namespace GraphBLAS
         void ewise_or_opt_accum(ZMatrixT         &Z,
                                 CMatrixT const   &C,
                                 TMatrixT const   &T,
-                                BinaryOpT        accum)
+                                BinaryOpT         accum)
         {
             typedef typename ZMatrixT::ScalarType ZScalarType;
 
