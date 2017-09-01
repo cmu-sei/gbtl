@@ -1,11 +1,22 @@
-//
-// Created by aomellinger on 5/15/17.
-//
+/*
+ * Copyright (c) 2017 Carnegie Mellon University.
+ * All Rights Reserved.
+ *
+ * THIS SOFTWARE IS PROVIDED "AS IS," WITH NO WARRANTIES WHATSOEVER. CARNEGIE
+ * MELLON UNIVERSITY EXPRESSLY DISCLAIMS TO THE FULLEST EXTENT PERMITTED BY
+ * LAW ALL EXPRESS, IMPLIED, AND STATUTORY WARRANTIES, INCLUDING, WITHOUT
+ * LIMITATION, THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+ * PURPOSE, AND NON-INFRINGEMENT OF PROPRIETARY RIGHTS.
+ *
+ * This Program is distributed under a BSD license.  Please see LICENSE file or
+ * permission@sei.cmu.edu for more information.  DM-0002659
+ */
 
 #include "graphblas.h"
 #include "graphblas_private.h"
 
 #include <graphblas/graphblas.hpp>
+#include <capi/detail/index_support.hpp>
 
 #include "TypeAdapter.hpp"
 #include "UnaryAdapter.hpp"
@@ -19,7 +30,6 @@ extern "C" {
 // I want these to be const *, but I get const violations when I do this
 //const void *GrB_NULL = (void *) &("GrB_NULL");
 void *GrB_NULL = (void *) &("GrB_NULL");
-void *GrB_ALL = (void *) &("GrB_ALL");
 
 
 //=============================================================================
@@ -657,17 +667,14 @@ GrB_Info GrB_extract(GrB_Matrix C,
     if (desc != GrB_NULL)
         return GrB_PANIC;
 
-    GraphBLAS::IndexArrayType row_vec(row_indices, &(row_indices[nrows]));
-    GraphBLAS::IndexArrayType col_vec(col_indices, &(col_indices[ncols]));
-
     if ((void *) Mask == GrB_NULL)
     {
         GraphBLAS::extract(*C->m_matrix,
                            GraphBLAS::NoMask(),
                            GraphBLAS::NoAccumulate(),
                            *A->m_matrix,
-                           row_vec,
-                           col_vec,
+                           GraphBLAS::IndexProxy(row_indices, nrows),
+                           GraphBLAS::IndexProxy(col_indices, ncols),
                            false);
     }
     else
@@ -676,8 +683,8 @@ GrB_Info GrB_extract(GrB_Matrix C,
                            *Mask->m_matrix,
                            GraphBLAS::NoAccumulate(),
                            *A->m_matrix,
-                           row_vec,
-                           col_vec,
+                           GraphBLAS::IndexProxy(row_indices, nrows),
+                           GraphBLAS::IndexProxy(col_indices, ncols),
                            false);
     }
 
@@ -710,15 +717,13 @@ GrB_Info GrB_Vector_assign_FP32(GrB_Vector w,
     if (mask != GrB_NULL)
         return GrB_PANIC;
 
-    GraphBLAS::IndexArrayType row_vec(row_indicies, &(row_indicies[nindicies]));
-
     if (accum == GrB_NULL)
     {
         GraphBLAS::assign(*w->m_vec,
                            GraphBLAS::NoMask(),
                            GraphBLAS::NoAccumulate(),
                            val,
-                           row_vec,
+                           GraphBLAS::IndexProxy(row_indicies, nindicies),
                            false);
     }
     else
@@ -727,7 +732,7 @@ GrB_Info GrB_Vector_assign_FP32(GrB_Vector w,
                            GraphBLAS::NoMask(),
                            BinaryAdapter(accum),
                            val,
-                           row_vec,
+                           GraphBLAS::IndexProxy(row_indicies, nindicies),
                            false);
     }
     return GrB_SUCCESS;
@@ -754,15 +759,12 @@ GrB_Info GrB_Matrix_assign_FP32(GrB_Matrix C,
     if (accum != GrB_NULL)
         return GrB_PANIC;
 
-    GraphBLAS::IndexArrayType row_vec(row_indicies, &(row_indicies[nrows]));
-    GraphBLAS::IndexArrayType col_vec(col_indicies, &(col_indicies[ncols]));
-
     GraphBLAS::assign(*C->m_matrix,
                        GraphBLAS::NoMask(),
                        GraphBLAS::NoAccumulate(),
                        val,
-                       row_vec,
-                       col_vec,
+                       GraphBLAS::IndexProxy(row_indicies, nrows),
+                       GraphBLAS::IndexProxy(col_indicies, ncols),
                        false);
 
     return GrB_SUCCESS;
@@ -843,6 +845,7 @@ GrB_Info GrB_Vector_reduce_BinaryOp(GrB_Vector w,
 void capi_print_matrix(GrB_Matrix matrix, char *label)
 {
     GraphBLAS::print_matrix(std::cout, *(matrix->m_matrix), label);
+    std::cout << std::endl;
 }
 
 void capi_print_vector(GrB_Vector vector, char *label)

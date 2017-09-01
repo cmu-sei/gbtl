@@ -316,7 +316,7 @@ namespace GraphBLAS
         void extractColumn(
             std::vector< std::tuple<IndexType, WScalarT> >        &vec_dest,
             backend::TransposeView<AMatrixT>                const &Atrans,
-            IndexSequence                                  const &row_indices,
+            IndexProxy                                  const &row_indices,
             IndexType                                              col_index)
         {
             // Walk the row, extracting the cell if it exists and is in row_indices
@@ -380,7 +380,7 @@ namespace GraphBLAS
             GRB_LOG_VERBOSE_REPLACE(replace_flag);
 
             check_index_array_content(indices, u.size(),
-                                      "extract(std vec): indices >= u.size");
+                                      "extract(std ptr): indices >= u.size");
 
             typedef typename WVectorT::ScalarType WScalarType;
             typedef std::vector<std::tuple<IndexType,WScalarType> > CColType;

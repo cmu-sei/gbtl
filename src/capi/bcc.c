@@ -1,6 +1,16 @@
-//
-// Created by aomellinger on 5/15/17.
-//
+/*
+ * Copyright (c) 2017 Carnegie Mellon University.
+ * All Rights Reserved.
+ *
+ * THIS SOFTWARE IS PROVIDED "AS IS," WITH NO WARRANTIES WHATSOEVER. CARNEGIE
+ * MELLON UNIVERSITY EXPRESSLY DISCLAIMS TO THE FULLEST EXTENT PERMITTED BY
+ * LAW ALL EXPRESS, IMPLIED, AND STATUTORY WARRANTIES, INCLUDING, WITHOUT
+ * LIMITATION, THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+ * PURPOSE, AND NON-INFRINGEMENT OF PROPRIETARY RIGHTS.
+ *
+ * This Program is distributed under a BSD license.  Please see LICENSE file or
+ * permission@sei.cmu.edu for more information.  DM-0002659
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -79,21 +89,6 @@ GrB_Info vertex_betweenness_centrality(float *result,
 
     printf("Num nodes (n): %lu\n", n);
 
-    // ======
-    // Make GrB_ALL here...
-
-    GrB_Index *GrB_ALL_nsver = (GrB_Index *) malloc(sizeof(GrB_Index) * nsver);
-    for (GrB_Index i = 0; i < nsver; ++i)
-        GrB_ALL_nsver[i] = i;
-
-    GrB_INT32 *GrB_ALL_nsver_ones = (GrB_INT32 *) malloc(
-            sizeof(GrB_INT32) * nsver);
-    for (GrB_Index i = 0; i < nsver; ++i)
-        GrB_ALL_nsver_ones[i] = 1;
-
-    GrB_Index *GrB_ALL_n = (GrB_Index *) malloc(sizeof(GrB_Index) * n);
-    for (GrB_Index i = 0; i < n; ++i)
-        GrB_ALL_n[i] = i;
 
     // ======
 
@@ -107,7 +102,7 @@ GrB_Info vertex_betweenness_centrality(float *result,
                       A,
                       s,
                       nsver,
-                      GrB_ALL_n,
+                      GrB_ALL,
                       n,
                       GrB_NULL));
     capi_print_matrix(Frontier, "initial frontier");
@@ -116,10 +111,26 @@ GrB_Info vertex_betweenness_centrality(float *result,
     // NumSP is initialized with the each starting root in 's':
     // NumSP[i,s[i]] = 1 where 0 <= i < nsver; implied zero elsewhere
     GrB_Matrix NumSP;
+
+    GrB_Index *row_indicies = (GrB_Index *) malloc(sizeof(GrB_Index) * nsver);
+    for (GrB_Index i = 0; i < nsver; ++i)
+        row_indicies[i] = i;
+
+    GrB_INT32 *one_values= (GrB_INT32 *) malloc(sizeof(GrB_INT32) * nsver);
+    for (GrB_Index i = 0; i < nsver; ++i)
+        one_values[i] = 1;
+
     check(GrB_Matrix_new(&NumSP, GrB_INT32_Type, nsver, n));
-    check(GrB_Matrix_build_INT32(NumSP, GrB_ALL_nsver, s, GrB_ALL_nsver_ones,
-                                 nsver, GrB_NULL));
+    check(GrB_Matrix_build_INT32(NumSP,
+                                 row_indicies,
+                                 s,
+                                 one_values,
+                                 nsver,
+                                 GrB_NULL));
     capi_print_matrix(NumSP, "initial NumSP");
+
+    free(row_indicies);
+    free(one_values);
 
     // ==================== BFS phase ====================
     // Placeholders for GraphBLAS operators
@@ -257,14 +268,14 @@ GrB_Info vertex_betweenness_centrality(float *result,
     GrB_Matrix BCu;
     check(GrB_Matrix_new(&BCu, GrB_FP32_Type, nsver, n));
     check(GrB_Matrix_assign_FP32(BCu,                 // C
-                                GrB_NULL,            // Mask
-                                GrB_NULL,            // accum
-                                1.0f,                // val
-                                GrB_ALL_nsver,       // row_indicies
-                                nsver,               // n row indicies
-                                GrB_ALL_n,           // col_indicies
-                                n,                   // n col indicies
-                                GrB_NULL));          // desc
+                                 GrB_NULL,            // Mask
+                                 GrB_NULL,            // accum
+                                 1.0f,                // val
+                                 GrB_ALL,             // row_indicies
+                                 nsver,               // n row indicies
+                                 GrB_ALL,             // col_indicies
+                                 n,                   // n col indicies
+                                 GrB_NULL));          // desc
     capi_print_matrix(BCu, "U");
 
     printf("======= BEGIN BACKPROP phase =======\n");
@@ -318,7 +329,7 @@ GrB_Info vertex_betweenness_centrality(float *result,
                                  GrB_NULL,               // mask
                                  GrB_NULL,               // accum
                                  nsver * -1.0f,          // val
-                                 GrB_ALL_n,              // row_undicies
+                                 GrB_ALL,                // row_undicies
                                  n,                      // nindicies
                                  GrB_NULL));             // desc
     capi_print_vector(tmpResult, "prepped result:");
@@ -340,13 +351,6 @@ GrB_Info vertex_betweenness_centrality(float *result,
         first = false;
     }
     printf("\n");
-
-
-    // @TODO:  Do all cleanup
-
-    // Clean up
-    free(GrB_ALL_nsver);
-    free(GrB_ALL_n);
 
     return GrB_SUCCESS;
 }

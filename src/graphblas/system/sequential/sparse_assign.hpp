@@ -207,8 +207,8 @@ namespace GraphBLAS
 
             // @TODO: Deal with sorting
 
-//            IndexSequence sorted_rows(row_indices);
-//            IndexSequence sorted_cols(col_indices);
+//            IndexProxy sorted_rows(row_indices);
+//            IndexProxy sorted_cols(col_indices);
 //            std::sort(sorted_rows.begin(), sorted_rows.end());
 //            std::sort(sorted_cols.begin(), sorted_cols.end());
 //            assignConstant(T, val,
@@ -241,7 +241,7 @@ namespace GraphBLAS
         {
             // execution error checks
             check_index_array_content(indices, w.size(),
-                                      "assign(std vec): indices content check");
+                                      "assign(std ptr): indices content check");
             // NOT Implemented yet.
             throw 1;
         }
@@ -321,7 +321,7 @@ namespace GraphBLAS
         {
             // execution error checks
             check_index_array_content(indices, w.size(),
-                                      "assign(const vec): indices content check");
+                                      "assign(const ptr): indices content check");
 
             std::vector<std::tuple<IndexType, ValueT> > T;
 

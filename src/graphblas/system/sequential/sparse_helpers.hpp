@@ -1019,11 +1019,11 @@ namespace GraphBLAS
 
         //**********************************************************************
         template <typename VectorT, typename MatrixT>
-        void check_vector_size_nrows(VectorT     const &vec,
+        void check_vector_size_nrows(VectorT     const &ptr,
                                      MatrixT     const &mat,
                                      std::string const &msg)
         {
-            if (vec.size() != mat.nrows())
+            if (ptr.size() != mat.nrows())
             {
                 throw GraphBLAS::DimensionException(msg);
             }
@@ -1031,11 +1031,11 @@ namespace GraphBLAS
 
         //**********************************************************************
         template <typename VectorT, typename MatrixT>
-        void check_vector_size_ncols(VectorT     const &vec,
+        void check_vector_size_ncols(VectorT     const &ptr,
                                      MatrixT     const &mat,
                                      std::string const &msg)
         {
-            if (vec.size() != mat.ncols())
+            if (ptr.size() != mat.ncols())
             {
                 throw GraphBLAS::DimensionException(msg);
             }

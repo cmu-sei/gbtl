@@ -226,7 +226,7 @@ namespace GraphBLAS
     void check_nindices_within_size(const S &seq, const V &vec,
                                     const std::string &msg)
     {
-        check_index_val_leq(seq.size(), vec.size(), "seq.size < vec.size", msg);
+        check_index_val_leq(seq.size(), vec.size(), "seq.size < ptr.size", msg);
     }
 
     template <typename V>

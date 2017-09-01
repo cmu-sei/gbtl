@@ -25,12 +25,12 @@ typedef enum {
 // I want these to be const *, but I get const violations when I do this
 //extern const void *GrB_NULL;
 extern void *GrB_NULL;
-extern void *GrB_ALL;
 
 // What is the right type to use that matches the C++ one?
 //typedef u_int64_t GrB_Index;
 typedef unsigned long GrB_Index;
 
+#define GrB_ALL ((GrB_Index *)NULL)
 
 typedef bool GrB_BOOL;
 // GrB_INT8 int8

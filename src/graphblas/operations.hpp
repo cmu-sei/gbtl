@@ -147,9 +147,9 @@ namespace GraphBLAS
                           VVectorT              const &v,
                           bool                         replace_flag = false)
     {
-        check_size_size(w, mask, "eWiseMult(vec): w.size != mask.size");
-        check_size_size(w, u, "eWiseMult(vec): w.size != u.size");
-        check_size_size(u, v, "eWiseMult(vec): u.size != v.size");
+        check_size_size(w, mask, "eWiseMult(ptr): w.size != mask.size");
+        check_size_size(w, u, "eWiseMult(ptr): w.size != u.size");
+        check_size_size(u, v, "eWiseMult(ptr): u.size != v.size");
 
         backend::eWiseMult(w.m_vec, mask.m_vec, accum, op, u.m_vec, v.m_vec,
                            replace_flag);
@@ -204,9 +204,9 @@ namespace GraphBLAS
                          VVectorT              const &v,
                          bool                         replace_flag = false)
     {
-        check_size_size(w, mask, "eWiseAdd(vec): w.size != mask.size");
-        check_size_size(w, u, "eWiseAdd(vec): w.size != u.size");
-        check_size_size(u, v, "eWiseAdd(vec): u.size != v.size");
+        check_size_size(w, mask, "eWiseAdd(ptr): w.size != mask.size");
+        check_size_size(w, u, "eWiseAdd(ptr): w.size != u.size");
+        check_size_size(u, v, "eWiseAdd(ptr): u.size != v.size");
 
         backend::eWiseAdd(w.m_vec, mask.m_vec, accum, op, u.m_vec, v.m_vec,
                           replace_flag);
@@ -256,9 +256,9 @@ namespace GraphBLAS
                         SequenceT      const &indices,
                         bool                  replace_flag = false)
     {
-        check_size_size(w, mask, "extract(std vec): w.size != mask.size");
+        check_size_size(w, mask, "extract(std ptr): w.size != mask.size");
         check_size_nindices(w, indices,
-                            "extract(std vec): w.size != indicies.size");
+                            "extract(std ptr): w.size != indicies.size");
 
         backend::extract(w.m_vec, mask.m_vec, accum, u.m_vec,
                          indices, replace_flag);
@@ -338,9 +338,9 @@ namespace GraphBLAS
                        SequenceT    const &indices,
                        bool                replace_flag = false)
     {
-        check_size_size(w, mask, "assign(std vec): w.size != mask.size");
+        check_size_size(w, mask, "assign(std ptr): w.size != mask.size");
         check_size_nindices(u, indices,
-                            "assign(std vec): u.size != indicies.size");
+                            "assign(std ptr): u.size != indicies.size");
 
         backend::assign(w.m_vec, mask.m_vec, accum, u.m_vec, indices,
                         replace_flag);
@@ -425,9 +425,9 @@ namespace GraphBLAS
                        SequenceT            const   &indices,
                        bool                          replace_flag = false)
     {
-        check_size_size(w, mask, "assign(const vec): w.size != mask.size");
+        check_size_size(w, mask, "assign(const ptr): w.size != mask.size");
         check_nindices_within_size(indices, w,
-                                   "assign(const vec): indicies.size !<= w.size");
+                                   "assign(const ptr): indicies.size !<= w.size");
 
         backend::assign_constant(w.m_vec, mask.m_vec, accum, val, indices,
                                  replace_flag);
@@ -483,8 +483,8 @@ namespace GraphBLAS
                       UVectorT              const &u,
                       bool                         replace_flag = false)
     {
-        check_size_size(w, mask, "apply(vec): w.size != mask.size");
-        check_size_size(w, u, "apply(vec): w.size != u.size");
+        check_size_size(w, mask, "apply(ptr): w.size != mask.size");
+        check_size_size(w, u, "apply(ptr): w.size != u.size");
 
         backend::apply(w.m_vec, mask.m_vec, accum, op, u.m_vec, replace_flag);
     }
