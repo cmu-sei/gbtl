@@ -457,7 +457,7 @@ namespace GraphBLAS
         check_nindices_within_nrows(
             row_indices, C,
             "assign(const mat): indicies.size !<= C.nrows");
-        check_nindices_within_nrows(
+        check_nindices_within_ncols(
             col_indices, C,
             "assign(const mat): indicies.size !<= C.ncols");
         backend::assign_constant(C.m_mat, Mask.m_mat, accum, val,
