@@ -27,6 +27,7 @@
 
 #include <graphblas/Matrix.hpp>
 #include <graphblas/Vector.hpp>
+#include <graphblas/indices.hpp>
 
 #include <graphblas/detail/config.hpp>
 #include <graphblas/detail/checks.hpp>

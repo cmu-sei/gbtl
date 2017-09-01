@@ -26,12 +26,12 @@
 #include <iterator>
 #include <iostream>
 
-#include "graphblas/detail/logging.h"
+#include <graphblas/detail/logging.h>
 #include <graphblas/types.hpp>
 #include <graphblas/exceptions.hpp>
 #include <graphblas/algebra.hpp>
+#include <graphblas/indices.hpp>
 
-#include "iterator_support.hpp"
 #include "sparse_helpers.hpp"
 #include "LilSparseMatrix.hpp"
 

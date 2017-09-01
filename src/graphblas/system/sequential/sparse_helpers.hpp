@@ -29,8 +29,7 @@
 #include <iostream>
 #include <string>
 #include <graphblas/algebra.hpp>
-
-#include "iterator_support.hpp"
+#include <graphblas/indices.hpp>
 
 //****************************************************************************
 
