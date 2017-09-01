@@ -336,7 +336,6 @@ GrB_Info GrB_mxm(GrB_Matrix C,
     if (desc != GrB_NULL)
         replace = desc->isSet(GrB_OUTP, GrB_REPLACE);
 
-
     if (Mask == GrB_NULL)
     {
         if (accum == GrB_NULL)
@@ -628,13 +627,14 @@ GrB_Info GrB_Matrix_eWiseAdd_BinaryOp(GrB_Matrix C,
                                       const GrB_Matrix B,
                                       const GrB_Descriptor desc)
 {
+    bool replace = false;
+    if (desc != GrB_NULL)
+        replace = desc->isSet(GrB_OUTP, GrB_REPLACE);
+
     if (Mask != GrB_NULL)
         return GrB_PANIC;
 
     if (accum != GrB_NULL)
-        return GrB_PANIC;
-
-    if (desc != GrB_NULL)
         return GrB_PANIC;
 
     GraphBLAS::eWiseAdd(*C->m_matrix,
@@ -643,7 +643,7 @@ GrB_Info GrB_Matrix_eWiseAdd_BinaryOp(GrB_Matrix C,
                         BinaryAdapter(op),
                         *A->m_matrix,
                         *B->m_matrix,
-                        false);
+                        replace);
     return GrB_SUCCESS;
 }
 
@@ -661,10 +661,11 @@ GrB_Info GrB_extract(GrB_Matrix C,
                      const GrB_Index ncols,
                      const GrB_Descriptor desc)
 {
-    if (accum != GrB_NULL)
-        return GrB_PANIC;
-
+    bool replace = false;
     if (desc != GrB_NULL)
+        replace = desc->isSet(GrB_OUTP, GrB_REPLACE);
+
+    if (accum != GrB_NULL)
         return GrB_PANIC;
 
     if ((void *) Mask == GrB_NULL)
@@ -675,7 +676,7 @@ GrB_Info GrB_extract(GrB_Matrix C,
                            *A->m_matrix,
                            GraphBLAS::IndexProxy(row_indices, nrows),
                            GraphBLAS::IndexProxy(col_indices, ncols),
-                           false);
+                           replace);
     }
     else
     {
@@ -685,7 +686,7 @@ GrB_Info GrB_extract(GrB_Matrix C,
                            *A->m_matrix,
                            GraphBLAS::IndexProxy(row_indices, nrows),
                            GraphBLAS::IndexProxy(col_indices, ncols),
-                           false);
+                           replace);
     }
 
 //    inline void extract(CMatrixT             &C,
@@ -711,8 +712,9 @@ GrB_Info GrB_Vector_assign_FP32(GrB_Vector w,
                                 const GrB_Index nindicies,
                                 const GrB_Descriptor desc)
 {
+    bool replace = false;
     if (desc != GrB_NULL)
-        return GrB_PANIC;
+        replace = desc->isSet(GrB_OUTP, GrB_REPLACE);
 
     if (mask != GrB_NULL)
         return GrB_PANIC;
@@ -724,7 +726,7 @@ GrB_Info GrB_Vector_assign_FP32(GrB_Vector w,
                            GraphBLAS::NoAccumulate(),
                            val,
                            GraphBLAS::IndexProxy(row_indicies, nindicies),
-                           false);
+                           replace);
     }
     else
     {
@@ -733,7 +735,7 @@ GrB_Info GrB_Vector_assign_FP32(GrB_Vector w,
                            BinaryAdapter(accum),
                            val,
                            GraphBLAS::IndexProxy(row_indicies, nindicies),
-                           false);
+                           replace);
     }
     return GrB_SUCCESS;
 }
@@ -750,8 +752,9 @@ GrB_Info GrB_Matrix_assign_FP32(GrB_Matrix C,
                                 const GrB_Index ncols,
                                 const GrB_Descriptor desc)
 {
+    bool replace = false;
     if (desc != GrB_NULL)
-        return GrB_PANIC;
+        replace = desc->isSet(GrB_OUTP, GrB_REPLACE);
 
     if (Mask != GrB_NULL)
         return GrB_PANIC;
@@ -765,7 +768,7 @@ GrB_Info GrB_Matrix_assign_FP32(GrB_Matrix C,
                        val,
                        GraphBLAS::IndexProxy(row_indicies, nrows),
                        GraphBLAS::IndexProxy(col_indicies, ncols),
-                       false);
+                       replace);
 
     return GrB_SUCCESS;
 }
@@ -773,14 +776,15 @@ GrB_Info GrB_Matrix_assign_FP32(GrB_Matrix C,
 //=============================================================================
 // 4.3.8.2
 GrB_Info GrB_apply(GrB_Matrix C,
-                   const GrB_Matrix Massk,
+                   const GrB_Matrix Mask,
                    const GrB_BinaryOp accum,
                    const GrB_UnaryOp op,
                    const GrB_Matrix A,
                    const GrB_Descriptor desc)
 {
+    bool replace = false;
     if (desc != GrB_NULL)
-        return GrB_PANIC;
+        replace = desc->isSet(GrB_OUTP, GrB_REPLACE);
 
     // Ignore mask and accum for now
     GraphBLAS::apply(*C->m_matrix,
@@ -788,7 +792,7 @@ GrB_Info GrB_apply(GrB_Matrix C,
                      GraphBLAS::NoAccumulate(),
                      UnaryAdapter(op),
                      *A->m_matrix,
-                     false);
+                     replace);
 
     return GrB_SUCCESS;
 }

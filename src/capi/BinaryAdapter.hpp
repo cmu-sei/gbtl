@@ -28,6 +28,7 @@ public:
                            input2);
     }
 
+
 private:
     const GrB_BinaryOp m_binary_op;
 };

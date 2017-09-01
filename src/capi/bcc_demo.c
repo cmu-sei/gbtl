@@ -3,10 +3,15 @@
 //
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 #include "bcc.h"
+
+#define EPSILON 0.001
 
 int main(int argc, char **argv)
 {
+
     int ncols = 8;
     GrB_Info info;
 
@@ -49,8 +54,12 @@ int main(int argc, char **argv)
     bool found_error = false;
     for (int i = 0; i < ncols; ++i)
     {
-        if (result != correct_result)
-            printf("ERROR at entry %d.  Expected %f, found %f\n", i, correct_result[i], result[i]);
+        if (fabs(result[i] - correct_result[i]) > EPSILON)
+        {
+            printf("ERROR at entry %d.  Expected %f, found %f\n", i,
+                   correct_result[i], result[i]);
+            found_error = true;
+        }
     }
 
     if (found_error)
