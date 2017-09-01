@@ -62,8 +62,9 @@ foreach( testsourcefile ${TEST_SOURCES} )
     get_filename_component(justname ${testsourcefile} NAME)
     string( REPLACE ".cpp" "" testname ${justname} )
     message("Adding: ${testname}")
-    add_executable( ${testname} ${testsourcefile} ${GRAPHBLAS_HEADERS})
+    add_executable( ${testname} ${testsourcefile} ${GRAPHBLAS_HEADERS} capi/detail/index_support.hpp)
 endforeach( testsourcefile ${TEST_SOURCES} )
 
 # TODO: Make capi tests
-#add_executable(bcc_demo capi/bcc_demo.c capi/bcc.c capi/bcc.h ${GRAPHBLAS} capi/graphblas.cpp capi/TypeAdapter.hpp capi/UnaryAdapter.hpp capi/graphblas_private.h capi/BinaryAdapter.xhpp capi/TypeUnion.hpp capi/SemiringAdapter.hpp capi/FunctionInvocation.cpp capi/FunctionInvocation.h capi/MonoidAdapter.hpp)
+
+add_executable(bcc_demo capi/bcc_demo.c capi/bcc.c ${GRAPHBLAS_HEADERS} capi/graphblas.cpp capi/FunctionInvocation.cpp)
