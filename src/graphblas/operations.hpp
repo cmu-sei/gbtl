@@ -322,7 +322,7 @@ namespace GraphBLAS
     //************************************************************************
 
     // 4.3.7.1: assign - standard vector variant
-    template<typename WVectorT,
+    template<typename WScalarT,
              typename MaskT,
              typename AccumT,
              typename UVectorT,
@@ -330,8 +330,9 @@ namespace GraphBLAS
              typename std::enable_if<
                  std::is_same<vector_tag,
                               typename UVectorT::tag_type>::value,
-                 int>::type = 0>
-    inline void assign(WVectorT           &w,
+                 int>::type = 0,
+             typename ...WTags>
+    inline void assign(Vector<WScalarT, WTags...>   &w,
                        MaskT        const &mask,
                        AccumT              accum,
                        UVectorT     const &u,
@@ -340,7 +341,7 @@ namespace GraphBLAS
     {
         check_size_size(w, mask, "assign(std vec): w.size != mask.size");
         check_size_nindices(u, indices,
-                            "assign(std vec): u.size != indicies.size");
+                            "assign(std vec): u.size != |indicies|");
 
         backend::assign(w.m_vec, mask.m_vec, accum, u.m_vec, indices,
                         replace_flag);
@@ -368,9 +369,9 @@ namespace GraphBLAS
         check_nrows_nrows(C, Mask, "assign(std mat): C.nrows != Mask.nrows");
         check_ncols_ncols(C, Mask, "assign(std mat): C.ncols != Mask.ncols");
         check_nrows_nindices(A, row_indices,
-                             "assign(std mat): A.nrows != row_indices");
+                             "assign(std mat): A.nrows != |row_indices|");
         check_ncols_nindices(A, col_indices,
-                             "assign(std mat): A.ncols != col_indices");
+                             "assign(std mat): A.ncols != |col_indices|");
 
         backend::assign(C.m_mat, Mask.m_mat, accum, A.m_mat,
                         row_indices, col_indices, replace_flag);
@@ -378,35 +379,56 @@ namespace GraphBLAS
 
 
     // 4.3.7.3: assign - column variant
-    // @TODO: Implement
-//    template<typename CMatrixT,
-//             typename MaskT,
-//             typename AccumT,
-//             typename UVectorT,
-//             typename SequenceT>
-//    inline void assign(CMatrixT             &C,
-//                       MaskT          const &mask,  // a vector
-//                       AccumT                accum,
-//                       UVectorT       const &u,
-//                       SequenceT      const &row_indices,
-//                       IndexType             col_index,
-//                       bool                  replace_flag = false);
-//
+    template<typename CScalarT,
+             typename MaskT,
+             typename AccumT,
+             typename UVectorT,
+             typename SequenceT,
+             typename ...CTags>
+    inline void assign(Matrix<CScalarT, CTags...>  &C,
+                       MaskT                 const &mask,  // a vector
+                       AccumT                       accum,
+                       UVectorT              const &u,
+                       SequenceT             const &row_indices,
+                       IndexType                    col_index,
+                       bool                         replace_flag = false)
+    {
+        std::cerr << "fe::assign(col)\n";
+        check_size_nrows(mask, C, "assign(col): C.nrows != mask.size");
+        check_size_nindices(u, row_indices,
+                            "assign(col): u.size != |row_indices|");
+        check_index_within_ncols(col_index, C,
+                                 "assign(col): col_index >= C.ncols");
+
+        backend::assign(C.m_mat, mask.m_vec, accum, u.m_vec,
+                        row_indices, col_index, replace_flag);
+    }
 
     // 4.3.7.4: assign - row variant
-    // @TODO: Implement
-//    template<typename CMatrixT,
-//             typename MaskT,
-//             typename AccumT,
-//             typename UVectorT,
-//             typename SequenceT>
-//    inline void assign(CMatrixT          &C,
-//                       MaskT       const &mask,  // a vector
-//                       AccumT             accum,
-//                       UVectorT    const &u,
-//                       IndexType          row_index,
-//                       SequenceT   const &col_indices,
-//                       bool               replace_flag = false);
+    template<typename CScalarT,
+             typename MaskT,
+             typename AccumT,
+             typename UVectorT,
+             typename SequenceT,
+             typename ...CTags>
+    inline void assign(Matrix<CScalarT, CTags...>  &C,
+                       MaskT                 const &mask,  // a vector
+                       AccumT                       accum,
+                       UVectorT              const &u,
+                       IndexType                    row_index,
+                       SequenceT             const &col_indices,
+                       bool                         replace_flag = false)
+    {
+        std::cerr << "fe::assign(row)\n";
+        check_size_ncols(mask, C, "assign(row): C.ncols != Mask.ncols");
+        check_size_nindices(u, col_indices,
+                            "assign(row): u.size != |col_indices|");
+        check_index_within_nrows(row_index, C,
+                                 "assign(col): row_index >= C.nrows");
+
+        backend::assign(C.m_mat, mask.m_vec, accum, u.m_vec,
+                        row_index, col_indices, replace_flag);
+    }
 
     // 4.3.7.5: assign: Constant vector variant
     template<typename WVectorT,

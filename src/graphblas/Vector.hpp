@@ -325,7 +325,23 @@ namespace GraphBLAS
                 bool                  replace_flag);
 
         // 4.3.7.1: assign - standard vector variant
-        template<typename WVectorT,
+        // template<typename WVectorT,
+        //          typename MaskT,
+        //          typename AccumT,
+        //          typename UVectorT,
+        //          typename SequenceT,
+        //          typename std::enable_if<
+        //              std::is_same<vector_tag,
+        //                           typename UVectorT::tag_type>::value,
+        //              int>::type>
+        // friend inline void assign(WVectorT           &w,
+        //                           MaskT        const &mask,
+        //                           AccumT              accum,
+        //                           UVectorT     const &u,
+        //                           SequenceT    const &indices,
+        //                           bool                replace_flag);
+
+        template<typename WScalarT,
                  typename MaskT,
                  typename AccumT,
                  typename UVectorT,
@@ -333,13 +349,44 @@ namespace GraphBLAS
                  typename std::enable_if<
                      std::is_same<vector_tag,
                                   typename UVectorT::tag_type>::value,
-                     int>::type>
-        friend inline void assign(WVectorT           &w,
+                     int>::type,
+                 typename ...WTags>
+        friend inline void assign(Vector<WScalarT, WTags...>   &w,
                                   MaskT        const &mask,
                                   AccumT              accum,
                                   UVectorT     const &u,
                                   SequenceT    const &indices,
                                   bool                replace_flag);
+
+        // 4.3.7.3:
+        template<typename CScalarT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename UVectorT,
+                 typename SequenceT,
+                 typename ...CTags>
+        friend inline void assign(Matrix<CScalarT, CTags...>  &C,
+                                  MaskT                 const &mask,  // a vector
+                                  AccumT                       accum,
+                                  UVectorT              const &u,
+                                  SequenceT             const &row_indices,
+                                  IndexType                    col_index,
+                                  bool                         replace_flag);
+
+        // 4.3.7.4:
+        template<typename CScalarT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename UVectorT,
+                 typename SequenceT,
+                 typename ...CTags>
+        friend inline void assign(Matrix<CScalarT, CTags...>  &C,
+                                  MaskT                 const &mask,  // a vector
+                                  AccumT                       accum,
+                                  UVectorT              const &u,
+                                  IndexType                    row_index,
+                                  SequenceT             const &col_indices,
+                                  bool                         replace_flag);
 
         // 4.3.7.5:
         template<typename WVectorT,

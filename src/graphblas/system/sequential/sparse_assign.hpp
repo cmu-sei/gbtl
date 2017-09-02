@@ -201,7 +201,7 @@ namespace GraphBLAS
                 if (!out_row.empty())
                     T.setRow(*row_it, out_row);
             }
-        };
+        }
 
 
         template <typename ValueT,
@@ -355,8 +355,53 @@ namespace GraphBLAS
 
             //std::cerr << ">>> C <<< " << std::endl;
             //std::cerr << C << std::endl;
-        };
+        }
 
+        //=====================================================================
+        //=====================================================================
+
+        // 4.3.7.3 assign: Column variant
+        template<typename CMatrixT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename UVectorT,
+                 typename SequenceT>
+        inline void assign(CMatrixT               &C,
+                           MaskT            const &mask,
+                           AccumT                  accum,
+                           UVectorT         const &u,
+                           SequenceT        const &row_indices,
+                           IndexType               col_index,
+                           bool                    replace = false)
+        {
+            // execution error checks
+            check_index_array_content(row_indices, C.nrows(),
+                                      "assign(col): indices content check");
+        }
+
+        //=====================================================================
+        //=====================================================================
+
+        // 4.3.7.4 assign: Row variant
+        template<typename CMatrixT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename UVectorT,
+                 typename SequenceT>
+        inline void assign(CMatrixT               &C,
+                           MaskT            const &mask,
+                           AccumT                  accum,
+                           UVectorT         const &u,
+                           IndexType               row_index,
+                           SequenceT        const &col_indices,
+                           bool                    replace = false)
+        {
+            // execution error checks
+            check_index_array_content(col_indices, C.ncols(),
+                                      "assign(row): indices content check");
+        }
+
+        //======================================================================
         //======================================================================
 
         // 4.3.7.5: assign: Constant vector variant
@@ -395,7 +440,7 @@ namespace GraphBLAS
             // =================================================================
             // Copy Z into the final output, w, considering mask and replace
             write_with_opt_mask_1D(w, z, mask, replace_flag);
-        };
+        }
 
         //======================================================================
         // 4.3.7.6: assign: Constant Matrix Variant

@@ -186,7 +186,12 @@ namespace GraphBLAS
         check_val_equals(v.size(), A.nrows(), "size != nrows", msg);
     };
 
-    // Note: no NoMask support
+    // Note: NoMask support for assign(col)
+    template <typename M>
+    void check_size_nrows(const NoMask &mask, const M &A, const std::string &msg)
+    {
+        // No op
+    };
 
     // =========================================================================
 
@@ -194,6 +199,13 @@ namespace GraphBLAS
     void check_size_ncols(const V &v, const M &A, const std::string &msg)
     {
         check_val_equals(v.size(), A.ncols(), "size != nrows", msg);
+    };
+
+    // Note: NoMask support for assign(row)
+    template <typename M>
+    void check_size_ncols(const NoMask &mask, const M &A, const std::string &msg)
+    {
+        // No op
     };
 
     // Note: no NoMask support
@@ -207,7 +219,9 @@ namespace GraphBLAS
     };
 
     template <typename V>
-    void check_size_nindices(const V &v, const GraphBLAS::AllIndices &s, const std::string &msg)
+    void check_size_nindices(const V &v,
+                             const GraphBLAS::AllIndices &s,
+                             const std::string &msg)
     {
     };
 
@@ -218,6 +232,15 @@ namespace GraphBLAS
                                   const std::string &msg)
     {
         check_index_val_lt(val, m.ncols(), "value < ncols", msg);
+    }
+
+    // ================================================
+
+    template <typename M>
+    void check_index_within_nrows(IndexType val, const M &m,
+                                  const std::string &msg)
+    {
+        check_index_val_lt(val, m.nrows(), "value < nrows", msg);
     }
 
     // ================================================

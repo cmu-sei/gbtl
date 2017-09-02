@@ -416,6 +416,36 @@ namespace GraphBLAS
                                   ColSequenceT    const &col_indices,
                                   bool                   replace_flag);
 
+        // 4.3.7.3:
+        template<typename CScalarT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename UVectorT,
+                 typename SequenceT,
+                 typename ...CTags>
+        friend inline void assign(Matrix<CScalarT, CTags...>  &C,
+                                  MaskT                 const &mask,  // a vector
+                                  AccumT                       accum,
+                                  UVectorT              const &u,
+                                  SequenceT             const &row_indices,
+                                  IndexType                    col_index,
+                                  bool                         replace_flag);
+
+        // 4.3.7.4:
+        template<typename CScalarT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename UVectorT,
+                 typename SequenceT,
+                 typename ...CTags>
+        friend inline void assign(Matrix<CScalarT, CTags...>  &C,
+                                  MaskT                 const &mask,  // a vector
+                                  AccumT                       accum,
+                                  UVectorT              const &u,
+                                  IndexType                    row_index,
+                                  SequenceT             const &col_indices,
+                                  bool                         replace_flag);
+
         // 4.3.7.6
         template<typename CMatrixT,
                  typename MaskT,

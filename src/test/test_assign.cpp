@@ -431,6 +431,64 @@ BOOST_AUTO_TEST_CASE(assign_mat_test_allrowscols_accum)
 /// @todo add tests with masks
 
 //****************************************************************************
+// Assign Column tests
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(assign_col_test_bad_dimensions)
+{
+    IndexArrayType      i_c = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType      j_c = {1, 2, 3, 0, 2, 3, 0, 1, 2};
+    std::vector<double> v_c = {   1, 2, 3,
+                               4,    6, 7,
+                               8, 9, 1   };
+    Matrix<double, DirectedMatrixTag> c(3, 4);
+    c.build(i_c, j_c, v_c);
+
+    IndexArrayType i_a    = {0, 1};
+    std::vector<double> v_a = {1, 99};
+    Vector<double> a(2);
+    a.build(i_a, v_a);
+
+    IndexArrayType vect_I({0,1,2});
+    //IndexArrayType vect_J({1,2});
+
+    BOOST_CHECK_THROW(
+        (assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                a, vect_I, 2)),
+        DimensionException);
+}
+
+/// @todo add tests with masks
+
+//****************************************************************************
+// Assign Row tests
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(assign_row_test_bad_dimensions)
+{
+    IndexArrayType      i_c = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType      j_c = {1, 2, 3, 0, 2, 3, 0, 1, 2};
+    std::vector<double> v_c = {   1, 2, 3,
+                               4,    6, 7,
+                               8, 9, 1   };
+    Matrix<double, DirectedMatrixTag> c(3, 4);
+    c.build(i_c, j_c, v_c);
+
+    IndexArrayType i_a    = {0, 1};
+    std::vector<double> v_a = {1, 99};
+    Vector<double> a(2);
+    a.build(i_a, v_a);
+
+    //IndexArrayType vect_I({0,1,2});
+    IndexArrayType vect_J({1});
+
+    BOOST_CHECK_THROW(
+        (assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                a, 1, vect_J)),
+        DimensionException);
+}
+
+/// @todo add tests with masks
+
+//****************************************************************************
 // 4.3.7.5 Vector constant tests
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(assign_vec_constant_test_bad_dimensions)
