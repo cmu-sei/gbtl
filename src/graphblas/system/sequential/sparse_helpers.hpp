@@ -533,6 +533,42 @@ namespace GraphBLAS
             }
         }
 
+
+        //**********************************************************************
+        template <typename ZScalarT,
+                  typename WVectorT,
+                  typename TScalarT,
+                  typename SequenceT,
+                  typename BinaryOpT >
+        void ewise_or_stencil_opt_accum_1D(
+            std::vector<std::tuple<GraphBLAS::IndexType,ZScalarT>>       &z,
+            WVectorT const                                               &w,
+            std::vector<std::tuple<GraphBLAS::IndexType,TScalarT>> const &t,
+            SequenceT const                                              &indices,
+            BinaryOpT                                                     accum)
+        {
+            // If there is an accumulate operations, do nothing with the stencil
+            ewise_or(z, w.getContents(), t, accum);
+        }
+
+        //**********************************************************************
+        template <typename ZScalarT,
+                  typename WVectorT,
+                  typename TScalarT,
+                  typename SequenceT>
+        void ewise_or_stencil_opt_accum_1D(
+            std::vector<std::tuple<GraphBLAS::IndexType,ZScalarT>>       &z,
+            WVectorT const                                               &w,
+            std::vector<std::tuple<GraphBLAS::IndexType,TScalarT>> const &t,
+            SequenceT const                                              &indices,
+            GraphBLAS::NoAccumulate)
+        {
+            // If there is no accumulate we need to annihilate stored values
+            // in w that fall in the stencil
+            ewise_or_stencil(z, w.getContents(), t, indices);
+        }
+
+
         //**********************************************************************
         template < typename ZMatrixT,
                    typename CMatrixT,
@@ -580,17 +616,16 @@ namespace GraphBLAS
 
             typedef std::vector<std::tuple<IndexType,ZScalarType> > ZRowType;
 
-            std::cerr << "In ewise_or_stencil_opt_accum\n";
             ZRowType tmp_row;
             IndexType nRows(Z.nrows());
             auto row_stencil_it = row_indices.begin();
             for (IndexType row_idx = 0; row_idx < nRows; ++row_idx)
             {
-                std::cerr << "Row: " << row_idx << std::endl;
+                //std::cerr << "Row: " << row_idx << std::endl;
                 if ((row_stencil_it != row_indices.end()) &&
                     (*row_stencil_it == row_idx))
                 {
-                    std::cerr << "Row Stenciled. merge C, T, and col stencil\n";
+                    //std::cerr << "Row Stenciled. merge C, T, and col stencil\n";
                     ewise_or_stencil(tmp_row, C.getRow(row_idx), T.getRow(row_idx),
                                      col_indices);
                     Z.setRow(row_idx, tmp_row);
@@ -598,7 +633,7 @@ namespace GraphBLAS
                 }
                 else
                 {
-                    std::cerr << "Not stenciled.  Take row from C" << std::endl;
+                    //std::cerr << "Not stenciled.  Take row from C" << std::endl;
                     // There should be nothing in T for this row
                     Z.setRow(row_idx, C.getRow(row_idx));
                 }

@@ -63,10 +63,11 @@ namespace GraphBLAS
             std::sort(inputOrder.begin(), inputOrder.end(), IndexCompare());
         }
 
-        template < typename TScalarT, typename AScalarT>
-        void vectorExpand(std::vector< std::tuple<IndexType, TScalarT> >  &vec_dest,
-                          std::vector< std::tuple<IndexType, AScalarT> > const &vec_src,
-                          std::vector< std::pair<IndexType, IndexType> > const &Indices)
+        template <typename TScalarT,
+                  typename AScalarT>
+        void vectorExpand(std::vector<std::tuple<IndexType, TScalarT>>  &vec_dest,
+                          std::vector<std::tuple<IndexType, AScalarT>> const &vec_src,
+                          std::vector<std::pair<IndexType, IndexType>> const &Indices)
         {
             // The Indices are pairs of ( output_index, input_index)
             // We do it this way, so we get the output in the right
@@ -145,6 +146,14 @@ namespace GraphBLAS
 
             T.clear();
 
+            // std::cerr << "row_indices:";
+            // for (auto it : row_Indices) std::cerr << " " << it;
+            // std::cerr << std::endl;
+
+            // std::cerr << "col_indices:";
+            // for (auto it : col_Indices) std::cerr << " " << it;
+            // std::cerr << std::endl;
+
             // Build the mapping pairs once up front
             std::vector<std::pair<IndexType, IndexType>> oi_pairs;
             compute_outin_mapping(col_Indices, oi_pairs);
@@ -155,7 +164,7 @@ namespace GraphBLAS
                  ++in_row_index)
             {
                 IndexType out_row_index = row_Indices[in_row_index];
-                ARowType row(A.getRow(in_row_index));
+                auto row(A.getRow(in_row_index));
                 auto row_it = row.begin();
 
                 TRowType out_row;
@@ -242,8 +251,43 @@ namespace GraphBLAS
             // execution error checks
             check_index_array_content(indices, w.size(),
                                       "assign(std vec): indices content check");
-            // NOT Implemented yet.
-            throw 1;
+
+            //std::cerr << ">>> w <<< " << std::endl;
+            //std::cerr << w << std::endl;
+
+            //std::cerr << ">>> u <<< " << std::endl;
+            //std::cerr << u << std::endl;
+
+            std::vector<std::pair<IndexType, IndexType>> oi_pairs;
+            compute_outin_mapping(setupIndices(indices, u.size()), oi_pairs);
+
+            // =================================================================
+            // Expand to T
+            typedef typename UVectorT::ScalarType UScalarType;
+            std::vector<std::tuple<IndexType, UScalarType> > t;
+            auto u_contents(u.getContents());
+            vectorExpand(t, u_contents, oi_pairs);
+
+            //std::cerr << ">>> t <<< " << std::endl;
+            //std::cerr << t << std::endl;
+
+            // =================================================================
+            // Accumulate into Z
+            typedef typename WVectorT::ScalarType WScalarType;
+            std::vector<std::tuple<IndexType, WScalarType> > z;
+            ewise_or_stencil_opt_accum_1D(z, w, t,
+                                          setupIndices(indices, u.size()),
+                                          accum);
+
+            //std::cerr << ">>> z <<< " << std::endl;
+            //std::cerr << z << std::endl;
+
+            // =================================================================
+            // Copy Z into the final output considering mask and replace
+            write_with_opt_mask_1D(w, z, mask, replace_flag);
+
+            //std::cerr << ">>> w <<< " << std::endl;
+            //std::cerr << w << std::endl;
         }
 
         //=====================================================================
@@ -273,6 +317,8 @@ namespace GraphBLAS
                                       "assign(std mat): col_indices content check");
 
             // This basically "expands" A into C
+            //std::cerr << ">>> A in <<< " << std::endl;
+            //std::cerr << A << std::endl;
 
             // dimension checks in the front end
             //std::cerr << ">>> C in <<< " << std::endl;
@@ -283,15 +329,22 @@ namespace GraphBLAS
 
             // =================================================================
             // Expand to T
-
+            /// @todo Should this be AScalarType?
             LilSparseMatrix<CScalarType> T(C.nrows(), C.ncols());
-            matrixExpand(T, A, row_indices, col_indices);
+            matrixExpand(T, A,
+                         setupIndices(row_indices, A.nrows()),
+                         setupIndices(col_indices, A.ncols()));
+
+            //std::cerr << ">>> T <<< " << std::endl;
+            //std::cerr << T << std::endl;
 
             // =================================================================
             // Accumulate into Z
-            std::cerr << "calling ewise_or_stencil_opt_accum\n";
             LilSparseMatrix<CScalarType> Z(C.nrows(), C.ncols());
-            ewise_or_stencil_opt_accum(Z, C, T, row_indices, col_indices, accum);
+            ewise_or_stencil_opt_accum(Z, C, T,
+                                       setupIndices(row_indices, A.nrows()),
+                                       setupIndices(col_indices, A.ncols()),
+                                       accum);
 
             //std::cerr << ">>> Z <<< " << std::endl;
             //std::cerr << Z << std::endl;
@@ -323,19 +376,21 @@ namespace GraphBLAS
             check_index_array_content(indices, w.size(),
                                       "assign(const vec): indices content check");
 
-            std::vector<std::tuple<IndexType, ValueT> > T;
+            std::vector<std::tuple<IndexType, ValueT> > t;
 
             // Set all in T
             auto seq = setupIndices(indices, w.size());
             for (auto it = seq.begin(); it != seq.end(); ++it)
-                T.push_back(std::make_tuple(*it, val));
+                t.push_back(std::make_tuple(*it, val));
 
             // =================================================================
             // Accumulate into Z
 
             typedef typename WVectorT::ScalarType WScalarType;
             std::vector<std::tuple<IndexType, WScalarType> > z;
-            ewise_or_opt_accum_1D(z, w, T, accum);
+            ewise_or_stencil_opt_accum_1D(z, w, t,
+                                          setupIndices(indices, w.size()),
+                                          accum);
 
             // =================================================================
             // Copy Z into the final output, w, considering mask and replace
@@ -386,7 +441,10 @@ namespace GraphBLAS
             // Accumulate into Z
 
             LilSparseMatrix<CScalarType> Z(C.nrows(), C.ncols());
-            ewise_or_opt_accum(Z, C, T, accum);
+            ewise_or_stencil_opt_accum(Z, C, T,
+                                       setupIndices(row_indices, C.nrows()),
+                                       setupIndices(col_indices, C.ncols()),
+                                       accum);
 
             //std::cerr << ">>> Z <<< " << std::endl;
             //std::cerr << Z << std::endl;
