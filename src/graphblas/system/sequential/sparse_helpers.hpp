@@ -420,10 +420,54 @@ namespace GraphBLAS
             }
         }
 
+        //********************************************************************
+        // ALL SUPPORT
+        // This is where we turns alls into the correct range
+
+        template <typename SequenceT>
+        bool searchIndices(SequenceT seq, IndexType n)
+        {
+            for (auto it : seq)
+            {
+                if (it == n) return true;
+            }
+            return false;
+        }
+
+        bool searchIndices(AllIndices seq, IndexType n)
+        {
+            return true;
+        }
+
         //**********************************************************************
         /// Apply element-wise operation to union on sparse vectors.
-        /// Indices in the stencil indicate where elements of vec1 should be
-        /// annihilated.
+        /// Indices in the stencil indicate where elements of vec2 should be
+        /// used (whether there is a stored value or not); otherwise the value
+        /// in vec1 should be taken.  Note: that it is assumed that if a value
+        /// is stored in vec2 then the corresponding location is contained in
+        /// stencil indices.
+        ///
+        /// Truth table (for each element, i, of the answer, where '-' means
+        /// no stored value):
+        ///
+        ///  vec1_i   vec2   s_i   ans_i
+        ///    -        -     -      -
+        ///    -        -     x      -
+        ///    -        x --> x    vec2_i
+        ///    x        -     -    vec1_i
+        ///    x        -     x      -    (take vec1_i which is no stored value)
+        ///    x        x --> x    vec1_i
+        ///
+        /// \tparam D1
+        /// \tparam D2
+        /// \tparam D3
+        /// \tparam SequenceT  Could be a out of order subset of indices
+        ///
+        /// \param ans   A row of the answer (Z or z), starts empty
+        /// \param vec1  A row of the output container (C or w), indices increasing order
+        /// \param vec2  A row of the T (or t) container, indices in increasing order
+        /// \param stencil_indices  Assumed to not be in order
+        ///
         template <typename D1, typename D2, typename D3, typename SequenceT>
         void ewise_or_stencil(
             std::vector<std::tuple<GraphBLAS::IndexType,D3> >       &ans,
@@ -432,21 +476,22 @@ namespace GraphBLAS
             SequenceT                                                stencil_indices)
         {
             ans.clear();
-            auto v1_it = vec1.begin();
-            auto v2_it = vec2.begin();
 
-            auto stencil_it = stencil_indices.begin();
-            while ((stencil_it != stencil_indices.end()) &&
-                   (*stencil_it < std::get<0>(*v1_it)))
-            {
-                ++stencil_it;
-            }
+            //auto stencil_it = stencil_indices.begin();
+            //if (v1_it)
+            //while ((stencil_it != stencil_indices.end()) &&
+            //       (*stencil_it < std::get<0>(*v1_it)))
+            //{
+            //    ++stencil_it;
+            //}
 
             D1 v1_val;
             D2 v2_val;
             GraphBLAS::IndexType v1_idx, v2_idx;
 
             // loop through both ordered sets to compute ewise_or
+            auto v1_it = vec1.begin();
+            auto v2_it = vec2.begin();
             while ((v1_it != vec1.end()) || (v2_it != vec2.end()))
             {
                 if ((v1_it != vec1.end()) && (v2_it != vec2.end()))
@@ -454,43 +499,28 @@ namespace GraphBLAS
                     std::tie(v1_idx, v1_val) = *v1_it;
                     std::tie(v2_idx, v2_val) = *v2_it;
 
+                    // If v1 and v2 both have stored values, it is assumed index
+                    // is in stencil_indices so v2 should be stored
                     if (v2_idx == v1_idx)
                     {
-                        while ((stencil_it != stencil_indices.end()) &&
-                               (*stencil_it <= v1_idx))
-                        {
-                            ++stencil_it;
-                        }
-
                         ans.push_back(std::make_tuple(
-                                          v1_idx,
+                                          v2_idx,
                                           static_cast<D3>(v2_val)));
 
                         ++v2_it;
                         ++v1_it;
                     }
-                    else if (v2_idx > v1_idx) // advance v1 and annihilate
+                    // In this case v1 has a value and not v2.  We need to search
+                    // stencil indices to see if index is present
+                    else if (v1_idx < v2_idx) // advance v1 and annihilate
                     {
-                        while ((stencil_it != stencil_indices.end()) &&
-                               (*stencil_it < v1_idx))
+                        if (!searchIndices(stencil_indices, v1_idx))
                         {
-                            ++stencil_it;
+                            ans.push_back(std::make_tuple(
+                                    v1_idx,
+                                    static_cast<D3>(v1_val)));
                         }
-
-                        if ((stencil_it != stencil_indices.end()) &&
-                            (*stencil_it == v1_idx))
-                        {
-                            // annihilate entry in v1
-                            ++stencil_it;
-                            ++v1_it;
-                        }
-                        else
-                        {
-                            // @todo: Should these static_cast??
-                            //std::cerr << "Copying v1, Advancing v1_it" << std::endl;
-                            ans.push_back(std::make_tuple(v1_idx, v1_val));
-                            ++v1_it;
-                        }
+                        ++v1_it;
                     }
                     else
                     {
@@ -504,23 +534,11 @@ namespace GraphBLAS
                 {
                     std::tie(v1_idx, v1_val) = *v1_it;
 
-                    while ((stencil_it != stencil_indices.end()) &&
-                           (*stencil_it < v1_idx))
+                    if (!searchIndices(stencil_indices, v1_idx))
                     {
-                        ++stencil_it;
-                    }
-
-                    if ((stencil_it != stencil_indices.end()) &&
-                        (*stencil_it == v1_idx))
-                    {
-                        // annihilate entry in v1
-                        ++stencil_it;
-                    }
-                    else
-                    {
-                        // @todo: Should these static_cast??
-                        //std::cerr << "Copying v1, Advancing v1_it" << std::endl;
-                        ans.push_back(std::make_tuple(v1_idx, static_cast<D3>(v1_val)));
+                        ans.push_back(std::make_tuple(
+                                v1_idx,
+                                static_cast<D3>(v1_val)));
                     }
                     ++v1_it;
                 }
@@ -618,22 +636,19 @@ namespace GraphBLAS
 
             ZRowType tmp_row;
             IndexType nRows(Z.nrows());
-            auto row_stencil_it = row_indices.begin();
+
             for (IndexType row_idx = 0; row_idx < nRows; ++row_idx)
             {
-                //std::cerr << "Row: " << row_idx << std::endl;
-                if ((row_stencil_it != row_indices.end()) &&
-                    (*row_stencil_it == row_idx))
+                if (searchIndices(row_indices, row_idx))
                 {
-                    //std::cerr << "Row Stenciled. merge C, T, and col stencil\n";
+                    // Row Stenciled. merge C, T, using col stencil\n";
                     ewise_or_stencil(tmp_row, C.getRow(row_idx), T.getRow(row_idx),
                                      col_indices);
                     Z.setRow(row_idx, tmp_row);
-                    ++row_stencil_it;
                 }
                 else
                 {
-                    //std::cerr << "Not stenciled.  Take row from C" << std::endl;
+                    // Row not stenciled.  Take row from C only
                     // There should be nothing in T for this row
                     Z.setRow(row_idx, C.getRow(row_idx));
                 }

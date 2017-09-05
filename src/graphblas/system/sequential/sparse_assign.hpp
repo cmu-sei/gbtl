@@ -164,7 +164,7 @@ namespace GraphBLAS
                  ++in_row_index)
             {
                 IndexType out_row_index = row_Indices[in_row_index];
-                auto row(A.getRow(in_row_index));
+                ARowType row(A.getRow(in_row_index));
                 auto row_it = row.begin();
 
                 TRowType out_row;
@@ -377,6 +377,35 @@ namespace GraphBLAS
             // execution error checks
             check_index_array_content(row_indices, C.nrows(),
                                       "assign(col): indices content check");
+
+            /// @todo copying the column of C out might not be the most performant
+            /// way of accomplishing this
+
+            // extract the column of C matrix
+            typedef typename CMatrixT::ScalarType CScalarType;
+            auto C_col(C.getCol(col_index));
+            Vector<CScalarType> c_vec(C.nrows());
+            for (auto it : C_col)
+            {
+                c_vec.setElement(std::get<0>(it), std::get<1>(it));
+            }
+
+            // ----------- standard vector variant -----------
+            assign(c_vec, mask, accum, u, row_indices, replace);
+
+            // replace the column of C matrix
+            std::vector<IndexType>   ic(c_vec.nvals());
+            std::vector<CScalarType> vc(c_vec.nvals());
+            c_vec.extractTuples(ic.begin(), vc.begin());
+
+            std::vector<std::tuple<IndexType,CScalarType> > col_data;
+
+            for (IndexType idx = 0; idx < ic.size(); ++idx)
+            {
+                col_data.push_back(std::make_tuple(ic[idx],vc[idx]));
+            }
+
+            C.setCol(col_index, col_data);
         }
 
         //=====================================================================
@@ -399,6 +428,35 @@ namespace GraphBLAS
             // execution error checks
             check_index_array_content(col_indices, C.ncols(),
                                       "assign(row): indices content check");
+
+            /// @todo copying the row of C out might not be the most performant
+            /// way of accomplishing this
+
+            // extract the row of C matrix
+            typedef typename CMatrixT::ScalarType CScalarType;
+            auto C_row(C.getRow(row_index));
+            Vector<CScalarType> c_vec(C.ncols());
+            for (auto it : C_row)
+            {
+                c_vec.setElement(std::get<0>(it), std::get<1>(it));
+            }
+
+            // ----------- standard vector variant -----------
+            assign(c_vec, mask, accum, u, col_indices, replace);
+
+            // replace the row of C matrix
+            std::vector<IndexType>   ic(c_vec.nvals());
+            std::vector<CScalarType> vc(c_vec.nvals());
+            c_vec.extractTuples(ic.begin(), vc.begin());
+
+            std::vector<std::tuple<IndexType,CScalarType> > row_data;
+
+            for (IndexType idx = 0; idx < ic.size(); ++idx)
+            {
+                row_data.push_back(std::make_tuple(ic[idx],vc[idx]));
+            }
+
+            C.setRow(row_index, row_data);
         }
 
         //======================================================================

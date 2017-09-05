@@ -393,7 +393,6 @@ namespace GraphBLAS
                        IndexType                    col_index,
                        bool                         replace_flag = false)
     {
-        std::cerr << "fe::assign(col)\n";
         check_size_nrows(mask, C, "assign(col): C.nrows != mask.size");
         check_size_nindices(u, row_indices,
                             "assign(col): u.size != |row_indices|");
@@ -419,7 +418,6 @@ namespace GraphBLAS
                        SequenceT             const &col_indices,
                        bool                         replace_flag = false)
     {
-        std::cerr << "fe::assign(row)\n";
         check_size_ncols(mask, C, "assign(row): C.ncols != Mask.ncols");
         check_size_nindices(u, col_indices,
                             "assign(row): u.size != |col_indices|");

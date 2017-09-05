@@ -25,7 +25,7 @@ using namespace GraphBLAS;
 BOOST_AUTO_TEST_SUITE(assign_suite)
 
 //****************************************************************************
-// Standard Vector tests
+// 4.3.7.1 Standard Vector tests
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(assign_vec_test_bad_dimensions)
 {
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(assign_vec_test_bad_dimensions)
 }
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(assign_vec_test_index_out_of_range)
+BOOST_AUTO_TEST_CASE(assign_vec_test_index_out_of_bounds)
 {
     IndexArrayType i_c = {1, 2, 3};
     std::vector<double> v_c  = {1, 2, 3};
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE(assign_vec_test_allindices_accum)
 /// @todo add tests with masks
 
 //****************************************************************************
-// Standard Matrix tests
+// 4.3.7.2 Standard Matrix tests
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(assign_mat_test_bad_dimensions)
 {
@@ -192,7 +192,7 @@ BOOST_AUTO_TEST_CASE(assign_mat_test_bad_dimensions)
 }
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(assign_mat_test_index_out_of_range)
+BOOST_AUTO_TEST_CASE(assign_mat_test_index_out_of_bounds)
 {
     IndexArrayType      i_c = {0, 0, 0, 1, 1, 1, 2, 2, 2};
     IndexArrayType      j_c = {1, 2, 3, 0, 2, 3, 0, 1, 2};
@@ -431,7 +431,7 @@ BOOST_AUTO_TEST_CASE(assign_mat_test_allrowscols_accum)
 /// @todo add tests with masks
 
 //****************************************************************************
-// Assign Column tests
+// 4.3.7.3 Assign Column tests
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(assign_col_test_bad_dimensions)
 {
@@ -457,10 +457,182 @@ BOOST_AUTO_TEST_CASE(assign_col_test_bad_dimensions)
         DimensionException);
 }
 
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(assign_col_test_invalid_index)
+{
+    IndexArrayType      i_c = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType      j_c = {1, 2, 3, 0, 2, 3, 0, 1, 2};
+    std::vector<double> v_c = {   1, 2, 3,
+                               4,    6, 7,
+                               8, 9, 1   };
+    Matrix<double, DirectedMatrixTag> c(3, 4);
+    c.build(i_c, j_c, v_c);
+
+    IndexArrayType i_a    = {0, 1};
+    std::vector<double> v_a = {1, 99};
+    Vector<double> a(2);
+    a.build(i_a, v_a);
+
+    IndexArrayType vect_I({0,2});
+    //IndexArrayType vect_J({1,2});
+
+    BOOST_CHECK_THROW(
+        (assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                a, vect_I, 5)),
+        InvalidIndexException);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(assign_col_test_index_out_of_bounds)
+{
+    IndexArrayType      i_c = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType      j_c = {1, 2, 3, 0, 2, 3, 0, 1, 2};
+    std::vector<double> v_c = {   1, 2, 3,
+                               4,    6, 7,
+                               8, 9, 1   };
+    Matrix<double, DirectedMatrixTag> c(3, 4);
+    c.build(i_c, j_c, v_c);
+
+    IndexArrayType i_a    = {0, 1};
+    std::vector<double> v_a = {1, 99};
+    Vector<double> a(2);
+    a.build(i_a, v_a);
+
+    IndexArrayType vect_I2({1,5});
+    BOOST_CHECK_THROW(
+        (assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                a, vect_I2, 2)),
+        IndexOutOfBoundsException);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(assign_col_test_no_accum)
+{
+    IndexArrayType i_c    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_c    = {1, 2, 3, 0, 2, 3, 0, 1, 2};
+    std::vector<double> v_c = {   1, 2, 3,
+                               4,    6, 7,
+                               8, 9, 1   };
+    Matrix<double, DirectedMatrixTag> c(3, 4);
+    c.build(i_c, j_c, v_c);
+
+    IndexArrayType i_a    = {0, 1};
+    std::vector<double> v_a = {1, 99};
+    Vector<double> a(2);
+    a.build(i_a, v_a);
+
+    IndexArrayType vect_I({1,2});
+
+    IndexArrayType i_result    = {0, 0, 0, 1, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_result    = {1, 2, 3, 0, 1, 2, 3, 0, 1, 2};
+    std::vector<double> v_result = {    1, 2, 3,
+                                    4,  1, 6, 7,
+                                    8, 99, 1    };
+    Matrix<double, DirectedMatrixTag> result(3, 4);
+    result.build(i_result, j_result, v_result);
+
+    assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+           a, vect_I, 1);
+
+    BOOST_CHECK_EQUAL(c, result);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(assign_col_test_allindices_no_accum)
+{
+    IndexArrayType i_c    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_c    = {1, 2, 3, 0, 2, 3, 0, 1, 2};
+    std::vector<double> v_c = {   1, 2, 3,
+                                  4,    6, 7,
+                                  8, 9, 1   };
+    Matrix<double, DirectedMatrixTag> c(3, 4);
+    c.build(i_c, j_c, v_c);
+
+    IndexArrayType i_a    = {1, 2};
+    std::vector<double> v_a = {1, 99};
+    Vector<double> a(3);
+    a.build(i_a, v_a);
+
+    IndexArrayType i_result    = {0, 0, 1, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_result    = {2, 3, 0, 1, 2, 3, 0, 1, 2};
+    std::vector<double> v_result = {       2, 3,
+                                    4,  1, 6, 7,
+                                    8, 99, 1    };
+    Matrix<double, DirectedMatrixTag> result(3, 4);
+    result.build(i_result, j_result, v_result);
+
+    assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+           a, GraphBLAS::AllIndices(), 1);
+
+    BOOST_CHECK_EQUAL(c, result);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(assign_col_test_accum)
+{
+    IndexArrayType i_c    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_c    = {1, 2, 3, 0, 2, 3, 0, 1, 2};
+    std::vector<double> v_c = {   1, 2, 3,
+                               4,    6, 7,
+                               8, 9, 1   };
+    Matrix<double, DirectedMatrixTag> c(3, 4);
+    c.build(i_c, j_c, v_c);
+
+    IndexArrayType i_a    = {0, 1};
+    std::vector<double> v_a = {1, 99};
+    Vector<double> a(2);
+    a.build(i_a, v_a);
+
+    IndexArrayType vect_I({1,2});
+
+    IndexArrayType i_result    = {0, 0, 0, 1, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_result    = {1, 2, 3, 0, 1, 2, 3, 0, 1, 2};
+    std::vector<double> v_result = {    1, 2, 3,
+                                    4,  1, 6, 7,
+                                    8,108, 1    };
+    Matrix<double, DirectedMatrixTag> result(3, 4);
+    result.build(i_result, j_result, v_result);
+
+    assign(c, GraphBLAS::NoMask(), GraphBLAS::Plus<double>(),
+           a, vect_I, 1);
+
+    BOOST_CHECK_EQUAL(c, result);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(assign_col_test_allindices_accum)
+{
+    IndexArrayType i_c    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_c    = {1, 2, 3, 0, 2, 3, 0, 1, 2};
+    std::vector<double> v_c = {   1, 2, 3,
+                               4,    6, 7,
+                               8, 9, 1   };
+    Matrix<double, DirectedMatrixTag> c(3, 4);
+    c.build(i_c, j_c, v_c);
+
+    IndexArrayType i_a    = {1, 2};
+    std::vector<double> v_a = {1, 99};
+    Vector<double> a(3);
+    a.build(i_a, v_a);
+
+    IndexArrayType i_result    = {0, 0, 0, 1, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_result    = {1, 2, 3, 0, 1, 2, 3, 0, 1, 2};
+    std::vector<double> v_result = {     1, 2, 3,
+                                     4,  1, 6, 7,
+                                     8,108, 1    };
+    Matrix<double, DirectedMatrixTag> result(3, 4);
+    result.build(i_result, j_result, v_result);
+
+    assign(c, GraphBLAS::NoMask(), GraphBLAS::Plus<double>(),
+           a, GraphBLAS::AllIndices(), 1);
+
+    BOOST_CHECK_EQUAL(c, result);
+}
+
 /// @todo add tests with masks
 
 //****************************************************************************
-// Assign Row tests
+// 4.3.7.4 Assign Row tests
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(assign_row_test_bad_dimensions)
 {
@@ -484,6 +656,179 @@ BOOST_AUTO_TEST_CASE(assign_row_test_bad_dimensions)
         (assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                 a, 1, vect_J)),
         DimensionException);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(assign_row_test_invalid_index)
+{
+    IndexArrayType      i_c = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType      j_c = {1, 2, 3, 0, 2, 3, 0, 1, 2};
+    std::vector<double> v_c = {   1, 2, 3,
+                               4,    6, 7,
+                               8, 9, 1   };
+    Matrix<double, DirectedMatrixTag> c(3, 4);
+    c.build(i_c, j_c, v_c);
+
+    IndexArrayType i_a    = {0, 1};
+    std::vector<double> v_a = {1, 99};
+    Vector<double> a(2);
+    a.build(i_a, v_a);
+
+    //IndexArrayType vect_I({0,2});
+    IndexArrayType vect_J({1,2});
+
+    BOOST_CHECK_THROW(
+        (assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                a, 5, vect_J)),
+        InvalidIndexException);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(assign_row_test_index_out_of_bounds)
+{
+    IndexArrayType      i_c = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType      j_c = {1, 2, 3, 0, 2, 3, 0, 1, 2};
+    std::vector<double> v_c = {   1, 2, 3,
+                               4,    6, 7,
+                               8, 9, 1   };
+    Matrix<double, DirectedMatrixTag> c(3, 4);
+    c.build(i_c, j_c, v_c);
+
+    IndexArrayType i_a    = {0, 1};
+    std::vector<double> v_a = {1, 99};
+    Vector<double> a(2);
+    a.build(i_a, v_a);
+
+    IndexArrayType vect_J2({1,5});
+
+    BOOST_CHECK_THROW(
+        (assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                a, 2, vect_J2)),
+        IndexOutOfBoundsException);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(assign_row_test_no_accum)
+{
+    IndexArrayType i_c    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_c    = {1, 2, 3, 0, 2, 3, 0, 1, 2};
+    std::vector<double> v_c = {   1, 2, 3,
+                               4,    6, 7,
+                               8, 9, 1   };
+    Matrix<double, DirectedMatrixTag> c(3, 4);
+    c.build(i_c, j_c, v_c);
+
+    IndexArrayType i_a    = {0, 1};
+    std::vector<double> v_a = {1, 99};
+    Vector<double> a(2);
+    a.build(i_a, v_a);
+
+    IndexArrayType vect_J({1,2});
+
+    IndexArrayType i_result    = {0, 0, 0, 1, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_result    = {1, 2, 3, 0, 1, 2, 3, 0, 1, 2};
+    std::vector<double> v_result = {    1,  2, 3,
+                                    4,  1, 99, 7,
+                                    8,  9,  1    };
+    Matrix<double, DirectedMatrixTag> result(3, 4);
+    result.build(i_result, j_result, v_result);
+
+    assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+           a, 1, vect_J);
+
+    BOOST_CHECK_EQUAL(c, result);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(assign_row_test_allindices_no_accum)
+{
+    IndexArrayType i_c    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_c    = {1, 2, 3, 0, 2, 3, 0, 1, 2};
+    std::vector<double> v_c = {   1, 2, 3,
+                               4,    6, 7,
+                               8, 9, 1   };
+    Matrix<double, DirectedMatrixTag> c(3, 4);
+    c.build(i_c, j_c, v_c);
+
+    IndexArrayType i_a    = {1, 2};
+    std::vector<double> v_a = {1, 99};
+    Vector<double> a(4);
+    a.build(i_a, v_a);
+
+    IndexArrayType i_result    = {0, 0, 0,  1, 1, 2, 2, 2};
+    IndexArrayType j_result    = {1, 2, 3,  1, 2, 0, 1, 2};
+    std::vector<double> v_result = {   1,  2, 3,
+                                       1, 99,
+                                    8, 9,  1    };
+    Matrix<double, DirectedMatrixTag> result(3, 4);
+    result.build(i_result, j_result, v_result);
+
+    assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+           a, 1, GraphBLAS::AllIndices());
+
+    BOOST_CHECK_EQUAL(c, result);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(assign_row_test_accum)
+{
+    IndexArrayType i_c    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_c    = {1, 2, 3, 0, 2, 3, 0, 1, 2};
+    std::vector<double> v_c = {   1, 2, 3,
+                               4,    6, 7,
+                               8, 9, 1   };
+    Matrix<double, DirectedMatrixTag> c(3, 4);
+    c.build(i_c, j_c, v_c);
+
+    IndexArrayType i_a    = {0, 1};
+    std::vector<double> v_a = {1, 99};
+    Vector<double> a(2);
+    a.build(i_a, v_a);
+
+    IndexArrayType vect_J({1,2});
+
+    IndexArrayType i_result    = {0, 0, 0, 1, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_result    = {1, 2, 3, 0, 1, 2, 3, 0, 1, 2};
+    std::vector<double> v_result = {    1,  2, 3,
+                                    4,  1,105, 7,
+                                    8,  9,  1    };
+    Matrix<double, DirectedMatrixTag> result(3, 4);
+    result.build(i_result, j_result, v_result);
+
+    assign(c, GraphBLAS::NoMask(), GraphBLAS::Plus<double>(),
+           a, 1, vect_J);
+
+    BOOST_CHECK_EQUAL(c, result);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(assign_row_test_allindices_accum)
+{
+    IndexArrayType i_c    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_c    = {1, 2, 3, 0, 2, 3, 0, 1, 2};
+    std::vector<double> v_c = {   1, 2, 3,
+                               4,    6, 7,
+                               8, 9, 1   };
+    Matrix<double, DirectedMatrixTag> c(3, 4);
+    c.build(i_c, j_c, v_c);
+
+    IndexArrayType i_a    = {1, 2};
+    std::vector<double> v_a = {1, 99};
+    Vector<double> a(4);
+    a.build(i_a, v_a);
+
+    IndexArrayType i_result    = {0, 0, 0, 1, 1, 1, 1, 2, 2, 2};
+    IndexArrayType j_result    = {1, 2, 3, 0, 1, 2, 3, 0, 1, 2};
+    std::vector<double> v_result = {   1,  2, 3,
+                                    4, 1,105, 7,
+                                    8, 9,  1    };
+    Matrix<double, DirectedMatrixTag> result(3, 4);
+    result.build(i_result, j_result, v_result);
+
+    assign(c, GraphBLAS::NoMask(), GraphBLAS::Plus<double>(),
+           a, 1, GraphBLAS::AllIndices());
+
+    BOOST_CHECK_EQUAL(c, result);
 }
 
 /// @todo add tests with masks
@@ -511,7 +856,7 @@ BOOST_AUTO_TEST_CASE(assign_vec_constant_test_bad_dimensions)
 }
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(assign_vec_constant_test_index_out_of_range)
+BOOST_AUTO_TEST_CASE(assign_vec_constant_test_index_out_of_bounds)
 {
     IndexArrayType i_w = {1, 2, 3};
     std::vector<double> v_w  = {1, 2, 3};
@@ -638,7 +983,7 @@ BOOST_AUTO_TEST_CASE(assign_mat_constant_test_bad_dimensions)
 }
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(assign_mat_constant_test_index_out_of_range)
+BOOST_AUTO_TEST_CASE(assign_mat_constant_test_index_out_of_bounds)
 {
     IndexArrayType      i_c = {0, 0, 0, 1, 1, 1, 2, 2, 2};
     IndexArrayType      j_c = {1, 2, 3, 0, 2, 3, 0, 1, 2};
