@@ -17,6 +17,7 @@
 
 #include <graphblas/graphblas.hpp>
 #include <capi/detail/index_support.hpp>
+#include <memory>
 
 #include "TypeAdapter.hpp"
 #include "UnaryAdapter.hpp"
@@ -31,54 +32,41 @@ extern "C" {
 //const void *GrB_NULL = (void *) &("GrB_NULL");
 void *GrB_NULL = (void *) &("GrB_NULL");
 
-
-//=============================================================================
-
-// Mask has 3 options: Null, regular, complement (SCMP)
-// Accum has 2 options: Null, regular
-// A has 2 options:  plain, transpose
-// B has 2 options:  plain, transpose
-
-// Total = 3 x 2 x 2 x 2 = 24
-
-// MASK_ACCUM_IN0_IN1
-enum BinaryInputSelectorEnum {
-    NULL_NULL_REG_REG,
-    NULL_NULL_REG_TRANS,
-    NULL_NULL_TRANS_REG,
-    NULL_NULL_TRANS_TRANS,
-    NULL_REG_REG_REG,
-    NULL_REG_REG_TRANS,
-    NULL_REG_TRANS_REG,
-    NULL_REG_TRANS_TRANS,
-    REG_NULL_REG_REG,
-    REG_NULL_REG_TRANS,
-    REG_NULL_TRANS_REG,
-    REG_NULL_TRANS_TRANS,
-    REG_REG_REG_REG,
-    REG_REG_REG_TRANS,
-    REG_REG_TRANS_REG,
-    REG_REG_TRANS_TRANS,
-    SCMP_NULL_REG_REG,
-    SCMP_NULL_REG_TRANS,
-    SCMP_NULL_TRANS_REG,
-    SCMP_NULL_TRANS_TRANS,
-    SCMP_REG_REG_REG,
-    SCMP_REG_REG_TRANS,
-    SCMP_REG_TRANS_REG,
-    SCMP_REG_TRANS_TRANS
-};
-
-
-BinaryInputSelectorEnum makeBinaryInputSelector(GrB_Matrix C,
-                                                const GrB_Matrix Mask,
-                                                const GrB_BinaryOp accum,
-                                                const GrB_Descriptor desc)
+// Helper function used to setup the mask. Move to a utility file.
+GraphBLAS::Matrix<TypeAdapter> *prepareMask(const GrB_Matrix C,
+                                            const GrB_Matrix Mask,
+                                            const GrB_Descriptor desc)
 {
+    // FullMask.  Return a constant mask.
+    if ((void *) Mask == GrB_NULL)
+    {
+        return new GraphBLAS::Matrix<TypeAdapter>(
+                C->m_matrix->nrows(), C->m_matrix->ncols(), 1);
+    }
 
+    // They gave us a mask AND they set to structural complement
+    if (desc != GrB_NULL && desc->isSet(GrB_MASK, GrB_SCMP))
+    {
+        GraphBLAS::Matrix<TypeAdapter> * new_matrix =
+            new GraphBLAS::Matrix<TypeAdapter>(C->m_matrix->nrows(), C->m_matrix->ncols());
+        new_matrix->build_complement_from(*Mask->m_matrix);
+        return new_matrix;
+    }
+
+    return Mask->m_matrix;
 }
 
-
+void cleanupMask(const GrB_Matrix Mask,
+                 const GrB_Descriptor desc,
+                 GraphBLAS::Matrix<TypeAdapter> *usedMask)
+{
+    // If either case from above, delete the mask
+    if ((void *) Mask == GrB_NULL ||
+        (desc != GrB_NULL && desc->isSet(GrB_MASK, GrB_SCMP)))
+    {
+        delete usedMask;
+    }
+}
 
 //=============================================================================
 // 4.2.1.2
@@ -336,222 +324,200 @@ GrB_Info GrB_mxm(GrB_Matrix C,
     if (desc != GrB_NULL)
         replace = desc->isSet(GrB_OUTP, GrB_REPLACE);
 
-    if (Mask == GrB_NULL)
+    GraphBLAS::Matrix<TypeAdapter> *mask_matrix = prepareMask(C, Mask, desc);
+
+    if (desc != GrB_NULL &&
+        desc->isSet(GrB_INP0, GrB_TRAN) &&
+        desc->isSet(GrB_INP1, GrB_TRAN))
     {
-        if (accum == GrB_NULL)
-        {
-            if (desc != GrB_NULL &&
-                desc->isSet(GrB_INP0, GrB_TRAN) &&
-                desc->isSet(GrB_INP1, GrB_TRAN))
-            {
-                GraphBLAS::mxm(*C->m_matrix,
-                               GraphBLAS::NoMask(),
-                               GraphBLAS::NoAccumulate(),
-                               SemiringAdapter(op),
-                               GraphBLAS::transpose(*A->m_matrix),
-                               GraphBLAS::transpose(*B->m_matrix),
-                               replace);
-
-                return GrB_SUCCESS;
-            }
-            else if (desc != GrB_NULL && desc->isSet(GrB_INP0, GrB_TRAN))
-            {
-                return GrB_PANIC;
-            }
-            else if (desc != GrB_NULL && desc->isSet(GrB_INP1, GrB_TRAN))
-            {
-                return GrB_PANIC;
-            }
-            else
-            {
-                GraphBLAS::mxm(*C->m_matrix,
-                               GraphBLAS::NoMask(),
-                               GraphBLAS::NoAccumulate(),
-                               SemiringAdapter(op),
-                               *A->m_matrix,
-                               *B->m_matrix,
-                               replace);
-
-                return GrB_SUCCESS;
-            }
-        }
-        else
-        {
-            // @TODO: Build out all four
-            return GrB_PANIC;
-        }
+        GraphBLAS::mxm(*C->m_matrix,
+                       *mask_matrix,
+                       BinaryAdapter(accum),
+                       SemiringAdapter(op),
+                       GraphBLAS::transpose(*A->m_matrix),
+                       GraphBLAS::transpose(*B->m_matrix),
+                       replace);
+        return GrB_SUCCESS;
     }
-    else if (desc != GrB_NULL && desc->isSet(GrB_MASK, GrB_SCMP))
+    else if (desc != GrB_NULL && desc->isSet(GrB_INP0, GrB_TRAN))
     {
-        if (accum == GrB_NULL)
-        {
-            if (desc->isSet(GrB_INP0, GrB_TRAN) &&
-                desc->isSet(GrB_INP1, GrB_TRAN))
-            {
-                return GrB_SUCCESS;
-            }
-            else if (desc->isSet(GrB_INP0, GrB_TRAN))
-            {
-                return GrB_PANIC;
-            }
-            else if (desc->isSet(GrB_INP1, GrB_TRAN))
-            {
-                return GrB_PANIC;
-            }
-            else
-            {
-                GraphBLAS::mxm(*C->m_matrix,
-                               GraphBLAS::complement(*Mask->m_matrix),
-                               GraphBLAS::NoAccumulate(),
-                               SemiringAdapter(op),
-                               *A->m_matrix,
-                               *B->m_matrix,
-                               replace);
-                return GrB_SUCCESS;
-            }
-        }
-        else
-        {
-            // @TODO: Build out all four
-            return GrB_PANIC;
-        }
-
-        // @todo: Add all four transpose options times op options
+        GraphBLAS::mxm(*C->m_matrix,
+                       *mask_matrix,
+                       BinaryAdapter(accum),
+                       SemiringAdapter(op),
+                       GraphBLAS::transpose(*A->m_matrix),
+                       *B->m_matrix,
+                       replace);
+        return GrB_SUCCESS;
+    }
+    else if (desc != GrB_NULL && desc->isSet(GrB_INP1, GrB_TRAN))
+    {
+        GraphBLAS::mxm(*C->m_matrix,
+                       *mask_matrix,
+                       BinaryAdapter(accum),
+                       SemiringAdapter(op),
+                       *A->m_matrix,
+                       GraphBLAS::transpose(*B->m_matrix),
+                       replace);
+        return GrB_SUCCESS;
     }
     else
     {
-        if (accum == GrB_NULL)
-        {
-            if (desc != GrB_NULL && desc->isSet(GrB_INP0, GrB_TRAN) &&
-                desc->isSet(GrB_INP1, GrB_TRAN))
-            {
-                return GrB_PANIC;
-            }
-            else if (desc != GrB_NULL && desc->isSet(GrB_INP0, GrB_TRAN))
-            {
-                return GrB_PANIC;
-            }
-            else if (desc != GrB_NULL && desc->isSet(GrB_INP1, GrB_TRAN))
-            {
-                GraphBLAS::mxm(*C->m_matrix,
-                               *Mask->m_matrix,
-                               GraphBLAS::NoAccumulate(),
-                               SemiringAdapter(op),
-                               *A->m_matrix,
-                               GraphBLAS::transpose(*B->m_matrix),
-                               replace);
-                return GrB_SUCCESS;
-            }
-            else
-            {
-                GraphBLAS::mxm(*C->m_matrix,
-                               *Mask->m_matrix,
-                               GraphBLAS::NoAccumulate(),
-                               SemiringAdapter(op),
-                               *A->m_matrix,
-                               *B->m_matrix,
-                               replace);
-                return GrB_SUCCESS;
-            }
-        }
-        else
-        {
-            // @TODO: Build out all four
-            return GrB_PANIC;
-        }
+        GraphBLAS::mxm(*C->m_matrix,
+                       *mask_matrix,
+                       BinaryAdapter(accum),
+                       SemiringAdapter(op),
+                       *A->m_matrix,
+                       *B->m_matrix,
+                       replace);
+        return GrB_SUCCESS;
     }
 
 
-//    if (desc != GrB_NULL && desc->isSet(GrB_INP0, GrB_TRAN) && desc->isSet(GrB_INP1, GrB_TRAN))
+//
+//    if (Mask == GrB_NULL)
 //    {
-//        return GrB_PANIC;
+//        if (accum == GrB_NULL)
+//        {
+//            if (desc != GrB_NULL &&
+//                desc->isSet(GrB_INP0, GrB_TRAN) &&
+//                desc->isSet(GrB_INP1, GrB_TRAN))
+//            {
+//                GraphBLAS::mxm(*C->m_matrix,
+//                               GraphBLAS::NoMask(),
+//                               GraphBLAS::NoAccumulate(),
+//                               SemiringAdapter(op),
+//                               GraphBLAS::transpose(*A->m_matrix),
+//                               GraphBLAS::transpose(*B->m_matrix),
+//                               replace);
+//
+//                return GrB_SUCCESS;
+//            }
+//            else if (desc != GrB_NULL && desc->isSet(GrB_INP0, GrB_TRAN))
+//            {
+//                return GrB_PANIC;
+//            }
+//            else if (desc != GrB_NULL && desc->isSet(GrB_INP1, GrB_TRAN))
+//            {
+//                return GrB_PANIC;
+//            }
+//            else
+//            {
+//                GraphBLAS::mxm(*C->m_matrix,
+//                               GraphBLAS::NoMask(),
+//                               GraphBLAS::NoAccumulate(),
+//                               SemiringAdapter(op),
+//                               *A->m_matrix,
+//                               *B->m_matrix,
+//                               replace);
+//
+//                return GrB_SUCCESS;
+//            }
+//        }
+//        else
+//        {
+//            // @TODO: Build out all four
+//            return GrB_PANIC;
+//        }
 //    }
-//    else if (desc != GrB_NULL && desc->isSet(GrB_INP0, GrB_TRAN))
+//    else if (desc != GrB_NULL && desc->isSet(GrB_MASK, GrB_SCMP))
 //    {
-//        return GrB_PANIC;
-//    }
-//    else if (desc != GrB_NULL && desc->isSet(GrB_INP1, GrB_TRAN))
-//    {
-//        return GrB_PANIC;
+//        if (accum == GrB_NULL)
+//        {
+//            if (desc->isSet(GrB_INP0, GrB_TRAN) &&
+//                desc->isSet(GrB_INP1, GrB_TRAN))
+//            {
+//                return GrB_SUCCESS;
+//            }
+//            else if (desc->isSet(GrB_INP0, GrB_TRAN))
+//            {
+//                return GrB_PANIC;
+//            }
+//            else if (desc->isSet(GrB_INP1, GrB_TRAN))
+//            {
+//                return GrB_PANIC;
+//            }
+//            else
+//            {
+//                GraphBLAS::mxm(*C->m_matrix,
+//                               GraphBLAS::complement(*Mask->m_matrix),
+//                               GraphBLAS::NoAccumulate(),
+//                               SemiringAdapter(op),
+//                               *A->m_matrix,
+//                               *B->m_matrix,
+//                               replace);
+//                return GrB_SUCCESS;
+//            }
+//        }
+//        else
+//        {
+//            // @TODO: Build out all four
+//            return GrB_PANIC;
+//        }
+//
+//        // @todo: Add all four transpose options times op options
 //    }
 //    else
 //    {
-//        return GrB_SUCCESS;
+//        if (accum == GrB_NULL)
+//        {
+//            if (desc != GrB_NULL && desc->isSet(GrB_INP0, GrB_TRAN) &&
+//                desc->isSet(GrB_INP1, GrB_TRAN))
+//            {
+//                return GrB_PANIC;
+//            }
+//            else if (desc != GrB_NULL && desc->isSet(GrB_INP0, GrB_TRAN))
+//            {
+//                return GrB_PANIC;
+//            }
+//            else if (desc != GrB_NULL && desc->isSet(GrB_INP1, GrB_TRAN))
+//            {
+//                GraphBLAS::mxm(*C->m_matrix,
+//                               *Mask->m_matrix,
+//                               GraphBLAS::NoAccumulate(),
+//                               SemiringAdapter(op),
+//                               *A->m_matrix,
+//                               GraphBLAS::transpose(*B->m_matrix),
+//                               replace);
+//                return GrB_SUCCESS;
+//            }
+//            else
+//            {
+//                GraphBLAS::mxm(*C->m_matrix,
+//                               *Mask->m_matrix,
+//                               GraphBLAS::NoAccumulate(),
+//                               SemiringAdapter(op),
+//                               *A->m_matrix,
+//                               *B->m_matrix,
+//                               replace);
+//                return GrB_SUCCESS;
+//            }
+//        }
+//        else
+//        {
+//            // @TODO: Build out all four
+//            return GrB_PANIC;
+//        }
 //    }
-
-
-    return GrB_PANIC;
-}
-
-
-GrB_Info GrB_mxm_v2(GrB_Matrix C,
-                 const GrB_Matrix Mask,
-                 const GrB_BinaryOp accum,
-                 const GrB_Semiring op,
-                 const GrB_Matrix A,
-                 const GrB_Matrix B,
-                 const GrB_Descriptor desc)
-{
-    int foo = 0;
-    switch(foo)
-    {
-        case NULL_NULL_REG_REG:
-            break;
-        case NULL_NULL_REG_TRANS:
-            break;
-        case NULL_NULL_TRANS_REG:
-            break;
-        case NULL_NULL_TRANS_TRANS:
-            break;
-        case NULL_REG_REG_REG:
-            break;
-        case NULL_REG_REG_TRANS:
-            break;
-        case NULL_REG_TRANS_REG:
-            break;
-        case NULL_REG_TRANS_TRANS:
-            break;
-        case REG_NULL_REG_REG:
-            break;
-        case REG_NULL_REG_TRANS:
-            break;
-        case REG_NULL_TRANS_REG:
-            break;
-        case REG_NULL_TRANS_TRANS:
-            break;
-        case REG_REG_REG_REG:
-            break;
-        case REG_REG_REG_TRANS:
-            break;
-        case REG_REG_TRANS_REG:
-            break;
-        case REG_REG_TRANS_TRANS:
-            break;
-        case SCMP_NULL_REG_REG:
-            break;
-        case SCMP_NULL_REG_TRANS:
-            break;
-        case SCMP_NULL_TRANS_REG:
-            break;
-        case SCMP_NULL_TRANS_TRANS:
-            break;
-        case SCMP_REG_REG_REG:
-            break;
-        case SCMP_REG_REG_TRANS:
-            break;
-        case SCMP_REG_TRANS_REG:
-            break;
-        case SCMP_REG_TRANS_TRANS:
-            break;
-        default:
-            break;
-    }
 }
 
 //=============================================================================
 
-// 4.3.4.2
+// 4.3.4.2 - Semiring variant
+//// @TODO:
+//GrB_Info GrB_Martrix_eWiseMult_Semiring(GrB_Matrix C,
+//                                        const GrB_Matrix Mask,
+//                                        const GrB_BinaryOp accum,
+//                                        const GrB_BinaryOp op,
+//                                        const GrB_Matrix A,
+//                                        const GrB_Matrix B,
+//                                        const GrB_Descriptor desc)
+//{
+//
+//}
 
+
+// 4.3.4.2 - BinaryOp Variant
 GrB_Info GrB_Martrix_eWiseMult_BinaryOp(GrB_Matrix C,
                                         const GrB_Matrix Mask,
                                         const GrB_BinaryOp accum,
@@ -560,61 +526,48 @@ GrB_Info GrB_Martrix_eWiseMult_BinaryOp(GrB_Matrix C,
                                         const GrB_Matrix B,
                                         const GrB_Descriptor desc)
 {
+    if ((void *) op == GrB_NULL)
+    {
+        printf("!!GrB_Martrix_eWiseMult_BinaryOp: operator can't be GrB_NULL!");
+        return GrB_PANIC;
+    }
+
     bool replace = false;
     if (desc != GrB_NULL)
         replace = desc->isSet(GrB_OUTP, GrB_REPLACE);
 
-    // Add debug check for transpose and scmp
+    // @TODO: Implement transpose
+    if (desc != GrB_NULL && desc->isSet(GrB_INP0, GrB_TRAN))
+        return GrB_PANIC;
 
-    if (Mask == GrB_NULL)
-    {
-        if (accum == GrB_NULL)
-        {
-            GraphBLAS::eWiseMult(*C->m_matrix,
-                                 GraphBLAS::NoMask(),
-                                 GraphBLAS::NoAccumulate(),
-                                 BinaryAdapter(op),
-                                 *A->m_matrix,
-                                 *B->m_matrix,
-                                 replace);
-        }
-        else
-        {
-            GraphBLAS::eWiseMult(*C->m_matrix,
-                                 GraphBLAS::NoMask(),
-                                 BinaryAdapter(accum),
-                                 BinaryAdapter(op),
-                                 *A->m_matrix,
-                                 *B->m_matrix,
-                                 replace);
-        }
-    }
-    else
-    {
-        if (accum == GrB_NULL)
-        {
-            GraphBLAS::eWiseMult(*C->m_matrix,
-                                 *Mask->m_matrix,
-                                 GraphBLAS::NoAccumulate(),
-                                 BinaryAdapter(op),
-                                 *A->m_matrix,
-                                 *B->m_matrix,
-                                 replace);
-        }
-        else
-        {
-            GraphBLAS::eWiseMult(*C->m_matrix,
-                                 *Mask->m_matrix,
-                                 BinaryAdapter(accum),
-                                 BinaryAdapter(op),
-                                 *A->m_matrix,
-                                 *B->m_matrix,
-                                 replace);
-        }
-    }
+    GraphBLAS::Matrix<TypeAdapter> *mask_matrix = prepareMask(C, Mask, desc);
+
+    // The real call
+    GraphBLAS::eWiseMult(*C->m_matrix,
+                         *mask_matrix,
+                         BinaryAdapter(accum),
+                         BinaryAdapter(op),
+                         *A->m_matrix,
+                         *B->m_matrix,
+                         replace);
+
+    cleanupMask(Mask, desc, mask_matrix);
 
     return GrB_SUCCESS;
 }
+
+// 4.3.4.2 - Monoid Variant
+// @TODO:
+//GrB_Info GrB_Martrix_eWiseMult_Monoid(GrB_Matrix C,
+//                                        const GrB_Matrix Mask,
+//                                        const GrB_BinaryOp accum,
+//                                        const GrB_Monoid op,
+//                                        const GrB_Matrix A,
+//                                        const GrB_Matrix B,
+//                                        const GrB_Descriptor desc)
+//{
+//
+//}
 
 //=============================================================================
 
@@ -650,7 +603,7 @@ GrB_Info GrB_Matrix_eWiseAdd_BinaryOp(GrB_Matrix C,
 
 //=============================================================================
 
-// 4.3.6.2
+// 4.3.6.2 - IMPL_STATUS: ALPHA
 GrB_Info GrB_extract(GrB_Matrix C,
                      const GrB_Matrix Mask,
                      const GrB_BinaryOp accum,
@@ -665,45 +618,28 @@ GrB_Info GrB_extract(GrB_Matrix C,
     if (desc != GrB_NULL)
         replace = desc->isSet(GrB_OUTP, GrB_REPLACE);
 
-    if (accum != GrB_NULL)
+    // @TODO: Implement transpose
+    if (desc != GrB_NULL && desc->isSet(GrB_INP0, GrB_TRAN))
         return GrB_PANIC;
 
-    if ((void *) Mask == GrB_NULL)
-    {
-        GraphBLAS::extract(*C->m_matrix,
-                           GraphBLAS::NoMask(),
-                           GraphBLAS::NoAccumulate(),
-                           *A->m_matrix,
-                           GraphBLAS::IndexProxy(row_indices, nrows),
-                           GraphBLAS::IndexProxy(col_indices, ncols),
-                           replace);
-    }
-    else
-    {
-        GraphBLAS::extract(*C->m_matrix,
-                           *Mask->m_matrix,
-                           GraphBLAS::NoAccumulate(),
-                           *A->m_matrix,
-                           GraphBLAS::IndexProxy(row_indices, nrows),
-                           GraphBLAS::IndexProxy(col_indices, ncols),
-                           replace);
-    }
+    GraphBLAS::Matrix<TypeAdapter> *mask_matrix = prepareMask(C, Mask, desc);
 
-//    inline void extract(CMatrixT             &C,
-//                        MaskT          const &Mask,
-//                        AccumT                accum,
-//                        AMatrixT       const &A,
-//                        IndexArrayType const &row_indices,
-//                        IndexArrayType const &col_indices,
-//                        bool                  replace_flag = false)
+    GraphBLAS::extract(*C->m_matrix,
+                       *mask_matrix,
+                       BinaryAdapter(accum),
+                       *A->m_matrix,
+                       GraphBLAS::IndexProxy(row_indices, nrows),
+                       GraphBLAS::IndexProxy(col_indices, ncols),
+                       replace);
 
+    cleanupMask(Mask, desc, mask_matrix);
 
     return GrB_SUCCESS;
 }
 
 //=============================================================================
-// 4.3.7.6 - GrB_assign
 
+// 4.3.7.6 - GrB_assign
 GrB_Info GrB_Vector_assign_FP32(GrB_Vector w,
                                 const GrB_Vector mask,
                                 const GrB_BinaryOp accum,
@@ -773,8 +709,13 @@ GrB_Info GrB_Matrix_assign_FP32(GrB_Matrix C,
     return GrB_SUCCESS;
 }
 
+
+
+
+
+
 //=============================================================================
-// 4.3.8.2
+// 4.3.8.2 - IMPL_STATUS: ALPHA
 GrB_Info GrB_apply(GrB_Matrix C,
                    const GrB_Matrix Mask,
                    const GrB_BinaryOp accum,
@@ -786,13 +727,22 @@ GrB_Info GrB_apply(GrB_Matrix C,
     if (desc != GrB_NULL)
         replace = desc->isSet(GrB_OUTP, GrB_REPLACE);
 
+    // @TODO: Implement transpose
+    if (desc != GrB_NULL && desc->isSet(GrB_INP0, GrB_TRAN))
+        return GrB_PANIC;
+
+    // Setup mask
+    GraphBLAS::Matrix<TypeAdapter> *mask_matrix = prepareMask(C, Mask, desc);
+
     // Ignore mask and accum for now
     GraphBLAS::apply(*C->m_matrix,
-                     GraphBLAS::NoMask(),
-                     GraphBLAS::NoAccumulate(),
+                     *mask_matrix,
+                     BinaryAdapter(accum),
                      UnaryAdapter(op),
                      *A->m_matrix,
                      replace);
+
+    cleanupMask(Mask, desc, mask_matrix);
 
     return GrB_SUCCESS;
 }
@@ -810,6 +760,9 @@ GrB_Info GrB_Vector_reduce_BinaryOp(GrB_Vector w,
     bool replace = false;
     if (desc != GrB_NULL)
         replace = desc->isSet(GrB_OUTP, GrB_REPLACE);
+
+    if (mask != GrB_NULL)
+        return GrB_PANIC;
 
     if (accum != GrB_NULL)
     {

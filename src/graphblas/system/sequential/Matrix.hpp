@@ -55,6 +55,14 @@ namespace GraphBLAS
             {
             }
 
+            // For a constant matrix
+            Matrix(IndexType    num_rows,
+                   IndexType    num_cols,
+                   ScalarT      constant_value)
+                    : LilSparseMatrix<ScalarT>(num_rows, num_cols, constant_value)
+            {
+            }
+
             // copy construct
             Matrix(Matrix const &rhs)
                 : LilSparseMatrix<ScalarT>(rhs)

@@ -77,6 +77,19 @@ namespace GraphBLAS
         }
 
         /**
+         * @brief Construct an matrix with the specified shape that returns the
+         * specified value for every cell. Useful for masks.
+         *
+         * @param[in] num_rows  Number of rows in the matrix
+         * @param[in] num_cols  Number of columns in the matrix
+         * @param[in] constanValue A constant value to be return on gets
+         */
+        Matrix(IndexType num_rows, IndexType num_cols, ScalarT constantValue)
+                : m_mat(num_rows, num_cols, constantValue)
+        {
+        }
+
+        /**
          * @brief Copy constructor.
          *
          * @param[in] rhs   The matrix to copy.
@@ -221,6 +234,23 @@ namespace GraphBLAS
                         values.begin(), values.size(), dup);
         }
 
+
+        /**
+         * @TODO
+         * This is a HACK. The C API wants a matrix type because it does
+         * runtime selection. This is one of the warts from front end to back
+         * end supports.
+         */
+        template <typename OtherScalarT, typename ...OtherTagsT>
+        inline void build_complement_from(
+                const Matrix<OtherScalarT, OtherTagsT...> &other)
+        {
+            m_mat.build_complement_from(other.m_mat);
+        }
+
+        /**
+         * Clears the content of the matrix.
+         */
         void clear() { m_mat.clear(); }
 
         IndexType nrows() const  { return m_mat.nrows(); }

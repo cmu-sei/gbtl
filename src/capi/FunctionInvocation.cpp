@@ -1,6 +1,17 @@
-//
-// Created by aomellinger on 5/23/17.
-//
+/*
+ * Copyright (c) 2015 Carnegie Mellon University and The Trustees of Indiana
+ * University.
+ * All Rights Reserved.
+ *
+ * THIS SOFTWARE IS PROVIDED "AS IS," WITH NO WARRANTIES WHATSOEVER. CARNEGIE
+ * MELLON UNIVERSITY AND THE TRUSTEES OF INDIANA UNIVERSITY EXPRESSLY DISCLAIM
+ * TO THE FULLEST EXTENT PERMITTED BY LAW ALL EXPRESS, IMPLIED, AND STATUTORY
+ * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT OF PROPRIETARY RIGHTS.
+ *
+ * This Program is distributed under a BSD license.  Please see LICENSE file or
+ * permission@sei.cmu.edu for more information.  DM-0002659
+ */
 
 #include "FunctionInvocation.h"
 
@@ -48,3 +59,17 @@ TypeAdapter binary_call(GrB_Type returnType,
          input2.convert(input2Type).getUnion());
     return retVal;
 }
+
+TypeAdapter binary_call_choose_second(GrB_Type returnType,
+                        GrB_Type input1Type,
+                        GrB_Type input2Type,
+                        void *fn,
+                        TypeAdapter input1,
+                        TypeAdapter input2)
+{
+    // We just return the second value
+    return input2;
+}
+
+
+

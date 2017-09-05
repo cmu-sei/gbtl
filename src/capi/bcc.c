@@ -89,22 +89,21 @@ GrB_Info vertex_betweenness_centrality(float *result,
 
     printf("Num nodes (n): %lu\n", n);
 
-
     // ======
 
     // The current frontier for all BFS's (from all roots)
     // It is initialized to the out neighbors of the specified roots
     GrB_Matrix Frontier;
     check(GrB_Matrix_new(&Frontier, GrB_INT32_Type, nsver, n));
-    check(GrB_extract(Frontier,
-                      GrB_NULL,
-                      GrB_NULL,
-                      A,
-                      s,
-                      nsver,
-                      GrB_ALL,
-                      n,
-                      GrB_NULL));
+    check(GrB_extract(Frontier,           // C
+                      GrB_NULL,           // Mask
+                      GrB_NULL,           // accum
+                      A,                  // A
+                      s,                  // row_indicies
+                      nsver,              // num_row_indicies
+                      GrB_ALL,            // col_indicies
+                      n,                  // num_col_indicies
+                      GrB_NULL));         // desc
     capi_print_matrix(Frontier, "initial frontier");
 
     // NumSP holds number of shortest paths to a vertex from a given root
@@ -121,12 +120,12 @@ GrB_Info vertex_betweenness_centrality(float *result,
         one_values[i] = 1;
 
     check(GrB_Matrix_new(&NumSP, GrB_INT32_Type, nsver, n));
-    check(GrB_Matrix_build_INT32(NumSP,
-                                 row_indicies,
-                                 s,
-                                 one_values,
-                                 nsver,
-                                 GrB_NULL));
+    check(GrB_Matrix_build_INT32(NumSP,                // C
+                                 row_indicies,         // row_indices
+                                 s,                    // col_indicies
+                                 one_values,           // values
+                                 nsver,                // nvals
+                                 GrB_NULL));           // dup
     capi_print_matrix(NumSP, "initial NumSP");
 
     free(row_indicies);
@@ -217,12 +216,12 @@ GrB_Info vertex_betweenness_centrality(float *result,
         check(GrB_Matrix_new(&Sigmas[d], GrB_BOOL_Type, nsver, n));
 
         // Sigma[d] = (bool)
-        check(GrB_apply(Sigmas[d],
-                        GrB_NULL,
-                        GrB_NULL,
-                        bool_identity,
-                        Frontier,
-                        GrB_NULL));
+        check(GrB_apply(Sigmas[d],      // C
+                        GrB_NULL,       // Mask
+                        GrB_NULL,       // accum
+                        bool_identity,  // op
+                        Frontier,       // A
+                        GrB_NULL));     // desc
         capi_print_matrix(Sigmas[d], "Sigma[d] = (bool)Frontier");
 
         // P = F + P

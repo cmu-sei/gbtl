@@ -26,10 +26,13 @@
 
 //****************************************************************************
 
+
 namespace GraphBLAS
 {
     namespace backend
     {
+        #define CONTANT_ROW_INDEX 0
+        #define CONTANT_COL_INDEX 1
 
         template<typename ScalarT, typename... TagsT>
         class LilSparseMatrix
@@ -42,9 +45,33 @@ namespace GraphBLAS
                             IndexType num_cols)
                 : m_num_rows(num_rows),
                   m_num_cols(num_cols),
-                  m_nvals(0)
+                  m_nvals(0),
+                  m_isConstant(false)
             {
                 m_data.resize(m_num_rows);
+            }
+
+            // Constructor for constant version
+            LilSparseMatrix(IndexType num_rows,
+                            IndexType num_cols,
+                            ScalarT constantValue)
+                    : m_num_rows(num_rows),
+                      m_num_cols(num_cols),
+                      m_nvals(0),
+                      m_isConstant(true),
+                      m_constantValue(constantValue)
+            {
+                // We realize one row on slot 0 and one column in slot 1
+                typedef std::vector<std::tuple<IndexType, ScalarT>> RowType;
+
+                m_data.resize(2);
+                m_data[CONTANT_ROW_INDEX] = RowType(num_cols);
+                for (IndexType i = 0; i < num_cols; ++i)
+                    m_data[CONTANT_ROW_INDEX][i] = std::make_tuple(i, constantValue);
+
+                m_data[CONTANT_COL_INDEX] = RowType(num_rows);
+                for (IndexType i = 0; i < num_rows; ++i)
+                    m_data[CONTANT_COL_INDEX][i] = std::make_tuple(i, constantValue);
             }
 
             // Constructor - copy
@@ -52,14 +79,17 @@ namespace GraphBLAS
                 : m_num_rows(rhs.m_num_rows),
                   m_num_cols(rhs.m_num_cols),
                   m_nvals(rhs.m_nvals),
-                  m_data(rhs.m_data)
+                  m_data(rhs.m_data),
+                  m_isConstant(rhs.m_isConstant),
+                  m_constantValue(rhs.m_constantValue)
             {
             }
 
             // Constructor - dense from dense matrix
             LilSparseMatrix(std::vector<std::vector<ScalarT>> const &val)
                 : m_num_rows(val.size()),
-                  m_num_cols(val[0].size())
+                  m_num_cols(val[0].size()),
+                  m_isConstant(false)
             {
                 m_data.resize(m_num_rows);
                 m_nvals = 0;
@@ -82,7 +112,8 @@ namespace GraphBLAS
             LilSparseMatrix(std::vector<std::vector<ScalarT>> const &val,
                             ScalarT zero)
                 : m_num_rows(val.size()),
-                  m_num_cols(val[0].size())
+                  m_num_cols(val[0].size()),
+                  m_isConstant(false)
             {
                 m_data.resize(m_num_rows);
                 m_nvals = 0;
@@ -109,7 +140,7 @@ namespace GraphBLAS
             {}
 
             // Assignment (currently restricted to same dimensions)
-            LilSparseMatrix<ScalarT> &operator=(LilSparseMatrix<ScalarT> const &rhs)
+            LilSparseMatrix<ScalarT, TagsT...> &operator=(LilSparseMatrix<ScalarT> const &rhs)
             {
                 if (this != &rhs)
                 {
@@ -134,10 +165,14 @@ namespace GraphBLAS
              */
             bool operator==(LilSparseMatrix<ScalarT> const &rhs) const
             {
+                // @TODO: What is the right thing to do with constant vs. populated?
                 return ((m_num_rows == rhs.m_num_rows) &&
                         (m_num_cols == rhs.m_num_cols) &&
                         (m_nvals == rhs.m_nvals) &&
-                        (m_data == rhs.m_data));
+                        (m_data == rhs.m_data) &&
+                        (m_isConstant == rhs.m_isConstant) &&
+                        (m_constantValue == rhs.m_constantValue)
+                        );
             }
 
             /**
@@ -160,6 +195,9 @@ namespace GraphBLAS
                        IndexType    n,
                        DupT         dup)
             {
+                if (m_isConstant)
+                    throw InvalidOperationException("Illegal to build constant matrix.");
+
                 /// @todo should this function throw an error if matrix is not empty
 
                 /// @todo should this function call clear?
@@ -173,8 +211,41 @@ namespace GraphBLAS
                 }
             }
 
+
+            // HACK: Handle this some other way.  Can we wrap complement view?
+            template <typename OtherScalarT, typename ...OtherTagsT>
+            inline void build_complement_from(
+                    const LilSparseMatrix<OtherScalarT, OtherTagsT...> &other)
+            {
+                // @TODO:  Add dimensions checks!
+                clear();
+
+                for (int row_num = 0; row_num < m_num_rows; ++row_num)
+                {
+                    IndexType lastIndex = 0;
+                    for (auto elem : other.m_data[row_num])
+                    {
+                        // If the thing is zero (e.g. false) then set elem
+                        IndexType idx = std::get<0>(elem);
+                        if (!std::get<1>(elem))
+                        {
+                            m_data[row_num].push_back(std::make_tuple(idx, 1));
+                        }
+                        lastIndex = idx;
+                    }
+                    // Now, we need to go to the end of the row.
+                    ++lastIndex;
+                    for (IndexType idx = lastIndex; idx < m_num_cols; ++idx)
+                        m_data[row_num].push_back(std::make_tuple(idx, 1));
+
+                }
+            };
+
             void clear()
             {
+                if (m_isConstant)
+                    throw InvalidOperationException("Illegal to clear() constant matrix.");
+
                 /// @todo make atomic? transactional?
                 m_nvals = 0;
                 for (IndexType row = 0; row < m_data.size(); ++row)
@@ -186,6 +257,9 @@ namespace GraphBLAS
             IndexType nrows() const { return m_num_rows; }
             IndexType ncols() const { return m_num_cols; }
             IndexType nvals() const { return m_nvals; }
+
+            bool    isConstant()    const   { return m_isConstant; }
+            ScalarT constantValue() const   { return m_constantValue; }
 
             /// Version 1 of getshape that assigns to two passed parameters
             // void get_shape(IndexType &num_rows, IndexType &num_cols) const
@@ -201,14 +275,16 @@ namespace GraphBLAS
                     throw IndexOutOfBoundsException(
                         "get_value_at: index out of bounds");
                 }
+
+                // Since in bounds, then yes we always have a value
+                if (m_isConstant)
+                    return true;
+
                 if (m_data.empty())
-                {
                     return false;
-                }
+
                 if (m_data.at(irow).empty())
-                {
                     return false;
-                }
 
                 IndexType ind;
                 ScalarT val;
@@ -229,16 +305,17 @@ namespace GraphBLAS
                 if (irow >= m_num_rows || icol >= m_num_cols)
                 {
                     throw IndexOutOfBoundsException(
-                        "get_value_at: index out of bounds");
+                            "get_value_at: index out of bounds");
                 }
+
+                if (m_isConstant)
+                    return m_constantValue;
+
                 if (m_data.empty())
-                {
                     throw NoValueException("get_value_at: no entry at index");
-                }
+
                 if (m_data.at(irow).empty())
-                {
                     throw NoValueException("get_value_at: no entry at index");
-                }
 
                 IndexType ind;
                 ScalarT val;
@@ -259,6 +336,9 @@ namespace GraphBLAS
             // Set value at index
             void setElement(IndexType irow, IndexType icol, ScalarT const &val)
             {
+                if (m_isConstant)
+                    throw InvalidOperationException("Illegal to call setElement on constant matrix.");
+
                 m_data[irow].reserve(m_data[irow].capacity() + 10);
                 if (irow >= m_num_rows || icol >= m_num_cols)
                 {
@@ -270,6 +350,7 @@ namespace GraphBLAS
                     m_data[irow].push_back(std::make_tuple(icol, val));
                     ++m_nvals;
                 }
+
                 if (std::get<0>(*m_data[irow].begin()) > icol)
                 {
                     m_data[irow].insert(m_data[irow].begin(),
@@ -305,6 +386,9 @@ namespace GraphBLAS
             void setElement(IndexType irow, IndexType icol, ScalarT const &val,
                             BinaryOpT merge)
             {
+                if (m_isConstant)
+                    throw InvalidOperationException("Illegal to call setElement on constant matrix.");
+
                 if (irow >= m_num_rows || icol >= m_num_cols)
                 {
                     throw IndexOutOfBoundsException(
@@ -344,6 +428,12 @@ namespace GraphBLAS
             typedef std::vector<std::tuple<IndexType, ScalarT>> const & RowType;
             RowType getRow(IndexType row_index) const
             {
+                if (row_index >= m_num_rows)
+                    throw IndexOutOfBoundsException("getRow out of bounds");
+
+                if (m_constantValue)
+                    return m_data[CONTANT_ROW_INDEX];
+
                 return m_data[row_index];
             }
 
@@ -353,6 +443,13 @@ namespace GraphBLAS
                 IndexType row_index,
                 std::vector<std::tuple<IndexType, OtherScalarT> > const &row_data)
             {
+                if (row_index >= m_num_rows)
+                    throw IndexOutOfBoundsException("setRow out of bounds");
+
+                if (m_isConstant)
+                    throw InvalidOperationException(
+                            "Illegal to call setRow on constant matrix.");
+
                 IndexType old_nvals = m_data[row_index].size();
                 IndexType new_nvals = row_data.size();
 
@@ -372,6 +469,13 @@ namespace GraphBLAS
                 IndexType row_index,
                 std::vector<std::tuple<IndexType, ScalarT> > const &row_data)
             {
+                if (row_index >= m_num_rows)
+                    throw IndexOutOfBoundsException("setRow out of bounds");
+
+                if (m_isConstant)
+                    throw InvalidOperationException(
+                            "Illegal to call setRow on constant matrix.");
+
                 IndexType old_nvals = m_data[row_index].size();
                 IndexType new_nvals = row_data.size();
 
@@ -383,6 +487,12 @@ namespace GraphBLAS
             typedef std::vector<std::tuple<IndexType, ScalarT> > const ColType;
             ColType getCol(IndexType col_index) const
             {
+                if (col_index >= m_num_cols)
+                    throw IndexOutOfBoundsException("getCol out of bounds");
+
+                if (m_constantValue)
+                    return m_data[CONTANT_COL_INDEX];
+
                 std::vector<std::tuple<IndexType, ScalarT> > data;
 
                 for (IndexType ii = 0; ii < m_num_rows; ii++)
@@ -409,6 +519,13 @@ namespace GraphBLAS
                 IndexType col_index,
                 std::vector<std::tuple<IndexType, OtherScalarT> > const &col_data)
             {
+                if (col_index >= m_num_cols)
+                    throw IndexOutOfBoundsException("getCol out of bounds");
+
+                if (m_isConstant)
+                    throw InvalidOperationException(
+                            "Illegal to call setCol on constant matrix.");
+
                 auto it = col_data.begin();
                 for (IndexType row_index = 0; row_index < m_num_rows; row_index++)
                 {
@@ -496,6 +613,14 @@ namespace GraphBLAS
                         "getColumnIndices: index out of bounds");
                 }
 
+                if (m_isConstant)
+                {
+                    v.resize(m_num_cols);
+                    for (IndexType i = 0; i < m_num_cols; ++i)
+                        v[i] = i;
+                    return;
+                }
+
                 if (!m_data[irow].empty())
                 {
                     IndexType ind;
@@ -517,6 +642,14 @@ namespace GraphBLAS
                 {
                     throw IndexOutOfBoundsException(
                         "getRowIndices: index out of bounds");
+                }
+
+                if (m_isConstant)
+                {
+                    v.resize(m_num_rows);
+                    for (IndexType i = 0; i < m_num_rows; ++i)
+                        v[i] = i;
+                    return;
                 }
 
                 IndexType ind;
@@ -547,10 +680,23 @@ namespace GraphBLAS
             template<typename RAIteratorIT,
                      typename RAIteratorJT,
                      typename RAIteratorVT>
-            ScalarT extractTuples(RAIteratorIT        row_it,
+            void extractTuples(RAIteratorIT        row_it,
                                   RAIteratorJT        col_it,
                                   RAIteratorVT        values) const
             {
+                if (m_isConstant)
+                {
+                    for (IndexType row = 0; row < m_num_rows; ++row)
+                    {
+                        for (IndexType col = 0; row < m_num_cols; ++col)
+                        {
+                            *row_it = row;              ++row_it;
+                            *col_it = col;              ++col_it;
+                            *values = m_constantValue;  ++values;
+                        }
+                    }
+                }
+
                 for (IndexType row = 0; row < m_data.size(); ++row)
                 {
                     for (auto it = m_data[row].begin();
@@ -567,6 +713,13 @@ namespace GraphBLAS
             // output specific to the storage layout of this type of matrix
             void printInfo(std::ostream &os) const
             {
+                if (m_isConstant)
+                {
+                    os << "COONSANT MATRIX: " << m_num_rows << " x " <<
+                       m_num_cols << ", value=" << m_constantValue;
+                    return;
+                }
+
                 // Used to print data in storage format instead of like a matrix
                 #ifdef GRB_SEQUENTIAL_MATRIX_PRINT_STORAGE
                     os << "LilSparseMatrix<" << typeid(ScalarT).name() << ">"
@@ -654,9 +807,11 @@ namespace GraphBLAS
             }
 
         private:
-            IndexType m_num_rows;
-            IndexType m_num_cols;
-            IndexType m_nvals;
+            IndexType   m_num_rows;
+            IndexType   m_num_cols;
+            IndexType   m_nvals;
+            bool        m_isConstant;
+            ScalarT     m_constantValue;
 
             // List-of-lists storage (LIL)
             std::vector<std::vector<std::tuple<IndexType, ScalarT>>> m_data;

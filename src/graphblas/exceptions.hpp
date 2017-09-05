@@ -67,6 +67,24 @@ namespace GraphBLAS
         std::string m_message;
     };
 
+    class InvalidOperationException: public std::exception
+    {
+    public:
+        InvalidOperationException(std::string const &msg)
+                : m_message(msg) {}
+
+        InvalidOperationException() {}
+
+    private:
+        const char* what() const throw()
+        {
+            return ("InvalidOperationException: " + m_message).c_str();
+        }
+
+        std::string m_message;
+    };
+
+
     //************************************************************************
     // API Errors, Table 2.5(a) of Spec version 1.0.2
     //************************************************************************
