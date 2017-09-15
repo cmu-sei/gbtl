@@ -40,7 +40,7 @@ namespace GraphBLAS
     template<typename MatrixT>
     class TransposeView;
 
-    template<typename MatriT>
+    template<typename MatrixT>
     class MatrixComplementView;
 
     //************************************************************************
