@@ -431,7 +431,7 @@ namespace GraphBLAS
                 if (row_index >= m_num_rows)
                     throw IndexOutOfBoundsException("getRow out of bounds");
 
-                if (m_constantValue)
+                if (m_isConstant)
                     return m_data[CONTANT_ROW_INDEX];
 
                 return m_data[row_index];
@@ -458,8 +458,9 @@ namespace GraphBLAS
                 m_data[row_index].clear();
                 for (auto &tupl : row_data)
                 {
+                    IndexType idx = std::get<0>(tupl);
                     m_data[row_index].push_back(
-                        std::make_tuple(std::get<0>(tupl),
+                        std::make_tuple(idx,
                                         static_cast<ScalarT>(std::get<1>(tupl))));
                 }
             }
@@ -490,7 +491,7 @@ namespace GraphBLAS
                 if (col_index >= m_num_cols)
                     throw IndexOutOfBoundsException("getCol out of bounds");
 
-                if (m_constantValue)
+                if (m_isConstant)
                     return m_data[CONTANT_COL_INDEX];
 
                 std::vector<std::tuple<IndexType, ScalarT> > data;

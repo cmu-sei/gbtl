@@ -540,6 +540,10 @@ GrB_Info GrB_Martrix_eWiseMult_BinaryOp(GrB_Matrix C,
     if (desc != GrB_NULL && desc->isSet(GrB_INP0, GrB_TRAN))
         return GrB_PANIC;
 
+    // @TODO: Implement transpose
+    if (desc != GrB_NULL && desc->isSet(GrB_INP1, GrB_TRAN))
+        return GrB_PANIC;
+
     GraphBLAS::Matrix<TypeAdapter> *mask_matrix = prepareMask(C, Mask, desc);
 
     // The real call
@@ -584,19 +588,26 @@ GrB_Info GrB_Matrix_eWiseAdd_BinaryOp(GrB_Matrix C,
     if (desc != GrB_NULL)
         replace = desc->isSet(GrB_OUTP, GrB_REPLACE);
 
-    if (Mask != GrB_NULL)
+    // @TODO: Implement transpose
+    if (desc != GrB_NULL && desc->isSet(GrB_INP0, GrB_TRAN))
         return GrB_PANIC;
 
-    if (accum != GrB_NULL)
+    // @TODO: Implement transpose
+    if (desc != GrB_NULL && desc->isSet(GrB_INP1, GrB_TRAN))
         return GrB_PANIC;
+
+    GraphBLAS::Matrix<TypeAdapter> *mask_matrix = prepareMask(C, Mask, desc);
 
     GraphBLAS::eWiseAdd(*C->m_matrix,
-                        GraphBLAS::NoMask(),
-                        GraphBLAS::NoAccumulate(),
+                        *mask_matrix,
+                        BinaryAdapter(accum),
                         BinaryAdapter(op),
                         *A->m_matrix,
                         *B->m_matrix,
                         replace);
+
+    cleanupMask(Mask, desc, mask_matrix);
+
     return GrB_SUCCESS;
 }
 
@@ -655,24 +666,13 @@ GrB_Info GrB_Vector_assign_FP32(GrB_Vector w,
     if (mask != GrB_NULL)
         return GrB_PANIC;
 
-    if (accum == GrB_NULL)
-    {
-        GraphBLAS::assign(*w->m_vec,
-                           GraphBLAS::NoMask(),
-                           GraphBLAS::NoAccumulate(),
-                           val,
-                           GraphBLAS::IndexProxy(row_indicies, nindicies),
-                           replace);
-    }
-    else
-    {
-        GraphBLAS::assign(*w->m_vec,
-                           GraphBLAS::NoMask(),
-                           BinaryAdapter(accum),
-                           val,
-                           GraphBLAS::IndexProxy(row_indicies, nindicies),
-                           replace);
-    }
+    GraphBLAS::assign(*w->m_vec,
+                       GraphBLAS::NoMask(),
+                       BinaryAdapter(accum),
+                       val,
+                       GraphBLAS::IndexProxy(row_indicies, nindicies),
+                       replace);
+
     return GrB_SUCCESS;
 }
 
