@@ -36,6 +36,8 @@ BOOST_AUTO_TEST_CASE(maxflow_test)
     Matrix<double, DirectedMatrixTag> m1(6, 6);
     m1.build(i, j, v);
 
+    std::cerr << "============================== test1 =======================\n";
+    GraphBLAS::print_matrix(std::cerr, m1, "\nGraph");
     auto result = algorithms::maxflow(m1, 0, 5);
     BOOST_CHECK_EQUAL(result, 14);
 }
@@ -43,22 +45,24 @@ BOOST_AUTO_TEST_CASE(maxflow_test)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(maxflow_test2)
 {
-    //       s   2  3  4  5  6  7  t
-    //  m1({{0, 10, 5,15, 0, 0, 0, 0}, //s
-    //      {0,  0, 4, 0, 9,15, 0, 0}, //2
-    //      {0,  0, 0, 4, 0, 8, 0, 0}, //3
-    //      {0,  0, 0, 0, 0, 0,30, 0}, //4
-    //      {0,  0, 0, 0, 0,15, 0,10}, //5
-    //      {0,  0, 0, 0, 0, 0,15,10}, //6
-    //      {0,  0, 6, 0, 0, 0, 0,10}, //7
-    //      {0,  0, 0, 0, 0, 0, 0, 0}});
+    //       s   1  2  3  4  5  6  t
+    //  m1({{-, 10, 5,15, -, -, -, -},   // s = 0
+    //      {-,  -, 4, -, 9,15, -, -},   // 1
+    //      {-,  -, -, 4, -, 8, -, -},   // 2
+    //      {-,  -, -, -, -, -,30, -},   // 3
+    //      {-,  -, -, -, -,15, -,10},   // 4
+    //      {-,  -, -, -, -, -,15,10},   // 5
+    //      {-,  -, 6, -, -, -, -,10},   // 6
+    //      {-,  -, -, -, -, -, -, -}}); // t = 7
 
-    IndexArrayType i = {0, 0, 0, 1, 1, 1, 2, 2, 3, 4, 4, 5, 5, 6, 6};
-    IndexArrayType j = {1, 2, 3, 2, 4, 5, 3, 5, 6, 5, 7, 6, 7, 2, 7};
-    std::vector<double>       v = {10,5,15, 4, 9,15, 4, 8,30,15,10,15,10, 6,10};
+    IndexArrayType i =      {0, 0, 0, 1, 1, 1, 2, 2, 3, 4, 4, 5, 5, 6, 6};
+    IndexArrayType j =      {1, 2, 3, 2, 4, 5, 3, 5, 6, 5, 7, 6, 7, 2, 7};
+    std::vector<double> v = {10,5,15, 4, 9,15, 4, 8,30,15,10,15,10, 6,10};
     Matrix<double, DirectedMatrixTag> m1(8, 8);
     m1.build(i, j, v);
 
+    std::cerr << "============================== test2 =======================\n";
+    GraphBLAS::print_matrix(std::cerr, m1, "\nGraph");
     auto result = algorithms::maxflow(m1, 0, 7);
     BOOST_CHECK_EQUAL(result, 28);
 }

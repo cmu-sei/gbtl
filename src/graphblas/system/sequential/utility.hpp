@@ -120,7 +120,7 @@ namespace GraphBLAS
                         ++curr_idx;
                     }
                 }
-                ostr << ((row_idx == num_rows - 1 ) ? "]]" : "]\n");
+                ostr << ((row_idx == num_rows - 1 ) ? "]]\n" : "]\n");
             }
         }
 
