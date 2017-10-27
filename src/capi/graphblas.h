@@ -250,9 +250,9 @@ GrB_Info GrB_extract(GrB_Matrix C,
                      const GrB_BinaryOp accum,
                      const GrB_Matrix A,
                      const GrB_Index *row_indices,
-                     const GrB_Index nrows,
+                     GrB_Index nrows,
                      const GrB_Index *col_indices,
-                     const GrB_Index ncols,
+                     GrB_Index ncols,
                      const GrB_Descriptor desc);
 
 //=============================================================================
@@ -263,7 +263,7 @@ GrB_Info GrB_Vector_assign_FP32(GrB_Vector w,
                                 const GrB_BinaryOp accum,
                                 const GrB_FP32 val,
                                 const GrB_Index *row_indicies,
-                                const GrB_Index nindicies,
+                                GrB_Index nindicies,
                                 const GrB_Descriptor desc);
 
 
@@ -276,9 +276,9 @@ GrB_Info GrB_Matrix_assign_FP32(GrB_Matrix C,
                                const GrB_BinaryOp accum,
                                const GrB_FP32 val,
                                const GrB_Index *row_indicies,
-                               const GrB_Index nrows,
+                               GrB_Index nrows,
                                const GrB_Index *col_indicies,
-                               const GrB_Index ncols,
+                               GrB_Index ncols,
                                const GrB_Descriptor desc);
 
 //=============================================================================
