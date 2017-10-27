@@ -16,28 +16,38 @@
 // Opaque struct to support 4.2.1.2
 struct GrB_UnaryOp_Struct
 {
-    GrB_UnaryOp_Struct(GrB_Type d1, GrB_Type d2, void *unary_func)
-            : m_input(d1), m_output(d2), m_unary_fp(unary_func)
+    GrB_UnaryOp_Struct(GrB_UnaryFunc unary_func,
+                       GrB_Type      d_out,
+                       GrB_Type      d_in)
+      : m_unary_fp(unary_func),
+        m_output_type(d_out),
+        m_input_type(d_in)
     {
     }
 
-    const GrB_Type          m_input;
-    const GrB_Type          m_output;
-    void * const            m_unary_fp;
+    GrB_UnaryFunc const  m_unary_fp;
+    const GrB_Type       m_output_type;
+    const GrB_Type       m_input_type;
 };
 
 // Opaque struct to support 4.2.1.3
 struct GrB_BinaryOp_Struct
 {
-    GrB_BinaryOp_Struct(GrB_Type d1, GrB_Type d2, GrB_Type d3, void *binary_func)
-            : m_input1(d1), m_input2(d2), m_output(d3), m_binary_fp(binary_func)
+    GrB_BinaryOp_Struct(GrB_BinaryFunc binary_func,
+                        GrB_Type       d_out,
+                        GrB_Type       d_in1,
+                        GrB_Type       d_in2)
+      : m_binary_fp(binary_func),
+        m_output_type(d_out),
+        m_input1_type(d_in1),
+        m_input2_type(d_in2)
     {
     }
 
-    const GrB_Type          m_input1;
-    const GrB_Type          m_input2;
-    const GrB_Type          m_output;
-    void * const            m_binary_fp;
+    GrB_BinaryFunc const  m_binary_fp;
+    const GrB_Type        m_output_type;
+    const GrB_Type        m_input1_type;
+    const GrB_Type        m_input2_type;
 };
 
 // Opaque to support 4.2.1.4
@@ -58,7 +68,7 @@ struct GrB_Monoid_Struct
     const GrB_Type         m_identity_type;
     const GrB_BinaryOp     m_binary_op;
 
-    GrB_TypeUnion      m_identity;
+    GrB_TypeUnion          m_identity;
 };
 
 // Opaque struct to support 4.2.1.5

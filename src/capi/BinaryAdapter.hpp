@@ -31,14 +31,16 @@ public:
     typedef TypeAdapter result_type;
     TypeAdapter operator()(TypeAdapter input1, TypeAdapter input2)
     {
-        // @TODO: Is this always true that we take the second?
+        /// @TODO: Is this always true that we take the second?
+        /// @todo: this is not correct.  There is no binary function that behaves the
+        /// same when the accum parameter is passed as GrB_NULL.
         if (m_binary_op == GrB_NULL)
             return input2;
 
-        return binary_call(m_binary_op->m_output,
-                           m_binary_op->m_input1,
-                           m_binary_op->m_input2,
-                           m_binary_op->m_binary_fp,
+        return binary_call(m_binary_op->m_binary_fp,
+                           m_binary_op->m_output_type,
+                           m_binary_op->m_input1_type,
+                           m_binary_op->m_input2_type,
                            input1,
                            input2);
     }

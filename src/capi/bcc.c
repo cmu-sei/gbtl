@@ -146,16 +146,19 @@ GrB_Info vertex_betweenness_centrality(float *result,
     //=============
 
     GrB_UnaryOp bool_identity;
-    check(GrB_UnaryOp_new(&bool_identity, GrB_BOOL_Type, GrB_BOOL_Type,
-                          (void *) &bool_identity_fn));
+    check(GrB_UnaryOp_new(&bool_identity,
+                          (GrB_UnaryFunc) &bool_identity_fn,
+                          GrB_BOOL_Type, GrB_BOOL_Type))
 
     GrB_BinaryOp int32_plus;
-    check(GrB_BinaryOp_new(&int32_plus, GrB_INT32_Type, GrB_INT32_Type,
-                           GrB_INT32_Type, (void *) &int32_plus_fn))
+    check(GrB_BinaryOp_new(&int32_plus,
+                           (GrB_BinaryFunc) &int32_plus_fn,
+                           GrB_INT32_Type, GrB_INT32_Type, GrB_INT32_Type))
 
     GrB_BinaryOp fp32_plus;
-    check(GrB_BinaryOp_new(&fp32_plus, GrB_FP32_Type, GrB_FP32_Type,
-                           GrB_FP32_Type, (void *) &fp32_plus_fn))
+    check(GrB_BinaryOp_new(&fp32_plus,
+                           (GrB_BinaryFunc) &fp32_plus_fn,
+                           GrB_FP32_Type, GrB_FP32_Type, GrB_FP32_Type))
 
     GrB_Monoid int32_plus_monoid;
     check(GrB_Monoid_INT32_new(&int32_plus_monoid, int32_plus, 0));
@@ -164,16 +167,19 @@ GrB_Info vertex_betweenness_centrality(float *result,
     check(GrB_Monoid_FP32_new(&fp32_plus_monoid, fp32_plus, 0));
 
     GrB_BinaryOp int32_times;
-    check(GrB_BinaryOp_new(&int32_times, GrB_INT32_Type, GrB_INT32_Type,
-                           GrB_INT32_Type, (void *) &int32_times_fn))
+    check(GrB_BinaryOp_new(&int32_times,
+                           (GrB_BinaryFunc) &int32_times_fn,
+                           GrB_INT32_Type, GrB_INT32_Type, GrB_INT32_Type))
 
     GrB_BinaryOp fp32_times;
-    check(GrB_BinaryOp_new(&fp32_times, GrB_FP32_Type, GrB_FP32_Type,
-                           GrB_FP32_Type, (void *) &fp32_times_fn))
+    check(GrB_BinaryOp_new(&fp32_times,
+                           (GrB_BinaryFunc) &fp32_times_fn,
+                           GrB_FP32_Type, GrB_FP32_Type, GrB_FP32_Type))
 
     GrB_UnaryOp fp32_mult_inv;
-    check(GrB_UnaryOp_new(&fp32_mult_inv, GrB_FP32_Type, GrB_FP32_Type,
-                          (void *) &fp32_mult_inv_fn));
+    check(GrB_UnaryOp_new(&fp32_mult_inv,
+                          (GrB_UnaryFunc) &fp32_mult_inv_fn,
+                          GrB_FP32_Type, GrB_FP32_Type));
 
     //=============
 

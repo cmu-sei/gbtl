@@ -99,26 +99,26 @@ typedef void (* GrB_BinaryFunc)(void *, const void *, const void *);
 
 //=============================================================================
 // 4.2.1.2
-// d1 = arg1, d2 = result
-GrB_Info GrB_UnaryOp_new(GrB_UnaryOp *unary_op,
-                         GrB_Type d1,
-                         GrB_Type d2,
-                         void *unary_func);
+// d_in = arg1, d_out = result
+GrB_Info GrB_UnaryOp_new(GrB_UnaryOp   *unary_op,
+                         GrB_UnaryFunc  unary_func,
+                         GrB_Type       d_out,
+                         GrB_Type       d_in);
 
 //=============================================================================
 // 4.2.1.3
-GrB_Info GrB_BinaryOp_new(GrB_BinaryOp *binary_op,
-                          GrB_Type d1,
-                          GrB_Type d2,
-                          GrB_Type d3,
-                          void *binary_func);
+GrB_Info GrB_BinaryOp_new(GrB_BinaryOp   *binary_op,
+                          GrB_BinaryFunc  binary_func,
+                          GrB_Type        d_out,
+                          GrB_Type        d_in1,
+                          GrB_Type        d_in2);
 
 //=============================================================================
 // 4.2.1.4
 // NONPOLYMORPHIC INTERFACES
 GrB_Info GrB_Monoid_INT32_new(GrB_Monoid *monoid,
-                                GrB_BinaryOp binary_op,
-                                GrB_INT32 identity);
+                              GrB_BinaryOp binary_op,
+                              GrB_INT32 identity);
 
 GrB_Info GrB_Monoid_FP32_new(GrB_Monoid *monoid,
                              GrB_BinaryOp binary_op,

@@ -70,24 +70,24 @@ void cleanupMask(const GrB_Matrix Mask,
 
 //=============================================================================
 // 4.2.1.2
-GrB_Info GrB_UnaryOp_new(GrB_UnaryOp *unary_op,
-                         GrB_Type d1,
-                         GrB_Type d2,
-                         void *unary_func)
+GrB_Info GrB_UnaryOp_new(GrB_UnaryOp   *unary_op,
+                         GrB_UnaryFunc  unary_func,
+                         GrB_Type       d_out,
+                         GrB_Type       d_in)
 {
-    *unary_op = new GrB_UnaryOp_Struct(d1, d2, unary_func);
+    *unary_op = new GrB_UnaryOp_Struct(unary_func, d_out, d_in);
     return GrB_SUCCESS;
 }
 
 //=============================================================================
 // 4.2.1.3
-GrB_Info GrB_BinaryOp_new(GrB_BinaryOp *binary_op,
-                          GrB_Type d1,
-                          GrB_Type d2,
-                          GrB_Type d3,
-                          void *binary_func)
+GrB_Info GrB_BinaryOp_new(GrB_BinaryOp   *binary_op,
+                          GrB_BinaryFunc  binary_func,
+                          GrB_Type        d_out,
+                          GrB_Type        d_in1,
+                          GrB_Type        d_in2)
 {
-    *binary_op = new GrB_BinaryOp_Struct(d1, d2, d3, binary_func);
+    *binary_op = new GrB_BinaryOp_Struct(binary_func, d_out, d_in1, d_in2);
     return GrB_SUCCESS;
 }
 

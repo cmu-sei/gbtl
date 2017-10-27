@@ -11,7 +11,7 @@
 #include "FunctionInvocation.h"
 
 /**
- * Adapts the GraphBLAS unarfy function point to the template TypeAdapter
+ * Adapts the GraphBLAS unary function pointer to the template TypeAdapter
  * we pass into the tempkate C++ backend.
  */
 class UnaryAdapter
@@ -25,9 +25,9 @@ public:
     typedef TypeAdapter result_type;
     TypeAdapter operator()(TypeAdapter input)
     {
-        return unary_call(m_unary_op->m_output,
-                          m_unary_op->m_input,
-                          m_unary_op->m_unary_fp,
+        return unary_call(m_unary_op->m_unary_fp,
+                          m_unary_op->m_output_type,
+                          m_unary_op->m_input_type,
                           input);
     }
 

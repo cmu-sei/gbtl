@@ -28,10 +28,10 @@ public:
 
     TypeAdapter operator()(TypeAdapter input1, TypeAdapter input2)
     {
-        return binary_call(m_monoid->m_binary_op->m_output,
-                           m_monoid->m_binary_op->m_input1,
-                           m_monoid->m_binary_op->m_input2,
-                           m_monoid->m_binary_op->m_binary_fp,
+        return binary_call(m_monoid->m_binary_op->m_binary_fp,
+                           m_monoid->m_binary_op->m_output_type,
+                           m_monoid->m_binary_op->m_input1_type,
+                           m_monoid->m_binary_op->m_input2_type,
                            input1,
                            input2);
     }

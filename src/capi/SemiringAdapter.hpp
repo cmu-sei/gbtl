@@ -22,20 +22,20 @@ public:
 
     TypeAdapter add(TypeAdapter a, TypeAdapter b) const
     {
-        return binary_call(m_semiring->m_monoid->m_binary_op->m_output,
-                           m_semiring->m_monoid->m_binary_op->m_input1,
-                           m_semiring->m_monoid->m_binary_op->m_input2,
-                           m_semiring->m_monoid->m_binary_op->m_binary_fp,
+        return binary_call(m_semiring->m_monoid->m_binary_op->m_binary_fp,
+                           m_semiring->m_monoid->m_binary_op->m_output_type,
+                           m_semiring->m_monoid->m_binary_op->m_input1_type,
+                           m_semiring->m_monoid->m_binary_op->m_input2_type,
                            a,
                            b);
     }
 
     TypeAdapter mult(TypeAdapter a, TypeAdapter b) const
     {
-        return binary_call(m_semiring->m_binary_op->m_output,
-                           m_semiring->m_binary_op->m_input1,
-                           m_semiring->m_binary_op->m_input2,
-                           m_semiring->m_binary_op->m_binary_fp,
+        return binary_call(m_semiring->m_binary_op->m_binary_fp,
+                           m_semiring->m_binary_op->m_output_type,
+                           m_semiring->m_binary_op->m_input1_type,
+                           m_semiring->m_binary_op->m_input2_type,
                            a,
                            b);
     }
