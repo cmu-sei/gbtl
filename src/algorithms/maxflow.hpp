@@ -20,6 +20,7 @@
 #include <random>
 
 #include <graphblas/graphblas.hpp>
+#include <algorithms/bfs.hpp>
 
 //****************************************************************************
 // The following are hacks because algorithm assumes access to implicit zero
@@ -194,7 +195,7 @@ namespace algorithms
             push(capacity, flow, excess, source, i);
         }
 
-        GraphBLAS::print_matrix(std::cerr, flow, "\nFLOW");
+        //GraphBLAS::print_matrix(std::cerr, flow, "\nFLOW");
 
         GraphBLAS::IndexType  p = 0;
         while (p < (num_nodes - 2))
@@ -202,7 +203,8 @@ namespace algorithms
             GraphBLAS::IndexType u = list[p];
             T old_height = at(height, u);
             discharge(capacity, flow, excess, height, seen, u);
-            GraphBLAS::print_matrix(std::cerr, flow, "\nFLOW after discharge");
+            //GraphBLAS::print_matrix(std::cerr, flow, "\nFLOW after discharge");
+
             if (at(height,u) > old_height)
             {
                 GraphBLAS::IndexType t = list[p];
@@ -223,7 +225,7 @@ namespace algorithms
         //{
         //    maxflow += flow.extractElement(source, i);
         //}
-        GraphBLAS::print_matrix(std::cerr, flow, "\nFlow");
+        //GraphBLAS::print_matrix(std::cerr, flow, "\nFlow");
         GraphBLAS::Vector<T> flows(rows);
         GraphBLAS::reduce(flows, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                           GraphBLAS::Plus<T>(), flow);
@@ -232,11 +234,11 @@ namespace algorithms
         return maxflow;
     }
 
-//****************************************************************************
+    //************************************************************************
     template<typename MatrixT>
     bool bfs_wrapper(MatrixT const        &graph,
                      GraphBLAS::IndexType  source,
-                     GraphBLAS::IndexType  sink
+                     GraphBLAS::IndexType  sink,
                      GraphBLAS::Vector<GraphBLAS::IndexType> &parent_list)
     {
         GraphBLAS::Vector<bool> wavefront(graph.ncols());
@@ -248,6 +250,7 @@ namespace algorithms
         return parent_list.hasElement(sink);
     }
 
+    //************************************************************************
     template<typename MatrixT>
     typename MatrixT::ScalarType maxflow_ford_fulk(MatrixT const        &graph,
                                                    GraphBLAS::IndexType  source,
@@ -260,20 +263,20 @@ namespace algorithms
         // assert num_nodes == cols
 
         MatrixT rGraph = graph;
-        GraphBLAS::Vector<IndexType> parent_list(num_nodes);
+        GraphBLAS::Vector<GraphBLAS::IndexType> parent_list(num_nodes);
         T max_flow(0);
 
         while (bfs_wrapper(rGraph, source, sink, parent_list))
         {
             // There exists a path to sink from source
-            GraphBLAS::IndexType u = parent_list.getElement(sink);
+            GraphBLAS::IndexType u = parent_list.extractElement(sink);
             T path_flow = rGraph.getElement(u, sink);
 
             for (GraphBLAS::IndexType v = sink;
                  v != source;
-                 v = parent_list.getElement(v))
+                 v = parent_list.extractElement(v))
             {
-                GraphBLAS::IndexType u = parent_list.getElement(v);
+                GraphBLAS::IndexType u = parent_list.extractElement(v);
             }
         }
     }
