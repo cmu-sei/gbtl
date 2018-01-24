@@ -579,4 +579,84 @@ BOOST_AUTO_TEST_CASE(batch_bfs_level_masked_test_one_root_integer)
     }
 }
 
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(bfs_level_masked_v2_test_one_root)
+{
+    typedef double T;
+    typedef GraphBLAS::Matrix<T, GraphBLAS::DirectedMatrixTag> GrBMatrix;
+    typedef GraphBLAS::Vector<T> GrBVector;
+
+    GraphBLAS::IndexType const NUM_NODES(9);
+    GraphBLAS::IndexType const START_INDEX(5);
+
+    GraphBLAS::IndexArrayType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
+                                   4, 4, 4, 5, 6, 6, 6, 8, 8};
+    GraphBLAS::IndexArrayType j = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
+                                   2, 3, 8, 2, 1, 2, 3, 2, 4};
+    std::vector<T> v(i.size(), 1);
+
+    GrBMatrix G_tn(NUM_NODES, NUM_NODES);
+    G_tn.build(i, j, v);
+
+    GrBVector root(NUM_NODES);
+    root.setElement(START_INDEX, 1);  // multiplicative identity
+
+    GrBVector levels(NUM_NODES);
+    algorithms::bfs_level_masked_v2(G_tn, root, levels);
+
+    std::vector<T> answer = {5, 4, 2, 4, 3, 1, 3, 0, 3};
+    for (GraphBLAS::IndexType ix = 0; ix < NUM_NODES; ++ix)
+    {
+        if (levels.hasElement(ix))
+        {
+            BOOST_CHECK_EQUAL(levels.extractElement(ix),
+                              answer[ix]);
+        }
+        else
+        {
+            BOOST_CHECK_EQUAL(0, answer[ix]);
+        }
+    }
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(bfs_level_masked_v2_test_one_root_integer)
+{
+    typedef unsigned int T;
+    typedef GraphBLAS::Matrix<T, GraphBLAS::DirectedMatrixTag> GrBMatrix;
+    typedef GraphBLAS::Vector<T> GrBVector;
+
+    GraphBLAS::IndexType const NUM_NODES(9);
+    GraphBLAS::IndexType const START_INDEX(5);
+
+    GraphBLAS::IndexArrayType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
+                                   4, 4, 4, 5, 6, 6, 6, 8, 8};
+    GraphBLAS::IndexArrayType j = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
+                                   2, 3, 8, 2, 1, 2, 3, 2, 4};
+    std::vector<T> v(i.size(), 1);
+
+    GrBMatrix G_tn(NUM_NODES, NUM_NODES);
+    G_tn.build(i, j, v);
+
+    GrBVector root(NUM_NODES);
+    root.setElement(START_INDEX, 1);  // multiplicative identity
+
+    GrBVector levels(NUM_NODES);
+    algorithms::bfs_level_masked_v2(G_tn, root, levels);
+
+    std::vector<T> answer = {5, 4, 2, 4, 3, 1, 3, 0, 3};
+    for (GraphBLAS::IndexType ix = 0; ix < NUM_NODES; ++ix)
+    {
+        if (levels.hasElement(ix))
+        {
+            BOOST_CHECK_EQUAL(levels.extractElement(ix),
+                              answer[ix]);
+        }
+        else
+        {
+            BOOST_CHECK_EQUAL(0, answer[ix]);
+        }
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END()

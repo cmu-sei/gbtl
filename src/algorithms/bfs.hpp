@@ -419,4 +419,66 @@ namespace algorithms
                 true);
         }
     }
+
+
+    //************************************************************************
+    /**
+     * @brief Perform a single breadth first searches (BFS) on the given graph.
+     *
+     * @param[in]  graph      NxN adjacency matrix of the graph on which to
+     *                        perform a BFS (not the transpose).  A value of
+     *                        1 indicates an edge (structural zero = 0).
+     * @param[in]  wavefront  N-vector initial wavefront to use in the calculation
+     *                        of R simultaneous traversals.  A value of 1 in a
+     *                        given position indicates a root for the
+     *                        traversal..
+     * @param[out] levels     The level (distance in unweighted graphs) from
+     *                        the corresponding root of that BFS.  Roots are
+     *                        assigned a value of 1. (a value of 0 implies not
+     *                        reachable.
+     */
+    template <typename MatrixT,
+              typename WavefrontT,
+              typename LevelListT>
+    void bfs_level_masked_v2(MatrixT const  &graph,
+                             WavefrontT      wavefront, //row vector, copy made
+                             LevelListT     &levels)
+    {
+        using T = typename MatrixT::ScalarType;
+
+        /// Assert graph is square/have a compatible shape with wavefront
+        GraphBLAS::IndexType grows(graph.nrows());
+        GraphBLAS::IndexType gcols(graph.ncols());
+
+        GraphBLAS::IndexType wsize(wavefront.size());
+
+        if ((grows != gcols) || (wsize != grows))
+        {
+            throw GraphBLAS::DimensionException();
+        }
+
+        GraphBLAS::IndexType depth = 0;
+        while (wavefront.nvals() > 0)
+        {
+            // Increment the level
+            ++depth;
+
+            GraphBLAS::assign(levels,
+                              wavefront,
+                              GraphBLAS::NoAccumulate(),
+                              depth,
+                              GraphBLAS::AllIndices(),
+                              false);
+
+            // Advance the wavefront and mask out nodes already assigned levels
+            GraphBLAS::vxm(
+                wavefront,
+                GraphBLAS::complement(levels),
+                GraphBLAS::NoAccumulate(),
+                GraphBLAS::LogicalSemiring<GraphBLAS::IndexType>(),
+                wavefront, graph,
+                true);
+        }
+    }
+
 }
