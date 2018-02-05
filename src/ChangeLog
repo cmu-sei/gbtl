@@ -1,3 +1,12 @@
+2018-02 Scott McMillan <smcmillan@sei.cmu.edu>
+	* Version 2.0 merged from spiral_graph branch to master.
+	* API revamped to implement the functionality included in GraphBLAS C
+	API spec
+	* All algorithms revamped to be more "GraphBLAS-ified".  Maxflow
+	still needs additional conversion.
+	* Support for GPU backend removed.
+	* Build system switched from autotools to cmake.
+
 2016-04-25
 	* implemented mxm masking in cusp
 	* fixed ewisemult issue
@@ -33,6 +42,6 @@
 	* Alpha release of graph algorithms suite
 	* Alpha release of GPU backend built on Cusp and Thrust (and a proof
 	  of concept release of a simple, naive sequential backend for CPU)
-	  
+  
 2015-07-16 John Matty <jcmatty@sei.cmu.edu>
 	* Everything: Initial prototyping.
