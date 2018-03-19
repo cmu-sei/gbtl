@@ -63,7 +63,7 @@ namespace algorithms
         GraphBLAS::IndexArrayType const &s)
     {
         //GRB_BC_LOG(GraphBLAS::print_matrix(std::cerr, A, "Graph"));
-        GRB_BC_LOG("Graph " << A);
+        GRB_BC_LOG("vertex_betweenness_centrality_batch_alt_trans_v2 Graph " << A);
 
         // nsver = |s| (partition size)
         GraphBLAS::IndexType nsver(s.size());

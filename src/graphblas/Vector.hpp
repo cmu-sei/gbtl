@@ -476,6 +476,7 @@ namespace GraphBLAS
         // ostr << label << ": zero = " << vec.m_vec.get_zero() << std::endl;
         ostr << label << ":" << std::endl;
         vec.printInfo(ostr);
+        ostr << std::endl;
     }
 
     /// @todo This does not need to be a friend

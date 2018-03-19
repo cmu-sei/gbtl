@@ -274,6 +274,21 @@ namespace GraphBLAS
 
 
         //--------------------------------------------------------------------
+        // 4.3.8.2: matrix variant
+        template<typename CScalarT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename UnaryFunctionT,
+                 typename AMatrixT,
+                 typename ...ATagsT>
+        friend inline void apply(Matrix<CScalarT, ATagsT...> &C,
+                                 MaskT                 const &Mask,
+                                 AccumT                       accum,
+                                 UnaryFunctionT               op,
+                                 AMatrixT              const &A,
+                                 bool                         replace_flag);
+
+        //--------------------------------------------------------------------
 
         template<typename WVectorT,
                  typename MaskT,

@@ -58,6 +58,31 @@ namespace
     //************************************************************************
     //convert each stored entry of a vector to its 1-based index
     template <typename VectorT>
+    void index_of_0based(VectorT &vec)
+    {
+        using T = typename VectorT::ScalarType;
+
+        GraphBLAS::IndexArrayType i, j, v;
+        for (GraphBLAS::IndexType ix = 0; ix < vec.size(); ++ix)
+        {
+            i.push_back(ix);
+            j.push_back(ix);
+            v.push_back(ix);
+        }
+
+        GraphBLAS::Matrix<T> identity_ramp(vec.size(), vec.size());
+
+        identity_ramp.build(i,j,v);
+
+        GraphBLAS::vxm(vec,
+                       GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                       GraphBLAS::MinSelect2ndSemiring<T>(),
+                       vec, identity_ramp, true);
+    }
+
+    //************************************************************************
+    //convert each stored entry of a vector to its 1-based index
+    template <typename VectorT>
     void index_of_1based(VectorT &vec)
     {
         using T = typename VectorT::ScalarType;

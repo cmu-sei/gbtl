@@ -472,8 +472,8 @@ namespace GraphBLAS
                        ColSequenceT   const &col_indices,
                        bool                  replace_flag = false)
     {
-        check_nrows_nrows(C, Mask, "extract(const mat): C.nrows != Mask.nrows");
-        check_ncols_ncols(C, Mask, "extract(const mat): C.ncols != Mask.ncols");
+        check_nrows_nrows(C, Mask, "assign(const mat): C.nrows != Mask.nrows");
+        check_ncols_ncols(C, Mask, "assign(const mat): C.ncols != Mask.ncols");
 
         check_nindices_within_nrows(
             row_indices, C,
