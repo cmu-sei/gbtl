@@ -234,6 +234,7 @@ namespace algorithms
         GraphBLAS::print_matrix(std::cerr, flow, "Final FLOW:");
         return maxflow;
     }
+
     //************************************************************************
     /**
      * @brief Perform a single breadth first search (BFS) traversal on the

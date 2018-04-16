@@ -52,7 +52,23 @@ namespace
 
         bool operator()(T val)
         {
-            return LessT()(val, m_threshold);
+            return LessT()(val, m_threshold);  // val < threshold
+        }
+    };
+
+    //************************************************************************
+    template <typename T, typename LessT = std::less<T>>
+    struct SupportMinTest
+    {
+        typedef bool result_type;
+
+        T const m_threshold;
+
+        SupportMinTest(T threshold) : m_threshold(threshold) {}
+
+        bool operator()(T val)
+        {
+            return !LessT()(val, m_threshold);  // val >= threshold
         }
     };
 }
@@ -253,6 +269,53 @@ namespace algorithms
         // return incidence matrix containing all edges in k-trusses
         return *E;
     }
+
+    //************************************************************************
+    template<typename AMatrixT>
+    AMatrixT k_truss2(AMatrixT const       &Ain,   // undirected adjacency matrix
+                      GraphBLAS::IndexType  k_size)
+    {
+        typedef typename AMatrixT::ScalarType AType;
+
+        //GraphBLAS::print_matrix(std::cout, Ain, "adjacency");
+
+        GraphBLAS::IndexType num_vertices(Ain.ncols());
+        // TODO: assert square
+
+        AMatrixT A(Ain);
+        GraphBLAS::IndexType num_edges, new_num_edges(A.nvals());
+
+        GraphBLAS::Matrix<bool> Mask(num_vertices, num_vertices);
+        GraphBLAS::Matrix<GraphBLAS::IndexType> Support(num_vertices, num_vertices);
+
+        do
+        {
+            num_edges = new_num_edges;
+
+            // Compute the support of each edge
+            // S<A,-> = (A' +.* A) = (A' * A) .* A
+            GraphBLAS::mxm(Support, A, GraphBLAS::NoAccumulate(),
+                           GraphBLAS::ArithmeticSemiring<AType>(),
+                           GraphBLAS::transpose(A), A, true);
+            //GraphBLAS::print_matrix(std::cout, Support, "Support");
+
+            // Keep all edges with enough support
+            // Mask = S .>= (k - 2)
+            GraphBLAS::apply(Mask,
+                             GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                             SupportMinTest<AType>(k_size - 2),
+                             Support, true);
+
+            // Annihilate all edges lacking support: A<A> = A or  A = A .* M
+            GraphBLAS::apply(A, Mask, GraphBLAS::NoAccumulate(),
+                             GraphBLAS::Identity<AType>(), A, true);
+            new_num_edges = A.nvals();
+
+        } while (new_num_edges != num_edges);  // loop while edges are being removed
+
+        return A;
+    }
+
 }
 
 #endif

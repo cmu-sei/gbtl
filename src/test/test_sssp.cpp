@@ -97,6 +97,53 @@ GraphBLAS::Matrix<T> get_gilbert_answer()
 
 
 //****************************************************************************
+BOOST_AUTO_TEST_CASE(sssp_basic_mincost_one_root)
+{
+    GraphBLAS::IndexType const NUM_NODES(4);
+    GraphBLAS::IndexType const start_index(0);
+
+    GraphBLAS::IndexArrayType i = {0, 0, 1, 2};
+    GraphBLAS::IndexArrayType j = {1, 3, 2, 3};
+    std::vector<double>       v = {1, 5, 1, 1};
+    GraphBLAS::Matrix<double> G(NUM_NODES, NUM_NODES);
+    G.build(i, j, v);
+
+    GraphBLAS::Vector<double> path(NUM_NODES);
+    path.setElement(start_index, 0);
+
+    sssp(G, path);
+    //GraphBLAS::print_vector(std::cout, path, "MINCOST path");
+    BOOST_CHECK_EQUAL(path.extractElement(0), 0);
+    BOOST_CHECK_EQUAL(path.extractElement(1), 1);
+    BOOST_CHECK_EQUAL(path.extractElement(2), 2);
+    BOOST_CHECK_EQUAL(path.extractElement(3), 3);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sssp_basic_mincost2_one_root)
+{
+    GraphBLAS::IndexType const NUM_NODES(4);
+    GraphBLAS::IndexType const start_index(0);
+
+    GraphBLAS::IndexArrayType i = {0, 0, 1, 2};
+    GraphBLAS::IndexArrayType j = {1, 3, 2, 3};
+    std::vector<double>       v = {1, 2, 1, 1};
+    GraphBLAS::Matrix<double> G(NUM_NODES, NUM_NODES);
+    G.build(i, j, v);
+
+    GraphBLAS::Vector<double> path(NUM_NODES);
+    path.setElement(start_index, 0);
+
+    sssp(G, path);
+    //GraphBLAS::print_vector(std::cout, path, "MINCOST path");
+    BOOST_CHECK_EQUAL(path.extractElement(0), 0);
+    BOOST_CHECK_EQUAL(path.extractElement(1), 1);
+    BOOST_CHECK_EQUAL(path.extractElement(2), 2);
+    BOOST_CHECK_EQUAL(path.extractElement(3), 2);
+}
+
+
+//****************************************************************************
 BOOST_AUTO_TEST_CASE(sssp_basic_double_one_root)
 {
     GraphBLAS::IndexType const NUM_NODES(9);
