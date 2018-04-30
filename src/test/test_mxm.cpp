@@ -16,7 +16,7 @@
 #include <graphblas/graphblas.hpp>
 
 #define BOOST_TEST_MAIN
-#define BOOST_TEST_MODULE sparse_mxm_suite
+#define BOOST_TEST_MODULE test_mxm_suite
 
 #include <boost/test/included/unit_test.hpp>
 
