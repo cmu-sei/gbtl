@@ -65,8 +65,8 @@ namespace GraphBLAS
         check_nrows_nrows(C, Mask, "mxm: C.nrows != Mask.nrows");
         check_ncols_ncols(C, Mask, "mxm: C.ncols != Mask.ncols");
         check_nrows_nrows(C, A, "mxm: C.nrows != A.nrows");
-        check_ncols_nrows(A, B, "mxm: A.ncols != B.nrows");
         check_ncols_ncols(C, B, "mxm: C.ncols != B.ncols");
+        check_ncols_nrows(A, B, "mxm: A.ncols != B.nrows");
 
         backend::mxm(C.m_mat, Mask.m_mat, accum, op, A.m_mat, B.m_mat,
                      replace_flag);

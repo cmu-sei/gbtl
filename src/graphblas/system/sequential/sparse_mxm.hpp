@@ -58,7 +58,7 @@ namespace GraphBLAS
                         BMatrixT    const   &B,
                         bool                 replace_flag = false)
         {
-            // Dimension checkss happenned in front end
+            // Dimension checks happenned in front end
             GRB_LOG_FN_BEGIN("SEQUENTIAL mxm - 4.3.1 - matrix-matrix multiply");
 
             GRB_LOG_VERBOSE("C in :" << C);
@@ -68,8 +68,6 @@ namespace GraphBLAS
             GRB_LOG_VERBOSE("A in :" << A);
             GRB_LOG_VERBOSE("B in :" << B);
             GRB_LOG_VERBOSE_REPLACE(replace_flag);
-
-            // @TODO: Do we need domain checks?  Won't templates make that work?
 
             IndexType nrow_A(A.nrows());
             IndexType ncol_B(B.ncols());
