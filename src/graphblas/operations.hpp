@@ -391,19 +391,30 @@ namespace GraphBLAS
                               typename UVectorT::tag_type>::value,
                  int>::type = 0,
              typename ...WTags>
-    inline void assign(Vector<WScalarT, WTags...>   &w,
-                       MaskT        const &mask,
-                       AccumT              accum,
-                       UVectorT     const &u,
-                       SequenceT    const &indices,
-                       bool                replace_flag = false)
+    inline void assign(Vector<WScalarT, WTags...>      &w,
+                       MaskT                    const  &mask,
+                       AccumT                           accum,
+                       UVectorT                 const  &u,
+                       SequenceT                const  &indices,
+                       bool                             replace_flag = false)
     {
+        GRB_LOG_FN_BEGIN("assign - 4.3.7.1 - standard vector variant");
+        GRB_LOG_VERBOSE("w in: " << w.m_vec);
+        GRB_LOG_VERBOSE("mask in: " << mask.m_vec);
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE("u in: " << u.m_vec);
+        GRB_LOG_VERBOSE("indicies in: " << indices);
+        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+
         check_size_size(w, mask, "assign(std vec): w.size != mask.size");
         check_size_nindices(u, indices,
                             "assign(std vec): u.size != |indicies|");
 
         backend::assign(w.m_vec, mask.m_vec, accum, u.m_vec, indices,
                         replace_flag);
+
+        GRB_LOG_VERBOSE("w out: " << w.m_vec);
+        GRB_LOG_FN_END("assign - 4.3.7.1 - standard vector variant");
     }
 
     // 4.3.7.2: assign - standard matrix variant
@@ -425,6 +436,16 @@ namespace GraphBLAS
                        ColSequenceT    const &col_indices,
                        bool                   replace_flag = false)
     {
+        GRB_LOG_FN_BEGIN("assign - 4.3.7.2 - standard matrix variant");
+
+        GRB_LOG_VERBOSE("C in: " << C.m_mat);
+        GRB_LOG_VERBOSE("Mask in: " << Mask.m_mat);
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE("A in: " << A.m_mat);
+        GRB_LOG_VERBOSE("row_indices in: " << row_indices);
+        GRB_LOG_VERBOSE("col_indices in: " << col_indices);
+        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+
         check_nrows_nrows(C, Mask, "assign(std mat): C.nrows != Mask.nrows");
         check_ncols_ncols(C, Mask, "assign(std mat): C.ncols != Mask.ncols");
         check_nrows_nindices(A, row_indices,
@@ -434,8 +455,10 @@ namespace GraphBLAS
 
         backend::assign(C.m_mat, Mask.m_mat, accum, A.m_mat,
                         row_indices, col_indices, replace_flag);
-    }
 
+        GRB_LOG_VERBOSE("C out: " << C.m_mat);
+        GRB_LOG_FN_END("assign - 4.3.7.2 - standard matrix variant");
+    }
 
     // 4.3.7.3: assign - column variant
     template<typename CScalarT,
@@ -452,6 +475,16 @@ namespace GraphBLAS
                        IndexType                    col_index,
                        bool                         replace_flag = false)
     {
+        GRB_LOG_FN_BEGIN("assign - 4.3.7.3 - column variant");
+
+        GRB_LOG_VERBOSE("C in: " << C.m_mat);
+        GRB_LOG_VERBOSE("mask in: " << mask.m_vec);
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE("u in: " << u.m_vec);
+        GRB_LOG_VERBOSE("row_indices in:" << row_indices);
+        GRB_LOG_VERBOSE("col_index in:" << col_index);
+        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+
         check_size_nrows(mask, C, "assign(col): C.nrows != mask.size");
         check_size_nindices(u, row_indices,
                             "assign(col): u.size != |row_indices|");
@@ -460,6 +493,9 @@ namespace GraphBLAS
 
         backend::assign(C.m_mat, mask.m_vec, accum, u.m_vec,
                         row_indices, col_index, replace_flag);
+
+        GRB_LOG_VERBOSE("C out: " << C.m_mat);
+        GRB_LOG_FN_END("assign - 4.3.7.3 - column variant");
     }
 
     // 4.3.7.4: assign - row variant
@@ -477,6 +513,15 @@ namespace GraphBLAS
                        SequenceT             const &col_indices,
                        bool                         replace_flag = false)
     {
+        GRB_LOG_FN_BEGIN("assign - 4.3.7.4 - row variant");
+        GRB_LOG_VERBOSE("C in: " << C.m_mat);
+        GRB_LOG_VERBOSE("mask in: " << mask.m_vec);
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE("u in: " << u.m_vec);
+        GRB_LOG_VERBOSE("row_index in:" << row_index);
+        GRB_LOG_VERBOSE("col_indices in:" << col_indices);
+        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+
         check_size_ncols(mask, C, "assign(row): C.ncols != Mask.ncols");
         check_size_nindices(u, col_indices,
                             "assign(row): u.size != |col_indices|");
@@ -485,6 +530,9 @@ namespace GraphBLAS
 
         backend::assign(C.m_mat, mask.m_vec, accum, u.m_vec,
                         row_index, col_indices, replace_flag);
+
+        GRB_LOG_VERBOSE("C out: " << C.m_mat);
+        GRB_LOG_FN_END("assign - 4.3.7.4 - row variant");
     }
 
     // 4.3.7.5: assign: Constant vector variant
@@ -504,12 +552,23 @@ namespace GraphBLAS
                        SequenceT            const   &indices,
                        bool                          replace_flag = false)
     {
+        GRB_LOG_FN_BEGIN("assign - 4.3.7.5 - constant vector variant");
+        GRB_LOG_VERBOSE("w in: " << w.m_vec);
+        GRB_LOG_VERBOSE("Mask in: " << mask.m_vec);
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE("val in: " << val);
+        GRB_LOG_VERBOSE("indices in:" << indices);
+        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+
         check_size_size(w, mask, "assign(const vec): w.size != mask.size");
         check_nindices_within_size(indices, w,
                                    "assign(const vec): indicies.size !<= w.size");
 
         backend::assign_constant(w.m_vec, mask.m_vec, accum, val, indices,
                                  replace_flag);
+
+        GRB_LOG_VERBOSE("w out: " << w.m_vec);
+        GRB_LOG_FN_END("assign - 4.3.7.5 - constant vector variant");
     };
 
     // 4.3.7.6: assign: Constant Matrix Variant
@@ -531,6 +590,15 @@ namespace GraphBLAS
                        ColSequenceT   const &col_indices,
                        bool                  replace_flag = false)
     {
+        GRB_LOG_FN_BEGIN("assign - 4.3.7.6 - constant matrix variant");
+        GRB_LOG_VERBOSE("C in: " << C.m_mat);
+        GRB_LOG_VERBOSE("Mask in: " << Mask.m_mat);
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE("val in: " << val);
+        GRB_LOG_VERBOSE("row_indices in:" << row_indices);
+        GRB_LOG_VERBOSE("col_indices in:" << col_indices);
+        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+
         check_nrows_nrows(C, Mask, "assign(const mat): C.nrows != Mask.nrows");
         check_ncols_ncols(C, Mask, "assign(const mat): C.ncols != Mask.ncols");
 
@@ -542,6 +610,9 @@ namespace GraphBLAS
             "assign(const mat): indicies.size !<= C.ncols");
         backend::assign_constant(C.m_mat, Mask.m_mat, accum, val,
                                  row_indices, col_indices, replace_flag);
+
+        GRB_LOG_VERBOSE("C out: " << C.m_mat);
+        GRB_LOG_FN_END("assign - 4.3.7.6 - constant matrix variant");
     }
 
     //************************************************************************

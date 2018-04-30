@@ -22,6 +22,7 @@
 #include <vector>
 #include <iterator>
 #include <iostream>
+#include <type_traits>
 #include <graphblas/types.hpp>
 #include <graphblas/exceptions.hpp>
 #include <graphblas/algebra.hpp>
@@ -49,7 +50,7 @@ namespace GraphBLAS
         void compute_outin_mapping(SequenceT const & Indices,
                       std::vector<std::pair<IndexType, IndexType>> &inputOrder)
         {
-            // Walk the Indices generating generating pairs showing the existing
+            // Walk the Indices generating pairs of the mapping
             auto index_it = Indices.begin();
             IndexType idx = 0;
             while (index_it != Indices.end())
@@ -248,46 +249,40 @@ namespace GraphBLAS
                            SequenceT    const &indices,
                            bool                replace_flag)
         {
-            // execution error checks
+            GRB_LOG_VERBOSE("reference backend - 4.3.7.1");
+
             check_index_array_content(indices, w.size(),
                                       "assign(std vec): indices content check");
-
-            //std::cerr << ">>> w <<< " << std::endl;
-            //std::cerr << w << std::endl;
-
-            //std::cerr << ">>> u <<< " << std::endl;
-            //std::cerr << u << std::endl;
 
             std::vector<std::pair<IndexType, IndexType>> oi_pairs;
             compute_outin_mapping(setupIndices(indices, u.size()), oi_pairs);
 
             // =================================================================
-            // Expand to T
+            // Expand to t
             typedef typename UVectorT::ScalarType UScalarType;
             std::vector<std::tuple<IndexType, UScalarType> > t;
             auto u_contents(u.getContents());
             vectorExpand(t, u_contents, oi_pairs);
 
-            //std::cerr << ">>> t <<< " << std::endl;
-            //std::cerr << t << std::endl;
+            GRB_LOG_VERBOSE("t: " << t);
 
             // =================================================================
-            // Accumulate into Z
-            typedef typename WVectorT::ScalarType WScalarType;
-            std::vector<std::tuple<IndexType, WScalarType> > z;
+            // Accumulate into z
+
+            typedef typename std::conditional<std::is_same<AccumT, NoAccumulate>::value,
+                    typename WVectorT::ScalarType,
+                    typename AccumT::result_type>::type ZScalarType;
+
+            std::vector<std::tuple<IndexType, ZScalarType> > z;
             ewise_or_stencil_opt_accum_1D(z, w, t,
                                           setupIndices(indices, u.size()),
                                           accum);
 
-            //std::cerr << ">>> z <<< " << std::endl;
-            //std::cerr << z << std::endl;
+            GRB_LOG_VERBOSE("z: " << z);
 
             // =================================================================
-            // Copy Z into the final output considering mask and replace
+            // Copy z into the final output considering mask and replace
             write_with_opt_mask_1D(w, z, mask, replace_flag);
-
-            //std::cerr << ">>> w <<< " << std::endl;
-            //std::cerr << w << std::endl;
         }
 
         //=====================================================================
@@ -309,6 +304,7 @@ namespace GraphBLAS
                            bool                    replace = false)
         {
             typedef typename CMatrixT::ScalarType  CScalarType;
+            typedef typename AMatrixT::ScalarType  AScalarType;
 
             // execution error checks
             check_index_array_content(row_indices, C.nrows(),
@@ -316,45 +312,32 @@ namespace GraphBLAS
             check_index_array_content(col_indices, C.ncols(),
                                       "assign(std mat): col_indices content check");
 
-            // This basically "expands" A into C
-            //std::cerr << ">>> A in <<< " << std::endl;
-            //std::cerr << A << std::endl;
-
-            // dimension checks in the front end
-            //std::cerr << ">>> C in <<< " << std::endl;
-            //std::cerr << C << std::endl;
-
-            //std::cerr << ">>> Mask <<< " << std::endl;
-            //std::cerr << mask << std::endl;
-
             // =================================================================
             // Expand to T
-            /// @todo Should this be AScalarType?
-            LilSparseMatrix<CScalarType> T(C.nrows(), C.ncols());
+            LilSparseMatrix<AScalarType> T(C.nrows(), C.ncols());
             matrixExpand(T, A,
                          setupIndices(row_indices, A.nrows()),
                          setupIndices(col_indices, A.ncols()));
 
-            //std::cerr << ">>> T <<< " << std::endl;
-            //std::cerr << T << std::endl;
+            GRB_LOG_VERBOSE("T: " << T);
 
             // =================================================================
             // Accumulate into Z
-            LilSparseMatrix<CScalarType> Z(C.nrows(), C.ncols());
+            typedef typename std::conditional<std::is_same<AccumT, NoAccumulate>::value,
+                    typename CMatrixT::ScalarType,
+                    typename AccumT::result_type>::type ZScalarType;
+
+            LilSparseMatrix<ZScalarType> Z(C.nrows(), C.ncols());
             ewise_or_stencil_opt_accum(Z, C, T,
                                        setupIndices(row_indices, A.nrows()),
                                        setupIndices(col_indices, A.ncols()),
                                        accum);
 
-            //std::cerr << ">>> Z <<< " << std::endl;
-            //std::cerr << Z << std::endl;
+            GRB_LOG_VERBOSE("Z:  " << Z);
 
             // =================================================================
             // Copy Z into the final output considering mask and replace
             write_with_opt_mask(C, Z, mask, replace);
-
-            //std::cerr << ">>> C <<< " << std::endl;
-            //std::cerr << C << std::endl;
         }
 
         //=====================================================================
@@ -374,14 +357,15 @@ namespace GraphBLAS
                            IndexType               col_index,
                            bool                    replace = false)
         {
+            // IMPLEMENTATION NOTE: This function does not directly follow our
+            // standard implementation method.  We leverage a different assign
+            // variant and wrap it's contents with this.
+
             // execution error checks
             check_index_array_content(row_indices, C.nrows(),
                                       "assign(col): indices content check");
 
-            /// @todo copying the column of C out might not be the most performant
-            /// way of accomplishing this
-
-            // extract the column of C matrix
+            // EXTRACT the column of C matrix
             typedef typename CMatrixT::ScalarType CScalarType;
             auto C_col(C.getCol(col_index));
             Vector<CScalarType> c_vec(C.nrows());
@@ -390,10 +374,11 @@ namespace GraphBLAS
                 c_vec.setElement(std::get<0>(it), std::get<1>(it));
             }
 
-            // ----------- standard vector variant -----------
+            // ----------- standard vector variant 4.3.7.1 -----------
             assign(c_vec, mask, accum, u, row_indices, replace);
+            // ----------- standard vector variant 4.3.7.1 -----------
 
-            // replace the column of C matrix
+            // REPLACE the column of C matrix
             std::vector<IndexType>   ic(c_vec.nvals());
             std::vector<CScalarType> vc(c_vec.nvals());
             c_vec.extractTuples(ic.begin(), vc.begin());
@@ -425,14 +410,15 @@ namespace GraphBLAS
                            SequenceT        const &col_indices,
                            bool                    replace = false)
         {
+            // IMPLEMENTATION NOTE: This function does not directly follow our
+            // standard implementation method.  We leverage a different assign
+            // variant and wrap it's contents with this.
+
             // execution error checks
             check_index_array_content(col_indices, C.ncols(),
                                       "assign(row): indices content check");
 
-            /// @todo copying the row of C out might not be the most performant
-            /// way of accomplishing this
-
-            // extract the row of C matrix
+            // EXTRACT the row of C matrix
             typedef typename CMatrixT::ScalarType CScalarType;
             auto C_row(C.getRow(row_index));
             Vector<CScalarType> c_vec(C.ncols());
@@ -441,10 +427,11 @@ namespace GraphBLAS
                 c_vec.setElement(std::get<0>(it), std::get<1>(it));
             }
 
-            // ----------- standard vector variant -----------
+            // ----------- standard vector variant 4.3.7.1 -----------
             assign(c_vec, mask, accum, u, col_indices, replace);
+            // ----------- standard vector variant 4.3.7.1 -----------
 
-            // replace the row of C matrix
+            // REPLACE the row of C matrix
             std::vector<IndexType>   ic(c_vec.nvals());
             std::vector<CScalarType> vc(c_vec.nvals());
             c_vec.extractTuples(ic.begin(), vc.begin());
@@ -489,8 +476,11 @@ namespace GraphBLAS
             // =================================================================
             // Accumulate into Z
 
-            typedef typename WVectorT::ScalarType WScalarType;
-            std::vector<std::tuple<IndexType, WScalarType> > z;
+            typedef typename std::conditional<std::is_same<AccumT, NoAccumulate>::value,
+                    typename WVectorT::ScalarType,
+                    typename AccumT::result_type>::type ZScalarType;
+
+            std::vector<std::tuple<IndexType, ZScalarType> > z;
             ewise_or_stencil_opt_accum_1D(z, w, t,
                                           setupIndices(indices, w.size()),
                                           accum);
@@ -501,6 +491,8 @@ namespace GraphBLAS
         }
 
         //======================================================================
+        //======================================================================
+
         // 4.3.7.6: assign: Constant Matrix Variant
         template<typename CMatrixT,
                  typename MaskT,
@@ -524,12 +516,6 @@ namespace GraphBLAS
             check_index_array_content(col_indices, C.ncols(),
                                       "assign(std mat): col_indices content check");
 
-            //std::cerr << ">>> C in <<< " << std::endl;
-            //std::cerr << C << std::endl;
-
-            //std::cerr << ">>> Mask <<< " << std::endl;
-            //std::cerr << mask << std::endl;
-
             // =================================================================
             // Assign spots in T
             LilSparseMatrix<ValueT> T(C.nrows(), C.ncols());
@@ -537,11 +523,13 @@ namespace GraphBLAS
                            setupIndices(row_indices, C.nrows()),
                            setupIndices(col_indices, C.ncols()));
 
-            //std::cerr << ">>> T <<< " << std::endl;
-            //std::cerr << T << std::endl;
+            GRB_LOG_VERBOSE("T: " << T);
 
             // =================================================================
             // Accumulate into Z
+            typedef typename std::conditional<std::is_same<AccumT, NoAccumulate>::value,
+                    typename CMatrixT::ScalarType,
+                    typename AccumT::result_type>::type ZScalarType;
 
             LilSparseMatrix<CScalarType> Z(C.nrows(), C.ncols());
             ewise_or_stencil_opt_accum(Z, C, T,
@@ -549,15 +537,11 @@ namespace GraphBLAS
                                        setupIndices(col_indices, C.ncols()),
                                        accum);
 
-            //std::cerr << ">>> Z <<< " << std::endl;
-            //std::cerr << Z << std::endl;
+            GRB_LOG_VERBOSE("Z: " << Z);
 
             // =================================================================
             // Copy Z into the final output considering mask and replace
             write_with_opt_mask(C, Z, Mask, replace_flag);
-
-            //std::cerr << ">>> C <<< " << std::endl;
-            //std::cerr << C << std::endl;
         }
     }
 }
