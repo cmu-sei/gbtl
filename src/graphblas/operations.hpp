@@ -130,12 +130,12 @@ namespace GraphBLAS
     {
         GRB_LOG_FN_BEGIN("mxv - 4.3.3 - matrix-vector multiply");
 
-        GRB_LOG_VERBOSE("w in :" << w);
-        GRB_LOG_VERBOSE("Mask in : " << mask);
+        GRB_LOG_VERBOSE("w in :" << w.m_vec);
+        GRB_LOG_VERBOSE("Mask in : " << mask.m_vec);
         GRB_LOG_VERBOSE_ACCUM(accum);
         GRB_LOG_VERBOSE_OP(op);
-        GRB_LOG_VERBOSE("A in :" << A);
-        GRB_LOG_VERBOSE("u in :" << u);
+        GRB_LOG_VERBOSE("A in :" << A.m_mat);
+        GRB_LOG_VERBOSE("u in :" << u.m_vec);
         GRB_LOG_VERBOSE_REPLACE(replace_flag);
 
         check_size_size(w, mask, "mxv: w.size != mask.size");
@@ -144,6 +144,7 @@ namespace GraphBLAS
 
         backend::mxv(w.m_vec, mask.m_vec, accum, op, A.m_mat, u.m_vec,
                      replace_flag);
+        GRB_LOG_FN_END("mxv - 4.3.3 - matrix-vector multiply");
     }
 
 
