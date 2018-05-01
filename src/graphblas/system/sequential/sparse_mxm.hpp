@@ -59,18 +59,11 @@ namespace GraphBLAS
                         bool                 replace_flag = false)
         {
             // Dimension checks happenned in front end
-            GRB_LOG_FN_BEGIN("SEQUENTIAL mxm - 4.3.1 - matrix-matrix multiply");
-
-            GRB_LOG_VERBOSE("C in :" << C);
-            GRB_LOG_VERBOSE("Mask in : " << M);
-            GRB_LOG_VERBOSE_ACCUM(accum);
-            GRB_LOG_VERBOSE_OP(op);
-            GRB_LOG_VERBOSE("A in :" << A);
-            GRB_LOG_VERBOSE("B in :" << B);
-            GRB_LOG_VERBOSE_REPLACE(replace_flag);
-
             IndexType nrow_A(A.nrows());
             IndexType ncol_B(B.ncols());
+            //Frontend checks the dimensions, but use C explicitly
+            IndexType nrow_C(C.nrows());
+            IndexType ncol_C(C.ncols());
 
             typedef typename SemiringT::result_type D3ScalarType;
             typedef typename AMatrixT::ScalarType AScalarType;
@@ -121,7 +114,11 @@ namespace GraphBLAS
             // =================================================================
             // Accumulate into Z
 
-            LilSparseMatrix<CScalarType> Z(nrow_A, ncol_B);
+            typedef typename std::conditional<std::is_same<AccumT, NoAccumulate>::value,
+                                              D3ScalarType,
+                                              typename AccumT::result_type>::type ZScalarType;
+            LilSparseMatrix<ZScalarType> Z(nrow_C, ncol_C);
+
             ewise_or_opt_accum(Z, C, T, accum);
 
             GRB_LOG_VERBOSE("Z: " << Z);
@@ -130,8 +127,6 @@ namespace GraphBLAS
             // Copy Z into the final output considering mask and replace
             write_with_opt_mask(C, Z, M, replace_flag);
 
-            GRB_LOG_VERBOSE("C (Result): " << C);
-            GRB_LOG_FN_END("SEQUENTIAL mxm - 4.3.1 - matrix-matrix multiply");
         } // mxm
 
 
