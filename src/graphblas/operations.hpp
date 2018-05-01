@@ -114,6 +114,16 @@ namespace GraphBLAS
                     UVectorT  const &u,
                     bool             replace_flag = false)
     {
+        GRB_LOG_FN_BEGIN("mxv - 4.3.3 - matrix-vector multiply");
+
+        GRB_LOG_VERBOSE("w in :" << w);
+        GRB_LOG_VERBOSE("Mask in : " << mask);
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE_OP(op);
+        GRB_LOG_VERBOSE("A in :" << A);
+        GRB_LOG_VERBOSE("u in :" << u);
+        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+        
         check_size_size(w, mask, "mxv: w.size != mask.size");
         check_size_nrows(w, A, "mxv: w.size != A.nrows");
         check_size_ncols(u, A, "mxv: u.size != A.ncols");

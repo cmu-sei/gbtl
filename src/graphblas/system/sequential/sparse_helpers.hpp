@@ -393,8 +393,8 @@ namespace GraphBLAS
                     else if (v2_idx > v1_idx)
                     {
                         //std::cerr << "Copying v1, Advancing v1_it" << std::endl;
-                        // @todo: Should these static_cast??
-                        ans.push_back(std::make_tuple(v1_idx, v1_val));
+                        ans.push_back(std::make_tuple(v1_idx, 
+                                                      static_cast<D3>(v1_val)));
                         ++v1_it;
                     }
                     else
