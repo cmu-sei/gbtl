@@ -29,6 +29,7 @@
 #include <graphblas/Vector.hpp>
 #include <graphblas/indices.hpp>
 
+#include <graphblas/detail/logging.h>
 #include <graphblas/detail/config.hpp>
 #include <graphblas/detail/checks.hpp>
 
@@ -136,7 +137,7 @@ namespace GraphBLAS
         GRB_LOG_VERBOSE("A in :" << A);
         GRB_LOG_VERBOSE("u in :" << u);
         GRB_LOG_VERBOSE_REPLACE(replace_flag);
-        
+
         check_size_size(w, mask, "mxv: w.size != mask.size");
         check_size_nrows(w, A, "mxv: w.size != A.nrows");
         check_size_ncols(u, A, "mxv: u.size != A.ncols");
@@ -279,12 +280,23 @@ namespace GraphBLAS
                         SequenceT      const &indices,
                         bool                  replace_flag = false)
     {
+        GRB_LOG_FN_BEGIN("extract - 4.3.6.1 - standard vector variant");
+
+        GRB_LOG_VERBOSE("w:    " << w.m_vec);
+        GRB_LOG_VERBOSE("mask: " << mask.m_vec);
+        GRB_LOG_VERBOSE("u:    " << u.m_vec);
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE("indices: " << indices);
+        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+
         check_size_size(w, mask, "extract(std vec): w.size != mask.size");
         check_size_nindices(w, indices,
                             "extract(std vec): w.size != indicies.size");
 
         backend::extract(w.m_vec, mask.m_vec, accum, u.m_vec,
                          indices, replace_flag);
+
+        GRB_LOG_FN_END("extract - 4.3.6.1 - standard vector variant");
     }
 
     // 4.3.6.2 - extract: Standard matrix variant
@@ -303,6 +315,16 @@ namespace GraphBLAS
                         ColSequenceT      const &col_indices,
                         bool                     replace_flag = false)
     {
+        GRB_LOG_FN_BEGIN("extract - 4.3.6.2 - standard matrix variant");
+
+        GRB_LOG_VERBOSE("C: " << C.m_mat);
+        GRB_LOG_VERBOSE("Mask: " << Mask.m_mat);
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE("A: " << A.m_mat);
+        GRB_LOG_VERBOSE("row_indices: " << row_indices);
+        GRB_LOG_VERBOSE("col_indices: " << col_indices);
+        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+
         check_nrows_nrows(C, Mask, "extract(std mat): C.nrows != Mask.nrows");
         check_ncols_ncols(C, Mask, "extract(std mat): C.ncols != Mask.ncols");
         check_nrows_nindices(C, row_indices,
@@ -312,6 +334,8 @@ namespace GraphBLAS
 
         backend::extract(C.m_mat, Mask.m_mat, accum, A.m_mat,
                          row_indices, col_indices, replace_flag);
+
+        GRB_LOG_FN_END("SEQUENTIAL extract - 4.3.6.2 - standard matrix variant");
     }
 
     // 4.3.6.3 - extract: Column (and row) variant
@@ -330,6 +354,16 @@ namespace GraphBLAS
                         IndexType                   col_index,
                         bool                        replace_flag = false)
     {
+        GRB_LOG_FN_BEGIN("extract - 4.3.6.3 - column (and row) variant");
+
+        GRB_LOG_VERBOSE("w:    " << w.m_vec);
+        GRB_LOG_VERBOSE("mask: " << mask.m_vec);
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE("A:    " << A.m_mat);
+        GRB_LOG_VERBOSE("row_indices: " << row_indices);
+        GRB_LOG_VERBOSE("col_index:   " << col_index);
+        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+
         check_size_size(w, mask, "extract(col): w.size != mask.size");
         check_size_nindices(w, row_indices,
                             "extract(col): w.size != row_indicies");
@@ -338,6 +372,7 @@ namespace GraphBLAS
 
         backend::extract(w.m_vec, mask.m_vec, accum, A.m_mat, row_indices,
                          col_index, replace_flag);
+        GRB_LOG_FN_END("extract - 4.3.6.3 - column (and row) variant");
     }
 
     //************************************************************************
