@@ -221,15 +221,15 @@ BOOST_AUTO_TEST_CASE(k_truss2_test_basic)
     // build the adjacency matrix
     Matrix<T> A(num_nodes, num_nodes);
     A.build(i.begin(), j.begin(), val.begin(), val.size());
-    print_matrix(std::cout, A, "Adjaceney");
+    //print_matrix(std::cout, A, "Adjaceney");
 
     auto Aout3 = k_truss2(A, 3);
     BOOST_CHECK_EQUAL(Aout3.nvals(), 10); // only removed one edge
-    print_matrix(std::cout, Aout3, "Adjacency (k=3)");
+    //print_matrix(std::cout, Aout3, "Adjacency (k=3)");
 
     auto Aout4 = k_truss2(Aout3, 4);
     BOOST_CHECK_EQUAL(Aout4.nvals(), 0); // removed all edges
-    print_matrix(std::cout, Aout4, "Adjacency (k=4)");
+    //print_matrix(std::cout, Aout4, "Adjacency (k=4)");
 
     auto Atmp4 = k_truss2(A, 4);
     BOOST_CHECK_EQUAL(Atmp4.nvals(), 0); // removed all edges
@@ -311,29 +311,46 @@ BOOST_AUTO_TEST_CASE(k_truss2_test_peer_pressure1)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(k_truss2_test_peer_pressure2)
 {
-    GraphBLAS::IndexArrayType i = {   0, 0, 0, 0,
-                                      1, 1, 1,
-                                   2,    2, 2,
-                                   3, 3,    3,
-                                   4, 4,    4,
-                                   5, 5,    5, 5,
-                                   6, 6,
-                                   7, 7, 7   };
-    GraphBLAS::IndexArrayType j = {   2, 3, 4, 6,
-                                      2, 3, 7,
-                                   0,    4, 6,
-                                   0, 1,    5,
-                                   0, 2,    6,
-                                   1, 3,    6, 7,
-                                   0, 4,
-                                   1, 3, 5   };
 
-    IndexType num_edges = i.size();
-    IndexType num_nodes = 8;
+    GraphBLAS::IndexArrayType i = {0, 0, 0, 0,
+                                   1, 1, 1, 1,
+                                   2, 2, 2, 2,
+                                   3, 3, 3, 3,
+                                   4, 4, 4, 4,
+                                   5, 5, 5, 5, 5,
+                                   6, 6, 6,
+                                   7, 7, 7, 7};
+    GraphBLAS::IndexArrayType j = {0, 2, 3, 6,
+                                   1, 2, 3, 7,
+                                   0, 2, 4, 6,
+                                   0, 1, 3, 5,
+                                   0, 2, 4, 6,
+                                   1, 3, 5, 6, 7,
+                                   0, 4, 6,
+                                   1, 3, 5, 7};
+
+    // create an adjacency matrix equivalent to the incidence matrix produced in a previous test
+    IndexType num_nodes = 0;
+    IndexArrayType iv, jv;
+    // count edges in upper triangle of A
+    for (IndexType ix = 0; ix < i.size(); ++ix)
+    {
+        if (i[ix] < j[ix])
+        {
+            iv.push_back(i[ix]); jv.push_back(j[ix]);
+            iv.push_back(j[ix]); jv.push_back(i[ix]);  //reverse link
+
+            num_nodes = std::max(num_nodes, i[ix]);
+            num_nodes = std::max(num_nodes, j[ix]);
+        }
+    }
+    ++num_nodes;
+    IndexType num_edges(iv.size());
     std::vector<int> v(num_edges, 1);
 
     Matrix<int> A(num_nodes, num_nodes);
-    A.build(i.begin(), j.begin(), v.begin(), num_edges);
+    A.build(iv.begin(), jv.begin(), v.begin(), num_edges);
+    //print_matrix(std::cout, A, "graph");
 
     auto Aout3 = algorithms::k_truss2(A, 3);
     //print_matrix(std::cout, Aout3, "3-truss edges");
