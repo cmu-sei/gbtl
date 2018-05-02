@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(extract_test_no_accum)
 
     extract(C, NoMask(), NoAccumulate(), A, vect_I, vect_J);
 
-    BOOST_CHECK_EQUAL(c, result);
+    BOOST_CHECK_EQUAL(C, result);
 }
 
 //****************************************************************************
