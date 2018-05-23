@@ -302,6 +302,16 @@ namespace GraphBLAS
                                   AMatrixT  const &A,
                                   bool             replace_flag);
 
+        // 4.3.10: transpose
+        template<typename CMatrixT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename AMatrixT>
+        friend inline void transpose(CMatrixT       &C,
+                                     MaskT    const &Mask,
+                                     AccumT          accum,
+                                     AMatrixT const &A,
+                                     bool            replace_flag);
     };
 
 } // end namespace GraphBLAS

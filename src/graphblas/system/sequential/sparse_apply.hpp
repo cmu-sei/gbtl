@@ -159,8 +159,12 @@ namespace GraphBLAS
 
             // =================================================================
             // Accumulate T via C into Z
+            typedef typename std::conditional<
+                std::is_same<AccumT, NoAccumulate>::value,
+                AScalarType,
+                typename AccumT::result_type>::type  ZScalarType;
 
-            LilSparseMatrix<CScalarType> Z(nrows, ncols);
+            LilSparseMatrix<ZScalarType> Z(nrows, ncols);
             ewise_or_opt_accum(Z, C, T, accum);
 
             //std::cerr << ">>> Z <<< " << std::endl;

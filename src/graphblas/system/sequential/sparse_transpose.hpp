@@ -60,12 +60,6 @@ namespace GraphBLAS
             IndexType nrows(A.nrows());
             IndexType ncols(A.ncols());
 
-            //std::cerr << ">>> C in <<< " << std::endl;
-            //std::cerr << C << std::endl;
-
-            //std::cerr << ">>> A in <<< " << std::endl;
-            //std::cerr << A << std::endl;
-
             // =================================================================
             // Apply the unary operator from A into T.
             // This is really the guts of what makes this special.
@@ -87,24 +81,25 @@ namespace GraphBLAS
                 }
             }
 
-            //std::cerr << ">>> T <<< " << std::endl;
-            //std::cerr << T << std::endl;
+            GRB_LOG_VERBOSE("T: " << T);
 
             // =================================================================
             // Accumulate T via C into Z
+            typedef typename std::conditional<
+                std::is_same<AccumT, NoAccumulate>::value,
+                AScalarType,
+                typename AccumT::result_type>::type  ZScalarType;
 
-            LilSparseMatrix<CScalarType> Z(ncols, nrows);
+            LilSparseMatrix<ZScalarType> Z(ncols, nrows);
             ewise_or_opt_accum(Z, C, T, accum);
 
-            //std::cerr << ">>> Z <<< " << std::endl;
-            //std::cerr << Z << std::endl;
+            GRB_LOG_VERBOSE("Z: " << Z);
 
             // =================================================================
             // Copy Z into the final output considering mask and replace
             write_with_opt_mask(C, Z, mask, replace_flag);
 
-            //std::cerr << ">>> C <<< " << std::endl;
-            //std::cerr << C << std::endl;
+            GRB_LOG_VERBOSE("C (Result): " << C);
         }
 
     }
@@ -112,4 +107,4 @@ namespace GraphBLAS
 
 
 
-#endif //GB_SEQUENTIAL_SPARSE_APPLY_HPP
+#endif //GB_SEQUENTIAL_SPARSE_TRANSPOSE_HPP

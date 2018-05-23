@@ -13,8 +13,9 @@
  * permission@sei.cmu.edu for more information.  DM-0002659
  */
 
-#include <iostream>
+#define GRAPHBLAS_LOGGING_LEVEL 0
 
+#include <iostream>
 #include <graphblas/graphblas.hpp>
 
 using namespace GraphBLAS;
@@ -121,6 +122,236 @@ BOOST_AUTO_TEST_CASE(test_single_argument_transpose_nonsquare)
     BOOST_CHECK_EQUAL(r, 4);
     BOOST_CHECK_EQUAL(c, 3);
     BOOST_CHECK_EQUAL(result, answer);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_transpose_noaccum)
+{
+    // Build input matrix
+    // | 1 1 - - |T
+    // | 1 2 2 - |
+    // | - 2 3 3 |
+
+    std::vector<std::vector<double>> Atmp = {{1, 1, 0},
+                                             {1, 2, 2},
+                                             {0, 2, 3},
+                                             {0, 0, 3}};
+    Matrix<double, DirectedMatrixTag> A(Atmp, 0.0);
+
+    std::vector<std::vector<double>> Ctmp = {{9, 9, 9, 9},
+                                             {9, 9, 9, 9},
+                                             {9, 9, 9, 9}};
+
+    std::vector<std::vector<uint8_t>> mask = {{1, 1, 1, 1},
+                                              {0, 1, 1, 1},
+                                              {0, 0, 0, 1}};
+    Matrix<uint8_t> M(mask, 0);
+    {
+        std::vector<std::vector<double>> ans = {{1, 1, 0, 0},
+                                                {1, 2, 2, 0},
+                                                {0, 2, 3, 3}};
+        Matrix<double, DirectedMatrixTag> answer(ans, 0.);
+
+        Matrix<double, DirectedMatrixTag> C(Ctmp, 0);
+        transpose(C,
+                  NoMask(),
+                  NoAccumulate(),
+                  A);
+        BOOST_CHECK_EQUAL(C, answer);
+    }
+
+    // Mask, replace
+    {
+        std::vector<std::vector<double>> ans = {{1, 1, 0, 0},
+                                                {0, 2, 2, 0},
+                                                {0, 0, 0, 3}};
+        Matrix<double, DirectedMatrixTag> answer(ans, 0.);
+
+        Matrix<double, DirectedMatrixTag> C(Ctmp, 0);
+        transpose(C,
+                  M,
+                  NoAccumulate(),
+                  A,
+                  true);
+        BOOST_CHECK_EQUAL(C, answer);
+    }
+
+    // Mask, merge
+    {
+        std::vector<std::vector<double>> ans = {{1, 1, 0, 0},
+                                                {9, 2, 2, 0},
+                                                {9, 9, 9, 3}};
+        Matrix<double, DirectedMatrixTag> answer(ans, 0.);
+
+        Matrix<double, DirectedMatrixTag> C(Ctmp, 0);
+        transpose(C,
+                  M,
+                  NoAccumulate(),
+                  A,
+                  false);
+        BOOST_CHECK_EQUAL(C, answer);
+    }
+
+    // scmp(Mask), replace
+    {
+        std::vector<std::vector<double>> ans = {{0, 0, 0, 0},
+                                                {1, 0, 0, 0},
+                                                {0, 2, 3, 0}};
+        Matrix<double, DirectedMatrixTag> answer(ans, 0.);
+
+        Matrix<double, DirectedMatrixTag> C(Ctmp, 0);
+        transpose(C,
+                  complement(M),
+                  NoAccumulate(),
+                  A,
+                  true);
+        BOOST_CHECK_EQUAL(C, answer);
+    }
+
+    // scmp(Mask), merge
+    {
+        std::vector<std::vector<double>> ans = {{9, 9, 9, 9},
+                                                {1, 9, 9, 9},
+                                                {0, 2, 3, 9}};
+        Matrix<double, DirectedMatrixTag> answer(ans, 0.);
+
+        Matrix<double, DirectedMatrixTag> C(Ctmp, 0);
+        transpose(C,
+                  complement(M),
+                  NoAccumulate(),
+                  A,
+                  false);
+        BOOST_CHECK_EQUAL(C, answer);
+    }
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_transpose_plus_accum)
+{
+    // Build input matrix
+    // | 1 1 - - |T
+    // | 1 2 2 - |
+    // | - 2 3 3 |
+
+    std::vector<std::vector<double>> Atmp = {{1, 1, 0},
+                                             {1, 2, 2},
+                                             {0, 2, 3},
+                                             {0, 0, 3}};
+    Matrix<double, DirectedMatrixTag> A(Atmp, 0.0);
+
+    std::vector<std::vector<double>> Ctmp = {{9, 9, 9, 9},
+                                             {9, 9, 9, 9},
+                                             {9, 9, 9, 9}};
+
+    std::vector<std::vector<uint8_t>> mask = {{1, 1, 1, 1},
+                                              {0, 1, 1, 1},
+                                              {0, 0, 0, 1}};
+    Matrix<uint8_t> M(mask, 0);
+    {
+        std::vector<std::vector<double>> ans = {{10, 10,  9,  9},
+                                                {10, 11, 11,  9},
+                                                { 9, 11, 12, 12}};
+        Matrix<double, DirectedMatrixTag> answer(ans, 0.);
+
+        Matrix<double, DirectedMatrixTag> C(Ctmp, 0);
+        transpose(C,
+                  NoMask(),
+                  Plus<double>(),
+                  A);
+        BOOST_CHECK_EQUAL(C, answer);
+    }
+
+    // Mask, replace
+    {
+        std::vector<std::vector<double>> ans = {{10, 10,  9,  9},
+                                                {0,  11, 11,  9},
+                                                {0,   0,  0, 12}};
+        Matrix<double, DirectedMatrixTag> answer(ans, 0.);
+
+        Matrix<double, DirectedMatrixTag> C(Ctmp, 0);
+        transpose(C,
+                  M,
+                  Plus<double>(),
+                  A,
+                  true);
+        BOOST_CHECK_EQUAL(C, answer);
+    }
+
+    // Mask, merge
+    {
+        std::vector<std::vector<double>> ans = {{10, 10, 9,  9},
+                                                { 9, 11, 11, 9},
+                                                { 9, 9,  9, 12}};
+        Matrix<double, DirectedMatrixTag> answer(ans, 0.);
+
+        Matrix<double, DirectedMatrixTag> C(Ctmp, 0);
+        transpose(C,
+                  M,
+                  Plus<double>(),
+                  A,
+                  false);
+        BOOST_CHECK_EQUAL(C, answer);
+    }
+
+    // scmp(Mask), replace
+    {
+        std::vector<std::vector<double>> ans = {{ 0,  0,  0, 0},
+                                                {10,  0,  0, 0},
+                                                { 9, 11, 12, 0}};
+        Matrix<double, DirectedMatrixTag> answer(ans, 0.);
+
+        Matrix<double, DirectedMatrixTag> C(Ctmp, 0);
+        transpose(C,
+                  complement(M),
+                  Plus<double>(),
+                  A,
+                  true);
+        BOOST_CHECK_EQUAL(C, answer);
+    }
+
+    // scmp(Mask), merge
+    {
+        std::vector<std::vector<double>> ans = {{ 9,  9,  9, 9},
+                                                {10,  9,  9, 9},
+                                                { 9, 11, 12, 9}};
+        Matrix<double, DirectedMatrixTag> answer(ans, 0.);
+
+        Matrix<double, DirectedMatrixTag> C(Ctmp, 0);
+        transpose(C,
+                  complement(M),
+                  Plus<double>(),
+                  A,
+                  false);
+        BOOST_CHECK_EQUAL(C, answer);
+    }
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_transpose_nonsquare_trans)
+{
+    // Build input matrix
+    // | 1 1 - - |T
+    // | 1 2 2 - |
+    // | - 2 3 3 |
+
+    std::vector<std::vector<double>> Atmp = {{1, 1, 0, 0},
+                                             {1, 2, 2, 0},
+                                             {0, 2, 3, 3}};
+    Matrix<double, DirectedMatrixTag> A(Atmp, 0.0);
+
+    {
+        std::vector<std::vector<double>> ans = {{1, 1, 0, 0},
+                                                {1, 2, 2, 0},
+                                                {0, 2, 3, 3}};
+        Matrix<double, DirectedMatrixTag> answer(ans, 0.);
+
+        Matrix<double, DirectedMatrixTag> C(3, 4);
+        transpose(C,
+                  NoMask(),
+                  NoAccumulate(),
+                  transpose(A));
+        BOOST_CHECK_EQUAL(C, answer);
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

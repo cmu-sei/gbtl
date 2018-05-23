@@ -633,10 +633,21 @@ namespace GraphBLAS
                       UVectorT              const &u,
                       bool                         replace_flag = false)
     {
+        GRB_LOG_FN_BEGIN("apply - 4.3.8.1 - vector variant");
+        GRB_LOG_VERBOSE("w in: " << w.m_vec);
+        GRB_LOG_VERBOSE("mask in: " << mask.m_vec);
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE_OP(op);
+        GRB_LOG_VERBOSE("u in: " << u.m_vec);
+        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+
         check_size_size(w, mask, "apply(vec): w.size != mask.size");
         check_size_size(w, u, "apply(vec): w.size != u.size");
 
         backend::apply(w.m_vec, mask.m_vec, accum, op, u.m_vec, replace_flag);
+
+        GRB_LOG_VERBOSE("w out: " << w.m_vec);
+        GRB_LOG_FN_END("assign - 4.3.8.1 - vector variant");
     }
 
     // 4.3.8.2: matrix variant
@@ -653,12 +664,24 @@ namespace GraphBLAS
                       AMatrixT              const &A,
                       bool                         replace_flag = false)
     {
+
+        GRB_LOG_FN_BEGIN("apply - 4.3.8.2 - matrix variant");
+        GRB_LOG_VERBOSE("C in: " << C.m_mat);
+        GRB_LOG_VERBOSE("Mask in: " << Mask.m_mat);
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE_OP(op);
+        GRB_LOG_VERBOSE("A in: " << A);
+        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+
         check_ncols_ncols(C, Mask, "apply(mat): C.ncols != Mask.ncols");
         check_nrows_nrows(C, Mask, "apply(mat): C.nrows != Mask.nrows");
         check_ncols_ncols(C, A, "apply(mat): C.ncols != A.ncols");
         check_nrows_nrows(C, A, "apply(mat): C.nrows != A.nrows");
 
         backend::apply(C.m_mat, Mask.m_mat, accum, op, A.m_mat, replace_flag);
+
+        GRB_LOG_VERBOSE("C out: " << C.m_mat);
+        GRB_LOG_FN_END("apply - 4.3.8.2 - matrix variant");
     };
 
     //************************************************************************
@@ -733,12 +756,22 @@ namespace GraphBLAS
                           AMatrixT const &A,
                           bool            replace_flag = false)
     {
+        GRB_LOG_FN_BEGIN("transpose - 4.3.10");
+        GRB_LOG_VERBOSE("C in: " << C.m_mat);
+        GRB_LOG_VERBOSE("Mask in: " << Mask.m_mat);
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE("A in: " << A.m_mat);
+        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+
         check_nrows_nrows(C, Mask, "transpose: C.nrows != Mask.nrows");
         check_ncols_ncols(C, Mask, "transpose: C.ncols != Mask.ncols");
         check_ncols_nrows(C, A, "transpose: C.ncols != A.nrows");
         check_ncols_nrows(A, C, "transpose: A.ncols != C.nrows");
 
         backend::transpose(C.m_mat, Mask.m_mat, accum, A.m_mat, replace_flag);
+
+        GRB_LOG_VERBOSE("C out: " << C.m_mat);
+        GRB_LOG_FN_END("transpose - 4.3.10");
     }
 
     //************************************************************************

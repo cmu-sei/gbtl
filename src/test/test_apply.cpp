@@ -13,6 +13,8 @@
  * permission@sei.cmu.edu for more information.  DM-0002659
  */
 
+#define GRAPHBLAS_LOGGING_LEVEL 0
+
 #include <functional>
 #include <iostream>
 #include <vector>
