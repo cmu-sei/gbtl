@@ -325,7 +325,7 @@ namespace GraphBLAS
             typedef typename WVectorT::ScalarType WScalarType;
             typedef std::vector<std::tuple<IndexType,WScalarType> > CColType;
 
-            GRB_LOG_VERBOSE("U inside: " << u);
+            GRB_LOG_VERBOSE("u inside: " << u);
 
             // =================================================================
             // Extract to T
@@ -336,7 +336,7 @@ namespace GraphBLAS
                           setupIndices(indices,
                                        std::min(w.size(), u.size())));
 
-            GRB_LOG_VERBOSE("T: " << t);
+            GRB_LOG_VERBOSE("t: " << t);
 
             // =================================================================
             // Accumulate into Z
@@ -348,13 +348,13 @@ namespace GraphBLAS
             std::vector<std::tuple<IndexType, ZScalarType> > z;
             ewise_or_opt_accum_1D(z, w, t, accum);
 
-            GRB_LOG_VERBOSE("Z: " << z);
+            GRB_LOG_VERBOSE("z: " << z);
 
             // =================================================================
             // Copy Z into the final output considering mask and replace
             write_with_opt_mask_1D(w, z, mask, replace_flag);
 
-            GRB_LOG_VERBOSE("W (Result): " << w);
+            GRB_LOG_VERBOSE("w (Result): " << w);
         };
 
         //**********************************************************************

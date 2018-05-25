@@ -13,7 +13,7 @@
  * permission@sei.cmu.edu for more information.  DM-0002659
  */
 
-#define GRAPHBLAS_LOGGING_LEVEL 0
+#define GRAPHBLAS_LOGGING_LEVEL 2
 
 #include <functional>
 #include <iostream>
@@ -92,6 +92,102 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_bad_dimension)
                    A)),
             DimensionException);
     }
+}
+
+//****************************************************************************
+
+BOOST_AUTO_TEST_CASE(sparse_apply_matrix_nomask_noaccum)
+{
+    std::vector<std::vector<double>> matA = {{8, 1, 6},
+                                             {3, 5, 7},
+                                             {4, 9, 0}};
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(matA, 0);
+
+    std::vector<std::vector<double>> matC = {{1, 2, 3},
+                                             {4, 5, 6},
+                                             {7, 8, 0}};
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mC(matC, 0);
+
+    std::vector<std::vector<double>> matAnswer = {{-8, -1, -6},
+                                                  {-3, -5, -7},
+                                                  {-4, -9,  0}};
+
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 0);
+
+    GraphBLAS::apply(mC,
+                     GraphBLAS::NoMask(),
+                     GraphBLAS::NoAccumulate(),
+                     GraphBLAS::AdditiveInverse<double>(),
+                     mA);
+
+    BOOST_CHECK_EQUAL(mC, answer);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_apply_matrix_mask_merge_noaccum)
+{
+    std::vector<std::vector<double>> matA = {{8, 1, 6},
+                                             {3, 5, 7},
+                                             {4, 9, 0}};
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(matA, 0);
+
+    std::vector<std::vector<double>> matC = {{1, 2, 3},
+                                             {4, 5, 6},
+                                             {7, 8, 0}};
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mC(matC, 0);
+
+
+    std::vector<std::vector<bool>> matMask = {{true, false, false},
+                                              {true, true,  false,},
+                                              {true, true,  true}};
+    GraphBLAS::Matrix<bool, GraphBLAS::DirectedMatrixTag> mask(matMask, false);
+
+    std::vector<std::vector<double>> matAnswer = {{-8, 2,  3},
+                                                  {-3, -5, 6},
+                                                  {-4, -9, 0}};
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 0);
+
+    GraphBLAS::apply(mC,
+                     mask,
+                     GraphBLAS::NoAccumulate(),
+                     GraphBLAS::AdditiveInverse<double>(),
+                     mA);
+
+    BOOST_CHECK_EQUAL(mC, answer);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_apply_matrix_mask_replace_noaccum)
+{
+    std::vector<std::vector<double>> matA = {{8, 1, 6},
+                                             {3, 5, 7},
+                                             {4, 9, 0}};
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(matA, 0);
+
+    std::vector<std::vector<double>> matC = {{1, 2, 3},
+                                             {4, 5, 6},
+                                             {7, 8, 0}};
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mC(matC, 0);
+
+
+    std::vector<std::vector<bool>> matMask = {{true, false, false},
+                                              {true, true,  false,},
+                                              {true, true,  true}};
+    GraphBLAS::Matrix<bool, GraphBLAS::DirectedMatrixTag> mask(matMask, false);
+
+    std::vector<std::vector<double>> matAnswer = {{-8, 0,  0},
+                                                  {-3, -5, 0},
+                                                  {-4, -9, 0}};
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 0);
+
+    GraphBLAS::apply(mC,
+                     mask,
+                     GraphBLAS::NoAccumulate(),
+                     GraphBLAS::AdditiveInverse<double>(),
+                     mA,
+                     true);
+
+    BOOST_CHECK_EQUAL(mC, answer);
 }
 
 //****************************************************************************
@@ -196,6 +292,34 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_noaccum)
               false);
         BOOST_CHECK_EQUAL(C, answer);
     }
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_apply_matrix_nomask_plus_accum)
+{
+    std::vector<std::vector<double>> matA = {{8, 1, 6},
+                                             {3, 5, 7},
+                                             {4, 9, 0}};
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(matA, 0);
+
+    std::vector<std::vector<double>> matC = {{1, 2, 3},
+                                             {4, 5, 6},
+                                             {7, 8, 0}};
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mC(matC, 0);
+
+    std::vector<std::vector<double>> matAnswer = {{-7, 1, -3},
+                                                  { 1, 0, -1},
+                                                  { 3,-1,  1337}};
+    // NOTE: The accum results in an explicit zero
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 1337);
+
+    GraphBLAS::apply(mC,
+                     GraphBLAS::NoMask(),
+                     GraphBLAS::Plus<double>(),
+                     GraphBLAS::AdditiveInverse<double>(),
+                     mA);
+
+    BOOST_CHECK_EQUAL(mC, answer);
 }
 
 //****************************************************************************
@@ -375,7 +499,7 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_bad_dimension)
 {
     // | - 2 3 3 |
 
-    // Build some sparse matrices.
+    // Build some sparse vectors.
     std::vector<double> v = {0, 2, 3, 3};
     Vector<double> u(v, 0.0);
 
@@ -401,6 +525,77 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_bad_dimension)
                    u)),
             DimensionException);
     }
+}
+
+//****************************************************************************
+
+BOOST_AUTO_TEST_CASE(sparse_apply_vector_nomask_noaccum)
+{
+    std::vector<double> vecA = {8, 0, 6, 0};
+    GraphBLAS::Vector<double> vA(vecA, 0);
+
+    std::vector<double> vecC = {1, 2, 0, 0};
+    GraphBLAS::Vector<double> vC(vecC, 0);
+
+    std::vector<double> vecAnswer = {-8, 0, -6,  0};
+    GraphBLAS::Vector<double> answer(vecAnswer, 0);
+
+    GraphBLAS::apply(vC,
+                     GraphBLAS::NoMask(),
+                     GraphBLAS::NoAccumulate(),
+                     GraphBLAS::AdditiveInverse<double>(),
+                     vA);
+
+    BOOST_CHECK_EQUAL(vC, answer);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_apply_vector_mask_merge_noaccum)
+{
+    std::vector<double> vecA = {8, 8, 0, 0, 6, 6, 0, 0};
+    GraphBLAS::Vector<double> vA(vecA, 0);
+
+    std::vector<double> vecC = {1, 1, 2, 2, 0, 0, 0, 0};
+    GraphBLAS::Vector<double> vC(vecC, 0);
+
+    std::vector<bool> vecMask = {true, false, true, false, true, false, true, false};
+    GraphBLAS::Vector<bool> mask(vecMask, false);
+
+    std::vector<double> vecAnswer = {-8, 1, 0, 2, -6, 0, 0, 0};
+    GraphBLAS::Vector<double> answer(vecAnswer, 0);
+
+    GraphBLAS::apply(vC,
+                     mask,
+                     GraphBLAS::NoAccumulate(),
+                     GraphBLAS::AdditiveInverse<double>(),
+                     vA);
+
+    BOOST_CHECK_EQUAL(vC, answer);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_apply_vector_mask_replace_noaccum)
+{
+    std::vector<double> vecA = {8, 8, 0, 0, 6, 6, 0, 0};
+    GraphBLAS::Vector<double> vA(vecA, 0);
+
+    std::vector<double> vecC = {1, 1, 2, 2, 0, 0, 0, 0};
+    GraphBLAS::Vector<double> vC(vecC, 0);
+
+    std::vector<bool> vecMask = {true, false, true, false, true, false, true, false};
+    GraphBLAS::Vector<bool> mask(vecMask, false);
+
+    std::vector<double> vecAnswer = {-8, 0, 0, 0, -6, 0, 0, 0};
+    GraphBLAS::Vector<double> answer(vecAnswer, 0);
+
+    GraphBLAS::apply(vC,
+                     mask,
+                     GraphBLAS::NoAccumulate(),
+                     GraphBLAS::AdditiveInverse<double>(),
+                     vA,
+                     true);
+
+    BOOST_CHECK_EQUAL(vC, answer);
 }
 
 //****************************************************************************
@@ -488,6 +683,28 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_noaccum)
     }
 }
 
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_apply_vector_accum)
+{
+    std::vector<double> vecA = {8, 0, 6, 0};
+    GraphBLAS::Vector<double> vA(vecA, 0);
+
+    std::vector<double> vecC = {8, 2, 0, 0};
+    GraphBLAS::Vector<double> vC(vecC, 0);
+
+    // NOTE: The accum results in an explicit zero
+    std::vector<double> vecAnswer = {0, 2, -6,  666};
+    GraphBLAS::Vector<double> answer(vecAnswer, 666);
+
+    GraphBLAS::apply(vC,
+                     GraphBLAS::NoMask(),
+                     GraphBLAS::Plus<double>(),
+                     GraphBLAS::AdditiveInverse<double>(),
+                     vA);
+
+    BOOST_CHECK_EQUAL(vC, answer);
+}
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(apply_stdvec_test_plus_accum)

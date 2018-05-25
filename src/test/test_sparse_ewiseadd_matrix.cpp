@@ -13,7 +13,11 @@
  * permission@sei.cmu.edu for more information.  DM-0002659
  */
 
+#define GRAPHBLAS_LOGGING_LEVEL 0
+
 #include <graphblas/graphblas.hpp>
+
+using namespace GraphBLAS;
 
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE sparse_ewiseadd_matrix_suite
@@ -104,6 +108,53 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_bad_dimensions)
                              GraphBLAS::NoAccumulate(),
                              GraphBLAS::Plus<double>(), mB, mB)),
         GraphBLAS::DimensionException);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_bad_dimensions2)
+{
+    IndexArrayType i_m1    = {0, 0, 1, 1, 2, 2, 3};
+    IndexArrayType j_m1    = {0, 1, 1, 2, 2, 3, 3};
+    std::vector<double> v_m1 = {1, 2, 2, 3, 3, 4, 4};
+    Matrix<double, DirectedMatrixTag> m1(4, 4);
+    m1.build(i_m1, j_m1, v_m1);
+
+    IndexArrayType i_m2    = {0, 0, 1, 1, 1, 2, 2};
+    IndexArrayType j_m2    = {0, 1, 0, 1, 2, 1, 2};
+    std::vector<double> v_m2 = {2, 2, 1, 4, 4, 4, 6};
+    Matrix<double, DirectedMatrixTag> m2(3, 4);
+    m2.build(i_m2, j_m2, v_m2);
+
+    Matrix<double, DirectedMatrixTag> m3(4, 4);
+
+    BOOST_CHECK_THROW(
+        eWiseAdd(m3, NoMask(), NoAccumulate(),
+                 Plus<double>(), m1, m2),
+        DimensionException);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_eWiseadd_matrix_normal)
+{
+    // Build some sparse matrices.
+    IndexArrayType i_mat    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_mat    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v_mat = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
+    Matrix<double, DirectedMatrixTag> mat(4, 4);
+    mat.build(i_mat, j_mat, v_mat);
+
+    Matrix<double, DirectedMatrixTag> m3(4, 4);
+
+    IndexArrayType i_answer    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_answer    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v_answer = {2, 2, 2, 4, 4, 4, 6, 6, 6, 8};
+    Matrix<double, DirectedMatrixTag> answer(4, 4);
+    answer.build(i_answer, j_answer, v_answer);
+
+    // Now try simple's ewiseapply.
+    eWiseAdd(m3, NoMask(), NoAccumulate(), Plus<double>(), mat, mat);
+
+    BOOST_CHECK_EQUAL(m3, answer);
 }
 
 //****************************************************************************

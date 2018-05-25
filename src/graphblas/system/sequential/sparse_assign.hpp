@@ -473,17 +473,22 @@ namespace GraphBLAS
             for (auto it = seq.begin(); it != seq.end(); ++it)
                 t.push_back(std::make_tuple(*it, val));
 
+            GRB_LOG_VERBOSE("t: " << t);
+
             // =================================================================
             // Accumulate into Z
 
-            typedef typename std::conditional<std::is_same<AccumT, NoAccumulate>::value,
-                    typename WVectorT::ScalarType,
-                    typename AccumT::result_type>::type ZScalarType;
+            typedef typename std::conditional<
+                std::is_same<AccumT, NoAccumulate>::value,
+                typename WVectorT::ScalarType,
+                typename AccumT::result_type>::type ZScalarType;
 
             std::vector<std::tuple<IndexType, ZScalarType> > z;
             ewise_or_stencil_opt_accum_1D(z, w, t,
                                           setupIndices(indices, w.size()),
                                           accum);
+
+            GRB_LOG_VERBOSE("z: " << z);
 
             // =================================================================
             // Copy Z into the final output, w, considering mask and replace

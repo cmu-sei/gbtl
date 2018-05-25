@@ -79,11 +79,12 @@ namespace GraphBLAS
 
             // =================================================================
             // Accumulate into Z
-            /// @todo Do we need a type generator for z: D(w) if no accum,
-            /// or D3(accum). I think that output type should be equivalent, but
-            /// still need to work the proof.
-            typedef typename WVectorT::ScalarType WScalarType;
-            std::vector<std::tuple<IndexType, WScalarType> > z;
+            // Type generator for z: D3(accum), or D(w) if no accum.
+            typedef typename std::conditional<
+                std::is_same<AccumT, NoAccumulate>::value,
+                D3ScalarType,
+                typename AccumT::result_type>::type  ZScalarType;
+            std::vector<std::tuple<IndexType, ZScalarType> > z;
             ewise_or_opt_accum_1D(z, w, t, accum);
 
             // =================================================================

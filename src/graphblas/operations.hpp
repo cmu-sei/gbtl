@@ -64,7 +64,6 @@ namespace GraphBLAS
                     bool              replace_flag = false)
     {
         GRB_LOG_FN_BEGIN("mxm - 4.3.1 - matrix-matrix multiply");
-
         GRB_LOG_VERBOSE("C in :" << C.m_mat);
         GRB_LOG_VERBOSE("Mask in : " << Mask.m_mat);
         GRB_LOG_VERBOSE_ACCUM(accum);
@@ -103,12 +102,24 @@ namespace GraphBLAS
                     AMatrixT   const &A,
                     bool              replace_flag = false)
     {
+        GRB_LOG_FN_BEGIN("mxv - 4.3.2 - vector-matrix multiply");
+        GRB_LOG_VERBOSE("w in :" << w.m_vec);
+        GRB_LOG_VERBOSE("mask in : " << mask.m_vec);
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE_OP(op);
+        GRB_LOG_VERBOSE("u in :" << u.m_vec);
+        GRB_LOG_VERBOSE("A in :" << A.m_mat);
+        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+
         check_size_size(w, mask, "vxm: w.size != mask.size");
         check_size_ncols(w, A, "vxm: w.size != A.ncols");
         check_size_nrows(u, A, "vxm: u.size != A.nrows");
 
         backend::vxm(w.m_vec, mask.m_vec, accum, op, u.m_vec, A.m_mat,
                      replace_flag);
+
+        GRB_LOG_VERBOSE("w out :" << w.m_vec);
+        GRB_LOG_FN_END("mxm - 4.3.2 - vector-matrix multiply");
     }
 
     //************************************************************************
@@ -129,7 +140,6 @@ namespace GraphBLAS
                     bool             replace_flag = false)
     {
         GRB_LOG_FN_BEGIN("mxv - 4.3.3 - matrix-vector multiply");
-
         GRB_LOG_VERBOSE("w in :" << w.m_vec);
         GRB_LOG_VERBOSE("Mask in : " << mask.m_vec);
         GRB_LOG_VERBOSE_ACCUM(accum);
@@ -144,6 +154,7 @@ namespace GraphBLAS
 
         backend::mxv(w.m_vec, mask.m_vec, accum, op, A.m_mat, u.m_vec,
                      replace_flag);
+        GRB_LOG_VERBOSE("w out :" << w.m_vec);
         GRB_LOG_FN_END("mxv - 4.3.3 - matrix-vector multiply");
     }
 
@@ -172,12 +183,24 @@ namespace GraphBLAS
                           VVectorT              const &v,
                           bool                         replace_flag = false)
     {
+        GRB_LOG_FN_BEGIN("eWiseMult - 4.3.4.1 - element-wise vector multiply");
+        GRB_LOG_VERBOSE("w in :" << w.m_vec);
+        GRB_LOG_VERBOSE("Mask in : " << mask.m_vec);
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE_OP(op);
+        GRB_LOG_VERBOSE("u in :" << u.m_vec);
+        GRB_LOG_VERBOSE("v in :" << v.m_vec);
+        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+
         check_size_size(w, mask, "eWiseMult(vec): w.size != mask.size");
         check_size_size(w, u, "eWiseMult(vec): w.size != u.size");
         check_size_size(u, v, "eWiseMult(vec): u.size != v.size");
 
         backend::eWiseMult(w.m_vec, mask.m_vec, accum, op, u.m_vec, v.m_vec,
                            replace_flag);
+
+        GRB_LOG_VERBOSE("w out :" << w.m_vec);
+        GRB_LOG_FN_END("eWiseMult - 4.3.4.1 - element-wise vector multiply");
     }
 
     // 4.3.4.2: Element-wise multiplication - matrix variant
@@ -196,6 +219,15 @@ namespace GraphBLAS
                           BMatrixT              const &B,
                           bool                         replace_flag = false)
     {
+        GRB_LOG_FN_BEGIN("eWiseMult - 4.3.4.2 - element-wise matrix multiply");
+        GRB_LOG_VERBOSE("C in :" << C.m_mat);
+        GRB_LOG_VERBOSE("Mask in : " << Mask.m_mat);
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE_OP(op);
+        GRB_LOG_VERBOSE("A in :" << A.m_mat);
+        GRB_LOG_VERBOSE("B in :" << B.m_mat);
+        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+
         check_ncols_ncols(C, Mask, "eWiseMult(mat): C.ncols != Mask.ncols");
         check_nrows_nrows(C, Mask, "eWiseMult(mat): C.nrows != Mask.nrows");
         check_ncols_ncols(C, A, "eWiseMult(mat): C.ncols != A.ncols");
@@ -205,6 +237,9 @@ namespace GraphBLAS
 
         backend::eWiseMult(C.m_mat, Mask.m_mat, accum, op, A.m_mat, B.m_mat,
                            replace_flag);
+
+        GRB_LOG_VERBOSE("C out :" << C.m_mat);
+        GRB_LOG_FN_END("eWiseMult - 4.3.4.2 - element-wise matrix multiply");
     }
 
     //************************************************************************
@@ -229,12 +264,24 @@ namespace GraphBLAS
                          VVectorT              const &v,
                          bool                         replace_flag = false)
     {
+        GRB_LOG_FN_BEGIN("eWiseAdd - 4.3.5.1 - element-wise vector addition");
+        GRB_LOG_VERBOSE("w in :" << w.m_vec);
+        GRB_LOG_VERBOSE("Mask in : " << mask.m_vec);
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE_OP(op);
+        GRB_LOG_VERBOSE("u in :" << u.m_vec);
+        GRB_LOG_VERBOSE("v in :" << v.m_vec);
+        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+
         check_size_size(w, mask, "eWiseAdd(vec): w.size != mask.size");
         check_size_size(w, u, "eWiseAdd(vec): w.size != u.size");
         check_size_size(u, v, "eWiseAdd(vec): u.size != v.size");
 
         backend::eWiseAdd(w.m_vec, mask.m_vec, accum, op, u.m_vec, v.m_vec,
                           replace_flag);
+
+        GRB_LOG_VERBOSE("w out :" << w.m_vec);
+        GRB_LOG_FN_END("eWiseAdd - 4.3.5.1 - element-wise vector addition");
     }
 
     // 4.3.5.2: Element-wise addition - matrix variant
@@ -253,6 +300,15 @@ namespace GraphBLAS
                          BMatrixT              const &B,
                          bool                         replace_flag = false)
     {
+        GRB_LOG_FN_BEGIN("eWiseAdd - 4.3.5.2 - element-wise matrix addition");
+        GRB_LOG_VERBOSE("C in :" << C.m_mat);
+        GRB_LOG_VERBOSE("Mask in : " << Mask.m_mat);
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE_OP(op);
+        GRB_LOG_VERBOSE("A in :" << A.m_mat);
+        GRB_LOG_VERBOSE("B in :" << B.m_mat);
+        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+
         check_ncols_ncols(C, Mask, "eWiseAdd(mat): C.ncols != Mask.ncols");
         check_nrows_nrows(C, Mask, "eWiseAdd(mat): C.nrows != Mask.nrows");
         check_ncols_ncols(C, A, "eWiseAdd(mat): C.ncols != A.ncols");
@@ -262,6 +318,9 @@ namespace GraphBLAS
 
         backend::eWiseAdd(C.m_mat, Mask.m_mat, accum, op, A.m_mat, B.m_mat,
                           replace_flag);
+
+        GRB_LOG_VERBOSE("C out :" << C.m_mat);
+        GRB_LOG_FN_END("eWiseAdd - 4.3.5.2 - element-wise matrix addition");
     }
 
     //************************************************************************
@@ -702,10 +761,21 @@ namespace GraphBLAS
                        AMatrixT  const &A,
                        bool             replace_flag = false)
     {
+        GRB_LOG_FN_BEGIN("reduce - 4.3.9.1 - matrix to vector variant");
+        GRB_LOG_VERBOSE("w in: " << w.m_vec);
+        GRB_LOG_VERBOSE("mask in: " << mask.m_vec);
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE_OP(op);
+        GRB_LOG_VERBOSE("A in: " << A.m_mat);
+        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+
         check_size_size(w, mask, "reduce(mat2vec): w.size != mask.size");
         check_size_nrows(w, A, "reduce(mat2vec): w.size != A.nrows");
 
         backend::reduce(w.m_vec, mask.m_vec, accum, op, A.m_mat, replace_flag);
+
+        GRB_LOG_VERBOSE("w out: " << w.m_vec);
+        GRB_LOG_FN_END("reduce - 4.3.9.1 - matrix to vector variant");
     }
 
     // 4.3.9.2: reduce - vector-scalar variant
@@ -720,11 +790,21 @@ namespace GraphBLAS
             MonoidT                            op,
             Vector<UScalarT, UTagsT...> const &u)
     {
+        GRB_LOG_FN_BEGIN("reduce - 4.3.9.2 - vector to scalar variant");
+        GRB_LOG_VERBOSE("val in: " << val);
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE_OP(op);
+        GRB_LOG_VERBOSE("u in: " << u.m_vec);
+
         backend::reduce_vector_to_scalar(val, accum, op, u.m_vec);
+
+        GRB_LOG_VERBOSE("val out: " << val);
+        GRB_LOG_FN_END("reduce - 4.3.9.2 - vector to scalar variant");
     }
 
     // 4.3.9.3: reduce - matrix-scalar variant
-    /// @todo Won't support transpose of matrix here.
+    /// @note We aren't supporting transpose of matrix here. The spec does not
+    /// require support.
     template<typename ValueT,
              typename AccumT,
              typename MonoidT, // monoid only
@@ -735,10 +815,17 @@ namespace GraphBLAS
             AccumT                             accum,
             MonoidT                            op,
             Matrix<AScalarT, ATagsT...> const &A)
-    //  @TODO: We can probably support tranpose using the enable_if and tag
-    //    typename std::enable_if<std::is_same<matrix_tag, typename AMatrixT::tag_type>::value, int>::type = 0>
     {
+        GRB_LOG_FN_BEGIN("reduce - 4.3.9.3 - matrix to scalar variant");
+        GRB_LOG_VERBOSE("val in: " << val);
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE_OP(op);
+        GRB_LOG_VERBOSE("A in: " << A.m_mat);
+
         backend::reduce_matrix_to_scalar(val, accum, op, A.m_mat);
+
+        GRB_LOG_VERBOSE("val out: " << val);
+        GRB_LOG_FN_END("reduce - 4.3.9.3 - matrix to scalar variant");
     }
 
     //************************************************************************

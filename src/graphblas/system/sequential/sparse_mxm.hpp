@@ -113,10 +113,10 @@ namespace GraphBLAS
 
             // =================================================================
             // Accumulate into Z
-
-            typedef typename std::conditional<std::is_same<AccumT, NoAccumulate>::value,
-                                              D3ScalarType,
-                                              typename AccumT::result_type>::type ZScalarType;
+            typedef typename std::conditional<
+                std::is_same<AccumT, NoAccumulate>::value,
+                D3ScalarType,
+                typename AccumT::result_type>::type ZScalarType;
             LilSparseMatrix<ZScalarType> Z(nrow_C, ncol_C);
 
             ewise_or_opt_accum(Z, C, T, accum);
@@ -128,11 +128,7 @@ namespace GraphBLAS
             write_with_opt_mask(C, Z, M, replace_flag);
 
         } // mxm
-
-
     } // backend
-
-
 } // GraphBLAS
 
 #endif

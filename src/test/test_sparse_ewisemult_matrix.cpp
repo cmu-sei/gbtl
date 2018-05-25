@@ -13,7 +13,11 @@
  * permission@sei.cmu.edu for more information.  DM-0002659
  */
 
+#define GRAPHBLAS_LOGGING_LEVEL 0
+
 #include <graphblas/graphblas.hpp>
+
+using namespace GraphBLAS;
 
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE sparse_ewisemult_matrix_suite
@@ -80,37 +84,30 @@ namespace
 //****************************************************************************
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(test_ewisemult_matrix_overwrite_replace)
+BOOST_AUTO_TEST_CASE(test_ewisemult_matrix_bad_dimensions)
 {
-    using T = int32_t;
+    IndexArrayType i_m1    = {0, 0, 1, 1, 2, 2, 3};
+    IndexArrayType j_m1    = {0, 1, 1, 2, 2, 3, 3};
+    std::vector<double> v_m1 = {1, 2, 2, 3, 3, 4, 4};
+    Matrix<double, DirectedMatrixTag> m1(4, 4);
+    m1.build(i_m1, j_m1, v_m1);
 
-    std::vector<std::vector<T> > tmp1_dense = {{0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0}};
-    std::vector<std::vector<T> >  a10_dense = {{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1}};
+    IndexArrayType i_m2    = {0, 0, 1, 1, 1, 2, 2};
+    IndexArrayType j_m2    = {0, 1, 0, 1, 2, 1, 2};
+    std::vector<double> v_m2 = {2, 2, 1, 4, 4, 4, 6};
+    Matrix<double, DirectedMatrixTag> m2(3, 4);
+    m2.build(i_m2, j_m2, v_m2);
 
-    GraphBLAS::Matrix<T> tmp1(tmp1_dense, 0);
-    GraphBLAS::Matrix<T> a10(a10_dense, 0);
+    Matrix<double, DirectedMatrixTag> m3(4, 4);
 
-    /// TODO: it did not work to assign back into tmp1 (got extra '1')
-    GraphBLAS::eWiseMult(tmp1, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<T>(),
-                         tmp1, a10, true);
-    BOOST_CHECK_EQUAL(0, tmp1.nvals());
-
-    GraphBLAS::print_matrix(std::cerr, tmp1, "tmp1");
-
-    T delta(0);
-    GraphBLAS::reduce(delta, GraphBLAS::Plus<T>(),
-                      GraphBLAS::PlusMonoid<T>(), tmp1);
-
-    BOOST_CHECK_EQUAL(delta, 0);
+    BOOST_CHECK_THROW(
+        eWiseMult(m3, NoMask(), NoAccumulate(),
+                  Times<double>(), m1, m2),
+        DimensionException);
 }
 
 //****************************************************************************
-// Tests without mask
-//****************************************************************************
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(test_ewisemult_matrix_bad_dimensions)
+BOOST_AUTO_TEST_CASE(test_ewisemult_matrix_bad_dimensions2)
 {
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(m3x3_dense, 0.);
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m4x3_dense, 0.);
@@ -133,6 +130,59 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_matrix_bad_dimensions)
                               GraphBLAS::Times<double>(), mB, mB)),
         GraphBLAS::DimensionException);
 }
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_ewisemult_matrix_overwrite_replace)
+{
+    using T = int32_t;
+
+    std::vector<std::vector<T> > tmp1_dense = {{0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0}};
+    std::vector<std::vector<T> >  a10_dense = {{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1}};
+
+    GraphBLAS::Matrix<T> tmp1(tmp1_dense, 0);
+    GraphBLAS::Matrix<T> a10(a10_dense, 0);
+
+    GraphBLAS::eWiseMult(tmp1, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                         GraphBLAS::Times<T>(),
+                         tmp1, a10, true);
+    BOOST_CHECK_EQUAL(0, tmp1.nvals());
+
+    //GraphBLAS::print_matrix(std::cerr, tmp1, "tmp1");
+
+    T delta(0);
+    GraphBLAS::reduce(delta, GraphBLAS::Plus<T>(),
+                      GraphBLAS::PlusMonoid<T>(), tmp1);
+
+    BOOST_CHECK_EQUAL(delta, 0);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_ewisemult_normal)
+{
+    IndexArrayType i_mat    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_mat    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v_mat = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
+    Matrix<double, DirectedMatrixTag> mat(4, 4);
+    mat.build(i_mat, j_mat, v_mat);
+
+    Matrix<double, DirectedMatrixTag> m3(4, 4);
+
+    IndexArrayType i_answer    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_answer    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v_answer = {1, 1, 1, 4, 4, 4, 9, 9, 9, 16};
+    Matrix<double, DirectedMatrixTag> answer(4, 4);
+    answer.build(i_answer, j_answer, v_answer);
+
+    eWiseMult(m3, NoMask(), NoAccumulate(),
+              Times<double>(),
+              mat, mat);
+
+    BOOST_CHECK_EQUAL(m3, answer);
+}
+
+//****************************************************************************
+// Tests without mask
+//****************************************************************************
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewisemult_matrix_reg)
