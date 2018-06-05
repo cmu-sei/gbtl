@@ -301,4 +301,39 @@ BOOST_AUTO_TEST_CASE(new_sssp_gilbert_uint)
     BOOST_CHECK_EQUAL(G_gilbert_res, G_gilbert_answer);
 }
 
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_sssp_delta_step_gilbert_uint)
+{
+    unsigned int const INF = 666666;
+
+    // The correct answer for all starting points (in order by row)
+    //std::vector<std::vector<unsigned int> > G_gilbert_answer_dense =
+    //    {{  0,   1,   2,   1,   2,   3,   2},
+    //     {  3,   0,   2,   2,   1,   2,   1},
+    //     {INF, INF,   0, INF, INF,   1, INF},
+    //     {  1,   2,   1,   0,   3,   2,   3},
+    //     {INF, INF,   2, INF,   0,   1, INF},
+    //     {INF, INF,   1, INF, INF,   0, INF},
+    //     {  2,   3,   1,   1,   1,   2,   0}};
+
+    GraphBLAS::IndexType const SOURCE = 3;
+    std::vector<unsigned int> dense_ans3 =  {3,   4,   1,   0,   5,   2,   7};
+    GraphBLAS::Vector<unsigned int> answer3(dense_ans3);
+
+    GraphBLAS::IndexType const NUM_NODES(7);
+    GraphBLAS::IndexArrayType i = {0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6};
+    GraphBLAS::IndexArrayType j = {1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4};
+    std::vector<unsigned int> v = {1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3};
+    GraphBLAS::Matrix<unsigned int> G_gilbert(NUM_NODES, NUM_NODES);
+    G_gilbert.build(i.begin(), j.begin(), v.begin(), i.size());
+
+    //auto identity_7x7 =
+    //    GraphBLAS::identity<GraphBLAS::Matrix<unsigned int> >(
+    //        NUM_NODES, INF, 0);
+    GraphBLAS::Vector<unsigned int> result(NUM_NODES);
+    sssp_delta_step(G_gilbert, 2U, SOURCE, result);
+
+    BOOST_CHECK_EQUAL(result, answer3);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -153,6 +153,194 @@ namespace algorithms
         }
         // paths holds return value
     }
+
+    //************************************************************************
+    //************************************************************************
+
+    //************************************************************************
+    template <typename ScalarT>
+    struct SelectInRange
+    {
+        typedef bool result_type;
+
+        ScalarT const m_low, m_high;
+
+        SelectInRange(ScalarT low, ScalarT high) : m_low(low), m_high(high) {}
+
+        inline bool operator()(ScalarT input)
+        {
+            if ((m_low <= input) && (input < m_high))
+            {
+                return true;
+            }
+
+            return false;
+        }
+    };
+
+    //************************************************************************
+    template<typename MatrixT>
+    void sssp_delta_step(MatrixT const                                   &graph,
+                         typename MatrixT::ScalarType                     delta,
+                         GraphBLAS::IndexType                             src,
+                         GraphBLAS::Vector<typename MatrixT::ScalarType> &paths)
+    {
+        std::cerr << "delta = " << delta << std::endl;
+        using T = typename MatrixT::ScalarType;
+        GraphBLAS::print_matrix(std::cerr, graph, "A");
+
+        GraphBLAS::IndexType n(graph.nrows());  /// @todo assert #rows=#cols
+        paths.clear();                          /// @todo assert size = #rows
+
+        GraphBLAS::Vector<T>    t(n);
+        GraphBLAS::Vector<T>    tmasked(n);
+        GraphBLAS::Vector<T>    tReq(n);
+
+        GraphBLAS::Vector<bool> tBi(n);
+        GraphBLAS::Vector<bool> tnew(n);
+        GraphBLAS::Vector<bool> tcomp(n);
+        GraphBLAS::Vector<bool> s(n);
+
+        // t = infinity, t[src] = 0
+        t.setElement(src, 0);
+
+        // AL = A .* (A <= delta)
+        MatrixT AL(n, n);
+        GraphBLAS::BinaryOp_Bind2nd<T, GraphBLAS::LessEqual<T>>
+            leq_delta((T)delta);
+        GraphBLAS::apply(AL, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                         leq_delta, graph);
+        GraphBLAS::apply(AL, AL, GraphBLAS::NoAccumulate(),
+                         GraphBLAS::Identity<T>(), graph, true);
+        GraphBLAS::print_matrix(std::cerr, AL, "AL = A(<=delta)");
+
+        // AH = A .* (A > delta)
+        MatrixT AH(n, n);
+        //GraphBLAS::apply(AH, GraphBLAS::complement(AL), GraphBLAS::NoAccumulate(),
+        //                 GraphBLAS::Identity<T>(), A);
+        GraphBLAS::BinaryOp_Bind2nd<T, GraphBLAS::GreaterThan<T>>
+            gt_delta(delta);
+        GraphBLAS::apply(AH, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                         gt_delta, graph);
+        GraphBLAS::apply(AH, AH, GraphBLAS::NoAccumulate(),
+                         GraphBLAS::Identity<T>(), graph, true);
+        GraphBLAS::print_matrix(std::cerr, AH, "AH = A(>delta)");
+
+        // i = 0
+        GraphBLAS::IndexType i(0);
+
+        // t >= i*delta
+        GraphBLAS::BinaryOp_Bind2nd<T, GraphBLAS::GreaterEqual<T>>
+            geq_idelta((T)i*delta);
+        GraphBLAS::apply(tcomp, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                         geq_idelta, t);
+        GraphBLAS::apply(tcomp, tcomp, GraphBLAS::NoAccumulate(),
+                         GraphBLAS::Identity<bool>(), tcomp);
+
+        GraphBLAS::print_vector(std::cerr, tcomp, "tcomp = t(>=i*delta)");
+
+        // while (t >= i*delta) not empty
+        while (tcomp.nvals() > 0)
+        {
+            std::cerr << "************************************************\n";
+            std::cerr << "****** Outer loop: i = " << i << std::endl;
+            // s = 0 (clear)
+            s.clear();
+
+            // tBi = t .* (i*delta <= t < (i+1)*delta)
+            SelectInRange<T> in_range((T)i*delta, ((T)(i + 1))*delta);
+            GraphBLAS::apply(tBi, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                             in_range, t);
+            GraphBLAS::apply(tBi, tBi, GraphBLAS::NoAccumulate(),
+                             GraphBLAS::Identity<T>(), tBi, true);
+
+            while (tBi.nvals() > 0)
+            {
+                std::cerr << "******************* inner *********************\n";
+                GraphBLAS::print_vector(std::cerr, tBi, "tBi = t([i*d, (i+1)*d))");
+                // t .* tBi
+                GraphBLAS::apply(tmasked, tBi, GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::Identity<T>(), t, true);
+                GraphBLAS::print_vector(std::cerr, tmasked, "tm = t<tBi>");
+
+                // tReq = AL' (min.+) (t .* tBi)
+                //GraphBLAS::(tcomp, tBi, GraphBLAS::NoAccumulate(),
+                GraphBLAS::vxm(tReq, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                               GraphBLAS::MinPlusSemiring<T>(), tmasked, AL);
+                GraphBLAS::print_vector(std::cerr, tReq, "tReq = tm*AL");
+
+                // s = s + tBi
+                GraphBLAS::eWiseAdd(s,
+                                    GraphBLAS::NoMask(),
+                                    GraphBLAS::NoAccumulate(),
+                                    GraphBLAS::LogicalOr<bool>(),
+                                    s, tBi);
+                GraphBLAS::print_vector(std::cerr, s, "s += tBi");
+
+                // Don't tBi = 0
+                // tBi.clear();
+
+                // t = min(t, tReq)
+                GraphBLAS::eWiseAdd(t,
+                                    GraphBLAS::NoMask(),
+                                    GraphBLAS::NoAccumulate(),
+                                    GraphBLAS::Min<T>(),
+                                    t, tReq);
+                GraphBLAS::print_vector(std::cerr, t, "t = min(t, tReq)");
+
+                // tnew = i*delta <= t < (i+1)*delta
+                GraphBLAS::apply(tnew,
+                                 GraphBLAS::NoMask(),
+                                 GraphBLAS::NoAccumulate(),
+                                 in_range, t);
+                GraphBLAS::apply(tnew, tnew, GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::Identity<bool>(), tnew, true);
+                GraphBLAS::print_vector(std::cerr, tnew, "tnew = t([i*d, (i+1)*d))");
+                GraphBLAS::apply(tBi, complement(s), GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::Identity<bool>(), tnew, true);
+                GraphBLAS::print_vector(std::cerr, tBi, "tBi = tnew<!s>");
+
+            }
+            std::cerr << "******************** end inner loop *****************\n";
+
+            // (t .* s)
+            GraphBLAS::apply(tmasked, s, GraphBLAS::NoAccumulate(),
+                             GraphBLAS::Identity<T>(), t, true);
+            GraphBLAS::print_vector(std::cerr, tmasked, "tm = t<s>");
+
+            // tReq = AH'(t .* s)
+            GraphBLAS::vxm(tReq,
+                           GraphBLAS::NoMask(),
+                           GraphBLAS::NoAccumulate(),
+                           GraphBLAS::MinPlusSemiring<T>(), tmasked, AH);
+            GraphBLAS::print_vector(std::cerr, tReq, "tReq = tcomp min.+ AH");
+
+            // t = min(t, tReq)
+            GraphBLAS::eWiseAdd(t,
+                                GraphBLAS::NoMask(),
+                                GraphBLAS::NoAccumulate(),
+                                GraphBLAS::Min<T>(), t, tReq);
+            GraphBLAS::print_vector(std::cerr, t, "t = min(t,tReq)");
+
+            ++i;
+
+            // t >= i*delta
+            GraphBLAS::BinaryOp_Bind2nd<T, GraphBLAS::GreaterEqual<T>>
+                geq_idelta((T)i*delta);
+
+            GraphBLAS::apply(tcomp,
+                             GraphBLAS::NoMask(),
+                             GraphBLAS::NoAccumulate(),
+                             geq_idelta, t);
+            GraphBLAS::apply(tcomp, tcomp, GraphBLAS::NoAccumulate(),
+                             GraphBLAS::Identity<bool>(), tcomp, true);
+            GraphBLAS::print_vector(std::cerr, tcomp, "tcomp = t(>=i*delta)");
+        }
+
+        // result = t
+        GraphBLAS::apply(paths, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                         GraphBLAS::Identity<T>(), t);
+    }
 } // algorithms
 
 #endif // GBTL_SSSP_HPP
