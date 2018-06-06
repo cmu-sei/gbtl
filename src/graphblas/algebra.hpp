@@ -63,8 +63,6 @@ namespace GraphBLAS
     //************************************************************************
     // Turn a binary op into a unary op by binding the 2nd term to a constant
     //
-    /// @todo BinaryOps need typedefs for RHS arg so that ConstT
-    /// can be defaulted (and ConstT is moved after BinaryOpT
     template <typename ConstT, typename BinaryOpT>
     struct BinaryOp_Bind2nd
     {
