@@ -98,10 +98,7 @@ namespace GraphBLAS
             // =================================================================
             // Copy Z into the final output considering mask and replace
             write_with_opt_mask(C, Z, mask, replace_flag);
-
-            GRB_LOG_VERBOSE("C (Result): " << C);
         }
-
     }
 }
 

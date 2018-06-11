@@ -264,15 +264,6 @@ namespace algorithms
                            GraphBLAS::MinSelect1stSemiring<GraphBLAS::IndexType,T,GraphBLAS::IndexType>(),
                            wavefront, graph, true);
 
-
-            // We don't need to mask here since we did it in vxm.
-            // Merges new parents in current wavefront with existing parents
-            // parent_list<!parent_list,merge> += wavefront
-            //GraphBLAS::eWiseAdd(visited,
-            //                    GraphBLAS::NoMask(),
-            //                    GraphBLAS::NoAccumulate(),
-            //                    GraphBLAS::LogicalOr<bool>(),
-            //                    visited, wavefront);
             GraphBLAS::apply(parent_list,
                              GraphBLAS::NoMask(),
                              GraphBLAS::Plus<GraphBLAS::IndexType>(),

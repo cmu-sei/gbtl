@@ -58,7 +58,7 @@ namespace GraphBLAS
                         BMatrixT    const   &B,
                         bool                 replace_flag = false)
         {
-            // Dimension checks happenned in front end
+            // Dimension checks happen in front end
             IndexType nrow_A(A.nrows());
             IndexType ncol_B(B.ncols());
             //Frontend checks the dimensions, but use C explicitly

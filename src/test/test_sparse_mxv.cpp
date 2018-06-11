@@ -12,7 +12,7 @@
  * This Program is distributed under a BSD license.  Please see LICENSE file or
  * permission@sei.cmu.edu for more information.  DM-0002659
  */
-#define GRAPHBLAS_LOGGING_LEVEL 2
+#define GRAPHBLAS_LOGGING_LEVEL 0
 
 #include <graphblas/graphblas.hpp>
 
@@ -65,8 +65,8 @@ BOOST_AUTO_TEST_CASE(test_mxv_bad_dimensions)
         (GraphBLAS::mxv(w3,
                         GraphBLAS::NoMask(),
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::ArithmeticSemiring<double>(), 
-                        mB, 
+                        GraphBLAS::ArithmeticSemiring<double>(),
+                        mB,
                         u3)),
         GraphBLAS::DimensionException);
 
@@ -75,8 +75,8 @@ BOOST_AUTO_TEST_CASE(test_mxv_bad_dimensions)
         (GraphBLAS::mxv(w4,
                         GraphBLAS::NoMask(),
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::ArithmeticSemiring<double>(), 
-                        mA, 
+                        GraphBLAS::ArithmeticSemiring<double>(),
+                        mA,
                         u3)),
         GraphBLAS::DimensionException);
 }
@@ -95,16 +95,16 @@ BOOST_AUTO_TEST_CASE(test_mxv_reg)
     GraphBLAS::mxv(result,
                    GraphBLAS::NoMask(),
                    GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), 
-                   mA, 
+                   GraphBLAS::ArithmeticSemiring<double>(),
+                   mA,
                    u3);
     BOOST_CHECK_EQUAL(result, ansA);
 
     GraphBLAS::mxv(result,
                    GraphBLAS::NoMask(),
                    GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), 
-                   mB, 
+                   GraphBLAS::ArithmeticSemiring<double>(),
+                   mB,
                    u4);
     BOOST_CHECK_EQUAL(result, ansB);
 }
@@ -130,8 +130,8 @@ BOOST_AUTO_TEST_CASE(test_mxv_stored_zero_result)
     GraphBLAS::mxv(result,
                    GraphBLAS::NoMask(),
                    GraphBLAS::NoAccumulate(), // Second<int>(),
-                   GraphBLAS::ArithmeticSemiring<int>(), 
-                   mA, 
+                   GraphBLAS::ArithmeticSemiring<int>(),
+                   mA,
                    u);
     BOOST_CHECK_EQUAL(result, answer);
     BOOST_CHECK_EQUAL(result.nvals(), 3);
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE(test_a_transpose)
                    GraphBLAS::NoMask(),
                    GraphBLAS::NoAccumulate(),
                    GraphBLAS::ArithmeticSemiring<double>(),
-                   transpose(mA), 
+                   transpose(mA),
                    u3);
     BOOST_CHECK_EQUAL(result3, ansA);
 
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE(test_a_transpose)
                         GraphBLAS::NoMask(),
                         GraphBLAS::NoAccumulate(),
                         GraphBLAS::ArithmeticSemiring<double>(),
-                        transpose(mB), 
+                        transpose(mB),
                         u4)),
         GraphBLAS::DimensionException);
 
@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(test_a_transpose)
                    GraphBLAS::NoMask(),
                    GraphBLAS::NoAccumulate(),
                    GraphBLAS::ArithmeticSemiring<double>(),
-                   transpose(mB), 
+                   transpose(mB),
                    u3);
     BOOST_CHECK_EQUAL(result4, ansB);
 }
@@ -220,8 +220,8 @@ BOOST_AUTO_TEST_CASE(test_mxv_masked_replace_reg)
         GraphBLAS::mxv(result,
                        m3,
                        GraphBLAS::Second<double>(),
-                       GraphBLAS::ArithmeticSemiring<double>(), 
-                       mA, 
+                       GraphBLAS::ArithmeticSemiring<double>(),
+                       mA,
                        u3,
                        true);
 
@@ -238,8 +238,8 @@ BOOST_AUTO_TEST_CASE(test_mxv_masked_replace_reg)
         GraphBLAS::mxv(result,
                        m3,
                        GraphBLAS::NoAccumulate(),
-                       GraphBLAS::ArithmeticSemiring<double>(), 
-                       mA, 
+                       GraphBLAS::ArithmeticSemiring<double>(),
+                       mA,
                        u3,
                        true);
 
@@ -307,8 +307,8 @@ BOOST_AUTO_TEST_CASE(test_mxv_masked_replace_a_transpose)
     GraphBLAS::mxv(result,
                    mask,
                    GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), 
-                   transpose(A), 
+                   GraphBLAS::ArithmeticSemiring<double>(),
+                   transpose(A),
                    u,
                    true);
 
@@ -333,8 +333,8 @@ BOOST_AUTO_TEST_CASE(test_mxv_masked_bad_dimensions)
         (GraphBLAS::mxv(w3,
                         m4,
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::ArithmeticSemiring<double>(), 
-                        mA, 
+                        GraphBLAS::ArithmeticSemiring<double>(),
+                        mA,
                         u3)),
         GraphBLAS::DimensionException);
 }
@@ -357,8 +357,8 @@ BOOST_AUTO_TEST_CASE(test_mxv_masked_reg)
         GraphBLAS::mxv(result,
                        m3,
                        GraphBLAS::Second<double>(),
-                       GraphBLAS::ArithmeticSemiring<double>(), 
-                       mA, 
+                       GraphBLAS::ArithmeticSemiring<double>(),
+                       mA,
                        u3);
 
         BOOST_CHECK_EQUAL(result.nvals(), 3);
@@ -374,8 +374,8 @@ BOOST_AUTO_TEST_CASE(test_mxv_masked_reg)
         GraphBLAS::mxv(result,
                        m3,
                        GraphBLAS::NoAccumulate(),
-                       GraphBLAS::ArithmeticSemiring<double>(), 
-                       mA, 
+                       GraphBLAS::ArithmeticSemiring<double>(),
+                       mA,
                        u3);
 
         BOOST_CHECK_EQUAL(result.nvals(), 2);
@@ -401,8 +401,8 @@ BOOST_AUTO_TEST_CASE(test_mxv_masked_reg_stored_zero)
         GraphBLAS::mxv(result,
                        m3,
                        GraphBLAS::Second<double>(),
-                       GraphBLAS::ArithmeticSemiring<double>(), 
-                       mA, 
+                       GraphBLAS::ArithmeticSemiring<double>(),
+                       mA,
                        u3);
 
         BOOST_CHECK_EQUAL(result.nvals(), 3);
@@ -418,8 +418,8 @@ BOOST_AUTO_TEST_CASE(test_mxv_masked_reg_stored_zero)
         GraphBLAS::mxv(result,
                        m3,
                        GraphBLAS::NoAccumulate(),
-                       GraphBLAS::ArithmeticSemiring<double>(), 
-                       mA, 
+                       GraphBLAS::ArithmeticSemiring<double>(),
+                       mA,
                        u3);
 
         BOOST_CHECK_EQUAL(result.nvals(), 2);
@@ -468,8 +468,8 @@ BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_replace_bad_dimensions)
         (GraphBLAS::mxv(w3,
                         GraphBLAS::complement(m4),
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::ArithmeticSemiring<double>(), 
-                        mA, 
+                        GraphBLAS::ArithmeticSemiring<double>(),
+                        mA,
                         u3,
                         true)),
         GraphBLAS::DimensionException);
@@ -494,8 +494,8 @@ BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_replace_reg)
         GraphBLAS::mxv(result,
                        GraphBLAS::complement(m3),
                        GraphBLAS::Second<double>(),
-                       GraphBLAS::ArithmeticSemiring<double>(), 
-                       mA, 
+                       GraphBLAS::ArithmeticSemiring<double>(),
+                       mA,
                        u3,
                        true);
 
@@ -512,8 +512,8 @@ BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_replace_reg)
         GraphBLAS::mxv(result,
                        GraphBLAS::complement(m3),
                        GraphBLAS::NoAccumulate(),
-                       GraphBLAS::ArithmeticSemiring<double>(), 
-                       mA, 
+                       GraphBLAS::ArithmeticSemiring<double>(),
+                       mA,
                        u3,
                        true);
 
@@ -549,8 +549,8 @@ BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_replace_reg_stored_zero)
     GraphBLAS::mxv(result,
                    GraphBLAS::complement(mask),
                    GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), 
-                   A, 
+                   GraphBLAS::ArithmeticSemiring<double>(),
+                   A,
                    u,
                    true);
     BOOST_CHECK_EQUAL(result.nvals(), 3);
@@ -580,8 +580,8 @@ BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_replace_a_transpose)
     GraphBLAS::mxv(result,
                    GraphBLAS::complement(mask),
                    GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), 
-                   transpose(A), 
+                   GraphBLAS::ArithmeticSemiring<double>(),
+                   transpose(A),
                    u,
                    true);
 
@@ -606,8 +606,8 @@ BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_bad_dimensions)
         (GraphBLAS::mxv(w3,
                         GraphBLAS::complement(m4),
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::ArithmeticSemiring<double>(), 
-                        mA, 
+                        GraphBLAS::ArithmeticSemiring<double>(),
+                        mA,
                         u3)),
         GraphBLAS::DimensionException);
 }
@@ -628,8 +628,8 @@ BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_reg)
     GraphBLAS::mxv(result,
                    GraphBLAS::complement(m3),
                    GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), 
-                   mA, 
+                   GraphBLAS::ArithmeticSemiring<double>(),
+                   mA,
                    u3);
 
     BOOST_CHECK_EQUAL(result.nvals(), 3); //2);
@@ -653,8 +653,8 @@ BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_reg_stored_zero)
     GraphBLAS::mxv(result,
                    GraphBLAS::complement(m3),
                    GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), 
-                   mA, 
+                   GraphBLAS::ArithmeticSemiring<double>(),
+                   mA,
                    u3);
 
     BOOST_CHECK_EQUAL(result.nvals(), 3); //2);
@@ -678,8 +678,8 @@ BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_a_transpose)
     GraphBLAS::mxv(result,
                    GraphBLAS::complement(m3),
                    GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), 
-                   transpose(mA), 
+                   GraphBLAS::ArithmeticSemiring<double>(),
+                   transpose(mA),
                    u3);
 
     BOOST_CHECK_EQUAL(result.nvals(), 3);
@@ -704,7 +704,7 @@ BOOST_AUTO_TEST_CASE(mxv_reg)
     std::vector<double> vec2 = {0, 1, 0};
     std::vector<double> vec3 = {2, 1, 0};
     std::vector<double> vec4 = {0, 1, 1};
-    
+
     GraphBLAS::Vector<double, GraphBLAS::SparseTag> v1(vec1, 0.);
     GraphBLAS::Vector<double, GraphBLAS::SparseTag> v2(vec2, 0.);
     GraphBLAS::Vector<double, GraphBLAS::SparseTag> v3(vec3, 0.);

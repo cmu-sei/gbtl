@@ -221,7 +221,7 @@ BOOST_AUTO_TEST_CASE(k_truss2_test_basic)
     // build the adjacency matrix
     Matrix<T> A(num_nodes, num_nodes);
     A.build(i.begin(), j.begin(), val.begin(), val.size());
-    //print_matrix(std::cout, A, "Adjaceney");
+    //print_matrix(std::cout, A, "Adjacency");
 
     auto Aout3 = k_truss2(A, 3);
     BOOST_CHECK_EQUAL(Aout3.nvals(), 10); // only removed one edge
