@@ -14,16 +14,31 @@
 
 cmake_minimum_required(VERSION 2.8)
 
-project(SPIRALGRAPH)
-
-# https://stackoverflow.com/questions/14306642/adding-multiple-executables-in-cmake
+project(GRAPHBLAS_TEMPLATE_LIBRARY_2)
 
 # For debugging
-#message("CMake SRC: ${CMAKE_SOURCE_DIR}")
-#message("Project Name: ${PROJECT_NAME}")
-#message("Bin Directory: ${CMAKE_BINARY_DIR}")
-#message("Project Name: ${CMAKE_SOURCE_DIR}")
-#message("PProject Bin Directory: ${PROJECT_BINARY_DIR}")
+message("CMake SRC: ${CMAKE_SOURCE_DIR}")
+message("Project Name: ${PROJECT_NAME}")
+message("Bin Directory: ${CMAKE_BINARY_DIR}")
+message("Project Name: ${CMAKE_SOURCE_DIR}")
+message("Project Bin Directory: ${PROJECT_BINARY_DIR}")
+
+# Default platform is sequential
+if (NOT PLATFORM)
+  set(PLATFORM sequential)
+endif()
+
+message("Configuring platform: ${PLATFORM}")
+
+if (EXISTS ${CMAKE_SOURCE_DIR}/graphblas/system/${PLATFORM})
+    file(COPY ${CMAKE_SOURCE_DIR}/graphblas/system/${PLATFORM}/backend_include.hpp DESTINATION ${CMAKE_SOURCE_DIR}/graphblas)
+else()
+    message(FATAL_ERROR "Backend directory does not exist: ${PLATFORM}")
+endif()
+
+unset($PLATFORM)
+
+# https://stackoverflow.com/questions/14306642/adding-multiple-executables-in-cmake
 
 # This seems hokey that we need to include the root as our directory
 include_directories(${CMAKE_SOURCE_DIR})

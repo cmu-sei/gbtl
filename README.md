@@ -30,8 +30,14 @@ source" style build to make it easy to clean up. We build in to a
 
 $ mkdir build
 $ cd build
-$ cmake ../src
+$ cmake [-DPLATFORM=<backend>] ../src
 $ make
+
+The PLATFORM argument to cmake specifies which backend source code should
+configured for the build and the value must correspond to a subdirectory
+in "gbtl/src/graphblas/system/" and that subdirectory must have a
+"backend_include.hpp" file.  If this argument is omitted it defaults to
+configuring the "sequential" backend.
 
 Using "make -i -j8" tries to build every test (ignoring all erros) and
 uses all eight the CPU's cores to speed up the build (use a number
