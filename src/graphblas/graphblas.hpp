@@ -34,6 +34,6 @@
 #include <graphblas/matrix_utils.hpp>
 
 #define GB_INCLUDE_BACKEND_ALL 1
-#include <graphblas/backend_include.hpp>
+#include <backend_include.hpp>
 
 #endif // GRAPHBLAS_HPP

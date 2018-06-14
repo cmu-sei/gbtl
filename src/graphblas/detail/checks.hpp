@@ -18,7 +18,7 @@
 
 #define GB_INCLUDE_BACKEND_MATRIX 1
 #define GB_INCLUDE_BACKEND_VECTOR 1
-#include <graphblas/backend_include.hpp>
+#include <backend_include.hpp>
 #include "logging.h"
 
 namespace GraphBLAS

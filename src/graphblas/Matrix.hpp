@@ -21,7 +21,7 @@
 #include <graphblas/detail/param_unpack.hpp>
 
 #define GB_INCLUDE_BACKEND_MATRIX 1
-#include <graphblas/backend_include.hpp>
+#include <backend_include.hpp>
 
 
 //****************************************************************************

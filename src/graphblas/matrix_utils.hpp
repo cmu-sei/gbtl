@@ -22,7 +22,7 @@
 #include <graphblas/graphblas.hpp>
 
 #define GB_INCLUDE_BACKEND_UTILITY 1
-#include <graphblas/backend_include.hpp>
+#include <backend_include.hpp>
 
 //****************************************************************************
 // Miscellaneous matrix convenience functions

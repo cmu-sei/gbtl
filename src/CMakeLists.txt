@@ -25,23 +25,24 @@ message("Project Bin Directory: ${PROJECT_BINARY_DIR}")
 
 # Default platform is sequential
 if (NOT PLATFORM)
-  set(PLATFORM sequential)
+    set(PLATFORM sequential)
 endif()
 
 message("Configuring platform: ${PLATFORM}")
 
 if (EXISTS ${CMAKE_SOURCE_DIR}/graphblas/system/${PLATFORM})
-    file(COPY ${CMAKE_SOURCE_DIR}/graphblas/system/${PLATFORM}/backend_include.hpp DESTINATION ${CMAKE_SOURCE_DIR}/graphblas)
+    set(PLATFORM_SOURCE_DIR ${CMAKE_SOURCE_DIR}/graphblas/system/${PLATFORM})
 else()
-    message(FATAL_ERROR "Backend directory does not exist: ${PLATFORM}")
+    unset(PLATFORM CACHE)
+    message(FATAL_ERROR "Specified platform directory does not exist.")
 endif()
 
-unset($PLATFORM)
+message("Configured platform: ${PLATFORM}")
 
 # https://stackoverflow.com/questions/14306642/adding-multiple-executables-in-cmake
 
 # This seems hokey that we need to include the root as our directory
-include_directories(${CMAKE_SOURCE_DIR})
+include_directories(${CMAKE_SOURCE_DIR} ${PLATFORM_SOURCE_DIR})
 
 # Compiler flags
 set(CMAKE_CXX_STANDARD 11)
@@ -62,13 +63,13 @@ foreach( testsourcefile ${TEST_SOURCES} )
     add_executable( ${testname} ${testsourcefile} ${GRAPHBLAS_HEADERS})
 endforeach( testsourcefile ${TEST_SOURCES} )
 
-### Make extra sequential tests
-file( GLOB TEST_SOURCES LIST_DIRECTORIES false ${CMAKE_SOURCE_DIR}/test/sequential/*.cpp )
+### Make extra PLATFORM-specific tests
+file( GLOB TEST_SOURCES LIST_DIRECTORIES false ${CMAKE_SOURCE_DIR}/test/${PLATFORM}/*.cpp )
 foreach( testsourcefile ${TEST_SOURCES} )
     get_filename_component(justname ${testsourcefile} NAME)
     string( REPLACE ".cpp" "" testname ${justname} )
-    message("Adding: ${testname}_sequential ")
-    add_executable( ${testname}_sequential ${testsourcefile} ${GRAPHBLAS_HEADERS})
+    message("Adding: ${testname}_${PLATFORM} ")
+    add_executable( ${testname}_${PLATFORM} ${testsourcefile} ${GRAPHBLAS_HEADERS})
 endforeach( testsourcefile ${TEST_SOURCES} )
 
 ## Make demos
@@ -79,6 +80,3 @@ foreach( testsourcefile ${TEST_SOURCES} )
     message("Adding: ${testname}")
     add_executable( ${testname} ${testsourcefile} ${GRAPHBLAS_HEADERS})
 endforeach( testsourcefile ${TEST_SOURCES} )
-
-# TODO: Make capi tests
-#add_executable(bcc_demo capi/bcc_demo.c capi/bcc.c capi/bcc.h ${GRAPHBLAS} capi/graphblas.cpp capi/TypeAdapter.hpp capi/UnaryAdapter.hpp capi/graphblas_private.h capi/BinaryAdapter.xhpp capi/TypeUnion.hpp capi/SemiringAdapter.hpp capi/FunctionInvocation.cpp capi/FunctionInvocation.h capi/MonoidAdapter.hpp)

@@ -36,7 +36,7 @@
 #define GB_INCLUDE_BACKEND_TRANSPOSE_VIEW 1
 #define GB_INCLUDE_BACKEND_COMPLEMENT_VIEW 1
 #define GB_INCLUDE_BACKEND_OPERATIONS 1
-#include <graphblas/backend_include.hpp>
+#include <backend_include.hpp>
 
 //****************************************************************************
 // New signatures to conform to GraphBLAS Specification

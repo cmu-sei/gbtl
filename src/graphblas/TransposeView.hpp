@@ -19,7 +19,7 @@
 #include <graphblas/Matrix.hpp>
 
 #define GB_INCLUDE_BACKEND_TRANSPOSE_VIEW 1
-#include <graphblas/backend_include.hpp>
+#include <backend_include.hpp>
 
 //****************************************************************************
 //****************************************************************************
