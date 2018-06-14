@@ -30,8 +30,8 @@ endif()
 
 message("Configuring platform: ${PLATFORM}")
 
-if (EXISTS ${CMAKE_SOURCE_DIR}/graphblas/system/${PLATFORM})
-    set(PLATFORM_SOURCE_DIR ${CMAKE_SOURCE_DIR}/graphblas/system/${PLATFORM})
+if (EXISTS ${CMAKE_SOURCE_DIR}/graphblas/platforms/${PLATFORM})
+    set(PLATFORM_SOURCE_DIR ${CMAKE_SOURCE_DIR}/graphblas/platforms/${PLATFORM})
 else()
     unset(PLATFORM CACHE)
     message(FATAL_ERROR "Specified platform directory does not exist.")
@@ -64,7 +64,7 @@ foreach( testsourcefile ${TEST_SOURCES} )
 endforeach( testsourcefile ${TEST_SOURCES} )
 
 ### Make extra PLATFORM-specific tests
-file( GLOB TEST_SOURCES LIST_DIRECTORIES false ${CMAKE_SOURCE_DIR}/test/${PLATFORM}/*.cpp )
+file( GLOB TEST_SOURCES LIST_DIRECTORIES false ${PLATFORM_SOURCE_DIR}/test/*.cpp )
 foreach( testsourcefile ${TEST_SOURCES} )
     get_filename_component(justname ${testsourcefile} NAME)
     string( REPLACE ".cpp" "" testname ${justname} )

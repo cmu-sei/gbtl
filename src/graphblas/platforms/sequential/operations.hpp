@@ -29,20 +29,20 @@
 #include <iterator>
 
 #include <graphblas/algebra.hpp>
-#include <graphblas/system/sequential/TransposeView.hpp>
-#include <graphblas/system/sequential/ComplementView.hpp>
+#include <graphblas/platforms/sequential/TransposeView.hpp>
+#include <graphblas/platforms/sequential/ComplementView.hpp>
 
 // Add individual operation files here
-#include <graphblas/system/sequential/sparse_mxm.hpp>
-#include <graphblas/system/sequential/sparse_mxv.hpp>
-#include <graphblas/system/sequential/sparse_vxm.hpp>
-#include <graphblas/system/sequential/sparse_ewisemult.hpp>
-#include <graphblas/system/sequential/sparse_ewiseadd.hpp>
-#include <graphblas/system/sequential/sparse_extract.hpp>
-#include <graphblas/system/sequential/sparse_assign.hpp>
-#include <graphblas/system/sequential/sparse_apply.hpp>
-#include <graphblas/system/sequential/sparse_reduce.hpp>
-#include <graphblas/system/sequential/sparse_transpose.hpp>
+#include <graphblas/platforms/sequential/sparse_mxm.hpp>
+#include <graphblas/platforms/sequential/sparse_mxv.hpp>
+#include <graphblas/platforms/sequential/sparse_vxm.hpp>
+#include <graphblas/platforms/sequential/sparse_ewisemult.hpp>
+#include <graphblas/platforms/sequential/sparse_ewiseadd.hpp>
+#include <graphblas/platforms/sequential/sparse_extract.hpp>
+#include <graphblas/platforms/sequential/sparse_assign.hpp>
+#include <graphblas/platforms/sequential/sparse_apply.hpp>
+#include <graphblas/platforms/sequential/sparse_reduce.hpp>
+#include <graphblas/platforms/sequential/sparse_transpose.hpp>
 
 
 namespace GraphBLAS

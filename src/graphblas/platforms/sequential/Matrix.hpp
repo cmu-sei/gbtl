@@ -16,7 +16,7 @@
 #pragma once
 
 #include <cstddef>
-#include <graphblas/system/sequential/LilSparseMatrix.hpp>
+#include <graphblas/platforms/sequential/LilSparseMatrix.hpp>
 
 //****************************************************************************
 
@@ -92,4 +92,4 @@ namespace GraphBLAS
 }
 
 // HACK
-#include <graphblas/system/sequential/utility.hpp>
+#include <graphblas/platforms/sequential/utility.hpp>

@@ -20,7 +20,7 @@
 
 #include <graphblas/detail/config.hpp>
 #include <vector>
-#include <graphblas/system/sequential/BitmapSparseVector.hpp>
+#include <graphblas/platforms/sequential/BitmapSparseVector.hpp>
 
 namespace GraphBLAS
 {

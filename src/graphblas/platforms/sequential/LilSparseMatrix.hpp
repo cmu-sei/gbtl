@@ -22,8 +22,6 @@
 
 #include <graphblas/graphblas.hpp>
 
-#include <graphblas/system/sequential/types.hpp>
-
 //****************************************************************************
 
 namespace GraphBLAS

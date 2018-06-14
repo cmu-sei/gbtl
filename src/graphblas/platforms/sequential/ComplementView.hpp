@@ -16,9 +16,7 @@
 #ifndef GB_SEQUENTIAL_NEW_COMPLEMENT_VIEW_HPP
 #define GB_SEQUENTIAL_NEW_COMPLEMENT_VIEW_HPP
 
-#include <graphblas/system/sequential/types.hpp>
-
-#include <graphblas/system/sequential/Matrix.hpp>
+#include <graphblas/platforms/sequential/Matrix.hpp>
 
 namespace GraphBLAS
 {

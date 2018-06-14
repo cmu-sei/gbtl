@@ -17,17 +17,17 @@
 
 #pragma once
 
-#include <graphblas/system/sequential/Matrix.hpp>
-#include <graphblas/system/sequential/Vector.hpp>
+#include <graphblas/platforms/sequential/Matrix.hpp>
+#include <graphblas/platforms/sequential/Vector.hpp>
 
-#include <graphblas/system/sequential/utility.hpp>
+#include <graphblas/platforms/sequential/utility.hpp>
 
-#include <graphblas/system/sequential/TransposeView.hpp>
-#include <graphblas/system/sequential/ComplementView.hpp>
+#include <graphblas/platforms/sequential/TransposeView.hpp>
+#include <graphblas/platforms/sequential/ComplementView.hpp>
 
-#include <graphblas/system/sequential/operations.hpp>
+#include <graphblas/platforms/sequential/operations.hpp>
 
-#include <graphblas/system/sequential/BitmapSparseVector.hpp>
-#include <graphblas/system/sequential/LilSparseMatrix.hpp>
+#include <graphblas/platforms/sequential/BitmapSparseVector.hpp>
+#include <graphblas/platforms/sequential/LilSparseMatrix.hpp>
 
 #endif // GB_SEQUENTIAL_HPP

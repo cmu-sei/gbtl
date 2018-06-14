@@ -17,7 +17,7 @@
 #ifndef GB_SEQUENTIAL_TRANSPOSE_VIEW_HPP
 #define GB_SEQUENTIAL_TRANSPOSE_VIEW_HPP
 
-#include <graphblas/system/sequential/Matrix.hpp>
+#include <graphblas/platforms/sequential/Matrix.hpp>
 
 //****************************************************************************
 
