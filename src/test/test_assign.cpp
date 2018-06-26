@@ -267,6 +267,7 @@ BOOST_AUTO_TEST_CASE(assign_vec_test_mask_no_accum)
     BOOST_CHECK_EQUAL(w, result2);
 }
 
+//****************************************************************************
 BOOST_AUTO_TEST_CASE(assign_vec_test_mask_accum)
 {
     // w = { 8, 9, 1, 7, - }
@@ -375,6 +376,11 @@ BOOST_AUTO_TEST_CASE(assign_mat_test_bad_dimensions)
     BOOST_CHECK_THROW(
         (assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                 a, vect_I, vect_J)),
+        DimensionException);
+
+    BOOST_CHECK_THROW(
+        (assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                transpose(a), vect_I, vect_J)),
         DimensionException);
 }
 

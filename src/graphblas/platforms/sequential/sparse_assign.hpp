@@ -36,6 +36,7 @@ namespace GraphBLAS
 {
     namespace backend
     {
+        //********************************************************************
         struct IndexCompare
         {
             inline bool operator()(std::pair<IndexType, IndexType> const &i1,
@@ -45,6 +46,7 @@ namespace GraphBLAS
             }
         };
 
+        //********************************************************************
         // Builds a simple mapping
         template <typename SequenceT>
         void compute_outin_mapping(SequenceT const & Indices,
@@ -64,6 +66,7 @@ namespace GraphBLAS
             std::sort(inputOrder.begin(), inputOrder.end(), IndexCompare());
         }
 
+        //********************************************************************
         template <typename TScalarT,
                   typename AScalarT>
         void vectorExpand(std::vector<std::tuple<IndexType, TScalarT>>  &vec_dest,
@@ -130,6 +133,7 @@ namespace GraphBLAS
             }
         }
 
+        //********************************************************************
         template<typename TScalarT,
                  typename AScalarT,
                  typename RowSequenceT,
@@ -179,6 +183,49 @@ namespace GraphBLAS
             }
         }
 
+        //********************************************************************
+        template<typename TScalarT,
+                 typename AMatrixT,
+                 typename RowSequenceT,
+                 typename ColSequenceT>
+        void matrixExpand(LilSparseMatrix<TScalarT>              &T,
+                          backend::TransposeView<AMatrixT> const &A,
+                          RowSequenceT               const       &row_Indices,
+                          ColSequenceT               const       &col_Indices)
+        {
+            // NOTE!! - Backend code. We expect that all dimension
+            // checks done elsewhere.
+            typedef typename AMatrixT::ScalarType AScalarT;
+            //typedef std::vector<std::tuple<IndexType,AScalarT> > ARowType;
+            typedef std::vector<std::tuple<IndexType,TScalarT> > TRowType;
+
+            T.clear();
+
+            // Build the mapping pairs once up front
+            std::vector<std::pair<IndexType, IndexType>> oi_pairs;
+            compute_outin_mapping(col_Indices, oi_pairs);
+
+            // Walk the rows
+            for (IndexType in_row_index = 0;
+                 in_row_index < row_Indices.size();
+                 ++in_row_index)
+            {
+                IndexType out_row_index = row_Indices[in_row_index];
+                auto row(A.getRow(in_row_index));
+                auto row_it = row.begin();
+
+                TRowType out_row;
+
+                // Extract the values from the row
+                //std::cerr << "Expanding row " << in_row_index << " to " << out_row_index << std::endl;
+                vectorExpand(out_row, row, oi_pairs);
+
+                if (!out_row.empty())
+                    T.setRow(out_row_index, out_row);
+            }
+        }
+
+        //********************************************************************
         template <typename ValueT, typename RowIteratorT, typename ColIteratorT >
         void assignConstant(LilSparseMatrix<ValueT>             &T,
                             ValueT                     const    value,
@@ -204,7 +251,7 @@ namespace GraphBLAS
             }
         }
 
-
+        //********************************************************************
         template <typename ValueT,
                 typename RowIndicesT,
                 typename ColIndicesT>

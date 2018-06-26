@@ -48,10 +48,9 @@ namespace GraphBLAS
     class Matrix
     {
     public:
+        typedef matrix_tag  tag_type;
 
-        typedef     matrix_tag          tag_type;
-
-        typedef ScalarT ScalarType;
+        typedef ScalarT     ScalarType;
         typedef typename detail::matrix_generator::result<
             ScalarT,
             detail::SparsenessCategoryTag,
