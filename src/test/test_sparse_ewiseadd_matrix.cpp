@@ -26,6 +26,8 @@ using namespace GraphBLAS;
 
 BOOST_AUTO_TEST_SUITE(sparse_ewiseadd_matrix_suite)
 
+/// @todo add better tests with accumulate (only a few using Second)
+
 //****************************************************************************
 
 namespace
@@ -193,6 +195,48 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_reg)
                         GraphBLAS::NoMask(),
                         GraphBLAS::NoAccumulate(),
                         GraphBLAS::Plus<double>(), A, B3);
+    BOOST_CHECK_EQUAL(Result, Ans3);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_matrix_reg)
+{
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> A(m3x3_dense, 0.);
+
+    // ewise add with dense matrix
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> B(twos3x3_dense, 0.);
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(
+        ans_twos3x3_dense, 0.);
+
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(3,3);
+
+    GraphBLAS::eWiseAdd(Result,
+                        GraphBLAS::NoMask(),
+                        GraphBLAS::NoAccumulate(),
+                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
+                        A, B);
+    BOOST_CHECK_EQUAL(Result, Ans);
+
+    // ewise add with sparse matrix
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> B2(eye3x3_dense, 0.);
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans2(
+        ans_eye3x3_dense, 0.);
+    GraphBLAS::eWiseAdd(Result,
+                        GraphBLAS::NoMask(),
+                        GraphBLAS::NoAccumulate(),
+                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
+                        A, B2);
+    BOOST_CHECK_EQUAL(Result, Ans2);
+
+    // ewise add with empty matrix
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> B3(zero3x3_dense, 0.);
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans3(
+        m3x3_dense, 0.);
+    GraphBLAS::eWiseAdd(Result,
+                        GraphBLAS::NoMask(),
+                        GraphBLAS::NoAccumulate(),
+                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
+                        A, B3);
     BOOST_CHECK_EQUAL(Result, Ans3);
 }
 

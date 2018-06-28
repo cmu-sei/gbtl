@@ -22,6 +22,8 @@
 
 BOOST_AUTO_TEST_SUITE(sparse_ewiseadd_vector_suite)
 
+/// @todo add tests with accumulate
+
 //****************************************************************************
 
 namespace
@@ -250,6 +252,51 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_replace_reg_stored_zero)
 }
 
 //****************************************************************************
+BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_vector_masked_replace_reg_stored_zero)
+{
+    std::vector<int> mask4_dense = {0, 1, 1, 0};
+    GraphBLAS::Vector<int> mask(mask4_dense); //, 0);
+
+    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+
+    // ewise add with dense vector
+    GraphBLAS::Vector<double> v(twos4_dense, 0.);
+    std::vector<double> ans_4atwos4_dense2 = {0, 2, 14, 0};
+    GraphBLAS::Vector<double> ans(ans_4atwos4_dense2, 0.);
+
+    GraphBLAS::Vector<double> result(4);
+
+    GraphBLAS::eWiseAdd(result,
+                        mask,
+                        GraphBLAS::NoAccumulate(),
+                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
+                        u, v, true);
+    BOOST_CHECK_EQUAL(result, ans);
+
+    // ewise add with sparse vector
+    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
+    std::vector<double> answer2 = {0, 1, 12, 0};
+    GraphBLAS::Vector<double> ans2(answer2, 0.);
+    GraphBLAS::eWiseAdd(result,
+                        mask,
+                        GraphBLAS::NoAccumulate(),
+                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
+                        u, v2, true);
+    BOOST_CHECK_EQUAL(result, ans2);
+
+    // ewise add with empty vector
+    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
+    std::vector<double> answer3 = {0, 0, 12, 0};
+    GraphBLAS::Vector<double> ans3(answer3, 0.);
+    GraphBLAS::eWiseAdd(result,
+                        mask,
+                        GraphBLAS::NoAccumulate(),
+                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
+                        u, v3, true);
+    BOOST_CHECK_EQUAL(result, ans3);
+}
+
+//****************************************************************************
 // Tests using a mask with MERGE semantics
 //****************************************************************************
 
@@ -351,6 +398,51 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_reg_stored_zero)
                         mask,
                         GraphBLAS::NoAccumulate(),
                         GraphBLAS::Plus<double>(), u, v3, false);
+    BOOST_CHECK_EQUAL(result, ans3);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_vector_masked_reg_stored_zero)
+{
+    std::vector<int> mask4_dense = {0, 1, 1, 0};
+    GraphBLAS::Vector<int> mask(mask4_dense); //, 0);
+
+    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+
+    // ewise add with dense vector
+    GraphBLAS::Vector<double> v(twos4_dense, 0.);
+    std::vector<double> ans_4atwos4_dense2 = {0, 2, 14, 0};
+    GraphBLAS::Vector<double> ans(ans_4atwos4_dense2, 0.);
+
+    GraphBLAS::Vector<double> result(4);
+
+    GraphBLAS::eWiseAdd(result,
+                        mask,
+                        GraphBLAS::NoAccumulate(),
+                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
+                        u, v, false);
+    BOOST_CHECK_EQUAL(result, ans);
+
+    // ewise add with sparse vector
+    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
+    std::vector<double> answer2 = {0, 1, 12, 0};
+    GraphBLAS::Vector<double> ans2(answer2, 0.);
+    GraphBLAS::eWiseAdd(result,
+                        mask,
+                        GraphBLAS::NoAccumulate(),
+                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
+                        u, v2, false);
+    BOOST_CHECK_EQUAL(result, ans2);
+
+    // ewise add with empty vector
+    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
+    std::vector<double> answer3 = {0, 0, 12, 0};
+    GraphBLAS::Vector<double> ans3(answer3, 0.);
+    GraphBLAS::eWiseAdd(result,
+                        mask,
+                        GraphBLAS::NoAccumulate(),
+                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
+                        u, v3, false);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -461,6 +553,51 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_replace_reg_stored_zero)
 }
 
 //****************************************************************************
+BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_vector_scmp_masked_replace_reg_stored_zero)
+{
+    std::vector<int> mask4_dense = {1, 0, 0, 1};
+    GraphBLAS::Vector<int> mask(mask4_dense); //, 0);
+
+    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+
+    // ewise add with dense vector
+    GraphBLAS::Vector<double> v(twos4_dense, 0.);
+    std::vector<double> ans_4atwos4_dense2 = {0, 2, 14, 0};
+    GraphBLAS::Vector<double> ans(ans_4atwos4_dense2, 0.);
+
+    GraphBLAS::Vector<double> result(4);
+
+    GraphBLAS::eWiseAdd(result,
+                        GraphBLAS::complement(mask),
+                        GraphBLAS::NoAccumulate(),
+                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
+                        u, v, true);
+    BOOST_CHECK_EQUAL(result, ans);
+
+    // ewise add with sparse vector
+    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
+    std::vector<double> answer2 = {0, 1, 12, 0};
+    GraphBLAS::Vector<double> ans2(answer2, 0.);
+    GraphBLAS::eWiseAdd(result,
+                        GraphBLAS::complement(mask),
+                        GraphBLAS::NoAccumulate(),
+                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
+                        u, v2, true);
+    BOOST_CHECK_EQUAL(result, ans2);
+
+    // ewise add with empty vector
+    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
+    std::vector<double> answer3 = {0, 0, 12, 0};
+    GraphBLAS::Vector<double> ans3(answer3, 0.);
+    GraphBLAS::eWiseAdd(result,
+                        GraphBLAS::complement(mask),
+                        GraphBLAS::NoAccumulate(),
+                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
+                        u, v3, true);
+    BOOST_CHECK_EQUAL(result, ans3);
+}
+
+//****************************************************************************
 // Tests using a complemented mask (with merge semantics)
 //****************************************************************************
 
@@ -562,6 +699,51 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_reg_stored_zero)
                         GraphBLAS::complement(mask),
                         GraphBLAS::NoAccumulate(),
                         GraphBLAS::Plus<double>(), u, v3, false);
+    BOOST_CHECK_EQUAL(result, ans3);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_vector_scmp_masked_reg_stored_zero)
+{
+    std::vector<int> mask4_dense = {1, 0, 0, 1};
+    GraphBLAS::Vector<int> mask(mask4_dense); //, 0);
+
+    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+
+    // ewise add with dense vector
+    GraphBLAS::Vector<double> v(twos4_dense, 0.);
+    std::vector<double> ans_4atwos4_dense2 = {0, 2, 14, 0};
+    GraphBLAS::Vector<double> ans(ans_4atwos4_dense2, 0.);
+
+    GraphBLAS::Vector<double> result(4);
+
+    GraphBLAS::eWiseAdd(result,
+                        GraphBLAS::complement(mask),
+                        GraphBLAS::NoAccumulate(),
+                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
+                        u, v, false);
+    BOOST_CHECK_EQUAL(result, ans);
+
+    // ewise add with sparse vector
+    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
+    std::vector<double> answer2 = {0, 1, 12, 0};
+    GraphBLAS::Vector<double> ans2(answer2, 0.);
+    GraphBLAS::eWiseAdd(result,
+                        GraphBLAS::complement(mask),
+                        GraphBLAS::NoAccumulate(),
+                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
+                        u, v2, false);
+    BOOST_CHECK_EQUAL(result, ans2);
+
+    // ewise add with empty vector
+    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
+    std::vector<double> answer3 = {0, 0, 12, 0};
+    GraphBLAS::Vector<double> ans3(answer3, 0.);
+    GraphBLAS::eWiseAdd(result,
+                        GraphBLAS::complement(mask),
+                        GraphBLAS::NoAccumulate(),
+                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
+                        u, v3, false);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 

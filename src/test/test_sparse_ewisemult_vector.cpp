@@ -145,6 +145,46 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_stored_zero_result)
 }
 
 // ***************************************************************************
+BOOST_AUTO_TEST_CASE(test_ewisemult_semiring_vector_stored_zero_result)
+{
+    GraphBLAS::Vector<double> u(v4a_dense); //, 0.);
+
+    // ewise mult with dense vector
+    GraphBLAS::Vector<double> v(twos4_dense, 0.);
+    GraphBLAS::Vector<double> ans(ans_4atwos4_dense); //, 0.);
+
+    GraphBLAS::Vector<double> result(4);
+
+    GraphBLAS::eWiseMult(result,
+                         GraphBLAS::NoMask(),
+                         GraphBLAS::NoAccumulate(),
+                         multiply_op(GraphBLAS::ArithmeticSemiring<double>()),
+                         u, v);
+    BOOST_CHECK_EQUAL(result, ans);
+
+    // ewise mult with sparse vector
+    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
+    GraphBLAS::Vector<double> ans2(ans_4a4b_dense, 0.);
+    ans2.setElement(1, 0.);
+    GraphBLAS::eWiseMult(result,
+                         GraphBLAS::NoMask(),
+                         GraphBLAS::NoAccumulate(),
+                         multiply_op(GraphBLAS::ArithmeticSemiring<double>()),
+                         u, v2);
+    BOOST_CHECK_EQUAL(result, ans2);
+
+    // ewise mult with empty vector
+    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
+    GraphBLAS::Vector<double> ans3(zero4_dense, 0.);
+    GraphBLAS::eWiseMult(result,
+                         GraphBLAS::NoMask(),
+                         GraphBLAS::NoAccumulate(),
+                         multiply_op(GraphBLAS::ArithmeticSemiring<double>()),
+                         u, v3);
+    BOOST_CHECK_EQUAL(result, ans3);
+}
+
+// ***************************************************************************
 // Tests using a mask with REPLACE
 // ***************************************************************************
 

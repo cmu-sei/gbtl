@@ -24,9 +24,9 @@
 
 namespace GraphBLAS
 {
-    //****************************************************************************
+    //************************************************************************
     // The Unary Operators
-    //****************************************************************************
+    //************************************************************************
 
     // Also performs casting
     template <typename D1, typename D2 = D1>
@@ -86,9 +86,9 @@ namespace GraphBLAS
 
 namespace GraphBLAS
 {
-    //****************************************************************************
+    //************************************************************************
     // The Binary Operators
-    //****************************************************************************
+    //************************************************************************
 
     template <typename D1 = bool, typename D2 = D1, typename D3 = D1>
     struct LogicalOr
@@ -275,11 +275,13 @@ typedef GraphBLAS::LogicalXor<bool>   GrB_LXOR;
 // Monoids
 //****************************************************************************
 
-#define GEN_GRAPHBLAS_MONOID(M_NAME, BINARYOP, IDENTITY)               \
+#define GEN_GRAPHBLAS_MONOID(M_NAME, BINARYOP, IDENTITY)        \
     template <typename ScalarT>                                 \
     struct M_NAME                                               \
     {                                                           \
     public:                                                     \
+        typedef ScalarT lhs_type;                               \
+        typedef ScalarT rhs_type;                               \
         typedef ScalarT ScalarType;                             \
         typedef ScalarT result_type;                            \
                                                                 \
@@ -323,6 +325,8 @@ namespace GraphBLAS
     class SRNAME                                                        \
     {                                                                   \
     public:                                                             \
+        typedef D1 lhs_type;                                            \
+        typedef D2 rhs_type;                                            \
         typedef D3 ScalarType;                                          \
         typedef D3 result_type;                                         \
                                                                         \
@@ -344,8 +348,8 @@ namespace GraphBLAS
     GEN_GRAPHBLAS_SEMIRING(LogicalSemiring, LogicalOrMonoid, LogicalAnd)
 
     /// @note the Plus operator would need to be "infinity aware" if the caller
-    /// were to pass "infinity" sentinel as one of the arguments. But no GraphBLAS
-    /// operations should do that.
+    /// were to pass "infinity" sentinel as one of the arguments. But no
+    /// GraphBLAS operations 'should' do that.
     GEN_GRAPHBLAS_SEMIRING(MinPlusSemiring, MinMonoid, Plus)
 
     GEN_GRAPHBLAS_SEMIRING(MaxTimesSemiring, MaxMonoid, Times)
@@ -357,5 +361,75 @@ namespace GraphBLAS
     GEN_GRAPHBLAS_SEMIRING(MaxSelect1stSemiring, MaxMonoid, First)
 } // namespace GraphBLAS
 
+//****************************************************************************
+// Convert Semirings to BinaryOps
+//****************************************************************************
+
+namespace GraphBLAS
+{
+    //************************************************************************
+    template <typename SemiringT>
+    struct MultiplicativeOpFromSemiring
+    {
+    public:
+        typedef typename SemiringT::lhs_type lhs_type;
+        typedef typename SemiringT::rhs_type rhs_type;
+        typedef typename SemiringT::result_type result_type;
+        typedef typename SemiringT::ScalarType ScalarType;
+
+        MultiplicativeOpFromSemiring() = delete;
+        MultiplicativeOpFromSemiring(SemiringT const &sr) : sr(sr) {}
+
+        ScalarType operator() (lhs_type lhs, rhs_type rhs) const
+        {
+            return sr.mult(lhs, rhs);
+        }
+
+    private:
+        SemiringT sr;
+    };
+
+    //************************************************************************
+    template <typename SemiringT>
+    struct AdditiveMonoidFromSemiring
+    {
+    public:
+        typedef typename SemiringT::result_type result_type;
+        typedef typename SemiringT::ScalarType ScalarType;
+
+        AdditiveMonoidFromSemiring() = delete;
+        AdditiveMonoidFromSemiring(SemiringT const &sr) : sr(sr) {}
+
+        ScalarType identity() const
+        {
+            return sr.zero();
+        }
+
+        ScalarType operator() (ScalarType lhs, ScalarType rhs) const
+        {
+            return sr.add(lhs, rhs);
+        }
+
+    private:
+        SemiringT sr;
+    };
+
+    //************************************************************************
+    template <typename SemiringT>
+    MultiplicativeOpFromSemiring<SemiringT>
+    multiply_op(SemiringT const &sr)
+    {
+        return MultiplicativeOpFromSemiring<SemiringT>(sr);
+    }
+
+    //************************************************************************
+    template <typename SemiringT>
+    AdditiveMonoidFromSemiring<SemiringT>
+    add_monoid(SemiringT const &sr)
+    {
+        return AdditiveMonoidFromSemiring<SemiringT>(sr);
+    }
+
+} // namespace GraphBLAS
 
 #endif // GB_ALGEBRA_HPP

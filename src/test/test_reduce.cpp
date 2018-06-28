@@ -233,6 +233,14 @@ BOOST_AUTO_TEST_CASE(reduce_matvec_test_noaccum)
     reduce(C, NoMask(), NoAccumulate(),
            PlusMonoid<double>(), A);
     BOOST_CHECK_EQUAL(C, answer);
+
+    reduce(C, NoMask(), NoAccumulate(),
+           Plus<double>(), A);
+    BOOST_CHECK_EQUAL(C, answer);
+
+    reduce(C, NoMask(), NoAccumulate(),
+           add_monoid(ArithmeticSemiring<double>()), A);
+    BOOST_CHECK_EQUAL(C, answer);
 }
 
 //****************************************************************************
@@ -955,6 +963,12 @@ BOOST_AUTO_TEST_CASE(test_reduce_vecscalar_reg)
            NoAccumulate(),
            PlusMonoid<double>(), ansA);
     BOOST_CHECK_EQUAL(val, 32.0);
+
+    val = 22;
+    reduce(val,
+           NoAccumulate(),
+           add_monoid(ArithmeticSemiring<double>()), ansA);
+    BOOST_CHECK_EQUAL(val, 32.0);
 }
 
 //****************************************************************************
@@ -1043,6 +1057,12 @@ BOOST_AUTO_TEST_CASE(test_reduce_matscalar_noaccum)
     reduce(val,
            NoAccumulate(),
            PlusMonoid<double>(), mB);
+    BOOST_CHECK_EQUAL(val, 50.0);
+
+    val = 22;
+    reduce(val,
+           NoAccumulate(),
+           add_monoid(ArithmeticSemiring<double>()), mB);
     BOOST_CHECK_EQUAL(val, 50.0);
 }
 

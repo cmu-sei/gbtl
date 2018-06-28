@@ -157,6 +157,33 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_matrix_overwrite_replace)
 }
 
 //****************************************************************************
+BOOST_AUTO_TEST_CASE(test_ewisemult_semiring_matrix_overwrite_replace)
+{
+    using T = int32_t;
+
+    std::vector<std::vector<T> > tmp1_dense = {{0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0}};
+    std::vector<std::vector<T> >  a10_dense = {{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1}};
+
+    GraphBLAS::Matrix<T> tmp1(tmp1_dense, 0);
+    GraphBLAS::Matrix<T> a10(a10_dense, 0);
+
+    GraphBLAS::eWiseMult(tmp1, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                         multiply_op(GraphBLAS::ArithmeticSemiring<T>()),
+                         tmp1, a10, true);
+    BOOST_CHECK_EQUAL(0, tmp1.nvals());
+
+    //GraphBLAS::print_matrix(std::cerr, tmp1, "tmp1");
+
+    T delta(0);
+    GraphBLAS::reduce(delta,
+                      add_monoid(GraphBLAS::ArithmeticSemiring<T>()),
+                      add_monoid(GraphBLAS::ArithmeticSemiring<T>()),
+                      tmp1);
+
+    BOOST_CHECK_EQUAL(delta, 0);
+}
+
+//****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewisemult_normal)
 {
     IndexArrayType i_mat    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
