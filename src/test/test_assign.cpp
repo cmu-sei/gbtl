@@ -1,16 +1,30 @@
 /*
- * Copyright (c) 2015 Carnegie Mellon University and The Trustees of Indiana
- * University.
- * All Rights Reserved.
+ * GraphBLAS Template Library, Version 2.0
  *
- * THIS SOFTWARE IS PROVIDED "AS IS," WITH NO WARRANTIES WHATSOEVER. CARNEGIE
- * MELLON UNIVERSITY AND THE TRUSTEES OF INDIANA UNIVERSITY EXPRESSLY DISCLAIM
- * TO THE FULLEST EXTENT PERMITTED BY LAW ALL EXPRESS, IMPLIED, AND STATUTORY
- * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT OF PROPRIETARY RIGHTS.
+ * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Authors. All Rights Reserved.
  *
- * This Program is distributed under a BSD license.  Please see LICENSE file or
- * permission@sei.cmu.edu for more information.  DM-0002659
+ * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
+ * THE UNITED STATES GOVERNMENT.  NEITHER THE UNITED STATES GOVERNMENT NOR THE
+ * UNITED STATES DEPARTMENT OF ENERGY, NOR THE UNITED STATES DEPARTMENT OF
+ * DEFENSE, NOR CARNEGIE MELLON UNIVERSITY, NOR BATTELLE, NOR ANY OF THEIR
+ * EMPLOYEES, NOR ANY JURISDICTION OR ORGANIZATION THAT HAS COOPERATED IN THE
+ * DEVELOPMENT OF THESE MATERIALS, MAKES ANY WARRANTY, EXPRESS OR IMPLIED, OR
+ * ASSUMES ANY LEGAL LIABILITY OR RESPONSIBILITY FOR THE ACCURACY, COMPLETENESS,
+ * OR USEFULNESS OR ANY INFORMATION, APPARATUS, PRODUCT, SOFTWARE, OR PROCESS
+ * DISCLOSED, OR REPRESENTS THAT ITS USE WOULD NOT INFRINGE PRIVATELY OWNED
+ * RIGHTS..
+ *
+ * Released under a BSD (SEI)-style license, please see license.txt or contact
+ * permission@sei.cmu.edu for full terms.
+ *
+ * This release is an update of:
+ *
+ * 1. GraphBLAS Template Library (GBTL)
+ * (https://github.com/cmu-sei/gbtl/blob/1.0.0/LICENSE) Copyright 2015 Carnegie
+ * Mellon University and The Trustees of Indiana. DM17-0037, DM-0002659
+ *
+ * DM18-0559
  */
 
 //#define GRAPHBLAS_LOGGING_LEVEL 2
@@ -20,11 +34,11 @@
 using namespace GraphBLAS;
 
 #define BOOST_TEST_MAIN
-#define BOOST_TEST_MODULE assign_suite
+#define BOOST_TEST_MODULE assign_test_suite
 
 #include <boost/test/included/unit_test.hpp>
 
-BOOST_AUTO_TEST_SUITE(assign_suite)
+BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
 //****************************************************************************
 // 4.3.7.1 Standard Vector tests
@@ -406,6 +420,104 @@ BOOST_AUTO_TEST_CASE(assign_mat_test_index_out_of_bounds)
         (assign(C, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                 A, vect_I, vect_J)),
         IndexOutOfBoundsException);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_assign_matrix_base)
+{
+    std::vector<std::vector<double>> matA = {{1, 6},
+                                             {9, 2}};
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(matA, 0);
+
+    std::vector<std::vector<double>> matAnswer = {{0, 0, 0},
+                                                  {9, 0, 2},
+                                                  {1, 0, 6}};
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 0);
+
+    // Output space
+    GraphBLAS::IndexType M = 3;
+    GraphBLAS::IndexType N = 3;
+
+    GraphBLAS::IndexArrayType row_indices = {2, 1};
+    GraphBLAS::IndexArrayType col_indices = {0, 2};
+
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(M, N);
+
+    GraphBLAS::assign(result,
+                      GraphBLAS::NoMask(),
+                      GraphBLAS::NoAccumulate(),
+                      mA,
+                      row_indices,
+                      col_indices);
+
+    BOOST_CHECK_EQUAL(result, answer);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_assign_matrix_mask)
+{
+    std::vector<std::vector<double>> matA = {{1, 6},
+                                             {9, 2}};
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(matA, 0);
+
+    std::vector<std::vector<double>> matAnswer = {{0, 0, 0},
+                                                  {9, 0, 0},
+                                                  {1, 0, 0}};
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 0);
+
+    std::vector<std::vector<bool>> matMask = {{true, true, false},
+                                              {true, true, false},
+                                              {true, true, false}};
+    GraphBLAS::Matrix<bool, GraphBLAS::DirectedMatrixTag> mask(matMask, 0);
+
+
+    // Output space
+    GraphBLAS::IndexType M = 3;
+    GraphBLAS::IndexType N = 3;
+
+    GraphBLAS::IndexArrayType row_indices = {2, 1};
+    GraphBLAS::IndexArrayType col_indices = {0, 2};
+
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(M, N);
+
+    GraphBLAS::assign(result,
+                      mask,
+                      GraphBLAS::NoAccumulate(),
+                      mA,
+                      row_indices,
+                      col_indices);
+
+    BOOST_CHECK_EQUAL(result, answer);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_assign_matrix_accum)
+{
+    std::vector<std::vector<double>> matA = {{1, 6},
+                                             {9, 2}};
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(matA, 0);
+
+    std::vector<std::vector<double>> matC= {{1, 2, 3},
+                                            {4, 5, 6},
+                                            {7, 8, 9}};
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mC(matC, 0);
+
+    std::vector<std::vector<double>> matAnswer = {{1,  2, 3},
+                                                  {13, 5, 8},
+                                                  {8,  8, 15}};
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 0);
+
+    GraphBLAS::IndexArrayType row_indices = {2, 1};
+    GraphBLAS::IndexArrayType col_indices = {0, 2};
+
+    GraphBLAS::assign(mC,
+                      GraphBLAS::NoMask(),
+                      GraphBLAS::Plus<double>(),
+                      mA,
+                      row_indices,
+                      col_indices);
+
+    BOOST_CHECK_EQUAL(mC, answer);
 }
 
 //****************************************************************************
@@ -1762,6 +1874,30 @@ BOOST_AUTO_TEST_CASE(assign_mat_constant_test_index_out_of_bounds)
         (assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                 99, vect_I, vect_J)),
         IndexOutOfBoundsException);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_assign_const_base)
+{
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mC(3, 3);
+
+    std::vector<std::vector<double>> matAnswer = {{0, 0, 0},
+                                                  {1, 0, 1},
+                                                  {1, 0, 1}};
+    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 0);
+
+    GraphBLAS::IndexArrayType row_indices = {2, 1};
+    GraphBLAS::IndexArrayType col_indices = {0, 2};
+
+//    GraphBLAS::assign_constant(mC,
+    GraphBLAS::assign(mC,
+                      GraphBLAS::NoMask(),
+                      GraphBLAS::NoAccumulate(),
+                      1,
+                      row_indices,
+                      col_indices);
+
+    BOOST_CHECK_EQUAL(mC, answer);
 }
 
 //****************************************************************************

@@ -54,7 +54,7 @@ Please see “AUTHORS” file for a list of known contributors.
 This release is an update of:
 
 1. GraphBLAS Template Library (GBTL)
-(https://github.com/cmu-sei/gbtl/blob/master/LICENSE) Copyright 2015 Carnegie
+(https://github.com/cmu-sei/gbtl/blob/1.0.0/LICENSE) Copyright 2015 Carnegie
 Mellon University and The Trustees of Indiana. DM17-0037, DM-0002659
 
 DM18-0559
