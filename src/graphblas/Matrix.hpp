@@ -58,6 +58,15 @@ namespace GraphBLAS
     class MatrixComplementView;
 
     //************************************************************************
+
+    /**
+     * @brief Frontend Matrix class. Performs API checks and forwards to
+     *        backend code.
+     *
+     * @note The backend should be able to decide when to ignore any of the
+     *       template tags and/or arguments.
+     *
+     */
     template<typename ScalarT, typename... TagsT>
     class Matrix
     {
@@ -81,8 +90,6 @@ namespace GraphBLAS
          *
          * @param[in] num_rows  Number of rows in the matrix
          * @param[in] num_cols  Number of columns in the matrix
-         * @param[in] zero      The "zero" value, additive identity, and
-         *                      the structural zero.
          */
         Matrix(IndexType num_rows, IndexType num_cols)
             : m_mat(num_rows, num_cols)

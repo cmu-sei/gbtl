@@ -707,6 +707,8 @@ namespace algorithms
      * @param[in] graph  Must be undirected graph with no self-loops; i.e.,
      *                   matrix is symmetric with zeros on the diagonal.
      *                   Upper triangular portion of matrix is accessed.
+     * @param[in] block_size  Number of vertices (batch size) to compute per
+     *                        iteration.
      */
     template<typename MatrixT>
     typename MatrixT::ScalarType triangle_count_flame2_newGBTL_blocked(

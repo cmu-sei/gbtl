@@ -40,7 +40,10 @@ namespace algorithms
     GEN_GRAPHBLAS_SEMIRING(PlusEqualSemiring,
                            GraphBLAS::PlusMonoid,
                            GraphBLAS::Equal)
+}
 
+namespace algorithms
+{
     //************************************************************************
     /**
      * @brief Assign a zero-based cluster ID to each vertex based on the
@@ -322,7 +325,7 @@ namespace algorithms
      *                           On output contains the cluster assignments.
      *                           If element (i,j) == 1, then vertex j belongs
      *                           to cluster i.
-     * @param[in]     max_iter   The maximum number of iterations to run if
+     * @param[in]     max_iters  The maximum number of iterations to run if
      *                           convergence doesn't occur first.
      *
      * @todo This should be merged with the other version and a configuration

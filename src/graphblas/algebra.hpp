@@ -330,9 +330,9 @@ namespace GraphBLAS
 /**
  * The macro for building semi-ring objects
  *
- * @param[in]  SRNAME  The class name
- * @param[in]  SRADD   The addition monoid
- * @param[in]  SRMULT  The multiplication binary function
+ * @param[in]  SRNAME        The class name
+ * @param[in]  ADD_MONOID    The addition monoid
+ * @param[in]  MULT_BINARYOP The multiplication binary function
  */
 #define GEN_GRAPHBLAS_SEMIRING(SRNAME, ADD_MONOID, MULT_BINARYOP)       \
     template <typename D1, typename D2=D1, typename D3=D1>              \

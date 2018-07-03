@@ -54,11 +54,13 @@ namespace algorithms
      *                              the page rank.  The structural zero needs
      *                              to be '0' and edges are indicated by '1'
      *                              to support use of the Arithmetic semiring.
-     * @param[out] result           N vector of page ranks
+     * @param[out] page_rank        N vector of page ranks
      * @param[in]  damping_factor   The constant to ensure stability in cyclic
      *                              graphs
      * @param[in]  threshold        The sum of squared errors termination
      *                              threshold.
+     * @param[in]  max_iters        The maximum number of iterations to perform
+     *                              in case threshold is not met prior.
      *
      */
     template<typename MatrixT, typename RealT = double>

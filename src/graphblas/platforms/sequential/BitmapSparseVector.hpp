@@ -63,10 +63,9 @@ namespace GraphBLAS
             // }
 
             /**
-             * @brief Construct an empty list of lists sparse matrix with
-             *        the given shape.
+             * @brief Construct an empty sparse vector with given size
              *
-             * @param[in] num_vals  width of matrix
+             * @param[in] nsize  Size of vector.
              */
             BitmapSparseVector(IndexType nsize)
                 : m_size(nsize),
@@ -332,16 +331,12 @@ namespace GraphBLAS
             }
 
             /**
-             * @brief Access the elements of this BitmapSparseVector given row and
-             *        column indexes.
+             * @brief Access the elements of this BitmapSparseVector given index.
              *
              * Function provided to access the elements of this BitmapSparseVector
-             * given row and column indices.  The functionality is the
-             * same as that of the indexing function for a standard dense
-             * matrix.
+             * given the index.
              *
-             * @param[in] row_index  The row to access.
-             * @param[in] col_index  The column to access.
+             * @param[in] index  Position to access.
              *
              * @return The element of this BitmapSparseVector at the given row and
              *         column.
@@ -361,7 +356,7 @@ namespace GraphBLAS
                 return m_vals[index];
             }
 
-            // Not certain about this implementation
+            /// @todo Not certain about this implementation
             void setElement(IndexType      index,
                             ScalarT const &new_val)
             {

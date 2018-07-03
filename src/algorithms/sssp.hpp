@@ -203,8 +203,8 @@ namespace algorithms
         using T = typename MatrixT::ScalarType;
         GraphBLAS::print_matrix(std::cerr, graph, "A");
 
-        GraphBLAS::IndexType n(graph.nrows());  /// @todo assert #rows=#cols
-        paths.clear();                          /// @todo assert size = #rows
+        GraphBLAS::IndexType n(graph.nrows());  /// @todo assert nrows = ncols
+        paths.clear();                          /// @todo assert size = nrows
 
         GraphBLAS::Vector<T>    t(n);
         GraphBLAS::Vector<T>    tmasked(n);

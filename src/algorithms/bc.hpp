@@ -273,7 +273,7 @@ namespace algorithms
      * \f$C_b(v)=\sum\limits_{s \\neq v \in V}
      *           \sum\limits_{t \\neq v \in V}\\frac{\sigma_{st}(v)}{\sigma_{st}}\f$
      *
-     * @param[in]  graph     The graph to compute the betweenness centrality of.
+     * @param[in]  A         The graph to compute the betweenness centrality of.
      * @param[in]  s         The set of source vertex indices from which to compute
      *                       BC contributions
      *
@@ -448,7 +448,7 @@ namespace algorithms
      * \f$C_b(v)=\sum\limits_{s \\neq v \in V}
      *           \sum\limits_{t \\neq v \in V}\\frac{\sigma_{st}(v)}{\sigma_{st}}\f$
      *
-     * @param[in]  graph     The graph to compute the betweenness centrality of.
+     * @param[in]  A         The graph to compute the betweenness centrality of.
      * @param[in]  s         The set of source vertex indices from which to compute
      *                       BC contributions
      *
@@ -625,7 +625,7 @@ namespace algorithms
      * \f$C_b(v)=\sum\limits_{s \\neq v \in V}
      *           \sum\limits_{t \\neq v \in V}\\frac{\sigma_{st}(v)}{\sigma_{st}}\f$
      *
-     * @param[in]  graph     The graph to compute the betweenness centrality of.
+     * @param[in]  A         The graph to compute the betweenness centrality of.
      * @param[in]  s         The set of source vertex indices from which to compute
      *                       BC contributions
      *

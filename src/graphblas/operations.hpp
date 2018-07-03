@@ -881,7 +881,7 @@ namespace GraphBLAS
 
     /**
      * @brief  "Flip" the rows and columns of a matrix
-     * @param[in]  a  The matrix to transpose
+     * @param[in]  A  The matrix to transpose
      *
      */
     template<typename MatrixT>
@@ -892,7 +892,7 @@ namespace GraphBLAS
 
     /**
      * @brief  Return a view that complements the structure of a matrix.
-     * @param[in]  a  The matrix to complement
+     * @param[in]  Mask  The matrix to complement
      *
      */
     template<typename ScalarT, typename... TagsT>
@@ -903,6 +903,11 @@ namespace GraphBLAS
             backend::matrix_complement(Mask.m_mat));
     }
 
+    /**
+     * @brief  Return a view that complements the structure of a vector.
+     * @param[in]  mask  The vector to complement
+     *
+     */
     template<typename ScalarT, typename... TagsT>
     inline VectorComplementView<Vector<ScalarT, TagsT...>> complement(
         Vector<ScalarT, TagsT...> const &mask)
