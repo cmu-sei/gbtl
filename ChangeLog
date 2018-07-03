@@ -1,13 +1,13 @@
-2018-02 Scott McMillan <smcmillan@sei.cmu.edu>
-	* Version 2.0 merged from spiral_graph branch to master.
-	* API revamped to implement the functionality included in GraphBLAS C
-	API spec
-	* All algorithms revamped to be more "GraphBLAS-ified".  Maxflow
-	still needs additional conversion.
+2018-07 Scott McMillan <smcmillan@sei.cmu.edu>
+	* Version 2.0 Release (merged from spiral_graph branch to master).
+	* API revamped to implement the functionality included in GraphBLAS C	API spec
+	* All algorithms revamped to be more "GraphBLAS-ified".
+	* Substantially more unit tests added.
+	* New algorithms added like maxflow, delta-stepping SSSP, etc.
 	* Support for GPU backend removed.
 	* Build system switched from autotools to cmake.
 
-2016-04-25
+2016-04-25 - Tagged as Version 1.0
 	* implemented mxm masking in cusp
 	* fixed ewisemult issue
 	* fixed ewisemult and mxm tests

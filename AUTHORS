@@ -1,10 +1,24 @@
-Software Engineering Institute (SEI) / Carnegie Mellon University
-Center for Research in ExaScale Technologies (CREST) / Indiana University
+Version 2.0 Contributors
+------------------------
 
-Scott McMillan    SEI/CMU           Andrew Lumsdaine  CREST/IU
-Jonathan Chu      SEI/CMU           Marcin Zalewski   CREST/IU
-Samantha Misurda  SEI/CMU           Eric Holk         CREST/IU
-John Matty        SEI/CMU           Peter Zhang       CREST/IU
+Scott McMillan    Software Engineering Institute/Carnegie Mellon University
 Andrew Mellinger  SEI/CMU
+Oren Wright       SEI/CMU
+Jason Larkin      SEI/CMU
+Andrew Lumsdaine  Pacific Northwest National Laboratory/Battelle Memorial Institute
+Marcin Zalewski   PNNL/Battelle
 
+==============================================================================
 
+Version 1.0 Contributors
+------------------------
+
+Scott McMillan        Software Engineering Institute/Carnegie Mellon University
+Jonathan Chu          SEI/CMU
+Samantha Misurda      SEI/CMU
+John Matty            SEI/CMU
+Andrew Mellinger      SEI/CMU
+Andrew Lumsdaine      Center for Research in ExaScale Technologies/Indiana University
+Marcin Zalewski       CREST/IU
+Eric Holk             CREST/IU
+Peter Zhang/Aaltonen  CREST/IU
