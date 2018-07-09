@@ -149,29 +149,6 @@ namespace GraphBLAS
         }
 
 
-        /// Assignment from dense data
-        /// @todo This ignores the structural zero value.
-        //Matrix<ScalarT, TagsT...>& operator=(
-        //    std::vector<std::vector<ScalarT> > const &rhs)
-        //{
-        //    m_mat = rhs;
-        //    return *this;
-        //}
-
-        /// Version 1 of getshape that assigns to two passed parameters
-        //void get_shape(IndexType &num_rows, IndexType &num_cols) const
-        //{
-        //    m_mat.get_shape(num_rows, num_cols);
-        //}
-
-        /// Version 2 of getshape that returns a std::pair = [rows, cols]
-        //std::pair<IndexType, IndexType> get_shape() const
-        //{
-        //    IndexType num_rows, num_cols;
-        //    m_mat.get_shape(num_rows, num_cols);
-        //    return std::make_pair(num_rows, num_cols);
-        //}
-
         /// @todo need to change to mix and match internal types
         bool operator==(Matrix<ScalarT, TagsT...> const &rhs) const
         {

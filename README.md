@@ -14,6 +14,8 @@ predates the GraphBLAS C API Specification), this only contains the
 CPU.  Support for GPUs that was in version 1.0 is currently not
 available but can be accessed using the git tag: 'Version1').
 
+The API defined by GBTL v. 2.0 is not backward compatible with v. 1.0.
+
 The implementation of the sequential backend is currently focused on
 correctness over performance.  The project also contains implementations of
 many common graph algorithms using the C++ API:

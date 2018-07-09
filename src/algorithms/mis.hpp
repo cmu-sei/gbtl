@@ -59,29 +59,6 @@ namespace
                                   distribution(generator)/(1. + 2.*degree));
         }
     };
-
-    //************************************************************************
-    // select source node if its probability is greater than max neighbor
-    /// @todo Consider moving this to algebra.hpp
-    // template <typename T>
-    // class GreaterThan
-    // {
-    // public:
-    //     typedef T result_type;
-
-    //     __device__ __host__ inline result_type operator()(T const &source,
-    //                                                       T const &max_neighbor)
-    //     {
-    //         if (source == 0)
-    //             return 0;
-    //         else if (max_neighbor == 0)
-    //             return 1;
-    //         else
-    //             return ((source > max_neighbor) ?
-    //                     static_cast<T>(1) :
-    //                     static_cast<T>(0));
-    //     }
-    // };
 }
 
 //****************************************************************************
