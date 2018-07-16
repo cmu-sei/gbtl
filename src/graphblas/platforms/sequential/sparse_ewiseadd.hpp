@@ -64,7 +64,7 @@ namespace GraphBLAS
                  typename UVectorT,
                  typename VVectorT,
                  typename ...WTagsT>
-        inline void eWiseAdd(
+        inline Info eWiseAdd(
             GraphBLAS::backend::Vector<WScalarT, WTagsT...> &w,
             MaskT                                     const &mask,
             AccumT                                           accum,
@@ -94,6 +94,7 @@ namespace GraphBLAS
             // =================================================================
             // Copy Z into the final output considering mask and replace
             write_with_opt_mask_1D(w, z_contents, mask, replace_flag);
+            return SUCCESS;
         }
 
         //**********************************************************************
@@ -105,7 +106,7 @@ namespace GraphBLAS
                  typename AMatrixT,
                  typename BMatrixT,
                  typename ...CTagsT>
-        inline void eWiseAdd(
+        inline Info eWiseAdd(
             GraphBLAS::backend::Matrix<CScalarT, CTagsT...> &C,
             MaskT                                     const &Mask,
             AccumT                                           accum,
@@ -162,13 +163,14 @@ namespace GraphBLAS
 
             // =================================================================
             // Accumulate into Z
-
             LilSparseMatrix<CScalarT> Z(num_rows, num_cols);
             ewise_or_opt_accum(Z, C, T, accum);
 
             // =================================================================
             // Copy Z into the final output considering mask and replace
             write_with_opt_mask(C, Z, Mask, replace_flag);
+
+            return SUCCESS;
         } // ewisemult
 
     } // backend

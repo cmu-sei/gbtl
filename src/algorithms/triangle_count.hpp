@@ -138,8 +138,9 @@ namespace algorithms
 
         if (rows != cols)
         {
-            throw GraphBLAS::DimensionException(
-                "triangle_count_flame1 matrix is not square");
+            //throw GraphBLAS::DimensionException(
+            //    "triangle_count_flame1 matrix is not square");
+            exit(-1);
         }
 
         // A graph less than three vertices cannot have any triangles
@@ -218,8 +219,9 @@ namespace algorithms
 
         if (rows != cols)
         {
-            throw GraphBLAS::DimensionException(
-                "triangle_count_flame1 matrix is not square");
+            //throw GraphBLAS::DimensionException(
+            //    "triangle_count_flame1 matrix is not square");
+            exit(-1);
         }
 
         // A graph less than three vertices cannot have any triangles
@@ -334,8 +336,9 @@ namespace algorithms
 
         if (rows != cols)
         {
-            throw GraphBLAS::DimensionException(
-                "triangle_count_flame2 matrix is not square");
+            //throw GraphBLAS::DimensionException(
+            //    "triangle_count_flame2 matrix is not square");
+            exit(-1);
         }
 
         // A graph less than three vertices cannot have any triangles
@@ -488,8 +491,9 @@ namespace algorithms
 
         if (rows != cols)
         {
-            throw GraphBLAS::DimensionException(
-                "triangle_count_flame1_new matrix is not square");
+            //throw GraphBLAS::DimensionException(
+            //    "triangle_count_flame1_new matrix is not square");
+            exit(-1);
         }
 
         // A graph less than three vertices cannot have any triangles
@@ -555,8 +559,9 @@ namespace algorithms
         GraphBLAS::IndexType cols(graph.ncols());
         if (rows != cols)
         {
-            throw GraphBLAS::DimensionException(
-                "triangle_count_flame2 matrix is not square");
+            //throw GraphBLAS::DimensionException(
+            //    "triangle_count_flame2 matrix is not square");
+            exit(-1);
         }
 
         // A graph less than three vertices cannot have any triangles
@@ -631,8 +636,9 @@ namespace algorithms
         GraphBLAS::IndexType cols(graph.ncols());
         if (rows != cols)
         {
-            throw GraphBLAS::DimensionException(
-                "triangle_count_flame2 matrix is not square");
+            //throw GraphBLAS::DimensionException(
+            //    "triangle_count_flame2 matrix is not square");
+            exit(-1);
         }
 
         // A graph less than three vertices cannot have any triangles
@@ -718,10 +724,9 @@ namespace algorithms
         using T = typename MatrixT::ScalarType;
         T  num_triangles = 0;
 
-        GraphBLAS::IndexType rows(graph.nrows());
-        GraphBLAS::IndexType cols(graph.ncols());
-
         // assert(rows == cols);
+        //GraphBLAS::IndexType cols(graph.ncols());
+        GraphBLAS::IndexType rows(graph.nrows());
 
         // A graph less than three vertices cannot have any triangles
         if (rows < 3)

@@ -30,6 +30,8 @@
 #ifndef GB_CHECKS_HPP
 #define GB_CHECKS_HPP
 
+#include <graphblas/types.hpp>
+
 #define GB_INCLUDE_BACKEND_MATRIX 1
 #define GB_INCLUDE_BACKEND_VECTOR 1
 #include <backend_include.hpp>
@@ -37,8 +39,6 @@
 
 namespace GraphBLAS
 {
-
-
     // Helper method to make a nicely formatted messages
     std::string make_message(const std::string &msg, const std::string &msg2, IndexType dim1, IndexType dim2)
     {
@@ -55,16 +55,23 @@ namespace GraphBLAS
         return ss.str();
     }
 
+    // ***********************************************************************
+    // ***********************************************************************
+
     // This is the basis for everything
-    inline void check_val_equals(IndexType val1, IndexType val2,
+    inline Info check_val_equals(IndexType val1, IndexType val2,
                                  const std::string &msg1,
                                  const std::string &msg2)
     {
         if (val1 != val2)
-            throw DimensionException(make_message(msg1, msg2, val1, val2));
+        {
+            //throw DimensionException(make_message(msg1, msg2, val1, val2));
+            return DIMENSION_MISMATCH;
+        }
+        return SUCCESS;
     };
 
-    inline void check_index_val_lt(IndexType val1, IndexType val2,
+    inline Info check_index_val_lt(IndexType val1, IndexType val2,
                                    const std::string &msg1,
                                    const std::string &msg2)
     {
@@ -72,11 +79,13 @@ namespace GraphBLAS
         {
             std::ostringstream ss;
             ss << msg1 << ", " << msg2 << ", (" << val1 << " >= " << val2 << ")";
-            throw InvalidIndexException(ss.str());
+            //throw InvalidIndexException(ss.str());
+            return DIMENSION_MISMATCH;
         }
+        return SUCCESS;
     };
 
-    inline void check_index_val_leq(IndexType val1, IndexType val2,
+    inline Info check_index_val_leq(IndexType val1, IndexType val2,
                                     const std::string &msg1,
                                     const std::string &msg2)
     {
@@ -84,142 +93,156 @@ namespace GraphBLAS
         {
             std::ostringstream ss;
             ss << msg1 << ", " << msg2 << ", (" << val1 << " > " << val2 << ")";
-            throw DimensionException(ss.str());
+            //throw DimensionException(ss.str());
+            return DIMENSION_MISMATCH;
         }
+        return SUCCESS;
     };
 
     // ================================================
 
     template <typename M1, typename M2>
-    void check_nrows_nrows(M1 m1, M2 m2, const std::string &msg)
+    Info check_nrows_nrows(M1 m1, M2 m2, const std::string &msg)
     {
-        check_val_equals(m1.nrows(), m2.nrows(), "nrows != nrows", msg);
+        return check_val_equals(m1.nrows(), m2.nrows(), "nrows != nrows", msg);
     }
 
     template <typename M1>
-    void check_nrows_nrows(M1 m1, NoMask mask, const std::string &msg)
+    Info check_nrows_nrows(M1 m1, NoMask mask, const std::string &msg)
     {
         // No op
+        return SUCCESS;
     }
 
     // ================================================
 
     template <typename M1, typename M2>
-    void check_ncols_ncols(M1 m1, M2 m2, const std::string &msg)
+    Info check_ncols_ncols(M1 m1, M2 m2, const std::string &msg)
     {
-        check_val_equals(m1.ncols(), m2.ncols(), "ncols != ncols", msg);
+        return check_val_equals(m1.ncols(), m2.ncols(), "ncols != ncols", msg);
     }
 
     template <typename M1>
-    void check_ncols_ncols(M1 m1, NoMask mask, const std::string &msg)
+    Info check_ncols_ncols(M1 m1, NoMask mask, const std::string &msg)
     {
         // No op
+        return SUCCESS;
     }
 
     // ================================================
 
     template <typename M1, typename M2>
-    void check_ncols_nrows(M1 m1, M2 m2, const std::string &msg)
+    Info check_ncols_nrows(M1 m1, M2 m2, const std::string &msg)
     {
-        check_val_equals(m1.ncols(), m2.nrows(), "ncols != nrows", msg);
+        return check_val_equals(m1.ncols(), m2.nrows(), "ncols != nrows", msg);
     };
 
     template <typename M>
-    void check_ncols_nrows(M m, NoMask mask, const std::string &msg)
+    Info check_ncols_nrows(M m, NoMask mask, const std::string &msg)
     {
         // No op
+        return SUCCESS;
     };
 
     template <typename M>
-    void check_ncols_nrows(NoMask mask, M m, const std::string &msg)
+    Info check_ncols_nrows(NoMask mask, M m, const std::string &msg)
     {
         // No op
+        return SUCCESS;
     };
 
     // =========================================================================
 
     template <typename M, typename S>
-    void check_nrows_nindices(const M &m, const S &s, const std::string &msg)
+    Info check_nrows_nindices(const M &m, const S &s, const std::string &msg)
     {
-        check_val_equals(m.nrows(), s.size(), "nrows != nindices", msg);
+        return check_val_equals(m.nrows(), s.size(), "nrows != nindices", msg);
     };
 
     template <typename M>
-    void check_nrows_nindices(const M &m, const AllIndices &s, const std::string &msg)
+    Info check_nrows_nindices(const M &m, const AllIndices &s, const std::string &msg)
     {
+        return SUCCESS;
     };
 
     template <typename S>
-    void check_nrows_nindices(const NoMask &m, const S &s, const std::string &msg)
+    Info check_nrows_nindices(const NoMask &m, const S &s, const std::string &msg)
     {
+        return SUCCESS;
     };
 
     // =========================================================================
 
     template <typename M, typename S>
-    void check_ncols_nindices(const M &m, const S &s, const std::string &msg)
+    Info check_ncols_nindices(const M &m, const S &s, const std::string &msg)
     {
-        check_val_equals(m.ncols(), s.size(), "ncols != nindices", msg);
+        return check_val_equals(m.ncols(), s.size(), "ncols != nindices", msg);
     };
 
     template <typename M>
-    void check_ncols_nindices(const M &m, const AllIndices &s, const std::string &msg)
+    Info check_ncols_nindices(const M &m, const AllIndices &s, const std::string &msg)
     {
+        return SUCCESS;
     };
 
     template <typename S>
-    void check_ncols_nindices(const NoMask &m, const S &s, const std::string &msg)
+    Info check_ncols_nindices(const NoMask &m, const S &s, const std::string &msg)
     {
+        return SUCCESS;
     };
 
     // =========================================================================
 
     template <typename V1, typename V2>
-    void check_size_size(const V1 &v1, const V2 &v2, const std::string &msg)
+    Info check_size_size(const V1 &v1, const V2 &v2, const std::string &msg)
     {
-        check_val_equals(v1.size(), v2.size(), "size != size", msg);
+        return check_val_equals(v1.size(), v2.size(), "size != size", msg);
     };
 
     template <typename V>
-    void check_size_size(const V &v, const NoMask &mask, const std::string &msg)
+    Info check_size_size(const V &v, const NoMask &mask, const std::string &msg)
     {
         // No op
+        return SUCCESS;
     };
 
     template <typename V>
-    void check_size_size(const NoMask &mask, const V &v, const std::string &msg)
+    Info check_size_size(const NoMask &mask, const V &v, const std::string &msg)
     {
         // No op
+        return SUCCESS;
     };
 
     // =========================================================================
 
     template <typename V, typename M>
-    void check_size_nrows(const V &v, const M &A, const std::string &msg)
+    Info check_size_nrows(const V &v, const M &A, const std::string &msg)
     {
-        check_val_equals(v.size(), A.nrows(), "size != nrows", msg);
+        return check_val_equals(v.size(), A.nrows(), "size != nrows", msg);
     };
 
     // Note: NoMask support for assign(col)
     template <typename M>
-    void check_size_nrows(const NoMask &mask, const M &A, const std::string &msg)
+    Info check_size_nrows(const NoMask &mask, const M &A, const std::string &msg)
     {
         // No op
+        return SUCCESS;
     };
 
     // =========================================================================
 
     template <typename V, typename M>
-    void check_size_ncols(const V &v, const M &A, const std::string &msg)
+    Info check_size_ncols(const V &v, const M &A, const std::string &msg)
     {
-        check_val_equals(v.size(), A.ncols(), "size != nrows", msg);
+        return check_val_equals(v.size(), A.ncols(), "size != nrows", msg);
     };
 
     // Note: NoMask support for assign(row)
     template <typename M>
-    void check_size_ncols(const NoMask &mask, const M &A, const std::string &msg)
+    Info check_size_ncols(const NoMask &mask, const M &A, const std::string &msg)
     {
         // No op
+        return SUCCESS;
     };
 
     // Note: no NoMask support
@@ -227,83 +250,87 @@ namespace GraphBLAS
     // ================================================
 
     template <typename V, typename S>
-    void check_size_nindices(const V &v, const S &s, const std::string &msg)
+    Info check_size_nindices(const V &v, const S &s, const std::string &msg)
     {
-        check_val_equals(v.size(), s.size(), "size != nindices", msg);
+        return check_val_equals(v.size(), s.size(), "size != nindices", msg);
     };
 
     template <typename V>
-    void check_size_nindices(const V &v,
+    Info check_size_nindices(const V &v,
                              const GraphBLAS::AllIndices &s,
                              const std::string &msg)
     {
+        return SUCCESS;
     };
 
     // ================================================
 
     template <typename M>
-    void check_index_within_ncols(IndexType val, const M &m,
+    Info check_index_within_ncols(IndexType val, const M &m,
                                   const std::string &msg)
     {
-        check_index_val_lt(val, m.ncols(), "value < ncols", msg);
+        return check_index_val_lt(val, m.ncols(), "value < ncols", msg);
     }
 
     // ================================================
 
     template <typename M>
-    void check_index_within_nrows(IndexType val, const M &m,
+    Info check_index_within_nrows(IndexType val, const M &m,
                                   const std::string &msg)
     {
-        check_index_val_lt(val, m.nrows(), "value < nrows", msg);
+        return check_index_val_lt(val, m.nrows(), "value < nrows", msg);
     }
 
     // ================================================
 
     template <typename S, typename V>
-    void check_nindices_within_size(const S &seq, const V &vec,
+    Info check_nindices_within_size(const S &seq, const V &vec,
                                     const std::string &msg)
     {
-        check_index_val_leq(seq.size(), vec.size(), "seq.size < vec.size", msg);
+        return check_index_val_leq(seq.size(), vec.size(), "seq.size < vec.size", msg);
     }
 
     template <typename V>
-    void check_nindices_within_size(const GraphBLAS::AllIndices &seq,
+    Info check_nindices_within_size(const GraphBLAS::AllIndices &seq,
                                     const V &vec,
                                     const std::string &msg)
     {
+        return SUCCESS;
     }
 
     // ================================================
 
     template <typename S, typename M>
-    void check_nindices_within_ncols(const S &seq, const M &mat,
+    Info check_nindices_within_ncols(const S &seq, const M &mat,
                                      const std::string &msg)
     {
-        check_index_val_leq(seq.size(), mat.ncols(), "seq.size < mat.ncols", msg);
+        return check_index_val_leq(seq.size(), mat.ncols(), "seq.size < mat.ncols", msg);
     }
 
     template <typename M>
-    void check_nindices_within_ncols(const GraphBLAS::AllIndices &seq,
+    Info check_nindices_within_ncols(const GraphBLAS::AllIndices &seq,
                                      const M &mat,
                                      const std::string &msg)
     {
+        return SUCCESS;
     }
 
     // ================================================
 
     template <typename S, typename M>
-    void check_nindices_within_nrows(const S &seq,
+    Info check_nindices_within_nrows(const S &seq,
                                      const M &mat,
                                      const std::string &msg)
     {
-        check_index_val_leq(seq.size(), mat.nrows(), "seq.size < mat.nrows", msg);
+        return check_index_val_leq(seq.size(), mat.nrows(), "seq.size < mat.nrows", msg);
     }
 
     template <typename M>
-    void check_nindices_within_nrows(const GraphBLAS::AllIndices &seq,
+    Info check_nindices_within_nrows(const GraphBLAS::AllIndices &seq,
                                      const M &mat,
                                      const std::string &msg)
     {
+        return SUCCESS;
     }
 
 } // end namespace GraphBLAS

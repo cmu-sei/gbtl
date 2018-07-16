@@ -75,7 +75,7 @@ namespace GraphBLAS
             {
                 if (nsize == 0)
                 {
-                    throw InvalidValueException();
+                    exit(-1); // throw InvalidValueException();
                 }
             }
 
@@ -102,7 +102,7 @@ namespace GraphBLAS
             {
                 if (rhs.size() == 0)
                 {
-                    throw InvalidValueException();
+                    exit(-1); // throw InvalidValueException();
                 }
             }
 
@@ -124,7 +124,7 @@ namespace GraphBLAS
             {
                 if (rhs.size() == 0)
                 {
-                    throw InvalidValueException();
+                    exit(-1); // throw InvalidValueException();
                 }
 
                 for (IndexType idx = 0; idx < rhs.size(); ++idx)
@@ -157,7 +157,7 @@ namespace GraphBLAS
                     IndexType i = indices[idx];
                     if (i >= m_size)
                     {
-                        throw DimensionException();  // Should this be IndexOutOfBounds?
+                        exit(-1); // throw DimensionException();  // Should this be IndexOutOfBounds?
                     }
 
                     m_vals[i] = values[idx];
@@ -196,7 +196,7 @@ namespace GraphBLAS
                 {
                     if (m_size != rhs.m_size)
                     {
-                        throw DimensionException();
+                        exit(-1); // throw DimensionException();
                     }
 
                     m_nvals = rhs.m_nvals;
@@ -217,7 +217,7 @@ namespace GraphBLAS
             {
                 if (rhs.size() != m_size)
                 {
-                    throw DimensionException();
+                    exit(-1); // throw DimensionException();
                 }
                 for (IndexType idx = 0; idx < rhs.size(); ++idx)
                 {
@@ -277,7 +277,7 @@ namespace GraphBLAS
             template<typename RAIteratorIT,
                      typename RAIteratorVT,
                      typename BinaryOpT = GraphBLAS::Second<ScalarType> >
-            void build(RAIteratorIT  i_it,
+            Info build(RAIteratorIT  i_it,
                        RAIteratorVT  v_it,
                        IndexType     nvals,
                        BinaryOpT     dup = BinaryOpT())
@@ -291,7 +291,8 @@ namespace GraphBLAS
                     IndexType i = i_it[idx];
                     if (i >= m_size)
                     {
-                        throw IndexOutOfBoundsException();
+                        // throw IndexOutOfBoundsException();
+                        return INDEX_OUT_OF_BOUNDS;
                     }
 
                     if (bitmap[i] == true)
@@ -308,6 +309,8 @@ namespace GraphBLAS
                 m_vals.swap(vals);
                 m_bitmap.swap(bitmap);
                 m_nvals = nvals;
+
+                return SUCCESS;
             }
 
             void clear()
@@ -324,7 +327,7 @@ namespace GraphBLAS
             {
                 if (index >= m_size)
                 {
-                    throw IndexOutOfBoundsException();
+                    exit(-1); // throw IndexOutOfBoundsException();
                 }
 
                 return m_bitmap[index];
@@ -345,12 +348,12 @@ namespace GraphBLAS
             {
                 if (index >= m_size)
                 {
-                    throw IndexOutOfBoundsException();
+                    exit(-1); // throw IndexOutOfBoundsException();
                 }
 
                 if (m_bitmap[index] == false)
                 {
-                    throw NoValueException();
+                    exit(-1); // throw NoValueException();
                 }
 
                 return m_vals[index];
@@ -362,7 +365,7 @@ namespace GraphBLAS
             {
                 if (index >= m_size)
                 {
-                    throw IndexOutOfBoundsException();
+                    exit(-1); // throw IndexOutOfBoundsException();
                 }
                 m_vals[index] = new_val;
                 if (m_bitmap[index] == false)

@@ -60,7 +60,7 @@ namespace GraphBLAS
                  typename SemiringT,
                  typename AMatrixT,
                  typename UVectorT>
-        inline void mxv(WVectorT        &w,
+        inline Info mxv(WVectorT        &w,
                         MaskT     const &mask,
                         AccumT           accum,
                         SemiringT        op,
@@ -105,6 +105,7 @@ namespace GraphBLAS
             // =================================================================
             // Copy Z into the final output, w, considering mask and replace
             write_with_opt_mask_1D(w, z, mask, replace_flag);
+            return SUCCESS;
         }
 
     } // backend

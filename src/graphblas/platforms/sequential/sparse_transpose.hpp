@@ -60,7 +60,7 @@ namespace GraphBLAS
                  typename MaskT,
                  typename AccumT,
                  typename AMatrixT>
-        inline void transpose(CMatrixT       &C,
+        inline Info transpose(CMatrixT       &C,
                               MaskT    const &mask,
                               AccumT          accum,
                               AMatrixT const &A,
@@ -113,6 +113,7 @@ namespace GraphBLAS
             // =================================================================
             // Copy Z into the final output considering mask and replace
             write_with_opt_mask(C, Z, mask, replace_flag);
+            return SUCCESS;
         }
     }
 }

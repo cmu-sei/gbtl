@@ -146,7 +146,6 @@ namespace GraphBLAS
             {
                 auto row(A.getRow(*row_it));
 
-                IndexType tmp_idx;
                 AScalarT tmp_value;
                 CRowType out_row;
 
@@ -185,7 +184,6 @@ namespace GraphBLAS
             {
                 auto row(A.getRow(*row_it));
 
-                IndexType tmp_idx;
                 AScalarT tmp_value;
                 CRowType out_row;
 
@@ -327,15 +325,17 @@ namespace GraphBLAS
                  typename AccumT,
                  typename UVectorT,
                  typename SequenceT>
-        void extract(WVectorT                 &w,
+        Info extract(WVectorT                 &w,
                      MVectorT           const &mask,
                      AccumT                    accum,
                      UVectorT           const &u,
                      SequenceT          const &indices,
                      bool                      replace_flag = false)
         {
-            check_index_array_content(indices, u.size(),
-                                      "extract(std vec): indices >= u.size");
+            CHECK_STATUS(
+                check_index_array_content(indices, u.size(),
+                                          "extract(std vec): indices >= u.size")
+                );
 
             typedef typename WVectorT::ScalarType WScalarType;
             typedef std::vector<std::tuple<IndexType,WScalarType> > CColType;
@@ -370,6 +370,7 @@ namespace GraphBLAS
             write_with_opt_mask_1D(w, z, mask, replace_flag);
 
             GRB_LOG_VERBOSE("w (Result): " << w);
+            return SUCCESS;
         };
 
         //**********************************************************************
@@ -385,7 +386,7 @@ namespace GraphBLAS
                  typename AMatrixT,
                  typename RowSequenceT,
                  typename ColSequenceT>
-        void extract(CMatrixT                   &C,
+        Info extract(CMatrixT                   &C,
                      MMatrixT           const   &Mask,
                      AccumT                      accum,
                      AMatrixT           const   &A,
@@ -393,10 +394,14 @@ namespace GraphBLAS
                      ColSequenceT       const   &col_indices,
                      bool                        replace_flag = false)
         {
-            check_index_array_content(row_indices, A.nrows(),
-                                      "extract(std mat): row_indices >= A.nrows");
-            check_index_array_content(col_indices, A.ncols(),
-                                      "extract(std mat): col_indices >= A.ncols");
+            CHECK_STATUS(
+                check_index_array_content(row_indices, A.nrows(),
+                                          "extract(std mat): row_indices >= A.nrows")
+                );
+            CHECK_STATUS(
+                check_index_array_content(col_indices, A.ncols(),
+                                          "extract(std mat): col_indices >= A.ncols")
+                );
 
             // =================================================================
             // Extract to T
@@ -427,6 +432,7 @@ namespace GraphBLAS
             write_with_opt_mask(C, Z, Mask, replace_flag);
 
             GRB_LOG_VERBOSE("C (Result): " << C);
+            return SUCCESS;
         };
 
 
@@ -444,7 +450,7 @@ namespace GraphBLAS
                  typename AccumT,
                  typename AMatrixT,
                  typename SequenceT>
-        void extract(WVectorT                 &w,
+        Info extract(WVectorT                 &w,
                      MaskVectorT        const &mask,
                      AccumT                    accum,
                      AMatrixT           const &A,
@@ -452,8 +458,10 @@ namespace GraphBLAS
                      IndexType                 col_index,
                      bool                      replace_flag = false)
         {
-            check_index_array_content(row_indices, A.nrows(),
-                                      "extract(col): row_indices >= A.nrows");
+            CHECK_STATUS(
+                check_index_array_content(row_indices, A.nrows(),
+                                          "extract(col): row_indices >= A.nrows")
+                );
 
             // =================================================================
             // Extract to T
@@ -484,10 +492,10 @@ namespace GraphBLAS
             write_with_opt_mask_1D(w, z, mask, replace_flag);
 
             GRB_LOG_VERBOSE("w (Result): " << w);
+
+            return SUCCESS;
         }
     }
 }
-
-
 
 #endif //GB_SEQUENTIAL_SPARSE_EXTRACT_HPP

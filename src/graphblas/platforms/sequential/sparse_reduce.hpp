@@ -58,7 +58,7 @@ namespace GraphBLAS
                  typename AccumT,
                  typename BinaryOpT,  // monoid or binary op only
                  typename AMatrixT>
-        inline void reduce(WVectorT        &w,
+        inline Info reduce(WVectorT        &w,
                            MaskT     const &mask,
                            AccumT           accum,
                            BinaryOpT        op,
@@ -105,6 +105,7 @@ namespace GraphBLAS
             // =================================================================
             // Copy Z into the final output, w, considering mask and replace
             write_with_opt_mask_1D(w, z, mask, replace_flag);
+            return SUCCESS;
         }
 
         //********************************************************************
@@ -113,7 +114,7 @@ namespace GraphBLAS
                  typename AccumT,
                  typename MonoidT, // monoid only
                  typename UVectorT>
-        inline void reduce_vector_to_scalar(ValueT         &val,
+        inline Info reduce_vector_to_scalar(ValueT         &val,
                                             AccumT          accum,
                                             MonoidT         op,
                                             UVectorT const &u)
@@ -143,6 +144,7 @@ namespace GraphBLAS
 
             // Copy Z into the final output
             val = z;
+            return SUCCESS;
         }
 
         //********************************************************************
@@ -151,7 +153,7 @@ namespace GraphBLAS
                  typename AccumT,
                  typename MonoidT, // monoid only
                  typename AMatrixT>
-        inline void reduce_matrix_to_scalar(ValueT         &val,
+        inline Info reduce_matrix_to_scalar(ValueT         &val,
                                             AccumT          accum,
                                             MonoidT         op,
                                             AMatrixT const &A)
@@ -193,6 +195,7 @@ namespace GraphBLAS
 
             // Copy Z into the final output
             val = z;
+            return SUCCESS;
         }
 
     } // backend

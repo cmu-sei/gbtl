@@ -201,7 +201,8 @@ namespace GraphBLAS
                     return true;
                 }
 
-                throw GraphBLAS::NoValueException();
+                //throw GraphBLAS::NoValueException();
+                exit(-4);
             }
 
             std::vector<std::tuple<IndexType, bool> > getRow(
@@ -407,8 +408,8 @@ namespace GraphBLAS
                 }
 
                 /// @todo stored zeros need to evaluate to true in the complement
-                throw 1;  // Not implemented yet
-
+                //throw 1;  // Not implemented yet
+                exit(-4);
                 /// @todo Not implemented yet.
 
                 return true;
@@ -459,7 +460,8 @@ namespace GraphBLAS
                     return true;
                 }
 
-                throw GraphBLAS::NoValueException();
+                //throw GraphBLAS::NoValueException();
+                exit(-4);
             }
 
             std::vector<std::tuple<IndexType, bool> > getContents() const

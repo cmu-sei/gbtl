@@ -45,6 +45,21 @@ namespace GraphBLAS
     typedef std::vector<IndexType> IndexArrayType;
 
     //**************************************************************************
+    // Error codes to replace some of the exceptions
+    enum Info {
+        SUCCESS,
+        INVALID_VALUE,
+        INVALID_INDEX,
+        DOMAIN_MISMATCH,
+        DIMENSION_MISMATCH,
+        OUTPUT_NOT_EMPTY,
+        NO_VALUE,
+        INDEX_OUT_OF_BOUNDS,
+        OUT_OF_MEMORY
+    };
+
+
+    //**************************************************************************
     struct NoAccumulate
     {
         // It doesn't really matter what the type is, it never gets executed.
@@ -63,6 +78,8 @@ namespace GraphBLAS
 
 
 } // namespace GraphBLAS
+
+#define CHECK_STATUS(x)     do { Info status(x); if (status != SUCCESS) return status; } while(0)
 
 namespace std
 {

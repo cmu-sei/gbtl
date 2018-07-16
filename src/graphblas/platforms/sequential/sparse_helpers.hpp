@@ -1022,7 +1022,7 @@ namespace GraphBLAS
         // Index-out-of-bounds is an execution error and a responsibility of
         // the backend.
         template <typename SequenceT>
-        void check_index_array_content(SequenceT const   &array,
+        Info check_index_array_content(SequenceT const   &array,
                                        IndexType          dim,
                                        std::string const &msg)
         {
@@ -1032,10 +1032,12 @@ namespace GraphBLAS
                 {
                     if (ix >= dim)
                     {
-                        throw IndexOutOfBoundsException(msg);
+                        //throw IndexOutOfBoundsException(msg);
+                        return INDEX_OUT_OF_BOUNDS;
                     }
                 }
             }
+            return SUCCESS;
         }
 
         //********************************************************************

@@ -187,15 +187,16 @@ namespace GraphBLAS
          */
         template<typename ValueT,
                  typename BinaryOpT = GraphBLAS::Second<ScalarType> >
-        inline void build(IndexArrayType       const &indices,
+        inline Info build(IndexArrayType       const &indices,
                           std::vector<ValueT>  const &values,
                           BinaryOpT                   dup = BinaryOpT())
         {
             if (indices.size() != values.size())
             {
-                throw DimensionException("Vector::build");
+                //throw DimensionException("Vector::build");
+                return DIMENSION_MISMATCH;
             }
-            m_vec.build(indices.begin(), values.begin(), values.size(), dup);
+            return m_vec.build(indices.begin(), values.begin(), values.size(), dup);
         }
 
         void clear() { m_vec.clear(); }
@@ -250,7 +251,7 @@ namespace GraphBLAS
                 typename SemiringT,
                 typename UVectorT,
                 typename AMatrixT>
-        friend inline void vxm(WVectorT         &w,
+        friend inline Info vxm(WVectorT         &w,
                                MaskT      const &mask,
                                AccumT            accum,
                                SemiringT         op,
@@ -265,7 +266,7 @@ namespace GraphBLAS
                  typename SemiringT,
                  typename AMatrixT,
                  typename UVectorT>
-        friend inline void mxv(WVectorT        &w,
+        friend inline Info mxv(WVectorT        &w,
                                MaskT     const &mask,
                                AccumT           accum,
                                SemiringT        op,
@@ -281,7 +282,7 @@ namespace GraphBLAS
                  typename UVectorT,
                  typename VVectorT,
                  typename ...WTagsT>
-        friend inline void eWiseMult(
+        friend inline Info eWiseMult(
             GraphBLAS::Vector<WScalarT, WTagsT...> &w,
             MaskT                            const &mask,
             AccumT                                  accum,
@@ -298,7 +299,7 @@ namespace GraphBLAS
                  typename UVectorT,
                  typename VVectorT,
                  typename ...WTagsT>
-        friend inline void eWiseAdd(
+        friend inline Info eWiseAdd(
             GraphBLAS::Vector<WScalarT, WTagsT...> &w,
             MaskT                            const &mask,
             AccumT                                  accum,
@@ -313,7 +314,7 @@ namespace GraphBLAS
                  typename AccumT,
                  typename UVectorT,
                  typename SequenceT>
-        friend inline void extract(WVectorT             &w,
+        friend inline Info extract(WVectorT             &w,
                                    MaskT          const &mask,
                                    AccumT                accum,
                                    UVectorT       const &u,
@@ -327,7 +328,7 @@ namespace GraphBLAS
                  typename AMatrixT,
                  typename SequenceT,
                  typename ...WTags>
-        friend inline void extract(
+        friend inline Info extract(
                 GraphBLAS::Vector<WScalarT, WTags...> &w,
                 MaskT          const &mask,
                 AccumT                accum,
@@ -346,7 +347,7 @@ namespace GraphBLAS
         //              std::is_same<vector_tag,
         //                           typename UVectorT::tag_type>::value,
         //              int>::type>
-        // friend inline void assign(WVectorT           &w,
+        // friend inline Info assign(WVectorT           &w,
         //                           MaskT        const &mask,
         //                           AccumT              accum,
         //                           UVectorT     const &u,
@@ -363,7 +364,7 @@ namespace GraphBLAS
                                   typename UVectorT::tag_type>::value,
                      int>::type,
                  typename ...WTags>
-        friend inline void assign(Vector<WScalarT, WTags...>   &w,
+        friend inline Info assign(Vector<WScalarT, WTags...>   &w,
                                   MaskT        const &mask,
                                   AccumT              accum,
                                   UVectorT     const &u,
@@ -377,7 +378,7 @@ namespace GraphBLAS
                  typename UVectorT,
                  typename SequenceT,
                  typename ...CTags>
-        friend inline void assign(Matrix<CScalarT, CTags...>  &C,
+        friend inline Info assign(Matrix<CScalarT, CTags...>  &C,
                                   MaskT                 const &mask,  // a vector
                                   AccumT                       accum,
                                   UVectorT              const &u,
@@ -392,7 +393,7 @@ namespace GraphBLAS
                  typename UVectorT,
                  typename SequenceT,
                  typename ...CTags>
-        friend inline void assign(Matrix<CScalarT, CTags...>  &C,
+        friend inline Info assign(Matrix<CScalarT, CTags...>  &C,
                                   MaskT                 const &mask,  // a vector
                                   AccumT                       accum,
                                   UVectorT              const &u,
@@ -410,7 +411,7 @@ namespace GraphBLAS
                      std::is_convertible<ValueT,
                                          typename WVectorT::ScalarType>::value,
                      int>::type>
-        friend inline void assign(WVectorT &w,
+        friend inline Info assign(WVectorT &w,
                                   MaskT const &mask,
                                   AccumT accum,
                                   ValueT val,
@@ -424,7 +425,7 @@ namespace GraphBLAS
                  typename UnaryFunctionT,
                  typename UVectorT,
                  typename ...WTagsT>
-        friend inline void apply(
+        friend inline Info apply(
             GraphBLAS::Vector<WScalarT, WTagsT...> &w,
             MaskT                            const &mask,
             AccumT                                  accum,
@@ -438,7 +439,7 @@ namespace GraphBLAS
                  typename AccumT,
                  typename BinaryOpT,  // monoid or binary op only
                  typename AMatrixT>
-        friend inline void reduce(WVectorT        &u,
+        friend inline Info reduce(WVectorT        &u,
                                   MaskT     const &mask,
                                   AccumT           accum,
                                   BinaryOpT        op,
@@ -450,7 +451,7 @@ namespace GraphBLAS
                  typename MonoidT, // monoid only
                  typename UScalarT,
                  typename ...UTagsT>
-        friend inline void reduce(
+        friend inline Info reduce(
             ValueT                                       &dst,
             AccumT                                        accum,
             MonoidT                                       op,

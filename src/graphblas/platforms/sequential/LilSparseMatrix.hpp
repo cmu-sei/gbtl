@@ -80,10 +80,11 @@ namespace GraphBLAS
                 {
                     if (val[ii].size() != m_num_cols)
                     {
-                        throw DimensionException("LilSparseMatix(dense ctor)");
+                        //throw DimensionException("LilSparseMatix(dense ctor)");
+                        exit(1);
                     }
 
-                    for (IndexType jj = 0; jj < m_num_cols; jj++)
+                    for (IndexType jj = 0; jj < val[ii].size(); jj++)
                     {
                         m_data[ii].push_back(std::make_tuple(jj, val[ii][jj]));
                         m_nvals = m_nvals + 1;
@@ -103,10 +104,11 @@ namespace GraphBLAS
                 {
                     if (val[ii].size() != m_num_cols)
                     {
-                        throw DimensionException("LilSparseMatix(dense ctor)");
+                        //throw DimensionException("LilSparseMatix(dense ctor)");
+                        exit(2);
                     }
 
-                    for (IndexType jj = 0; jj < m_num_cols; jj++)
+                    for (IndexType jj = 0; jj < val[ii].size(); jj++)
                     {
                         if (val[ii][jj] != zero)
                         {
@@ -130,7 +132,8 @@ namespace GraphBLAS
                     if ((m_num_rows != rhs.m_num_rows) ||
                         (m_num_cols != rhs.m_num_cols))
                     {
-                        throw DimensionException();
+                        //throw DimensionException();
+                        exit(3);
                     }
 
                     m_nvals = rhs.m_nvals;
@@ -167,7 +170,7 @@ namespace GraphBLAS
                      typename RAIteratorJ,
                      typename RAIteratorV,
                      typename DupT>
-            void build(RAIteratorI  i_it,
+            Info build(RAIteratorI  i_it,
                        RAIteratorJ  j_it,
                        RAIteratorV  v_it,
                        IndexType    n,
@@ -184,6 +187,7 @@ namespace GraphBLAS
                     setElement(*i_it, *j_it, *v_it, dup);
                     ++i_it; ++j_it; ++v_it;
                 }
+                return SUCCESS;
             }
 
             void clear()
@@ -211,8 +215,9 @@ namespace GraphBLAS
             {
                 if (irow >= m_num_rows || icol >= m_num_cols)
                 {
-                    throw IndexOutOfBoundsException(
-                        "get_value_at: index out of bounds");
+                    //throw IndexOutOfBoundsException(
+                    //    "get_value_at: index out of bounds");
+                    exit(4);
                 }
                 if (m_data.empty())
                 {
@@ -223,7 +228,6 @@ namespace GraphBLAS
                     return false;
                 }
 
-                IndexType ind;
                 ScalarT val;
                 //for (auto tupl : m_data[irow])// Range-based loop, access by value
                 for (auto tupl : m_data.at(irow))// Range-based loop, access by value
@@ -241,32 +245,32 @@ namespace GraphBLAS
             {
                 if (irow >= m_num_rows || icol >= m_num_cols)
                 {
-                    throw IndexOutOfBoundsException(
-                        "get_value_at: index out of bounds");
+                    //throw IndexOutOfBoundsException(
+                    //    "get_value_at: index out of bounds");
+                    exit(-1);
                 }
                 if (m_data.empty())
                 {
-                    throw NoValueException("get_value_at: no entry at index");
+                    //throw NoValueException("get_value_at: no entry at index");
+                    exit(-2);
                 }
                 if (m_data.at(irow).empty())
                 {
-                    throw NoValueException("get_value_at: no entry at index");
+                    //throw NoValueException("get_value_at: no entry at index");
+                    exit(-3);
                 }
 
-                IndexType ind;
                 ScalarT val;
                 //for (auto tupl : m_data[irow])// Range-based loop, access by value
                 for (auto tupl : m_data.at(irow))// Range-based loop, access by value
                 {
-                    //std::tie(ind, val) = tupl;
-                    //if (ind == icol)
                     if (std::get<0>(tupl) == icol)
                     {
-                        //return val;
                         return std::get<1>(tupl);
                     }
                 }
-                throw NoValueException("get_value_at: no entry at index");
+                //throw NoValueException("get_value_at: no entry at index");
+                exit (-4);
             }
 
             // Set value at index
@@ -275,7 +279,8 @@ namespace GraphBLAS
                 m_data[irow].reserve(m_data[irow].capacity() + 10);
                 if (irow >= m_num_rows || icol >= m_num_cols)
                 {
-                    throw IndexOutOfBoundsException("setElement: index out of bounds");
+                    //throw IndexOutOfBoundsException("setElement: index out of bounds");
+                    exit(-5);
                 }
 
                 if (m_data[irow].empty())
@@ -320,8 +325,9 @@ namespace GraphBLAS
             {
                 if (irow >= m_num_rows || icol >= m_num_cols)
                 {
-                    throw IndexOutOfBoundsException(
-                        "setElement(merge): index out of bounds");
+                    //throw IndexOutOfBoundsException(
+                    //    "setElement(merge): index out of bounds");
+                    exit(-6);
                 }
 
                 if (m_data[irow].empty())
@@ -493,8 +499,9 @@ namespace GraphBLAS
                     else // row_index > next entry to insert
                     {
                         // This should not happen
-                        throw GraphBLAS::PanicException(
-                            "LilSparseMatrix::setCol() INTERNAL ERROR");
+                        //throw GraphBLAS::PanicException(
+                        //    "LilSparseMatrix::setCol() INTERNAL ERROR");
+                        exit(-7);
                     }
                 }
 
@@ -505,8 +512,9 @@ namespace GraphBLAS
             {
                 if (irow >= m_num_rows)
                 {
-                    throw IndexOutOfBoundsException(
-                        "getColumnIndices: index out of bounds");
+                    //throw IndexOutOfBoundsException(
+                    //    "getColumnIndices: index out of bounds");
+                    exit(-8);
                 }
 
                 if (!m_data[irow].empty())
@@ -528,8 +536,9 @@ namespace GraphBLAS
             {
                 if (icol >= m_num_cols)
                 {
-                    throw IndexOutOfBoundsException(
-                        "getRowIndices: index out of bounds");
+                    //throw IndexOutOfBoundsException(
+                    //    "getRowIndices: index out of bounds");
+                    exit(-9);
                 }
 
                 IndexType ind;

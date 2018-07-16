@@ -65,7 +65,7 @@ namespace GraphBLAS
                  typename SemiringT,
                  typename AMatrixT,
                  typename BMatrixT>
-        inline void mxm(CMatrixT            &C,
+        inline Info mxm(CMatrixT            &C,
                         MMatrixT    const   &M,
                         AccumT      const   &accum,
                         SemiringT            op,
@@ -141,7 +141,7 @@ namespace GraphBLAS
             // =================================================================
             // Copy Z into the final output considering mask and replace
             write_with_opt_mask(C, Z, M, replace_flag);
-
+            return SUCCESS;
         } // mxm
     } // backend
 } // GraphBLAS

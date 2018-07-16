@@ -101,12 +101,11 @@ namespace GraphBLAS
     template<typename MatrixT>
     void split(MatrixT const &A, MatrixT &L, MatrixT &U)
     {
-        /// @todo assert A, L, and U are same size.
-
         using T = typename MatrixT::ScalarType;
 
-        GraphBLAS::IndexType rows(A.nrows());
-        GraphBLAS::IndexType cols(A.ncols());
+        /// @todo assert A, L, and U are same size.
+        //GraphBLAS::IndexType rows(A.nrows());
+        //GraphBLAS::IndexType cols(A.ncols());
         GraphBLAS::IndexType nvals(A.nvals());
 
         GraphBLAS::IndexArrayType i(nvals), j(nvals);

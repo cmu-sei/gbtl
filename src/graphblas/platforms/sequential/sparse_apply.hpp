@@ -62,7 +62,7 @@ namespace GraphBLAS
                  typename UnaryFunctionT,
                  typename UVectorT,
                  typename ...WTagsT>
-        inline void apply(
+        inline Info apply(
             GraphBLAS::backend::Vector<WScalarT, WTagsT...> &w,
             MaskT                                     const &mask,
             AccumT                                           accum,
@@ -109,6 +109,7 @@ namespace GraphBLAS
             // =================================================================
             // Copy Z into the final output considering mask and replace
             write_with_opt_mask_1D(w, z_contents, mask, replace_flag);
+            return SUCCESS;
         }
 
         //**********************************************************************
@@ -119,7 +120,7 @@ namespace GraphBLAS
                  typename UnaryFunctionT,
                  typename AMatrixT,
                  typename ...CTagsT>
-        inline void apply(
+        inline Info apply(
             GraphBLAS::backend::Matrix<CScalarT, CTagsT...> &C,
             MaskT                                     const &mask,
             AccumT                                           accum,
@@ -188,6 +189,7 @@ namespace GraphBLAS
             // =================================================================
             // Copy Z into the final output considering mask and replace
             write_with_opt_mask(C, Z, mask, replace_flag);
+            return SUCCESS;
         }
     }
 }

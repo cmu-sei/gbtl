@@ -304,7 +304,7 @@ namespace GraphBLAS
                  typename AccumT,
                  typename UVectorT,
                  typename SequenceT>
-        inline void assign(WVectorT           &w,
+        inline Info assign(WVectorT           &w,
                            MaskT        const &mask,
                            AccumT              accum,
                            UVectorT     const &u,
@@ -313,8 +313,10 @@ namespace GraphBLAS
         {
             GRB_LOG_VERBOSE("reference backend - 4.3.7.1");
 
-            check_index_array_content(indices, w.size(),
-                                      "assign(std vec): indices content check");
+            CHECK_STATUS(
+                check_index_array_content(indices, w.size(),
+                                          "assign(std vec): indices content check")
+                );
 
             std::vector<std::pair<IndexType, IndexType>> oi_pairs;
             compute_outin_mapping(setupIndices(indices, u.size()), oi_pairs);
@@ -345,6 +347,7 @@ namespace GraphBLAS
             // =================================================================
             // Copy z into the final output considering mask and replace
             write_with_opt_mask_1D(w, z, mask, replace_flag);
+            return SUCCESS;
         }
 
         //=====================================================================
@@ -357,7 +360,7 @@ namespace GraphBLAS
                  typename AMatrixT,
                  typename RowSequenceT,
                  typename ColSequenceT>
-        inline void assign(CMatrixT               &C,
+        inline Info assign(CMatrixT               &C,
                            MaskT            const &mask,
                            AccumT                  accum,
                            AMatrixT         const &A,
@@ -369,10 +372,14 @@ namespace GraphBLAS
             typedef typename AMatrixT::ScalarType  AScalarType;
 
             // execution error checks
-            check_index_array_content(row_indices, C.nrows(),
-                                      "assign(std mat): row_indices content check");
-            check_index_array_content(col_indices, C.ncols(),
-                                      "assign(std mat): col_indices content check");
+            CHECK_STATUS(
+                check_index_array_content(row_indices, C.nrows(),
+                                          "assign(std mat): row_indices content check")
+                );
+            CHECK_STATUS(
+                check_index_array_content(col_indices, C.ncols(),
+                                          "assign(std mat): col_indices content check")
+                );
 
             // =================================================================
             // Expand to T
@@ -400,6 +407,7 @@ namespace GraphBLAS
             // =================================================================
             // Copy Z into the final output considering mask and replace
             write_with_opt_mask(C, Z, mask, replace);
+            return SUCCESS;
         }
 
         //=====================================================================
@@ -411,7 +419,7 @@ namespace GraphBLAS
                  typename AccumT,
                  typename UVectorT,
                  typename SequenceT>
-        inline void assign(CMatrixT               &C,
+        inline Info assign(CMatrixT               &C,
                            MaskT            const &mask,
                            AccumT                  accum,
                            UVectorT         const &u,
@@ -424,8 +432,10 @@ namespace GraphBLAS
             // variant and wrap it's contents with this.
 
             // execution error checks
-            check_index_array_content(row_indices, C.nrows(),
-                                      "assign(col): indices content check");
+            CHECK_STATUS(
+                check_index_array_content(row_indices, C.nrows(),
+                                          "assign(col): indices content check")
+                );
 
             // EXTRACT the column of C matrix
             typedef typename CMatrixT::ScalarType CScalarType;
@@ -437,7 +447,9 @@ namespace GraphBLAS
             }
 
             // ----------- standard vector variant 4.3.7.1 -----------
-            assign(c_vec, mask, accum, u, row_indices, replace);
+            CHECK_STATUS(
+                assign(c_vec, mask, accum, u, row_indices, replace)
+                );
             // ----------- standard vector variant 4.3.7.1 -----------
 
             // REPLACE the column of C matrix
@@ -453,6 +465,7 @@ namespace GraphBLAS
             }
 
             C.setCol(col_index, col_data);
+            return SUCCESS;
         }
 
         //=====================================================================
@@ -464,7 +477,7 @@ namespace GraphBLAS
                  typename AccumT,
                  typename UVectorT,
                  typename SequenceT>
-        inline void assign(CMatrixT               &C,
+        inline Info assign(CMatrixT               &C,
                            MaskT            const &mask,
                            AccumT                  accum,
                            UVectorT         const &u,
@@ -477,8 +490,10 @@ namespace GraphBLAS
             // variant and wrap it's contents with this.
 
             // execution error checks
-            check_index_array_content(col_indices, C.ncols(),
-                                      "assign(row): indices content check");
+            CHECK_STATUS(
+                check_index_array_content(col_indices, C.ncols(),
+                                          "assign(row): indices content check")
+                );
 
             // EXTRACT the row of C matrix
             typedef typename CMatrixT::ScalarType CScalarType;
@@ -490,7 +505,9 @@ namespace GraphBLAS
             }
 
             // ----------- standard vector variant 4.3.7.1 -----------
-            assign(c_vec, mask, accum, u, col_indices, replace);
+            CHECK_STATUS(
+                assign(c_vec, mask, accum, u, col_indices, replace)
+                );
             // ----------- standard vector variant 4.3.7.1 -----------
 
             // REPLACE the row of C matrix
@@ -506,6 +523,7 @@ namespace GraphBLAS
             }
 
             C.setRow(row_index, row_data);
+            return SUCCESS;
         }
 
         //======================================================================
@@ -517,7 +535,7 @@ namespace GraphBLAS
                  typename AccumT,
                  typename ValueT,
                  typename SequenceT>
-        inline void assign_constant(WVectorT             &w,
+        inline Info assign_constant(WVectorT             &w,
                                     MaskT          const &mask,
                                     AccumT                accum,
                                     ValueT                val,
@@ -525,8 +543,10 @@ namespace GraphBLAS
                                     bool                  replace_flag = false)
         {
             // execution error checks
-            check_index_array_content(indices, w.size(),
-                                      "assign(const vec): indices content check");
+            CHECK_STATUS(
+                check_index_array_content(indices, w.size(),
+                                          "assign(const vec): indices content check")
+                );
 
             std::vector<std::tuple<IndexType, ValueT> > t;
 
@@ -555,6 +575,7 @@ namespace GraphBLAS
             // =================================================================
             // Copy Z into the final output, w, considering mask and replace
             write_with_opt_mask_1D(w, z, mask, replace_flag);
+            return SUCCESS;
         }
 
         //======================================================================
@@ -567,7 +588,7 @@ namespace GraphBLAS
                  typename ValueT,
                  typename RowIndicesT,
                  typename ColIndicesT>
-        inline void assign_constant(CMatrixT             &C,
+        inline Info assign_constant(CMatrixT             &C,
                                     MaskT          const &Mask,
                                     AccumT                accum,
                                     ValueT                val,
@@ -578,10 +599,14 @@ namespace GraphBLAS
             typedef typename CMatrixT::ScalarType CScalarType;
 
             // execution error checks
-            check_index_array_content(row_indices, C.nrows(),
-                                      "assign(std mat): row_indices content check");
-            check_index_array_content(col_indices, C.ncols(),
-                                      "assign(std mat): col_indices content check");
+            CHECK_STATUS(
+                check_index_array_content(row_indices, C.nrows(),
+                                          "assign(std mat): row_indices content check")
+                );
+            CHECK_STATUS(
+                check_index_array_content(col_indices, C.ncols(),
+                                          "assign(std mat): col_indices content check")
+                );
 
             // =================================================================
             // Assign spots in T
@@ -609,6 +634,7 @@ namespace GraphBLAS
             // =================================================================
             // Copy Z into the final output considering mask and replace
             write_with_opt_mask(C, Z, Mask, replace_flag);
+            return SUCCESS;
         }
     }
 }
