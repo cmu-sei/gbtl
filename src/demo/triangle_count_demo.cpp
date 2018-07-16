@@ -28,8 +28,9 @@
  */
 
 #include <iostream>
-#include <fstream>
+//#include <fstream>
 #include <chrono>
+#include <stdio.h>
 
 #define GRAPHBLAS_DEBUG 1
 
@@ -46,21 +47,25 @@ int main(int argc, char **argv)
     }
 
     // Read the edgelist and create the tuple arrays
-    std::string pathname(argv[1]);
-    std::ifstream infile(pathname);
+    //std::string pathname(argv[1]);
+    //std::ifstream infile(pathname);
     GraphBLAS::IndexArrayType iL, iU, iA;
     GraphBLAS::IndexArrayType jL, jU, jA;
     int64_t num_rows = 0;
     int64_t max_id = 0;
     uint64_t src, dst;
-//    for (std::string row; getline(infile, row, '\n');)
-//    {
-//        std::cout << "Row: " << row << std::endl;
-//        sscanf(row.c_str(), "%ld\t%ld", &src, &dst);
-    while (infile)
+
+    FILE *infile = fopen(argv[1], "r");
+    if (!infile)
     {
-        infile >> src >> dst;
-        //std::cout << "Read: " << src << ", " << dst << std::endl;
+        fprintf(stderr, "Unable to open file: %s\n", argv[1]);
+        exit(1);
+    }
+
+    while (!feof(infile))
+    {
+        fscanf(infile, "%ld %ld", &src, &dst);
+        printf("Read: %ld, %ld\n", src, dst);
         if (src > max_id) max_id = src;
         if (dst > max_id) max_id = dst;
 
@@ -84,6 +89,7 @@ int main(int argc, char **argv)
 
         ++num_rows;
     }
+    fclose(infile);
     std::cout << "Read " << num_rows << " rows." << std::endl;
     std::cout << "#Nodes = " << (max_id + 1) << std::endl;
 
