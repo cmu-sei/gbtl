@@ -54,7 +54,8 @@ namespace algorithms
 
         if (vid >= graph.ncols())
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return 0;
         }
 
         GraphBLAS::Vector<T> in_edges(graph.nrows());
@@ -84,7 +85,8 @@ namespace algorithms
 
         if (vid >= graph.nrows())
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return 0;
         }
 
         GraphBLAS::Vector<T> out_edges(graph.nrows());
@@ -139,7 +141,8 @@ namespace algorithms
 
         if ((rows != cols) || (rows != result.size()))
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return;
         }
 
         result.clear();
@@ -169,7 +172,8 @@ namespace algorithms
             (result.nrows() != rows) ||
             (result.ncols() != cols))
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return 0;
         }
 
         result.clear();
@@ -206,7 +210,8 @@ namespace algorithms
 
         if (rows != cols)
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return 0;
         }
 
         GraphBLAS::Vector<T> result(rows);

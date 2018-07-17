@@ -58,7 +58,8 @@ namespace algorithms
         GraphBLAS::IndexType num_vertices(graph.nrows());
         if (num_vertices != graph.ncols())
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return GraphBLAS::Matrix<T>(num_vertices, num_vertices);
         }
 
         auto Distances(

@@ -569,9 +569,9 @@ namespace GraphBLAS
             template<typename RAIteratorIT,
                      typename RAIteratorJT,
                      typename RAIteratorVT>
-            ScalarT extractTuples(RAIteratorIT        row_it,
-                                  RAIteratorJT        col_it,
-                                  RAIteratorVT        values) const
+            void extractTuples(RAIteratorIT        row_it,
+                               RAIteratorJT        col_it,
+                               RAIteratorVT        values) const
             {
                 for (IndexType row = 0; row < m_data.size(); ++row)
                 {

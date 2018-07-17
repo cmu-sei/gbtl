@@ -65,7 +65,7 @@ int main(int argc, char **argv)
     while (!feof(infile))
     {
         fscanf(infile, "%ld %ld", &src, &dst);
-        printf("Read: %ld, %ld\n", src, dst);
+        //printf("Read: %ld, %ld\n", src, dst);
         if (src > max_id) max_id = src;
         if (dst > max_id) max_id = dst;
 

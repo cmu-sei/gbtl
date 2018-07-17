@@ -115,7 +115,7 @@ namespace
      */
     template <typename MatrixT,
               typename WavefrontMatrixT>
-    void bfs_level_masked(MatrixT const     &graph,
+    Info bfs_level_masked(MatrixT const     &graph,
                           WavefrontMatrixT   wavefront, //row vector, copy made
                           Matrix<IndexType> &levels)
     {
@@ -125,15 +125,16 @@ namespace
         IndexType grows(graph.nrows());
         IndexType gcols(graph.ncols());
 
-        IndexType rows(wavefront.nrows());
+        //IndexType rows(wavefront.nrows());
         IndexType cols(wavefront.ncols());
 
         if ((grows != gcols) || (cols != grows))
         {
-            throw DimensionException("grows="+std::to_string(grows)
-                                     + ", gcols"+std::to_string(gcols)
-                                     + "\ncols="+std::to_string(cols)
-                                     + ", grows="+std::to_string(grows));
+            //throw DimensionException("grows="+std::to_string(grows)
+            //                         + ", gcols"+std::to_string(gcols)
+            //                         + "\ncols="+std::to_string(cols)
+            //                         + ", grows="+std::to_string(grows));
+            return DIMENSION_MISMATCH;
         }
 
         IndexType depth = 0;
@@ -154,6 +155,7 @@ namespace
                 LogicalSemiring<IndexType>(),
                 wavefront, graph, true);
         }
+        return SUCCESS;
     }
 }
 

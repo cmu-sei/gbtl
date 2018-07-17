@@ -82,7 +82,8 @@ namespace algorithms
     {
         if (v.nvals() == 0)
         {
-            throw GraphBLAS::PanicException();
+            //throw GraphBLAS::PanicException();
+            return (GraphBLAS::IndexType)-1;
         }
 
         std::vector<T> vals(v.nvals());
@@ -136,7 +137,8 @@ namespace algorithms
 
         if ((rows != cols) || (rows != mst_parents.size()))
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return (T)0;
         }
         //GraphBLAS::print_matrix(std::cout, graph, "GRAPH***");
 

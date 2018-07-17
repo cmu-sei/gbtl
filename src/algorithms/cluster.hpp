@@ -63,7 +63,7 @@ namespace algorithms
         using T = typename MatrixT::ScalarType;
 
         GraphBLAS::IndexType num_nodes(cluster_matrix.nrows());
-        GraphBLAS::IndexType num_clusters(cluster_matrix.ncols());
+        //GraphBLAS::IndexType num_clusters(cluster_matrix.ncols());
 
         GraphBLAS::IndexType nnz = cluster_matrix.nvals();
         GraphBLAS::IndexArrayType cluster_ids(nnz), vertex_ids(nnz);
@@ -164,20 +164,21 @@ namespace algorithms
     {
         using T = typename MatrixT::ScalarType;
 
-        size_t iter_num(0);
         GraphBLAS::IndexType num_rows(graph.nrows());
         GraphBLAS::IndexType num_cols(graph.ncols());
 
         if (num_rows != num_cols)
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return;
         }
 
         // assert C dimensions should be same as graph.
         if (num_rows != C.nrows() ||
             num_cols != C.ncols())
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return;
         }
 
         GraphBLAS::IndexType num_vertices = num_cols;
@@ -339,20 +340,21 @@ namespace algorithms
     {
         using T = typename MatrixT::ScalarType;
 
-        size_t iter_num(0);
         GraphBLAS::IndexType num_rows(graph.nrows());
         GraphBLAS::IndexType num_cols(graph.ncols());
 
         if (num_rows != num_cols)
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return;
         }
 
         // assert C dimensions should be same as graph.
         if (num_rows != C.nrows() ||
             num_cols != C.ncols())
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return;
         }
 
         GraphBLAS::IndexType num_vertices = num_cols;
@@ -473,7 +475,8 @@ namespace algorithms
         GraphBLAS::IndexType cols(graph.ncols());
         if (rows != cols)
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return;
         }
 
         // A = (RealT)graph

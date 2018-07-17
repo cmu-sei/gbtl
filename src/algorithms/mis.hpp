@@ -125,7 +125,8 @@ namespace algorithms
 
         if ((num_vertices != cols) || (num_vertices != r))
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return;
         }
 
         //GraphBLAS::print_matrix(std::cout, graph, "Graph");

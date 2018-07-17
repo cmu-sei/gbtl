@@ -281,10 +281,9 @@ namespace algorithms
         using T = typename MatrixT::ScalarType;
 
         /// @todo Assert graph is square
-        /// @todo Assert graph has a compatible shape with wavefront?
-
-        GraphBLAS::IndexType rows(wavefront.nrows());
-        GraphBLAS::IndexType cols(wavefront.ncols());
+        /// @todo Assert graph has a compatible shape with wavefront
+        //GraphBLAS::IndexType rows(wavefront.nrows());
+        //GraphBLAS::IndexType cols(wavefront.ncols());
 
         unsigned int depth = 0;
 
@@ -361,7 +360,8 @@ namespace algorithms
 
         if ((grows != gcols) || (wsize != grows))
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return;
         }
 
         GraphBLAS::IndexType depth = 0;
@@ -422,12 +422,13 @@ namespace algorithms
         GraphBLAS::IndexType grows(graph.nrows());
         GraphBLAS::IndexType gcols(graph.ncols());
 
-        GraphBLAS::IndexType rows(wavefronts.nrows());
+        //GraphBLAS::IndexType rows(wavefronts.nrows());
         GraphBLAS::IndexType cols(wavefronts.ncols());
 
         if ((grows != gcols) || (cols != grows))
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return;
         }
 
         GraphBLAS::IndexType depth = 0;
@@ -493,7 +494,8 @@ namespace algorithms
 
         if ((grows != gcols) || (wsize != grows))
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return;
         }
 
         GraphBLAS::IndexType depth = 0;

@@ -78,23 +78,26 @@ namespace algorithms
     {
         //GRB_BC_LOG(GraphBLAS::print_matrix(std::cerr, A, "Graph"));
         GRB_BC_LOG("vertex_betweenness_centrality_batch_alt_trans_v2 Graph " << A);
-
-        // nsver = |s| (partition size)
-        GraphBLAS::IndexType nsver(s.size());
-        if (nsver == 0)
-        {
-            throw GraphBLAS::DimensionException();
-        }
-
-        GRB_BC_LOG("batch size (p): " << nsver);
-
         using T = typename MatrixT::ScalarType;
 
         GraphBLAS::IndexType m = A.nrows();
         GraphBLAS::IndexType n = A.ncols();
+        GraphBLAS::IndexType nsver(s.size());
+        std::vector<float> betweenness_centrality(n, 0.f);
+
+        // nsver = |s| (partition size)
+        if (nsver == 0)
+        {
+            //throw GraphBLAS::DimensionException();
+            return betweenness_centrality;
+        }
+
+        GRB_BC_LOG("batch size (p): " << nsver);
+
         if (m != n)
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return betweenness_centrality;
         }
 
         GRB_BC_LOG( "num nodes (n): " << n );
@@ -244,7 +247,6 @@ namespace algorithms
 
         GRB_BC_LOG("RESULT: " << result);
 
-        std::vector<float> betweenness_centrality(n, 0.f);
         for (GraphBLAS::IndexType k = 0; k < n; k++)
         {
             if (result.hasElement(k))
@@ -286,20 +288,24 @@ namespace algorithms
         MatrixT const                   &A,
         GraphBLAS::IndexArrayType const &s)
     {
-        // nsver = |s| (partition size)
-        GraphBLAS::IndexType nsver(s.size());
-        if (nsver == 0)
-        {
-            throw GraphBLAS::DimensionException();
-        }
-
         using T = typename MatrixT::ScalarType;
 
         GraphBLAS::IndexType m = A.nrows();
         GraphBLAS::IndexType n = A.ncols();
+        GraphBLAS::IndexType nsver(s.size());
+        std::vector<float> betweenness_centrality(n, 0.f);
+
+        // nsver = |s| (partition size)
+        if (nsver == 0)
+        {
+            //throw GraphBLAS::DimensionException();
+            return betweenness_centrality;
+        }
+
         if (m != n)
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return betweenness_centrality;
         }
 
         // The current frontier for all BFS's (from all roots)
@@ -420,7 +426,6 @@ namespace algorithms
                           GraphBLAS::Plus<float>(),
                           GraphBLAS::transpose(BCu));
 
-        std::vector<float> betweenness_centrality(n, 0.f);
         for (GraphBLAS::IndexType k = 0; k < n;k++)
         {
             if (result.hasElement(k))
@@ -461,20 +466,24 @@ namespace algorithms
         MatrixT const                   &A,
         GraphBLAS::IndexArrayType const &s)
     {
-        // nsver = |s| (partition size)
-        GraphBLAS::IndexType nsver(s.size());
-        if (nsver == 0)
-        {
-            throw GraphBLAS::DimensionException();
-        }
-
         using T = typename MatrixT::ScalarType;
 
         GraphBLAS::IndexType m(A.nrows());
         GraphBLAS::IndexType n(A.ncols());
+        GraphBLAS::IndexType nsver(s.size());
+        std::vector<float> betweenness_centrality(n, 0.f);
+
+        // nsver = |s| (partition size)
+        if (nsver == 0)
+        {
+            //throw GraphBLAS::DimensionException();
+            return betweenness_centrality;
+        }
+
         if (m != n)
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return betweenness_centrality;
         }
 
         // The current frontier for all BFS's (from all roots)
@@ -597,7 +606,6 @@ namespace algorithms
                           GraphBLAS::Plus<float>(),
                           BCu); // replace = dont care
 
-        std::vector<float> betweenness_centrality(n, 0.f);
         for (GraphBLAS::IndexType k = 0; k < n;k++)
         {
             if (result.hasElement(k))
@@ -638,20 +646,24 @@ namespace algorithms
         MatrixT const                   &A,
         GraphBLAS::IndexArrayType const &s)
     {
-        // nsver = |s| (partition size)
-        GraphBLAS::IndexType nsver(s.size());
-        if (nsver == 0)
-        {
-            throw GraphBLAS::DimensionException();
-        }
-
         using T = typename MatrixT::ScalarType;
 
         GraphBLAS::IndexType m(A.nrows());
         GraphBLAS::IndexType n(A.ncols());
+        GraphBLAS::IndexType nsver(s.size());
+        std::vector<float> betweenness_centrality(n, 0.f);
+
+        // nsver = |s| (partition size)
+        if (nsver == 0)
+        {
+            //throw GraphBLAS::DimensionException();
+            return betweenness_centrality;
+        }
+
         if (m != n)
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return betweenness_centrality;
         }
 
         // The current frontier for all BFS's (from all roots)
@@ -776,7 +788,6 @@ namespace algorithms
                           GraphBLAS::Plus<float>(),
                           BCu); // replace = dont care
 
-        std::vector<float> betweenness_centrality(n, 0.f);
         for (GraphBLAS::IndexType k = 0; k < n;k++)
         {
             if (result.hasElement(k))
@@ -821,23 +832,24 @@ namespace algorithms
         GraphBLAS::IndexArrayType const &src_nodes)
     {
         //GraphBLAS::print_matrix(std::cerr, graph, "Graph");
-
-        // p = nsver = |src_nodes| (partition size)
-        GraphBLAS::IndexType p(src_nodes.size());
-        if (p == 0)
-        {
-            throw GraphBLAS::DimensionException();
-        }
-
         using T = typename MatrixT::ScalarType;
 
-        // GrB_Matrix_nrows(&N, graph)
         GraphBLAS::IndexType N(graph.nrows());
         GraphBLAS::IndexType num_cols(graph.ncols());
+        GraphBLAS::IndexType p(src_nodes.size());
+        std::vector<double> betweenness_centrality(N, 0.);
+
+        // p = nsver = |src_nodes| (partition size)
+        if (p == 0)
+        {
+            //throw GraphBLAS::DimensionException();
+            return betweenness_centrality;
+        }
 
         if (N != num_cols)
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return betweenness_centrality;
         }
 
         // P holds number of shortest paths to a vertex from a given root
@@ -962,7 +974,6 @@ namespace algorithms
                           GraphBLAS::transpose(U),         // A, transpose make col reduce
                           true);                           // replace
 
-        std::vector<double> betweenness_centrality(N, 0.);
         for (GraphBLAS::IndexType k = 0; k < N;k++)
         {
             if (result.hasElement(k))
@@ -999,10 +1010,12 @@ namespace algorithms
 
         GraphBLAS::IndexType num_nodes(graph.nrows());
         GraphBLAS::IndexType cols(graph.ncols());
+        std::vector <typename MatrixT::ScalarType> betweenness_centrality(num_nodes, 0);
 
         if (num_nodes != cols)
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return betweenness_centrality;
         }
 
         VectorT bc_vec(num_nodes);
@@ -1126,7 +1139,6 @@ namespace algorithms
                             bias,
                             true);
 
-        std::vector <typename MatrixT::ScalarType> betweenness_centrality(num_nodes, 0);
         for (GraphBLAS::IndexType k = 0; k<num_nodes;k++)
         {
             if (bc_vec.hasElement(k))
@@ -1159,13 +1171,14 @@ namespace algorithms
 
         GraphBLAS::IndexType num_nodes(graph.nrows());
         GraphBLAS::IndexType cols(graph.ncols());
+        MatrixT score(num_nodes, num_nodes);
 
         if (num_nodes != cols)
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return score;
         }
 
-        MatrixT score(num_nodes, num_nodes);
 
         GraphBLAS::IndexType depth;
         for (GraphBLAS::IndexType root = 0; root < num_nodes; root++)

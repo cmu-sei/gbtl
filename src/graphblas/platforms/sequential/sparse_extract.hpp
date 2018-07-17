@@ -146,7 +146,6 @@ namespace GraphBLAS
             {
                 auto row(A.getRow(*row_it));
 
-                AScalarT tmp_value;
                 CRowType out_row;
 
                 // Extract the values from the row

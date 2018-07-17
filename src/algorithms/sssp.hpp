@@ -82,7 +82,8 @@ namespace algorithms
         if ((graph.nrows() != path.size()) ||
             (graph.ncols() != path.size()))
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return;
         }
 
         /// @todo why num_rows iterations? (REALLY should be bounded by diameter)
@@ -148,7 +149,8 @@ namespace algorithms
         if ((graph.nrows() != paths.ncols()) ||
             (graph.ncols() != paths.ncols()))
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return;
         }
 
         /// @todo why num_rows iterations?  Should be the diameter or terminate

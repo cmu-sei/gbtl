@@ -78,7 +78,8 @@ namespace algorithms
 
         if ((rows != cols) || (page_rank.size() != rows))
         {
-            throw GraphBLAS::DimensionException();
+            //throw GraphBLAS::DimensionException();
+            return;
         }
 
         // Compute the scaled graph matrix
