@@ -478,7 +478,7 @@ namespace GraphBLAS
         //--------------------------------------------------------------------
 
         // 4.3.7.1: assign - standard vector variant
-        template<typename WVectorT,
+        template<typename WScalarT,
                  typename MaskT,
                  typename AccumT,
                  typename UVectorT,
@@ -486,13 +486,14 @@ namespace GraphBLAS
                  typename std::enable_if<
                      std::is_same<vector_tag,
                                   typename UVectorT::tag_type>::value,
-                     int>::type>
-        friend inline void assign(WVectorT           &w,
-                                  MaskT        const &mask,
-                                  AccumT              accum,
-                                  UVectorT     const &u,
-                                  SequenceT    const &indices,
-                                  bool                replace_flag);
+                     int>::type,
+                 typename ...WTags>
+        friend inline void assign(Vector<WScalarT, WTags...>      &w,
+                                  MaskT                     const &mask,
+                                  AccumT                           accum,
+                                  UVectorT                  const &u,
+                                  SequenceT                 const &indices,
+                                  bool                             replace_flag);
 
         // 4.3.7.3: assign - column variant
         template<typename CScalarT,
