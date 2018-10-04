@@ -222,6 +222,30 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_normal)
 }
 
 //****************************************************************************
+BOOST_AUTO_TEST_CASE(test_ewisemult_normal_semiring)
+{
+    IndexArrayType i_mat    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_mat    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v_mat = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
+    Matrix<double, DirectedMatrixTag> mat(4, 4);
+    mat.build(i_mat, j_mat, v_mat);
+
+    Matrix<double, DirectedMatrixTag> m3(4, 4);
+
+    IndexArrayType i_answer    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_answer    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v_answer = {1, 1, 1, 4, 4, 4, 9, 9, 9, 16};
+    Matrix<double, DirectedMatrixTag> answer(4, 4);
+    answer.build(i_answer, j_answer, v_answer);
+
+    eWiseMult(m3, NoMask(), NoAccumulate(),
+              multiply_op(ArithmeticSemiring<double>()),
+              mat, mat);
+
+    BOOST_CHECK_EQUAL(m3, answer);
+}
+
+//****************************************************************************
 // Tests without mask
 //****************************************************************************
 

@@ -174,6 +174,31 @@ BOOST_AUTO_TEST_CASE(test_eWiseadd_matrix_normal)
 }
 
 //****************************************************************************
+BOOST_AUTO_TEST_CASE(test_eWiseadd_matrix_semiring)
+{
+    // Build some sparse matrices.
+    IndexArrayType i_mat    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_mat    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v_mat = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
+    Matrix<double, DirectedMatrixTag> mat(4, 4);
+    mat.build(i_mat, j_mat, v_mat);
+
+    Matrix<double, DirectedMatrixTag> m3(4, 4);
+
+    IndexArrayType i_answer    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j_answer    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v_answer = {2, 2, 2, 4, 4, 4, 6, 6, 6, 8};
+    Matrix<double, DirectedMatrixTag> answer(4, 4);
+    answer.build(i_answer, j_answer, v_answer);
+
+    eWiseAdd(m3, NoMask(), NoAccumulate(),
+             add_monoid(ArithmeticSemiring<double>()),
+             mat, mat);
+
+    BOOST_CHECK_EQUAL(m3, answer);
+}
+
+//****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_reg)
 {
     GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> A(m3x3_dense, 0.);
