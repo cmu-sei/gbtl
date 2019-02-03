@@ -350,4 +350,55 @@ BOOST_AUTO_TEST_CASE(test_sssp_delta_step_gilbert_uint)
     BOOST_CHECK_EQUAL(result, answer3);
 }
 
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_sssp_delta_step_marcin_uint)
+{
+    unsigned int const INF = 666666;
+
+    //  - 7 1 - - - - -
+    //  7 - - - - 1 1 -
+    //  1 - - 1 - - - -
+    //  - - 1 - 1 - - -
+    //  - - - 1 - 1 - -
+    //  - 1 - - 1 - - 1
+    //  - 1 - - - - - 1
+    //  - - - - - 1 1 -
+
+    // The correct answer for source vertex 0
+    //
+    //    {0, 5, 1, 2, 3, 4, 6, 5};
+
+    GraphBLAS::IndexType const SOURCE = 0;
+    std::vector<unsigned int> dense_ans = {0, 5, 1, 2, 3, 4, 6, 5};
+    GraphBLAS::Vector<unsigned int> answer(dense_ans);
+
+    GraphBLAS::IndexType const NUM_NODES(8);
+    GraphBLAS::IndexArrayType i = {0,0,1,1,1,2,2,3,3,4,4,5,5,5,6,6,7,7};
+    GraphBLAS::IndexArrayType j = {1,2,0,5,6,0,3,2,4,3,5,1,4,7,1,7,5,6};
+    std::vector<unsigned int> v = {7,1,7,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+    GraphBLAS::Matrix<unsigned int> G(NUM_NODES, NUM_NODES);
+    G.build(i.begin(), j.begin(), v.begin(), i.size());
+
+    std::cout << "\n*************************************\nStarting delta = 2" << std::endl;
+    GraphBLAS::Vector<unsigned int> result2(NUM_NODES);
+    sssp_delta_step(G, 2U, SOURCE, result2);
+    BOOST_CHECK_EQUAL(result2, answer);
+    std::cout << "\n*************************************\nStarting delta = 7" << std::endl;
+    GraphBLAS::Vector<unsigned int> result7(NUM_NODES);
+    sssp_delta_step(G, 7U, SOURCE, result7);
+    BOOST_CHECK_EQUAL(result7, answer);
+    std::cout << "\n*************************************\nStarting delta = 8" << std::endl;
+    GraphBLAS::Vector<unsigned int> result8(NUM_NODES);
+    sssp_delta_step(G, 8U, SOURCE, result8);
+    BOOST_CHECK_EQUAL(result8, answer);
+    std::cout << "\n*************************************\nStarting delta = 9" << std::endl;
+    GraphBLAS::Vector<unsigned int> result9(NUM_NODES);
+    sssp_delta_step(G, 9U, SOURCE, result9);
+    BOOST_CHECK_EQUAL(result9, answer);
+    std::cout << "\n*************************************\nStarting delta = 10" << std::endl;
+    GraphBLAS::Vector<unsigned int> result10(NUM_NODES);
+    sssp_delta_step(G, 10U, SOURCE, result10);
+    BOOST_CHECK_EQUAL(result10, answer);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
