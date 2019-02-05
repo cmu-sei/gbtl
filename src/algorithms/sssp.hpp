@@ -213,6 +213,7 @@ namespace algorithms
         GraphBLAS::Vector<bool> tBi(n);
         GraphBLAS::Vector<bool> tnew(n);
         GraphBLAS::Vector<bool> tcomp(n);
+        GraphBLAS::Vector<bool> tless(n);
         GraphBLAS::Vector<bool> s(n);
 
         // t = infinity, t[src] = 0
@@ -267,18 +268,18 @@ namespace algorithms
                              in_range, t);
             GraphBLAS::apply(tBi, tBi, GraphBLAS::NoAccumulate(),
                              GraphBLAS::Identity<T>(), tBi, true);
+            GraphBLAS::print_vector(std::cerr, tBi,
+                                    "tBi<tless> = tReq([i*d, (i+1)*d))");
 
-            while (tBi.nvals() > 0)
+            // tm<tBi> = t
+            GraphBLAS::apply(tmasked, tBi, GraphBLAS::NoAccumulate(),
+                             GraphBLAS::Identity<T>(), t, true);
+            GraphBLAS::print_vector(std::cerr, tmasked, "tm = t<tBi>");
+
+            while (tmasked.nvals() > 0)
             {
                 std::cerr << "******************* inner *********************\n";
-                GraphBLAS::print_vector(std::cerr, tBi, "tBi = t([i*d, (i+1)*d))");
-                // t .* tBi
-                GraphBLAS::apply(tmasked, tBi, GraphBLAS::NoAccumulate(),
-                                 GraphBLAS::Identity<T>(), t, true);
-                GraphBLAS::print_vector(std::cerr, tmasked, "tm = t<tBi>");
-
                 // tReq = AL' (min.+) (t .* tBi)
-                //GraphBLAS::(tcomp, tBi, GraphBLAS::NoAccumulate(),
                 GraphBLAS::vxm(tReq, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                                GraphBLAS::MinPlusSemiring<T>(), tmasked, AL);
                 GraphBLAS::print_vector(std::cerr, tReq, "tReq = tm*AL");
@@ -294,6 +295,24 @@ namespace algorithms
                 // Don't tBi = 0
                 // tBi.clear();
 
+                // tless<tReq> = tReq .< t
+                GraphBLAS::eWiseAdd(tless,
+                                    tReq,
+                                    GraphBLAS::NoAccumulate(),
+                                    GraphBLAS::LessThan<T>(),
+                                    tReq, t, true);
+                GraphBLAS::print_vector(std::cerr, tless, "tless<tReq> = tReq .< t");
+
+                // tBi<tless> = i*delta <= tReq < (i+1)*delta
+                GraphBLAS::apply(tBi,
+                                 tless,
+                                 GraphBLAS::NoAccumulate(),
+                                 in_range, tReq, true);
+                //GraphBLAS::apply(tnew, tnew, GraphBLAS::NoAccumulate(),
+                //                 GraphBLAS::Identity<bool>(), tnew, true);
+                GraphBLAS::print_vector(std::cerr, tBi,
+                                        "tBi<tless> = tReq([i*d, (i+1)*d))");
+
                 // t = min(t, tReq)
                 GraphBLAS::eWiseAdd(t,
                                     GraphBLAS::NoMask(),
@@ -302,18 +321,10 @@ namespace algorithms
                                     t, tReq);
                 GraphBLAS::print_vector(std::cerr, t, "t = min(t, tReq)");
 
-                // tnew = i*delta <= t < (i+1)*delta
-                GraphBLAS::apply(tnew,
-                                 GraphBLAS::NoMask(),
-                                 GraphBLAS::NoAccumulate(),
-                                 in_range, t);
-                GraphBLAS::apply(tnew, tnew, GraphBLAS::NoAccumulate(),
-                                 GraphBLAS::Identity<bool>(), tnew, true);
-                GraphBLAS::print_vector(std::cerr, tnew, "tnew = t([i*d, (i+1)*d))");
-                GraphBLAS::apply(tBi, complement(s), GraphBLAS::NoAccumulate(),
-                                 GraphBLAS::Identity<bool>(), tnew, true);
-                GraphBLAS::print_vector(std::cerr, tBi, "tBi = tnew<!s>");
-
+                // tm<tBi> = t
+                GraphBLAS::apply(tmasked, tBi, GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::Identity<T>(), t, true);
+                GraphBLAS::print_vector(std::cerr, tmasked, "tm = t<tBi>");
             }
             std::cerr << "******************** end inner loop *****************\n";
 
