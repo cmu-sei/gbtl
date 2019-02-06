@@ -401,4 +401,39 @@ BOOST_AUTO_TEST_CASE(test_sssp_delta_step_marcin_uint)
     BOOST_CHECK_EQUAL(result10, answer);
 }
 
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_filtered_sssp_marcin_uint)
+{
+    unsigned int const INF = 666666;
+
+    //  - 7 1 - - - - -
+    //  7 - - - - 1 1 -
+    //  1 - - 1 - - - -
+    //  - - 1 - 1 - - -
+    //  - - - 1 - 1 - -
+    //  - 1 - - 1 - - 1
+    //  - 1 - - - - - 1
+    //  - - - - - 1 1 -
+
+    // The correct answer for source vertex 0
+    //
+    //    {0, 5, 1, 2, 3, 4, 6, 5};
+
+    GraphBLAS::IndexType const SOURCE = 0;
+    std::vector<unsigned int> dense_ans = {0, 5, 1, 2, 3, 4, 6, 5};
+    GraphBLAS::Vector<unsigned int> answer(dense_ans);
+
+    GraphBLAS::IndexType const NUM_NODES(8);
+    GraphBLAS::IndexArrayType i = {0,0,1,1,1,2,2,3,3,4,4,5,5,5,6,6,7,7};
+    GraphBLAS::IndexArrayType j = {1,2,0,5,6,0,3,2,4,3,5,1,4,7,1,7,5,6};
+    std::vector<unsigned int> v = {7,1,7,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+    GraphBLAS::Matrix<unsigned int> G(NUM_NODES, NUM_NODES);
+    G.build(i.begin(), j.begin(), v.begin(), i.size());
+
+    GraphBLAS::Vector<unsigned int> result(NUM_NODES);
+    result.setElement(SOURCE, 0);
+    filtered_sssp(G, result);
+    BOOST_CHECK_EQUAL(result, answer);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

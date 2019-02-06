@@ -169,6 +169,67 @@ namespace algorithms
     }
 
     //************************************************************************
+    template<typename MatrixT,
+             typename DistanceVectorT>
+    void filtered_sssp(MatrixT const     &graph,
+                       DistanceVectorT   &distance)
+    {
+        using T = typename DistanceVectorT::ScalarType;
+
+        if ((graph.nrows() != distance.size()) ||
+            (graph.ncols() != distance.size()))
+        {
+            throw GraphBLAS::DimensionException();
+        }
+
+        GraphBLAS::Vector<T> new_distance(distance);
+        GraphBLAS::Vector<bool> new_distance_flags(distance.size());
+
+        /// @todo why num_rows iterations? (REALLY should be bounded by diameter)
+        /// or detection of no change in distances matrix
+        while (true)
+        {
+            std::cout << "============= Filtered BF Iteration ================="
+                      << std::endl;
+            GraphBLAS::vxm(new_distance,
+                           GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                           GraphBLAS::MinPlusSemiring<T>(),
+                           new_distance, graph);
+            GraphBLAS::print_vector(std::cout, new_distance,
+                                    "new distance");
+
+            // new_distance_flags<new_distance> = new_distance .< distance
+            GraphBLAS::eWiseAdd(new_distance_flags,
+                                new_distance,
+                                GraphBLAS::NoAccumulate(),
+                                GraphBLAS::LessThan<T>(),
+                                new_distance, distance, true);
+            GraphBLAS::print_vector(std::cout, new_distance_flags,
+                                    "new distance flags");
+
+            // clear out any non-contributing paths
+            GraphBLAS::apply(new_distance,
+                             new_distance_flags,
+                             GraphBLAS::NoAccumulate(),
+                             GraphBLAS::Identity<T>(), new_distance, true);
+            GraphBLAS::print_vector(std::cout, new_distance,
+                                    "new distance (cleared)");
+
+            if (new_distance.nvals() == 0)
+                break;
+
+            GraphBLAS::eWiseAdd(distance,
+                                GraphBLAS::NoMask(),
+                                GraphBLAS::NoAccumulate(),
+                                GraphBLAS::Min<T>(),
+                                new_distance, distance);
+            GraphBLAS::print_vector(std::cout, distance, "Distance");
+            std::cout << std::endl;
+        }
+        // paths holds return value
+    }
+
+    //************************************************************************
     //************************************************************************
 
     //************************************************************************
