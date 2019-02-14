@@ -1,6 +1,12 @@
+2019-xx In progress
+	* Bug fix: correcting friend declaration signature of vector variant of assign 
+	* Bug fix: enabling mask complements in row/col variants of assign
+	* Bug fix: detect distance updates in current bin of delta stepping SSSP algorithm
+	* Added filtered Bellman-Ford SSSP algorithm
+
 2018-07 Scott McMillan <smcmillan@sei.cmu.edu>
 	* Version 2.0 Release (merged from spiral_graph branch to master).
-	* API revamped to implement the functionality included in GraphBLAS C	API spec
+	* API revamped to implement the functionality included in GraphBLAS C API spec
 	* All algorithms revamped to be more "GraphBLAS-ified".
 	* Substantially more unit tests added.
 	* New algorithms added like maxflow, delta-stepping SSSP, etc.
