@@ -113,6 +113,51 @@ namespace
              {true, true,  true,  false}};
 
 }
+//****************************************************************************
+// checking result from graphblas test framework
+BOOST_AUTO_TEST_CASE(graphblas_tf_mxm30)
+{
+    Matrix<double> A1(3,3), B1(3,3), C1(3,3);
+    Matrix<bool> M1(3,3);
+
+    //M1.setElement(3, 3, true);
+    M1.setElement(0, 2, true);
+
+    //A1.setElement(3, 3, 1.);
+    A1.setElement(2, 1, 0.2215395618663762);
+
+    //B1.setElement(3, 3, 1.);
+    B1.setElement(0, 2, -1.796394937062196);
+
+    //C1.setElement(3, 3, 1.);
+    C1.setElement(0, 2, 0.7345667281066299);
+
+    mxm(C1, GraphBLAS::complement(M1),
+        GraphBLAS::Plus<double>(), ArithmeticSemiring<double>(),
+        transpose(A1),transpose(B1));
+
+    //GraphBLAS::print_matrix(std::cout, C1, "graphblas_tf Test 30");
+
+    //===================
+    C1.clear();
+    C1.setElement(0, 2, 0.7345667281066299);
+
+    mxm(C1, GraphBLAS::complement(M1),
+        GraphBLAS::NoAccumulate(), ArithmeticSemiring<double>(),
+        transpose(A1),transpose(B1), true);
+
+    //GraphBLAS::print_matrix(std::cout, C1, "graphblas_tf Test 31");
+
+    //===================
+    C1.clear();
+    C1.setElement(0, 2, 0.7345667281066299);
+
+    mxm(C1, GraphBLAS::complement(M1),
+        GraphBLAS::Plus<double>(), ArithmeticSemiring<double>(),
+        transpose(A1),transpose(B1), true);
+
+    //GraphBLAS::print_matrix(std::cout, C1, "graphblas_tf Test 32");
+}
 
 //****************************************************************************
 // Original 9 tests from test_mxm
