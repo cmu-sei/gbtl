@@ -25,7 +25,8 @@ many common graph algorithms using the C++ API:
   * parent list BFS
   * batched BFS
 * Single-source shortest path (SSSP)
-  * Floyd-Warshall
+  * Bellman-Ford
+  * Filtered Bellman-Ford
   * Delta stepping
 * All-pairs shortest path (APSP)
 * Centrality measures
