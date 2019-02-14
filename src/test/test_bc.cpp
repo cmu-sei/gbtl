@@ -30,7 +30,7 @@
 #include <iostream>
 
 #define GRAPHBLAS_LOGGING_LEVEL 0
-#define GRAPHBLAS_BC_DEBUG 1
+#define GRAPHBLAS_BC_DEBUG 0
 
 #include <graphblas/graphblas.hpp>
 #include <algorithms/bc.hpp>
@@ -61,6 +61,72 @@ static std::vector<double> bv(br.size(), 1);
 //     {0, 0, 0, 0, 0, 0, 0, 1},
 //     {0, 0, 0, 0, 0, 0, 0, 0}});
 
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(bc_test_vertex_betweenness_centrality_gilbert)
+{
+    IndexType const NUM_NODES = 7;
+    std::vector<IndexType> row_indices = {0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6};
+    std::vector<IndexType> col_indices = {1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4};
+    std::vector<double> values(row_indices.size(), 1.);
+
+    Matrix<double> graph(NUM_NODES, NUM_NODES);
+    graph.build(row_indices.begin(), col_indices.begin(),
+                      values.begin(), values.size());
+
+    IndexArrayType seed_set={0, 1, 2, 3, 4, 5, 6};
+
+    //std::vector<float> result = vertex_betweenness_centrality(graph);
+    std::vector<float> answer = {4.0, 4.5, 2, 4.5, 2.0, 1.0, 3.0};
+
+    {
+        std::vector<double> result =
+            vertex_betweenness_centrality(graph);
+
+        BOOST_CHECK_EQUAL(result.size(), answer.size());
+        for (unsigned int ix = 0; ix < result.size(); ++ix)
+            BOOST_CHECK_CLOSE(result[ix], answer[ix], 0.0001);
+    }
+    {
+        std::vector<double> result =
+            vertex_betweenness_centrality_batch_old(graph, seed_set);
+
+        BOOST_CHECK_EQUAL(result.size(), answer.size());
+        for (unsigned int ix = 0; ix < result.size(); ++ix)
+            BOOST_CHECK_CLOSE(result[ix], answer[ix], 0.0001);
+    }
+    {
+        std::vector<float> result =
+            vertex_betweenness_centrality_batch(graph, seed_set);
+
+        BOOST_CHECK_EQUAL(result.size(), answer.size());
+        for (unsigned int ix = 0; ix < result.size(); ++ix)
+            BOOST_CHECK_CLOSE(result[ix], answer[ix], 0.0001);
+    }
+    {
+        std::vector<float> result =
+            vertex_betweenness_centrality_batch_alt(graph, seed_set);
+
+        BOOST_CHECK_EQUAL(result.size(), answer.size());
+        for (unsigned int ix = 0; ix < result.size(); ++ix)
+            BOOST_CHECK_CLOSE(result[ix], answer[ix], 0.0001);
+    }
+    {
+        std::vector<float> result =
+            vertex_betweenness_centrality_batch_alt_trans(graph, seed_set);
+
+        BOOST_CHECK_EQUAL(result.size(), answer.size());
+        for (unsigned int ix = 0; ix < result.size(); ++ix)
+            BOOST_CHECK_CLOSE(result[ix], answer[ix], 0.0001);
+    }
+    {
+        std::vector<float> result =
+            vertex_betweenness_centrality_batch_alt_trans_v2(graph, seed_set);
+
+        BOOST_CHECK_EQUAL(result.size(), answer.size());
+        for (unsigned int ix = 0; ix < result.size(); ++ix)
+            BOOST_CHECK_CLOSE(result[ix], answer[ix], 0.0001);
+    }
+}
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(bc_test_vertex_betweenness_centrality)
@@ -265,7 +331,7 @@ BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch_alt)
 //BOOST_AUTO_TEST_CASE(bc_test_vertex_betweennes_centrality_batch_alt_trans)
 BOOST_AUTO_TEST_CASE(bc_batch_alt_trans)
 {
-    std::cout << "======================= BEGIN0 ==========================\n";
+    //std::cout << "======================= BEGIN0 ==========================\n";
     Matrix<double, DirectedMatrixTag> betweenness(8,8);
     betweenness.build(br.begin(), bc.begin(), bv.begin(), bv.size());
 
@@ -281,7 +347,7 @@ BOOST_AUTO_TEST_CASE(bc_batch_alt_trans)
         BOOST_CHECK_CLOSE(result[ix], answer[ix], 0.0001);
 
     //==========
-    std::cout << "======================= BEGIN3 ==========================\n";
+    //std::cout << "======================= BEGIN3 ==========================\n";
     IndexArrayType seed_set3={3};
     std::vector<float> answer3 = {0.0, 0.0, 0.0, 0.0, 3.0, 0.5, 0.5, 0.0};
 
@@ -293,7 +359,7 @@ BOOST_AUTO_TEST_CASE(bc_batch_alt_trans)
         BOOST_CHECK_CLOSE(result3[ix], answer3[ix], 0.0001);
 
     //==========
-    std::cout << "======================= BEGIN0,3 ==========================\n";
+    //std::cout << "======================= BEGIN0,3 ==========================\n";
     IndexArrayType seed_set03={0,3};
 
     std::vector<float> result03 =
@@ -304,7 +370,7 @@ BOOST_AUTO_TEST_CASE(bc_batch_alt_trans)
         BOOST_CHECK_CLOSE(result03[ix], answer[ix] + answer3[ix], 0.0001);
 
     //==========
-    std::cout << "======================= BEGIN0-7 ==========================\n";
+    //std::cout << "======================= BEGIN0-7 ==========================\n";
     IndexArrayType seed_set_all={0,1,2,3,4,5,6,7};
     std::vector<double> answer_all = {0.0, 4.0/3, 4.0/3, 4.0/3, 12.0, 2.5, 2.5, 0.0};
 
@@ -314,7 +380,7 @@ BOOST_AUTO_TEST_CASE(bc_batch_alt_trans)
     BOOST_CHECK_EQUAL(result_all.size(), answer_all.size());
     for (unsigned int ix = 0; ix < result_all.size(); ++ix)
         BOOST_CHECK_CLOSE(result_all[ix], answer_all[ix], 0.0001);
-    std::cout << "=======================  END  ==========================\n";
+    //std::cout << "=======================  END  ==========================\n";
 }
 
 //****************************************************************************
