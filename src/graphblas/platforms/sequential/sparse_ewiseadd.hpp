@@ -122,7 +122,6 @@ namespace GraphBLAS
 
             typedef std::vector<std::tuple<IndexType,AScalarType> > ARowType;
             typedef std::vector<std::tuple<IndexType,BScalarType> > BRowType;
-            typedef std::vector<std::tuple<IndexType,CScalarT> > CRowType;
 
             // =================================================================
             // Do the basic ewise-and work: T = A .* B

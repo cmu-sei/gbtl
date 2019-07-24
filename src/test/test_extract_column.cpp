@@ -447,7 +447,6 @@ BOOST_AUTO_TEST_CASE(extract_col_test_nomask_accum_notrans)
         Vector<double> answer(vecAnswer, 0);
 
         // Output rank
-        IndexType M = 3;
         std::vector<double> res = {1, 0, 1};
         Vector<double> result(res, 0.);
 
@@ -469,7 +468,6 @@ BOOST_AUTO_TEST_CASE(extract_col_test_nomask_accum_notrans)
         Vector<double> answer(vecAnswer, 0);
 
         // Output rank
-        IndexType M = 2;
         std::vector<double> res = {1, 0};
         Vector<double> result(res, 0.);
 
@@ -491,7 +489,6 @@ BOOST_AUTO_TEST_CASE(extract_col_test_nomask_accum_notrans)
         Vector<double> answer(vecAnswer, 0);
 
         // Output rank
-        IndexType M = 2;
         std::vector<double> res = {1, 0};
         Vector<double> result(res, 0.);
 
@@ -513,7 +510,6 @@ BOOST_AUTO_TEST_CASE(extract_col_test_nomask_accum_notrans)
         Vector<double> answer(vecAnswer, 0);
 
         // Output rank
-        IndexType M = 4;
         std::vector<double> res = {1, 0, 1, 0};
         Vector<double> result(res, 0.);
 
@@ -535,7 +531,6 @@ BOOST_AUTO_TEST_CASE(extract_col_test_nomask_accum_notrans)
         Vector<double> answer(vecAnswer, 0);
 
         // Output rank
-        IndexType M = 4;
         std::vector<double> res = {0, 0, 1, 1};
         Vector<double> result(res, 0.);
 
@@ -564,7 +559,6 @@ BOOST_AUTO_TEST_CASE(extract_col_test_nomask_accum_trans)
         Vector<double> answer(vecAnswer, 0);
 
         // Output rank
-        IndexType M = 3;
         std::vector<double> res = {1, 0, 1, 1};
         Vector<double> result(res, 0.);
 
@@ -586,7 +580,6 @@ BOOST_AUTO_TEST_CASE(extract_col_test_nomask_accum_trans)
         Vector<double> answer(vecAnswer, 0);
 
         // Output rank
-        IndexType M = 2;
         std::vector<double> res = {1, 0};
         Vector<double> result(res, 0.);
 
@@ -608,7 +601,6 @@ BOOST_AUTO_TEST_CASE(extract_col_test_nomask_accum_trans)
         Vector<double> answer(vecAnswer, 0);
 
         // Output rank
-        IndexType M = 2;
         std::vector<double> res = {1, 0};
         Vector<double> result(res, 0.);
 
@@ -630,7 +622,6 @@ BOOST_AUTO_TEST_CASE(extract_col_test_nomask_accum_trans)
         Vector<double> answer(vecAnswer, 0);
 
         // Output rank
-        IndexType M = 4;
         std::vector<double> res = {1, 0, 1, 0};
         Vector<double> result(res, 0.);
 
@@ -652,7 +643,6 @@ BOOST_AUTO_TEST_CASE(extract_col_test_nomask_accum_trans)
         Vector<double> answer(vecAnswer, 0);
 
         // Output rank
-        IndexType M = 4;
         std::vector<double> res = {0, 0, 1, 1};
         Vector<double> result(res, 0.);
 

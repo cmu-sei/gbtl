@@ -418,8 +418,6 @@ BOOST_AUTO_TEST_CASE(test_filtered_sssp_basic_double_one_root)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_filtered_sssp_marcin_uint)
 {
-    unsigned int const INF = 666666;
-
     //  - 7 1 - - - - -
     //  7 - - - - 1 1 -
     //  1 - - 1 - - - -
@@ -473,8 +471,6 @@ BOOST_AUTO_TEST_CASE(test_sssp_delta2_step_gilbert_uint)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_sssp_delta_step_marcin_uint)
 {
-    unsigned int const INF = 666666;
-
     //  - 7 1 - - - - -
     //  7 - - - - 1 1 -
     //  1 - - 1 - - - -

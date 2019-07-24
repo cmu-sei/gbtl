@@ -88,8 +88,6 @@ namespace algorithms
 
         GRB_BC_LOG("batch size (p): " << nsver);
 
-        using T = typename MatrixT::ScalarType;
-
         GraphBLAS::IndexType m = A.nrows();
         GraphBLAS::IndexType n = A.ncols();
         if (m != n)
@@ -293,8 +291,6 @@ namespace algorithms
             throw GraphBLAS::DimensionException();
         }
 
-        using T = typename MatrixT::ScalarType;
-
         GraphBLAS::IndexType m = A.nrows();
         GraphBLAS::IndexType n = A.ncols();
         if (m != n)
@@ -467,8 +463,6 @@ namespace algorithms
         {
             throw GraphBLAS::DimensionException();
         }
-
-        using T = typename MatrixT::ScalarType;
 
         GraphBLAS::IndexType m(A.nrows());
         GraphBLAS::IndexType n(A.ncols());
@@ -644,8 +638,6 @@ namespace algorithms
         {
             throw GraphBLAS::DimensionException();
         }
-
-        using T = typename MatrixT::ScalarType;
 
         GraphBLAS::IndexType m(A.nrows());
         GraphBLAS::IndexType n(A.ncols());
@@ -829,9 +821,6 @@ namespace algorithms
             throw GraphBLAS::DimensionException();
         }
 
-        using T = typename MatrixT::ScalarType;
-
-        // GrB_Matrix_nrows(&N, graph)
         GraphBLAS::IndexType N(graph.nrows());
         GraphBLAS::IndexType num_cols(graph.ncols());
 

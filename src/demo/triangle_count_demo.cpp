@@ -50,13 +50,10 @@ int main(int argc, char **argv)
     std::ifstream infile(pathname);
     GraphBLAS::IndexArrayType iL, iU, iA;
     GraphBLAS::IndexArrayType jL, jU, jA;
-    int64_t num_rows = 0;
-    int64_t max_id = 0;
+    uint64_t num_rows = 0;
+    uint64_t max_id = 0;
     uint64_t src, dst;
-//    for (std::string row; getline(infile, row, '\n');)
-//    {
-//        std::cout << "Row: " << row << std::endl;
-//        sscanf(row.c_str(), "%ld\t%ld", &src, &dst);
+
     while (infile)
     {
         infile >> src >> dst;

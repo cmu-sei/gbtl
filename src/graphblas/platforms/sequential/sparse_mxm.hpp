@@ -81,10 +81,6 @@ namespace GraphBLAS
             IndexType ncol_C(C.ncols());
 
             typedef typename SemiringT::result_type D3ScalarType;
-            typedef typename AMatrixT::ScalarType AScalarType;
-            typedef typename BMatrixT::ScalarType BScalarType;
-            typedef typename CMatrixT::ScalarType CScalarType;
-            typedef std::vector<std::tuple<IndexType,CScalarType> > CColType;
             typedef std::vector<std::tuple<IndexType,D3ScalarType> > TColType;
 
             // =================================================================

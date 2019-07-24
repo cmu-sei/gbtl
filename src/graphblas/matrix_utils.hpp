@@ -105,8 +105,6 @@ namespace GraphBLAS
 
         using T = typename MatrixT::ScalarType;
 
-        GraphBLAS::IndexType rows(A.nrows());
-        GraphBLAS::IndexType cols(A.ncols());
         GraphBLAS::IndexType nvals(A.nvals());
 
         GraphBLAS::IndexArrayType i(nvals), j(nvals);

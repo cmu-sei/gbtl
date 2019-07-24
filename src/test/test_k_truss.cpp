@@ -306,7 +306,6 @@ BOOST_AUTO_TEST_CASE(k_truss2_test2)
 BOOST_AUTO_TEST_CASE(k_truss2_test_peer_pressure1)
 {
     IndexType num_nodes(5);
-    IndexType num_edges(5);
     GraphBLAS::IndexArrayType i = {0, 1, 2, 1, 2, 0, 3, 0, 4, 3};
     GraphBLAS::IndexArrayType j = {1, 0, 1, 2, 0, 2, 0, 3, 3, 4};
     std::vector<int> v(i.size(), 1);

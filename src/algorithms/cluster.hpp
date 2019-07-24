@@ -63,7 +63,6 @@ namespace algorithms
         using T = typename MatrixT::ScalarType;
 
         GraphBLAS::IndexType num_nodes(cluster_matrix.nrows());
-        GraphBLAS::IndexType num_clusters(cluster_matrix.ncols());
 
         GraphBLAS::IndexType nnz = cluster_matrix.nvals();
         GraphBLAS::IndexArrayType cluster_ids(nnz), vertex_ids(nnz);
@@ -164,7 +163,6 @@ namespace algorithms
     {
         using T = typename MatrixT::ScalarType;
 
-        size_t iter_num(0);
         GraphBLAS::IndexType num_rows(graph.nrows());
         GraphBLAS::IndexType num_cols(graph.ncols());
 
@@ -339,7 +337,6 @@ namespace algorithms
     {
         using T = typename MatrixT::ScalarType;
 
-        size_t iter_num(0);
         GraphBLAS::IndexType num_rows(graph.nrows());
         GraphBLAS::IndexType num_cols(graph.ncols());
 
@@ -466,7 +463,6 @@ namespace algorithms
         unsigned int          max_iters = std::numeric_limits<unsigned int>::max(),
         double                convergence_threshold = 1.0e-16)
     {
-        using T = typename MatrixT::ScalarType;
         using RealMatrixT = GraphBLAS::Matrix<RealT>;
 
         GraphBLAS::IndexType rows(graph.nrows());
