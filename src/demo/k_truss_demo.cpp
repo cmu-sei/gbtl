@@ -145,7 +145,6 @@ int main(int argc, char **argv)
     print_matrix(std::cout, E, "Incidence");
 
     std::cout << "Running k-truss algorithm..." << std::endl;
-    T count(0);
 
     auto Eout3 = algorithms::k_truss(E, 3);
     std::cout << "===============================================" << std::endl;

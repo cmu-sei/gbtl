@@ -130,12 +130,8 @@ namespace GraphBLAS
             typedef typename AMatrixT::ScalarType                   AScalarType;
             typedef std::vector<std::tuple<IndexType,AScalarType> > ARowType;
 
-            typedef CScalarT                                        CScalarType;
-            typedef std::vector<std::tuple<IndexType,CScalarType> > CRowType;
-
             typedef typename UnaryFunctionT::result_type            TScalarType;
             typedef std::vector<std::tuple<IndexType,TScalarType> > TRowType;
-
 
             IndexType nrows(A.nrows());
             IndexType ncols(A.ncols());

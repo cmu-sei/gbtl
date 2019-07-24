@@ -949,12 +949,7 @@ namespace GraphBLAS
                                  bool               replace)
         {
             typedef typename CMatrixT::ScalarType CScalarType;
-            typedef typename ZMatrixT::ScalarType ZScalarType;
-            typedef typename MMatrixT::ScalarType MScalarType;
-
             typedef std::vector<std::tuple<IndexType, CScalarType> > CRowType;
-            typedef std::vector<std::tuple<IndexType, ZScalarType> > ZRowType;
-            typedef std::vector<std::tuple<IndexType, MScalarType> > MRowType;
 
             CRowType tmp_row;
             IndexType nRows(C.nrows());

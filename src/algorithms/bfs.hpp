@@ -278,13 +278,8 @@ namespace algorithms
                    WavefrontMatrixT   wavefront, //row vectors, copy made
                    LevelListMatrixT  &levels)
     {
-        using T = typename MatrixT::ScalarType;
-
         /// @todo Assert graph is square
         /// @todo Assert graph has a compatible shape with wavefront?
-
-        GraphBLAS::IndexType rows(wavefront.nrows());
-        GraphBLAS::IndexType cols(wavefront.ncols());
 
         unsigned int depth = 0;
 
@@ -351,8 +346,6 @@ namespace algorithms
                           WavefrontT      wavefront, //row vector, copy made
                           LevelListT     &levels)
     {
-        using T = typename MatrixT::ScalarType;
-
         /// Assert graph is square/have a compatible shape with wavefront
         GraphBLAS::IndexType grows(graph.nrows());
         GraphBLAS::IndexType gcols(graph.ncols());
@@ -416,13 +409,9 @@ namespace algorithms
                                 WavefrontsMatrixT  wavefronts, //row vectors, copy
                                 LevelListMatrixT  &levels)
     {
-        using T = typename MatrixT::ScalarType;
-
         /// Assert graph is square/have a compatible shape with wavefronts
         GraphBLAS::IndexType grows(graph.nrows());
         GraphBLAS::IndexType gcols(graph.ncols());
-
-        GraphBLAS::IndexType rows(wavefronts.nrows());
         GraphBLAS::IndexType cols(wavefronts.ncols());
 
         if ((grows != gcols) || (cols != grows))
@@ -483,8 +472,6 @@ namespace algorithms
                              WavefrontT      wavefront, //row vector, copy made
                              LevelListT     &levels)
     {
-        using T = typename MatrixT::ScalarType;
-
         /// Assert graph is square/have a compatible shape with wavefront
         GraphBLAS::IndexType grows(graph.nrows());
         GraphBLAS::IndexType gcols(graph.ncols());

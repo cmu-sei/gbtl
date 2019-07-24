@@ -119,13 +119,9 @@ namespace
                           WavefrontMatrixT   wavefront, //row vector, copy made
                           Matrix<IndexType> &levels)
     {
-        using T = typename MatrixT::ScalarType;
-
         /// Assert graph is square/have a compatible shape with wavefront
         IndexType grows(graph.nrows());
         IndexType gcols(graph.ncols());
-
-        IndexType rows(wavefront.nrows());
         IndexType cols(wavefront.ncols());
 
         if ((grows != gcols) || (cols != grows))

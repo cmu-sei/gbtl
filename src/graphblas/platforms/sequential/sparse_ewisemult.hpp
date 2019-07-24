@@ -123,7 +123,6 @@ namespace GraphBLAS
 
             typedef std::vector<std::tuple<IndexType,AScalarType> > ARowType;
             typedef std::vector<std::tuple<IndexType,BScalarType> > BRowType;
-            typedef std::vector<std::tuple<IndexType,CScalarT> > CRowType;
 
             // =================================================================
             // Do the basic ewise-and work: T = A .* B
@@ -156,25 +155,15 @@ namespace GraphBLAS
                 }
             }
 
-//            GRB_LOG_E(">>> T <<<");
-//            GRB_LOG_E(T);
-
             // =================================================================
             // Accumulate into Z
 
             LilSparseMatrix<CScalarT> Z(num_rows, num_cols);
             ewise_or_opt_accum(Z, C, T, accum);
 
-//            GRB_LOG_E(">>> Z <<< ");
-//            GRB_LOG_E(Z);
-
             // =================================================================
             // Copy Z into the final output considering mask and replace
             write_with_opt_mask(C, Z, Mask, replace_flag);
-
-//            GRB_LOG_E(">>> C <<< ");
-//            GRB_LOG_E(C);
-
         } // ewisemult
 
     } // backend

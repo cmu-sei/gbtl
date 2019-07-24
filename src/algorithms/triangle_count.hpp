@@ -719,9 +719,7 @@ namespace algorithms
         T  num_triangles = 0;
 
         GraphBLAS::IndexType rows(graph.nrows());
-        GraphBLAS::IndexType cols(graph.ncols());
-
-        // assert(rows == cols);
+        // @todo assert graph matrix is square
 
         // A graph less than three vertices cannot have any triangles
         if (rows < 3)

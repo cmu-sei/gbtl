@@ -27,7 +27,7 @@
  * DM18-0559
  */
 
-#define GRAPHBLAS_LOGGING_LEVEL 2
+#define GRAPHBLAS_LOGGING_LEVEL 0
 
 #include <functional>
 #include <iostream>

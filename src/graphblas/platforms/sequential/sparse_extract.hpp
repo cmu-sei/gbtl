@@ -132,7 +132,6 @@ namespace GraphBLAS
                            ColIteratorT                        col_begin,
                            ColIteratorT                        col_end)
         {
-            //typedef std::vector<std::tuple<IndexType,AScalarT> > ARowType;
             typedef std::vector<std::tuple<IndexType,CScalarT> > CRowType;
 
             C.clear();
@@ -145,9 +144,6 @@ namespace GraphBLAS
                  ++row_it, ++out_row_index)
             {
                 auto row(A.getRow(*row_it));
-
-                IndexType tmp_idx;
-                AScalarT tmp_value;
                 CRowType out_row;
 
                 // Extract the values from the row
@@ -170,8 +166,6 @@ namespace GraphBLAS
                            ColIteratorT                            col_begin,
                            ColIteratorT                            col_end)
         {
-            typedef typename AMatrixT::ScalarType AScalarT;
-            //typedef std::vector<std::tuple<IndexType,AScalarT> > ARowType;
             typedef std::vector<std::tuple<IndexType,CScalarT> > CRowType;
 
             C.clear();
@@ -184,9 +178,6 @@ namespace GraphBLAS
                  ++row_it, ++out_row_index)
             {
                 auto row(A.getRow(*row_it));
-
-                IndexType tmp_idx;
-                AScalarT tmp_value;
                 CRowType out_row;
 
                 // Extract the values from the row
@@ -281,9 +272,6 @@ namespace GraphBLAS
             IndexType                                        col_index)
         {
             // Walk the row, extracting the cell if it exists and is in row_indices
-            typedef typename AMatrixT::ScalarType AScalarType;
-            typedef std::vector<std::tuple<IndexType,AScalarType> > ARowType;
-
             vec_dest.clear();
 
             auto row(Atrans.getCol(col_index));
@@ -336,9 +324,6 @@ namespace GraphBLAS
         {
             check_index_array_content(indices, u.size(),
                                       "extract(std vec): indices >= u.size");
-
-            typedef typename WVectorT::ScalarType WScalarType;
-            typedef std::vector<std::tuple<IndexType,WScalarType> > CColType;
 
             GRB_LOG_VERBOSE("u inside: " << u);
 

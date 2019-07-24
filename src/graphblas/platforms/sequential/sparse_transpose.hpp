@@ -67,10 +67,6 @@ namespace GraphBLAS
                               bool            replace_flag = false)
         {
             typedef typename AMatrixT::ScalarType                   AScalarType;
-            typedef std::vector<std::tuple<IndexType,AScalarType> > ARowType;
-
-            typedef typename CMatrixT::ScalarType                   CScalarType;
-            typedef std::vector<std::tuple<IndexType,CScalarType> > CRowType;
 
             IndexType nrows(A.nrows());
             IndexType ncols(A.ncols());

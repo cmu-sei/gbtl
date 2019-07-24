@@ -185,8 +185,6 @@ namespace GraphBLAS
             {
                 IndexType out_row_index = row_Indices[in_row_index];
                 ARowType row(A.getRow(in_row_index));
-                auto row_it = row.begin();
-
                 TRowType out_row;
 
                 // Extract the values from the row
@@ -210,8 +208,7 @@ namespace GraphBLAS
         {
             // NOTE!! - Backend code. We expect that all dimension
             // checks done elsewhere.
-            typedef typename AMatrixT::ScalarType AScalarT;
-            //typedef std::vector<std::tuple<IndexType,AScalarT> > ARowType;
+
             typedef std::vector<std::tuple<IndexType,TScalarT> > TRowType;
 
             T.clear();
@@ -227,8 +224,6 @@ namespace GraphBLAS
             {
                 IndexType out_row_index = row_Indices[in_row_index];
                 auto row(A.getRow(in_row_index));
-                auto row_it = row.begin();
-
                 TRowType out_row;
 
                 // Extract the values from the row
@@ -365,7 +360,6 @@ namespace GraphBLAS
                            ColSequenceT     const &col_indices,
                            bool                    replace = false)
         {
-            typedef typename CMatrixT::ScalarType  CScalarType;
             typedef typename AMatrixT::ScalarType  AScalarType;
 
             // execution error checks
@@ -575,8 +569,6 @@ namespace GraphBLAS
                                     ColIndicesT  const &col_indices,
                                     bool                  replace_flag = false)
         {
-            typedef typename CMatrixT::ScalarType CScalarType;
-
             // execution error checks
             check_index_array_content(row_indices, C.nrows(),
                                       "assign(std mat): row_indices content check");
@@ -598,7 +590,7 @@ namespace GraphBLAS
                     typename CMatrixT::ScalarType,
                     typename AccumT::result_type>::type ZScalarType;
 
-            LilSparseMatrix<CScalarType> Z(C.nrows(), C.ncols());
+            LilSparseMatrix<ZScalarType> Z(C.nrows(), C.ncols());
             ewise_or_stencil_opt_accum(Z, C, T,
                                        setupIndices(row_indices, C.nrows()),
                                        setupIndices(col_indices, C.ncols()),

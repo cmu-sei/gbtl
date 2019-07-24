@@ -223,9 +223,6 @@ namespace GraphBLAS
                     return false;
                 }
 
-                IndexType ind;
-                ScalarT val;
-                //for (auto tupl : m_data[irow])// Range-based loop, access by value
                 for (auto tupl : m_data.at(irow))// Range-based loop, access by value
                 {
                     if (std::get<0>(tupl) == icol)
@@ -253,9 +250,6 @@ namespace GraphBLAS
                     throw NoValueException("get_value_at: no entry at index");
                 }
 
-                IndexType ind;
-                ScalarT val;
-                //for (auto tupl : m_data[irow])// Range-based loop, access by value
                 for (auto tupl : m_data.at(irow))// Range-based loop, access by value
                 {
                     //std::tie(ind, val) = tupl;
@@ -560,9 +554,9 @@ namespace GraphBLAS
             template<typename RAIteratorIT,
                      typename RAIteratorJT,
                      typename RAIteratorVT>
-            ScalarT extractTuples(RAIteratorIT        row_it,
-                                  RAIteratorJT        col_it,
-                                  RAIteratorVT        values) const
+            void extractTuples(RAIteratorIT        row_it,
+                               RAIteratorJT        col_it,
+                               RAIteratorVT        values) const
             {
                 for (IndexType row = 0; row < m_data.size(); ++row)
                 {

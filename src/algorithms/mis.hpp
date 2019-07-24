@@ -132,7 +132,6 @@ namespace algorithms
 
         generator.seed(seed);
 
-        using T = typename MatrixT::ScalarType;
         using RealT = float;
         typedef GraphBLAS::Vector<RealT> RealVector;
         typedef GraphBLAS::Vector<bool> BoolVector;
