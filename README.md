@@ -63,10 +63,12 @@ This project is designed to use cmake to build and use an "out of
 source" style build to make it easy to clean up. We build in to a
 "build" directory in the top-level directory by following these steps:
 
+```
 $ mkdir build
 $ cd build
-$ cmake [-DPLATFORM=<backend>] ../src
+$ cmake [CXX=<compiler binary>] [-DPLATFORM=<backend>] ../src
 $ make
+```
 
 The PLATFORM argument to cmake specifies which platform-specific source
 code (also referred to as the backend) should be configured for the build
@@ -105,8 +107,10 @@ a location in your include path.
 Documentation can be generated using the Doxygen documentation system.  To
 generate documentation run doxygen from the src directory:
 
+```
 $ cd src
 $ doxygen
+```
 
 All documentation is built in the 'docs' subdirectory.
 
