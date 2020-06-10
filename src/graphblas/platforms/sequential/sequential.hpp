@@ -1,8 +1,8 @@
 /*
- * GraphBLAS Template Library, Version 2.1
+ * GraphBLAS Template Library (GBTL), Version 3.0
  *
  * Copyright 2020 Carnegie Mellon University, Battelle Memorial Institute, and
- * Authors. All Rights Reserved.
+ * Authors.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
  * THE UNITED STATES GOVERNMENT.  NEITHER THE UNITED STATES GOVERNMENT NOR THE
@@ -15,20 +15,15 @@
  * DISCLOSED, OR REPRESENTS THAT ITS USE WOULD NOT INFRINGE PRIVATELY OWNED
  * RIGHTS.
  *
- * Released under a BSD (SEI)-style license, please see license.txt or contact
+ * Released under a BSD-style license, please see LICENSE file or contact
  * permission@sei.cmu.edu for full terms.
  *
- * This release is an update of:
+ * [DISTRIBUTION STATEMENT A] This material has been approved for public release
+ * and unlimited distribution.  Please see Copyright notice for non-US
+ * Government use and distribution.
  *
- * 1. GraphBLAS Template Library (GBTL)
- * (https://github.com/cmu-sei/gbtl/blob/1.0.0/LICENSE) Copyright 2015 Carnegie
- * Mellon University and The Trustees of Indiana. DM17-0037, DM-0002659
- *
- * DM18-0559
+ * DM20-0442
  */
-
-#ifndef GB_SEQUENTIAL_HPP
-#define GB_SEQUENTIAL_HPP
 
 #pragma once
 
@@ -39,5 +34,3 @@
 
 #include <graphblas/platforms/sequential/BitmapSparseVector.hpp>
 #include <graphblas/platforms/sequential/LilSparseMatrix.hpp>
-
-#endif // GB_SEQUENTIAL_HPP

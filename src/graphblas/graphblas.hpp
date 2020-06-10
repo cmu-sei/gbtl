@@ -1,8 +1,8 @@
 /*
- * GraphBLAS Template Library, Version 2.1
+ * GraphBLAS Template Library (GBTL), Version 3.0
  *
  * Copyright 2020 Carnegie Mellon University, Battelle Memorial Institute, and
- * Authors. All Rights Reserved.
+ * Authors.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
  * THE UNITED STATES GOVERNMENT.  NEITHER THE UNITED STATES GOVERNMENT NOR THE
@@ -13,18 +13,16 @@
  * ASSUMES ANY LEGAL LIABILITY OR RESPONSIBILITY FOR THE ACCURACY, COMPLETENESS,
  * OR USEFULNESS OR ANY INFORMATION, APPARATUS, PRODUCT, SOFTWARE, OR PROCESS
  * DISCLOSED, OR REPRESENTS THAT ITS USE WOULD NOT INFRINGE PRIVATELY OWNED
- * RIGHTS..
+ * RIGHTS.
  *
- * Released under a BSD (SEI)-style license, please see license.txt or contact
+ * Released under a BSD-style license, please see LICENSE file or contact
  * permission@sei.cmu.edu for full terms.
  *
- * This release is an update of:
+ * [DISTRIBUTION STATEMENT A] This material has been approved for public release
+ * and unlimited distribution.  Please see Copyright notice for non-US
+ * Government use and distribution.
  *
- * 1. GraphBLAS Template Library (GBTL)
- * (https://github.com/cmu-sei/gbtl/blob/1.0.0/LICENSE) Copyright 2015 Carnegie
- * Mellon University and The Trustees of Indiana. DM17-0037, DM-0002659
- *
- * DM18-0559
+ * DM20-0442
  */
 
 #pragma once
@@ -32,15 +30,15 @@
 #include <functional>
 
 // C API Version equivalents
-#define GrB_VERSION    1
-#define GrB_SUBVERSION 3
+#define GRB_VERSION    1
+#define GRB_SUBVERSION 3
 
 namespace GraphBLAS
 {
     auto getVersion()
     {
-        return std::make_tuple(static_cast<unsigned int>(GrB_VERSION),
-                               static_cast<unsigned int>(GrB_SUBVERSION));
+        return std::make_tuple(static_cast<unsigned int>(GRB_VERSION),
+                               static_cast<unsigned int>(GRB_SUBVERSION));
     }
 }
 

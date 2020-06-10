@@ -51,21 +51,24 @@ algorithms using the C++ API:
 
 Work is underway to port some of the algorithms in LAGraph repository to GBTL.
 
-## Backend Implementations Available
+## Backend Implementations (Platforms)
 
 The file structure and build system support defining multiple
 different 'backend' implementations (platforms), but only one of these
 can be configured and compiled at a time.  However, if multiple
 different build directories are used (extending what is shown below),
-then each can configured for a different platform.
+then each can configured for a different platform.  The code for each
+platform can be found in an appropriately named subdirectory of
+`src/graphblas/platforms`.
 
-This release contains the 'sequential' backend in the platforms
-directory that is written for a single CPU. It is intended as a
-reference implementation focusing on correctness, but contains some
-modest performance improvements over previous releases.  An
-experimental platform called 'optimized_sequential' is currently under
-development and is exploring more comprehensive performance
-improvements (currently only for the mxm operation).
+1. 'sequential' platform: this platform is written for a single CPU.
+It is intended as a reference implementation focusing on correctness,
+but contains some modest (significant in some cases) performance
+improvements over previous releases.
+
+2. 'optimized_sequential' platform: this is an experimental platform
+that is currently under development and is exploring more comprehensive
+performance improvements (currently only for the mxm operation).
 
 Support for GPUs that was in version 1.0 is currently not available
 but can be accessed using the git tag: '1.0.0').
@@ -150,37 +153,52 @@ All documentation is built in the 'docs' subdirectory.
 
 ## Acknowledgments and Disclaimers
 
-This material is based upon work funded and supported by the United
-States Department of Defense under Contract No. FA8702-15-D-0002 with
-Carnegie Mellon University for the operation of the Software
-Engineering Institute, a federally funded research and development
-center and by the United States Department of Energy under Contract
-DE-AC05-76RL01830 with Battelle Memorial Institute for the Operation
-of the Pacific Northwest National Laboratory.
+GraphBLAS Template Library (GBTL), Version 3.0 includes and/or can make use
+of certain third party software ("Third Party Software"). The Third Party
+Software that is used by GraphBLAS Template Library (GBTL), Version 3.0 is
+dependent upon your system configuration, but typically includes the software
+identified below. By using GraphBLAS Template Library (GBTL), Version 3.0,
+You agree to comply with any and all relevant Third Party Software terms and
+conditions contained in any such Third Party Software or separate license
+file distributed with such Third Party Software. The parties who own the
+Third Party Software ("Third Party Licensors") are intended third party
+beneficiaries to this License with respect to the terms applicable to their
+Third Party Software. Third Party Software licenses only apply to the Third
+Party Software and not any other portion of GraphBLAS Template Library
+(GBTL), Version 3.0 or GraphBLAS Template Library (GBTL), Version 3.0 as a
+whole.
 
-THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN
-AGENCY OF THE UNITED STATES GOVERNMENT.  NEITHER THE UNITED STATES
-GOVERNMENT NOR THE UNITED STATES DEPARTMENT OF ENERGY, NOR THE UNITED
-STATES DEPARTMENT OF DEFENSE, NOR CARNEGIE MELLON UNIVERSITY, NOR
-BATTELLE, NOR ANY OF THEIR EMPLOYEES, NOR ANY JURISDICTION OR
-ORGANIZATION THAT HAS COOPERATED IN THE DEVELOPMENT OF THESE
-MATERIALS, MAKES ANY WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY
-LEGAL LIABILITY OR RESPONSIBILITY FOR THE ACCURACY, COMPLETENESS, OR
-USEFULNESS OR ANY INFORMATION, APPARATUS, PRODUCT, SOFTWARE, OR
-PROCESS DISCLOSED, OR REPRESENTS THAT ITS USE WOULD NOT INFRINGE
-PRIVATELY OWNED RIGHTS.
+This material is based upon work funded and supported by the United States
+Department of Defense under Contract No. FA8702-15-D-0002 with Carnegie
+Mellon University for the operation of the Software Engineering Institute, a
+federally funded research and development center and by the United States
+Department of Energy under Contract DE-AC05-76RL01830 with Battelle Memorial
+Institute for the Operation of the Pacific Northwest National Laboratory.
 
-Reference herein to any specific commercial product, process, or
-service by trade name, trademark, manufacturer, or otherwise does not
-necessarily constitute or imply its endorsement, recommendation, or
-favoring by the United States Government or any agency thereof, or
-Carnegie Mellon University, or Battelle Memorial Institute. The views
-and opinions of authors expressed herein do not necessarily state or
-reflect those of the United States Government or any agency thereof.
+THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
+THE UNITED STATES GOVERNMENT.  NEITHER THE UNITED STATES GOVERNMENT NOR THE
+UNITED STATES DEPARTMENT OF ENERGY, NOR THE UNITED STATES DEPARTMENT OF
+DEFENSE, NOR CARNEGIE MELLON UNIVERSITY, NOR BATTELLE, NOR ANY OF THEIR
+EMPLOYEES, NOR ANY JURISDICTION OR ORGANIZATION THAT HAS COOPERATED IN THE
+DEVELOPMENT OF THESE MATERIALS, MAKES ANY WARRANTY, EXPRESS OR IMPLIED, OR
+ASSUMES ANY LEGAL LIABILITY OR RESPONSIBILITY FOR THE ACCURACY, COMPLETENESS,
+OR USEFULNESS OR ANY INFORMATION, APPARATUS, PRODUCT, SOFTWARE, OR PROCESS
+DISCLOSED, OR REPRESENTS THAT ITS USE WOULD NOT INFRINGE PRIVATELY OWNED
+RIGHTS.
 
-DM20-0442
+Reference herein to any specific commercial product, process, or service by
+trade name, trademark, manufacturer, or otherwise does not necessarily
+constitute or imply its endorsement, recommendation, or favoring by the
+United States Government or any agency thereof, or Carnegie Mellon
+University, or Battelle Memorial Institute. The views and opinions of authors
+expressed herein do not necessarily state or reflect those of the United
+States Government or any agency thereof.
 
 Please see “AUTHORS” file for a list of known contributors.
+
+[DISTRIBUTION STATEMENT A] This material has been approved for public release
+and unlimited distribution.  Please see Copyright notice for non-US
+Government use and distribution.
 
 This release is an update of:
 
@@ -193,3 +211,5 @@ DM-0002659
 (https://github.com/cmu-sei/gbtl/blob/2.0.0/LICENSE) Copyright 2018
 Carnegie Mellon University, Battelle Memorial Institute, and Authors.
 DM18-0559
+
+DM20-0442
