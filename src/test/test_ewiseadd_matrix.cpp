@@ -1,7 +1,7 @@
 /*
- * GraphBLAS Template Library, Version 2.0
+ * GraphBLAS Template Library, Version 2.1
  *
- * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Copyright 2019 Carnegie Mellon University, Battelle Memorial Institute, and
  * Authors. All Rights Reserved.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
@@ -426,7 +426,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_replace_bad_dimensions)
                              Mask,
                              GraphBLAS::NoAccumulate(),
                              GraphBLAS::Plus<double>(), mA, mB,
-                             true)),
+                             REPLACE)),
         GraphBLAS::DimensionException);
 }
 
@@ -455,7 +455,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_replace_reg)
                             Mask,
                             GraphBLAS::NoAccumulate(),
                             GraphBLAS::Plus<double>(), mA, mB,
-                            true);
+                            REPLACE);
 
         BOOST_CHECK_EQUAL(Result.nvals(), 6);
         BOOST_CHECK_EQUAL(Result, Ans);
@@ -474,7 +474,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_replace_reg)
                             Mask,
                             GraphBLAS::Second<double>(),
                             GraphBLAS::Plus<double>(), mA, mB,
-                            true);
+                            REPLACE);
 
         BOOST_CHECK_EQUAL(Result.nvals(), 6);
         BOOST_CHECK_EQUAL(Result, Ans);
@@ -509,7 +509,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_replace_reg_stored_zero)
                             Mask,
                             GraphBLAS::NoAccumulate(),
                             GraphBLAS::Plus<double>(), mA, mB,
-                            true);
+                            REPLACE);
 
         BOOST_CHECK_EQUAL(Result.nvals(), 6);
         BOOST_CHECK_EQUAL(Result, Ans);
@@ -528,7 +528,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_replace_reg_stored_zero)
                             Mask,
                             GraphBLAS::Second<double>(),
                             GraphBLAS::Plus<double>(), mA, mB,
-                            true);
+                            REPLACE);
 
         BOOST_CHECK_EQUAL(Result.nvals(), 6);
         BOOST_CHECK_EQUAL(Result, Ans);
@@ -559,7 +559,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_replace_a_transpose)
                         Mask,
                         GraphBLAS::NoAccumulate(),
                         GraphBLAS::Plus<double>(), transpose(mA), mB,
-                        true);
+                        REPLACE);
 
     BOOST_CHECK_EQUAL(Result.nvals(), 6);
     BOOST_CHECK_EQUAL(Result, Ans);
@@ -589,7 +589,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_replace_b_transpose)
                         Mask,
                         GraphBLAS::NoAccumulate(),
                         GraphBLAS::Plus<double>(), mA, transpose(mB),
-                        true);
+                        REPLACE);
 
     BOOST_CHECK_EQUAL(Result.nvals(), 6);
     BOOST_CHECK_EQUAL(Result, Ans);
@@ -619,7 +619,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_replace_a_and_b_transpose)
                         Mask,
                         GraphBLAS::NoAccumulate(),
                         GraphBLAS::Plus<double>(), transpose(mA), transpose(mB),
-                        true);
+                        REPLACE);
 
     BOOST_CHECK_EQUAL(Result.nvals(), 6);
     BOOST_CHECK_EQUAL(Result, Ans);
@@ -850,7 +850,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_replace_bad_dimensions)
                              GraphBLAS::complement(Mask),
                              GraphBLAS::NoAccumulate(),
                              GraphBLAS::Plus<double>(), mA, mB,
-                             true)),
+                             REPLACE)),
         GraphBLAS::DimensionException);
 }
 
@@ -879,7 +879,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_replace_reg)
                             GraphBLAS::complement(Mask),
                             GraphBLAS::NoAccumulate(),
                             GraphBLAS::Plus<double>(), mA, mB,
-                            true);
+                            REPLACE);
 
         BOOST_CHECK_EQUAL(Result.nvals(), 6);
         BOOST_CHECK_EQUAL(Result, Ans);
@@ -898,7 +898,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_replace_reg)
                             GraphBLAS::complement(Mask),
                             GraphBLAS::Second<double>(),
                             GraphBLAS::Plus<double>(), mA, mB,
-                            true);
+                            REPLACE);
 
         BOOST_CHECK_EQUAL(Result.nvals(), 6);
         BOOST_CHECK_EQUAL(Result, Ans);
@@ -933,7 +933,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_replace_reg_stored_zero)
                             GraphBLAS::complement(Mask),
                             GraphBLAS::NoAccumulate(),
                             GraphBLAS::Plus<double>(), mA, mB,
-                            true);
+                            REPLACE);
 
         BOOST_CHECK_EQUAL(Result.nvals(), 6);
         BOOST_CHECK_EQUAL(Result, Ans);
@@ -952,7 +952,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_replace_reg_stored_zero)
                             GraphBLAS::complement(Mask),
                             GraphBLAS::Second<double>(),
                             GraphBLAS::Plus<double>(), mA, mB,
-                            true);
+                            REPLACE);
 
         BOOST_CHECK_EQUAL(Result.nvals(), 6);
         BOOST_CHECK_EQUAL(Result, Ans);
@@ -983,7 +983,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_replace_a_transpose)
                         GraphBLAS::complement(Mask),
                         GraphBLAS::NoAccumulate(),
                         GraphBLAS::Plus<double>(), transpose(mA), mB,
-                        true);
+                        REPLACE);
 
     BOOST_CHECK_EQUAL(Result.nvals(), 6);
     BOOST_CHECK_EQUAL(Result, Ans);
@@ -1013,7 +1013,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_replace_b_transpose)
                         GraphBLAS::complement(Mask),
                         GraphBLAS::NoAccumulate(),
                         GraphBLAS::Plus<double>(), mA, transpose(mB),
-                        true);
+                        REPLACE);
 
     BOOST_CHECK_EQUAL(Result.nvals(), 6);
     BOOST_CHECK_EQUAL(Result, Ans);
@@ -1043,7 +1043,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_replace_a_and_b_transpose)
                         GraphBLAS::complement(Mask),
                         GraphBLAS::NoAccumulate(),
                         GraphBLAS::Plus<double>(), transpose(mA), transpose(mB),
-                        true);
+                        REPLACE);
 
     BOOST_CHECK_EQUAL(Result.nvals(), 6);
     BOOST_CHECK_EQUAL(Result, Ans);

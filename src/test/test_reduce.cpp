@@ -1,7 +1,7 @@
 /*
- * GraphBLAS Template Library, Version 2.0
+ * GraphBLAS Template Library, Version 2.1
  *
- * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Copyright 2019 Carnegie Mellon University, Battelle Memorial Institute, and
  * Authors. All Rights Reserved.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(test_reduce_matvec_mask_replace_bad_dimensions)
                 m4,
                 NoAccumulate(),
                 Plus<double>(), mA,
-                true)),
+                REPLACE)),
         DimensionException);
 }
 
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE(test_reduce_matvec_scmp_replace_bad_dimensions)
                 complement(m4),
                 NoAccumulate(),
                 Plus<double>(), mA,
-                true)),
+                REPLACE)),
         DimensionException);
 }
 
@@ -353,7 +353,7 @@ BOOST_AUTO_TEST_CASE(test_reduce_matvec_mask_replace_second_accum)
                m3,
                Second<double>(),
                Plus<double>(), mA,
-               true);
+               REPLACE);
 
         BOOST_CHECK_EQUAL(result.nvals(), 2);
         BOOST_CHECK_EQUAL(result, answer);
@@ -369,7 +369,7 @@ BOOST_AUTO_TEST_CASE(test_reduce_matvec_mask_replace_second_accum)
                m3,
                NoAccumulate(),
                Plus<double>(), mA,
-               true);
+               REPLACE);
 
         BOOST_CHECK_EQUAL(result.nvals(), 1);
         BOOST_CHECK_EQUAL(result, answer);
@@ -405,7 +405,7 @@ BOOST_AUTO_TEST_CASE(test_reduce_matvec_mask_replace_stored_zero)
            mask,
            NoAccumulate(),
            Plus<double>(), A,
-           true);
+           REPLACE);
     BOOST_CHECK_EQUAL(result.nvals(), 3);
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -433,7 +433,7 @@ BOOST_AUTO_TEST_CASE(test_reduce_matvec_mask_replace_transpose)
            mask,
            NoAccumulate(),
            Plus<double>(), transpose(A),
-           true);
+           REPLACE);
 
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -818,7 +818,7 @@ BOOST_AUTO_TEST_CASE(test_reduce_matvec_scmp_replace)
                complement(m3),
                Second<double>(),
                Plus<double>(), mA,
-               true);
+               REPLACE);
 
         BOOST_CHECK_EQUAL(result.nvals(), 2);
         BOOST_CHECK_EQUAL(result, answer);
@@ -834,7 +834,7 @@ BOOST_AUTO_TEST_CASE(test_reduce_matvec_scmp_replace)
                complement(m3),
                NoAccumulate(),
                Plus<double>(), mA,
-               true);
+               REPLACE);
 
         BOOST_CHECK_EQUAL(result.nvals(), 1);
         BOOST_CHECK_EQUAL(result, answer);
@@ -867,7 +867,7 @@ BOOST_AUTO_TEST_CASE(test_reduce_matvec_scmp_replace_stored_zero)
            complement(mask),
            NoAccumulate(),
            Plus<double>(), A,
-           true);
+           REPLACE);
     BOOST_CHECK_EQUAL(result.nvals(), 3);
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -894,7 +894,7 @@ BOOST_AUTO_TEST_CASE(test_reduce_matvec_scmp_replace_transpose)
            complement(mask),
            NoAccumulate(),
            Plus<double>(), transpose(A),
-           true);
+           REPLACE);
 
     BOOST_CHECK_EQUAL(result, answer);
 }

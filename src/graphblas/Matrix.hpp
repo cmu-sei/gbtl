@@ -1,7 +1,7 @@
 /*
- * GraphBLAS Template Library, Version 2.0
+ * GraphBLAS Template Library, Version 2.1
  *
- * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Copyright 2020 Carnegie Mellon University, Battelle Memorial Institute, and
  * Authors. All Rights Reserved.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
@@ -33,32 +33,14 @@
 #include <type_traits>
 #include <graphblas/detail/config.hpp>
 #include <graphblas/detail/param_unpack.hpp>
+#include <graphblas/types.hpp>
 
 #define GB_INCLUDE_BACKEND_MATRIX 1
 #include <backend_include.hpp>
 
-
-//****************************************************************************
-// The new namespace
-//****************************************************************************
-
 namespace GraphBLAS
 {
-    // We need to declare class so we can include later.
-    template<typename ScalarT, typename... TagsT>
-    class Vector;
-
-    template<typename ScalarT, typename... TagsT>
-    class Matrix;
-
-    template<typename MatrixT>
-    class TransposeView;
-
-    template<typename MatrixT>
-    class MatrixComplementView;
-
     //************************************************************************
-
     /**
      * @brief Frontend Matrix class. Performs API checks and forwards to
      *        backend code.
@@ -71,16 +53,14 @@ namespace GraphBLAS
     class Matrix
     {
     public:
-        typedef matrix_tag  tag_type;
-
-        typedef ScalarT     ScalarType;
-        typedef typename detail::matrix_generator::result<
+        using ScalarType = ScalarT;
+        using BackendType = typename detail::matrix_generator::result<
             ScalarT,
             detail::SparsenessCategoryTag,
             detail::DirectednessCategoryTag,
             TagsT... ,
             detail::NullTag,
-            detail::NullTag >::type BackendType;
+            detail::NullTag >::type;
 
         /**
          * @brief Construct an empty matrix with the specified shape.
@@ -224,15 +204,34 @@ namespace GraphBLAS
         IndexType ncols() const  { return m_mat.ncols(); }
         IndexType nvals() const  { return m_mat.nvals(); }
 
+        /**
+         * @brief Resize the matrix dimensions (smaller or larger)
+         *
+         * @param[in]  new_num_rows  New number of rows (zero is invalid)
+         * @param[in]  new_num_cols  New number of columns (zero is invalid)
+         *
+         */
+        void resize(IndexType new_num_rows, IndexType new_num_cols)
+        {
+            if ((new_num_rows == 0) || (new_num_cols == 0))
+                throw InvalidValueException();
+
+            m_mat.resize(new_num_rows, new_num_cols);
+        }
+
         bool hasElement(IndexType row, IndexType col) const
         {
             return m_mat.hasElement(row, col);
         }
 
-        /// @todo I don't think this is a valid interface for sparse
         void setElement(IndexType row, IndexType col, ScalarT const &val)
         {
             m_mat.setElement(row, col, val);
+        }
+
+        void removeElement(IndexType row, IndexType col)
+        {
+            m_mat.removeElement(row, col);
         }
 
         /// @throw NoValueException if there is no value stored at (row,col)
@@ -262,335 +261,45 @@ namespace GraphBLAS
                                 values.begin());
         }
 
-        /// This replaces operator<< and outputs implementation specific
-        /// information.
-        void printInfo(std::ostream &os) const
+        // ================================================
+        void printInfo(std::ostream &ostr) const
         {
-            m_mat.printInfo(os);
+            ostr << "GraphBLAS::Matrix: ";
+            m_mat.printInfo(ostr);
+        }
+
+        friend std::ostream &operator<<(std::ostream &ostr, Matrix const &mat)
+        {
+            mat.printInfo(ostr);
+            return ostr;
         }
 
     private:
-
-        // 4.3.1:
-        template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename AMatrixT,
-                 typename BMatrixT>
-        friend inline void mxm(CMatrixT         &C,
-                               MaskT      const &Mask,
-                               AccumT            accum,
-                               SemiringT         op,
-                               AMatrixT   const &A,
-                               BMatrixT   const &B,
-                               bool              replace_flag);
-
-        //--------------------------------------------------------------------
-
-        // 4.3.2:
-        template<typename WVectorT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename UVectorT,
-                 typename AMatrixT>
-        friend inline void vxm(WVectorT         &w,
-                               MaskT      const &mask,
-                               AccumT            accum,
-                               SemiringT         op,
-                               UVectorT   const &u,
-                               AMatrixT   const &A,
-                               bool              replace_flag);
-
-        //--------------------------------------------------------------------
-
-        // 4.3.3
-        template<typename WVectorT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename AMatrixT,
-                 typename UVectorT>
-        friend inline void mxv(WVectorT        &w,
-                               MaskT     const &mask,
-                               AccumT           accum,
-                               SemiringT        op,
-                               AMatrixT  const &A,
-                               UVectorT  const &u,
-                               bool             replace_flag);
-
-        //--------------------------------------------------------------------
-
-        // 4.3.4.2:
-        template<typename CScalarT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename BinaryOpT,  //can be BinaryOp, Monoid (not Semiring)
-                 typename AMatrixT,
-                 typename BMatrixT,
-                 typename... CTagsT>
-        friend inline void eWiseMult(
-            GraphBLAS::Matrix<CScalarT, CTagsT...> &C,
-            MaskT                            const &Mask,
-            AccumT                                  accum,
-            BinaryOpT                               op,
-            AMatrixT                         const &A,
-            BMatrixT                         const &B,
-            bool                                    replace_flag);
-
-        //--------------------------------------------------------------------
-
-        // 4.3.5.2
-        template<typename CScalarT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename BinaryOpT,  //can be BinaryOp, Monoid (not Semiring)
-                 typename AMatrixT,
-                 typename BMatrixT,
-                 typename... CTagsT>
-        friend inline void eWiseAdd(
-            GraphBLAS::Matrix<CScalarT, CTagsT...> &C,
-            MaskT                            const &Mask,
-            AccumT                                  accum,
-            BinaryOpT                               op,
-            AMatrixT                         const &A,
-            BMatrixT                         const &B,
-            bool                                    replace_flag);
-
-        //--------------------------------------------------------------------
-
-        // 4.3.6.2
-        template<typename CScalarT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename AMatrixT,
-                 typename RowSequenceT,
-                 typename ColSequenceT,
-                 typename ...CTags>
-        friend inline void extract(
-                GraphBLAS::Matrix<CScalarT, CTags...>   &C,
-                MaskT               const   &Mask,
-                AccumT                       accum,
-                AMatrixT            const   &A,
-                RowSequenceT        const   &row_indices,
-                ColSequenceT        const   &col_indices,
-                bool                         replace_flag);
-
-        // 4.3.6.3
-        template<typename WScalarT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename AMatrixT,
-                 typename SequenceT,
-                 typename ...WTags>
-        friend inline void extract(
-                GraphBLAS::Vector<WScalarT, WTags...> &w,
-                MaskT          const &mask,
-                AccumT                accum,
-                AMatrixT       const &A,
-                SequenceT      const &row_indices,
-                IndexType             col_index,
-                bool                  replace_flag);
-
-        //--------------------------------------------------------------------
-        // 4.3.7.2
-        template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename AMatrixT,
-                 typename RowSequenceT,
-                 typename ColSequenceT,
-                 typename std::enable_if<
-                     std::is_same<matrix_tag,
-                                  typename AMatrixT::tag_type>::value,
-                     int>::type>
-        friend inline void assign(CMatrixT              &C,
-                                  MaskT           const &Mask,
-                                  AccumT                 accum,
-                                  AMatrixT        const &A,
-                                  RowSequenceT    const &row_indices,
-                                  ColSequenceT    const &col_indices,
-                                  bool                   replace_flag);
-
-        // 4.3.7.3:
-        template<typename CScalarT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename UVectorT,
-                 typename SequenceT,
-                 typename ...CTags>
-        friend inline void assign(Matrix<CScalarT, CTags...>  &C,
-                                  MaskT                 const &mask,  // a vector
-                                  AccumT                       accum,
-                                  UVectorT              const &u,
-                                  SequenceT             const &row_indices,
-                                  IndexType                    col_index,
-                                  bool                         replace_flag);
-
-        // 4.3.7.4:
-        template<typename CScalarT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename UVectorT,
-                 typename SequenceT,
-                 typename ...CTags>
-        friend inline void assign(Matrix<CScalarT, CTags...>  &C,
-                                  MaskT                 const &mask,  // a vector
-                                  AccumT                       accum,
-                                  UVectorT              const &u,
-                                  IndexType                    row_index,
-                                  SequenceT             const &col_indices,
-                                  bool                         replace_flag);
-
-        // 4.3.7.6
-        template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename ValueT,
-                 typename RowSequenceT,
-                 typename ColSequenceT,
-                 typename std::enable_if<
-                     std::is_convertible<ValueT,
-                                         typename CMatrixT::ScalarType>::value,
-                     int>::type>
-        friend inline void assign(CMatrixT             &C,
-                                  MaskT          const &Mask,
-                                  AccumT                accum,
-                                  ValueT                val,
-                                  RowSequenceT   const &row_indices,
-                                  ColSequenceT   const &col_indices,
-                                  bool                  replace_flag);
-
-        //--------------------------------------------------------------------
-
-        // 4.3.8.2:
-        template<typename CScalarT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename UnaryFunctionT,
-                 typename AMatrixT,
-                 typename... ATagsT>
-        friend inline void apply(
-                GraphBLAS::Matrix<CScalarT, ATagsT...>          &C,
-                MaskT                                   const   &Mask,
-                AccumT                                           accum,
-                UnaryFunctionT                                   op,
-                AMatrixT                                const   &A,
-                bool                                             replace_flag);
-
-        //--------------------------------------------------------------------
-
-        // 4.3.9.1
-        template<typename WVectorT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename BinaryOpT,  // monoid or binary op only
-                 typename AMatrixT>
-        friend inline void reduce(WVectorT        &u,
-                                  MaskT     const &mask,
-                                  AccumT           accum,
-                                  BinaryOpT        op,
-                                  AMatrixT  const &A,
-                                  bool             replace_flag);
-
-        // 4.3.9.3
-        template<typename ValueT,
-                 typename AccumT,
-                 typename MonoidT, // monoid only
-                 typename AScalarT,
-                 typename... ATagsT>
-        friend inline void reduce(
-            ValueT                                       &dst,
-            AccumT                                        accum,
-            MonoidT                                       op,
-            GraphBLAS::Matrix<AScalarT, ATagsT...> const &A);
-
-        //--------------------------------------------------------------------
-
-        // 4.3.10
-        template<typename CMatrixT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename AMatrixT>
-        friend inline void transpose(CMatrixT       &C,
-                                     MaskT    const &Mask,
-                                     AccumT          accum,
-                                     AMatrixT const &A,
-                                     bool            replace_flag);
-
-        //--------------------------------------------------------------------
-
-        template<typename MatrixT>
-        friend inline GraphBLAS::TransposeView<MatrixT> transpose(MatrixT const &A);
-
-
-        //--------------------------------------------------------------------
-
-        template<typename OtherScalarT, typename... OtherTagsT>
-        friend inline MatrixComplementView<Matrix<OtherScalarT, OtherTagsT...> >
-            complement(Matrix<OtherScalarT, OtherTagsT...> const &Mask);
-
-        //--------------------------------------------------------------------
-
-        // .... ADD OTHER OPERATIONS AS FRIENDS AS THEY ARE IMPLEMENTED .....
-
-        template <typename MatrixT>
-        friend void print_matrix(std::ostream      &ostr,
-                                 MatrixT const     &mat,
-                                 std::string const &label);
-
-    private:
         BackendType m_mat;
+
+        // FRIEND FUNCTIONS
+
+        friend inline BackendType &get_internal_matrix(Matrix &matrix)
+        {
+            return matrix.m_mat;
+        }
+
+        friend inline BackendType const &get_internal_matrix(Matrix const &matrix)
+        {
+            return matrix.m_mat;
+        }
+
     };
 
-    //**************************************************************************
-    // GrB_NULL mask: should be GrB_FULL
-    class NoMask
-    {
-    public:
-        typedef bool ScalarType; // not necessary?
-        typedef backend::NoMask BackendType; // not necessary?
-
-        backend::NoMask m_mat;  // can be const?
-        backend::NoMask m_vec;
-    };
-
-    //**************************************************************************
-    // Currently these won't work because of include order.
-    /// @todo move all these to backend::sparse_helpers
-
-
-
-    // ================================================
-
-    /**
-     *  @brief Output the matrix in array form.  Mainly for debugging
-     *         small matrices.
-     *
-     *  @param[in] ostr  The output stream to send the contents
-     *  @param[in] mat   The matrix to output
-     *  @param[in] label Optional label to output first.
-     *
-     *  @deprecated - use ostream inserter
-     */
-    template <typename MatrixT>
-    void print_matrix(std::ostream      &ostr,
-                      MatrixT const     &mat,
-                      std::string const &label = "")
-    {
-        // ostr << label << ": zero = " << mat.m_mat.get_zero() << std::endl;
-        ostr << label << " (" << mat.nrows() << "x" << mat.ncols() << ")"
-             << std::endl;
-        backend::pretty_print_matrix(ostr, mat.m_mat);
-    }
-
-
+    /// @deprecated
     template<typename ScalarT, typename... TagsT>
-    std::ostream &operator<<(std::ostream &os, const Matrix<ScalarT, TagsT...> &mat)
+    void print_matrix(std::ostream                     &ostr,
+                      Matrix<ScalarT, TagsT...> const  &mat,
+                      std::string const                &label = "")
     {
-        mat.printInfo(os);
-        return os;
+        ostr << label << ":" << std::endl;
+        ostr << mat;
+        ostr << std::endl;
     }
 
 } // end namespace GraphBLAS

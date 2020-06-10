@@ -47,10 +47,10 @@ namespace GraphBLAS
         class Vector : public BitmapSparseVector<ScalarT>
         {
         private:
-            typedef BitmapSparseVector<ScalarT> ParentVectorType;
+            using ParentVectorType = BitmapSparseVector<ScalarT>;
 
         public:
-            typedef ScalarT ScalarType;
+            using ScalarType = ScalarT;
 
             Vector() = delete;
 
@@ -70,19 +70,19 @@ namespace GraphBLAS
             // necessary?
             bool operator==(Vector const &rhs) const
             {
-                return BitmapSparseVector<ScalarT>::operator==(rhs);
+                return ParentVectorType::operator==(rhs);
             }
 
             // necessary?
             bool operator!=(Vector const &rhs) const
             {
-                return BitmapSparseVector<ScalarT>::operator!=(rhs);
+                return ParentVectorType::operator!=(rhs);
             }
 
             void printInfo(std::ostream &os) const
             {
-                os << "Sequential Backend:" << std::endl;
-                BitmapSparseVector<ScalarT>::printInfo(os);
+                os << "Sequential Backend: ";
+                ParentVectorType::printInfo(os);
             }
         };
     }

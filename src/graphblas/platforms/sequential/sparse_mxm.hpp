@@ -1,7 +1,7 @@
 /*
- * GraphBLAS Template Library, Version 2.0
+ * GraphBLAS Template Library, Version 2.1
  *
- * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Copyright 2020 Carnegie Mellon University, Battelle Memorial Institute, and
  * Authors. All Rights Reserved.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
@@ -27,13 +27,6 @@
  * DM18-0559
  */
 
-/**
- * Implementation of sparse mxm for the sequential (CPU) backend.
- */
-
-#ifndef GB_SEQUENTIAL_SPARSE_MXM_HPP
-#define GB_SEQUENTIAL_SPARSE_MXM_HPP
-
 #pragma once
 
 #include <functional>
@@ -58,7 +51,8 @@ namespace GraphBLAS
     namespace backend
     {
         //**********************************************************************
-        /// Implementation of 4.3.1 mxm: Matrix-matrix multiply
+        /// Implementation of 4.3.1 mxm: Matrix-matrix multiply: A +.* B
+        //**********************************************************************
         template<typename CMatrixT,
                  typename MMatrixT,
                  typename AccumT,
@@ -71,52 +65,27 @@ namespace GraphBLAS
                         SemiringT            op,
                         AMatrixT    const   &A,
                         BMatrixT    const   &B,
-                        bool                 replace_flag = false)
+                        OutputControlEnum    outp)
         {
-            // Dimension checks happen in front end
-            IndexType nrow_A(A.nrows());
-            IndexType ncol_B(B.ncols());
-            //Frontend checks the dimensions, but use C explicitly
-            IndexType nrow_C(C.nrows());
-            IndexType ncol_C(C.ncols());
+            GRB_LOG_VERBOSE("C<M,z> := (A*B)");
 
-            typedef typename SemiringT::result_type D3ScalarType;
-            typedef std::vector<std::tuple<IndexType,D3ScalarType> > TColType;
+            using CScalarType = typename CMatrixT::ScalarType;
 
             // =================================================================
-            // Do the basic dot-product work with the semi-ring.
-            LilSparseMatrix<D3ScalarType> T(nrow_A, ncol_B);
+            // Do the axpy work with the semiring.
+            using TScalarType = typename SemiringT::result_type;
+            LilSparseMatrix<TScalarType> T(C.nrows(), C.ncols());
 
-            // Build this completely based on the semiring
-            if ((A.nvals() > 0) && (B.nvals() > 0))
+            typename LilSparseMatrix<TScalarType>::RowType T_row;
+
+            for (IndexType i = 0; i < A.nrows(); ++i)
             {
-                // create a column of result at a time
-                TColType T_col;
-                for (IndexType col_idx = 0; col_idx < ncol_B; ++col_idx)
+                for (auto&& [k, a_ik] : A[i])
                 {
-                    typename BMatrixT::ColType B_col(B.getCol(col_idx));
+                    if (B[k].empty()) continue;
 
-                    if (!B_col.empty())
-                    {
-                        for (IndexType row_idx = 0; row_idx < nrow_A; ++row_idx)
-                        {
-                            typename AMatrixT::RowType A_row(A.getRow(row_idx));
-                            if (!A_row.empty())
-                            {
-                                D3ScalarType T_val;
-                                if (dot(T_val, A_row, B_col, op))
-                                {
-                                    T_col.push_back(
-                                            std::make_tuple(row_idx, T_val));
-                                }
-                            }
-                        }
-                        if (!T_col.empty())
-                        {
-                            T.setCol(col_idx, T_col);
-                            T_col.clear();
-                        }
-                    }
+                    // T[i] += (a_ik*B[k])  // must reduce in D3
+                    axpy(T[i], op, a_ik, B[k]);
                 }
             }
 
@@ -124,22 +93,229 @@ namespace GraphBLAS
 
             // =================================================================
             // Accumulate into Z
-            typedef typename std::conditional<
-                std::is_same<AccumT, NoAccumulate>::value,
-                D3ScalarType,
-                typename AccumT::result_type>::type ZScalarType;
-            LilSparseMatrix<ZScalarType> Z(nrow_C, ncol_C);
+            using ZScalarType = typename std::conditional_t<
+                std::is_same_v<AccumT, NoAccumulate>,
+                TScalarType,
+                decltype(accum(std::declval<CScalarType>(),
+                               std::declval<TScalarType>()))>;
+
+            LilSparseMatrix<ZScalarType> Z(C.nrows(), C.ncols());
 
             ewise_or_opt_accum(Z, C, T, accum);
 
             GRB_LOG_VERBOSE("Z: " << Z);
 
             // =================================================================
-            // Copy Z into the final output considering mask and replace
-            write_with_opt_mask(C, Z, M, replace_flag);
-
+            // Copy Z into the final output considering mask and replace/merge
+            write_with_opt_mask(C, Z, M, outp);
         } // mxm
+
+        //**********************************************************************
+        /// Implementation of 4.3.1 mxm: Matrix-matrix multiply: A' +.* B
+        //**********************************************************************
+        template<typename CMatrixT,
+                 typename MMatrixT,
+                 typename AccumT,
+                 typename SemiringT,
+                 typename AMatrixT,
+                 typename BMatrixT>
+        inline void mxm(CMatrixT                        &C,
+                        MMatrixT                const   &M,
+                        AccumT                  const   &accum,
+                        SemiringT                        op,
+                        TransposeView<AMatrixT> const   &AT,
+                        BMatrixT                const   &B,
+                        OutputControlEnum                outp)
+        {
+            GRB_LOG_VERBOSE("C<M,z> := (A'*B)");
+            auto const &A(AT.m_mat);
+
+            using CScalarType = typename CMatrixT::ScalarType;
+
+            // =================================================================
+            // Do the basic axpy work with the semiring.
+            using TScalarType = typename SemiringT::result_type;
+            LilSparseMatrix<TScalarType> T(C.nrows(), C.ncols());
+
+            for (IndexType k = 0; k < A.nrows(); ++k)
+            {
+                if (A[k].empty() || B[k].empty()) continue;
+
+                for (auto&& [i, a_ki] : A[k])
+                {
+                    // T[i] += (a_ki*B[k])  // must reduce in D3, hence T.
+                    axpy(T[i], op, a_ki, B[k]);
+                }
+            }
+
+            GRB_LOG_VERBOSE("T: " << T);
+
+            // =================================================================
+            // Accumulate into Z
+            using ZScalarType = typename std::conditional_t<
+                std::is_same_v<AccumT, NoAccumulate>,
+                TScalarType,
+                decltype(accum(std::declval<CScalarType>(),
+                               std::declval<TScalarType>()))>;
+
+            LilSparseMatrix<ZScalarType> Z(C.nrows(), C.ncols());
+
+            ewise_or_opt_accum(Z, C, T, accum);
+
+            GRB_LOG_VERBOSE("Z: " << Z);
+
+            // =================================================================
+            // Copy Z into the final output considering mask and replace/merge
+            write_with_opt_mask(C, Z, M, outp);
+        } // mxm
+
+        //**********************************************************************
+        /// Implementation of 4.3.1 mxm: Matrix-matrix multiply: A +.* B'
+        //**********************************************************************
+        template<typename CMatrixT,
+                 typename MMatrixT,
+                 typename AccumT,
+                 typename SemiringT,
+                 typename AMatrixT,
+                 typename BMatrixT>
+        inline void mxm(CMatrixT                        &C,
+                        MMatrixT                const   &M,
+                        AccumT                  const   &accum,
+                        SemiringT                        op,
+                        AMatrixT                const   &A,
+                        TransposeView<BMatrixT> const   &BT,
+                        OutputControlEnum                outp)
+        {
+            GRB_LOG_VERBOSE("C<M,z> := (A*B')");
+            auto const &B(BT.m_mat);
+
+            // Dimension checks happen in front end
+            IndexType nrow_A(A.nrows());
+            IndexType nrow_B(B.nrows());
+
+            using CScalarType = typename CMatrixT::ScalarType;
+
+            // =================================================================
+            // Do the basic dot-product work with the semiring.
+            using TScalarType = typename SemiringT::result_type;
+            LilSparseMatrix<TScalarType> T(C.nrows(), C.ncols());
+
+            // Build this completely based on the semiring
+            if ((A.nvals() > 0) && (B.nvals() > 0))
+            {
+                // create a row of result at a time
+                for (IndexType row_idx = 0; row_idx < nrow_A; ++row_idx)
+                {
+                    if (!A[row_idx].empty())
+                    {
+                        for (IndexType col_idx = 0; col_idx < nrow_B; ++col_idx)
+                        {
+                            if (!B[col_idx].empty())
+                            {
+                                TScalarType T_val;
+                                if (dot(T_val, A[row_idx], B[col_idx], op))
+                                {
+                                    T[row_idx].emplace_back(col_idx, T_val);
+                                }
+                            }
+                        }
+                    }
+                }
+                T.recomputeNvals();
+            }
+
+            GRB_LOG_VERBOSE("T: " << T);
+
+            // =================================================================
+            // Accumulate into Z
+            using ZScalarType = typename std::conditional_t<
+                std::is_same_v<AccumT, NoAccumulate>,
+                TScalarType,
+                decltype(accum(std::declval<CScalarType>(),
+                               std::declval<TScalarType>()))>;
+
+            LilSparseMatrix<ZScalarType> Z(C.nrows(), C.ncols());
+
+            ewise_or_opt_accum(Z, C, T, accum);
+
+            GRB_LOG_VERBOSE("Z: " << Z);
+
+            // =================================================================
+            // Copy Z into the final output considering mask and replace/merge
+            write_with_opt_mask(C, Z, M, outp);
+        } // mxm
+
+        //**********************************************************************
+        /// Implementation of 4.3.1 mxm: Matrix-matrix multiply: A' +.* B'
+        //**********************************************************************
+        template<typename CMatrixT,
+                 typename MMatrixT,
+                 typename AccumT,
+                 typename SemiringT,
+                 typename AMatrixT,
+                 typename BMatrixT>
+        inline void mxm(CMatrixT                        &C,
+                        MMatrixT                const   &M,
+                        AccumT                  const   &accum,
+                        SemiringT                        op,
+                        TransposeView<AMatrixT> const   &AT,
+                        TransposeView<BMatrixT> const   &BT,
+                        OutputControlEnum                outp)
+        {
+            GRB_LOG_VERBOSE("C<M,z> := (A'*B')");
+            auto const &A(AT.m_mat);
+            auto const &B(BT.m_mat);
+
+            using CScalarType = typename CMatrixT::ScalarType;
+
+            // =================================================================
+            // Do the basic dot-product work with the semiring.
+            using TScalarType = typename SemiringT::result_type;
+            LilSparseMatrix<TScalarType> T(C.nrows(), C.ncols());
+            typename LilSparseMatrix<TScalarType>::RowType T_row;
+
+            // compute transpose T = B +.* A (one row at a time and transpose)
+            for (IndexType i = 0; i < B.nrows(); ++i)
+            {
+                // this part is same as sparse_mxm_NoMask_NoAccum_AB
+                T_row.clear();
+                for (auto&& [k, b_ik] : B[i])
+                {
+                    if (A[k].empty()) continue;
+
+                    // T[i] += (b_ik*A[k])  // must reduce in D3
+                    axpy(T_row, op, b_ik, A[k]);
+                }
+
+                //C.setCol(i, T_row); // this is a push_back form of setCol
+                for (auto const &t : T_row)
+                {
+                    IndexType j(std::get<0>(t));
+
+                    T[j].emplace_back(i, static_cast<CScalarType>(std::get<1>(t)));
+                }
+            }
+
+            GRB_LOG_VERBOSE("T: " << T);
+
+            // =================================================================
+            // Accumulate into Z
+            using ZScalarType = typename std::conditional_t<
+                std::is_same_v<AccumT, NoAccumulate>,
+                TScalarType,
+                decltype(accum(std::declval<CScalarType>(),
+                               std::declval<TScalarType>()))>;
+
+            LilSparseMatrix<ZScalarType> Z(C.nrows(), C.ncols());
+
+            ewise_or_opt_accum(Z, C, T, accum);
+
+            GRB_LOG_VERBOSE("Z: " << Z);
+
+            // =================================================================
+            // Copy Z into the final output considering mask and replace/merge
+            write_with_opt_mask(C, Z, M, outp);
+        } // mxm
+
     } // backend
 } // GraphBLAS
-
-#endif

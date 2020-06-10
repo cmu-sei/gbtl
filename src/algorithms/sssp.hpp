@@ -1,7 +1,7 @@
 /*
- * GraphBLAS Template Library, Version 2.0
+ * GraphBLAS Template Library, Version 2.1
  *
- * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Copyright 2019 Carnegie Mellon University, Battelle Memorial Institute, and
  * Authors. All Rights Reserved.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
@@ -38,32 +38,6 @@
 
 namespace algorithms
 {
-    /**
-     * @brief Perform a binary min operation and store whether or not any
-     * lhs value was different than rhs.
-     */
-    template<typename D1, typename D2 = D1, typename D3 = bool>
-    struct EqualTest
-    {
-        typedef D1 lhs_type;
-        typedef D2 rhs_type;
-        typedef D3 result_type;
-
-        EqualTest(bool &difference_flag) : m_difference_flag(difference_flag)
-        {
-            m_difference_flag = false;
-        }
-
-        inline D3 operator()(D1 lhs, D2 rhs)
-        {
-            m_difference_flag |= (lhs != rhs);
-            return lhs == rhs;
-        }
-
-    private:
-        bool &m_difference_flag;
-    };
-
     //************************************************************************
 
     /**
@@ -90,7 +64,8 @@ namespace algorithms
     bool sssp(MatrixT const     &graph,
               DistVectorT       &dist)
     {
-        using T = typename MatrixT::ScalarType;  // todo: assert same as Dist
+        using T  = typename MatrixT::ScalarType;  // todo: assert same as DT
+        using DT = typename DistVectorT::ScalarType;
 
         if ((graph.nrows() != dist.size()) ||
             (graph.ncols() != dist.size()))
@@ -122,12 +97,20 @@ namespace algorithms
                        dist2, graph);
         //GraphBLAS::print_vector(std::cout, dist2, "Dist2");
 
+        // determine which distances are equal and also detect if any
+        // are still changing.
         GraphBLAS::Vector<bool> equal_flags(graph.nrows());
         bool changed_flag(false);
-        algorithms::EqualTest<T> equal_test(changed_flag);
-        GraphBLAS::eWiseMult(equal_flags,
-                             GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                             equal_test, dist, dist2);
+        GraphBLAS::eWiseMult(
+            equal_flags,
+            GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+            [&changed_flag](DT const &lhs,
+                            DT const &rhs)     //equal_test,
+            {
+                changed_flag |= (lhs != rhs);
+                return lhs == rhs;
+            },
+            dist, dist2);
 
         //std::cout << "changed_flag = " << changed_flag << std::endl;
         return !changed_flag;
@@ -160,7 +143,8 @@ namespace algorithms
     bool batch_sssp(MatrixT const     &graph,
                     DistMatrixT       &dists)  // dists are initialized to start
     {
-        using T = typename MatrixT::ScalarType;
+        using T  = typename MatrixT::ScalarType;  // todo: assert same as DT
+        using DT = typename DistMatrixT::ScalarType;
 
         if ((graph.nrows() != dists.ncols()) ||
             (graph.ncols() != dists.ncols()))
@@ -191,12 +175,20 @@ namespace algorithms
                        dist2, graph);
         //GraphBLAS::print_matrix(std::cout, dist2, "Dist2");
 
+        // determine which distances are equal and also detect if any
+        // are still changing.
         GraphBLAS::Matrix<bool> equal_flags(dists.nrows(), dists.ncols());
         bool changed_flag(false);
-        algorithms::EqualTest<T> equal_test(changed_flag);
-        GraphBLAS::eWiseMult(equal_flags,
-                             GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                             equal_test, dists, dist2);
+        GraphBLAS::eWiseMult(
+            equal_flags,
+            GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+            [&changed_flag](DT const &lhs,
+                            DT const &rhs)     //equal_test,
+            {
+                changed_flag |= (lhs != rhs);
+                return lhs == rhs;
+            },
+            dists, dist2);
 
         //std::cout << "changed_flag = " << changed_flag << std::endl;
         return !changed_flag;
@@ -258,7 +250,7 @@ namespace algorithms
                                 new_dist,
                                 GraphBLAS::NoAccumulate(),
                                 GraphBLAS::LessThan<T>(),
-                                new_dist, dist, true);
+                                new_dist, dist, GraphBLAS::REPLACE);
             //GraphBLAS::print_vector(std::cout, new_dist_flags,
             //                        "new dist flags");
 
@@ -266,7 +258,7 @@ namespace algorithms
             GraphBLAS::apply(new_dist,
                              new_dist_flags,
                              GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Identity<T>(), new_dist, true);
+                             GraphBLAS::Identity<T>(), new_dist, GraphBLAS::REPLACE);
             //GraphBLAS::print_vector(std::cout, new_dist,
             //                        "new dist (cleared)");
 
@@ -295,8 +287,6 @@ namespace algorithms
     template <typename ScalarT>
     struct SelectInRange
     {
-        typedef bool result_type;
-
         ScalarT const m_low, m_high;
 
         SelectInRange(ScalarT low, ScalarT high) : m_low(low), m_high(high) {}
@@ -341,34 +331,35 @@ namespace algorithms
 
         // AL = A .* (A <= delta)
         MatrixT AL(n, n);
-        GraphBLAS::BinaryOp_Bind2nd<T, GraphBLAS::LessEqual<T>>
-            leq_delta((T)delta);
         GraphBLAS::apply(AL, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                         leq_delta, graph);
+                         std::bind(GraphBLAS::LessEqual<T>(),
+                                   std::placeholders::_1,
+                                   static_cast<T>(delta)),
+                          graph);
         GraphBLAS::apply(AL, AL, GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Identity<T>(), graph, true);
+                         GraphBLAS::Identity<T>(), graph, GraphBLAS::REPLACE);
         //GraphBLAS::print_matrix(std::cerr, AL, "AL = A(<=delta)");
 
         // AH = A .* (A > delta)
         MatrixT AH(n, n);
-        //GraphBLAS::apply(AH, GraphBLAS::complement(AL), GraphBLAS::NoAccumulate(),
-        //                 GraphBLAS::Identity<T>(), A);
-        GraphBLAS::BinaryOp_Bind2nd<T, GraphBLAS::GreaterThan<T>>
-            gt_delta(delta);
         GraphBLAS::apply(AH, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                         gt_delta, graph);
+                         std::bind(GraphBLAS::GreaterThan<T>(),
+                                   std::placeholders::_1,
+                                   delta),
+                         graph);
         GraphBLAS::apply(AH, AH, GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Identity<T>(), graph, true);
+                         GraphBLAS::Identity<T>(), graph, GraphBLAS::REPLACE);
         //GraphBLAS::print_matrix(std::cerr, AH, "AH = A(>delta)");
 
         // i = 0
         GraphBLAS::IndexType i(0);
 
         // t >= i*delta
-        GraphBLAS::BinaryOp_Bind2nd<T, GraphBLAS::GreaterEqual<T>>
-            geq_idelta((T)i*delta);
         GraphBLAS::apply(tcomp, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                         geq_idelta, t);
+                         std::bind(GraphBLAS::GreaterEqual<T>(),
+                                   std::placeholders::_1,
+                                   static_cast<T>(i)*delta),
+                         t);
         GraphBLAS::apply(tcomp, tcomp, GraphBLAS::NoAccumulate(),
                          GraphBLAS::Identity<bool>(), tcomp);
 
@@ -387,13 +378,13 @@ namespace algorithms
             GraphBLAS::apply(tBi, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                              in_range, t);
             GraphBLAS::apply(tBi, tBi, GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Identity<T>(), tBi, true);
+                             GraphBLAS::Identity<T>(), tBi, GraphBLAS::REPLACE);
             //GraphBLAS::print_vector(std::cerr, tBi,
             //                        "tBi<tless> = tReq([i*d, (i+1)*d))");
 
             // tm<tBi> = t
             GraphBLAS::apply(tmasked, tBi, GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Identity<T>(), t, true);
+                             GraphBLAS::Identity<T>(), t, GraphBLAS::REPLACE);
             //GraphBLAS::print_vector(std::cerr, tmasked, "tm = t<tBi>");
 
             while (tmasked.nvals() > 0)
@@ -423,16 +414,16 @@ namespace algorithms
                                     tReq,
                                     GraphBLAS::NoAccumulate(),
                                     GraphBLAS::LessThan<T>(),
-                                    tReq, t, true);
+                                    tReq, t, GraphBLAS::REPLACE);
                 //GraphBLAS::print_vector(std::cerr, tless, "tless<tReq> = tReq .< t");
 
                 // tBi<tless> = i*delta <= tReq < (i+1)*delta
                 GraphBLAS::apply(tBi,
                                  tless,
                                  GraphBLAS::NoAccumulate(),
-                                 in_range, tReq, true);
+                                 in_range, tReq, GraphBLAS::REPLACE);
                 //GraphBLAS::apply(tnew, tnew, GraphBLAS::NoAccumulate(),
-                //                 GraphBLAS::Identity<bool>(), tnew, true);
+                //                 GraphBLAS::Identity<bool>(), tnew, GraphBLAS::REPLACE);
                 //GraphBLAS::print_vector(std::cerr, tBi,
                 //                        "tBi<tless> = tReq([i*d, (i+1)*d))");
 
@@ -446,14 +437,14 @@ namespace algorithms
 
                 // tm<tBi> = t
                 GraphBLAS::apply(tmasked, tBi, GraphBLAS::NoAccumulate(),
-                                 GraphBLAS::Identity<T>(), t, true);
+                                 GraphBLAS::Identity<T>(), t, GraphBLAS::REPLACE);
                 //GraphBLAS::print_vector(std::cerr, tmasked, "tm = t<tBi>");
             }
             //std::cerr << "******************** end inner loop *****************\n";
 
             // (t .* s)
             GraphBLAS::apply(tmasked, s, GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Identity<T>(), t, true);
+                             GraphBLAS::Identity<T>(), t, GraphBLAS::REPLACE);
             //GraphBLAS::print_vector(std::cerr, tmasked, "tm = t<s>");
 
             // tReq = AH'(t .* s)
@@ -473,15 +464,15 @@ namespace algorithms
             ++i;
 
             // t >= i*delta
-            GraphBLAS::BinaryOp_Bind2nd<T, GraphBLAS::GreaterEqual<T>>
-                geq_idelta((T)i*delta);
-
             GraphBLAS::apply(tcomp,
                              GraphBLAS::NoMask(),
                              GraphBLAS::NoAccumulate(),
-                             geq_idelta, t);
+                             std::bind(GraphBLAS::GreaterEqual<T>(),
+                                       std::placeholders::_1,
+                                       static_cast<T>(i)*delta),
+                             t);
             GraphBLAS::apply(tcomp, tcomp, GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Identity<bool>(), tcomp, true);
+                             GraphBLAS::Identity<bool>(), tcomp, GraphBLAS::REPLACE);
             //GraphBLAS::print_vector(std::cerr, tcomp, "tcomp = t(>=i*delta)");
         }
 

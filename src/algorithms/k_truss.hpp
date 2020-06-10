@@ -1,7 +1,7 @@
 /*
- * GraphBLAS Template Library, Version 2.0
+ * GraphBLAS Template Library, Version 2.1
  *
- * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Copyright 2019 Carnegie Mellon University, Battelle Memorial Institute, and
  * Authors. All Rights Reserved.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
@@ -41,10 +41,9 @@ namespace
     template <typename D1, typename D2=D1, typename D3=D1>
     struct FirstEqualsTwo
     {
-        typedef D3 result_type;
         D3 operator()(D1 lhs, D2 rhs)
         {
-            result_type res(0);
+            D3 res(0);
             if (lhs == static_cast<D1>(2))
                 res = static_cast<D3>(rhs);
             return res;
@@ -58,8 +57,6 @@ namespace
     template <typename T, typename LessT = std::less<T>>
     struct SupportTest
     {
-        typedef bool result_type;
-
         T const m_threshold;
 
         SupportTest(T threshold) : m_threshold(threshold) {}
@@ -74,8 +71,6 @@ namespace
     template <typename T, typename LessT = std::less<T>>
     struct SupportMinTest
     {
-        typedef bool result_type;
-
         T const m_threshold;
 
         SupportMinTest(T threshold) : m_threshold(threshold) {}
@@ -95,7 +90,7 @@ namespace algorithms
     EMatrixT k_truss(EMatrixT const       &Ein,        // incidence array
                      GraphBLAS::IndexType  k_size)
     {
-        typedef typename EMatrixT::ScalarType EdgeType;
+        using EdgeType = typename EMatrixT::ScalarType;
 
         //GraphBLAS::print_matrix(std::cout, Ein, "incidence");
 
@@ -129,7 +124,7 @@ namespace algorithms
                        GraphBLAS::complement(DiagMask),
                        GraphBLAS::NoAccumulate(),
                        GraphBLAS::ArithmeticSemiring<EdgeType>(),
-                       GraphBLAS::transpose(Ein), Ein, true);
+                       GraphBLAS::transpose(Ein), Ein, GraphBLAS::REPLACE);
         //GraphBLAS::print_matrix(std::cout, A, "adjacencies");
 
         // 3. Compute the support for each edge:
@@ -147,11 +142,11 @@ namespace algorithms
         GraphBLAS::assign(OnesN,
                           GraphBLAS::NoMask(),
                           GraphBLAS::NoAccumulate(),
-                          static_cast<EdgeType>(1), I_n, true);
+                          static_cast<EdgeType>(1), I_n, GraphBLAS::REPLACE);
         auto s = std::make_shared<GraphBLAS::Vector<EdgeType>>(num_edges);
         GraphBLAS::mxv(*s, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                        Support2Semiring<EdgeType>(),
-                       *R, OnesN, true);
+                       *R, OnesN, GraphBLAS::REPLACE);
         //GraphBLAS::print_vector(std::cout, *s, "edge support");
 
         // 4. Determine edges which lack enough support for k-truss
@@ -159,10 +154,10 @@ namespace algorithms
         auto x = std::make_shared<GraphBLAS::Vector<bool>>(num_edges);
         GraphBLAS::apply(*x, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                          SupportTest<EdgeType>(k_size - 2),
-                         *s, true);
+                         *s, GraphBLAS::REPLACE);
         GraphBLAS::apply(*x, *x, GraphBLAS::NoAccumulate(),
                          GraphBLAS::Identity<EdgeType>(),
-                         *x, true);
+                         *x, GraphBLAS::REPLACE);
         //GraphBLAS::print_vector(std::cout, *x, "edges lacking support");
 
         while (x->nvals() > 0)
@@ -184,11 +179,11 @@ namespace algorithms
             GraphBLAS::apply(
                 xc, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                 SupportTest<EdgeType, std::greater_equal<EdgeType>>(k_size - 2),
-                *s, true);
+                *s, GraphBLAS::REPLACE);
             // masked no-op to get rid of stored falses.
             GraphBLAS::apply(xc, xc, GraphBLAS::NoAccumulate(),
                              GraphBLAS::Identity<EdgeType>(),
-                             xc, true);
+                             xc, GraphBLAS::REPLACE);
             //GraphBLAS::print_vector(std::cout, xc, "complement(x)");
 
             GraphBLAS::IndexArrayType xc_indices(xc.nvals());
@@ -208,7 +203,7 @@ namespace algorithms
                                *E,
                                x_indices,
                                GraphBLAS::AllIndices(),
-                               true);
+                               GraphBLAS::REPLACE);
             //GraphBLAS::print_matrix(std::cout, Ex, "Ex");
 
             // Step 1b: extract the edges that are left
@@ -221,7 +216,7 @@ namespace algorithms
                                *E,
                                xc_indices,
                                GraphBLAS::AllIndices(),
-                               true);
+                               GraphBLAS::REPLACE);
             //GraphBLAS::print_matrix(std::cout, *Enew, "Enew");
             E = Enew;
             if (num_edges == 0)
@@ -237,7 +232,7 @@ namespace algorithms
                                *R,
                                xc_indices,
                                GraphBLAS::AllIndices(),
-                               true);
+                               GraphBLAS::REPLACE);
             //GraphBLAS::print_matrix(std::cout, *Rnew, "Rnew");
             R = Rnew;
 
@@ -250,7 +245,7 @@ namespace algorithms
                            GraphBLAS::complement(DiagMask),
                            GraphBLAS::NoAccumulate(),
                            GraphBLAS::ArithmeticSemiring<EdgeType>(),
-                           GraphBLAS::transpose(Ex), Ex, true);
+                           GraphBLAS::transpose(Ex), Ex, GraphBLAS::REPLACE);
             //GraphBLAS::print_matrix(std::cout, ExT_Ex, "Ex'*Ex - diag");
 
             // R -= E(Ex'*Ex)
@@ -258,13 +253,13 @@ namespace algorithms
                            GraphBLAS::NoMask(),
                            GraphBLAS::Minus<EdgeType>(),
                            GraphBLAS::ArithmeticSemiring<EdgeType>(),
-                           *Enew, ExT_Ex, true);
+                           *Enew, ExT_Ex, GraphBLAS::REPLACE);
             //GraphBLAS::print_matrix(std::cout, *R, "R -= E*[Ex'*Ex - diag]");
 
             s = std::make_shared<GraphBLAS::Vector<EdgeType>>(num_edges);
             GraphBLAS::mxv(*s, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                            Support2Semiring<EdgeType>(),
-                           *Rnew, OnesN, true);
+                           *Rnew, OnesN, GraphBLAS::REPLACE);
             //GraphBLAS::print_vector(std::cout, *s, "support");
 
             // 4. Determine edges which lack enough support for k-truss
@@ -272,11 +267,11 @@ namespace algorithms
             GraphBLAS::apply(*x,
                              GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                              SupportTest<EdgeType>(k_size - 2),
-                             *s, true);
+                             *s, GraphBLAS::REPLACE);
             //GraphBLAS::print_vector(std::cout, *x, "new x");
             GraphBLAS::apply(*x, *x, GraphBLAS::NoAccumulate(),
                              GraphBLAS::Identity<EdgeType>(),
-                             *x, true);
+                             *x, GraphBLAS::REPLACE);
             //GraphBLAS::print_vector(std::cout, *x, "new x (masked noop)");
         }
 
@@ -289,7 +284,7 @@ namespace algorithms
     AMatrixT k_truss2(AMatrixT const       &Ain,   // undirected adjacency matrix
                       GraphBLAS::IndexType  k_size)
     {
-        typedef typename AMatrixT::ScalarType AType;
+        using AType = typename AMatrixT::ScalarType;
 
         //GraphBLAS::print_matrix(std::cout, Ain, "adjacency");
 
@@ -310,7 +305,7 @@ namespace algorithms
             // S<A,-> = (A' +.* A) = (A' * A) .* A
             GraphBLAS::mxm(Support, A, GraphBLAS::NoAccumulate(),
                            GraphBLAS::ArithmeticSemiring<AType>(),
-                           GraphBLAS::transpose(A), A, true);
+                           GraphBLAS::transpose(A), A, GraphBLAS::REPLACE);
             //GraphBLAS::print_matrix(std::cout, Support, "Support");
 
             // Keep all edges with enough support
@@ -318,11 +313,11 @@ namespace algorithms
             GraphBLAS::apply(Mask,
                              GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                              SupportMinTest<AType>(k_size - 2),
-                             Support, true);
+                             Support, GraphBLAS::REPLACE);
 
             // Annihilate all edges lacking support: A<A> = A or  A = A .* M
             GraphBLAS::apply(A, Mask, GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Identity<AType>(), A, true);
+                             GraphBLAS::Identity<AType>(), A, GraphBLAS::REPLACE);
             new_num_edges = A.nvals();
 
         } while (new_num_edges != num_edges);  // loop while edges are being removed

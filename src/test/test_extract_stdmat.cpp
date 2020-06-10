@@ -1,7 +1,7 @@
 /*
- * GraphBLAS Template Library, Version 2.0
+ * GraphBLAS Template Library, Version 2.1
  *
- * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Copyright 2019 Carnegie Mellon University, Battelle Memorial Institute, and
  * Authors. All Rights Reserved.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
@@ -600,7 +600,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_noaccum_notrans)
     // I,J - AllIndices
     {
         Matrix<double> C(matC3x4, 0);
-        extract(C, mask3x4, NoAccumulate(), A, AllIndices(), AllIndices(), true);
+        extract(C, mask3x4, NoAccumulate(), A, AllIndices(), AllIndices(), REPLACE);
 
         std::vector<std::vector<double>> ansMat = {{8, 1, 6, 0},
                                                    {0, 5, 0, 0},
@@ -610,7 +610,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_noaccum_notrans)
     }
     {
         Matrix<double> C(matC3x4, 0);
-        extract(C, mask3x4, NoAccumulate(), A, AllIndices(), AllIndices(), false);
+        extract(C, mask3x4, NoAccumulate(), A, AllIndices(), AllIndices(), MERGE);
 
         std::vector<std::vector<double>> ansMat = {{8, 1, 6, 9},
                                                    {0, 5, 9, 9},
@@ -625,7 +625,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_noaccum_notrans)
         IndexArrayType arrayJ({0,1,3});
 
         Matrix<double> C(matC2x3, 0);
-        extract(C, mask2x3, NoAccumulate(), A, arrayI, arrayJ, true);
+        extract(C, mask2x3, NoAccumulate(), A, arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{8, 1, 0},
                                                   {4, 0, 0}};
@@ -637,7 +637,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_noaccum_notrans)
         IndexArrayType arrayJ({0,1,3});
 
         Matrix<double> C(matC2x3, 0);
-        extract(C, mask2x3, NoAccumulate(), A, arrayI, arrayJ, false);
+        extract(C, mask2x3, NoAccumulate(), A, arrayI, arrayJ, MERGE);
 
         std::vector<std::vector<double>> ansMat ={{8, 1, 9},
                                                   {4, 9, 0}};
@@ -651,7 +651,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_noaccum_notrans)
         IndexArrayType arrayJ({3,0,1});
 
         Matrix<double> C(matC2x3, 0);
-        extract(C, mask2x3, NoAccumulate(), A, arrayI, arrayJ, true);
+        extract(C, mask2x3, NoAccumulate(), A, arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{0, 4, 0},
                                                   {0, 0, 0}};
@@ -663,7 +663,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_noaccum_notrans)
         IndexArrayType arrayJ({3,0,1});
 
         Matrix<double> C(matC2x3, 0);
-        extract(C, mask2x3, NoAccumulate(), A, arrayI, arrayJ, false);
+        extract(C, mask2x3, NoAccumulate(), A, arrayI, arrayJ, MERGE);
 
         std::vector<std::vector<double>> ansMat ={{0, 4, 9},
                                                   {0, 9, 0}};
@@ -677,7 +677,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_noaccum_notrans)
         IndexArrayType arrayJ({0,1,1,3});
 
         Matrix<double> C(matC3x4, 0);
-        extract(C, mask3x4, NoAccumulate(), A, arrayI, arrayJ, true);
+        extract(C, mask3x4, NoAccumulate(), A, arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{8, 1, 1, 0},
                                                   {8, 1, 0, 0},
@@ -690,7 +690,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_noaccum_notrans)
         IndexArrayType arrayJ({0,1,1,3});
 
         Matrix<double> C(matC3x4, 0);
-        extract(C, mask3x4, NoAccumulate(), A, arrayI, arrayJ, false);
+        extract(C, mask3x4, NoAccumulate(), A, arrayI, arrayJ, MERGE);
 
         std::vector<std::vector<double>> ansMat ={{8, 1, 1, 9},
                                                   {8, 1, 9, 9},
@@ -705,7 +705,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_noaccum_notrans)
         IndexArrayType arrayJ({3,0,1,0});
 
         Matrix<double> C(matC3x4, 0);
-        extract(C, mask3x4, NoAccumulate(), A, arrayI, arrayJ, true);
+        extract(C, mask3x4, NoAccumulate(), A, arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{0, 4, 0, 0},
                                                   {0, 8, 0, 0},
@@ -718,7 +718,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_noaccum_notrans)
         IndexArrayType arrayJ({3,0,1,0});
 
         Matrix<double> C(matC3x4, 0);
-        extract(C, mask3x4, NoAccumulate(), A, arrayI, arrayJ, false);
+        extract(C, mask3x4, NoAccumulate(), A, arrayI, arrayJ, MERGE);
 
         std::vector<std::vector<double>> ansMat ={{0, 4, 0, 9},
                                                   {0, 8, 9, 9},
@@ -757,7 +757,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_noaccum_trans)
     {
         Matrix<double> C(matC4x3, 0);
         extract(C, mask4x3, NoAccumulate(), transpose(A),
-                AllIndices(), AllIndices(), true);
+                AllIndices(), AllIndices(), REPLACE);
 
         std::vector<std::vector<double>> ansMat = {{8, 0, 4},
                                                    {1, 5, 0},
@@ -769,7 +769,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_noaccum_trans)
     {
         Matrix<double> C(matC4x3, 0);
         extract(C, mask4x3, NoAccumulate(), transpose(A),
-                AllIndices(), AllIndices(), false);
+                AllIndices(), AllIndices(), MERGE);
 
         std::vector<std::vector<double>> ansMat = {{8, 0, 4},
                                                    {1, 5, 9},
@@ -785,7 +785,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_noaccum_trans)
         IndexArrayType arrayJ({0,2});
 
         Matrix<double> C(matC3x2, 0);
-        extract(C, mask3x2, NoAccumulate(), transpose(A), arrayI, arrayJ, true);
+        extract(C, mask3x2, NoAccumulate(), transpose(A), arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{8, 4},
                                                   {1, 0},
@@ -798,7 +798,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_noaccum_trans)
         IndexArrayType arrayJ({0,2});
 
         Matrix<double> C(matC3x2, 0);
-        extract(C, mask3x2, NoAccumulate(), transpose(A), arrayI, arrayJ,false);
+        extract(C, mask3x2, NoAccumulate(), transpose(A), arrayI, arrayJ,MERGE);
 
         std::vector<std::vector<double>> ansMat ={{8, 4},
                                                   {1, 9},
@@ -813,7 +813,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_noaccum_trans)
         IndexArrayType arrayJ({2,0});
 
         Matrix<double> C(matC3x2, 0);
-        extract(C, mask3x2, NoAccumulate(), transpose(A), arrayI, arrayJ, true);
+        extract(C, mask3x2, NoAccumulate(), transpose(A), arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{0, 0},
                                                   {4, 0},
@@ -826,7 +826,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_noaccum_trans)
         IndexArrayType arrayJ({2,0});
 
         Matrix<double> C(matC3x2, 0);
-        extract(C, mask3x2, NoAccumulate(), transpose(A), arrayI, arrayJ,false);
+        extract(C, mask3x2, NoAccumulate(), transpose(A), arrayI, arrayJ,MERGE);
 
         std::vector<std::vector<double>> ansMat ={{0, 0},
                                                   {4, 9},
@@ -841,7 +841,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_noaccum_trans)
         IndexArrayType arrayJ({0,0,2});
 
         Matrix<double> C(matC4x3, 0);
-        extract(C, mask4x3, NoAccumulate(), transpose(A), arrayI, arrayJ, true);
+        extract(C, mask4x3, NoAccumulate(), transpose(A), arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{8, 8, 4},
                                                   {1, 1, 0},
@@ -855,7 +855,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_noaccum_trans)
         IndexArrayType arrayJ({0,0,2});
 
         Matrix<double> C(matC4x3, 0);
-        extract(C, mask4x3, NoAccumulate(), transpose(A), arrayI, arrayJ,false);
+        extract(C, mask4x3, NoAccumulate(), transpose(A), arrayI, arrayJ,MERGE);
 
         std::vector<std::vector<double>> ansMat ={{8, 8, 4},
                                                   {1, 1, 9},
@@ -871,7 +871,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_noaccum_trans)
         IndexArrayType arrayJ({2,0,2});
 
         Matrix<double> C(matC4x3, 0);
-        extract(C, mask4x3, NoAccumulate(), transpose(A), arrayI, arrayJ, true);
+        extract(C, mask4x3, NoAccumulate(), transpose(A), arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{0, 0, 0},
                                                   {4, 8, 0},
@@ -885,7 +885,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_noaccum_trans)
         IndexArrayType arrayJ({2,0,2});
 
         Matrix<double> C(matC4x3, 0);
-        extract(C, mask4x3, NoAccumulate(), transpose(A), arrayI, arrayJ,false);
+        extract(C, mask4x3, NoAccumulate(), transpose(A), arrayI, arrayJ,MERGE);
 
         std::vector<std::vector<double>> ansMat ={{0, 0, 0},
                                                   {4, 8, 9},
@@ -921,7 +921,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_accum_notrans)
     // I,J - AllIndices
     {
         Matrix<double> C(matC3x4, 0);
-        extract(C, mask3x4, Plus<double>(), A, AllIndices(), AllIndices(), true);
+        extract(C, mask3x4, Plus<double>(), A, AllIndices(), AllIndices(), REPLACE);
 
         std::vector<std::vector<double>> ansMat = {{17, 10, 15, 0},
                                                    { 9, 14,  0, 0},
@@ -931,7 +931,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_accum_notrans)
     }
     {
         Matrix<double> C(matC3x4, 0);
-        extract(C, mask3x4, Plus<double>(), A, AllIndices(), AllIndices(), false);
+        extract(C, mask3x4, Plus<double>(), A, AllIndices(), AllIndices(), MERGE);
 
         std::vector<std::vector<double>> ansMat = {{17, 10, 15, 9},
                                                    { 9, 14,  9, 9},
@@ -946,7 +946,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_accum_notrans)
         IndexArrayType arrayJ({0,1,3});
 
         Matrix<double> C(matC2x3, 0);
-        extract(C, mask2x3, Plus<double>(), A, arrayI, arrayJ, true);
+        extract(C, mask2x3, Plus<double>(), A, arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{17, 10, 0},
                                                   {13,  0, 0}};
@@ -958,7 +958,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_accum_notrans)
         IndexArrayType arrayJ({0,1,3});
 
         Matrix<double> C(matC2x3, 0);
-        extract(C, mask2x3, Plus<double>(), A, arrayI, arrayJ, false);
+        extract(C, mask2x3, Plus<double>(), A, arrayI, arrayJ, MERGE);
 
         std::vector<std::vector<double>> ansMat ={{17, 10, 9},
                                                   {13,  9, 0}};
@@ -972,7 +972,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_accum_notrans)
         IndexArrayType arrayJ({3,0,1});
 
         Matrix<double> C(matC2x3, 0);
-        extract(C, mask2x3, Plus<double>(), A, arrayI, arrayJ, true);
+        extract(C, mask2x3, Plus<double>(), A, arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{9,13, 0},
                                                   {9, 0, 0}};
@@ -984,7 +984,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_accum_notrans)
         IndexArrayType arrayJ({3,0,1});
 
         Matrix<double> C(matC2x3, 0);
-        extract(C, mask2x3, Plus<double>(), A, arrayI, arrayJ, false);
+        extract(C, mask2x3, Plus<double>(), A, arrayI, arrayJ, MERGE);
 
         std::vector<std::vector<double>> ansMat ={{9,13, 9},
                                                   {9, 9, 0}};
@@ -998,7 +998,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_accum_notrans)
         IndexArrayType arrayJ({0,1,1,3});
 
         Matrix<double> C(matC3x4, 0);
-        extract(C, mask3x4, Plus<double>(), A, arrayI, arrayJ, true);
+        extract(C, mask3x4, Plus<double>(), A, arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{17, 10, 10, 0},
                                                   {17, 10,  0, 0},
@@ -1011,7 +1011,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_accum_notrans)
         IndexArrayType arrayJ({0,1,1,3});
 
         Matrix<double> C(matC3x4, 0);
-        extract(C, mask3x4, Plus<double>(), A, arrayI, arrayJ, false);
+        extract(C, mask3x4, Plus<double>(), A, arrayI, arrayJ, MERGE);
 
         std::vector<std::vector<double>> ansMat ={{17, 10, 10, 9},
                                                   {17, 10,  9, 9},
@@ -1026,7 +1026,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_accum_notrans)
         IndexArrayType arrayJ({3,0,1,0});
 
         Matrix<double> C(matC3x4, 0);
-        extract(C, mask3x4, Plus<double>(), A, arrayI, arrayJ, true);
+        extract(C, mask3x4, Plus<double>(), A, arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{9,13, 9, 0},
                                                   {9,17, 0, 0},
@@ -1039,7 +1039,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_accum_notrans)
         IndexArrayType arrayJ({3,0,1,0});
 
         Matrix<double> C(matC3x4, 0);
-        extract(C, mask3x4, Plus<double>(), A, arrayI, arrayJ, false);
+        extract(C, mask3x4, Plus<double>(), A, arrayI, arrayJ, MERGE);
 
         std::vector<std::vector<double>> ansMat ={{9,13, 9, 9},
                                                   {9,17, 9, 9},
@@ -1078,7 +1078,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_accum_trans)
     {
         Matrix<double> C(matC4x3, 0);
         extract(C, mask4x3, Plus<double>(), transpose(A),
-                AllIndices(), AllIndices(), true);
+                AllIndices(), AllIndices(), REPLACE);
 
         std::vector<std::vector<double>> ansMat = {{17,  9, 13},
                                                    {10, 14,  0},
@@ -1090,7 +1090,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_accum_trans)
     {
         Matrix<double> C(matC4x3, 0);
         extract(C, mask4x3, Plus<double>(), transpose(A),
-                AllIndices(), AllIndices(), false);
+                AllIndices(), AllIndices(), MERGE);
 
         std::vector<std::vector<double>> ansMat = {{17,  9, 13},
                                                    {10, 14,  9},
@@ -1106,7 +1106,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_accum_trans)
         IndexArrayType arrayJ({0,2});
 
         Matrix<double> C(matC3x2, 0);
-        extract(C, mask3x2, Plus<double>(), transpose(A), arrayI, arrayJ, true);
+        extract(C, mask3x2, Plus<double>(), transpose(A), arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{17, 13},
                                                   {10,  0},
@@ -1119,7 +1119,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_accum_trans)
         IndexArrayType arrayJ({0,2});
 
         Matrix<double> C(matC3x2, 0);
-        extract(C, mask3x2, Plus<double>(), transpose(A), arrayI, arrayJ,false);
+        extract(C, mask3x2, Plus<double>(), transpose(A), arrayI, arrayJ,MERGE);
 
         std::vector<std::vector<double>> ansMat ={{17, 13},
                                                   {10,  9},
@@ -1134,7 +1134,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_accum_trans)
         IndexArrayType arrayJ({2,0});
 
         Matrix<double> C(matC3x2, 0);
-        extract(C, mask3x2, Plus<double>(), transpose(A), arrayI, arrayJ, true);
+        extract(C, mask3x2, Plus<double>(), transpose(A), arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{ 9, 9},
                                                   {13, 0},
@@ -1147,7 +1147,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_accum_trans)
         IndexArrayType arrayJ({2,0});
 
         Matrix<double> C(matC3x2, 0);
-        extract(C, mask3x2, Plus<double>(), transpose(A), arrayI, arrayJ,false);
+        extract(C, mask3x2, Plus<double>(), transpose(A), arrayI, arrayJ,MERGE);
 
         std::vector<std::vector<double>> ansMat ={{ 9, 9},
                                                   {13, 9},
@@ -1162,7 +1162,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_accum_trans)
         IndexArrayType arrayJ({0,0,2});
 
         Matrix<double> C(matC4x3, 0);
-        extract(C, mask4x3, Plus<double>(), transpose(A), arrayI, arrayJ, true);
+        extract(C, mask4x3, Plus<double>(), transpose(A), arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{17, 17, 13},
                                                   {10, 10,  0},
@@ -1176,7 +1176,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_accum_trans)
         IndexArrayType arrayJ({0,0,2});
 
         Matrix<double> C(matC4x3, 0);
-        extract(C, mask4x3, Plus<double>(), transpose(A), arrayI, arrayJ,false);
+        extract(C, mask4x3, Plus<double>(), transpose(A), arrayI, arrayJ,MERGE);
 
         std::vector<std::vector<double>> ansMat ={{17, 17, 13},
                                                   {10, 10,  9},
@@ -1192,7 +1192,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_accum_trans)
         IndexArrayType arrayJ({2,0,2});
 
         Matrix<double> C(matC4x3, 0);
-        extract(C, mask4x3, Plus<double>(), transpose(A), arrayI, arrayJ, true);
+        extract(C, mask4x3, Plus<double>(), transpose(A), arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{ 9,  9, 9},
                                                   {13, 17, 0},
@@ -1206,7 +1206,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_noscmp_accum_trans)
         IndexArrayType arrayJ({2,0,2});
 
         Matrix<double> C(matC4x3, 0);
-        extract(C, mask4x3, Plus<double>(), transpose(A), arrayI, arrayJ,false);
+        extract(C, mask4x3, Plus<double>(), transpose(A), arrayI, arrayJ,MERGE);
 
         std::vector<std::vector<double>> ansMat ={{ 9,  9, 9},
                                                   {13, 17, 9},
@@ -1243,7 +1243,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_noaccum_notrans)
     // I,J - AllIndices
     {
         Matrix<double> C(matC3x4, 0);
-        extract(C, complement(mask3x4), NoAccumulate(), A, AllIndices(), AllIndices(), true);
+        extract(C, complement(mask3x4), NoAccumulate(), A, AllIndices(), AllIndices(), REPLACE);
 
         std::vector<std::vector<double>> ansMat = {{8, 1, 6, 0},
                                                    {0, 5, 0, 0},
@@ -1253,7 +1253,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_noaccum_notrans)
     }
     {
         Matrix<double> C(matC3x4, 0);
-        extract(C, complement(mask3x4), NoAccumulate(), A, AllIndices(), AllIndices(), false);
+        extract(C, complement(mask3x4), NoAccumulate(), A, AllIndices(), AllIndices(), MERGE);
 
         std::vector<std::vector<double>> ansMat = {{8, 1, 6, 9},
                                                    {0, 5, 9, 9},
@@ -1268,7 +1268,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_noaccum_notrans)
         IndexArrayType arrayJ({0,1,3});
 
         Matrix<double> C(matC2x3, 0);
-        extract(C, complement(mask2x3), NoAccumulate(), A, arrayI, arrayJ, true);
+        extract(C, complement(mask2x3), NoAccumulate(), A, arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{8, 1, 0},
                                                   {4, 0, 0}};
@@ -1280,7 +1280,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_noaccum_notrans)
         IndexArrayType arrayJ({0,1,3});
 
         Matrix<double> C(matC2x3, 0);
-        extract(C, complement(mask2x3), NoAccumulate(), A, arrayI, arrayJ, false);
+        extract(C, complement(mask2x3), NoAccumulate(), A, arrayI, arrayJ, MERGE);
 
         std::vector<std::vector<double>> ansMat ={{8, 1, 9},
                                                   {4, 9, 0}};
@@ -1294,7 +1294,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_noaccum_notrans)
         IndexArrayType arrayJ({3,0,1});
 
         Matrix<double> C(matC2x3, 0);
-        extract(C, complement(mask2x3), NoAccumulate(), A, arrayI, arrayJ, true);
+        extract(C, complement(mask2x3), NoAccumulate(), A, arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{0, 4, 0},
                                                   {0, 0, 0}};
@@ -1306,7 +1306,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_noaccum_notrans)
         IndexArrayType arrayJ({3,0,1});
 
         Matrix<double> C(matC2x3, 0);
-        extract(C, complement(mask2x3), NoAccumulate(), A, arrayI, arrayJ, false);
+        extract(C, complement(mask2x3), NoAccumulate(), A, arrayI, arrayJ, MERGE);
 
         std::vector<std::vector<double>> ansMat ={{0, 4, 9},
                                                   {0, 9, 0}};
@@ -1320,7 +1320,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_noaccum_notrans)
         IndexArrayType arrayJ({0,1,1,3});
 
         Matrix<double> C(matC3x4, 0);
-        extract(C, complement(mask3x4), NoAccumulate(), A, arrayI, arrayJ, true);
+        extract(C, complement(mask3x4), NoAccumulate(), A, arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{8, 1, 1, 0},
                                                   {8, 1, 0, 0},
@@ -1333,7 +1333,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_noaccum_notrans)
         IndexArrayType arrayJ({0,1,1,3});
 
         Matrix<double> C(matC3x4, 0);
-        extract(C, complement(mask3x4), NoAccumulate(), A, arrayI, arrayJ, false);
+        extract(C, complement(mask3x4), NoAccumulate(), A, arrayI, arrayJ, MERGE);
 
         std::vector<std::vector<double>> ansMat ={{8, 1, 1, 9},
                                                   {8, 1, 9, 9},
@@ -1348,7 +1348,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_noaccum_notrans)
         IndexArrayType arrayJ({3,0,1,0});
 
         Matrix<double> C(matC3x4, 0);
-        extract(C, complement(mask3x4), NoAccumulate(), A, arrayI, arrayJ, true);
+        extract(C, complement(mask3x4), NoAccumulate(), A, arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{0, 4, 0, 0},
                                                   {0, 8, 0, 0},
@@ -1361,7 +1361,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_noaccum_notrans)
         IndexArrayType arrayJ({3,0,1,0});
 
         Matrix<double> C(matC3x4, 0);
-        extract(C, complement(mask3x4), NoAccumulate(), A, arrayI, arrayJ, false);
+        extract(C, complement(mask3x4), NoAccumulate(), A, arrayI, arrayJ, MERGE);
 
         std::vector<std::vector<double>> ansMat ={{0, 4, 0, 9},
                                                   {0, 8, 9, 9},
@@ -1400,7 +1400,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_noaccum_trans)
     {
         Matrix<double> C(matC4x3, 0);
         extract(C, complement(mask4x3), NoAccumulate(), transpose(A),
-                AllIndices(), AllIndices(), true);
+                AllIndices(), AllIndices(), REPLACE);
 
         std::vector<std::vector<double>> ansMat = {{8, 0, 4},
                                                    {1, 5, 0},
@@ -1412,7 +1412,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_noaccum_trans)
     {
         Matrix<double> C(matC4x3, 0);
         extract(C, complement(mask4x3), NoAccumulate(), transpose(A),
-                AllIndices(), AllIndices(), false);
+                AllIndices(), AllIndices(), MERGE);
 
         std::vector<std::vector<double>> ansMat = {{8, 0, 4},
                                                    {1, 5, 9},
@@ -1428,7 +1428,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_noaccum_trans)
         IndexArrayType arrayJ({0,2});
 
         Matrix<double> C(matC3x2, 0);
-        extract(C, complement(mask3x2), NoAccumulate(), transpose(A), arrayI, arrayJ, true);
+        extract(C, complement(mask3x2), NoAccumulate(), transpose(A), arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{8, 4},
                                                   {1, 0},
@@ -1441,7 +1441,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_noaccum_trans)
         IndexArrayType arrayJ({0,2});
 
         Matrix<double> C(matC3x2, 0);
-        extract(C, complement(mask3x2), NoAccumulate(), transpose(A), arrayI, arrayJ,false);
+        extract(C, complement(mask3x2), NoAccumulate(), transpose(A), arrayI, arrayJ,MERGE);
 
         std::vector<std::vector<double>> ansMat ={{8, 4},
                                                   {1, 9},
@@ -1456,7 +1456,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_noaccum_trans)
         IndexArrayType arrayJ({2,0});
 
         Matrix<double> C(matC3x2, 0);
-        extract(C, complement(mask3x2), NoAccumulate(), transpose(A), arrayI, arrayJ, true);
+        extract(C, complement(mask3x2), NoAccumulate(), transpose(A), arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{0, 0},
                                                   {4, 0},
@@ -1469,7 +1469,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_noaccum_trans)
         IndexArrayType arrayJ({2,0});
 
         Matrix<double> C(matC3x2, 0);
-        extract(C, complement(mask3x2), NoAccumulate(), transpose(A), arrayI, arrayJ,false);
+        extract(C, complement(mask3x2), NoAccumulate(), transpose(A), arrayI, arrayJ,MERGE);
 
         std::vector<std::vector<double>> ansMat ={{0, 0},
                                                   {4, 9},
@@ -1484,7 +1484,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_noaccum_trans)
         IndexArrayType arrayJ({0,0,2});
 
         Matrix<double> C(matC4x3, 0);
-        extract(C, complement(mask4x3), NoAccumulate(), transpose(A), arrayI, arrayJ, true);
+        extract(C, complement(mask4x3), NoAccumulate(), transpose(A), arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{8, 8, 4},
                                                   {1, 1, 0},
@@ -1498,7 +1498,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_noaccum_trans)
         IndexArrayType arrayJ({0,0,2});
 
         Matrix<double> C(matC4x3, 0);
-        extract(C, complement(mask4x3), NoAccumulate(), transpose(A), arrayI, arrayJ,false);
+        extract(C, complement(mask4x3), NoAccumulate(), transpose(A), arrayI, arrayJ,MERGE);
 
         std::vector<std::vector<double>> ansMat ={{8, 8, 4},
                                                   {1, 1, 9},
@@ -1514,7 +1514,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_noaccum_trans)
         IndexArrayType arrayJ({2,0,2});
 
         Matrix<double> C(matC4x3, 0);
-        extract(C, complement(mask4x3), NoAccumulate(), transpose(A), arrayI, arrayJ, true);
+        extract(C, complement(mask4x3), NoAccumulate(), transpose(A), arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{0, 0, 0},
                                                   {4, 8, 0},
@@ -1528,7 +1528,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_noaccum_trans)
         IndexArrayType arrayJ({2,0,2});
 
         Matrix<double> C(matC4x3, 0);
-        extract(C, complement(mask4x3), NoAccumulate(), transpose(A), arrayI, arrayJ,false);
+        extract(C, complement(mask4x3), NoAccumulate(), transpose(A), arrayI, arrayJ,MERGE);
 
         std::vector<std::vector<double>> ansMat ={{0, 0, 0},
                                                   {4, 8, 9},
@@ -1564,7 +1564,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_accum_notrans)
     // I,J - AllIndices
     {
         Matrix<double> C(matC3x4, 0);
-        extract(C, complement(mask3x4), Plus<double>(), A, AllIndices(), AllIndices(), true);
+        extract(C, complement(mask3x4), Plus<double>(), A, AllIndices(), AllIndices(), REPLACE);
 
         std::vector<std::vector<double>> ansMat = {{17, 10, 15, 0},
                                                    { 9, 14,  0, 0},
@@ -1574,7 +1574,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_accum_notrans)
     }
     {
         Matrix<double> C(matC3x4, 0);
-        extract(C, complement(mask3x4), Plus<double>(), A, AllIndices(), AllIndices(), false);
+        extract(C, complement(mask3x4), Plus<double>(), A, AllIndices(), AllIndices(), MERGE);
 
         std::vector<std::vector<double>> ansMat = {{17, 10, 15, 9},
                                                    { 9, 14,  9, 9},
@@ -1589,7 +1589,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_accum_notrans)
         IndexArrayType arrayJ({0,1,3});
 
         Matrix<double> C(matC2x3, 0);
-        extract(C, complement(mask2x3), Plus<double>(), A, arrayI, arrayJ, true);
+        extract(C, complement(mask2x3), Plus<double>(), A, arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{17, 10, 0},
                                                   {13,  0, 0}};
@@ -1601,7 +1601,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_accum_notrans)
         IndexArrayType arrayJ({0,1,3});
 
         Matrix<double> C(matC2x3, 0);
-        extract(C, complement(mask2x3), Plus<double>(), A, arrayI, arrayJ, false);
+        extract(C, complement(mask2x3), Plus<double>(), A, arrayI, arrayJ, MERGE);
 
         std::vector<std::vector<double>> ansMat ={{17, 10, 9},
                                                   {13,  9, 0}};
@@ -1615,7 +1615,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_accum_notrans)
         IndexArrayType arrayJ({3,0,1});
 
         Matrix<double> C(matC2x3, 0);
-        extract(C, complement(mask2x3), Plus<double>(), A, arrayI, arrayJ, true);
+        extract(C, complement(mask2x3), Plus<double>(), A, arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{9,13, 0},
                                                   {9, 0, 0}};
@@ -1627,7 +1627,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_accum_notrans)
         IndexArrayType arrayJ({3,0,1});
 
         Matrix<double> C(matC2x3, 0);
-        extract(C, complement(mask2x3), Plus<double>(), A, arrayI, arrayJ, false);
+        extract(C, complement(mask2x3), Plus<double>(), A, arrayI, arrayJ, MERGE);
 
         std::vector<std::vector<double>> ansMat ={{9,13, 9},
                                                   {9, 9, 0}};
@@ -1641,7 +1641,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_accum_notrans)
         IndexArrayType arrayJ({0,1,1,3});
 
         Matrix<double> C(matC3x4, 0);
-        extract(C, complement(mask3x4), Plus<double>(), A, arrayI, arrayJ, true);
+        extract(C, complement(mask3x4), Plus<double>(), A, arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{17, 10, 10, 0},
                                                   {17, 10,  0, 0},
@@ -1654,7 +1654,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_accum_notrans)
         IndexArrayType arrayJ({0,1,1,3});
 
         Matrix<double> C(matC3x4, 0);
-        extract(C, complement(mask3x4), Plus<double>(), A, arrayI, arrayJ, false);
+        extract(C, complement(mask3x4), Plus<double>(), A, arrayI, arrayJ, MERGE);
 
         std::vector<std::vector<double>> ansMat ={{17, 10, 10, 9},
                                                   {17, 10,  9, 9},
@@ -1669,7 +1669,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_accum_notrans)
         IndexArrayType arrayJ({3,0,1,0});
 
         Matrix<double> C(matC3x4, 0);
-        extract(C, complement(mask3x4), Plus<double>(), A, arrayI, arrayJ, true);
+        extract(C, complement(mask3x4), Plus<double>(), A, arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{9,13, 9, 0},
                                                   {9,17, 0, 0},
@@ -1682,7 +1682,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_accum_notrans)
         IndexArrayType arrayJ({3,0,1,0});
 
         Matrix<double> C(matC3x4, 0);
-        extract(C, complement(mask3x4), Plus<double>(), A, arrayI, arrayJ, false);
+        extract(C, complement(mask3x4), Plus<double>(), A, arrayI, arrayJ, MERGE);
 
         std::vector<std::vector<double>> ansMat ={{9,13, 9, 9},
                                                   {9,17, 9, 9},
@@ -1721,7 +1721,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_accum_trans)
     {
         Matrix<double> C(matC4x3, 0);
         extract(C, complement(mask4x3), Plus<double>(), transpose(A),
-                AllIndices(), AllIndices(), true);
+                AllIndices(), AllIndices(), REPLACE);
 
         std::vector<std::vector<double>> ansMat = {{17,  9, 13},
                                                    {10, 14,  0},
@@ -1733,7 +1733,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_accum_trans)
     {
         Matrix<double> C(matC4x3, 0);
         extract(C, complement(mask4x3), Plus<double>(), transpose(A),
-                AllIndices(), AllIndices(), false);
+                AllIndices(), AllIndices(), MERGE);
 
         std::vector<std::vector<double>> ansMat = {{17,  9, 13},
                                                    {10, 14,  9},
@@ -1749,7 +1749,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_accum_trans)
         IndexArrayType arrayJ({0,2});
 
         Matrix<double> C(matC3x2, 0);
-        extract(C, complement(mask3x2), Plus<double>(), transpose(A), arrayI, arrayJ, true);
+        extract(C, complement(mask3x2), Plus<double>(), transpose(A), arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{17, 13},
                                                   {10,  0},
@@ -1762,7 +1762,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_accum_trans)
         IndexArrayType arrayJ({0,2});
 
         Matrix<double> C(matC3x2, 0);
-        extract(C, complement(mask3x2), Plus<double>(), transpose(A), arrayI, arrayJ,false);
+        extract(C, complement(mask3x2), Plus<double>(), transpose(A), arrayI, arrayJ,MERGE);
 
         std::vector<std::vector<double>> ansMat ={{17, 13},
                                                   {10,  9},
@@ -1777,7 +1777,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_accum_trans)
         IndexArrayType arrayJ({2,0});
 
         Matrix<double> C(matC3x2, 0);
-        extract(C, complement(mask3x2), Plus<double>(), transpose(A), arrayI, arrayJ, true);
+        extract(C, complement(mask3x2), Plus<double>(), transpose(A), arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{ 9, 9},
                                                   {13, 0},
@@ -1790,7 +1790,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_accum_trans)
         IndexArrayType arrayJ({2,0});
 
         Matrix<double> C(matC3x2, 0);
-        extract(C, complement(mask3x2), Plus<double>(), transpose(A), arrayI, arrayJ,false);
+        extract(C, complement(mask3x2), Plus<double>(), transpose(A), arrayI, arrayJ,MERGE);
 
         std::vector<std::vector<double>> ansMat ={{ 9, 9},
                                                   {13, 9},
@@ -1805,7 +1805,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_accum_trans)
         IndexArrayType arrayJ({0,0,2});
 
         Matrix<double> C(matC4x3, 0);
-        extract(C, complement(mask4x3), Plus<double>(), transpose(A), arrayI, arrayJ, true);
+        extract(C, complement(mask4x3), Plus<double>(), transpose(A), arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{17, 17, 13},
                                                   {10, 10,  0},
@@ -1819,7 +1819,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_accum_trans)
         IndexArrayType arrayJ({0,0,2});
 
         Matrix<double> C(matC4x3, 0);
-        extract(C, complement(mask4x3), Plus<double>(), transpose(A), arrayI, arrayJ,false);
+        extract(C, complement(mask4x3), Plus<double>(), transpose(A), arrayI, arrayJ,MERGE);
 
         std::vector<std::vector<double>> ansMat ={{17, 17, 13},
                                                   {10, 10,  9},
@@ -1835,7 +1835,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_accum_trans)
         IndexArrayType arrayJ({2,0,2});
 
         Matrix<double> C(matC4x3, 0);
-        extract(C, complement(mask4x3), Plus<double>(), transpose(A), arrayI, arrayJ, true);
+        extract(C, complement(mask4x3), Plus<double>(), transpose(A), arrayI, arrayJ, REPLACE);
 
         std::vector<std::vector<double>> ansMat ={{ 9,  9, 9},
                                                   {13, 17, 0},
@@ -1849,7 +1849,7 @@ BOOST_AUTO_TEST_CASE(extract_stdmat_test_scmp_accum_trans)
         IndexArrayType arrayJ({2,0,2});
 
         Matrix<double> C(matC4x3, 0);
-        extract(C, complement(mask4x3), Plus<double>(), transpose(A), arrayI, arrayJ,false);
+        extract(C, complement(mask4x3), Plus<double>(), transpose(A), arrayI, arrayJ,MERGE);
 
         std::vector<std::vector<double>> ansMat ={{ 9,  9, 9},
                                                   {13, 17, 9},

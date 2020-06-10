@@ -139,7 +139,6 @@ BOOST_AUTO_TEST_CASE(lil_test_construction_copy)
 }
 
 //****************************************************************************
-// Assignment to empty location
 BOOST_AUTO_TEST_CASE(lil_test_assign_to_implied_zero)
 {
     std::vector<std::vector<double>> mat = {{6, 0, 0, 4},
@@ -161,7 +160,6 @@ BOOST_AUTO_TEST_CASE(lil_test_assign_to_implied_zero)
 }
 
 //****************************************************************************
-// Assignment to a location with a previous value
 BOOST_AUTO_TEST_CASE(lil_test_assign_to_nonzero_element)
 {
     std::vector<std::vector<double>> mat = {{6, 0, 0, 4},
@@ -184,7 +182,6 @@ BOOST_AUTO_TEST_CASE(lil_test_assign_to_nonzero_element)
 
 
 //****************************************************************************
-// test set/get_col
 BOOST_AUTO_TEST_CASE(lil_test_get_set_col)
 {
     std::vector<std::vector<double>> mat = {{6, 0, 0, 4},
@@ -255,7 +252,6 @@ BOOST_AUTO_TEST_CASE(lil_test_get_set_col)
 }
 
 //****************************************************************************
-// test set/get_col
 BOOST_AUTO_TEST_CASE(lil_test_get_set_row)
 {
     std::vector<std::vector<double>> mat = {{6, 7, 0, 2, 2, 0, 0},
@@ -265,23 +261,17 @@ BOOST_AUTO_TEST_CASE(lil_test_get_set_row)
 
     backend::LilSparseMatrix<double> m1(mat, 0);
 
-    auto row = m1.getRow(0);
-    BOOST_CHECK_EQUAL(4UL, row.size());
-
-    row = m1.getRow(1);
-    BOOST_CHECK_EQUAL(2UL, row.size());
-
-    row = m1.getRow(2);
-    BOOST_CHECK_EQUAL(1UL, row.size());
-
-    row = m1.getRow(3);
-    BOOST_CHECK_EQUAL(5UL, row.size());
+    BOOST_CHECK_EQUAL(4UL, m1[0].size());
+    BOOST_CHECK_EQUAL(2UL, m1[1].size());
+    BOOST_CHECK_EQUAL(1UL, m1[2].size());
+    BOOST_CHECK_EQUAL(5UL, m1[3].size());
 
     BOOST_CHECK_EQUAL(12UL, m1.nvals());
-    row.clear();
+
+    std::vector<std::tuple<GraphBLAS::IndexType, double>> row;
     m1.setRow(0, row);
-    row = m1.getRow(0);
-    BOOST_CHECK_EQUAL(0UL, row.size());
+
+    BOOST_CHECK_EQUAL(0UL, m1[0].size());
     BOOST_CHECK_EQUAL(8UL, m1.nvals());
 
     row.clear();
@@ -315,7 +305,7 @@ BOOST_AUTO_TEST_CASE(lil_test_get_set_row)
     for (IndexType row_idx = 0; row_idx < 16; ++row_idx)
     {
         IndexType nz(0);
-        auto c = m2.getRow(row_idx);
+        auto &c = m2[row_idx];
         m3.setRow(0, c);
 
         for (IndexType col_idx = 0; col_idx < 4; ++col_idx)

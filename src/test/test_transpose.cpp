@@ -1,7 +1,7 @@
 /*
- * GraphBLAS Template Library, Version 2.0
+ * GraphBLAS Template Library, Version 2.1
  *
- * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Copyright 2019 Carnegie Mellon University, Battelle Memorial Institute, and
  * Authors. All Rights Reserved.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
@@ -95,50 +95,6 @@ BOOST_AUTO_TEST_CASE(test_two_argument_transpose_nonsquare)
 }
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(test_single_argument_transpose_square)
-{
-    IndexArrayType i_mA    = {0, 0, 0, 1, 1, 1, 2, 2, 2};
-    IndexArrayType j_mA    = {0, 1, 2, 0, 1, 2, 0, 1, 2};
-    std::vector<double>       v_mA    = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-    Matrix<double, DirectedMatrixTag> mA(3, 3);
-    mA.build(i_mA, j_mA, v_mA);
-
-    Matrix<double, DirectedMatrixTag> answer(3, 3);
-    answer.build(j_mA, i_mA, v_mA);
-
-    auto result = transpose(mA);
-
-    IndexType r(result.nrows());
-    IndexType c(result.ncols());
-
-    BOOST_CHECK_EQUAL(r, 3);
-    BOOST_CHECK_EQUAL(c, 3);
-    BOOST_CHECK_EQUAL(result, answer);
-}
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(test_single_argument_transpose_nonsquare)
-{
-    IndexArrayType i_mA    = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2};
-    IndexArrayType j_mA    = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2};
-    std::vector<double>       v_mA    = {1, 2, 3,-2, 4, 5, 6, 7, 8, 9};
-    Matrix<double, DirectedMatrixTag> mA(3, 4);
-    mA.build(i_mA, j_mA, v_mA);
-
-    Matrix<double, DirectedMatrixTag> answer(4, 3);
-    answer.build(j_mA, i_mA, v_mA);
-
-    auto result = transpose(mA);
-
-    IndexType r(result.nrows());
-    IndexType c(result.ncols());
-
-    BOOST_CHECK_EQUAL(r, 4);
-    BOOST_CHECK_EQUAL(c, 3);
-    BOOST_CHECK_EQUAL(result, answer);
-}
-
-//****************************************************************************
 BOOST_AUTO_TEST_CASE(test_transpose_noaccum)
 {
     // Build input matrix
@@ -186,7 +142,7 @@ BOOST_AUTO_TEST_CASE(test_transpose_noaccum)
                   M,
                   NoAccumulate(),
                   A,
-                  true);
+                  REPLACE);
         BOOST_CHECK_EQUAL(C, answer);
     }
 
@@ -202,7 +158,7 @@ BOOST_AUTO_TEST_CASE(test_transpose_noaccum)
                   M,
                   NoAccumulate(),
                   A,
-                  false);
+                  MERGE);
         BOOST_CHECK_EQUAL(C, answer);
     }
 
@@ -218,7 +174,7 @@ BOOST_AUTO_TEST_CASE(test_transpose_noaccum)
                   complement(M),
                   NoAccumulate(),
                   A,
-                  true);
+                  REPLACE);
         BOOST_CHECK_EQUAL(C, answer);
     }
 
@@ -234,7 +190,7 @@ BOOST_AUTO_TEST_CASE(test_transpose_noaccum)
                   complement(M),
                   NoAccumulate(),
                   A,
-                  false);
+                  MERGE);
         BOOST_CHECK_EQUAL(C, answer);
     }
 }
@@ -287,7 +243,7 @@ BOOST_AUTO_TEST_CASE(test_transpose_plus_accum)
                   M,
                   Plus<double>(),
                   A,
-                  true);
+                  REPLACE);
         BOOST_CHECK_EQUAL(C, answer);
     }
 
@@ -303,7 +259,7 @@ BOOST_AUTO_TEST_CASE(test_transpose_plus_accum)
                   M,
                   Plus<double>(),
                   A,
-                  false);
+                  MERGE);
         BOOST_CHECK_EQUAL(C, answer);
     }
 
@@ -319,7 +275,7 @@ BOOST_AUTO_TEST_CASE(test_transpose_plus_accum)
                   complement(M),
                   Plus<double>(),
                   A,
-                  true);
+                  REPLACE);
         BOOST_CHECK_EQUAL(C, answer);
     }
 
@@ -335,7 +291,7 @@ BOOST_AUTO_TEST_CASE(test_transpose_plus_accum)
                   complement(M),
                   Plus<double>(),
                   A,
-                  false);
+                  MERGE);
         BOOST_CHECK_EQUAL(C, answer);
     }
 }

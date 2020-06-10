@@ -1,7 +1,7 @@
 /*
- * GraphBLAS Template Library, Version 2.0
+ * GraphBLAS Template Library, Version 2.1
  *
- * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Copyright 2020 Carnegie Mellon University, Battelle Memorial Institute, and
  * Authors. All Rights Reserved.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
@@ -34,7 +34,6 @@
 #include <random>
 
 #include <graphblas/graphblas.hpp>
-#include <algorithms/bfs.hpp>
 
 //****************************************************************************
 // The following are hacks because algorithm assumes access to implicit zero
@@ -243,38 +242,43 @@ namespace algorithms
                           GraphBLAS::Plus<T>(), flow);
         T maxflow = at(flows,source);
 
-        GraphBLAS::print_matrix(std::cerr, flow, "Final FLOW:");
+        //GraphBLAS::print_matrix(std::cerr, flow, "Final FLOW:");
         return maxflow;
     }
 
     //************************************************************************
     //************************************************************************
     template<typename MatrixT>
-    bool maxflow_bfs(MatrixT const           &graph,
-                     GraphBLAS::IndexType     source,
-                     GraphBLAS::IndexType     sink,
-                     GraphBLAS::Matrix<bool> &M)
+    bool maxflow_bfs(
+        MatrixT const                                 &graph,
+        GraphBLAS::IndexType                           source,
+        GraphBLAS::IndexType                           sink,
+        GraphBLAS::Vector<GraphBLAS::IndexType> const &index_ramp,
+        GraphBLAS::Matrix<bool>                       &M)
     {
         using T = typename MatrixT::ScalarType;
         GraphBLAS::Vector<GraphBLAS::IndexType> parent_list(graph.nrows());
-        parent_list.setElement(source, source + 1ul);
+        parent_list.setElement(source, source);
 
         GraphBLAS::Vector<GraphBLAS::IndexType> wavefront(graph.ncols());
         wavefront.setElement(source, 1ul);
 
         while ((!parent_list.hasElement(sink)) && (wavefront.nvals() > 0))
         {
-            // convert all stored values to their 1-based column index
-            index_of_1based(wavefront);
+            // convert all stored values to their column index
+            GraphBLAS::eWiseMult(wavefront,
+                                 GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::First<GraphBLAS::IndexType>(),
+                                 index_ramp, wavefront);
 
-            // Select1st because we are left multiplying wavefront rows
+            // First because we are left multiplying wavefront rows
             // Masking out the parent list ensures wavefront values do not
             // overlap values already stored in the parent list
             GraphBLAS::vxm(wavefront,
-                           GraphBLAS::complement(parent_list),
+                           GraphBLAS::complement(GraphBLAS::structure(parent_list)),
                            GraphBLAS::NoAccumulate(),
-                           GraphBLAS::MinSelect1stSemiring<GraphBLAS::IndexType,T,GraphBLAS::IndexType>(),
-                           wavefront, graph, true);
+                           GraphBLAS::MinFirstSemiring<GraphBLAS::IndexType,T,GraphBLAS::IndexType>(),
+                           wavefront, graph, GraphBLAS::REPLACE);
 
             GraphBLAS::apply(parent_list,
                              GraphBLAS::NoMask(),
@@ -294,7 +298,7 @@ namespace algorithms
         GraphBLAS::IndexType curr_vertex(sink);
         while (curr_vertex != source)
         {
-            GraphBLAS::IndexType parent(parent_list.extractElement(curr_vertex) - 1);
+            GraphBLAS::IndexType parent(parent_list.extractElement(curr_vertex));
             M.setElement(parent, curr_vertex, true);
             curr_vertex = parent;
         }
@@ -313,6 +317,18 @@ namespace algorithms
 
         // @todo assert graph matrix is square
 
+        // create index ramp for index_of() functionality
+        GraphBLAS::Vector<GraphBLAS::IndexType> index_ramp(num_nodes);
+        {
+            std::vector<GraphBLAS::IndexType> idx(num_nodes);
+            for (GraphBLAS::IndexType i = 0; i < num_nodes; ++i)
+            {
+                idx[i] = i;
+            }
+
+            index_ramp.build(idx.begin(), idx.begin(), num_nodes);
+        }
+
         GraphBLAS::Matrix<bool> M(num_nodes, num_nodes);
         MatrixT F(num_nodes, num_nodes);
         MatrixT R = graph;
@@ -324,7 +340,7 @@ namespace algorithms
         //GraphBLAS::print_matrix(std::cerr, graph, "graph");
 
         GraphBLAS::IndexType count(0);
-        while (maxflow_bfs(R, source, sink, M) &&
+        while (maxflow_bfs(R, source, sink, index_ramp, M) &&
                count++ < graph.nvals())
         {
             //std::cerr << "----------- Iteration: " << count << " -----------\n";
@@ -342,9 +358,11 @@ namespace algorithms
 
             // GM = gamma*M
             MatrixT GM(num_nodes, num_nodes);
-            GraphBLAS::BinaryOp_Bind2nd<T, GraphBLAS::Times<T> > apply_gamma(gamma);
             GraphBLAS::apply(GM, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                             apply_gamma, M);
+                             std::bind(GraphBLAS::Times<T>(),
+                                       std::placeholders::_1,
+                                       gamma),
+                             M);
             //GraphBLAS::print_matrix(std::cerr, GM, "gamma*M");
 
             // F += gamma(M - M')
@@ -357,7 +375,7 @@ namespace algorithms
             // F := F + GM
             GraphBLAS::eWiseAdd(F, GraphBLAS::NoMask(),
                                 GraphBLAS::NoAccumulate(),
-                                GraphBLAS::Plus<T>(), F, GM, true);
+                                GraphBLAS::Plus<T>(), F, GM, GraphBLAS::REPLACE);
             //GraphBLAS::print_matrix(std::cerr, GM, "gamma(M - M')");
             //GraphBLAS::print_matrix(std::cerr, F, "F = F + gamma(M - M')");
 
@@ -369,92 +387,21 @@ namespace algorithms
                              GraphBLAS::AdditiveInverse<T>(), F);
             // R := graph + (-F)
             GraphBLAS::eWiseAdd(R, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                                GraphBLAS::Plus<T>(), graph, mF, true);
+                                GraphBLAS::Plus<T>(), graph, mF, GraphBLAS::REPLACE);
             // Clear the zero's
             GraphBLAS::apply(R, R, GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Identity<T>(), R, true);
+                             GraphBLAS::Identity<T>(), R, GraphBLAS::REPLACE);
             //GraphBLAS::print_matrix(std::cerr, R, "R = graph - F");
         }
 
-        GraphBLAS::print_matrix(std::cerr, F, "Final FLOW:");
+        //GraphBLAS::print_matrix(std::cerr, F, "Final FLOW:");
         GraphBLAS::Vector<T> sink_edges(num_nodes);
         GraphBLAS::extract(sink_edges,
                            GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
                            F, GraphBLAS::AllIndices(), sink);
         GraphBLAS::reduce(max_flow, GraphBLAS::NoAccumulate(),
                           GraphBLAS::PlusMonoid<T>(), sink_edges);
-        std::cerr << "Max flow = " << max_flow << std::endl;
-        return max_flow;
-    }
-
-    //************************************************************************
-    template<typename MatrixT>
-    typename MatrixT::ScalarType maxflow_ford_fulk2(MatrixT const        &graph,
-                                                    GraphBLAS::IndexType  source,
-                                                    GraphBLAS::IndexType  sink)
-    {
-        using T = typename MatrixT::ScalarType;
-        GraphBLAS::IndexType num_nodes(graph.nrows());
-
-        // @todo assert graph matrix is square
-
-        GraphBLAS::Matrix<bool> M(num_nodes, num_nodes);
-        MatrixT F(num_nodes, num_nodes);
-        MatrixT G(num_nodes, num_nodes);
-        MatrixT GM(num_nodes, num_nodes);
-        MatrixT R = graph;
-        T max_flow(0);
-
-        //GraphBLAS::print_matrix(std::cerr, R, "R");
-        //GraphBLAS::print_matrix(std::cerr, F, "F");
-
-        GraphBLAS::IndexType count(0);
-        while (maxflow_bfs(R, source, sink, M) &&
-               count++ < graph.nvals())
-        {
-            //std::cerr << "----------- Iteration: " << count << " -----------\n";
-            //GraphBLAS::print_matrix(std::cerr, M, "M (path)");
-
-            // gamma = min(M.*R)
-            T gamma;
-            GraphBLAS::eWiseMult(G, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                                 GraphBLAS::Times<T>(), M, R);
-            GraphBLAS::reduce(gamma, GraphBLAS::NoAccumulate(),
-                              GraphBLAS::MinMonoid<T>(), G);
-            //GraphBLAS::print_matrix(std::cerr, G, "M.*R");
-            //std::cerr << "gamma = min(M.*R) = " << gamma << std::endl;
-
-            // GM = gamma*M
-            GraphBLAS::BinaryOp_Bind2nd<T, GraphBLAS::Times<T> > apply_gamma(gamma);
-            GraphBLAS::apply(GM, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                             apply_gamma, M);
-            //GraphBLAS::print_matrix(std::cerr, GM, "gamma*M");
-
-            // F += gamma*M
-            GraphBLAS::eWiseAdd(F, GraphBLAS::NoMask(),
-                                GraphBLAS::NoAccumulate(),
-                                GraphBLAS::Plus<T>(), F, GM, true);
-            //GraphBLAS::print_matrix(std::cerr, F, "F += gamma*M");
-
-            // R += (-gamma*M)
-            GraphBLAS::apply(R, GraphBLAS::NoMask(), GraphBLAS::Plus<T>(),
-                             GraphBLAS::AdditiveInverse<T>(), GM);
-            //GraphBLAS::print_matrix(std::cerr, R, "R += -(gamma*M)");
-
-            // Clear the zero's
-            GraphBLAS::apply(R, R, GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Identity<T>(), R, true);
-            //GraphBLAS::print_matrix(std::cerr, R, "R<R> = R (annihilate zeros)");
-        }
-
-        GraphBLAS::print_matrix(std::cerr, F, "Final FLOW:");
-        GraphBLAS::Vector<T> sink_edges(num_nodes);
-        GraphBLAS::extract(sink_edges,
-                           GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                           F, GraphBLAS::AllIndices(), sink);
-        GraphBLAS::reduce(max_flow, GraphBLAS::NoAccumulate(),
-                          GraphBLAS::PlusMonoid<T>(), sink_edges);
-        std::cerr << "Max flow = " << max_flow << std::endl;
+        //std::cerr << "Max flow = " << max_flow << std::endl;
         return max_flow;
     }
 

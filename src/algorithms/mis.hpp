@@ -1,7 +1,7 @@
 /*
- * GraphBLAS Template Library, Version 2.0
+ * GraphBLAS Template Library, Version 2.1
  *
- * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Copyright 2019 Carnegie Mellon University, Battelle Memorial Institute, and
  * Authors. All Rights Reserved.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
@@ -34,32 +34,6 @@
 #include <random>
 
 #include <graphblas/graphblas.hpp>
-
-//****************************************************************************
-namespace
-{
-    //************************************************************************
-    std::default_random_engine             generator;
-    std::uniform_real_distribution<double> distribution;
-
-    // Return a random value that is scaled by the inverse of the degree.
-    template <typename T=float>
-    class SetRandom
-    {
-    public:
-        typedef T result_type;
-        SetRandom() {}
-
-        template <typename DegreeT>
-        __device__ __host__ inline result_type operator()(
-            bool,   // candidate_flag,
-            DegreeT degree)
-        {
-            return static_cast<T>(0.0001 +
-                                  distribution(generator)/(1. + 2.*degree));
-        }
-    };
-}
 
 //****************************************************************************
 namespace algorithms
@@ -119,6 +93,10 @@ namespace algorithms
              GraphBLAS::Vector<bool>  &independent_set,
              double                    seed = 0)
     {
+        std::default_random_engine             generator;
+        std::uniform_real_distribution<double> distribution;
+        generator.seed(seed);
+
         GraphBLAS::IndexType num_vertices(graph.nrows());
         GraphBLAS::IndexType cols(graph.ncols());
         GraphBLAS::IndexType r(independent_set.size());
@@ -130,11 +108,9 @@ namespace algorithms
 
         //GraphBLAS::print_matrix(std::cout, graph, "Graph");
 
-        generator.seed(seed);
-
         using RealT = float;
-        typedef GraphBLAS::Vector<RealT> RealVector;
-        typedef GraphBLAS::Vector<bool> BoolVector;
+        using RealVector = GraphBLAS::Vector<RealT>;
+        using BoolVector = GraphBLAS::Vector<bool>;
 
         RealVector prob(num_vertices);
         RealVector neighbor_max(num_vertices);
@@ -154,13 +130,13 @@ namespace algorithms
         GraphBLAS::assign(candidates,
                           degrees,
                           GraphBLAS::NoAccumulate(),
-                          true, GraphBLAS::AllIndices(), true);
+                          true, GraphBLAS::AllIndices(), GraphBLAS::REPLACE);
 
         // Courtesy of Tim Davis: singletons are not candidates.  Add to iset
         GraphBLAS::assign(independent_set,
                           GraphBLAS::complement(degrees),
                           GraphBLAS::NoAccumulate(),
-                          true, GraphBLAS::AllIndices(), true);
+                          true, GraphBLAS::AllIndices(), GraphBLAS::REPLACE);
 
         while (candidates.nvals() > 0)
         {
@@ -168,20 +144,23 @@ namespace algorithms
             //          << candidates.nvals() << std::endl;
             //GraphBLAS::print_vector(std::cout, candidates, "candidates");
 
-            // assign new random values to all non-zero elements (ensures
-            // that any ties that may occur between neighbors will eventually
-            // be broken.
-            GraphBLAS::eWiseMult(prob,
-                                 GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                                 SetRandom<RealT>(),
-                                 candidates, degrees);
+            // assign new random values scaled by inverse degree to
+            // all non-zero elements (ensures that any ties that may
+            // occur between neighbors will eventually be broken.
+            GraphBLAS::eWiseMult(
+                prob,
+                GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                [&](bool candidate, RealT const &degree)
+                { return static_cast<RealT>(
+                        0.0001 + distribution(generator)/(1. + 2.*degree)); },
+                candidates, degrees);
             //GraphBLAS::print_vector(std::cout, prob, "prob");
 
             // find the neighbor of each source node with the max random number
             GraphBLAS::mxv(neighbor_max,
                            candidates, GraphBLAS::NoAccumulate(),
-                           GraphBLAS::MaxSelect2ndSemiring<RealT>(),
-                           graph, prob, true);
+                           GraphBLAS::MaxSecondSemiring<RealT>(),
+                           graph, prob, GraphBLAS::REPLACE);
             //GraphBLAS::print_vector(std::cout, neighbor_max, "neighbor_max");
 
             // Select source node if its probability is > neighbor_max
@@ -195,7 +174,7 @@ namespace algorithms
             GraphBLAS::apply(new_members,
                              new_members, GraphBLAS::NoAccumulate(),
                              GraphBLAS::Identity<bool>(),
-                             new_members, true);
+                             new_members, GraphBLAS::REPLACE);
             //GraphBLAS::print_vector(std::cout, new_members, "new_members");
 
             // Add new members to independent set.
@@ -211,7 +190,7 @@ namespace algorithms
                                  GraphBLAS::complement(new_members),
                                  GraphBLAS::NoAccumulate(),
                                  GraphBLAS::LogicalAnd<bool>(),
-                                 candidates, candidates, true);
+                                 candidates, candidates, GraphBLAS::REPLACE);
             //GraphBLAS::print_vector(std::cout, candidates,
             //                        "candidates (sans new_members)");
 
@@ -233,7 +212,7 @@ namespace algorithms
                                  GraphBLAS::complement(new_neighbors),
                                  GraphBLAS::NoAccumulate(),
                                  GraphBLAS::LogicalAnd<bool>(),
-                                 candidates, candidates, true);
+                                 candidates, candidates, GraphBLAS::REPLACE);
             //GraphBLAS::print_vector(std::cout, candidates,
             //                        "candidates (sans new_members' neighbors)");
         }

@@ -1,7 +1,7 @@
 /*
- * GraphBLAS Template Library, Version 2.0
+ * GraphBLAS Template Library, Version 2.1
  *
- * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Copyright 2019 Carnegie Mellon University, Battelle Memorial Institute, and
  * Authors. All Rights Reserved.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(test_vxm_masked_replace_bad_dimensions)
                         m4,
                         GraphBLAS::NoAccumulate(),
                         GraphBLAS::ArithmeticSemiring<double>(), u3, mA,
-                        true)),
+                        GraphBLAS::REPLACE)),
         GraphBLAS::DimensionException);
 }
 
@@ -221,7 +221,7 @@ BOOST_AUTO_TEST_CASE(test_vxm_masked_replace_reg)
                        m3,
                        GraphBLAS::Second<double>(),
                        GraphBLAS::ArithmeticSemiring<double>(), u3, mA,
-                       true);
+                       GraphBLAS::REPLACE);
 
         BOOST_CHECK_EQUAL(result.nvals(), 2);
         BOOST_CHECK_EQUAL(result, answer);
@@ -237,7 +237,7 @@ BOOST_AUTO_TEST_CASE(test_vxm_masked_replace_reg)
                        m3,
                        GraphBLAS::NoAccumulate(),
                        GraphBLAS::ArithmeticSemiring<double>(), u3, mA,
-                       true);
+                       GraphBLAS::REPLACE);
 
         BOOST_CHECK_EQUAL(result.nvals(), 1);
         BOOST_CHECK_EQUAL(result, answer);
@@ -275,7 +275,7 @@ BOOST_AUTO_TEST_CASE(test_vxm_masked_replace_reg_stored_zero)
                    mask,
                    GraphBLAS::NoAccumulate(),
                    GraphBLAS::ArithmeticSemiring<double>(), u, A,
-                   true);
+                   GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result.nvals(), 3);
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -305,7 +305,7 @@ BOOST_AUTO_TEST_CASE(test_vxm_masked_replace_a_transpose)
                    mask,
                    GraphBLAS::NoAccumulate(),
                    GraphBLAS::ArithmeticSemiring<double>(), u, transpose(A),
-                   true);
+                   GraphBLAS::REPLACE);
 
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -454,7 +454,7 @@ BOOST_AUTO_TEST_CASE(test_vxm_scmp_masked_replace_bad_dimensions)
                         GraphBLAS::complement(m4),
                         GraphBLAS::NoAccumulate(),
                         GraphBLAS::ArithmeticSemiring<double>(), u3, mA,
-                        true)),
+                        GraphBLAS::REPLACE)),
         GraphBLAS::DimensionException);
 }
 //****************************************************************************
@@ -478,7 +478,7 @@ BOOST_AUTO_TEST_CASE(test_vxm_scmp_masked_replace_reg)
                        GraphBLAS::complement(m3),
                        GraphBLAS::Second<double>(),
                        GraphBLAS::ArithmeticSemiring<double>(), u3, mA,
-                       true);
+                       GraphBLAS::REPLACE);
 
         BOOST_CHECK_EQUAL(result.nvals(), 2);
         BOOST_CHECK_EQUAL(result, answer);
@@ -494,7 +494,7 @@ BOOST_AUTO_TEST_CASE(test_vxm_scmp_masked_replace_reg)
                        GraphBLAS::complement(m3),
                        GraphBLAS::NoAccumulate(),
                        GraphBLAS::ArithmeticSemiring<double>(), u3, mA,
-                       true);
+                       GraphBLAS::REPLACE);
 
         BOOST_CHECK_EQUAL(result.nvals(), 1);
         BOOST_CHECK_EQUAL(result, answer);
@@ -529,7 +529,7 @@ BOOST_AUTO_TEST_CASE(test_vxm_scmp_masked_replace_reg_stored_zero)
                    GraphBLAS::complement(mask),
                    GraphBLAS::NoAccumulate(),
                    GraphBLAS::ArithmeticSemiring<double>(), u, A,
-                   true);
+                   GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result.nvals(), 3);
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -559,7 +559,7 @@ BOOST_AUTO_TEST_CASE(test_vxm_scmp_masked_replace_a_transpose)
                    GraphBLAS::complement(mask),
                    GraphBLAS::NoAccumulate(),
                    GraphBLAS::ArithmeticSemiring<double>(), u, transpose(A),
-                   true);
+                   GraphBLAS::REPLACE);
 
     BOOST_CHECK_EQUAL(result, answer);
 }

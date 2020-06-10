@@ -40,9 +40,13 @@
 
 #pragma once
 
+#include <algorithms/appendix_algorithms.hpp>
+#include <algorithms/apsp.hpp>
 #include <algorithms/bc.hpp>
 #include <algorithms/bfs.hpp>
 #include <algorithms/cluster.hpp>
+#include <algorithms/cluster_louvain.hpp>
+#include <algorithms/k_truss.hpp>
 #include <algorithms/maxflow.hpp>
 #include <algorithms/metrics.hpp>
 #include <algorithms/mis.hpp>

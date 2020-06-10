@@ -1,7 +1,7 @@
 /*
- * GraphBLAS Template Library, Version 2.0
+ * GraphBLAS Template Library, Version 2.1
  *
- * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Copyright 2019 Carnegie Mellon University, Battelle Memorial Institute, and
  * Authors. All Rights Reserved.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
@@ -213,7 +213,7 @@ BOOST_AUTO_TEST_CASE(test_mxv_masked_replace_bad_dimensions)
                         m4,
                         GraphBLAS::NoAccumulate(),
                         GraphBLAS::ArithmeticSemiring<double>(), mA, u3,
-                        true)),
+                        GraphBLAS::REPLACE)),
         GraphBLAS::DimensionException);
 }
 
@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(test_mxv_masked_replace_reg)
                        GraphBLAS::ArithmeticSemiring<double>(),
                        mA,
                        u3,
-                       true);
+                       GraphBLAS::REPLACE);
 
         BOOST_CHECK_EQUAL(result.nvals(), 2);
         BOOST_CHECK_EQUAL(result, answer);
@@ -256,7 +256,7 @@ BOOST_AUTO_TEST_CASE(test_mxv_masked_replace_reg)
                        GraphBLAS::ArithmeticSemiring<double>(),
                        mA,
                        u3,
-                       true);
+                       GraphBLAS::REPLACE);
 
         BOOST_CHECK_EQUAL(result.nvals(), 1);
         BOOST_CHECK_EQUAL(result, answer);
@@ -294,7 +294,7 @@ BOOST_AUTO_TEST_CASE(test_mxv_masked_replace_reg_stored_zero)
                    mask,
                    GraphBLAS::NoAccumulate(),
                    GraphBLAS::ArithmeticSemiring<double>(), A, u,
-                   true);
+                   GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result.nvals(), 3);
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -325,7 +325,7 @@ BOOST_AUTO_TEST_CASE(test_mxv_masked_replace_a_transpose)
                    GraphBLAS::ArithmeticSemiring<double>(),
                    transpose(A),
                    u,
-                   true);
+                   GraphBLAS::REPLACE);
 
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -486,7 +486,7 @@ BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_replace_bad_dimensions)
                         GraphBLAS::ArithmeticSemiring<double>(),
                         mA,
                         u3,
-                        true)),
+                        GraphBLAS::REPLACE)),
         GraphBLAS::DimensionException);
 }
 //****************************************************************************
@@ -512,7 +512,7 @@ BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_replace_reg)
                        GraphBLAS::ArithmeticSemiring<double>(),
                        mA,
                        u3,
-                       true);
+                       GraphBLAS::REPLACE);
 
         BOOST_CHECK_EQUAL(result.nvals(), 2);
         BOOST_CHECK_EQUAL(result, answer);
@@ -530,7 +530,7 @@ BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_replace_reg)
                        GraphBLAS::ArithmeticSemiring<double>(),
                        mA,
                        u3,
-                       true);
+                       GraphBLAS::REPLACE);
 
         BOOST_CHECK_EQUAL(result.nvals(), 1);
         BOOST_CHECK_EQUAL(result, answer);
@@ -567,7 +567,7 @@ BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_replace_reg_stored_zero)
                    GraphBLAS::ArithmeticSemiring<double>(),
                    A,
                    u,
-                   true);
+                   GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result.nvals(), 3);
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -598,7 +598,7 @@ BOOST_AUTO_TEST_CASE(test_mxv_scmp_masked_replace_a_transpose)
                    GraphBLAS::ArithmeticSemiring<double>(),
                    transpose(A),
                    u,
-                   true);
+                   GraphBLAS::REPLACE);
 
     BOOST_CHECK_EQUAL(result, answer);
 }

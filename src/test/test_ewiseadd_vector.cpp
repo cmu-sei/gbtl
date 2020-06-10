@@ -1,7 +1,7 @@
 /*
- * GraphBLAS Template Library, Version 2.0
+ * GraphBLAS Template Library, Version 2.1
  *
- * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Copyright 2019 Carnegie Mellon University, Battelle Memorial Institute, and
  * Authors. All Rights Reserved.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
@@ -84,6 +84,102 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_bad_dimensions)
                              GraphBLAS::NoMask(),
                              GraphBLAS::NoAccumulate(),
                              GraphBLAS::Plus<double>(), u, u)),
+        GraphBLAS::DimensionException);
+
+    // Additional tests.
+    GraphBLAS::Vector<double> a(v3a_dense, 0.);
+    GraphBLAS::Vector<double> b(v4a_dense, 0.);
+    GraphBLAS::Vector<double> result_a(3);
+    GraphBLAS::Vector<double> result_b(4);
+
+    // w0 m0 u1 v1
+    BOOST_CHECK_THROW(
+            (GraphBLAS::eWiseAdd(result_a,
+                                 a,
+                                 GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::Plus<double>(),
+                                 b,
+                                 b)),
+            GraphBLAS::DimensionException);
+
+    // w0 m1 u0 v0
+    BOOST_CHECK_THROW(
+            (GraphBLAS::eWiseAdd(result_a,
+                                 b,
+                                 GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::Plus<double>(),
+                                 a,
+                                 a)),
+            GraphBLAS::DimensionException);
+
+    // w1 m0 u0 v1
+    BOOST_CHECK_THROW(
+            (GraphBLAS::eWiseAdd(result_b,
+                                 a,
+                                 GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::Plus<double>(),
+                                 a,
+                                 b)),
+            GraphBLAS::DimensionException);
+
+    // w1 m1 u1 v0
+    BOOST_CHECK_THROW(
+            (GraphBLAS::eWiseAdd(result_b,
+                                 b,
+                                 GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::Plus<double>(),
+                                 b,
+                                 a)),
+            GraphBLAS::DimensionException);
+
+    // w1 m0 u1 v1
+    BOOST_CHECK_THROW(
+            (GraphBLAS::eWiseAdd(result_b,
+                                 a,
+                                 GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::Plus<double>(),
+                                 b,
+                                 b)),
+            GraphBLAS::DimensionException);
+
+    // w0 m1 u1 v1
+    BOOST_CHECK_THROW(
+            (GraphBLAS::eWiseAdd(result_a,
+                                 b,
+                                 GraphBLAS::NoAccumulate(),
+                                 GraphBLAS::Plus<double>(),
+                                 b,
+                                 b)),
+            GraphBLAS::DimensionException);
+
+    // w0 no u1 v0
+    BOOST_CHECK_THROW(
+        (GraphBLAS::eWiseAdd(result_a,
+                             GraphBLAS::NoMask(),
+                             GraphBLAS::NoAccumulate(),
+                             GraphBLAS::Plus<double>(),
+                             b,
+                             a)),
+        GraphBLAS::DimensionException);
+
+    // w1 no u1 v0
+    BOOST_CHECK_THROW(
+        (GraphBLAS::eWiseAdd(result_b,
+                             GraphBLAS::NoMask(),
+                             GraphBLAS::NoAccumulate(),
+                             GraphBLAS::Plus<double>(),
+                             b,
+                             a)),
+        GraphBLAS::DimensionException);
+
+    // w1 no u0 v0
+    BOOST_CHECK_THROW(
+        (GraphBLAS::eWiseAdd(result_b,
+                             GraphBLAS::NoMask(),
+                             GraphBLAS::NoAccumulate(),
+                             GraphBLAS::Plus<double>(),
+                             a,
+                             a)),
         GraphBLAS::DimensionException);
 }
 
@@ -177,7 +273,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_replace_bad_dimensions)
                              mask,
                              GraphBLAS::NoAccumulate(),
                              GraphBLAS::Plus<double>(), v, u,
-                             true)),
+                             GraphBLAS::REPLACE)),
         GraphBLAS::DimensionException);
 }
 
@@ -199,7 +295,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_replace_reg)
     GraphBLAS::eWiseAdd(result,
                         mask,
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v, true);
+                        GraphBLAS::Plus<double>(), u, v, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
@@ -209,7 +305,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_replace_reg)
     GraphBLAS::eWiseAdd(result,
                         mask,
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v2, true);
+                        GraphBLAS::Plus<double>(), u, v2, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
@@ -219,7 +315,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_replace_reg)
     GraphBLAS::eWiseAdd(result,
                         mask,
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v3, true);
+                        GraphBLAS::Plus<double>(), u, v3, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -241,7 +337,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_replace_reg_stored_zero)
     GraphBLAS::eWiseAdd(result,
                         mask,
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v, true);
+                        GraphBLAS::Plus<double>(), u, v, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
@@ -251,7 +347,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_replace_reg_stored_zero)
     GraphBLAS::eWiseAdd(result,
                         mask,
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v2, true);
+                        GraphBLAS::Plus<double>(), u, v2, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
@@ -261,7 +357,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_replace_reg_stored_zero)
     GraphBLAS::eWiseAdd(result,
                         mask,
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v3, true);
+                        GraphBLAS::Plus<double>(), u, v3, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -284,7 +380,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_vector_masked_replace_reg_stored_zer
                         mask,
                         GraphBLAS::NoAccumulate(),
                         add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
-                        u, v, true);
+                        u, v, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
@@ -295,7 +391,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_vector_masked_replace_reg_stored_zer
                         mask,
                         GraphBLAS::NoAccumulate(),
                         add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
-                        u, v2, true);
+                        u, v2, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
@@ -306,7 +402,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_vector_masked_replace_reg_stored_zer
                         mask,
                         GraphBLAS::NoAccumulate(),
                         add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
-                        u, v3, true);
+                        u, v3, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -327,7 +423,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_bad_dimensions)
         (GraphBLAS::eWiseAdd(result,
                              mask,
                              GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Plus<double>(), v, u, false)),
+                             GraphBLAS::Plus<double>(), v, u, GraphBLAS::MERGE)),
         GraphBLAS::DimensionException);
 }
 
@@ -349,7 +445,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_reg)
     GraphBLAS::eWiseAdd(result,
                         mask,
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v, false);
+                        GraphBLAS::Plus<double>(), u, v, GraphBLAS::MERGE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
@@ -359,7 +455,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_reg)
     GraphBLAS::eWiseAdd(result,
                         mask,
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v2, false);
+                        GraphBLAS::Plus<double>(), u, v2, GraphBLAS::MERGE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
@@ -369,7 +465,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_reg)
     GraphBLAS::eWiseAdd(result,
                         mask,
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v3, false);
+                        GraphBLAS::Plus<double>(), u, v3, GraphBLAS::MERGE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -391,7 +487,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_reg_stored_zero)
     GraphBLAS::eWiseAdd(result,
                         mask,
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v, false);
+                        GraphBLAS::Plus<double>(), u, v, GraphBLAS::MERGE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
@@ -401,7 +497,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_reg_stored_zero)
     GraphBLAS::eWiseAdd(result,
                         mask,
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v2, false);
+                        GraphBLAS::Plus<double>(), u, v2, GraphBLAS::MERGE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
@@ -411,7 +507,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_reg_stored_zero)
     GraphBLAS::eWiseAdd(result,
                         mask,
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v3, false);
+                        GraphBLAS::Plus<double>(), u, v3, GraphBLAS::MERGE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -434,7 +530,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_vector_masked_reg_stored_zero)
                         mask,
                         GraphBLAS::NoAccumulate(),
                         add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
-                        u, v, false);
+                        u, v, GraphBLAS::MERGE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
@@ -445,7 +541,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_vector_masked_reg_stored_zero)
                         mask,
                         GraphBLAS::NoAccumulate(),
                         add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
-                        u, v2, false);
+                        u, v2, GraphBLAS::MERGE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
@@ -456,7 +552,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_vector_masked_reg_stored_zero)
                         mask,
                         GraphBLAS::NoAccumulate(),
                         add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
-                        u, v3, false);
+                        u, v3, GraphBLAS::MERGE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -478,7 +574,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_replace_bad_dimensions)
                              GraphBLAS::complement(mask),
                              GraphBLAS::NoAccumulate(),
                              GraphBLAS::Plus<double>(), v, u,
-                             false)),
+                             GraphBLAS::MERGE)),
         GraphBLAS::DimensionException);
 }
 
@@ -500,7 +596,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_replace_reg)
     GraphBLAS::eWiseAdd(result,
                         GraphBLAS::complement(mask),
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v, true);
+                        GraphBLAS::Plus<double>(), u, v, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
@@ -510,7 +606,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_replace_reg)
     GraphBLAS::eWiseAdd(result,
                         GraphBLAS::complement(mask),
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v2, true);
+                        GraphBLAS::Plus<double>(), u, v2, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
@@ -520,7 +616,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_replace_reg)
     GraphBLAS::eWiseAdd(result,
                         GraphBLAS::complement(mask),
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v3, true);
+                        GraphBLAS::Plus<double>(), u, v3, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -542,7 +638,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_replace_reg_stored_zero)
     GraphBLAS::eWiseAdd(result,
                         GraphBLAS::complement(mask),
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v, true);
+                        GraphBLAS::Plus<double>(), u, v, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
@@ -552,7 +648,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_replace_reg_stored_zero)
     GraphBLAS::eWiseAdd(result,
                         GraphBLAS::complement(mask),
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v2, true);
+                        GraphBLAS::Plus<double>(), u, v2, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
@@ -562,7 +658,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_replace_reg_stored_zero)
     GraphBLAS::eWiseAdd(result,
                         GraphBLAS::complement(mask),
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v3, true);
+                        GraphBLAS::Plus<double>(), u, v3, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -585,7 +681,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_vector_scmp_masked_replace_reg_store
                         GraphBLAS::complement(mask),
                         GraphBLAS::NoAccumulate(),
                         add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
-                        u, v, true);
+                        u, v, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
@@ -596,7 +692,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_vector_scmp_masked_replace_reg_store
                         GraphBLAS::complement(mask),
                         GraphBLAS::NoAccumulate(),
                         add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
-                        u, v2, true);
+                        u, v2, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
@@ -607,7 +703,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_vector_scmp_masked_replace_reg_store
                         GraphBLAS::complement(mask),
                         GraphBLAS::NoAccumulate(),
                         add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
-                        u, v3, true);
+                        u, v3, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -628,7 +724,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_bad_dimensions)
         (GraphBLAS::eWiseAdd(result,
                              GraphBLAS::complement(mask),
                              GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Plus<double>(), v, u, false)),
+                             GraphBLAS::Plus<double>(), v, u, GraphBLAS::MERGE)),
         GraphBLAS::DimensionException);
 }
 
@@ -650,7 +746,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_reg)
     GraphBLAS::eWiseAdd(result,
                         GraphBLAS::complement(mask),
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v, false);
+                        GraphBLAS::Plus<double>(), u, v, GraphBLAS::MERGE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
@@ -660,7 +756,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_reg)
     GraphBLAS::eWiseAdd(result,
                         GraphBLAS::complement(mask),
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v2, false);
+                        GraphBLAS::Plus<double>(), u, v2, GraphBLAS::MERGE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
@@ -670,7 +766,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_reg)
     GraphBLAS::eWiseAdd(result,
                         GraphBLAS::complement(mask),
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v3, false);
+                        GraphBLAS::Plus<double>(), u, v3, GraphBLAS::MERGE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -692,7 +788,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_reg_stored_zero)
     GraphBLAS::eWiseAdd(result,
                         GraphBLAS::complement(mask),
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v, false);
+                        GraphBLAS::Plus<double>(), u, v, GraphBLAS::MERGE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
@@ -702,7 +798,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_reg_stored_zero)
     GraphBLAS::eWiseAdd(result,
                         GraphBLAS::complement(mask),
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v2, false);
+                        GraphBLAS::Plus<double>(), u, v2, GraphBLAS::MERGE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
@@ -712,7 +808,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_reg_stored_zero)
     GraphBLAS::eWiseAdd(result,
                         GraphBLAS::complement(mask),
                         GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v3, false);
+                        GraphBLAS::Plus<double>(), u, v3, GraphBLAS::MERGE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -735,7 +831,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_vector_scmp_masked_reg_stored_zero)
                         GraphBLAS::complement(mask),
                         GraphBLAS::NoAccumulate(),
                         add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
-                        u, v, false);
+                        u, v, GraphBLAS::MERGE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
@@ -746,7 +842,7 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_vector_scmp_masked_reg_stored_zero)
                         GraphBLAS::complement(mask),
                         GraphBLAS::NoAccumulate(),
                         add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
-                        u, v2, false);
+                        u, v2, GraphBLAS::MERGE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
@@ -757,8 +853,35 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_vector_scmp_masked_reg_stored_zero)
                         GraphBLAS::complement(mask),
                         GraphBLAS::NoAccumulate(),
                         add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
-                        u, v3, false);
+                        u, v3, GraphBLAS::MERGE);
     BOOST_CHECK_EQUAL(result, ans3);
+}
+
+//****************************************************************************
+// Tests using an Accumulator (incomplete).
+//****************************************************************************
+
+//***************************************************************************
+BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_accum)
+{
+    GraphBLAS::Vector<double> v(v3a_dense, 0.);
+    GraphBLAS::Vector<double> u(twos3_dense, 0.);
+
+    GraphBLAS::Vector<double> result1({1, 1, 1}, 0.);
+    GraphBLAS::Vector<double> ans1({15, 3, 10}, 0.);
+    GraphBLAS::eWiseAdd(result1,
+                        GraphBLAS::NoMask(),
+                        GraphBLAS::Plus<double>(),
+                        GraphBLAS::Plus<double>(), u, v);
+    BOOST_CHECK_EQUAL(result1, ans1);
+
+    GraphBLAS::Vector<double> result2({1, 1, 1}, 0.);
+    GraphBLAS::Vector<double> ans2({-13, -1, -8}, 0.);
+    GraphBLAS::eWiseAdd(result2,
+                        GraphBLAS::NoMask(),
+                        GraphBLAS::Minus<double>(),
+                        GraphBLAS::Plus<double>(), u, v);
+    BOOST_CHECK_EQUAL(result2, ans2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

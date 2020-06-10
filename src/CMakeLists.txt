@@ -27,7 +27,7 @@
 
 cmake_minimum_required(VERSION 2.8)
 
-project(GRAPHBLAS_TEMPLATE_LIBRARY_2)
+project(GRAPHBLAS_TEMPLATE_LIBRARY_3)
 
 # For debugging
 message("CMake SRC: ${CMAKE_SOURCE_DIR}")
@@ -58,7 +58,8 @@ message("Configured platform: ${PLATFORM}")
 include_directories(${CMAKE_SOURCE_DIR} ${PLATFORM_SOURCE_DIR})
 
 # Compiler flags
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 # Build a list of all the graphblas headers.
 file(GLOB GRAPHBLAS_HEADERS graphblas/*.hpp)

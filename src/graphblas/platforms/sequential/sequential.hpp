@@ -1,7 +1,7 @@
 /*
- * GraphBLAS Template Library, Version 2.0
+ * GraphBLAS Template Library, Version 2.1
  *
- * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Copyright 2020 Carnegie Mellon University, Battelle Memorial Institute, and
  * Authors. All Rights Reserved.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
@@ -13,7 +13,7 @@
  * ASSUMES ANY LEGAL LIABILITY OR RESPONSIBILITY FOR THE ACCURACY, COMPLETENESS,
  * OR USEFULNESS OR ANY INFORMATION, APPARATUS, PRODUCT, SOFTWARE, OR PROCESS
  * DISCLOSED, OR REPRESENTS THAT ITS USE WOULD NOT INFRINGE PRIVATELY OWNED
- * RIGHTS..
+ * RIGHTS.
  *
  * Released under a BSD (SEI)-style license, please see license.txt or contact
  * permission@sei.cmu.edu for full terms.
@@ -34,11 +34,6 @@
 
 #include <graphblas/platforms/sequential/Matrix.hpp>
 #include <graphblas/platforms/sequential/Vector.hpp>
-
-#include <graphblas/platforms/sequential/utility.hpp>
-
-#include <graphblas/platforms/sequential/TransposeView.hpp>
-#include <graphblas/platforms/sequential/ComplementView.hpp>
 
 #include <graphblas/platforms/sequential/operations.hpp>
 

@@ -1,7 +1,7 @@
 /*
- * GraphBLAS Template Library, Version 2.0
+ * GraphBLAS Template Library, Version 3.0
  *
- * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Copyright 2020, Carnegie Mellon University, Battelle Memorial Institute, and
  * Authors. All Rights Reserved.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
@@ -13,7 +13,7 @@
  * ASSUMES ANY LEGAL LIABILITY OR RESPONSIBILITY FOR THE ACCURACY, COMPLETENESS,
  * OR USEFULNESS OR ANY INFORMATION, APPARATUS, PRODUCT, SOFTWARE, OR PROCESS
  * DISCLOSED, OR REPRESENTS THAT ITS USE WOULD NOT INFRINGE PRIVATELY OWNED
- * RIGHTS..
+ * RIGHTS.
  *
  * Released under a BSD (SEI)-style license, please see license.txt or contact
  * permission@sei.cmu.edu for full terms.
@@ -24,20 +24,24 @@
  * (https://github.com/cmu-sei/gbtl/blob/1.0.0/LICENSE) Copyright 2015 Carnegie
  * Mellon University and The Trustees of Indiana. DM17-0037, DM-0002659
  *
- * DM18-0559
+ * 2. GraphBLAS Template Library (GBTL)
+ * (https://github.com/cmu-sei/gbtl/blob/2.0.0/LICENSE) Copyright 2018 Carnegie
+ * Mellon University, Battelle Memorial Institute, and Authors. DM18-0559
+ *
+ * DM20-0442
  */
-
-#ifndef GB_OPERATIONS_HPP
-#define GB_OPERATIONS_HPP
 
 #pragma once
 
 #include <cstddef>
 #include <vector>
 
+#include <graphblas/types.hpp>
 #include <graphblas/algebra.hpp>
 #include <graphblas/TransposeView.hpp>
+#include <graphblas/StructureView.hpp>
 #include <graphblas/ComplementView.hpp>
+#include <graphblas/StructuralComplementView.hpp>
 
 #include <graphblas/Matrix.hpp>
 #include <graphblas/Vector.hpp>
@@ -71,20 +75,20 @@ namespace GraphBLAS
              typename BMatrixT>
     inline void mxm(CMatrixT         &C,
                     MaskT      const &Mask,
-                    AccumT            accum,
+                    AccumT     const &accum,
                     SemiringT         op,
                     AMatrixT   const &A,
                     BMatrixT   const &B,
-                    bool              replace_flag = false)
+                    OutputControlEnum outp = MERGE)
     {
         GRB_LOG_FN_BEGIN("mxm - 4.3.1 - matrix-matrix multiply");
-        GRB_LOG_VERBOSE("C in :" << C.m_mat);
-        GRB_LOG_VERBOSE("Mask in : " << Mask.m_mat);
+        GRB_LOG_VERBOSE("C in :" << get_internal_matrix(C));
+        GRB_LOG_VERBOSE("Mask in : " << get_internal_matrix(Mask));
         GRB_LOG_VERBOSE_ACCUM(accum);
         GRB_LOG_VERBOSE_OP(op);
-        GRB_LOG_VERBOSE("A in :" << A.m_mat);
-        GRB_LOG_VERBOSE("B in :" << B.m_mat);
-        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+        GRB_LOG_VERBOSE("A in :" << get_internal_matrix(A));
+        GRB_LOG_VERBOSE("B in :" << get_internal_matrix(B));
+        GRB_LOG_VERBOSE_OUTP(outp);
 
         check_nrows_nrows(C, Mask, "mxm: C.nrows != Mask.nrows");
         check_ncols_ncols(C, Mask, "mxm: C.ncols != Mask.ncols");
@@ -92,10 +96,14 @@ namespace GraphBLAS
         check_ncols_ncols(C, B, "mxm: C.ncols != B.ncols");
         check_ncols_nrows(A, B, "mxm: A.ncols != B.nrows");
 
-        backend::mxm(C.m_mat, Mask.m_mat, accum, op, A.m_mat, B.m_mat,
-                     replace_flag);
+        backend::mxm(get_internal_matrix(C),
+                     get_internal_matrix(Mask),
+                     accum, op,
+                     get_internal_matrix(A),
+                     get_internal_matrix(B),
+                     outp);
 
-        GRB_LOG_VERBOSE("C (Result): " << C.m_mat);
+        GRB_LOG_VERBOSE("C (Result): " << get_internal_matrix(C));
         GRB_LOG_FN_END("mxm - 4.3.1 - matrix-matrix multiply");
     }
 
@@ -110,29 +118,28 @@ namespace GraphBLAS
              typename AMatrixT>
     inline void vxm(WVectorT         &w,
                     MaskT      const &mask,
-                    AccumT            accum,
+                    AccumT     const &accum,
                     SemiringT         op,
                     UVectorT   const &u,
                     AMatrixT   const &A,
-                    bool              replace_flag = false)
+                    OutputControlEnum outp = MERGE)
     {
         GRB_LOG_FN_BEGIN("mxv - 4.3.2 - vector-matrix multiply");
-        GRB_LOG_VERBOSE("w in :" << w.m_vec);
-        GRB_LOG_VERBOSE("mask in : " << mask.m_vec);
+        GRB_LOG_VERBOSE("w in :" << get_internal_vector(w));
+        GRB_LOG_VERBOSE("mask in : " << get_internal_vector(mask));
         GRB_LOG_VERBOSE_ACCUM(accum);
         GRB_LOG_VERBOSE_OP(op);
-        GRB_LOG_VERBOSE("u in :" << u.m_vec);
-        GRB_LOG_VERBOSE("A in :" << A.m_mat);
-        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+        GRB_LOG_VERBOSE("u in :" << get_internal_vector(u));
+        GRB_LOG_VERBOSE("A in :" << get_internal_matrix(A));
+        GRB_LOG_VERBOSE_OUTP(outp);
 
         check_size_size(w, mask, "vxm: w.size != mask.size");
         check_size_ncols(w, A, "vxm: w.size != A.ncols");
         check_size_nrows(u, A, "vxm: u.size != A.nrows");
 
-        backend::vxm(w.m_vec, mask.m_vec, accum, op, u.m_vec, A.m_mat,
-                     replace_flag);
+        backend::vxm(get_internal_vector(w), get_internal_vector(mask), accum, op, get_internal_vector(u), get_internal_matrix(A), outp);
 
-        GRB_LOG_VERBOSE("w out :" << w.m_vec);
+        GRB_LOG_VERBOSE("w out :" << get_internal_vector(w));
         GRB_LOG_FN_END("mxm - 4.3.2 - vector-matrix multiply");
     }
 
@@ -145,30 +152,29 @@ namespace GraphBLAS
              typename SemiringT,
              typename AMatrixT,
              typename UVectorT>
-    inline void mxv(WVectorT        &w,
-                    MaskT     const &mask,
-                    AccumT           accum,
-                    SemiringT        op,
-                    AMatrixT  const &A,
-                    UVectorT  const &u,
-                    bool             replace_flag = false)
+    inline void mxv(WVectorT          &w,
+                    MaskT       const &mask,
+                    AccumT      const &accum,
+                    SemiringT          op,
+                    AMatrixT    const &A,
+                    UVectorT    const &u,
+                    OutputControlEnum  outp = MERGE)
     {
         GRB_LOG_FN_BEGIN("mxv - 4.3.3 - matrix-vector multiply");
-        GRB_LOG_VERBOSE("w in :" << w.m_vec);
-        GRB_LOG_VERBOSE("Mask in : " << mask.m_vec);
+        GRB_LOG_VERBOSE("w in :" << get_internal_vector(w));
+        GRB_LOG_VERBOSE("Mask in : " << get_internal_vector(mask));
         GRB_LOG_VERBOSE_ACCUM(accum);
         GRB_LOG_VERBOSE_OP(op);
-        GRB_LOG_VERBOSE("A in :" << A.m_mat);
-        GRB_LOG_VERBOSE("u in :" << u.m_vec);
-        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+        GRB_LOG_VERBOSE("A in :" << get_internal_matrix(A));
+        GRB_LOG_VERBOSE("u in :" << get_internal_vector(u));
+        GRB_LOG_VERBOSE_OUTP(outp);
 
         check_size_size(w, mask, "mxv: w.size != mask.size");
         check_size_nrows(w, A, "mxv: w.size != A.nrows");
         check_size_ncols(u, A, "mxv: u.size != A.ncols");
 
-        backend::mxv(w.m_vec, mask.m_vec, accum, op, A.m_mat, u.m_vec,
-                     replace_flag);
-        GRB_LOG_VERBOSE("w out :" << w.m_vec);
+        backend::mxv(get_internal_vector(w), get_internal_vector(mask), accum, op, get_internal_matrix(A), get_internal_vector(u), outp);
+        GRB_LOG_VERBOSE("w out :" << get_internal_vector(w));
         GRB_LOG_FN_END("mxv - 4.3.3 - matrix-vector multiply");
     }
 
@@ -191,29 +197,30 @@ namespace GraphBLAS
              typename ...WTagsT>
     inline void eWiseMult(Vector<WScalarT, WTagsT...> &w,
                           MaskT                 const &mask,
-                          AccumT                       accum,
+                          AccumT                const &accum,
                           BinaryOpT                    op,
                           UVectorT              const &u,
                           VVectorT              const &v,
-                          bool                         replace_flag = false)
+                          OutputControlEnum            outp = MERGE)
     {
         GRB_LOG_FN_BEGIN("eWiseMult - 4.3.4.1 - element-wise vector multiply");
-        GRB_LOG_VERBOSE("w in :" << w.m_vec);
-        GRB_LOG_VERBOSE("Mask in : " << mask.m_vec);
+        GRB_LOG_VERBOSE("w in :" << get_internal_vector(w));
+        GRB_LOG_VERBOSE("Mask in : " << get_internal_vector(mask));
         GRB_LOG_VERBOSE_ACCUM(accum);
         GRB_LOG_VERBOSE_OP(op);
-        GRB_LOG_VERBOSE("u in :" << u.m_vec);
-        GRB_LOG_VERBOSE("v in :" << v.m_vec);
-        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+        GRB_LOG_VERBOSE("u in :" << get_internal_vector(u));
+        GRB_LOG_VERBOSE("v in :" << get_internal_vector(v));
+        GRB_LOG_VERBOSE_OUTP(outp);
 
         check_size_size(w, mask, "eWiseMult(vec): w.size != mask.size");
         check_size_size(w, u, "eWiseMult(vec): w.size != u.size");
         check_size_size(u, v, "eWiseMult(vec): u.size != v.size");
 
-        backend::eWiseMult(w.m_vec, mask.m_vec, accum, op, u.m_vec, v.m_vec,
-                           replace_flag);
+        backend::eWiseMult(get_internal_vector(w),
+                           get_internal_vector(mask), accum, op, get_internal_vector(u), get_internal_vector(v),
+                           outp);
 
-        GRB_LOG_VERBOSE("w out :" << w.m_vec);
+        GRB_LOG_VERBOSE("w out :" << get_internal_vector(w));
         GRB_LOG_FN_END("eWiseMult - 4.3.4.1 - element-wise vector multiply");
     }
 
@@ -227,20 +234,20 @@ namespace GraphBLAS
              typename ...CTagsT>
     inline void eWiseMult(Matrix<CScalarT, CTagsT...> &C,
                           MaskT                 const &Mask,
-                          AccumT                       accum,
+                          AccumT                const &accum,
                           BinaryOpT                    op,
                           AMatrixT              const &A,
                           BMatrixT              const &B,
-                          bool                         replace_flag = false)
+                          OutputControlEnum            outp = MERGE)
     {
         GRB_LOG_FN_BEGIN("eWiseMult - 4.3.4.2 - element-wise matrix multiply");
-        GRB_LOG_VERBOSE("C in :" << C.m_mat);
-        GRB_LOG_VERBOSE("Mask in : " << Mask.m_mat);
+        GRB_LOG_VERBOSE("C in :" << get_internal_matrix(C));
+        GRB_LOG_VERBOSE("Mask in : " << get_internal_matrix(Mask));
         GRB_LOG_VERBOSE_ACCUM(accum);
         GRB_LOG_VERBOSE_OP(op);
-        GRB_LOG_VERBOSE("A in :" << A.m_mat);
-        GRB_LOG_VERBOSE("B in :" << B.m_mat);
-        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+        GRB_LOG_VERBOSE("A in :" << get_internal_matrix(A));
+        GRB_LOG_VERBOSE("B in :" << get_internal_matrix(B));
+        GRB_LOG_VERBOSE_OUTP(outp);
 
         check_ncols_ncols(C, Mask, "eWiseMult(mat): C.ncols != Mask.ncols");
         check_nrows_nrows(C, Mask, "eWiseMult(mat): C.nrows != Mask.nrows");
@@ -249,10 +256,14 @@ namespace GraphBLAS
         check_ncols_ncols(A, B, "eWiseMult(mat): A.ncols != B.ncols");
         check_nrows_nrows(A, B, "eWiseMult(mat): A.nrows != B.nrows");
 
-        backend::eWiseMult(C.m_mat, Mask.m_mat, accum, op, A.m_mat, B.m_mat,
-                           replace_flag);
+        backend::eWiseMult(get_internal_matrix(C),
+                           get_internal_matrix(Mask),
+                           accum, op,
+                           get_internal_matrix(A),
+                           get_internal_matrix(B),
+                           outp);
 
-        GRB_LOG_VERBOSE("C out :" << C.m_mat);
+        GRB_LOG_VERBOSE("C out :" << get_internal_matrix(C));
         GRB_LOG_FN_END("eWiseMult - 4.3.4.2 - element-wise matrix multiply");
     }
 
@@ -272,29 +283,33 @@ namespace GraphBLAS
              typename ...WTagsT>
     inline void eWiseAdd(Vector<WScalarT, WTagsT...> &w,
                          MaskT                 const &mask,
-                         AccumT                       accum,
+                         AccumT                const &accum,
                          BinaryOpT                    op,
                          UVectorT              const &u,
                          VVectorT              const &v,
-                         bool                         replace_flag = false)
+                         OutputControlEnum            outp = MERGE)
     {
         GRB_LOG_FN_BEGIN("eWiseAdd - 4.3.5.1 - element-wise vector addition");
-        GRB_LOG_VERBOSE("w in :" << w.m_vec);
-        GRB_LOG_VERBOSE("Mask in : " << mask.m_vec);
+        GRB_LOG_VERBOSE("w in :" << get_internal_vector(w));
+        GRB_LOG_VERBOSE("Mask in : " << get_internal_vector(mask));
         GRB_LOG_VERBOSE_ACCUM(accum);
         GRB_LOG_VERBOSE_OP(op);
-        GRB_LOG_VERBOSE("u in :" << u.m_vec);
-        GRB_LOG_VERBOSE("v in :" << v.m_vec);
-        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+        GRB_LOG_VERBOSE("u in :" << get_internal_vector(u));
+        GRB_LOG_VERBOSE("v in :" << get_internal_vector(v));
+        GRB_LOG_VERBOSE_OUTP(outp);
 
         check_size_size(w, mask, "eWiseAdd(vec): w.size != mask.size");
         check_size_size(w, u, "eWiseAdd(vec): w.size != u.size");
         check_size_size(u, v, "eWiseAdd(vec): u.size != v.size");
 
-        backend::eWiseAdd(w.m_vec, mask.m_vec, accum, op, u.m_vec, v.m_vec,
-                          replace_flag);
+        backend::eWiseAdd(get_internal_vector(w),
+                          get_internal_vector(mask),
+                          accum, op,
+                          get_internal_vector(u),
+                          get_internal_vector(v),
+                          outp);
 
-        GRB_LOG_VERBOSE("w out :" << w.m_vec);
+        GRB_LOG_VERBOSE("w out :" << get_internal_vector(w));
         GRB_LOG_FN_END("eWiseAdd - 4.3.5.1 - element-wise vector addition");
     }
 
@@ -308,20 +323,20 @@ namespace GraphBLAS
              typename ...CTagsT>
     inline void eWiseAdd(Matrix<CScalarT, CTagsT...> &C,
                          MaskT                 const &Mask,
-                         AccumT                       accum,
+                         AccumT                const &accum,
                          BinaryOpT                    op,
                          AMatrixT              const &A,
                          BMatrixT              const &B,
-                         bool                         replace_flag = false)
+                         OutputControlEnum            outp = MERGE)
     {
         GRB_LOG_FN_BEGIN("eWiseAdd - 4.3.5.2 - element-wise matrix addition");
-        GRB_LOG_VERBOSE("C in :" << C.m_mat);
-        GRB_LOG_VERBOSE("Mask in : " << Mask.m_mat);
+        GRB_LOG_VERBOSE("C in :" << get_internal_matrix(C));
+        GRB_LOG_VERBOSE("Mask in : " << get_internal_matrix(Mask));
         GRB_LOG_VERBOSE_ACCUM(accum);
         GRB_LOG_VERBOSE_OP(op);
-        GRB_LOG_VERBOSE("A in :" << A.m_mat);
-        GRB_LOG_VERBOSE("B in :" << B.m_mat);
-        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+        GRB_LOG_VERBOSE("A in :" << get_internal_matrix(A));
+        GRB_LOG_VERBOSE("B in :" << get_internal_matrix(B));
+        GRB_LOG_VERBOSE_OUTP(outp);
 
         check_ncols_ncols(C, Mask, "eWiseAdd(mat): C.ncols != Mask.ncols");
         check_nrows_nrows(C, Mask, "eWiseAdd(mat): C.nrows != Mask.nrows");
@@ -330,10 +345,14 @@ namespace GraphBLAS
         check_ncols_ncols(A, B, "eWiseAdd(mat): A.ncols != B.ncols");
         check_nrows_nrows(A, B, "eWiseAdd(mat): A.nrows != B.nrows");
 
-        backend::eWiseAdd(C.m_mat, Mask.m_mat, accum, op, A.m_mat, B.m_mat,
-                          replace_flag);
+        backend::eWiseAdd(get_internal_matrix(C),
+                          get_internal_matrix(Mask)
+                          , accum, op,
+                          get_internal_matrix(A),
+                          get_internal_matrix(B),
+                          outp);
 
-        GRB_LOG_VERBOSE("C out :" << C.m_mat);
+        GRB_LOG_VERBOSE("C out :" << get_internal_matrix(C));
         GRB_LOG_FN_END("eWiseAdd - 4.3.5.2 - element-wise matrix addition");
     }
 
@@ -349,26 +368,29 @@ namespace GraphBLAS
              typename SequenceT>
     inline void extract(WVectorT             &w,
                         MaskT          const &mask,
-                        AccumT                accum,
+                        AccumT         const &accum,
                         UVectorT       const &u,
                         SequenceT      const &indices,
-                        bool                  replace_flag = false)
+                        OutputControlEnum     outp = MERGE)
     {
         GRB_LOG_FN_BEGIN("extract - 4.3.6.1 - standard vector variant");
 
-        GRB_LOG_VERBOSE("w:    " << w.m_vec);
-        GRB_LOG_VERBOSE("mask: " << mask.m_vec);
-        GRB_LOG_VERBOSE("u:    " << u.m_vec);
+        GRB_LOG_VERBOSE("w:    " << get_internal_vector(w));
+        GRB_LOG_VERBOSE("mask: " << get_internal_vector(mask));
+        GRB_LOG_VERBOSE("u:    " << get_internal_vector(u));
         GRB_LOG_VERBOSE_ACCUM(accum);
         GRB_LOG_VERBOSE("indices: " << indices);
-        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+        GRB_LOG_VERBOSE_OUTP(outp);
 
         check_size_size(w, mask, "extract(std vec): w.size != mask.size");
         check_size_nindices(w, indices,
                             "extract(std vec): w.size != indicies.size");
 
-        backend::extract(w.m_vec, mask.m_vec, accum, u.m_vec,
-                         indices, replace_flag);
+        backend::extract(get_internal_vector(w),
+                         get_internal_vector(mask),
+                         accum,
+                         get_internal_vector(u),
+                         indices, outp);
 
         GRB_LOG_FN_END("extract - 4.3.6.1 - standard vector variant");
     }
@@ -383,21 +405,21 @@ namespace GraphBLAS
              typename ...CTags>
     inline void extract(Matrix<CScalarT, CTags...>   &C,
                         MaskT             const &Mask,
-                        AccumT                   accum,
+                        AccumT            const &accum,
                         AMatrixT          const &A,
                         RowSequenceT      const &row_indices,
                         ColSequenceT      const &col_indices,
-                        bool                     replace_flag = false)
+                        OutputControlEnum        outp = MERGE)
     {
         GRB_LOG_FN_BEGIN("extract - 4.3.6.2 - standard matrix variant");
 
-        GRB_LOG_VERBOSE("C: " << C.m_mat);
-        GRB_LOG_VERBOSE("Mask: " << Mask.m_mat);
+        GRB_LOG_VERBOSE("C: " << get_internal_matrix(C));
+        GRB_LOG_VERBOSE("Mask: " << get_internal_matrix(Mask));
         GRB_LOG_VERBOSE_ACCUM(accum);
-        GRB_LOG_VERBOSE("A: " << A.m_mat);
+        GRB_LOG_VERBOSE("A: " << get_internal_matrix(A));
         GRB_LOG_VERBOSE("row_indices: " << row_indices);
         GRB_LOG_VERBOSE("col_indices: " << col_indices);
-        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+        GRB_LOG_VERBOSE_OUTP(outp);
 
         check_nrows_nrows(C, Mask, "extract(std mat): C.nrows != Mask.nrows");
         check_ncols_ncols(C, Mask, "extract(std mat): C.ncols != Mask.ncols");
@@ -406,8 +428,11 @@ namespace GraphBLAS
         check_ncols_nindices(C, col_indices,
                              "extract(std mat): C.ncols != col_indices");
 
-        backend::extract(C.m_mat, Mask.m_mat, accum, A.m_mat,
-                         row_indices, col_indices, replace_flag);
+        backend::extract(get_internal_matrix(C),
+                         get_internal_matrix(Mask),
+                         accum,
+                         get_internal_matrix(A),
+                         row_indices, col_indices, outp);
 
         GRB_LOG_FN_END("SEQUENTIAL extract - 4.3.6.2 - standard matrix variant");
     }
@@ -422,21 +447,21 @@ namespace GraphBLAS
              typename ...WTags>
     inline void extract(Vector<WScalarT, WTags...> &w,
                         MaskT                const &mask,
-                        AccumT                      accum,
+                        AccumT               const &accum,
                         AMatrixT             const &A,
                         SequenceT            const &row_indices,
                         IndexType                   col_index,
-                        bool                        replace_flag = false)
+                        OutputControlEnum           outp = MERGE)
     {
         GRB_LOG_FN_BEGIN("extract - 4.3.6.3 - column (and row) variant");
 
-        GRB_LOG_VERBOSE("w:    " << w.m_vec);
-        GRB_LOG_VERBOSE("mask: " << mask.m_vec);
+        GRB_LOG_VERBOSE("w:    " << get_internal_vector(w));
+        GRB_LOG_VERBOSE("mask: " << get_internal_vector(mask));
         GRB_LOG_VERBOSE_ACCUM(accum);
-        GRB_LOG_VERBOSE("A:    " << A.m_mat);
+        GRB_LOG_VERBOSE("A:    " << get_internal_matrix(A));
         GRB_LOG_VERBOSE("row_indices: " << row_indices);
         GRB_LOG_VERBOSE("col_index:   " << col_index);
-        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+        GRB_LOG_VERBOSE_OUTP(outp);
 
         check_size_size(w, mask, "extract(col): w.size != mask.size");
         check_size_nindices(w, row_indices,
@@ -444,8 +469,12 @@ namespace GraphBLAS
         check_index_within_ncols(col_index, A,
                                  "extract(col): col_index >= A.ncols");
 
-        backend::extract(w.m_vec, mask.m_vec, accum, A.m_mat, row_indices,
-                         col_index, replace_flag);
+        backend::extract(get_internal_vector(w),
+                         get_internal_vector(mask),
+                         accum,
+                         get_internal_matrix(A),
+                         row_indices,
+                         col_index, outp);
         GRB_LOG_FN_END("extract - 4.3.6.3 - column (and row) variant");
     }
 
@@ -459,34 +488,34 @@ namespace GraphBLAS
              typename AccumT,
              typename UVectorT,
              typename SequenceT,
-             typename std::enable_if<
-                 std::is_same<vector_tag,
-                              typename UVectorT::tag_type>::value,
-                 int>::type = 0,
+             typename std::enable_if_t<is_vector_v<UVectorT>, int> = 0,
              typename ...WTags>
     inline void assign(Vector<WScalarT, WTags...>      &w,
                        MaskT                    const  &mask,
-                       AccumT                           accum,
+                       AccumT                   const  &accum,
                        UVectorT                 const  &u,
                        SequenceT                const  &indices,
-                       bool                             replace_flag = false)
+                       OutputControlEnum                outp = MERGE)
     {
         GRB_LOG_FN_BEGIN("assign - 4.3.7.1 - standard vector variant");
-        GRB_LOG_VERBOSE("w in: " << w.m_vec);
-        GRB_LOG_VERBOSE("mask in: " << mask.m_vec);
+        GRB_LOG_VERBOSE("w in: " << get_internal_vector(w));
+        GRB_LOG_VERBOSE("mask in: " << get_internal_vector(mask));
         GRB_LOG_VERBOSE_ACCUM(accum);
-        GRB_LOG_VERBOSE("u in: " << u.m_vec);
+        GRB_LOG_VERBOSE("u in: " << get_internal_vector(u));
         GRB_LOG_VERBOSE("indicies in: " << indices);
-        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+        GRB_LOG_VERBOSE_OUTP(outp);
 
         check_size_size(w, mask, "assign(std vec): w.size != mask.size");
         check_size_nindices(u, indices,
                             "assign(std vec): u.size != |indicies|");
 
-        backend::assign(w.m_vec, mask.m_vec, accum, u.m_vec, indices,
-                        replace_flag);
+        backend::assign(get_internal_vector(w),
+                        get_internal_vector(mask),
+                        accum,
+                        get_internal_vector(u),
+                        indices, outp);
 
-        GRB_LOG_VERBOSE("w out: " << w.m_vec);
+        GRB_LOG_VERBOSE("w out: " << get_internal_vector(w));
         GRB_LOG_FN_END("assign - 4.3.7.1 - standard vector variant");
     }
 
@@ -497,27 +526,24 @@ namespace GraphBLAS
              typename AMatrixT,
              typename RowSequenceT,
              typename ColSequenceT,
-             typename std::enable_if<
-                 std::is_same<matrix_tag,
-                              typename AMatrixT::tag_type>::value,
-                 int>::type = 0>
+             typename std::enable_if_t<is_matrix_v<AMatrixT>, int> = 0>
     inline void assign(CMatrixT              &C,
                        MaskT           const &Mask,
-                       AccumT                 accum,
+                       AccumT          const &accum,
                        AMatrixT        const &A,
                        RowSequenceT    const &row_indices,
                        ColSequenceT    const &col_indices,
-                       bool                   replace_flag = false)
+                       OutputControlEnum      outp = MERGE)
     {
         GRB_LOG_FN_BEGIN("assign - 4.3.7.2 - standard matrix variant");
 
-        GRB_LOG_VERBOSE("C in: " << C.m_mat);
-        GRB_LOG_VERBOSE("Mask in: " << Mask.m_mat);
+        GRB_LOG_VERBOSE("C in: " << get_internal_matrix(C));
+        GRB_LOG_VERBOSE("Mask in: " << get_internal_matrix(Mask));
         GRB_LOG_VERBOSE_ACCUM(accum);
-        GRB_LOG_VERBOSE("A in: " << A.m_mat);
+        GRB_LOG_VERBOSE("A in: " << get_internal_matrix(A));
         GRB_LOG_VERBOSE("row_indices in: " << row_indices);
         GRB_LOG_VERBOSE("col_indices in: " << col_indices);
-        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+        GRB_LOG_VERBOSE_OUTP(outp);
 
         check_nrows_nrows(C, Mask, "assign(std mat): C.nrows != Mask.nrows");
         check_ncols_ncols(C, Mask, "assign(std mat): C.ncols != Mask.ncols");
@@ -526,10 +552,13 @@ namespace GraphBLAS
         check_ncols_nindices(A, col_indices,
                              "assign(std mat): A.ncols != |col_indices|");
 
-        backend::assign(C.m_mat, Mask.m_mat, accum, A.m_mat,
-                        row_indices, col_indices, replace_flag);
+        backend::assign(get_internal_matrix(C),
+                        get_internal_matrix(Mask),
+                        accum,
+                        get_internal_matrix(A),
+                        row_indices, col_indices, outp);
 
-        GRB_LOG_VERBOSE("C out: " << C.m_mat);
+        GRB_LOG_VERBOSE("C out: " << get_internal_matrix(C));
         GRB_LOG_FN_END("assign - 4.3.7.2 - standard matrix variant");
     }
 
@@ -542,21 +571,21 @@ namespace GraphBLAS
              typename ...CTags>
     inline void assign(Matrix<CScalarT, CTags...>  &C,
                        MaskT                 const &mask,  // a vector
-                       AccumT                       accum,
+                       AccumT                const &accum,
                        UVectorT              const &u,
                        SequenceT             const &row_indices,
                        IndexType                    col_index,
-                       bool                         replace_flag = false)
+                       OutputControlEnum            outp = MERGE)
     {
         GRB_LOG_FN_BEGIN("assign - 4.3.7.3 - column variant");
 
-        GRB_LOG_VERBOSE("C in: " << C.m_mat);
-        GRB_LOG_VERBOSE("mask in: " << mask.m_vec);
+        GRB_LOG_VERBOSE("C in: " << get_internal_matrix(C));
+        GRB_LOG_VERBOSE("mask in: " << get_internal_vector(mask));
         GRB_LOG_VERBOSE_ACCUM(accum);
-        GRB_LOG_VERBOSE("u in: " << u.m_vec);
+        GRB_LOG_VERBOSE("u in: " << get_internal_vector(u));
         GRB_LOG_VERBOSE("row_indices in:" << row_indices);
         GRB_LOG_VERBOSE("col_index in:" << col_index);
-        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+        GRB_LOG_VERBOSE_OUTP(outp);
 
         check_size_nrows(mask, C, "assign(col): C.nrows != mask.size");
         check_size_nindices(u, row_indices,
@@ -564,10 +593,13 @@ namespace GraphBLAS
         check_index_within_ncols(col_index, C,
                                  "assign(col): col_index >= C.ncols");
 
-        backend::assign(C.m_mat, mask.m_vec, accum, u.m_vec,
-                        row_indices, col_index, replace_flag);
+        backend::assign(get_internal_matrix(C),
+                        get_internal_vector(mask),
+                        accum,
+                        get_internal_vector(u),
+                        row_indices, col_index, outp);
 
-        GRB_LOG_VERBOSE("C out: " << C.m_mat);
+        GRB_LOG_VERBOSE("C out: " << get_internal_matrix(C));
         GRB_LOG_FN_END("assign - 4.3.7.3 - column variant");
     }
 
@@ -580,20 +612,20 @@ namespace GraphBLAS
              typename ...CTags>
     inline void assign(Matrix<CScalarT, CTags...>  &C,
                        MaskT                 const &mask,  // a vector
-                       AccumT                       accum,
+                       AccumT                const &accum,
                        UVectorT              const &u,
                        IndexType                    row_index,
                        SequenceT             const &col_indices,
-                       bool                         replace_flag = false)
+                       OutputControlEnum            outp = MERGE)
     {
         GRB_LOG_FN_BEGIN("assign - 4.3.7.4 - row variant");
-        GRB_LOG_VERBOSE("C in: " << C.m_mat);
-        GRB_LOG_VERBOSE("mask in: " << mask.m_vec);
+        GRB_LOG_VERBOSE("C in: " << get_internal_matrix(C));
+        GRB_LOG_VERBOSE("mask in: " << get_internal_vector(mask));
         GRB_LOG_VERBOSE_ACCUM(accum);
-        GRB_LOG_VERBOSE("u in: " << u.m_vec);
+        GRB_LOG_VERBOSE("u in: " << get_internal_vector(u));
         GRB_LOG_VERBOSE("row_index in:" << row_index);
         GRB_LOG_VERBOSE("col_indices in:" << col_indices);
-        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+        GRB_LOG_VERBOSE_OUTP(outp);
 
         check_size_ncols(mask, C, "assign(row): C.ncols != Mask.ncols");
         check_size_nindices(u, col_indices,
@@ -601,10 +633,13 @@ namespace GraphBLAS
         check_index_within_nrows(row_index, C,
                                  "assign(col): row_index >= C.nrows");
 
-        backend::assign(C.m_mat, mask.m_vec, accum, u.m_vec,
-                        row_index, col_indices, replace_flag);
+        backend::assign(get_internal_matrix(C),
+                        get_internal_vector(mask),
+                        accum,
+                        get_internal_vector(u),
+                        row_index, col_indices, outp);
 
-        GRB_LOG_VERBOSE("C out: " << C.m_mat);
+        GRB_LOG_VERBOSE("C out: " << get_internal_matrix(C));
         GRB_LOG_FN_END("assign - 4.3.7.4 - row variant");
     }
 
@@ -620,27 +655,29 @@ namespace GraphBLAS
                  int>::type = 0>
     inline void assign(WVectorT                     &w,
                        MaskT                const   &mask,
-                       AccumT                        accum,
+                       AccumT               const   &accum,
                        ValueT                        val,
                        SequenceT            const   &indices,
-                       bool                          replace_flag = false)
+                       OutputControlEnum             outp = MERGE)
     {
         GRB_LOG_FN_BEGIN("assign - 4.3.7.5 - constant vector variant");
-        GRB_LOG_VERBOSE("w in: " << w.m_vec);
-        GRB_LOG_VERBOSE("Mask in: " << mask.m_vec);
+        GRB_LOG_VERBOSE("w in: " << get_internal_vector(w));
+        GRB_LOG_VERBOSE("Mask in: " << get_internal_vector(mask));
         GRB_LOG_VERBOSE_ACCUM(accum);
         GRB_LOG_VERBOSE("val in: " << val);
         GRB_LOG_VERBOSE("indices in:" << indices);
-        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+        GRB_LOG_VERBOSE_OUTP(outp);
 
         check_size_size(w, mask, "assign(const vec): w.size != mask.size");
         check_nindices_within_size(indices, w,
                                    "assign(const vec): indicies.size !<= w.size");
 
-        backend::assign_constant(w.m_vec, mask.m_vec, accum, val, indices,
-                                 replace_flag);
+        backend::assign_constant(get_internal_vector(w),
+                                 get_internal_vector(mask),
+                                 accum, val,
+                                 indices, outp);
 
-        GRB_LOG_VERBOSE("w out: " << w.m_vec);
+        GRB_LOG_VERBOSE("w out: " << get_internal_vector(w));
         GRB_LOG_FN_END("assign - 4.3.7.5 - constant vector variant");
     };
 
@@ -657,20 +694,20 @@ namespace GraphBLAS
                  int>::type = 0>
     inline void assign(CMatrixT             &C,
                        MaskT          const &Mask,
-                       AccumT                accum,
+                       AccumT         const &accum,
                        ValueT                val,
                        RowSequenceT   const &row_indices,
                        ColSequenceT   const &col_indices,
-                       bool                  replace_flag = false)
+                       OutputControlEnum     outp = MERGE)
     {
         GRB_LOG_FN_BEGIN("assign - 4.3.7.6 - constant matrix variant");
-        GRB_LOG_VERBOSE("C in: " << C.m_mat);
-        GRB_LOG_VERBOSE("Mask in: " << Mask.m_mat);
+        GRB_LOG_VERBOSE("C in: " << get_internal_matrix(C));
+        GRB_LOG_VERBOSE("Mask in: " << get_internal_matrix(Mask));
         GRB_LOG_VERBOSE_ACCUM(accum);
         GRB_LOG_VERBOSE("val in: " << val);
         GRB_LOG_VERBOSE("row_indices in:" << row_indices);
         GRB_LOG_VERBOSE("col_indices in:" << col_indices);
-        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+        GRB_LOG_VERBOSE_OUTP(outp);
 
         check_nrows_nrows(C, Mask, "assign(const mat): C.nrows != Mask.nrows");
         check_ncols_ncols(C, Mask, "assign(const mat): C.ncols != Mask.ncols");
@@ -681,10 +718,13 @@ namespace GraphBLAS
         check_nindices_within_ncols(
             col_indices, C,
             "assign(const mat): indicies.size !<= C.ncols");
-        backend::assign_constant(C.m_mat, Mask.m_mat, accum, val,
-                                 row_indices, col_indices, replace_flag);
+        backend::assign_constant(get_internal_matrix(C),
+                                 get_internal_matrix(Mask),
+                                 accum, val,
+                                 row_indices, col_indices,
+                                 outp);
 
-        GRB_LOG_VERBOSE("C out: " << C.m_mat);
+        GRB_LOG_VERBOSE("C out: " << get_internal_matrix(C));
         GRB_LOG_FN_END("assign - 4.3.7.6 - constant matrix variant");
     }
 
@@ -696,66 +736,223 @@ namespace GraphBLAS
     template<typename WScalarT,
              typename MaskT,
              typename AccumT,
-             typename UnaryFunctionT,
+             typename UnaryOpT,
              typename UVectorT,
              typename ...WTagsT>
     inline void apply(Vector<WScalarT, WTagsT...> &w,
                       MaskT                 const &mask,
-                      AccumT                       accum,
-                      UnaryFunctionT               op,
+                      AccumT                const &accum,
+                      UnaryOpT                     op,
                       UVectorT              const &u,
-                      bool                         replace_flag = false)
+                      OutputControlEnum            outp = MERGE)
     {
         GRB_LOG_FN_BEGIN("apply - 4.3.8.1 - vector variant");
-        GRB_LOG_VERBOSE("w in: " << w.m_vec);
-        GRB_LOG_VERBOSE("mask in: " << mask.m_vec);
+        GRB_LOG_VERBOSE("w in: " << get_internal_vector(w));
+        GRB_LOG_VERBOSE("mask in: " << get_internal_vector(mask));
         GRB_LOG_VERBOSE_ACCUM(accum);
         GRB_LOG_VERBOSE_OP(op);
-        GRB_LOG_VERBOSE("u in: " << u.m_vec);
-        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+        GRB_LOG_VERBOSE("u in: " << get_internal_vector(u));
+        GRB_LOG_VERBOSE_OUTP(outp);
 
         check_size_size(w, mask, "apply(vec): w.size != mask.size");
         check_size_size(w, u, "apply(vec): w.size != u.size");
 
-        backend::apply(w.m_vec, mask.m_vec, accum, op, u.m_vec, replace_flag);
+        backend::apply(get_internal_vector(w),
+                       get_internal_vector(mask),
+                       accum, op,
+                       get_internal_vector(u),
+                       outp);
 
-        GRB_LOG_VERBOSE("w out: " << w.m_vec);
-        GRB_LOG_FN_END("assign - 4.3.8.1 - vector variant");
+        GRB_LOG_VERBOSE("w out: " << get_internal_vector(w));
+        GRB_LOG_FN_END("apply - 4.3.8.1 - vector variant");
     }
 
     // 4.3.8.2: matrix variant
     template<typename CScalarT,
              typename MaskT,
              typename AccumT,
-             typename UnaryFunctionT,
+             typename UnaryOpT,
              typename AMatrixT,
-             typename ...ATagsT>
-    inline void apply(Matrix<CScalarT, ATagsT...> &C,
+             typename ...CTagsT>
+    inline void apply(Matrix<CScalarT, CTagsT...> &C,
                       MaskT                 const &Mask,
-                      AccumT                       accum,
-                      UnaryFunctionT               op,
+                      AccumT                const &accum,
+                      UnaryOpT                     op,
                       AMatrixT              const &A,
-                      bool                         replace_flag = false)
+                      OutputControlEnum            outp = MERGE)
     {
 
         GRB_LOG_FN_BEGIN("apply - 4.3.8.2 - matrix variant");
-        GRB_LOG_VERBOSE("C in: " << C.m_mat);
-        GRB_LOG_VERBOSE("Mask in: " << Mask.m_mat);
+        GRB_LOG_VERBOSE("C in: " << get_internal_matrix(C));
+        GRB_LOG_VERBOSE("Mask in: " << get_internal_matrix(Mask));
         GRB_LOG_VERBOSE_ACCUM(accum);
         GRB_LOG_VERBOSE_OP(op);
         GRB_LOG_VERBOSE("A in: " << A);
-        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+        GRB_LOG_VERBOSE_OUTP(outp);
 
         check_ncols_ncols(C, Mask, "apply(mat): C.ncols != Mask.ncols");
         check_nrows_nrows(C, Mask, "apply(mat): C.nrows != Mask.nrows");
         check_ncols_ncols(C, A, "apply(mat): C.ncols != A.ncols");
         check_nrows_nrows(C, A, "apply(mat): C.nrows != A.nrows");
 
-        backend::apply(C.m_mat, Mask.m_mat, accum, op, A.m_mat, replace_flag);
+        backend::apply(get_internal_matrix(C),
+                       get_internal_matrix(Mask),
+                       accum, op,
+                       get_internal_matrix(A),
+                       outp);
 
-        GRB_LOG_VERBOSE("C out: " << C.m_mat);
+        GRB_LOG_VERBOSE("C out: " << get_internal_matrix(C));
         GRB_LOG_FN_END("apply - 4.3.8.2 - matrix variant");
-    };
+    }
+
+    // 4.3.8.3: vector binaryop variants
+    template<typename WScalarT,
+             typename MaskT,
+             typename AccumT,
+             typename BinaryOpT,
+             typename FirstT,
+             typename SecondT,
+             typename ...WTagsT>
+    inline void apply(
+        Vector<WScalarT, WTagsT...> &w,
+        MaskT                 const &mask,
+        AccumT                const &accum,
+        BinaryOpT                    op,
+        FirstT                const &lhs,
+        SecondT               const &rhs,
+        OutputControlEnum            outp = MERGE)
+    {
+        // figure out if the user wants bind1st or bind2nd based on the arg types
+        constexpr bool is_bind1st = is_vector_v<SecondT>;
+        constexpr bool is_bind2nd = is_vector_v<FirstT>;
+
+        // make sure only one of the types matches
+        static_assert(is_bind1st ^ is_bind2nd, "apply isn't going to work");
+
+        if constexpr(is_bind1st) {
+            GRB_LOG_FN_BEGIN("apply - 4.3.8.3 - vector binaryop bind1st variant");
+            GRB_LOG_VERBOSE("w in: " << get_internal_vector(w));
+            GRB_LOG_VERBOSE("mask in: " << get_internal_vector(mask));
+            GRB_LOG_VERBOSE_ACCUM(accum);
+            GRB_LOG_VERBOSE_OP(op);
+            GRB_LOG_VERBOSE("val in: " << lhs);
+            GRB_LOG_VERBOSE("u in: " << get_internal_vector(rhs));
+            GRB_LOG_VERBOSE_OUTP(outp);
+
+            check_size_size(w, mask, "apply(vec,binop): w.size != mask.size");
+            check_size_size(w, rhs, "apply(vec,binop): w.size != u.size");
+
+            backend::apply_binop_1st(get_internal_vector(w),
+                                     get_internal_vector(mask),
+                                     accum, op,
+                                     lhs,
+                                     get_internal_vector(rhs),
+                                     outp);
+
+            GRB_LOG_VERBOSE("w out: " << get_internal_vector(w));
+            GRB_LOG_FN_END("apply - 4.3.8.3 - vector binaryop bind1st variant");
+        }
+        else {
+            GRB_LOG_FN_BEGIN("apply - 4.3.8.3 - vector binaryop bind2nd variant");
+            GRB_LOG_VERBOSE("w in: " << get_internal_vector(w));
+            GRB_LOG_VERBOSE("mask in: " << get_internal_vector(mask));
+            GRB_LOG_VERBOSE_ACCUM(accum);
+            GRB_LOG_VERBOSE_OP(op);
+            GRB_LOG_VERBOSE("u in: " << get_internal_vector(lhs));
+            GRB_LOG_VERBOSE("val in: " << rhs);
+            GRB_LOG_VERBOSE_OUTP(outp);
+
+            check_size_size(w, mask, "apply(vec,binop): w.size != mask.size");
+            check_size_size(w, lhs, "apply(vec,binop): w.size != u.size");
+
+            backend::apply_binop_2nd(get_internal_vector(w),
+                                     get_internal_vector(mask),
+                                     accum, op,
+                                     get_internal_vector(lhs),
+                                     rhs,
+                                     outp);
+
+            GRB_LOG_VERBOSE("w out: " << get_internal_vector(w));
+            GRB_LOG_FN_END("apply - 4.3.8.3 - vector binaryop bind2nd variant");
+        }
+    }
+
+    // 4.3.8.4: matrix binaryop variants
+    template<typename CScalarT,
+             typename MaskT,
+             typename AccumT,
+             typename BinaryOpT,
+             typename FirstT,
+             typename SecondT,
+             typename ...CTagsT>
+    inline void apply(
+        Matrix<CScalarT, CTagsT...> &C,
+        MaskT                 const &Mask,
+        AccumT                const &accum,
+        BinaryOpT                    op,
+        FirstT                const &lhs,
+        SecondT               const &rhs,
+        OutputControlEnum            outp = MERGE)
+    {
+        // figure out if the user wants bind1st or bind2nd based on the argument types
+        constexpr bool is_bind1st = is_matrix_v<SecondT>;
+        constexpr bool is_bind2nd = is_matrix_v<FirstT>;
+
+        // make sure only one of the types matches
+        static_assert(is_bind1st ^ is_bind2nd, "apply isn't going to work");
+
+        if constexpr(is_bind1st) {
+            GRB_LOG_FN_BEGIN("apply - 4.3.8.4 - matrix binaryop bind1st variant");
+            GRB_LOG_VERBOSE("C in: " << get_internal_matrix(C));
+            GRB_LOG_VERBOSE("Mask in: " << get_internal_matrix(Mask));
+            GRB_LOG_VERBOSE_ACCUM(accum);
+            GRB_LOG_VERBOSE_OP(op);
+            GRB_LOG_VERBOSE("val in: " << lhs);
+            GRB_LOG_VERBOSE("A in: " << get_internal_matrix(rhs));
+            GRB_LOG_VERBOSE_OUTP(outp);
+
+            check_ncols_ncols(C, Mask, "apply(mat,binop): C.ncols != Mask.ncols");
+            check_nrows_nrows(C, Mask, "apply(mat,binop): C.nrows != Mask.nrows");
+            check_ncols_ncols(C, rhs, "apply(mat,binop): C.ncols != A.ncols");
+            check_nrows_nrows(C, rhs, "apply(mat,binop): C.nrows != A.nrows");
+
+            backend::apply_binop_1st(get_internal_matrix(C),
+                                     get_internal_matrix(Mask),
+                                     accum, op,
+                                     lhs,
+                                     get_internal_matrix(rhs),
+                                     outp);
+
+            GRB_LOG_VERBOSE("C out: " << get_internal_matrix(C));
+            GRB_LOG_FN_END("apply - 4.3.8.4 - matrix binaryop bind1st variant");
+        }
+        else
+        {
+            GRB_LOG_FN_BEGIN("apply - 4.3.8.4 - matrix binaryop bind2nd variant");
+            GRB_LOG_VERBOSE("C in: " << get_internal_matrix(C));
+            GRB_LOG_VERBOSE("Mask in: " << get_internal_matrix(Mask));
+            GRB_LOG_VERBOSE_ACCUM(accum);
+            GRB_LOG_VERBOSE_OP(op);
+            GRB_LOG_VERBOSE("A in: " << get_internal_matrix(lhs));
+            GRB_LOG_VERBOSE("val in: " << rhs);
+            GRB_LOG_VERBOSE_OUTP(outp);
+
+            check_ncols_ncols(C, Mask, "apply(mat,binop): C.ncols != Mask.ncols");
+            check_nrows_nrows(C, Mask, "apply(mat,binop): C.nrows != Mask.nrows");
+            check_ncols_ncols(C, lhs, "apply(mat,binop): C.ncols != A.ncols");
+            check_nrows_nrows(C, lhs, "apply(mat,binop): C.nrows != A.nrows");
+
+            backend::apply_binop_2nd(get_internal_matrix(C),
+                                     get_internal_matrix(Mask),
+                                     accum, op,
+                                     get_internal_matrix(lhs),
+                                     rhs,
+                                     outp);
+
+            GRB_LOG_VERBOSE("C out: " << get_internal_matrix(C));
+            GRB_LOG_FN_END("apply - 4.3.8.4 - matrix binaryop bind2nd variant");
+        }
+    }
 
     //************************************************************************
     // reduce
@@ -768,27 +965,31 @@ namespace GraphBLAS
              typename AccumT,
              typename BinaryOpT,  // monoid or binary op only
              typename AMatrixT>
-    inline void reduce(WVectorT        &w,
-                       MaskT     const &mask,
-                       AccumT           accum,
-                       BinaryOpT        op,
-                       AMatrixT  const &A,
-                       bool             replace_flag = false)
+    inline void reduce(WVectorT          &w,
+                       MaskT       const &mask,
+                       AccumT      const &accum,
+                       BinaryOpT          op,
+                       AMatrixT    const &A,
+                       OutputControlEnum  outp = MERGE)
     {
         GRB_LOG_FN_BEGIN("reduce - 4.3.9.1 - matrix to vector variant");
-        GRB_LOG_VERBOSE("w in: " << w.m_vec);
-        GRB_LOG_VERBOSE("mask in: " << mask.m_vec);
+        GRB_LOG_VERBOSE("w in: " << get_internal_vector(w));
+        GRB_LOG_VERBOSE("mask in: " << get_internal_vector(mask));
         GRB_LOG_VERBOSE_ACCUM(accum);
         GRB_LOG_VERBOSE_OP(op);
-        GRB_LOG_VERBOSE("A in: " << A.m_mat);
-        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+        GRB_LOG_VERBOSE("A in: " << get_internal_matrix(A));
+        GRB_LOG_VERBOSE_OUTP(outp);
 
         check_size_size(w, mask, "reduce(mat2vec): w.size != mask.size");
         check_size_nrows(w, A, "reduce(mat2vec): w.size != A.nrows");
 
-        backend::reduce(w.m_vec, mask.m_vec, accum, op, A.m_mat, replace_flag);
+        backend::reduce(get_internal_vector(w),
+                        get_internal_vector(mask),
+                        accum, op,
+                        get_internal_matrix(A),
+                        outp);
 
-        GRB_LOG_VERBOSE("w out: " << w.m_vec);
+        GRB_LOG_VERBOSE("w out: " << get_internal_vector(w));
         GRB_LOG_FN_END("reduce - 4.3.9.1 - matrix to vector variant");
     }
 
@@ -800,7 +1001,7 @@ namespace GraphBLAS
              typename ...UTagsT>
     inline void reduce(
             ValueT                            &val,
-            AccumT                             accum,
+            AccumT                      const &accum,
             MonoidT                            op,
             Vector<UScalarT, UTagsT...> const &u)
     {
@@ -808,9 +1009,11 @@ namespace GraphBLAS
         GRB_LOG_VERBOSE("val in: " << val);
         GRB_LOG_VERBOSE_ACCUM(accum);
         GRB_LOG_VERBOSE_OP(op);
-        GRB_LOG_VERBOSE("u in: " << u.m_vec);
+        GRB_LOG_VERBOSE("u in: " << get_internal_vector(u));
 
-        backend::reduce_vector_to_scalar(val, accum, op, u.m_vec);
+        backend::reduce_vector_to_scalar(val,
+                                         accum, op,
+                                         get_internal_vector(u));
 
         GRB_LOG_VERBOSE("val out: " << val);
         GRB_LOG_FN_END("reduce - 4.3.9.2 - vector to scalar variant");
@@ -826,7 +1029,7 @@ namespace GraphBLAS
              typename ...ATagsT>
     inline void reduce(
             ValueT                            &val,
-            AccumT                             accum,
+            AccumT                      const &accum,
             MonoidT                            op,
             Matrix<AScalarT, ATagsT...> const &A)
     {
@@ -834,9 +1037,11 @@ namespace GraphBLAS
         GRB_LOG_VERBOSE("val in: " << val);
         GRB_LOG_VERBOSE_ACCUM(accum);
         GRB_LOG_VERBOSE_OP(op);
-        GRB_LOG_VERBOSE("A in: " << A.m_mat);
+        GRB_LOG_VERBOSE("A in: " << get_internal_matrix(A));
 
-        backend::reduce_matrix_to_scalar(val, accum, op, A.m_mat);
+        backend::reduce_matrix_to_scalar(val,
+                                         accum, op,
+                                         get_internal_matrix(A));
 
         GRB_LOG_VERBOSE("val out: " << val);
         GRB_LOG_FN_END("reduce - 4.3.9.3 - matrix to scalar variant");
@@ -851,73 +1056,186 @@ namespace GraphBLAS
              typename MaskT,
              typename AccumT,
              typename AMatrixT>
-    inline void transpose(CMatrixT       &C,
-                          MaskT    const &Mask,
-                          AccumT          accum,
-                          AMatrixT const &A,
-                          bool            replace_flag = false)
+    inline void transpose(CMatrixT          &C,
+                          MaskT       const &Mask,
+                          AccumT      const &accum,
+                          AMatrixT    const &A,
+                          OutputControlEnum  outp = MERGE)
     {
         GRB_LOG_FN_BEGIN("transpose - 4.3.10");
-        GRB_LOG_VERBOSE("C in: " << C.m_mat);
-        GRB_LOG_VERBOSE("Mask in: " << Mask.m_mat);
+        GRB_LOG_VERBOSE("C in: " << get_internal_matrix(C));
+        GRB_LOG_VERBOSE("Mask in: " << get_internal_matrix(Mask));
         GRB_LOG_VERBOSE_ACCUM(accum);
-        GRB_LOG_VERBOSE("A in: " << A.m_mat);
-        GRB_LOG_VERBOSE_REPLACE(replace_flag);
+        GRB_LOG_VERBOSE("A in: " << get_internal_matrix(A));
+        GRB_LOG_VERBOSE_OUTP(outp);
 
         check_nrows_nrows(C, Mask, "transpose: C.nrows != Mask.nrows");
         check_ncols_ncols(C, Mask, "transpose: C.ncols != Mask.ncols");
         check_ncols_nrows(C, A, "transpose: C.ncols != A.nrows");
         check_ncols_nrows(A, C, "transpose: A.ncols != C.nrows");
 
-        backend::transpose(C.m_mat, Mask.m_mat, accum, A.m_mat, replace_flag);
+        backend::transpose(get_internal_matrix(C), get_internal_matrix(Mask), accum, get_internal_matrix(A), outp);
 
-        GRB_LOG_VERBOSE("C out: " << C.m_mat);
+        GRB_LOG_VERBOSE("C out: " << get_internal_matrix(C));
         GRB_LOG_FN_END("transpose - 4.3.10");
+    }
+
+    //************************************************************************
+    // Kronecker product
+    //************************************************************************
+
+    // 4.3.11: Kronecker product
+    template<typename CMatrixT,
+             typename MaskT,
+             typename AccumT,
+             typename BinaryOpT,
+             typename AMatrixT,
+             typename BMatrixT>
+    inline void kronecker(CMatrixT          &C,
+                          MaskT       const &Mask,
+                          AccumT      const &accum,
+                          BinaryOpT          op,
+                          AMatrixT    const &A,
+                          BMatrixT    const &B,
+                          OutputControlEnum  outp = MERGE)
+    {
+        GRB_LOG_FN_BEGIN("kronecker - 4.3.11");
+        GRB_LOG_VERBOSE("C in: " << get_internal_matrix(C));
+        GRB_LOG_VERBOSE("Mask in: " << get_internal_matrix(Mask));
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE_OP(op);
+        GRB_LOG_VERBOSE("A in: " << get_internal_matrix(A));
+        GRB_LOG_VERBOSE("B in: " << get_internal_matrix(B));
+        GRB_LOG_VERBOSE_OUTP(outp);
+
+        check_nrows_nrows(C, Mask, "kronecker: C.nrows != Mask.nrows");
+        check_ncols_ncols(C, Mask, "kronecker: C.ncols != Mask.ncols");
+        check_ncols_ncolsxncols(C, A, B,
+                                "kronecker: C.ncols != A.ncols*B.ncols");
+        check_nrows_nrowsxnrows(C, A, B,
+                                "kronecker: C.nrows != A.nrows*B.nrows");
+
+        backend::kronecker(get_internal_matrix(C),
+                           get_internal_matrix(Mask),
+                           accum, op,
+                           get_internal_matrix(A),
+                           get_internal_matrix(B),
+                           outp);
+
+        GRB_LOG_VERBOSE("C out: " << get_internal_matrix(C));
+        GRB_LOG_FN_END("kronecker - 4.3.11");
     }
 
     //************************************************************************
     // Views
     //************************************************************************
 
+    // /**
+    //  * @brief  "Flip" the rows and columns of a matrix
+    //  * @param[in]  A  The matrix to transpose
+    //  *
+    //  */
+    // template<typename MatrixT>
+    // inline TransposeView<MatrixT> transpose(MatrixT const &A)
+    // {
+    //     return TransposeView<MatrixT>(backend::transpose(get_internal_matrix(A)));
+    // }
+
+    //************************************************************************
     /**
      * @brief  "Flip" the rows and columns of a matrix
      * @param[in]  A  The matrix to transpose
      *
      */
-    template<typename MatrixT>
+    template<typename MatrixT,
+             typename std::enable_if_t<is_matrix_v<MatrixT>, int> = 0>
     inline TransposeView<MatrixT> transpose(MatrixT const &A)
     {
-        return TransposeView<MatrixT>(backend::transpose(A.m_mat));
+        return TransposeView<MatrixT>(A);
+    }
+
+    //************************************************************************
+    /**
+     * @brief  Return a view that uses only the structure of a matrix mask.
+     * @param[in]  Mask  The matrix to take the structure of
+     *
+     */
+    template<typename MatrixT,
+             typename std::enable_if_t<is_matrix_v<MatrixT>, int> = 0>
+    MatrixStructureView<MatrixT> structure(MatrixT const &Mask)
+    {
+        return MatrixStructureView<MatrixT>(Mask);
     }
 
     /**
-     * @brief  Return a view that complements the structure of a matrix.
+     * @brief  Return a view that complements a matrix mask.
      * @param[in]  Mask  The matrix to complement
      *
      */
-    template<typename ScalarT, typename... TagsT>
-    inline MatrixComplementView<Matrix<ScalarT, TagsT...>> complement(
-        Matrix<ScalarT, TagsT...> const &Mask)
+    template<typename MatrixT,
+             typename std::enable_if_t<is_matrix_v<MatrixT>, int> = 0>
+    MatrixComplementView<MatrixT> complement(MatrixT const &Mask)
     {
-        return MatrixComplementView<Matrix<ScalarT, TagsT...>>(
-            backend::matrix_complement(Mask.m_mat));
+        return MatrixComplementView<MatrixT>(Mask);
     }
 
     /**
-     * @brief  Return a view that complements the structure of a vector.
-     * @param[in]  mask  The vector to complement
+     * @brief  Return a view that complements the structure of a matrix mask.
+     * @param[in]  structure_view  The matrix structure view to complement
      *
      */
-    template<typename ScalarT, typename... TagsT>
-    inline VectorComplementView<Vector<ScalarT, TagsT...>> complement(
-        Vector<ScalarT, TagsT...> const &mask)
+    template<class MatrixT,
+             typename std::enable_if_t<is_matrix_v<MatrixT>, int> = 0>
+    MatrixStructuralComplementView<MatrixT> complement(
+        MatrixStructureView<MatrixT> const &structure_view)
     {
-        return VectorComplementView<Vector<ScalarT, TagsT...>>(
-            backend::vector_complement(mask.m_vec));
+        return MatrixStructuralComplementView<MatrixT>(
+            structure_view.m_mat);
+    }
+
+
+    //************************************************************************
+    /**
+     * @brief  Return a view that uses only the structure of a vector mask mask.
+     * @param[in]  mask  The vector to take the structure of
+     *
+     */
+    template<class VectorT,
+             typename std::enable_if_t<is_vector_v<VectorT>, int> = 0>
+    VectorStructureView<VectorT> structure(VectorT const &mask)
+    {
+        return VectorStructureView<VectorT>(mask);
+    }
+
+    /**
+     * @brief  Return a view that complements a vector mask.
+     * @param[in]  mask  The vector to take the complement of
+     *
+     */
+    template<class VectorT,
+             typename std::enable_if_t<is_vector_v<VectorT>, int> = 0>
+    VectorComplementView<VectorT> complement(VectorT const &mask)
+    {
+        return VectorComplementView<VectorT>(mask);
+    }
+
+    /**
+     * @brief  Return a view that complements the structure of a vector mask.
+     * @param[in]  structure_view  The vector structure view to complement
+     *
+     */
+    template<class VectorT,
+             typename std::enable_if_t<is_vector_v<VectorT>, int> = 0>
+    VectorStructuralComplementView<VectorT> complement(
+        VectorStructureView<VectorT> const &structure_view)
+    {
+        return VectorStructuralComplementView<VectorT>(
+            structure_view.m_vec);
     }
 
 } // GraphBLAS
 
 
+//****************************************************************************
 #include <graphblas/detail/config.hpp>
-#endif
+//****************************************************************************

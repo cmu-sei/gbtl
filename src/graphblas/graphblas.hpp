@@ -1,7 +1,7 @@
 /*
- * GraphBLAS Template Library, Version 2.0
+ * GraphBLAS Template Library, Version 2.1
  *
- * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Copyright 2020 Carnegie Mellon University, Battelle Memorial Institute, and
  * Authors. All Rights Reserved.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
@@ -27,10 +27,22 @@
  * DM18-0559
  */
 
-#ifndef GRAPHBLAS_HPP
-#define GRAPHBLAS_HPP
-
 #pragma once
+
+#include <functional>
+
+// C API Version equivalents
+#define GrB_VERSION    1
+#define GrB_SUBVERSION 3
+
+namespace GraphBLAS
+{
+    auto getVersion()
+    {
+        return std::make_tuple(static_cast<unsigned int>(GrB_VERSION),
+                               static_cast<unsigned int>(GrB_SUBVERSION));
+    }
+}
 
 #include <graphblas/detail/config.hpp>
 
@@ -41,7 +53,9 @@
 
 #include <graphblas/Matrix.hpp>
 #include <graphblas/Vector.hpp>
+#include <graphblas/StructureView.hpp>
 #include <graphblas/ComplementView.hpp>
+#include <graphblas/StructuralComplementView.hpp>
 #include <graphblas/TransposeView.hpp>
 
 #include <graphblas/operations.hpp>
@@ -49,5 +63,3 @@
 
 #define GB_INCLUDE_BACKEND_ALL 1
 #include <backend_include.hpp>
-
-#endif // GRAPHBLAS_HPP

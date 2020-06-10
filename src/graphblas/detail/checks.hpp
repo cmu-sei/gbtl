@@ -97,7 +97,8 @@ namespace GraphBLAS
     }
 
     template <typename M1>
-    void check_nrows_nrows(M1 const & m1, NoMask const &mask, const std::string &msg)
+    void check_nrows_nrows(M1 const &m1, NoMask const &mask,
+                           const std::string &msg)
     {
         // No op
     }
@@ -111,9 +112,28 @@ namespace GraphBLAS
     }
 
     template <typename M1>
-    void check_ncols_ncols(M1 const &m1, NoMask const &mask, const std::string &msg)
+    void check_ncols_ncols(M1 const &m1, NoMask const &mask,
+                           const std::string &msg)
     {
         // No op
+    }
+
+    // ================================================
+
+    template <typename M1, typename M2, typename M3>
+    void check_nrows_nrowsxnrows(M1 const &m1, M2 const &m2, M3 const &m3,
+                                 const std::string &msg)
+    {
+        check_val_equals(m1.nrows(), m2.nrows()*m3.nrows(),
+                         "nrows != nrows*nrows", msg);
+    }
+
+    template <typename M1, typename M2, typename M3>
+    void check_ncols_ncolsxncols(M1 const &m1, M2 const &m2, M3 const &m3,
+                                 const std::string &msg)
+    {
+        check_val_equals(m1.ncols(), m2.ncols()*m3.ncols(),
+                         "ncols != ncols*ncols", msg);
     }
 
     // ================================================

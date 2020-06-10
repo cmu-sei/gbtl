@@ -49,7 +49,7 @@ int main()
 
     /// @todo change scalar type to unsigned int or GraphBLAS::IndexType
     using T = GraphBLAS::IndexType;
-    typedef GraphBLAS::Matrix<T, GraphBLAS::DirectedMatrixTag> GBMatrix;
+    using GBMatrix = GraphBLAS::Matrix<T, GraphBLAS::DirectedMatrixTag>;
     //T const INF(std::numeric_limits<T>::max());
 
     GraphBLAS::IndexType const NUM_NODES = 9;

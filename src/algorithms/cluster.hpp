@@ -1,7 +1,7 @@
 /*
- * GraphBLAS Template Library, Version 2.0
+ * GraphBLAS Template Library, Version 2.1
  *
- * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Copyright 2020 Carnegie Mellon University, Battelle Memorial Institute, and
  * Authors. All Rights Reserved.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
@@ -27,8 +27,7 @@
  * DM18-0559
  */
 
-#ifndef ALGORITHMS_CLUSTER_HPP
-#define ALGORITHMS_CLUSTER_HPP
+#pragma once
 
 #include <vector>
 #include <math.h>
@@ -119,7 +118,7 @@ namespace algorithms
         // return a GraphBLAS::Vector with cluster assignments
         GraphBLAS::vxm(clusters,
                        GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                       GraphBLAS::MaxSelect1stSemiring<GraphBLAS::IndexType>(),
+                       GraphBLAS::MaxFirstSemiring<GraphBLAS::IndexType>(),
                        index_of_vec, cluster_matrix);
 
         return clusters;
@@ -240,7 +239,7 @@ namespace algorithms
             GraphBLAS::mxm(Tally,
                            Cf, GraphBLAS::NoAccumulate(),
                            GraphBLAS::ArithmeticSemiring<RealT>(),
-                           cluster_num_mat, Cf, true);
+                           cluster_num_mat, Cf, GraphBLAS::REPLACE);
             //GraphBLAS::print_matrix(std::cerr, Tally,
             //                        "Next cluster mat x clusternum");
             GraphBLAS::reduce(m,
@@ -259,7 +258,7 @@ namespace algorithms
             GraphBLAS::apply(Cf,
                              Cf, GraphBLAS::NoAccumulate(),
                              GraphBLAS::Identity<bool>(),
-                             Cf, true);
+                             Cf, GraphBLAS::REPLACE);
             //GraphBLAS::print_matrix(std::cerr, Cf, "Next cluster mat, masked");
 
             if (Cf == C)
@@ -406,7 +405,7 @@ namespace algorithms
             GraphBLAS::mxm(Tally,
                            Cf, GraphBLAS::NoAccumulate(),
                            GraphBLAS::ArithmeticSemiring<RealT>(),
-                           cluster_num_mat, Cf, true);
+                           cluster_num_mat, Cf, GraphBLAS::REPLACE);
 
             GraphBLAS::reduce(m,
                               GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
@@ -423,7 +422,7 @@ namespace algorithms
             GraphBLAS::apply(Cf,
                              Cf, GraphBLAS::NoAccumulate(),
                              GraphBLAS::Identity<bool>(),
-                             Cf, true);
+                             Cf, GraphBLAS::REPLACE);
 
             if (Cf == C)
             {
@@ -494,7 +493,7 @@ namespace algorithms
                 GraphBLAS::mxm(Apower,
                                Apower, GraphBLAS::NoAccumulate(),
                                GraphBLAS::ArithmeticSemiring<RealT>(),
-                               Apower, Anorm, true);
+                               Apower, Anorm, GraphBLAS::REPLACE);
             }
 
             //GraphBLAS::print_matrix(std::cout, Apower, "Apower = Anorm^e");
@@ -507,7 +506,7 @@ namespace algorithms
                                      Ainfl,
                                      GraphBLAS::NoAccumulate(),
                                      GraphBLAS::Times<RealT>(),
-                                     Ainfl, Apower, true);
+                                     Ainfl, Apower, GraphBLAS::REPLACE);
             }
             //GraphBLAS::print_matrix(std::cout, Ainfl, "Ainfl = Apower .^ r");
             GraphBLAS::normalize_cols(Ainfl);
@@ -545,5 +544,3 @@ namespace algorithms
     }
 
 } // algorithms
-
-#endif // CLUSTER_HPP

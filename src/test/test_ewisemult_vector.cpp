@@ -1,7 +1,7 @@
 /*
- * GraphBLAS Template Library, Version 2.0
+ * GraphBLAS Template Library, Version 2.1
  *
- * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Copyright 2019 Carnegie Mellon University, Battelle Memorial Institute, and
  * Authors. All Rights Reserved.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_masked_replace_bad_dimensions)
         (GraphBLAS::eWiseMult(result,
                               mask,
                               GraphBLAS::NoAccumulate(),
-                              GraphBLAS::Times<double>(), v, u, true)),
+                              GraphBLAS::Times<double>(), v, u, GraphBLAS::REPLACE)),
         GraphBLAS::DimensionException);
 }
 
@@ -237,7 +237,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_masked_replace_reg)
     GraphBLAS::eWiseMult(result,
                          mask,
                          GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v, true);
+                         GraphBLAS::Times<double>(), u, v, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise mult with sparse vector
@@ -246,7 +246,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_masked_replace_reg)
     GraphBLAS::eWiseMult(result,
                          mask,
                          GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v2, true);
+                         GraphBLAS::Times<double>(), u, v2, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise mult with empty vector
@@ -255,7 +255,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_masked_replace_reg)
     GraphBLAS::eWiseMult(result,
                          mask,
                          GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v3, true);
+                         GraphBLAS::Times<double>(), u, v3, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -277,7 +277,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_masked_replace_reg_stored_zero)
     GraphBLAS::eWiseMult(result,
                          mask,
                          GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v, true);
+                         GraphBLAS::Times<double>(), u, v, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise mult with sparse vector
@@ -286,7 +286,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_masked_replace_reg_stored_zero)
     GraphBLAS::eWiseMult(result,
                          mask,
                          GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v2, true);
+                         GraphBLAS::Times<double>(), u, v2, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise mult with empty vector
@@ -295,7 +295,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_masked_replace_reg_stored_zero)
     GraphBLAS::eWiseMult(result,
                          mask,
                          GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v3, true);
+                         GraphBLAS::Times<double>(), u, v3, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -340,7 +340,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_masked_reg)
         GraphBLAS::eWiseMult(result,
                              mask,
                              GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<double>(), u, v, false);
+                             GraphBLAS::Times<double>(), u, v, GraphBLAS::MERGE);
         BOOST_CHECK_EQUAL(result, ans);
     }
 
@@ -356,7 +356,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_masked_reg)
         GraphBLAS::eWiseMult(result,
                              mask,
                              GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<double>(), u, v2, false);
+                             GraphBLAS::Times<double>(), u, v2, GraphBLAS::MERGE);
         BOOST_CHECK_EQUAL(result, ans2);
     }
 
@@ -372,7 +372,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_masked_reg)
         GraphBLAS::eWiseMult(result,
                              mask,
                              GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<double>(), u, v3, false);
+                             GraphBLAS::Times<double>(), u, v3, GraphBLAS::MERGE);
         BOOST_CHECK_EQUAL(result, ans3);
     }
 }
@@ -398,7 +398,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_masked_reg_stored_zero)
         GraphBLAS::eWiseMult(result,
                              mask,
                              GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<double>(), u, v, false);
+                             GraphBLAS::Times<double>(), u, v, GraphBLAS::MERGE);
         BOOST_CHECK_EQUAL(result, ans);
     }
 
@@ -414,7 +414,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_masked_reg_stored_zero)
         GraphBLAS::eWiseMult(result,
                              mask,
                              GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<double>(), u, v2, false);
+                             GraphBLAS::Times<double>(), u, v2, GraphBLAS::MERGE);
         BOOST_CHECK_EQUAL(result, ans2);
     }
 
@@ -430,7 +430,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_masked_reg_stored_zero)
         GraphBLAS::eWiseMult(result,
                              mask,
                              GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<double>(), u, v3, false);
+                             GraphBLAS::Times<double>(), u, v3, GraphBLAS::MERGE);
         BOOST_CHECK_EQUAL(result, ans3);
     }
 }
@@ -452,7 +452,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_scmp_masked_replace_bad_dimensions)
         (GraphBLAS::eWiseMult(result,
                               GraphBLAS::complement(mask),
                               GraphBLAS::NoAccumulate(),
-                              GraphBLAS::Times<double>(), v, u, true)),
+                              GraphBLAS::Times<double>(), v, u, GraphBLAS::REPLACE)),
         GraphBLAS::DimensionException);
 }
 
@@ -474,7 +474,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_scmp_masked_replace_reg)
     GraphBLAS::eWiseMult(result,
                          GraphBLAS::complement(mask),
                          GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v, true);
+                         GraphBLAS::Times<double>(), u, v, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise mult with sparse vector
@@ -483,7 +483,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_scmp_masked_replace_reg)
     GraphBLAS::eWiseMult(result,
                          GraphBLAS::complement(mask),
                          GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v2, true);
+                         GraphBLAS::Times<double>(), u, v2, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise mult with empty vector
@@ -492,7 +492,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_scmp_masked_replace_reg)
     GraphBLAS::eWiseMult(result,
                          GraphBLAS::complement(mask),
                          GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v3, true);
+                         GraphBLAS::Times<double>(), u, v3, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -514,7 +514,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_scmp_masked_replace_reg_stored_zero)
     GraphBLAS::eWiseMult(result,
                          GraphBLAS::complement(mask),
                          GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v, true);
+                         GraphBLAS::Times<double>(), u, v, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise mult with sparse vector
@@ -523,7 +523,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_scmp_masked_replace_reg_stored_zero)
     GraphBLAS::eWiseMult(result,
                          GraphBLAS::complement(mask),
                          GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v2, true);
+                         GraphBLAS::Times<double>(), u, v2, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise mult with empty vector
@@ -532,7 +532,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_scmp_masked_replace_reg_stored_zero)
     GraphBLAS::eWiseMult(result,
                          GraphBLAS::complement(mask),
                          GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v3, true);
+                         GraphBLAS::Times<double>(), u, v3, GraphBLAS::REPLACE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -577,7 +577,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_scmp_masked_reg)
         GraphBLAS::eWiseMult(result,
                              GraphBLAS::complement(mask),
                              GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<double>(), u, v, false);
+                             GraphBLAS::Times<double>(), u, v, GraphBLAS::MERGE);
         BOOST_CHECK_EQUAL(result, ans);
     }
 
@@ -593,7 +593,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_scmp_masked_reg)
         GraphBLAS::eWiseMult(result,
                              GraphBLAS::complement(mask),
                              GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<double>(), u, v2, false);
+                             GraphBLAS::Times<double>(), u, v2, GraphBLAS::MERGE);
         BOOST_CHECK_EQUAL(result, ans2);
     }
 
@@ -609,7 +609,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_scmp_masked_reg)
         GraphBLAS::eWiseMult(result,
                              GraphBLAS::complement(mask),
                              GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<double>(), u, v3, false);
+                             GraphBLAS::Times<double>(), u, v3, GraphBLAS::MERGE);
         BOOST_CHECK_EQUAL(result, ans3);
     }
 }
@@ -634,7 +634,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_scmp_masked_reg_stored_zero)
         GraphBLAS::eWiseMult(result,
                              GraphBLAS::complement(mask),
                              GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<double>(), u, v, false);
+                             GraphBLAS::Times<double>(), u, v, GraphBLAS::MERGE);
         BOOST_CHECK_EQUAL(result, ans);
     }
 
@@ -650,7 +650,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_scmp_masked_reg_stored_zero)
         GraphBLAS::eWiseMult(result,
                              GraphBLAS::complement(mask),
                              GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<double>(), u, v2, false);
+                             GraphBLAS::Times<double>(), u, v2, GraphBLAS::MERGE);
         BOOST_CHECK_EQUAL(result, ans2);
     }
 
@@ -666,7 +666,7 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_scmp_masked_reg_stored_zero)
         GraphBLAS::eWiseMult(result,
                              GraphBLAS::complement(mask),
                              GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<double>(), u, v3, false);
+                             GraphBLAS::Times<double>(), u, v3, GraphBLAS::MERGE);
         BOOST_CHECK_EQUAL(result, ans3);
     }
 }

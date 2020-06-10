@@ -143,6 +143,31 @@ BOOST_AUTO_TEST_CASE(bc_test_vertex_betweenness_centrality)
 
 
 //****************************************************************************
+BOOST_AUTO_TEST_CASE(bc_test_edge_betweenness_centrality_2)
+{
+    IndexType const NUM_NODES = 11;
+    std::vector<IndexType> row_indices = {0, 0, 0, 0, 1, 1, 2, 3, 3, 4, 4, 5,
+                                          5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 10};
+    std::vector<IndexType> col_indices = {1, 2, 3, 4, 0, 9, 0, 0, 9, 0, 5, 4,
+                                          6, 7, 5, 8, 5, 8, 6, 7, 1, 3, 10, 9};
+    std::vector<double> values(row_indices.size(), 1.);
+
+    Matrix<double> graph(NUM_NODES, NUM_NODES);
+    graph.build(row_indices.begin(), col_indices.begin(),
+                values.begin(), values.size());
+
+    IndexArrayType seed_set={0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+    std::vector<float> result =
+        vertex_betweenness_centrality_batch_alt_trans_v2(graph, seed_set);
+    std::cout << "Milcom 2016 Graph:";
+    for (auto a : result)
+        std::cout << " " << a;
+    std::cout << std::endl;
+}
+
+
+//****************************************************************************
 BOOST_AUTO_TEST_CASE(bc_test_edge_betweenness_centrality)
 {
     Matrix<double, DirectedMatrixTag> betweenness(8,8);

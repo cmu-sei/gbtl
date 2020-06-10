@@ -1,7 +1,7 @@
 /*
- * GraphBLAS Template Library, Version 2.0
+ * GraphBLAS Template Library, Version 2.1
  *
- * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Copyright 2019 Carnegie Mellon University, Battelle Memorial Institute, and
  * Authors. All Rights Reserved.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
@@ -39,64 +39,6 @@ using namespace GraphBLAS;
 //****************************************************************************
 namespace
 {
-    template <typename ScalarT>
-    struct LogicalOrMonoid
-    {
-    public:
-        typedef ScalarT ScalarType;
-        typedef ScalarT result_type;
-
-        ScalarT identity() const
-        {
-            return static_cast<ScalarT>(false);
-        }
-
-        ScalarT operator()(ScalarT lhs, ScalarT rhs) const
-        {
-            return LogicalOr<ScalarT>()(lhs, rhs);
-        }
-    };
-
-
-    template <typename D1, typename D2=D1, typename D3=D1>
-    class LogicalOrSemiring
-    {
-    public:
-        typedef D3 ScalarType;
-        typedef D3 result_type;
-
-        D3 add(D3 a, D3 b) const
-        { return LogicalOrMonoid<D3>()(a, b); }
-
-        D3 mult(D1 a, D2 b) const
-        { return LogicalAnd<D1,D2,D3>()(a, b); }
-
-        ScalarType zero() const
-        { return LogicalOrMonoid<D3>().identity(); }
-    };
-
-
-    //************************************************************************
-    //does arithmetic operation by n value
-    template <typename ConstT, typename BinaryOp>
-    struct BinaryOp_Bind2nd
-    {
-        ConstT n;
-        BinaryOp op;
-        typedef typename BinaryOp::result_type result_type;
-
-        BinaryOp_Bind2nd(ConstT const &value,
-                         BinaryOp      operation = BinaryOp() ) :
-            n(value),
-            op(operation)
-        {}
-
-        result_type operator()(result_type const &value)
-        {
-            return op(value, n);
-        }
-    };
-
     //************************************************************************
     /**
      * @brief Perform a breadth first search (BFS) on the given graph.
@@ -139,16 +81,17 @@ namespace
             ++depth;
 
             // Apply the level to all newly visited nodes
-            BinaryOp_Bind2nd<IndexType, Times<IndexType> > apply_depth(depth);
-
             apply(levels, NoMask(), Plus<unsigned int>(),
-                  apply_depth, wavefront);
+                  std::bind(Times<IndexType>(),
+                            std::placeholders::_1,
+                            depth),
+                  wavefront);
 
             // Advance the wavefront and mask out nodes already assigned levels
             mxm(wavefront,
                 complement(levels), NoAccumulate(),
                 LogicalSemiring<IndexType>(),
-                wavefront, graph, true);
+                wavefront, graph, GraphBLAS::REPLACE);
         }
     }
 }
@@ -158,7 +101,7 @@ namespace
 int main(int, char**)
 {
     // syntatic sugar
-    typedef IndexType ScalarType;
+    using ScalarType = IndexType;
 
     // Create an adjacency matrix for "Gilbert's" directed graph
     IndexType const NUM_NODES(7);

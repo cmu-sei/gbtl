@@ -1,7 +1,7 @@
 /*
- * GraphBLAS Template Library, Version 2.0
+ * GraphBLAS Template Library, Version 2.1
  *
- * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Copyright 2020 Carnegie Mellon University, Battelle Memorial Institute, and
  * Authors. All Rights Reserved.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
@@ -43,31 +43,10 @@ using namespace algorithms;
 BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
 //****************************************************************************
-namespace
-{
-    //************************************************************************
-    /// @todo merge with bind2nd functor found in bfs.hpp
-    template <typename BinaryComparatorT,
-              typename T>
-    struct Threshold_Bind2nd
-    {
-        typedef typename BinaryComparatorT::result_type result_type;
-
-        T m_threshold;
-
-        Threshold_Bind2nd(T const &val) : m_threshold(val) {}
-
-        result_type operator()(T const &lhs)
-        {
-            return BinaryComparatorT()(lhs, m_threshold);
-        }
-    };
-}
-
-//****************************************************************************
 BOOST_AUTO_TEST_CASE(cluster_test_markov)
 {
-    IndexType num_nodes = 52;
+    IndexType const NUM_NODES = 12;
+    IndexType const NUM_EDGES = 52;
     GraphBLAS::IndexArrayType i = {
         0, 0, 0, 0, 0,
         1, 1, 1, 1,
@@ -95,8 +74,8 @@ BOOST_AUTO_TEST_CASE(cluster_test_markov)
         0, 5, 6, 9,
         3, 7, 8, 10, 11,
         8, 10, 11};
-    std::vector<double> v(num_nodes, 1.0);
-    Matrix<double> m1(12, 12);
+    std::vector<double> v(NUM_EDGES, 1.0);
+    Matrix<double> m1(NUM_NODES, NUM_NODES);
 
     // Build matrix containing self loops
     m1.build(i, j, v);
@@ -107,18 +86,19 @@ BOOST_AUTO_TEST_CASE(cluster_test_markov)
                             "Cluster matrix (before threshold)");
 
     // Optional: Apply a threshold to annihilate REALLY small numbers
-    GraphBLAS::Matrix<bool> mask(12, 12);
-    GraphBLAS::apply(
-        mask,
-        GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-        Threshold_Bind2nd<GraphBLAS::GreaterThan<double>,double>(1.0e-8),
-        cluster_matrix);
+    GraphBLAS::Matrix<bool> mask(NUM_NODES, NUM_NODES);
+    GraphBLAS::apply(mask,
+                     GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                     std::bind(GraphBLAS::GreaterThan<double>(),
+                               std::placeholders::_1,
+                               1.0e-8),
+                     cluster_matrix);
     GraphBLAS::print_matrix(std::cout, mask,
                             "Threshold mask");
     GraphBLAS::apply(cluster_matrix,
                      mask, GraphBLAS::NoAccumulate(),
                      GraphBLAS::Identity<double>(),
-                     cluster_matrix, true);
+                     cluster_matrix, GraphBLAS::REPLACE);
     GraphBLAS::print_matrix(std::cout, cluster_matrix,
                             "Cluster matrix (after threshold)");
 
@@ -141,6 +121,10 @@ BOOST_AUTO_TEST_CASE(cluster_test_markov)
     BOOST_CHECK_EQUAL(cluster_assignments[3], cluster_assignments[8]);
     BOOST_CHECK_EQUAL(cluster_assignments[3], cluster_assignments[10]);
     BOOST_CHECK_EQUAL(cluster_assignments[3], cluster_assignments[11]);
+
+    BOOST_CHECK(cluster_assignments[0] != cluster_assignments[1]);
+    BOOST_CHECK(cluster_assignments[0] != cluster_assignments[3]);
+    BOOST_CHECK(cluster_assignments[1] != cluster_assignments[3]);
 }
 
 //****************************************************************************
@@ -227,77 +211,77 @@ BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure_karate)
 {
     IndexType num_nodes = 34;
 
-GraphBLAS::IndexArrayType i = {
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    1,1,1,1,1,1,1,1,1,
-    2,2,2,2,2,2,2,2,2,2,
-    3,3,3,3,3,3,
-    4,4,4,
-    5,5,5,5,
-    6,6,6,6,
-    7,7,7,7,
-    8,8,8,8,8,
-    9,9,
-    10,10,10,
-    11,
-    12,12,
-    13,13,13,13,13,
-    14,14,
-    15,15,
-    16,16,
-    17,17,
-    18,18,
-    19,19,19,
-    20,20,
-    21,21,
-    22,22,
-    23,23,23,23,23,
-    24,24,24,
-    25,25,25,
-    26,26,
-    27,27,27,27,
-    28,28,28,
-    29,29,29,29,
-    30,30,30,30,
-    31,31,31,31,31,
-    32,32,32,32,32,32,32,32,32,32,32,32,
-    33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33};
+    GraphBLAS::IndexArrayType i = {
+        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+        1,1,1,1,1,1,1,1,1,
+        2,2,2,2,2,2,2,2,2,2,
+        3,3,3,3,3,3,
+        4,4,4,
+        5,5,5,5,
+        6,6,6,6,
+        7,7,7,7,
+        8,8,8,8,8,
+        9,9,
+        10,10,10,
+        11,
+        12,12,
+        13,13,13,13,13,
+        14,14,
+        15,15,
+        16,16,
+        17,17,
+        18,18,
+        19,19,19,
+        20,20,
+        21,21,
+        22,22,
+        23,23,23,23,23,
+        24,24,24,
+        25,25,25,
+        26,26,
+        27,27,27,27,
+        28,28,28,
+        29,29,29,29,
+        30,30,30,30,
+        31,31,31,31,31,
+        32,32,32,32,32,32,32,32,32,32,32,32,
+        33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33};
 
-GraphBLAS::IndexArrayType j = {
-    1,2,3,4,5,6,7,8,10,11,12,13,17,19,21,31,     //1,2,3,4,5,6,7,8,10,11,12,13,19,21,23,31,
-    0,2,3,7,13,17,19,21,30,
-    0,1,3,7,8,9,13,27,28,32,
-    0,1,2,7,12,13,
-    0,6,10,
-    0,6,10,16,
-    0,4,5,16,
-    0,1,2,3,
-    0,2,30,32,33,
-    2,33,
-    0,4,5,
-    0,
-    0,3,
-    0,1,2,3,33,
-    32,33,
-    32,33,
-    5,6,
-    0,1,
-    32,33,
-    0,1,33,
-    32,33,
-    0,1,
-    32,33,
-    25,27,29,32,33,
-    25,27,31,
-    23,24,31,
-    29,33,
-    2,23,24,33,
-    2,31,33,
-    23,26,32,33,
-    1,8,32,33,
-    0,24,25,32,33,    //0,24,25,28,32,33,
-    2,8,14,15,18,20,22,23,29,30,31,33,
-    8,9,13,14,15,18,19,20,22,23,26,27,28,29,30,31,32};
+    GraphBLAS::IndexArrayType j = {
+        1,2,3,4,5,6,7,8,10,11,12,13,17,19,21,31,     //1,2,3,4,5,6,7,8,10,11,12,13,19,21,23,31,
+        0,2,3,7,13,17,19,21,30,
+        0,1,3,7,8,9,13,27,28,32,
+        0,1,2,7,12,13,
+        0,6,10,
+        0,6,10,16,
+        0,4,5,16,
+        0,1,2,3,
+        0,2,30,32,33,
+        2,33,
+        0,4,5,
+        0,
+        0,3,
+        0,1,2,3,33,
+        32,33,
+        32,33,
+        5,6,
+        0,1,
+        32,33,
+        0,1,33,
+        32,33,
+        0,1,
+        32,33,
+        25,27,29,32,33,
+        25,27,31,
+        23,24,31,
+        29,33,
+        2,23,24,33,
+        2,31,33,
+        23,26,32,33,
+        1,8,32,33,
+        0,24,25,32,33,    //0,24,25,28,32,33,
+        2,8,14,15,18,20,22,23,29,30,31,33,
+        8,9,13,14,15,18,19,20,22,23,26,27,28,29,30,31,32};
 
     std::vector<double> v(i.size(), 1.0);
 

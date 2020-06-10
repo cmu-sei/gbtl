@@ -1,7 +1,7 @@
 /*
- * GraphBLAS Template Library, Version 2.0
+ * GraphBLAS Template Library, Version 2.1
  *
- * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Copyright 2020 Carnegie Mellon University, Battelle Memorial Institute, and
  * Authors. All Rights Reserved.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
@@ -43,21 +43,6 @@
 #if(GB_INCLUDE_BACKEND_VECTOR)
 #include <graphblas/platforms/sequential/Vector.hpp>
 #undef GB_INCLUDE_BACKEND_VECTOR
-#endif
-
-#if(GB_INCLUDE_BACKEND_UTILITY)
-#include <graphblas/platforms/sequential/utility.hpp>
-#undef GB_INCLUDE_BACKEND_UTILITY
-#endif
-
-#if(GB_INCLUDE_BACKEND_TRANSPOSE_VIEW)
-#include <graphblas/platforms/sequential/TransposeView.hpp>
-#undef GB_INCLUDE_BACKEND_TRANSPOSE_VIEW
-#endif
-
-#if(GB_INCLUDE_BACKEND_COMPLEMENT_VIEW)
-#include <graphblas/platforms/sequential/ComplementView.hpp>
-#undef GB_INCLUDE_BACKEND_COMPLEMENT_VIEW
 #endif
 
 #if(GB_INCLUDE_BACKEND_OPERATIONS)

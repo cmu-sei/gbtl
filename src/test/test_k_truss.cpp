@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(k_truss_test_basic)
 {
-    typedef int32_t T;
+    using T = int32_t;
     IndexType num_nodes = 5;
     IndexType num_edges = 6;
     IndexArrayType edge_num = {0, 1, 2, 3, 4, 5,  0, 1, 2, 3, 4, 5};
@@ -226,7 +226,7 @@ BOOST_AUTO_TEST_CASE(k_truss_test_peer_pressure2)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(k_truss2_test_basic)
 {
-    typedef int32_t T;
+    using T = int32_t;
     IndexType num_nodes = 5;
     IndexArrayType i = {0, 1, 0, 2, 0, 1, 1, 2, 3, 3, 2, 4};
     IndexArrayType j = {1, 2, 3, 3, 2, 4, 0, 1, 0, 2, 0, 1};
@@ -306,6 +306,7 @@ BOOST_AUTO_TEST_CASE(k_truss2_test2)
 BOOST_AUTO_TEST_CASE(k_truss2_test_peer_pressure1)
 {
     IndexType num_nodes(5);
+
     GraphBLAS::IndexArrayType i = {0, 1, 2, 1, 2, 0, 3, 0, 4, 3};
     GraphBLAS::IndexArrayType j = {1, 0, 1, 2, 0, 2, 0, 3, 3, 4};
     std::vector<int> v(i.size(), 1);

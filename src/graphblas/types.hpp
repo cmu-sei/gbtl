@@ -1,7 +1,7 @@
 /*
- * GraphBLAS Template Library, Version 2.0
+ * GraphBLAS Template Library, Version 3.0
  *
- * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Copyright 2020, Carnegie Mellon University, Battelle Memorial Institute, and
  * Authors. All Rights Reserved.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
@@ -13,7 +13,7 @@
  * ASSUMES ANY LEGAL LIABILITY OR RESPONSIBILITY FOR THE ACCURACY, COMPLETENESS,
  * OR USEFULNESS OR ANY INFORMATION, APPARATUS, PRODUCT, SOFTWARE, OR PROCESS
  * DISCLOSED, OR REPRESENTS THAT ITS USE WOULD NOT INFRINGE PRIVATELY OWNED
- * RIGHTS..
+ * RIGHTS.
  *
  * Released under a BSD (SEI)-style license, please see license.txt or contact
  * permission@sei.cmu.edu for full terms.
@@ -24,15 +24,14 @@
  * (https://github.com/cmu-sei/gbtl/blob/1.0.0/LICENSE) Copyright 2015 Carnegie
  * Mellon University and The Trustees of Indiana. DM17-0037, DM-0002659
  *
- * DM18-0559
+ * 2. GraphBLAS Template Library (GBTL)
+ * (https://github.com/cmu-sei/gbtl/blob/2.0.0/LICENSE) Copyright 2018 Carnegie
+ * Mellon University, Battelle Memorial Institute, and Authors. DM18-0559
+ *
+ * DM20-0442
  */
 
-/**
- * @brief Some basic typedefs.
- */
-
-#ifndef GB_TYPES_HPP
-#define GB_TYPES_HPP
+#pragma once
 
 #include <cstdint>
 #include <exception>
@@ -41,45 +40,119 @@
 
 namespace GraphBLAS
 {
-    typedef uint64_t IndexType;
-    typedef std::vector<IndexType> IndexArrayType;
+    using IndexType = uint64_t;  /// @todo Consider template param for index type
+    using IndexArrayType = std::vector<IndexType>;
+
+    //**************************************************************************
+    // When an operation uses a mask this controls what happens to non-masked
+    // elements in the resulting container:
+    //    MERGE   -> leave as is,
+    //    REPLACE -> clear (annihilate) element.
+    //
+    /// @todo replace with a scoped enum; i.e., "enum class OutputControlEnum.."
+    enum OutputControlEnum
+    {
+        MERGE = 0,
+        REPLACE = 1
+    };
 
     //**************************************************************************
     struct NoAccumulate
     {
         // It doesn't really matter what the type is, it never gets executed.
-        typedef bool result_type;
-        inline bool operator()(bool lhs, bool rhs) { return true; }
+        template <typename D1=bool, typename D2=bool, typename D3=bool>
+        inline D3 operator()(D1 lhs, D2 rhs) const { return true; }
     };
 
+    //**************************************************************************
+    class NoMask
+    {
+    public:
+        friend std::ostream &operator<<(std::ostream             &os,
+                                        NoMask          const    &mask)
+        {
+            os << "No mask";
+            return os;
+        }
+
+        friend inline NoMask const &get_internal_matrix(NoMask const &mask)
+        {
+            return mask;
+        }
+
+        friend inline NoMask const &get_internal_vector(NoMask const &mask)
+        {
+            return mask;
+        }
+    };
 
     //**************************************************************************
+    template<typename ScalarT, typename... TagsT> class Vector;
 
-    // This is the "Matrix" class for this example
-    struct matrix_tag {};
+    template <class>
+    inline constexpr bool is_vector_v = false;
 
-    // This is the "Vector" class for this example
-    struct vector_tag {};
+    template <class ScalarT, class... Tags>
+    inline constexpr bool is_vector_v<Vector<ScalarT, Tags...>> = true;
+
+    //************************************************************************
+    template<typename ScalarT, typename... TagsT> class Matrix;
+
+    template <class>
+    inline constexpr bool is_matrix_v = false;
+
+    template <class ScalarT, class... Tags>
+    inline constexpr bool is_matrix_v<Matrix<ScalarT, Tags...>> = true;
+
+    //************************************************************************
+    template<class VectorT> class VectorComplementView;
+    template<class VectorT> class VectorStructureView;
+    template<class VectorT> class VectorStructuralComplementView;
+
+    template<class MatrixT> class TransposeView;
+    template<class MatrixT> class MatrixComplementView;
+    template<class MatrixT> class MatrixStructureView;
+    template<class MatrixT> class MatrixStructuralComplementView;
+
+    template <class MatrixT>
+    inline constexpr bool is_matrix_v<TransposeView<MatrixT>> = true;
+
+    //************************************************************************
+    template <class>
+    inline constexpr bool is_complement_v = false;
+
+    template <class MatrixT>
+    inline constexpr bool is_complement_v<MatrixComplementView<MatrixT>> = true;
+
+    template <class VectorT>
+    inline constexpr bool is_complement_v<VectorComplementView<VectorT>> = true;
 
 
-} // namespace GraphBLAS
+    template <class>
+    inline constexpr bool is_structure_v = false;
 
-namespace std
-{
+    template <class MatrixT>
+    inline constexpr bool is_structure_v<MatrixStructureView<MatrixT>> = true;
 
-// @TODO; It seems that unit tests can't find this!
-    inline std::ostream &
-    operator<<(std::ostream &os, const std::vector<long unsigned int> vec)
-    {
-        bool first = true;
-        for (auto it = vec.begin(); it != vec.end(); ++it)
-        {
-            os << (first ? "" : ",") << *it;
-            first = false;
-        }
-        return os;
-    }
+    template <class VectorT>
+    inline constexpr bool is_structure_v<VectorStructureView<VectorT>> = true;
 
-} // namespace std
 
-#endif // GB_TYPES_HPP
+    template <class>
+    inline constexpr bool is_structural_complement_v = false;
+
+    template <class MatrixT>
+    inline constexpr bool is_structural_complement_v<
+        MatrixStructuralComplementView<MatrixT>> = true;
+
+    template <class VectorT>
+    inline constexpr bool is_structural_complement_v<
+        VectorStructuralComplementView<VectorT>> = true;
+
+
+    template <class>
+    inline constexpr bool is_transpose_v = false;
+
+    template <class MatrixT>
+    inline constexpr bool is_transpose_v<TransposeView<MatrixT>> = true;
+}

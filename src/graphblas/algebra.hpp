@@ -30,6 +30,7 @@
 #ifndef GB_ALGEBRA_HPP
 #define GB_ALGEBRA_HPP
 
+#include <stdlib.h>
 #include <math.h>
 #include <algorithm>
 #include <functional>
@@ -38,64 +39,111 @@
 
 namespace GraphBLAS
 {
+    namespace detail
+    {
+        // Overload Abs for different types (call the right library func).
+        template<typename D2>
+        inline D2 MyAbs(int8_t input)        { return abs(input); }
+        template<typename D2>
+        inline D2 MyAbs(int16_t input)       { return abs(input); }
+        template<typename D2>
+        inline D2 MyAbs(int32_t input)       { return abs(input); } // labs>
+        template<typename D2>
+        inline D2 MyAbs(int64_t input)       { return labs(input); } // llabs?
+
+        template<typename D2>
+        inline D2 MyAbs(float input)         { return fabsf(input); }
+
+        template<typename D2>
+        inline D2 MyAbs(double input)        { return fabs(input); }
+
+        // all other types are unsigned; i.e., no op.
+        template<typename D2>
+        inline D2 MyAbs(bool input)          { return input; }
+        template<typename D2>
+        inline D2 MyAbs(uint8_t input)       { return input; }
+        template<typename D2>
+        inline D2 MyAbs(uint16_t input)      { return input; }
+        template<typename D2>
+        inline D2 MyAbs(uint32_t input)      { return input; }
+        template<typename D2>
+        inline D2 MyAbs(uint64_t input)      { return input; }
+
+    } // namespace detail (within GraphBLAS namespace
+
     //************************************************************************
     // The Unary Operators
     //************************************************************************
+    // Following the removal of std::unary_function from C++17 and beyond,
+    // these functors do not need to subclass from unary_function and don't
+    // need to define:
+    //   - argument_type
+    //   - result_type
 
     // Also performs casting
     template <typename D1, typename D2 = D1>
     struct Identity
     {
-        typedef D2 result_type;
-        inline D2 operator()(D1 input) { return input; }
+        inline D2 operator()(D1 input) const { return input; }
     };
 
-    template <typename D1 = bool, typename D2 = D1>
-    struct LogicalNot
+    template <typename D1, typename D2 = D1>
+    struct Abs
     {
-        typedef D2 result_type;
-        inline D2 operator()(D1 input) { return !input; }
+        inline D2 operator()(D1 input) const
+        {
+            return detail::MyAbs<D2>(input);
+        }
     };
+
 
     template <typename D1, typename D2 = D1>
     struct AdditiveInverse
     {
-        typedef D2 result_type;
-        inline D2 operator()(D1 input) { return -input; }
+        inline D2 operator()(D1 input) const { return -input; }
     };
 
     template <typename D1, typename D2 = D1>
     struct MultiplicativeInverse
     {
-        typedef D2 result_type;
-        inline D2 operator()(D1 input)
+        inline D2 operator()(D1 input) const
         {
             return static_cast<D2>(1) / input;
         }
     };
 
+
+    /// @todo should D2 default to bool
+    template <typename D1 = bool, typename D2 = D1>
+    struct LogicalNot
+    {
+        inline D2 operator()(D1 input) const { return !input; }
+    };
+
+    template <typename I1 = uint64_t, typename I2 = I1,
+              typename std::enable_if_t<std::is_integral_v<I1> &&
+                                        std::is_integral_v<I2>, int> = 0>
+    struct BitwiseNot
+    {
+        inline I2 operator()(I1 input) const { return ~input; }
+    };
+
     //************************************************************************
+    // User std::bind to turn binary ops into unary ops
+    //
     // Turn a binary op into a unary op by binding the 2nd term to a constant
     //
-    template <typename ConstT, typename BinaryOpT>
-    struct BinaryOp_Bind2nd
-    {
-        ConstT n;  /// @todo consider defaulting ConstT to BinaryOpT::rhs_type
-        BinaryOpT op;
-        typedef typename BinaryOpT::result_type result_type;
-        typedef typename BinaryOpT::lhs_type ValueType;
-
-        BinaryOp_Bind2nd(ConstT const &value,
-                         BinaryOpT     operation = BinaryOpT() ) :
-            n(value),
-            op(operation)
-        {}
-
-        result_type operator()(ValueType const &value)
-        {
-            return op(value, n);
-        }
-    };
+    //                     std::bind(GraphBLAS::Minus<float>(),
+    //                               std::placeholders::_1,
+    //                               static_cast<float>(nsver)),
+    //
+    // Turn a binary op into a unary op by binding the 1st term to a constant
+    //
+    //                     std::bind(GraphBLAS::Minus<float>(),
+    //                               static_cast<float>(nsver),
+    //                               std::placeholders::_1),
+    //
+    //************************************************************************
 }
 
 namespace GraphBLAS
@@ -103,201 +151,222 @@ namespace GraphBLAS
     //************************************************************************
     // The Binary Operators
     //************************************************************************
+    // Following the removal of std::binary_function from C++17 and beyond,
+    // these functors do not need to subclass from binary_function and don't
+    // need to define:
+    //   - first_argument_type
+    //   - second_argument_type
+    //   - result_type
+    //
+    // In lambda speak
+    // [](auto x, auto y) → D3 { return x * y };
+    // [](D1 x, D2 y) -> D3 { return x * y; }
 
     template <typename D1 = bool, typename D2 = D1, typename D3 = D1>
     struct LogicalOr
     {
-        typedef D1 lhs_type;
-        typedef D2 rhs_type;
-        typedef D3 result_type;
-        inline D3 operator()(D1 lhs, D2 rhs) { return lhs || rhs; }
+        inline D3 operator()(D1 lhs, D2 rhs) const { return lhs || rhs; }
     };
 
     template <typename D1 = bool, typename D2 = D1, typename D3 = D1>
     struct LogicalAnd
     {
-        typedef D1 lhs_type;
-        typedef D2 rhs_type;
-        typedef D3 result_type;
-        inline D3 operator()(D1 lhs, D2 rhs) { return lhs && rhs; }
+        inline D3 operator()(D1 lhs, D2 rhs) const { return lhs && rhs; }
     };
 
     template <typename D1 = bool, typename D2 = D1, typename D3 = D1>
     struct LogicalXor
     {
-        typedef D1 lhs_type;
-        typedef D2 rhs_type;
-        typedef D3 result_type;
         // ((bool)lhs) != ((bool)rhs)
-        // inline D3 operator()(D1 lhs, D2 rhs) { return lhs ^ rhs; }
-        inline D3 operator()(D1 lhs, D2 rhs)
+        // inline D3 operator()(D1 lhs, D2 rhs) const { return lhs ^ rhs; }
+        inline D3 operator()(D1 lhs, D2 rhs) const
         {
             return ((lhs && !rhs) || (!lhs && rhs));
         }
     };
 
+    template <typename D1 = bool, typename D2 = D1, typename D3 = D1>
+    struct LogicalXnor
+    {
+        // ((bool)lhs) != ((bool)rhs)
+        // inline D3 operator()(D1 lhs, D2 rhs) const { return !(lhs ^ rhs); }
+        inline D3 operator()(D1 lhs, D2 rhs) const
+        {
+            return ((lhs && rhs) || (!lhs && !rhs));
+        }
+    };
+
+    //-------------------------------------------------------------------------
+    /// @todo Consider decltype for D3's default
+    template <typename I1, typename I2 = I1, typename I3 = I1,
+              typename std::enable_if_t<std::is_integral_v<I1> &&
+                                        std::is_integral_v<I2> &&
+                                        std::is_integral_v<I3>, int> = 0>
+    struct BitwiseOr
+    {
+        inline I3 operator()(I1 lhs, I2 rhs) const { return lhs | rhs; }
+    };
+
+    template <typename I1, typename I2 = I1, typename I3 = I1,
+              typename std::enable_if_t<std::is_integral_v<I1> &&
+                                        std::is_integral_v<I2> &&
+                                        std::is_integral_v<I3>, int> = 0>
+    struct BitwiseAnd
+    {
+        inline I3 operator()(I1 lhs, I2 rhs) const { return lhs & rhs; }
+    };
+
+    template <typename I1, typename I2 = I1, typename I3 = I1,
+              typename std::enable_if_t<std::is_integral_v<I1> &&
+                                        std::is_integral_v<I2> &&
+                                        std::is_integral_v<I3>, int> = 0>
+    struct BitwiseXor
+    {
+        inline I3 operator()(I1 lhs, I2 rhs) const { return lhs ^ rhs; }
+    };
+
+    template <typename I1, typename I2 = I1, typename I3 = I1,
+              typename std::enable_if_t<std::is_integral_v<I1> &&
+                                        std::is_integral_v<I2> &&
+                                        std::is_integral_v<I3>, int> = 0>
+    struct BitwiseXnor
+    {
+        inline I3 operator()(I1 lhs, I2 rhs) const { return ~(lhs ^ rhs); }
+    };
+
+    //-------------------------------------------------------------------------
+
     template <typename D1, typename D2 = D1, typename D3 = bool>
     struct Equal
     {
-        typedef D1 lhs_type;
-        typedef D2 rhs_type;
-        typedef D3 result_type;
-        inline D3 operator()(D1 lhs, D2 rhs) { return lhs == rhs; }
+        inline D3 operator()(D1 lhs, D2 rhs) const { return lhs == rhs; }
     };
 
     template <typename D1, typename D2 = D1, typename D3 = bool>
     struct NotEqual
     {
-        typedef D1 lhs_type;
-        typedef D2 rhs_type;
-        typedef D3 result_type;
-        inline D3 operator()(D1 lhs, D2 rhs) { return lhs != rhs; }
+        inline D3 operator()(D1 lhs, D2 rhs) const { return lhs != rhs; }
     };
 
     template<typename D1, typename D2 = D1, typename D3 = bool>
     struct GreaterThan
     {
-        typedef D1 lhs_type;
-        typedef D2 rhs_type;
-        typedef D3 result_type;
-        inline D3 operator()(D1 lhs, D2 rhs) { return lhs > rhs; }
+        inline D3 operator()(D1 lhs, D2 rhs) const { return lhs > rhs; }
     };
 
     template<typename D1, typename D2 = D1, typename D3 = bool>
     struct LessThan
     {
-        typedef D1 lhs_type;
-        typedef D2 rhs_type;
-        typedef D3 result_type;
-        inline D3 operator()(D1 lhs, D2 rhs) { return lhs < rhs; }
+        inline D3 operator()(D1 lhs, D2 rhs) const { return lhs < rhs; }
     };
 
     template<typename D1, typename D2 = D1, typename D3 = bool>
     struct GreaterEqual
     {
-        typedef D1 lhs_type;
-        typedef D2 rhs_type;
-        typedef D3 result_type;
-        inline D3 operator()(D1 lhs, D2 rhs) { return lhs >= rhs; }
+        inline D3 operator()(D1 lhs, D2 rhs) const { return lhs >= rhs; }
     };
 
     template<typename D1, typename D2 = D1, typename D3 = bool>
     struct LessEqual
     {
-        typedef D1 lhs_type;
-        typedef D2 rhs_type;
-        typedef D3 result_type;
-        inline D3 operator()(D1 lhs, D2 rhs) { return lhs <= rhs; }
+        inline D3 operator()(D1 lhs, D2 rhs) const { return lhs <= rhs; }
     };
+
+    //-------------------------------------------------------------------------
 
     template<typename D1, typename D2 = D1, typename D3 = D1>
     struct First
     {
-        typedef D1 lhs_type;
-        typedef D2 rhs_type;
-        typedef D3 result_type;
-        inline D3 operator()(D1 lhs, D2 rhs) { return lhs; }
+        inline D3 operator()(D1 lhs, D2 rhs) const { return lhs; }
     };
 
-    template<typename D1, typename D2 = D1, typename D3 = D1>
+    // Note output type, D3, defaults to D2
+    template<typename D1, typename D2 = D1, typename D3 = D2>
     struct Second
     {
-        typedef D1 lhs_type;
-        typedef D2 rhs_type;
-        typedef D3 result_type;
-        inline D3 operator()(D1 lhs, D2 rhs) { return rhs; }
+        inline D3 operator()(D1 lhs, D2 rhs) const { return rhs; }
     };
 
+    //-------------------------------------------------------------------------
+    /// @todo Consider decltype for D3's default
     template<typename D1, typename D2 = D1, typename D3 = D1>
     struct Min
     {
-        typedef D1 lhs_type;
-        typedef D2 rhs_type;
-        typedef D3 result_type;
-        inline D3 operator()(D1 lhs, D2 rhs) { return lhs < rhs ? lhs : rhs; }
+        inline D3 operator()(D1 lhs, D2 rhs) const { return lhs < rhs ? lhs : rhs; }
     };
 
     template<typename D1, typename D2 = D1, typename D3 = D1>
     struct Max
     {
-        typedef D1 lhs_type;
-        typedef D2 rhs_type;
-        typedef D3 result_type;
-        inline D3 operator()(D1 lhs, D2 rhs) { return lhs < rhs ? rhs : lhs; }
+        inline D3 operator()(D1 lhs, D2 rhs) const { return lhs < rhs ? rhs : lhs; }
     };
+
+    //-------------------------------------------------------------------------
+    /// @todo Consider decltype for D3's default
+    ///
+    /// from std::plus<>::operator() (since C++14)
+    ///
+    /// template<typename T, typename U>
+    /// constexpr auto operator()(T&& &lhs, U&& rhs) const
+    ///  -> decltype(std::forward<T>(lhs) + std::forward<U>(rhs));
 
     template<typename D1, typename D2 = D1, typename D3 = D1>
     struct Plus
     {
-        typedef D1 lhs_type;
-        typedef D2 rhs_type;
-        typedef D3 result_type;
-        inline D3 operator()(D1 lhs, D2 rhs) { return lhs + rhs; }
+        inline D3 operator()(D1 lhs, D2 rhs) const { return lhs + rhs; }
     };
 
     template<typename D1, typename D2 = D1, typename D3 = D1>
     struct Minus
     {
-        typedef D1 lhs_type;
-        typedef D2 rhs_type;
-        typedef D3 result_type;
-        inline D3 operator()(D1 lhs, D2 rhs) { return lhs - rhs; }
+        inline D3 operator()(D1 lhs, D2 rhs) const { return lhs - rhs; }
     };
 
     template<typename D1, typename D2 = D1, typename D3 = D1>
     struct Times
     {
-        typedef D1 lhs_type;
-        typedef D2 rhs_type;
-        typedef D3 result_type;
-        inline D3 operator()(D1 lhs, D2 rhs) { return lhs * rhs; }
+        inline D3 operator()(D1 lhs, D2 rhs) const { return lhs * rhs; }
     };
 
     template<typename D1, typename D2 = D1, typename D3 = D1>
     struct Div
     {
-        typedef D1 lhs_type;
-        typedef D2 rhs_type;
-        typedef D3 result_type;
-        inline D3 operator()(D1 lhs, D2 rhs) { return lhs / rhs; }
+        inline D3 operator()(D1 lhs, D2 rhs) const { return lhs / rhs; }
     };
 
+    // Note: not in GraphBLAS C API Specification
     template<typename D1, typename D2 = D1, typename D3 = D1>
     struct Power
     {
-        typedef D1 lhs_type;
-        typedef D2 rhs_type;
-        typedef D3 result_type;
-        inline D3 operator()(D1 lhs, D2 rhs) { return std::pow(lhs, rhs); }
-    };
-
-    template<typename D1, typename D2 = D1, typename D3 = D1>
-    struct Xor
-    {
-        typedef D3 result_type;
-        inline D3 operator()(D1 lhs, D2 rhs) { return (lhs ^ rhs); }
+        inline D3 operator()(D1 lhs, D2 rhs) const { return std::pow(lhs, rhs); }
     };
 
 } // namespace GraphBLAS
 
 
-typedef GraphBLAS::LogicalOr<bool>    GrB_LOR;
-typedef GraphBLAS::LogicalAnd<bool>   GrB_LAND;
-typedef GraphBLAS::LogicalXor<bool>   GrB_LXOR;
-
 //****************************************************************************
 // Monoids
 //****************************************************************************
 
+//****************************************************************************
+/**
+ * The macro for building simple templated monoid classes
+ *
+ * @param[in]  M_NAME     The class name
+ * @param[in]  BINARYOP   The binary op callable to turn into a monoid
+ * @param[in]  IDENTITY   The multiplication binary function
+ *
+ * Note: the following only generates a template class where the identity is
+ * the "same" (with casting) regardless of ScalarT
+ *
+ * @todo Explore if this can be done with a class template like with MaxMonoid
+ */
 #define GEN_GRAPHBLAS_MONOID(M_NAME, BINARYOP, IDENTITY)        \
     template <typename ScalarT>                                 \
     struct M_NAME                                               \
     {                                                           \
     public:                                                     \
-        typedef ScalarT lhs_type;                               \
-        typedef ScalarT rhs_type;                               \
-        typedef ScalarT ScalarType;                             \
-        typedef ScalarT result_type;                            \
+        using result_type = ScalarT;                            \
                                                                 \
         ScalarT identity() const                                \
         {                                                       \
@@ -310,17 +379,109 @@ typedef GraphBLAS::LogicalXor<bool>   GrB_LXOR;
         }                                                       \
     };
 
+//****************************************************************************
 namespace GraphBLAS
 {
     GEN_GRAPHBLAS_MONOID(PlusMonoid, Plus, 0)
     GEN_GRAPHBLAS_MONOID(TimesMonoid, Times, 1)
-    GEN_GRAPHBLAS_MONOID(MinMonoid, Min, std::numeric_limits<ScalarT>::max())
 
-    /// @todo The following identity only works for unsigned domains
-    /// std::numerical_limits<>::min() does not work for floating point types
-    GEN_GRAPHBLAS_MONOID(MaxMonoid, Max, 0)
+    /// @todo the following identity only works for boolean domain
+    GEN_GRAPHBLAS_MONOID(LogicalOrMonoid,   LogicalOr,   false)
+    GEN_GRAPHBLAS_MONOID(LogicalAndMonoid,  LogicalAnd,  true)
+    GEN_GRAPHBLAS_MONOID(LogicalXorMonoid,  LogicalXor,  false)
+    GEN_GRAPHBLAS_MONOID(LogicalXnorMonoid, LogicalXnor, true)
 
-    GEN_GRAPHBLAS_MONOID(LogicalOrMonoid, LogicalOr, false)
+    // ***********************************************************************
+    // MaxMonoid identity depends on the type requiring class templates and SFINAE
+    // See below for explicit instantiations
+    template <typename ScalarT, typename Enable = void>
+    class MaxMonoid;
+
+    // MaxMonoid for ints
+    template <typename ScalarT>
+    class MaxMonoid<ScalarT,
+                    typename std::enable_if_t<std::is_integral_v<ScalarT> > >
+    {
+    public:
+        using result_type = ScalarT;
+
+        ScalarT identity() const
+        {
+            return static_cast<ScalarT>(std::numeric_limits<ScalarT>::min());
+        }
+
+        ScalarT operator()(ScalarT lhs, ScalarT rhs) const
+        {
+            return GraphBLAS::Max<ScalarT>()(lhs, rhs);
+        }
+    };
+
+    // MaxMonoid for floating point numbers
+    template <typename ScalarT>
+    class MaxMonoid<ScalarT,
+                    typename std::enable_if_t<std::is_floating_point_v<ScalarT> > >
+    {
+    public:
+        using result_type = ScalarT;
+
+        ScalarT identity() const
+        {
+            return static_cast<ScalarT>(-std::numeric_limits<ScalarT>::infinity());
+        }
+
+        ScalarT operator()(ScalarT lhs, ScalarT rhs) const
+        {
+            return GraphBLAS::Max<ScalarT>()(lhs, rhs);
+        }
+    };
+
+
+    //GEN_GRAPHBLAS_MONOID(MinMonoid, Min, std::numeric_limits<ScalarT>::max())
+
+    // ***********************************************************************
+    // MinMonoid identity depends on the type requiring class templates and SFINAE
+    // See below for explicit instantiations
+    template <typename ScalarT, typename Enable = void>
+    class MinMonoid;
+
+    // MinMonoid for ints
+    template <typename ScalarT>
+    class MinMonoid<ScalarT,
+                    typename std::enable_if_t<std::is_integral_v<ScalarT> > >
+    {
+    public:
+        using result_type = ScalarT;
+
+        ScalarT identity() const
+        {
+            return static_cast<ScalarT>(std::numeric_limits<ScalarT>::max());
+        }
+
+        ScalarT operator()(ScalarT lhs, ScalarT rhs) const
+        {
+            return GraphBLAS::Min<ScalarT>()(lhs, rhs);
+        }
+    };
+
+    // MinMonoid for floating point numbers
+    template <typename ScalarT>
+    class MinMonoid<ScalarT,
+                    typename std::enable_if_t<std::is_floating_point_v<ScalarT> > >
+    {
+    public:
+        using result_type = ScalarT;
+
+        ScalarT identity() const
+        {
+            return static_cast<ScalarT>(std::numeric_limits<ScalarT>::infinity());
+        }
+
+        ScalarT operator()(ScalarT lhs, ScalarT rhs) const
+        {
+            return GraphBLAS::Min<ScalarT>()(lhs, rhs);
+        }
+    };
+
 } // GraphBLAS
 
 //****************************************************************************
@@ -328,21 +489,20 @@ namespace GraphBLAS
 //****************************************************************************
 
 /**
- * The macro for building semi-ring objects
+ * The macro for building simple templated semiring classes
  *
  * @param[in]  SRNAME        The class name
  * @param[in]  ADD_MONOID    The addition monoid
- * @param[in]  MULT_BINARYOP The multiplication binary function
+ * @param[in]  MULT_BINARYOP The multiplication binary operator
  */
 #define GEN_GRAPHBLAS_SEMIRING(SRNAME, ADD_MONOID, MULT_BINARYOP)       \
     template <typename D1, typename D2=D1, typename D3=D1>              \
     class SRNAME                                                        \
     {                                                                   \
     public:                                                             \
-        typedef D1 lhs_type;                                            \
-        typedef D2 rhs_type;                                            \
-        typedef D3 ScalarType;                                          \
-        typedef D3 result_type;                                         \
+        using first_argument_type = D1;                                 \
+        using second_argument_type = D2;                                \
+        using result_type = D3;                                         \
                                                                         \
         D3 add(D3 a, D3 b) const                                        \
         { return ADD_MONOID<D3>()(a, b); }                              \
@@ -350,29 +510,68 @@ namespace GraphBLAS
         D3 mult(D1 a, D2 b) const                                       \
         { return MULT_BINARYOP<D1,D2,D3>()(a, b); }                     \
                                                                         \
-        ScalarType zero() const                                         \
+        D3 zero() const                                                 \
         { return ADD_MONOID<D3>().identity(); }                         \
     };
 
 
 namespace GraphBLAS
 {
+    //************************************************************************
+    // "true" and "useful" semirings
+    //************************************************************************
+
+    //************************************************************************
+    // "true" Arithmetic Semiring aka PlusTimesSemiring
     GEN_GRAPHBLAS_SEMIRING(ArithmeticSemiring, PlusMonoid, Times)
 
-    GEN_GRAPHBLAS_SEMIRING(LogicalSemiring, LogicalOrMonoid, LogicalAnd)
-
+    //************************************************************************
     /// @note the Plus operator would need to be "infinity aware" if the caller
     /// were to pass "infinity" sentinel as one of the arguments. But no
     /// GraphBLAS operations 'should' do that.
     GEN_GRAPHBLAS_SEMIRING(MinPlusSemiring, MinMonoid, Plus)
 
+    //************************************************************************
+    // MaxPlusSemiring is a true semiring signed integers and floating point
+    // MaxPlusSemiring is a "useful" semiring for unsigned ints
+    GEN_GRAPHBLAS_SEMIRING(MaxPlusSemiring, MaxMonoid, Plus)
+
+    //************************************************************************
+    // MinTimesSemiring is a true semiring signed integers and floating point
+    // MinTimesSemiring is a "useful" semiring for unsigned ints
+    GEN_GRAPHBLAS_SEMIRING(MinTimesSemiring, MinMonoid, Times)
+
+    //************************************************************************
+    // MaxTimesSemiring is a true semiring for unsigned ints
+    // MaxTimesSemiring is a "useful" semiring signed integers and floating point
     GEN_GRAPHBLAS_SEMIRING(MaxTimesSemiring, MaxMonoid, Times)
 
-    GEN_GRAPHBLAS_SEMIRING(MinSelect2ndSemiring, MinMonoid, Second)
-    GEN_GRAPHBLAS_SEMIRING(MaxSelect2ndSemiring, MaxMonoid, Second)
+    //************************************************************************
+    // more "true" semirings
+    GEN_GRAPHBLAS_SEMIRING(MinMaxSemiring, MinMonoid, Max)
+    GEN_GRAPHBLAS_SEMIRING(MaxMinSemiring, MaxMonoid, Min)
 
-    GEN_GRAPHBLAS_SEMIRING(MinSelect1stSemiring, MinMonoid, First)
-    GEN_GRAPHBLAS_SEMIRING(MaxSelect1stSemiring, MaxMonoid, First)
+    //************************************************************************
+    // PlusMinSemiring is a true semiring for unsigned ints
+    // PlusMinSemiring is a "useful" semiring signed integers and floating point
+    GEN_GRAPHBLAS_SEMIRING(PlusMinSemiring, PlusMonoid, Min)
+
+    //************************************************************************
+    /// @todo restrict to boolean?
+    GEN_GRAPHBLAS_SEMIRING(LogicalSemiring, LogicalOrMonoid,   LogicalAnd)
+    GEN_GRAPHBLAS_SEMIRING(AndOrSemiring,   LogicalAndMonoid,  LogicalOr)
+    GEN_GRAPHBLAS_SEMIRING(XorAndSemiring,  LogicalXorMonoid,  LogicalAnd)
+    GEN_GRAPHBLAS_SEMIRING(XnorOrSemiring,  LogicalXnorMonoid, LogicalOr)
+
+    //************************************************************************
+    // "other useful" semirings
+    //************************************************************************
+    GEN_GRAPHBLAS_SEMIRING(MinFirstSemiring, MinMonoid, First)
+    GEN_GRAPHBLAS_SEMIRING(MinSecondSemiring, MinMonoid, Second)
+
+    GEN_GRAPHBLAS_SEMIRING(MaxFirstSemiring, MaxMonoid, First)
+    GEN_GRAPHBLAS_SEMIRING(MaxSecondSemiring, MaxMonoid, Second)
+
 } // namespace GraphBLAS
 
 //****************************************************************************
@@ -386,15 +585,14 @@ namespace GraphBLAS
     struct MultiplicativeOpFromSemiring
     {
     public:
-        typedef typename SemiringT::lhs_type lhs_type;
-        typedef typename SemiringT::rhs_type rhs_type;
-        typedef typename SemiringT::result_type result_type;
-        typedef typename SemiringT::ScalarType ScalarType;
+        //using result_type = typename SemiringT::result_type;
 
         MultiplicativeOpFromSemiring() = delete;
         MultiplicativeOpFromSemiring(SemiringT const &sr) : sr(sr) {}
 
-        ScalarType operator() (lhs_type lhs, rhs_type rhs) const
+        typename SemiringT::result_type operator() (
+            typename SemiringT::first_argument_type  lhs,
+            typename SemiringT::second_argument_type rhs) const
         {
             return sr.mult(lhs, rhs);
         }
@@ -408,18 +606,19 @@ namespace GraphBLAS
     struct AdditiveMonoidFromSemiring
     {
     public:
-        typedef typename SemiringT::result_type result_type;
-        typedef typename SemiringT::ScalarType ScalarType;
+        //using result_type = typename SemiringT::result_type;
 
         AdditiveMonoidFromSemiring() = delete;
         AdditiveMonoidFromSemiring(SemiringT const &sr) : sr(sr) {}
 
-        ScalarType identity() const
+        typename SemiringT::result_type identity() const
         {
             return sr.zero();
         }
 
-        ScalarType operator() (ScalarType lhs, ScalarType rhs) const
+        typename SemiringT::result_type operator() (
+            typename SemiringT::result_type lhs,
+            typename SemiringT::result_type rhs) const
         {
             return sr.add(lhs, rhs);
         }

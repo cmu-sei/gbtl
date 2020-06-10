@@ -1,7 +1,7 @@
 /*
- * GraphBLAS Template Library, Version 2.0
+ * GraphBLAS Template Library, Version 2.1
  *
- * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Copyright 2020 Carnegie Mellon University, Battelle Memorial Institute, and
  * Authors. All Rights Reserved.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
@@ -32,9 +32,6 @@
  * (CPU) backend.
  */
 
-#ifndef GB_SEQUENTIAL_OPERATIONS_HPP
-#define GB_SEQUENTIAL_OPERATIONS_HPP
-
 #pragma once
 
 #include <functional>
@@ -43,8 +40,6 @@
 #include <iterator>
 
 #include <graphblas/algebra.hpp>
-#include <graphblas/platforms/sequential/TransposeView.hpp>
-#include <graphblas/platforms/sequential/ComplementView.hpp>
 
 // Add individual operation files here
 #include <graphblas/platforms/sequential/sparse_mxm.hpp>
@@ -57,39 +52,4 @@
 #include <graphblas/platforms/sequential/sparse_apply.hpp>
 #include <graphblas/platforms/sequential/sparse_reduce.hpp>
 #include <graphblas/platforms/sequential/sparse_transpose.hpp>
-
-
-namespace GraphBLAS
-{
-    namespace backend
-    {
-        /**
-         *
-         */
-
-        template<typename MatrixT>
-        inline MatrixComplementView<MatrixT> matrix_complement(MatrixT const &Mask)
-        {
-            return MatrixComplementView<MatrixT>(Mask);
-        }
-
-        template<typename VectorT>
-        inline VectorComplementView<VectorT> vector_complement(VectorT const &mask)
-        {
-            return VectorComplementView<VectorT>(mask);
-        }
-
-
-        /**
-         *
-         */
-        template<typename MatrixT>
-        inline TransposeView<MatrixT> transpose(MatrixT const &A)
-        {
-            return TransposeView<MatrixT>(A);
-        }
-
-    } // backend
-} // GraphBLAS
-
-#endif // GB_SEQUENTIAL_OPERATIONS_HPP
+#include <graphblas/platforms/sequential/sparse_kronecker.hpp>

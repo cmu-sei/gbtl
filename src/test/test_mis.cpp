@@ -43,8 +43,8 @@ BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(mis_test)
 {
-    typedef GraphBLAS::Matrix<double> GBMatrix;
-    typedef GraphBLAS::Vector<double> GBVector;
+    using GBMatrix = GraphBLAS::Matrix<double>;
+    using GBVector = GraphBLAS::Vector<double>;
 
     GraphBLAS::IndexType const NUM_NODES(7);
     GraphBLAS::IndexArrayType i = {0, 0, 1, 1, 2, 2, 3, 3, 3,
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(mis_test_isolated_vertex)
 
     /// @todo change scalar type to unsigned int or GraphBLAS::IndexType
     using T = GraphBLAS::IndexType;
-    typedef GraphBLAS::Matrix<T, GraphBLAS::DirectedMatrixTag> GBMatrix;
+    using GBMatrix = GraphBLAS::Matrix<T, GraphBLAS::DirectedMatrixTag>;
 
     GraphBLAS::IndexType const NUM_NODES = 9;
     GraphBLAS::IndexArrayType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,

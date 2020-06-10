@@ -116,7 +116,7 @@ namespace
 //****************************************************************************
 int main(int argc, char **argv)
 {
-    typedef int T;
+    using T = int;
 
     // create an incidence matrix from the data
     IndexType num_edges = 0;

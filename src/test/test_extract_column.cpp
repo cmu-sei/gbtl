@@ -1,7 +1,7 @@
 /*
- * GraphBLAS Template Library, Version 2.0
+ * GraphBLAS Template Library, Version 2.1
  *
- * Copyright 2018 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Copyright 2019 Carnegie Mellon University, Battelle Memorial Institute, and
  * Authors. All Rights Reserved.
  *
  * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
@@ -681,7 +681,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_noaccum_notrans)
         // replace
         Vector<double> result(res, 0.);
         extract(result, mask3, NoAccumulate(),
-                mA, AllIndices(), (IndexType)2, true);
+                mA, AllIndices(), (IndexType)2, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -696,7 +696,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_noaccum_notrans)
         // merge
         Vector<double> result(res, 0.);
         extract(result, mask3, NoAccumulate(),
-                mA, AllIndices(), (IndexType)2, false);
+                mA, AllIndices(), (IndexType)2, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -714,7 +714,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_noaccum_notrans)
         // replace
         Vector<double> result(res, 0.);
         extract(result, mask2, NoAccumulate(),
-                mA, row_indices, (IndexType)1, true);
+                mA, row_indices, (IndexType)1, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -731,7 +731,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_noaccum_notrans)
         // merge
         Vector<double> result(res, 0.);
         extract(result, mask2, NoAccumulate(),
-                mA, row_indices, (IndexType)1, false);
+                mA, row_indices, (IndexType)1, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -749,7 +749,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_noaccum_notrans)
         // replace
         Vector<double> result(res, 0.);
         extract(result, mask2, NoAccumulate(),
-                mA, row_indices, (IndexType)1, true);
+                mA, row_indices, (IndexType)1, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -765,7 +765,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_noaccum_notrans)
         // merge
         Vector<double> result(res, 0.);
         extract(result, mask2, NoAccumulate(),
-                mA, row_indices, (IndexType)1, false);
+                mA, row_indices, (IndexType)1, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -783,7 +783,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_noaccum_notrans)
         // replace
         Vector<double> result(res, 0.);
         extract(result, mask3, NoAccumulate(),
-                mA, row_indices, (IndexType)1, true);
+                mA, row_indices, (IndexType)1, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -799,7 +799,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_noaccum_notrans)
         // merge
         Vector<double> result(res, 0.);
         extract(result, mask3, NoAccumulate(),
-                mA, row_indices, (IndexType)1, false);
+                mA, row_indices, (IndexType)1, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -816,7 +816,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_noaccum_notrans)
         // replace
         Vector<double> result(res, 0.);
         extract(result, mask3, NoAccumulate(),
-                mA, row_indices, (IndexType)1, true);
+                mA, row_indices, (IndexType)1, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -832,7 +832,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_noaccum_notrans)
         // merge
         Vector<double> result(res, 0.);
         extract(result, mask3, NoAccumulate(),
-                mA, row_indices, (IndexType)1, false);
+                mA, row_indices, (IndexType)1, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -861,7 +861,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_noaccum_trans)
         Vector<double> result(res);
 
         extract(result, mask4, NoAccumulate(),
-                transpose(mA), AllIndices(), (IndexType)2, true);  // replace
+                transpose(mA), AllIndices(), (IndexType)2, REPLACE);  // replace
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -873,7 +873,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_noaccum_trans)
         Vector<double> result(res);
 
         extract(result, mask4, NoAccumulate(),
-                transpose(mA), AllIndices(), (IndexType)2, false);  // merge
+                transpose(mA), AllIndices(), (IndexType)2, MERGE);  // merge
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -889,7 +889,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_noaccum_trans)
         Vector<double> result(res);
 
         extract(result, mask3, NoAccumulate(),
-                transpose(mA), row_indices, (IndexType)2, true);  // replace
+                transpose(mA), row_indices, (IndexType)2, REPLACE);  // replace
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -903,7 +903,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_noaccum_trans)
         Vector<double> result(res);
 
         extract(result, mask3, NoAccumulate(),
-                transpose(mA), row_indices, (IndexType)2, false);  // merge
+                transpose(mA), row_indices, (IndexType)2, MERGE);  // merge
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -919,7 +919,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_noaccum_trans)
         Vector<double> result(res);
 
         extract(result, mask3,  NoAccumulate(),
-                transpose(mA), row_indices, (IndexType)2, true);
+                transpose(mA), row_indices, (IndexType)2, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -933,7 +933,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_noaccum_trans)
         Vector<double> result(res);
 
         extract(result, mask3,  NoAccumulate(),
-                transpose(mA), row_indices, (IndexType)2, false);
+                transpose(mA), row_indices, (IndexType)2, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -950,7 +950,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_noaccum_trans)
         Vector<double> result(res);
 
         extract(result, mask4, NoAccumulate(),
-                transpose(mA), row_indices, (IndexType)2, true);
+                transpose(mA), row_indices, (IndexType)2, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -964,7 +964,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_noaccum_trans)
         Vector<double> result(res);
 
         extract(result, mask4, NoAccumulate(),
-                transpose(mA), row_indices, (IndexType)2, false);
+                transpose(mA), row_indices, (IndexType)2, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -980,7 +980,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_noaccum_trans)
         Vector<double> result(res);
 
         extract(result, mask4, NoAccumulate(),
-                transpose(mA), row_indices, (IndexType)2, true);
+                transpose(mA), row_indices, (IndexType)2, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -994,7 +994,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_noaccum_trans)
         Vector<double> result(res);
 
         extract(result, mask4, NoAccumulate(),
-                transpose(mA), row_indices, (IndexType)2, false);
+                transpose(mA), row_indices, (IndexType)2, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1022,7 +1022,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_accum_notrans)
         Vector<double> result(res, 0.);
 
         extract(result, mask3, Plus<double>(),
-                mA, AllIndices(), (IndexType)2, true);
+                mA, AllIndices(), (IndexType)2, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1034,7 +1034,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_accum_notrans)
         Vector<double> result(res, 0.);
 
         extract(result, mask3, Plus<double>(),
-                mA, AllIndices(), (IndexType)2, false);
+                mA, AllIndices(), (IndexType)2, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1050,7 +1050,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_accum_notrans)
         Vector<double> result(res, 0.);
 
         extract(result, mask2, Plus<double>(),
-                mA, row_indices, (IndexType)1, true);
+                mA, row_indices, (IndexType)1, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1064,7 +1064,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_accum_notrans)
         Vector<double> result(res, 0.);
 
         extract(result, mask2, Plus<double>(),
-                mA, row_indices, (IndexType)1, false);
+                mA, row_indices, (IndexType)1, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1080,7 +1080,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_accum_notrans)
         Vector<double> result(res, 0.);
 
         extract(result, mask2, Plus<double>(),
-                mA, row_indices, (IndexType)1, true);
+                mA, row_indices, (IndexType)1, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1094,7 +1094,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_accum_notrans)
         Vector<double> result(res, 0.);
 
         extract(result, mask2, Plus<double>(),
-                mA, row_indices, (IndexType)1, false);
+                mA, row_indices, (IndexType)1, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1110,7 +1110,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_accum_notrans)
         Vector<double> result(res, 0.);
 
         extract(result, mask3, Plus<double>(),
-                mA, row_indices, (IndexType)1, true);
+                mA, row_indices, (IndexType)1, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1124,7 +1124,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_accum_notrans)
         Vector<double> result(res, 0.);
 
         extract(result, mask3, Plus<double>(),
-                mA, row_indices, (IndexType)1, false);
+                mA, row_indices, (IndexType)1, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1140,7 +1140,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_accum_notrans)
         Vector<double> result(res, 0.);
 
         extract(result, mask3, Plus<double>(),
-                mA, row_indices, (IndexType)1, true);
+                mA, row_indices, (IndexType)1, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1154,7 +1154,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_accum_notrans)
         Vector<double> result(res, 0.);
 
         extract(result, mask3, Plus<double>(),
-                mA, row_indices, (IndexType)1, false);
+                mA, row_indices, (IndexType)1, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1182,7 +1182,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_accum_trans)
         Vector<double> result(res);
 
         extract(result, mask4, Plus<double>(),
-                transpose(mA), AllIndices(), (IndexType)2, true);  // replace
+                transpose(mA), AllIndices(), (IndexType)2, REPLACE);  // replace
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1194,7 +1194,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_accum_trans)
         Vector<double> result(res);
 
         extract(result, mask4, Plus<double>(),
-                transpose(mA), AllIndices(), (IndexType)2, false);  // merge
+                transpose(mA), AllIndices(), (IndexType)2, MERGE);  // merge
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1210,7 +1210,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_accum_trans)
         Vector<double> result(res);
 
         extract(result, mask3, Plus<double>(),
-                transpose(mA), row_indices, (IndexType)2, true);  // replace
+                transpose(mA), row_indices, (IndexType)2, REPLACE);  // replace
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1224,7 +1224,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_accum_trans)
         Vector<double> result(res);
 
         extract(result, mask3, Plus<double>(),
-                transpose(mA), row_indices, (IndexType)2, false);  // merge
+                transpose(mA), row_indices, (IndexType)2, MERGE);  // merge
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1240,7 +1240,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_accum_trans)
         Vector<double> result(res);
 
         extract(result, mask3,  Plus<double>(),
-                transpose(mA), row_indices, (IndexType)2, true);
+                transpose(mA), row_indices, (IndexType)2, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1254,7 +1254,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_accum_trans)
         Vector<double> result(res);
 
         extract(result, mask3,  Plus<double>(),
-                transpose(mA), row_indices, (IndexType)2, false);
+                transpose(mA), row_indices, (IndexType)2, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1271,7 +1271,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_accum_trans)
         Vector<double> result(res);
 
         extract(result, mask4, Plus<double>(),
-                transpose(mA), row_indices, (IndexType)2, true);
+                transpose(mA), row_indices, (IndexType)2, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1285,7 +1285,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_accum_trans)
         Vector<double> result(res);
 
         extract(result, mask4, Plus<double>(),
-                transpose(mA), row_indices, (IndexType)2, false);
+                transpose(mA), row_indices, (IndexType)2, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1301,7 +1301,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_accum_trans)
         Vector<double> result(res);
 
         extract(result, mask4, Plus<double>(),
-                transpose(mA), row_indices, (IndexType)2, true);
+                transpose(mA), row_indices, (IndexType)2, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1315,7 +1315,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_noscmp_accum_trans)
         Vector<double> result(res);
 
         extract(result, mask4, Plus<double>(),
-                transpose(mA), row_indices, (IndexType)2, false);
+                transpose(mA), row_indices, (IndexType)2, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1342,7 +1342,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_noaccum_notrans)
         std::vector<double> res = {9, 9, 9};
         Vector<double> result(res, 0.);
         extract(result, complement(mask3), NoAccumulate(),
-                mA, AllIndices(), (IndexType)2, true);
+                mA, AllIndices(), (IndexType)2, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1353,7 +1353,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_noaccum_notrans)
         std::vector<double> res = {9, 9, 9};
         Vector<double> result(res, 0.);
         extract(result, complement(mask3), NoAccumulate(),
-                mA, AllIndices(), (IndexType)2, false);
+                mA, AllIndices(), (IndexType)2, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1368,7 +1368,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_noaccum_notrans)
         std::vector<double> res = {9, 9};
         Vector<double> result(res, 0.);
         extract(result, complement(mask2), NoAccumulate(),
-                mA, row_indices, (IndexType)1, true);
+                mA, row_indices, (IndexType)1, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1381,7 +1381,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_noaccum_notrans)
         std::vector<double> res = {9, 9};
         Vector<double> result(res, 0.);
         extract(result, complement(mask2), NoAccumulate(),
-                mA, row_indices, (IndexType)1, false);
+                mA, row_indices, (IndexType)1, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1396,7 +1396,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_noaccum_notrans)
         std::vector<double> res = {9, 9};
         Vector<double> result(res, 0.);
         extract(result, complement(mask2), NoAccumulate(),
-                mA, row_indices, (IndexType)1, true);
+                mA, row_indices, (IndexType)1, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1409,7 +1409,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_noaccum_notrans)
         std::vector<double> res = {9, 9};
         Vector<double> result(res, 0.);
         extract(result, complement(mask2), NoAccumulate(),
-                mA, row_indices, (IndexType)1, false);
+                mA, row_indices, (IndexType)1, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1424,7 +1424,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_noaccum_notrans)
         std::vector<double> res = {9, 9, 9};
         Vector<double> result(res, 0.);
         extract(result, complement(mask3), NoAccumulate(),
-                mA, row_indices, (IndexType)1, true);
+                mA, row_indices, (IndexType)1, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1437,7 +1437,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_noaccum_notrans)
         std::vector<double> res = {9, 9, 9};
         Vector<double> result(res, 0.);
         extract(result, complement(mask3), NoAccumulate(),
-                mA, row_indices, (IndexType)1, false);
+                mA, row_indices, (IndexType)1, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1451,7 +1451,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_noaccum_notrans)
         std::vector<double> res = {9, 9, 9};
         Vector<double> result(res, 0.);
         extract(result, complement(mask3), NoAccumulate(),
-                mA, row_indices, (IndexType)1, true);
+                mA, row_indices, (IndexType)1, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1464,7 +1464,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_noaccum_notrans)
         std::vector<double> res = {9, 9, 9};
         Vector<double> result(res, 0.);
         extract(result, complement(mask3), NoAccumulate(),
-                mA, row_indices, (IndexType)1, false);
+                mA, row_indices, (IndexType)1, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1493,7 +1493,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_noaccum_trans)
         Vector<double> result(res);
 
         extract(result, complement(mask4), NoAccumulate(),
-                transpose(mA), AllIndices(), (IndexType)2, true);  // replace
+                transpose(mA), AllIndices(), (IndexType)2, REPLACE);  // replace
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1505,7 +1505,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_noaccum_trans)
         Vector<double> result(res);
 
         extract(result, complement(mask4), NoAccumulate(),
-                transpose(mA), AllIndices(), (IndexType)2, false);  // merge
+                transpose(mA), AllIndices(), (IndexType)2, MERGE);  // merge
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1521,7 +1521,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_noaccum_trans)
         Vector<double> result(res);
 
         extract(result, complement(mask3), NoAccumulate(),
-                transpose(mA), row_indices, (IndexType)2, true);  // replace
+                transpose(mA), row_indices, (IndexType)2, REPLACE);  // replace
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1535,7 +1535,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_noaccum_trans)
         Vector<double> result(res);
 
         extract(result, complement(mask3), NoAccumulate(),
-                transpose(mA), row_indices, (IndexType)2, false);  // merge
+                transpose(mA), row_indices, (IndexType)2, MERGE);  // merge
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1551,7 +1551,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_noaccum_trans)
         Vector<double> result(res);
 
         extract(result, complement(mask3),  NoAccumulate(),
-                transpose(mA), row_indices, (IndexType)2, true);
+                transpose(mA), row_indices, (IndexType)2, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1565,7 +1565,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_noaccum_trans)
         Vector<double> result(res);
 
         extract(result, complement(mask3),  NoAccumulate(),
-                transpose(mA), row_indices, (IndexType)2, false);
+                transpose(mA), row_indices, (IndexType)2, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1582,7 +1582,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_noaccum_trans)
         Vector<double> result(res);
 
         extract(result, complement(mask4), NoAccumulate(),
-                transpose(mA), row_indices, (IndexType)2, true);
+                transpose(mA), row_indices, (IndexType)2, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1596,7 +1596,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_noaccum_trans)
         Vector<double> result(res);
 
         extract(result, complement(mask4), NoAccumulate(),
-                transpose(mA), row_indices, (IndexType)2, false);
+                transpose(mA), row_indices, (IndexType)2, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1612,7 +1612,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_noaccum_trans)
         Vector<double> result(res);
 
         extract(result, complement(mask4), NoAccumulate(),
-                transpose(mA), row_indices, (IndexType)2, true);
+                transpose(mA), row_indices, (IndexType)2, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1626,7 +1626,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_noaccum_trans)
         Vector<double> result(res);
 
         extract(result, complement(mask4), NoAccumulate(),
-                transpose(mA), row_indices, (IndexType)2, false);
+                transpose(mA), row_indices, (IndexType)2, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1654,7 +1654,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_accum_notrans)
         Vector<double> result(res, 0.);
 
         extract(result, complement(mask3), Plus<double>(),
-                mA, AllIndices(), (IndexType)1, true);
+                mA, AllIndices(), (IndexType)1, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1666,7 +1666,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_accum_notrans)
         Vector<double> result(res, 0.);
 
         extract(result, complement(mask3), Plus<double>(),
-                mA, AllIndices(), (IndexType)1, false);
+                mA, AllIndices(), (IndexType)1, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1682,7 +1682,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_accum_notrans)
         Vector<double> result(res, 0.);
 
         extract(result, complement(mask2), Plus<double>(),
-                mA, row_indices, (IndexType)1, true);
+                mA, row_indices, (IndexType)1, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1696,7 +1696,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_accum_notrans)
         Vector<double> result(res, 0.);
 
         extract(result, complement(mask2), Plus<double>(),
-                mA, row_indices, (IndexType)1, false);
+                mA, row_indices, (IndexType)1, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1712,7 +1712,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_accum_notrans)
         Vector<double> result(res, 0.);
 
         extract(result, complement(mask2), Plus<double>(),
-                mA, row_indices, (IndexType)1, true);
+                mA, row_indices, (IndexType)1, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1726,7 +1726,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_accum_notrans)
         Vector<double> result(res, 0.);
 
         extract(result, complement(mask2), Plus<double>(),
-                mA, row_indices, (IndexType)1, false);
+                mA, row_indices, (IndexType)1, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1742,7 +1742,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_accum_notrans)
         Vector<double> result(res, 0.);
 
         extract(result, complement(mask3), Plus<double>(),
-                mA, row_indices, (IndexType)1, true);
+                mA, row_indices, (IndexType)1, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1756,7 +1756,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_accum_notrans)
         Vector<double> result(res, 0.);
 
         extract(result, complement(mask3), Plus<double>(),
-                mA, row_indices, (IndexType)1, false);
+                mA, row_indices, (IndexType)1, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1772,7 +1772,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_accum_notrans)
         Vector<double> result(res, 0.);
 
         extract(result, complement(mask3), Plus<double>(),
-                mA, row_indices, (IndexType)1, true);
+                mA, row_indices, (IndexType)1, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1786,7 +1786,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_accum_notrans)
         Vector<double> result(res, 0.);
 
         extract(result, complement(mask3), Plus<double>(),
-                mA, row_indices, (IndexType)1, false);
+                mA, row_indices, (IndexType)1, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1814,7 +1814,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_accum_trans)
         Vector<double> result(res);
 
         extract(result, complement(mask4), Plus<double>(),
-                transpose(mA), AllIndices(), (IndexType)2, true);  // replace
+                transpose(mA), AllIndices(), (IndexType)2, REPLACE);  // replace
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1826,7 +1826,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_accum_trans)
         Vector<double> result(res);
 
         extract(result, complement(mask4), Plus<double>(),
-                transpose(mA), AllIndices(), (IndexType)2, false);  // merge
+                transpose(mA), AllIndices(), (IndexType)2, MERGE);  // merge
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1842,7 +1842,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_accum_trans)
         Vector<double> result(res);
 
         extract(result, complement(mask3), Plus<double>(),
-                transpose(mA), row_indices, (IndexType)2, true);  // replace
+                transpose(mA), row_indices, (IndexType)2, REPLACE);  // replace
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1856,7 +1856,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_accum_trans)
         Vector<double> result(res);
 
         extract(result, complement(mask3), Plus<double>(),
-                transpose(mA), row_indices, (IndexType)2, false);  // merge
+                transpose(mA), row_indices, (IndexType)2, MERGE);  // merge
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1872,7 +1872,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_accum_trans)
         Vector<double> result(res);
 
         extract(result, complement(mask3),  Plus<double>(),
-                transpose(mA), row_indices, (IndexType)2, true);
+                transpose(mA), row_indices, (IndexType)2, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1886,7 +1886,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_accum_trans)
         Vector<double> result(res);
 
         extract(result, complement(mask3),  Plus<double>(),
-                transpose(mA), row_indices, (IndexType)2, false);
+                transpose(mA), row_indices, (IndexType)2, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1903,7 +1903,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_accum_trans)
         Vector<double> result(res);
 
         extract(result, complement(mask4), Plus<double>(),
-                transpose(mA), row_indices, (IndexType)2, true);
+                transpose(mA), row_indices, (IndexType)2, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1917,7 +1917,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_accum_trans)
         Vector<double> result(res);
 
         extract(result, complement(mask4), Plus<double>(),
-                transpose(mA), row_indices, (IndexType)2, false);
+                transpose(mA), row_indices, (IndexType)2, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1933,7 +1933,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_accum_trans)
         Vector<double> result(res);
 
         extract(result, complement(mask4), Plus<double>(),
-                transpose(mA), row_indices, (IndexType)2, true);
+                transpose(mA), row_indices, (IndexType)2, REPLACE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }
@@ -1947,7 +1947,7 @@ BOOST_AUTO_TEST_CASE(extract_col_test_scmp_accum_trans)
         Vector<double> result(res);
 
         extract(result, complement(mask4), Plus<double>(),
-                transpose(mA), row_indices, (IndexType)2, false);
+                transpose(mA), row_indices, (IndexType)2, MERGE);
 
         BOOST_CHECK_EQUAL(result, answer);
     }

@@ -37,49 +37,49 @@
 namespace GraphBLAS
 {
     //**************************************************************************
-    // @TODO: How do we get this into comments?
-//    // Sequence::iterator concept
-//    class SequenceIteratorConcept
-//    {
-//    public:
-//        typedef IndexType difference_type;
-//
-//        IndexType operator*() const { return 0; }
-//
-//        const SequenceIteratorConcept &operator++() { return *this; }
-//        SequenceIteratorConcept operator++(int)     { return *this; }
-//
-//        const SequenceIteratorConcept &operator--() { return *this; }
-//        SequenceIteratorConcept operator--(int)     { return *this; }
-//
-//        bool operator==(const SequenceIteratorConcept &other) const { return false; }
-//        bool operator!=(const SequenceIteratorConcept &other) const { return false; }
-//
-//        SequenceIteratorConcept &operator=(const SequenceIteratorConcept &other) { return * this; }
-//
-//        // If we support some of these, we can get slices like
-//        // begin() + size()/4
-//        IndexType operator[](difference_type n) {};
-//    };
-//
-//    // Sequence concept
-//    class SequenceConcept
-//    {
-//    public:
-//        typedef IndexType difference_type;
-//
-//        bool empty() const { return false; }
-//
-//        SequenceIteratorConcept begin() const { return SequenceIteratorConcept(); }
-//        SequenceIteratorConcept end() const { return SequenceIteratorConcept(); }
-//
-//        IndexType size() const { return 0; }
-//
-//        IndexType operator[](difference_type n) const { return 0; }
-//
-//        const IndexType m_begin;
-//        const IndexType m_end;
-//    };
+    /// @todo: How do we get this into comments?
+    // // Sequence::iterator concept
+    // class SequenceIteratorConcept
+    // {
+    // public:
+    //     using difference_type = signed IndexType; ???
+    //
+    //     IndexType operator*() const { return 0; }
+    //
+    //     const SequenceIteratorConcept &operator++() { return *this; }
+    //     SequenceIteratorConcept operator++(int)     { return *this; }
+    //
+    //     const SequenceIteratorConcept &operator--() { return *this; }
+    //     SequenceIteratorConcept operator--(int)     { return *this; }
+    //
+    //     bool operator==(const SequenceIteratorConcept &other) const { return false; }
+    //     bool operator!=(const SequenceIteratorConcept &other) const { return false; }
+    //
+    //     SequenceIteratorConcept &operator=(const SequenceIteratorConcept &other) { return * this; }
+    //
+    //     // If we support some of these, we can get slices like
+    //     // begin() + size()/4
+    //     IndexType operator[](difference_type n) {};
+    // };
+    //
+    // // Sequence concept
+    // class SequenceConcept
+    // {
+    // public:
+    //     using difference_type = signed IndexType;???
+    //
+    //     bool empty() const { return false; }
+    //
+    //     SequenceIteratorConcept begin() const { return SequenceIteratorConcept(); }
+    //     SequenceIteratorConcept end() const { return SequenceIteratorConcept(); }
+    //
+    //     IndexType size() const { return 0; }
+    //
+    //     IndexType operator[](difference_type n) const { return 0; }
+    //
+    //     const IndexType m_begin;
+    //     const IndexType m_end;
+    // };
 
     //**************************************************************************
     //**************************************************************************
@@ -89,7 +89,7 @@ namespace GraphBLAS
     // that range in memory. It is not mutable.
     class IndexGenerator
     {
-        typedef int64_t difference_type;
+        using difference_type = ssize_t;
 
     public:
         IndexGenerator(IndexType value) : m_value(value)
@@ -175,7 +175,7 @@ namespace GraphBLAS
     class IndexSequenceRange
     {
     public:
-        typedef IndexGenerator                      iterator;
+        using iterator = IndexGenerator;
 
         IndexSequenceRange(IndexType begin, IndexType end)
                 : m_begin(begin), m_end(end)
@@ -233,8 +233,7 @@ namespace GraphBLAS
     class AllIndices
     {
     public:
-
-        typedef AllIndicesIterator              iterator;
+        using iterator = AllIndicesIterator;
 
         AllIndices() {}
 

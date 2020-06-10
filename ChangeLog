@@ -1,53 +1,164 @@
-2019-xx In progress
-	* Bug fix: correcting friend declaration signature of vector variant of assign 
-	* Bug fix: enabling mask complements in row/col variants of assign
-	* Bug fix: detect distance updates in current bin of delta stepping SSSP algorithm
-	* Added filtered Bellman-Ford SSSP algorithm
+2020-06 Scott McMillan <smcmillan@sei.cmu.edu>
+    * Version 3.0 Release. C++17 compiler required to build. This version is
+      NOT backward compatible with Version 2.0 for the following reasons:
+        - The boolean "replace_flag" has change types to an enum with
+          MERGE and REPLACE (corresponding false and true respectively).
+        - Some of the names of the monoid and semiring template classes have
+          been changed to more closely match C API 1.3 names
+          (e.g. MaxSelect1stSemiring is now MaxFirstSemiring)
+    * API updated to implement new functionality included in
+      GraphBLAS C API Specification version 1.3:
+        - add getVersion() method (reports the C API equivalent version)
+        - add removeElement() method to Matrix and Vector classes.
+        - add resize() method to Matrix and Vector classes.
+        - add Exclusive-NOR (XNOR) boolean binary operator
+        - add bitwise OR/AND/XOR/XNOR binary operators for integer types
+        - add all predefined monoids and semirings.
+        - add structure-only view for masks (composable with complement).
+        - add kronecker matrix multiply operation.
+        - add apply operation that takes a binary operator and a scalar
+          constant for one of its inputs (Note: this requires constexpr
+          processing and not recommended for C++ due to support of lambdas
+          and bind objects in the original variants).
+    * Modern C++ idioms from C++14 and C++17 Standards included
+        - removed tag_type from Matrix, Vector and "view" classes in
+          favor of modern traits idioms external to the classes.
+        - Using SFINAE techniques for template function overload
+          resolution and also template type restriction (e.g. std::enable_if,
+          etc) both for operators and operations.
+	- used tag dispatch to resolve overloaded template functions
+          (e.g. apply and assign operations)
+        - removed typedefs (like result_type) from within operators to
+          be consistent with C++17 changes to <functional> and to support
+          use of lambdas in place of predefined operator functors.  Replaced
+          uses with decltype() and declval() where necessary.
+        - Replaced typedefs with using.
+        - range based for-loops used where possible in implementation
+        - structured bindings used to access elements of tuples.
+        - Replaced calls to std::vector's insert() and push_back() methods
+          with emplace() and emplace_back() where possible.
+        - Removed GraphBLAS::BinaryOp_Bind2nd functor in favor of C++ STL's
+          std::bind().
+        - Replaced std::conditional<>::type with std::conditional_t<>,
+          std::is_same<>::value with std::is_same_v<>, etc.
+    * Refactored view classes: Changed design of view classes to lightweight
+      wrappers and added support for structure-only views. The "backend"
+      view classes have been removed. Nearly all friend declarations
+      are no longer necessary and have been removed.
+    * "sequential" platform
+        - Numerous performance improvements applied.
+        - modified to replace code paths that accessed columns of the
+          row-major storage matrix with row access only (improves
+          performance).
+        - backend NoMask class removed.
+        - backend View classes removed.
+        - backend utility functions removed (refactored into classes).
+    * New platform: "optimized_sequential" included that is a work in progress
+      to improve the performance of the "sequential" platform. Currently mxm
+      operation is implemented with more efficient code branches (72 of them).
+    * Algorithms:
+        - Updated algorithms replace use of GraphBLAS::BinaryOp_Bind2nd with
+          std::bind().
+        - Updated algorithms to use structure only masks where needed and
+          removed 1-based indexing.
+        - Improved performance of index-of() operation for single-source
+          parent BFS using a dense vector (of index values) and eWiseMult
+          (with First or Second operator).
+        - Added single-source level BFS algorithm
+        - Added Louvain clustering algorithm
+        - Removed an erroneous implementation of maxflow algorithm
+          (maxflow_ford_fulk2)
+        - Two new triangle counting algorithm variants:
+              1) |L .* (L +.* U)|,
+              2) |L .* (L +.* L)| (no transpose).
+        - Removed all experimental (FLAME-based) approaches to triangle
+          counting.
+        - Switched to lambda (as a binary operator to eWiseMult) for
+          computing random values in MIS algorithm so that random number
+          generator objects are local variables.
+        - Changed how nsver is subtracted from result vector in BC
+          algorithm (vertex_betweenness_centrality_batch_alt_trans_v2())
+        - Added direct translation of all algorithms in the appendix of the
+          C API Specification v 1.3.0.
+    * Test and demo programs:
+        - augmented tests for operators (new and old) found in algebra.hpp
+        - augmented tests for mxm to cover all combinations of input
+          transposes and mask views.  Augmented other tests to cover more
+          combinations.
+        - added tests for vector/matrix methods and new operations.
+        - removed tests for TransposeView (aka single argument transpose) and
+          ComplementView.
+        - triangle_count_demo now sorts the vertices by degree (flame
+          versions removed).
+        - new demo programs for appendix_algorithms, louvain clustering
+        - addition of mxm, mxv, and vxm timing demos to measure performance.
+    * Removing additional compiler warnings during build (some still exist
+      from algebra.hpp).
+
+2019-12 Scott McMillan <smcmillan@sei.cmu.edu>
+    * Version 2.0.2 Release.
+    * Bug fix: Remove warnings from build
+    * Bug fix: LilSparseMatrix::extractTuples() return type changed to void.
+    * Addition: Changing some 'checks' to take matrices and vectors as
+      'reference to const' instead of pass by value.
+
+2019-02 Scott McMillan <smcmillan@sei.cmu.edu>
+    * Version 2.0.1 Release.
+    * Bug fix: Added missing friend declarations for complementing mask in
+      row/col assign operations
+    * Bug fix: Corrected friend signature in assign standard vector variant
+    * Bug fix: Fix delta-stepping SSSP when nodes get updated distances
+      within the current bin (added tests for this condition).
+    * Bug fix: Fix karate club graph data (neighbors of vertex 0)
+    * Addition: Added filtered Bellman-Ford algorithm.  Added negative cycle
+      detection to Bellman-Ford (added tests for these).
 
 2018-07 Scott McMillan <smcmillan@sei.cmu.edu>
-	* Version 2.0 Release (merged from spiral_graph branch to master).
-	* API revamped to implement the functionality included in GraphBLAS C API spec
-	* All algorithms revamped to be more "GraphBLAS-ified".
-	* Substantially more unit tests added.
-	* New algorithms added like maxflow, delta-stepping SSSP, etc.
-	* Support for GPU backend removed.
-	* Build system switched from autotools to cmake.
+    * Version 2.0 Release (merged from spiral_graph branch to master).
+    * API revamped to implement the functionality included in
+      GraphBLAS C API Specification version 1.2
+    * All algorithms revamped to be more "GraphBLAS-ified".
+    * Substantially more unit tests added.
+    * New algorithms added like maxflow, delta-stepping SSSP, etc.
+    * Support for GPU backend removed.
+    * Build system switched from autotools to cmake.
 
 2016-04-25 - Tagged as Version 1.0
-	* implemented mxm masking in cusp
-	* fixed ewisemult issue
-	* fixed ewisemult and mxm tests
-	* fixed negation tests
-	* all basic functionalities described in M2 completed.
+    * implemented mxm masking in cusp
+    * fixed ewisemult issue
+    * fixed ewisemult and mxm tests
+    * fixed negation tests
+    * all basic functionalities described in M2 completed.
 2016-04-18
-	* fixed extract and assign operations (passing tests) in cusp
-	* fixed reduction operations and implemented masked reduction operations
+    * fixed extract and assign operations (passing tests) in cusp
+    * fixed reduction operations and implemented masked reduction operations
 2016-04-15
-	* fixed dimension checks on the frontend
-	* implemented == operator on cusp backend matrices
-	* fixed some issues in reduce, extract, assign
+    * fixed dimension checks on the frontend
+    * implemented == operator on cusp backend matrices
+    * fixed some issues in reduce, extract, assign
 2016-04-04
-	* cusp::NegateView implemented
-	* cusp::pretty_print_matrix implemented to support frontend matrix_util::print_matrix
-	* implemented (get,set)_value_at on the cusp backend
+    * cusp::NegateView implemented
+    * cusp::pretty_print_matrix implemented to support frontend
+       matrix_util::print_matrix
+    * implemented (get,set)_value_at on the cusp backend
 
 2016-03-30
-	* added files for compilation
-	* added vector concept (dense vector)
-	* cusp::buildmatrix filtering duplicate entries
-	* added utility::filter convenience method
-	* removed ConstantMatrix from both backends and replaced with apply
-	* implemented TransposeView in cusp
+    * added files for compilation
+    * added vector concept (dense vector)
+    * cusp::buildmatrix filtering duplicate entries
+    * added utility::filter convenience method
+    * removed ConstantMatrix from both backends and replaced with apply
+    * implemented TransposeView in cusp
 
 2016-02-14
-	* Version 0.1 released; CUSP and sequential backends (except for
-	  support of "views" like TransposeView, NegateView, "extended" views).
+    * Version 0.1 released; CUSP and sequential backends (except for
+      support of "views" like TransposeView, NegateView, "extended" views).
 
 2015-09-30 Scott McMillan <smcmillan@sei.cmu.edu>
-	* Alpha release of GraphBLAS API (WIP)
-	* Alpha release of graph algorithms suite
-	* Alpha release of GPU backend built on Cusp and Thrust (and a proof
-	  of concept release of a simple, naive sequential backend for CPU)
-  
+    * Alpha release of GraphBLAS API (WIP)
+    * Alpha release of graph algorithms suite
+    * Alpha release of GPU backend built on Cusp and Thrust (and a proof
+      of concept release of a simple, naive sequential backend for CPU)
+
 2015-07-16 John Matty <jcmatty@sei.cmu.edu>
-	* Everything: Initial prototyping.
+    * Everything: Initial prototyping.
