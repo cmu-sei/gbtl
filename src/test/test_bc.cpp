@@ -40,7 +40,7 @@
 #include <graphblas/graphblas.hpp>
 #include <algorithms/bc.hpp>
 
-using namespace GraphBLAS;
+using namespace grb;
 using namespace algorithms;
 
 #define BOOST_TEST_MAIN

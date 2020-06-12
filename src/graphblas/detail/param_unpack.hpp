@@ -33,20 +33,12 @@
 #define GB_INCLUDE_BACKEND_VECTOR 1
 #include <backend_include.hpp>
 
-//#define __GB_SYSTEM_MATRIX_HEADER <graphblas/system/__GB_SYSTEM_ROOT/Matrix.hpp>
-//#include __GB_SYSTEM_MATRIX_HEADER
-//#undef __GB_SYSTEM_MATRIX_HEADER
-//
-//#define __GB_SYSTEM_VECTOR_HEADER <graphblas/system/__GB_SYSTEM_ROOT/Vector.hpp>
-//#include __GB_SYSTEM_VECTOR_HEADER
-//#undef __GB_SYSTEM_VECTOR_HEADER
-
 //this file contains the variadic template parameters unpacking utility.
 
 //****************************************************************************
 //****************************************************************************
 
-namespace GraphBLAS
+namespace grb
 {
     namespace detail
     {

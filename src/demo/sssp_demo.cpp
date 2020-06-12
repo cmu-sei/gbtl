@@ -46,30 +46,30 @@ void run_demo()
     //    {-, -, -, -, -, -, -, -, -},
     //    {-, -, 1, -, 1, -, -, -, -};
 
-    GraphBLAS::IndexType const NUM_NODES = 9;
-    GraphBLAS::IndexArrayType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
+    grb::IndexType const NUM_NODES = 9;
+    grb::IndexArrayType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
                                    4, 4, 4, 5, 6, 6, 6, 8, 8};
-    GraphBLAS::IndexArrayType j = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
+    grb::IndexArrayType j = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
                                    2, 3, 8, 2, 1, 2, 3, 2, 4};
     std::vector<T> v(i.size(), 1);
 
-    GraphBLAS::Matrix<T> G_tn(NUM_NODES, NUM_NODES);
+    grb::Matrix<T> G_tn(NUM_NODES, NUM_NODES);
 
     G_tn.build(i.begin(), j.begin(), v.begin(), i.size());
-    GraphBLAS::print_matrix(std::cout, G_tn, "Graph");
+    grb::print_matrix(std::cout, G_tn, "Graph");
 
     // compute one shortest paths
-    GraphBLAS::Vector<T> path(NUM_NODES);
+    grb::Vector<T> path(NUM_NODES);
     path.setElement(0, 0);
-    GraphBLAS::print_vector(std::cout, path, "Source");
+    grb::print_vector(std::cout, path, "Source");
     algorithms::sssp(G_tn, path);
-    GraphBLAS::print_vector(std::cout, path, "single SSSP results");
+    grb::print_vector(std::cout, path, "single SSSP results");
 
     // compute all shortest paths
-    auto paths = GraphBLAS::scaled_identity<GraphBLAS::Matrix<T>>(NUM_NODES, 0);
-    GraphBLAS::print_matrix(std::cout, paths, "Sources");
+    auto paths = grb::scaled_identity<grb::Matrix<T>>(NUM_NODES, 0);
+    grb::print_matrix(std::cout, paths, "Sources");
     algorithms::batch_sssp(G_tn, paths);
-    GraphBLAS::print_matrix(std::cout, paths, "batch SSSP results");
+    grb::print_matrix(std::cout, paths, "batch SSSP results");
 }
 
 //****************************************************************************

@@ -36,7 +36,7 @@
 #define GB_INCLUDE_BACKEND_VECTOR 1
 #include <backend_include.hpp>
 
-namespace GraphBLAS
+namespace grb
 {
     //**************************************************************************
     template<typename ScalarT, typename... TagsT>
@@ -51,7 +51,7 @@ namespace GraphBLAS
             detail::NullTag >::type;
 
         // current equivalent:
-        //using BackendType = GraphBLAS::backend::Vector<ScalarT>;
+        //using BackendType = grb::backend::Vector<ScalarT>;
 
         Vector() = delete;
 
@@ -158,7 +158,7 @@ namespace GraphBLAS
          */
         template<typename RAIteratorI,
                  typename RAIteratorV,
-                 typename BinaryOpT = GraphBLAS::Second<ScalarType> >
+                 typename BinaryOpT = grb::Second<ScalarType> >
         void build(RAIteratorI  i_it,
                    RAIteratorV  v_it,
                    IndexType    num_vals,
@@ -180,7 +180,7 @@ namespace GraphBLAS
          *       vector.  Unclear if the C++ should.
          */
         template<typename ValueT,
-                 typename BinaryOpT = GraphBLAS::Second<ScalarType> >
+                 typename BinaryOpT = grb::Second<ScalarType> >
         inline void build(IndexArrayType       const &indices,
                           std::vector<ValueT>  const &values,
                           BinaryOpT                   dup = BinaryOpT())
@@ -249,7 +249,7 @@ namespace GraphBLAS
         // ================================================
         void printInfo(std::ostream &ostr) const
         {
-            ostr << "GraphBLAS::Vector: ";
+            ostr << "grb::Vector: ";
             m_vec.printInfo(ostr);
         }
 
@@ -286,4 +286,4 @@ namespace GraphBLAS
             ostr << std::endl;
         }
 
-} // end namespace GraphBLAS
+} // end namespace grb

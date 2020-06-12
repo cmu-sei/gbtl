@@ -47,8 +47,8 @@ int main(int argc, char **argv)
     // Read the edgelist and create the tuple arrays
     std::string pathname(argv[1]);
     std::ifstream infile(pathname);
-    GraphBLAS::IndexArrayType iA;
-    GraphBLAS::IndexArrayType jA;
+    grb::IndexArrayType iA;
+    grb::IndexArrayType jA;
     std::vector<double> weights;
     uint64_t num_rows = 0;
     uint64_t max_id = 0;
@@ -72,9 +72,9 @@ int main(int argc, char **argv)
     std::cout << "Read " << num_rows << " rows." << std::endl;
     std::cout << "#Nodes = " << (max_id + 1) << std::endl;
 
-    GraphBLAS::IndexType NUM_NODES(max_id + 1);
+    grb::IndexType NUM_NODES(max_id + 1);
 
-    using MatType = GraphBLAS::Matrix<double>;
+    using MatType = grb::Matrix<double>;
 
     MatType A(NUM_NODES, NUM_NODES);
     A.build(iA.begin(), jA.begin(), weights.begin(), iA.size());

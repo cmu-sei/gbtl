@@ -30,7 +30,7 @@
 #include <type_traits>
 #include <graphblas/types.hpp>
 
-namespace GraphBLAS
+namespace grb
 {
     //**************************************************************************
     /// @todo: How do we get this into comments?
@@ -279,4 +279,4 @@ namespace GraphBLAS
     };
 
 
-} // namespace GraphBLAS
+} // namespace grb

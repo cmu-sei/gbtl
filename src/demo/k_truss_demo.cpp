@@ -32,12 +32,12 @@
 #include <graphblas/graphblas.hpp>
 #include <algorithms/k_truss.hpp>
 
-using namespace GraphBLAS;
+using namespace grb;
 
 //****************************************************************************
 namespace
 {
-    GraphBLAS::IndexArrayType i = {
+    IndexArrayType i = {
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         1,1,1,1,1,1,1,1,1,
         2,2,2,2,2,2,2,2,2,2,
@@ -73,7 +73,7 @@ namespace
         32,32,32,32,32,32,32,32,32,32,32,32,
         33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33};
 
-    GraphBLAS::IndexArrayType j = {
+    IndexArrayType j = {
         1,2,3,4,5,6,7,8,10,11,12,13,17,19,21,31,     //1,2,3,4,5,6,7,8,10,11,12,13,19,21,23,31,
         0,2,3,7,13,17,19,21,30,
         0,1,3,7,8,9,13,27,28,32,
@@ -146,22 +146,22 @@ int main(int argc, char **argv)
 
     auto Eout3 = algorithms::k_truss(E, 3);
     std::cout << "===============================================" << std::endl;
-    GraphBLAS::print_matrix(std::cout, Eout3, "Edges in 3-trusses");
+    print_matrix(std::cout, Eout3, "Edges in 3-trusses");
     std::cout << "===============================================" << std::endl;
 
     auto Eout4 = algorithms::k_truss(Eout3, 4);
     std::cout << "===============================================" << std::endl;
-    GraphBLAS::print_matrix(std::cout, Eout4, "Edges in 4-trusses");
+    print_matrix(std::cout, Eout4, "Edges in 4-trusses");
     std::cout << "===============================================" << std::endl;
 
     auto Eout5 = algorithms::k_truss(Eout4, 5);
     std::cout << "===============================================" << std::endl;
-    GraphBLAS::print_matrix(std::cout, Eout5, "Edges in 5-trusses");
+    print_matrix(std::cout, Eout5, "Edges in 5-trusses");
     std::cout << "===============================================" << std::endl;
 
     auto Eout6 = algorithms::k_truss(Eout5, 6);
     std::cout << "===============================================" << std::endl;
-    GraphBLAS::print_matrix(std::cout, Eout6, "Edges in 6-trusses");
+    print_matrix(std::cout, Eout6, "Edges in 6-trusses");
     std::cout << "===============================================" << std::endl;
     return 0;
 }

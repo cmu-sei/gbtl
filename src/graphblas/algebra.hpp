@@ -34,7 +34,7 @@
 #include <limits>
 #include <utility>
 
-namespace GraphBLAS
+namespace grb
 {
     namespace detail
     {
@@ -66,7 +66,7 @@ namespace GraphBLAS
         template<typename D2>
         inline D2 MyAbs(uint64_t input)      { return input; }
 
-    } // namespace detail (within GraphBLAS namespace
+    } // namespace detail (within grb namespace
 
     //************************************************************************
     // The Unary Operators
@@ -130,20 +130,20 @@ namespace GraphBLAS
     //
     // Turn a binary op into a unary op by binding the 2nd term to a constant
     //
-    //                     std::bind(GraphBLAS::Minus<float>(),
+    //                     std::bind(grb::Minus<float>(),
     //                               std::placeholders::_1,
     //                               static_cast<float>(nsver)),
     //
     // Turn a binary op into a unary op by binding the 1st term to a constant
     //
-    //                     std::bind(GraphBLAS::Minus<float>(),
+    //                     std::bind(grb::Minus<float>(),
     //                               static_cast<float>(nsver),
     //                               std::placeholders::_1),
     //
     //************************************************************************
 }
 
-namespace GraphBLAS
+namespace grb
 {
     //************************************************************************
     // The Binary Operators
@@ -338,7 +338,7 @@ namespace GraphBLAS
         inline D3 operator()(D1 lhs, D2 rhs) const { return std::pow(lhs, rhs); }
     };
 
-} // namespace GraphBLAS
+} // namespace grb
 
 
 //****************************************************************************
@@ -377,7 +377,7 @@ namespace GraphBLAS
     };
 
 //****************************************************************************
-namespace GraphBLAS
+namespace grb
 {
     GEN_GRAPHBLAS_MONOID(PlusMonoid, Plus, 0)
     GEN_GRAPHBLAS_MONOID(TimesMonoid, Times, 1)
@@ -409,7 +409,7 @@ namespace GraphBLAS
 
         ScalarT operator()(ScalarT lhs, ScalarT rhs) const
         {
-            return GraphBLAS::Max<ScalarT>()(lhs, rhs);
+            return grb::Max<ScalarT>()(lhs, rhs);
         }
     };
 
@@ -428,7 +428,7 @@ namespace GraphBLAS
 
         ScalarT operator()(ScalarT lhs, ScalarT rhs) const
         {
-            return GraphBLAS::Max<ScalarT>()(lhs, rhs);
+            return grb::Max<ScalarT>()(lhs, rhs);
         }
     };
 
@@ -456,7 +456,7 @@ namespace GraphBLAS
 
         ScalarT operator()(ScalarT lhs, ScalarT rhs) const
         {
-            return GraphBLAS::Min<ScalarT>()(lhs, rhs);
+            return grb::Min<ScalarT>()(lhs, rhs);
         }
     };
 
@@ -475,11 +475,11 @@ namespace GraphBLAS
 
         ScalarT operator()(ScalarT lhs, ScalarT rhs) const
         {
-            return GraphBLAS::Min<ScalarT>()(lhs, rhs);
+            return grb::Min<ScalarT>()(lhs, rhs);
         }
     };
 
-} // GraphBLAS
+} // grb
 
 //****************************************************************************
 // Semirings
@@ -512,7 +512,7 @@ namespace GraphBLAS
     };
 
 
-namespace GraphBLAS
+namespace grb
 {
     //************************************************************************
     // "true" and "useful" semirings
@@ -569,13 +569,13 @@ namespace GraphBLAS
     GEN_GRAPHBLAS_SEMIRING(MaxFirstSemiring, MaxMonoid, First)
     GEN_GRAPHBLAS_SEMIRING(MaxSecondSemiring, MaxMonoid, Second)
 
-} // namespace GraphBLAS
+} // namespace grb
 
 //****************************************************************************
 // Convert Semirings to BinaryOps
 //****************************************************************************
 
-namespace GraphBLAS
+namespace grb
 {
     //************************************************************************
     template <typename SemiringT>
@@ -640,4 +640,4 @@ namespace GraphBLAS
         return AdditiveMonoidFromSemiring<SemiringT>(sr);
     }
 
-} // namespace GraphBLAS
+} // namespace grb

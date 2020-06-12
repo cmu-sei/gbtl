@@ -32,7 +32,7 @@
 #include <typeinfo>
 #include <numeric>
 
-namespace GraphBLAS
+namespace grb
 {
     namespace backend
     {
@@ -332,7 +332,7 @@ namespace GraphBLAS
              */
             template<typename RAIteratorIT,
                      typename RAIteratorVT,
-                     typename BinaryOpT = GraphBLAS::Second<ScalarType> >
+                     typename BinaryOpT = grb::Second<ScalarType> >
             void build(RAIteratorIT  i_it,
                        RAIteratorVT  v_it,
                        IndexType     nvals,
@@ -513,4 +513,4 @@ namespace GraphBLAS
             std::vector<bool>     m_bitmap;
         };
     } // backend
-} // GraphBLAS
+} // grb

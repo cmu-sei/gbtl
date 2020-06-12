@@ -43,7 +43,7 @@
 
 //****************************************************************************
 
-namespace GraphBLAS
+namespace grb
 {
     namespace backend
     {
@@ -98,7 +98,7 @@ namespace GraphBLAS
         /// Advance the provided iterator until the value evaluates to true or
         /// the end is reached.
         ///
-        /// Iter is iterator to std::vector<std::tuple<GraphBLAS::IndexType,T>>
+        /// Iter is iterator to std::vector<std::tuple<grb::IndexType,T>>
         template <typename Iter>
         void increment_until_true(Iter &iter, Iter const &iter_end)
         {
@@ -115,8 +115,8 @@ namespace GraphBLAS
         ///                reached first or targeted index was not present
         template <typename Iter>
         bool increment_while_below(Iter                 &iter,
-                                   Iter const           &iter_end,
-                                   GraphBLAS::IndexType  target_idx)
+                                   Iter           const &iter_end,
+                                   grb::IndexType        target_idx)
         {
             while ((iter != iter_end) && (std::get<0>(*iter) < target_idx))
             {
@@ -131,7 +131,7 @@ namespace GraphBLAS
         template <typename Iter, typename V>
         void increment_and_add_while_below(Iter                 &iter,
                                            Iter          const  &iter_end,
-                                           GraphBLAS::IndexType  idx,
+                                           grb::IndexType        idx,
                                            V                    &vec)
         {
             while ((iter != iter_end) && (std::get<0>(*iter) < idx)) {
@@ -144,12 +144,12 @@ namespace GraphBLAS
         /// Perform the dot product of a row of a matrix with a sparse vector
         /// without pulling the indices out of the vector first.
         template <typename D1, typename D2, typename D3, typename SemiringT>
-        bool dot2(D3                                                      &ans,
-                  std::vector<std::tuple<GraphBLAS::IndexType,D1> > const &A_row,
-                  std::vector<bool>                                 const &u_bitmap,
-                  std::vector<D2>                                   const &u_vals,
-                  GraphBLAS::IndexType                                     u_nvals,
-                  SemiringT                                                op)
+        bool dot2(D3                                                &ans,
+                  std::vector<std::tuple<grb::IndexType,D1> > const &A_row,
+                  std::vector<bool>                           const &u_bitmap,
+                  std::vector<D2>                             const &u_vals,
+                  grb::IndexType                                     u_nvals,
+                  SemiringT                                          op)
         {
             bool value_set(false);
             ans = op.zero();
@@ -160,13 +160,13 @@ namespace GraphBLAS
             }
 
             // find first stored value in u
-            GraphBLAS::IndexType u_idx(0);
+            grb::IndexType u_idx(0);
             while (!u_bitmap[u_idx]) ++u_idx; // skip unstored elements
 
             // pull first value out of the row
             auto A_iter = A_row.begin();
             D1 a_val;
-            GraphBLAS::IndexType a_idx;
+            grb::IndexType a_idx;
 
             // loop through both ordered sets to compute sparse dot prod
             while ((A_iter != A_row.end()) && (u_idx < u_vals.size()))
@@ -203,10 +203,10 @@ namespace GraphBLAS
         //************************************************************************
         /// A dot product of two sparse vectors (vectors<tuple(index,value)>)
         template <typename D1, typename D2, typename D3, typename SemiringT>
-        bool dot(D3                                                      &ans,
-                 std::vector<std::tuple<GraphBLAS::IndexType,D1> > const &vec1,
-                 std::vector<std::tuple<GraphBLAS::IndexType,D2> > const &vec2,
-                 SemiringT                                                op)
+        bool dot(D3                                                &ans,
+                 std::vector<std::tuple<grb::IndexType,D1> > const &vec1,
+                 std::vector<std::tuple<grb::IndexType,D2> > const &vec2,
+                 SemiringT                                          op)
         {
             bool value_set(false);
 
@@ -257,9 +257,9 @@ namespace GraphBLAS
         /// binary op or a monoid.
         template <typename D1, typename D3, typename BinaryOpT>
         bool reduction(
-            D3                                                      &ans,
-            std::vector<std::tuple<GraphBLAS::IndexType,D1> > const &vec,
-            BinaryOpT                                                op)
+            D3                                                &ans,
+            std::vector<std::tuple<grb::IndexType,D1> > const &vec,
+            BinaryOpT                                          op)
         {
             if (vec.empty())
             {
@@ -297,10 +297,10 @@ namespace GraphBLAS
         ///
         /// @note ans must be a unique vector from either vec1 or vec2
         template <typename D1, typename D2, typename D3, typename BinaryOpT>
-        void ewise_or(std::vector<std::tuple<GraphBLAS::IndexType,D3> >       &ans,
-                      std::vector<std::tuple<GraphBLAS::IndexType,D1> > const &vec1,
-                      std::vector<std::tuple<GraphBLAS::IndexType,D2> > const &vec2,
-                      BinaryOpT                                                op)
+        void ewise_or(std::vector<std::tuple<grb::IndexType,D3> >       &ans,
+                      std::vector<std::tuple<grb::IndexType,D1> > const &vec1,
+                      std::vector<std::tuple<grb::IndexType,D2> > const &vec2,
+                      BinaryOpT                                          op)
         {
             if (((void*)&ans == (void*)&vec1) || ((void*)&ans == (void*)&vec2))
             {
@@ -408,10 +408,10 @@ namespace GraphBLAS
         ///
         template <typename D1, typename D2, typename D3, typename SequenceT>
         void ewise_or_stencil(
-            std::vector<std::tuple<GraphBLAS::IndexType,D3> >       &ans,
-            std::vector<std::tuple<GraphBLAS::IndexType,D1> > const &vec1,
-            std::vector<std::tuple<GraphBLAS::IndexType,D2> > const &vec2,
-            SequenceT                                                stencil_indices)
+            std::vector<std::tuple<grb::IndexType,D3> >       &ans,
+            std::vector<std::tuple<grb::IndexType,D1> > const &vec1,
+            std::vector<std::tuple<grb::IndexType,D2> > const &vec2,
+            SequenceT                                          stencil_indices)
         {
             ans.clear();
 
@@ -425,7 +425,7 @@ namespace GraphBLAS
 
             D1 v1_val;
             D2 v2_val;
-            GraphBLAS::IndexType v1_idx, v2_idx;
+            grb::IndexType v1_idx, v2_idx;
 
             // loop through both ordered sets to compute ewise_or
             auto v1_it = vec1.begin();
@@ -490,11 +490,11 @@ namespace GraphBLAS
                   typename SequenceT,
                   typename BinaryOpT >
         void ewise_or_stencil_opt_accum_1D(
-            std::vector<std::tuple<GraphBLAS::IndexType,ZScalarT>>       &z,
-            WVectorT const                                               &w,
-            std::vector<std::tuple<GraphBLAS::IndexType,TScalarT>> const &t,
-            SequenceT const                                              &indices,
-            BinaryOpT                                                     accum)
+            std::vector<std::tuple<grb::IndexType,ZScalarT>>       &z,
+            WVectorT const                                         &w,
+            std::vector<std::tuple<grb::IndexType,TScalarT>> const &t,
+            SequenceT const                                        &indices,
+            BinaryOpT                                               accum)
         {
             // If there is an accumulate operations, do nothing with the stencil
             ewise_or(z, w.getContents(), t, accum);
@@ -506,11 +506,11 @@ namespace GraphBLAS
                   typename TScalarT,
                   typename SequenceT>
         void ewise_or_stencil_opt_accum_1D(
-            std::vector<std::tuple<GraphBLAS::IndexType,ZScalarT>>       &z,
-            WVectorT const                                               &w,
-            std::vector<std::tuple<GraphBLAS::IndexType,TScalarT>> const &t,
-            SequenceT const                                              &indices,
-            GraphBLAS::NoAccumulate)
+            std::vector<std::tuple<grb::IndexType,ZScalarT>>       &z,
+            WVectorT const                                         &w,
+            std::vector<std::tuple<grb::IndexType,TScalarT>> const &t,
+            SequenceT const                                        &indices,
+            grb::NoAccumulate)
         {
             // If there is no accumulate we need to annihilate stored values
             // in w that fall in the stencil
@@ -526,8 +526,8 @@ namespace GraphBLAS
                    typename ColSequenceT,
                    typename BinaryOpT >
         void ewise_or_stencil_opt_accum(ZMatrixT           &Z,
-                                        CMatrixT const     &C,
-                                        TMatrixT const     &T,
+                                        CMatrixT     const &C,
+                                        TMatrixT     const &T,
                                         RowSequenceT const &row_indices,
                                         ColSequenceT const &col_indices,
                                         BinaryOpT           accum)
@@ -553,11 +553,11 @@ namespace GraphBLAS
                    typename RowSequenceT,
                    typename ColSequenceT>
         void ewise_or_stencil_opt_accum(ZMatrixT           &Z,
-                                        CMatrixT const     &C,
-                                        TMatrixT const     &T,
+                                        CMatrixT     const &C,
+                                        TMatrixT     const &T,
                                         RowSequenceT const &row_indices,
                                         ColSequenceT const &col_indices,
-                                        GraphBLAS::NoAccumulate)
+                                        grb::NoAccumulate)
         {
             // If there is no accumulate, we need to annihilate stored values
             // in C that fall in the stencil
@@ -614,10 +614,10 @@ namespace GraphBLAS
         template < typename ZMatrixT,
                    typename CMatrixT,
                    typename TMatrixT>
-        void ewise_or_opt_accum(ZMatrixT                    &Z,
-                                CMatrixT const              &C,
-                                TMatrixT const              &T,
-                                GraphBLAS::NoAccumulate )
+        void ewise_or_opt_accum(ZMatrixT               &Z,
+                                CMatrixT          const &C,
+                                TMatrixT          const &T,
+                                grb::NoAccumulate )
         {
             sparse_copy(Z, T);
         }
@@ -628,10 +628,10 @@ namespace GraphBLAS
                   typename TScalarT,
                   typename BinaryOpT>
         void ewise_or_opt_accum_1D(
-            std::vector<std::tuple<GraphBLAS::IndexType,ZScalarT>>       &z,
-            WVectorT const                                               &w,
-            std::vector<std::tuple<GraphBLAS::IndexType,TScalarT>> const &t,
-            BinaryOpT                                                     accum)
+            std::vector<std::tuple<grb::IndexType,ZScalarT>>       &z,
+            WVectorT const                                         &w,
+            std::vector<std::tuple<grb::IndexType,TScalarT>> const &t,
+            BinaryOpT                                               accum)
         {
             //z.clear();
             ewise_or(z, w.getContents(), t, accum);
@@ -643,10 +643,10 @@ namespace GraphBLAS
                   typename WVectorT,
                   typename TScalarT>
         void ewise_or_opt_accum_1D(
-            std::vector<std::tuple<GraphBLAS::IndexType,ZScalarT>>       &z,
-            WVectorT const                                               &w,
-            std::vector<std::tuple<GraphBLAS::IndexType,TScalarT>> const &t,
-            GraphBLAS::NoAccumulate )
+            std::vector<std::tuple<grb::IndexType,ZScalarT>>       &z,
+            WVectorT const                                         &w,
+            std::vector<std::tuple<grb::IndexType,TScalarT>> const &t,
+            grb::NoAccumulate )
         {
             //sparse_copy(z, t);
             for (auto tupl: t)
@@ -675,9 +675,9 @@ namespace GraphBLAS
                   typename WScalarT,
                   typename TScalarT>
         void opt_accum_scalar(ZScalarT                &z,
-                              WScalarT const          &w,
-                              TScalarT const          &t,
-                              GraphBLAS::NoAccumulate  accum)
+                              WScalarT          const &w,
+                              TScalarT          const &t,
+                              grb::NoAccumulate        accum)
         {
             z = static_cast<ZScalarT>(t);
         }
@@ -685,10 +685,10 @@ namespace GraphBLAS
         //************************************************************************
         /// Apply element-wise operation to intersection of sparse vectors.
         template <typename D1, typename D2, typename D3, typename BinaryOpT>
-        void ewise_and(std::vector<std::tuple<GraphBLAS::IndexType,D3> >       &ans,
-                       std::vector<std::tuple<GraphBLAS::IndexType,D1> > const &vec1,
-                       std::vector<std::tuple<GraphBLAS::IndexType,D2> > const &vec2,
-                       BinaryOpT                                                op)
+        void ewise_and(std::vector<std::tuple<grb::IndexType,D3> >       &ans,
+                       std::vector<std::tuple<grb::IndexType,D1> > const &vec1,
+                       std::vector<std::tuple<grb::IndexType,D2> > const &vec2,
+                       BinaryOpT                                          op)
         {
             ans.clear();
 
@@ -929,7 +929,7 @@ namespace GraphBLAS
         void write_with_opt_mask(
             CMatrixT                                  &C,
             ZMatrixT                            const &Z,
-            GraphBLAS::MatrixComplementView<MMatrixT> const &Mask,
+            grb::MatrixComplementView<MMatrixT> const &Mask,
             OutputControlEnum                          outp)
         {
             using CScalarType = typename CMatrixT::ScalarType;
@@ -956,7 +956,7 @@ namespace GraphBLAS
         void write_with_opt_mask(
             CMatrixT                                 &C,
             ZMatrixT                           const &Z,
-            GraphBLAS::MatrixStructureView<MMatrixT> const &Mask,
+            grb::MatrixStructureView<MMatrixT> const &Mask,
             OutputControlEnum                         outp)
         {
             using CScalarType = typename CMatrixT::ScalarType;
@@ -983,7 +983,7 @@ namespace GraphBLAS
         void write_with_opt_mask(
             CMatrixT                                            &C,
             ZMatrixT                                      const &Z,
-            GraphBLAS::MatrixStructuralComplementView<MMatrixT> const &Mask,
+            grb::MatrixStructuralComplementView<MMatrixT> const &Mask,
             OutputControlEnum                                    outp)
         {
             using CScalarType = typename CMatrixT::ScalarType;
@@ -1008,7 +1008,7 @@ namespace GraphBLAS
                    typename ZMatrixT >
         void write_with_opt_mask(CMatrixT                   &C,
                                  ZMatrixT           const   &Z,
-                                 GraphBLAS::NoMask  const   &foo,
+                                 grb::NoMask        const   &foo,
                                  OutputControlEnum           outp)
         {
             sparse_copy(C, Z);
@@ -1118,7 +1118,7 @@ namespace GraphBLAS
         void write_with_opt_mask_1D(
             WVectorT                                           &w,
             std::vector<std::tuple<IndexType, ZScalarT>> const &z,
-            GraphBLAS::VectorComplementView<MaskT>       const &mask,
+            grb::VectorComplementView<MaskT>             const &mask,
             OutputControlEnum                                   outp)
         {
             using WScalarType = typename WVectorT::ScalarType;
@@ -1140,7 +1140,7 @@ namespace GraphBLAS
         void write_with_opt_mask_1D(
             WVectorT                                           &w,
             std::vector<std::tuple<IndexType, ZScalarT>> const &z,
-            GraphBLAS::VectorStructureView<MaskT>        const &mask,
+            grb::VectorStructureView<MaskT>              const &mask,
             OutputControlEnum                                   outp)
         {
             using WScalarType = typename WVectorT::ScalarType;
@@ -1163,7 +1163,7 @@ namespace GraphBLAS
         void write_with_opt_mask_1D(
             WVectorT                                               &w,
             std::vector<std::tuple<IndexType, ZScalarT>>     const &z,
-            GraphBLAS::VectorStructuralComplementView<MaskT> const &mask,
+            grb::VectorStructuralComplementView<MaskT>       const &mask,
             OutputControlEnum                                       outp)
         {
             using WScalarType = typename WVectorT::ScalarType;
@@ -1184,7 +1184,7 @@ namespace GraphBLAS
         void write_with_opt_mask_1D(
             WVectorT                                           &w,
             std::vector<std::tuple<IndexType, ZScalarT>> const &z,
-            GraphBLAS::NoMask                            const &foo,
+            grb::NoMask                                  const &foo,
             OutputControlEnum                                   outp)
         {
             //sparse_copy(w, z);
@@ -1284,9 +1284,9 @@ namespace GraphBLAS
         /// @note similarities with axpy()
         template <typename D1, typename D2, typename BinaryOpT>
         void xpey(
-            std::vector<std::tuple<GraphBLAS::IndexType,D1> >       &vec1,
-            std::vector<std::tuple<GraphBLAS::IndexType,D2> > const &vec2,
-            BinaryOpT                                                op)
+            std::vector<std::tuple<grb::IndexType,D1> >       &vec1,
+            std::vector<std::tuple<grb::IndexType,D2> > const &vec2,
+            BinaryOpT                                          op)
         {
             // point to first entries of the destination vector
             auto v1_it = vec1.begin();
@@ -1561,4 +1561,4 @@ namespace GraphBLAS
         }
 
     } // backend
-} // GraphBLAS
+} // grb

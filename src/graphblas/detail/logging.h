@@ -1,19 +1,31 @@
 /*
- * Copyright (c) 2017 Carnegie Mellon University.
- * All Rights Reserved.
+ * GraphBLAS Template Library (GBTL), Version 3.0
  *
- * THIS SOFTWARE IS PROVIDED "AS IS," WITH NO WARRANTIES WHATSOEVER. CARNEGIE
- * MELLON UNIVERSITY EXPRESSLY DISCLAIMS TO THE FULLEST EXTENT PERMITTED BY
- * LAW ALL EXPRESS, IMPLIED, AND STATUTORY WARRANTIES, INCLUDING, WITHOUT
- * LIMITATION, THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
- * PURPOSE, AND NON-INFRINGEMENT OF PROPRIETARY RIGHTS.
+ * Copyright 2020 Carnegie Mellon University, Battelle Memorial Institute, and
+ * Authors.
  *
- * This Program is distributed under a BSD license.  Please see LICENSE file or
- * permission@sei.cmu.edu for more information.  DM-0002659
+ * THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
+ * THE UNITED STATES GOVERNMENT.  NEITHER THE UNITED STATES GOVERNMENT NOR THE
+ * UNITED STATES DEPARTMENT OF ENERGY, NOR THE UNITED STATES DEPARTMENT OF
+ * DEFENSE, NOR CARNEGIE MELLON UNIVERSITY, NOR BATTELLE, NOR ANY OF THEIR
+ * EMPLOYEES, NOR ANY JURISDICTION OR ORGANIZATION THAT HAS COOPERATED IN THE
+ * DEVELOPMENT OF THESE MATERIALS, MAKES ANY WARRANTY, EXPRESS OR IMPLIED, OR
+ * ASSUMES ANY LEGAL LIABILITY OR RESPONSIBILITY FOR THE ACCURACY, COMPLETENESS,
+ * OR USEFULNESS OR ANY INFORMATION, APPARATUS, PRODUCT, SOFTWARE, OR PROCESS
+ * DISCLOSED, OR REPRESENTS THAT ITS USE WOULD NOT INFRINGE PRIVATELY OWNED
+ * RIGHTS.
+ *
+ * Released under a BSD-style license, please see LICENSE file or contact
+ * permission@sei.cmu.edu for full terms.
+ *
+ * [DISTRIBUTION STATEMENT A] This material has been approved for public release
+ * and unlimited distribution.  Please see Copyright notice for non-US
+ * Government use and distribution.
+ *
+ * DM20-0442
  */
 
-#ifndef GB_LOGGING_H
-#define GB_LOGGING_H
+#pragma once
 
 #include <typeinfo>
 
@@ -30,7 +42,7 @@
         #define GRB_LOG_VERBOSE(x) do { std::cout << "GRB --- " << x << std::endl; } while(0)
         #define GRB_LOG_VERBOSE_ACCUM(x) do { std::cout << "GRB --- accum: " << typeid(x).name() << std::endl; } while(0)
         #define GRB_LOG_VERBOSE_OP(x) do { std::cout << "GRB --- op: " << typeid(x).name() << std::endl; } while(0)
-        #define GRB_LOG_VERBOSE_OUTP(x) do { std::cout << "GRB --- outp: " << ((x == GraphBLAS::MERGE) ? "MERGE" : "REPLACE") << std::endl; } while(0)
+        #define GRB_LOG_VERBOSE_OUTP(x) do { std::cout << "GRB --- outp: " << ((x == grb::MERGE) ? "MERGE" : "REPLACE") << std::endl; } while(0)
 
     #else
 
@@ -53,5 +65,3 @@
     #define GRB_LOG_VERBOSE_OUTP(x)
 
 #endif
-
-#endif //GB_LOGGING_H

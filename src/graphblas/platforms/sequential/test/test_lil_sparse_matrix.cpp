@@ -31,7 +31,7 @@
 
 #include <graphblas/graphblas.hpp>
 
-using namespace GraphBLAS;
+using namespace grb;
 
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE lil_sparse_matrix_test_suite
@@ -268,7 +268,7 @@ BOOST_AUTO_TEST_CASE(lil_test_get_set_row)
 
     BOOST_CHECK_EQUAL(12UL, m1.nvals());
 
-    std::vector<std::tuple<GraphBLAS::IndexType, double>> row;
+    std::vector<std::tuple<grb::IndexType, double>> row;
     m1.setRow(0, row);
 
     BOOST_CHECK_EQUAL(0UL, m1[0].size());

@@ -49,13 +49,13 @@ BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
 //****************************************************************************
 template <typename T>
-GraphBLAS::Matrix<T> get_tn_answer()
+grb::Matrix<T> get_tn_answer()
 {
-    std::vector<GraphBLAS::IndexType> rows = {
+    std::vector<grb::IndexType> rows = {
         0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2,
         2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5,
         5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 7, 8, 8, 8, 8, 8, 8, 8, 8};
-    std::vector<GraphBLAS::IndexType> cols = {
+    std::vector<grb::IndexType> cols = {
         0, 1, 2, 3, 4, 5, 6, 8, 0, 1, 2, 3, 4, 5, 6, 8, 0, 1, 2, 3, 4, 5, 6,
         8, 0, 1, 2, 3, 4, 5, 6, 8, 0, 1, 2, 3, 4, 5, 6, 8, 0, 1, 2, 3, 4, 5,
         6, 8, 0, 1, 2, 3, 4, 5, 6, 8, 7, 0, 1, 2, 3, 4, 5, 6, 8
@@ -78,14 +78,14 @@ GraphBLAS::Matrix<T> get_tn_answer()
     //     {2, 1, 1, 1, 2, 2, 0, , 2},
     //     { ,  ,  ,  ,  ,  ,  , 0, },
     //     {3, 3, 1, 2, 1, 2, 2, , 0}};
-    GraphBLAS::Matrix<T> temp(9,9);
+    grb::Matrix<T> temp(9,9);
     temp.build(rows.begin(), cols.begin(), vals.begin(), rows.size());
     return temp;
 }
 
 //****************************************************************************
 template <typename T>
-GraphBLAS::Matrix<T> get_gilbert_answer()
+grb::Matrix<T> get_gilbert_answer()
 {
     //std::vector<std::vector<T> > G_gilbert_answer_dense =
     //    {{  0,   1,   2,   1,   2,   3,   2},
@@ -96,11 +96,11 @@ GraphBLAS::Matrix<T> get_gilbert_answer()
     //     {   ,    ,   1,    ,    ,   0,    },
     //     {  2,   3,   1,   1,   1,   2,   0}};
     //return Matrix<T>(G_gilbert_answer_dense, );
-    std::vector<GraphBLAS::IndexType> rows = {
+    std::vector<grb::IndexType> rows = {
         0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 3, 3, 3, 3, 3, 3, 3,
         4, 4, 4, 5, 5, 6, 6, 6, 6, 6, 6, 6
     };
-    std::vector<GraphBLAS::IndexType> cols = {
+    std::vector<grb::IndexType> cols = {
         0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 2, 5, 0, 1, 2, 3, 4, 5, 6,
         2, 4, 5, 2, 5, 0, 1, 2, 3, 4, 5, 6
     };
@@ -109,7 +109,7 @@ GraphBLAS::Matrix<T> get_gilbert_answer()
         1, 0,   1,   1,   2,   1, 0,   3,   2,   3,   2, 0,   1,
         1, 0,   2,   3,   1,   1,   1,   2, 0
     };
-    GraphBLAS::Matrix<T> temp(7,7);
+    grb::Matrix<T> temp(7,7);
     temp.build(rows.begin(), cols.begin(), vals.begin(), rows.size());
     return temp;
 }
@@ -118,13 +118,13 @@ GraphBLAS::Matrix<T> get_gilbert_answer()
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(apsp_basic_double_batch)
 {
-    GraphBLAS::IndexType const NUM_NODES(9);
-    GraphBLAS::IndexArrayType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
+    grb::IndexType const NUM_NODES(9);
+    grb::IndexArrayType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
                                    4, 4, 4, 5, 6, 6, 6, 8, 8};
-    GraphBLAS::IndexArrayType j = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
+    grb::IndexArrayType j = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
                                    2, 3, 8, 2, 1, 2, 3, 2, 4};
     std::vector<double>       v(i.size(), 1);
-    GraphBLAS::Matrix<double> G_tn(NUM_NODES, NUM_NODES);
+    grb::Matrix<double> G_tn(NUM_NODES, NUM_NODES);
     G_tn.build(i, j, v);
 
     // Perform for all roots simultaneously
@@ -137,13 +137,13 @@ BOOST_AUTO_TEST_CASE(apsp_basic_double_batch)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(apsp_basic_uint_batch)
 {
-    GraphBLAS::IndexType const NUM_NODES(9);
-    GraphBLAS::IndexArrayType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
+    grb::IndexType const NUM_NODES(9);
+    grb::IndexArrayType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
                                    4, 4, 4, 5, 6, 6, 6, 8, 8};
-    GraphBLAS::IndexArrayType j = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
+    grb::IndexArrayType j = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
                                    2, 3, 8, 2, 1, 2, 3, 2, 4};
     std::vector<unsigned int> v(i.size(), 1);
-    GraphBLAS::Matrix<unsigned int> G_tn(NUM_NODES, NUM_NODES);
+    grb::Matrix<unsigned int> G_tn(NUM_NODES, NUM_NODES);
     G_tn.build(i, j, v);
 
     // Perform for all roots simultaneously
@@ -156,11 +156,11 @@ BOOST_AUTO_TEST_CASE(apsp_basic_uint_batch)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(apsp_gilbert_double_batch)
 {
-    GraphBLAS::IndexType const NUM_NODES(7);
-    GraphBLAS::IndexArrayType i = {0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6};
-    GraphBLAS::IndexArrayType j = {1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4};
+    grb::IndexType const NUM_NODES(7);
+    grb::IndexArrayType i = {0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6};
+    grb::IndexArrayType j = {1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4};
     std::vector<double>       v(i.size(), 1);
-    GraphBLAS::Matrix<double> G_gilbert(NUM_NODES, NUM_NODES);
+    grb::Matrix<double> G_gilbert(NUM_NODES, NUM_NODES);
     G_gilbert.build(i, j, v);
     //print_matrix(std::cout, G_gilbert, "Graph");
 
@@ -176,11 +176,11 @@ BOOST_AUTO_TEST_CASE(apsp_gilbert_double_batch)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(apsp_gilbert_uint_batch)
 {
-    GraphBLAS::IndexType const NUM_NODES(7);
-    GraphBLAS::IndexArrayType i = {0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6};
-    GraphBLAS::IndexArrayType j = {1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4};
+    grb::IndexType const NUM_NODES(7);
+    grb::IndexArrayType i = {0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6};
+    grb::IndexArrayType j = {1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4};
     std::vector<unsigned int> v(i.size(), 1);
-    GraphBLAS::Matrix<unsigned int> G_gilbert(NUM_NODES, NUM_NODES);
+    grb::Matrix<unsigned int> G_gilbert(NUM_NODES, NUM_NODES);
     G_gilbert.build(i, j, v);
 
     auto distances = apsp(G_gilbert);
@@ -202,14 +202,14 @@ BOOST_AUTO_TEST_CASE(new_apsp_gilbert_uint)
          {INF, INF,   2, INF,   0,   1, INF},
          {INF, INF,   1, INF, INF,   0, INF},
          {  2,   3,   1,   1,   1,   2,   0}};
-    GraphBLAS::Matrix<unsigned int>
+    grb::Matrix<unsigned int>
         G_gilbert_answer(G_gilbert_answer_dense, INF);
 
-    GraphBLAS::IndexType const NUM_NODES(7);
-    GraphBLAS::IndexArrayType i = {0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6};
-    GraphBLAS::IndexArrayType j = {1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4};
+    grb::IndexType const NUM_NODES(7);
+    grb::IndexArrayType i = {0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6};
+    grb::IndexArrayType j = {1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4};
     std::vector<unsigned int> v(i.size(), 1);
-    GraphBLAS::Matrix<unsigned int> G_gilbert(NUM_NODES, NUM_NODES);
+    grb::Matrix<unsigned int> G_gilbert(NUM_NODES, NUM_NODES);
     G_gilbert.build(i.begin(), j.begin(), v.begin(), i.size());
 
     auto G_gilbert_res = apsp(G_gilbert);

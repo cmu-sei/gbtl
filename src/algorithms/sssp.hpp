@@ -33,6 +33,7 @@
 
 #include <graphblas/graphblas.hpp>
 
+//****************************************************************************
 namespace algorithms
 {
     //************************************************************************
@@ -67,42 +68,41 @@ namespace algorithms
         if ((graph.nrows() != dist.size()) ||
             (graph.ncols() != dist.size()))
         {
-            throw GraphBLAS::DimensionException();
+            throw grb::DimensionException();
         }
 
         //std::cout << "SSSP " << std::endl;
-        //GraphBLAS::print_vector(std::cout, dist, "dist");
+        //grb::print_vector(std::cout, dist, "dist");
         /// @todo why num_rows-1 iterations? REALLY should be tested for
         /// detection of no change in dist
-        for (GraphBLAS::IndexType k = 0; k < graph.nrows() - 1; ++k)
+        for (grb::IndexType k = 0; k < graph.nrows() - 1; ++k)
         {
-            GraphBLAS::vxm(dist,
-                           GraphBLAS::NoMask(), GraphBLAS::Min<T>(),
-                           GraphBLAS::MinPlusSemiring<T>(),
-                           dist, graph);
+            grb::vxm(dist,
+                     grb::NoMask(), grb::Min<T>(),
+                     grb::MinPlusSemiring<T>(),
+                     dist, graph);
 
             //std::cout << "SSSP Iteration " << k << std::endl;
-            //GraphBLAS::print_vector(std::cout, dist, "dist");
+            //grb::print_vector(std::cout, dist, "dist");
         }
 
         // Perform one more step to determine if any values have changed.
         // If so, that implies a negative cycle.
         DistVectorT dist2(dist);
-        GraphBLAS::vxm(dist2,
-                       GraphBLAS::NoMask(), GraphBLAS::Min<T>(),
-                       GraphBLAS::MinPlusSemiring<T>(),
-                       dist2, graph);
-        //GraphBLAS::print_vector(std::cout, dist2, "Dist2");
+        grb::vxm(dist2,
+                 grb::NoMask(), grb::Min<T>(),
+                 grb::MinPlusSemiring<T>(),
+                 dist2, graph);
+        //grb::print_vector(std::cout, dist2, "Dist2");
 
         // determine which distances are equal and also detect if any
         // are still changing.
-        GraphBLAS::Vector<bool> equal_flags(graph.nrows());
+        grb::Vector<bool> equal_flags(graph.nrows());
         bool changed_flag(false);
-        GraphBLAS::eWiseMult(
+        grb::eWiseMult(
             equal_flags,
-            GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-            [&changed_flag](DT const &lhs,
-                            DT const &rhs)     //equal_test,
+            grb::NoMask(), grb::NoAccumulate(),
+            [&changed_flag](DT const &lhs, DT const &rhs)     //equal_test,
             {
                 changed_flag |= (lhs != rhs);
                 return lhs == rhs;
@@ -146,41 +146,40 @@ namespace algorithms
         if ((graph.nrows() != dists.ncols()) ||
             (graph.ncols() != dists.ncols()))
         {
-            throw GraphBLAS::DimensionException();
+            throw grb::DimensionException();
         }
 
         /// @todo why num_rows-1 iterations?  Should terminate
         /// when there are no changes?
-        for (GraphBLAS::IndexType k = 0; k < graph.nrows()-1; ++k)
+        for (grb::IndexType k = 0; k < graph.nrows()-1; ++k)
         {
-            GraphBLAS::mxm(dists,
-                           GraphBLAS::NoMask(),
-                           GraphBLAS::Min<T>(),
-                           GraphBLAS::MinPlusSemiring<T>(),
-                           dists, graph);
+            grb::mxm(dists,
+                     grb::NoMask(),
+                     grb::Min<T>(),
+                     grb::MinPlusSemiring<T>(),
+                     dists, graph);
 
             //std::cout << "BATCH SSSP Iteration " << k << std::endl;
-            //GraphBLAS::print_vector(std::cout, dists, "dists");
+            //grb::print_vector(std::cout, dists, "dists");
         }
 
         // Perform one more step to determine if any values have changed.
         // If so, that implies a negative cycle.
         DistMatrixT dist2(dists);
-        GraphBLAS::mxm(dist2,
-                       GraphBLAS::NoMask(), GraphBLAS::Min<T>(),
-                       GraphBLAS::MinPlusSemiring<T>(),
-                       dist2, graph);
-        //GraphBLAS::print_matrix(std::cout, dist2, "Dist2");
+        grb::mxm(dist2,
+                 grb::NoMask(), grb::Min<T>(),
+                 grb::MinPlusSemiring<T>(),
+                 dist2, graph);
+        //grb::print_matrix(std::cout, dist2, "Dist2");
 
         // determine which distances are equal and also detect if any
         // are still changing.
-        GraphBLAS::Matrix<bool> equal_flags(dists.nrows(), dists.ncols());
+        grb::Matrix<bool> equal_flags(dists.nrows(), dists.ncols());
         bool changed_flag(false);
-        GraphBLAS::eWiseMult(
+        grb::eWiseMult(
             equal_flags,
-            GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-            [&changed_flag](DT const &lhs,
-                            DT const &rhs)     //equal_test,
+            grb::NoMask(), grb::NoAccumulate(),
+            [&changed_flag](DT const &lhs, DT const &rhs)     //equal_test
             {
                 changed_flag |= (lhs != rhs);
                 return lhs == rhs;
@@ -221,53 +220,47 @@ namespace algorithms
         if ((graph.nrows() != dist.size()) ||
             (graph.ncols() != dist.size()))
         {
-            throw GraphBLAS::DimensionException();
+            throw grb::DimensionException();
         }
 
-        GraphBLAS::Vector<T> new_dist(dist);
-        GraphBLAS::Vector<bool> new_dist_flags(dist.size());
+        grb::Vector<T> new_dist(dist);
+        grb::Vector<bool> new_dist_flags(dist.size());
 
-        GraphBLAS::IndexType iters_left(graph.nrows());
+        grb::IndexType iters_left(graph.nrows());
         while (iters_left > 0)
         {
-            //std::cout << "============= Filtered BF Iteration ================="
-            //          << std::endl;
-            GraphBLAS::vxm(new_dist,
-                           GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                           GraphBLAS::MinPlusSemiring<T>(),
-                           new_dist, graph);
-            //GraphBLAS::print_vector(std::cout, new_dist,
-            //                        "new dist");
+            //std::cout << "============= Filtered BF Iteration =================\n";
+            grb::vxm(new_dist,
+                     grb::NoMask(), grb::NoAccumulate(),
+                     grb::MinPlusSemiring<T>(),
+                     new_dist, graph);
+            //grb::print_vector(std::cout, new_dist, "new dist");
 
-            // Note that the following (masked less than) only
-            // works if the new distances are never zero.
-            // TODO: NEED STRUCTURE ONLY MASK here
             // new_dist_flags<new_dist> = new_dist .< dist
-            GraphBLAS::eWiseAdd(new_dist_flags,
-                                new_dist,
-                                GraphBLAS::NoAccumulate(),
-                                GraphBLAS::LessThan<T>(),
-                                new_dist, dist, GraphBLAS::REPLACE);
-            //GraphBLAS::print_vector(std::cout, new_dist_flags,
-            //                        "new dist flags");
+            // (works even if new_dist has a stored zero
+            grb::eWiseAdd(new_dist_flags,
+                          grb::structure(new_dist),
+                          grb::NoAccumulate(),
+                          grb::LessThan<T>(),
+                          new_dist, dist, grb::REPLACE);
+            //grb::print_vector(std::cout, new_dist_flags, "new dist flags");
 
             // clear out any non-contributing paths
-            GraphBLAS::apply(new_dist,
-                             new_dist_flags,
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Identity<T>(), new_dist, GraphBLAS::REPLACE);
-            //GraphBLAS::print_vector(std::cout, new_dist,
-            //                        "new dist (cleared)");
+            grb::apply(new_dist,
+                       new_dist_flags,
+                       grb::NoAccumulate(),
+                       grb::Identity<T>(), new_dist, grb::REPLACE);
+            //grb::print_vector(std::cout, new_dist, "new dist (cleared)");
 
             if (new_dist.nvals() == 0)
                 break;
 
-            GraphBLAS::eWiseAdd(dist,
-                                GraphBLAS::NoMask(),
-                                GraphBLAS::NoAccumulate(),
-                                GraphBLAS::Min<T>(),
-                                new_dist, dist);
-            //GraphBLAS::print_vector(std::cout, dist, "Dist");
+            grb::eWiseAdd(dist,
+                          grb::NoMask(),
+                          grb::NoAccumulate(),
+                          grb::Min<T>(),
+                          new_dist, dist);
+            //grb::print_vector(std::cout, dist, "Dist");
             //std::cout << std::endl;
 
             --iters_left;
@@ -301,66 +294,66 @@ namespace algorithms
 
     //************************************************************************
     template<typename MatrixT>
-    void sssp_delta_step(MatrixT const                                   &graph,
-                         typename MatrixT::ScalarType                     delta,
-                         GraphBLAS::IndexType                             src,
-                         GraphBLAS::Vector<typename MatrixT::ScalarType> &paths)
+    void sssp_delta_step(MatrixT const                             &graph,
+                         typename MatrixT::ScalarType               delta,
+                         grb::IndexType                             src,
+                         grb::Vector<typename MatrixT::ScalarType> &paths)
     {
         using T = typename MatrixT::ScalarType;
         //std::cerr << "delta = " << delta << std::endl;
-        //GraphBLAS::print_matrix(std::cerr, graph, "A");
+        //grb::print_matrix(std::cerr, graph, "A");
 
-        GraphBLAS::IndexType n(graph.nrows());  /// @todo assert nrows = ncols
-        paths.clear();                          /// @todo assert size = nrows
+        grb::IndexType n(graph.nrows());  /// @todo assert nrows = ncols
+        paths.clear();                    /// @todo assert size = nrows
 
-        GraphBLAS::Vector<T>    t(n);
-        GraphBLAS::Vector<T>    tmasked(n);
-        GraphBLAS::Vector<T>    tReq(n);
+        grb::Vector<T>    t(n);
+        grb::Vector<T>    tmasked(n);
+        grb::Vector<T>    tReq(n);
 
-        GraphBLAS::Vector<bool> tBi(n);
-        GraphBLAS::Vector<bool> tnew(n);
-        GraphBLAS::Vector<bool> tcomp(n);
-        GraphBLAS::Vector<bool> tless(n);
-        GraphBLAS::Vector<bool> s(n);
+        grb::Vector<bool> tBi(n);
+        grb::Vector<bool> tnew(n);
+        grb::Vector<bool> tcomp(n);
+        grb::Vector<bool> tless(n);
+        grb::Vector<bool> s(n);
 
         // t = infinity, t[src] = 0
         t.setElement(src, 0);
 
         // AL = A .* (A <= delta)
         MatrixT AL(n, n);
-        GraphBLAS::apply(AL, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                         std::bind(GraphBLAS::LessEqual<T>(),
-                                   std::placeholders::_1,
-                                   static_cast<T>(delta)),
-                          graph);
-        GraphBLAS::apply(AL, AL, GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Identity<T>(), graph, GraphBLAS::REPLACE);
-        //GraphBLAS::print_matrix(std::cerr, AL, "AL = A(<=delta)");
+        grb::apply(AL, grb::NoMask(), grb::NoAccumulate(),
+                   std::bind(grb::LessEqual<T>(),
+                             std::placeholders::_1,
+                             static_cast<T>(delta)),
+                   graph);
+        grb::apply(AL, AL, grb::NoAccumulate(),
+                   grb::Identity<T>(), graph, grb::REPLACE);
+        //grb::print_matrix(std::cerr, AL, "AL = A(<=delta)");
 
         // AH = A .* (A > delta)
         MatrixT AH(n, n);
-        GraphBLAS::apply(AH, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                         std::bind(GraphBLAS::GreaterThan<T>(),
-                                   std::placeholders::_1,
-                                   delta),
-                         graph);
-        GraphBLAS::apply(AH, AH, GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Identity<T>(), graph, GraphBLAS::REPLACE);
-        //GraphBLAS::print_matrix(std::cerr, AH, "AH = A(>delta)");
+        grb::apply(AH, grb::NoMask(), grb::NoAccumulate(),
+                   std::bind(grb::GreaterThan<T>(),
+                             std::placeholders::_1,
+                             delta),
+                   graph);
+        grb::apply(AH, AH, grb::NoAccumulate(),
+                   grb::Identity<T>(), graph, grb::REPLACE);
+        //grb::print_matrix(std::cerr, AH, "AH = A(>delta)");
 
         // i = 0
-        GraphBLAS::IndexType i(0);
+        grb::IndexType i(0);
 
         // t >= i*delta
-        GraphBLAS::apply(tcomp, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                         std::bind(GraphBLAS::GreaterEqual<T>(),
-                                   std::placeholders::_1,
-                                   static_cast<T>(i)*delta),
-                         t);
-        GraphBLAS::apply(tcomp, tcomp, GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Identity<bool>(), tcomp);
+        grb::apply(tcomp, grb::NoMask(), grb::NoAccumulate(),
+                   std::bind(grb::GreaterEqual<T>(),
+                             std::placeholders::_1,
+                             static_cast<T>(i)*delta),
+                   t);
+        grb::apply(tcomp, tcomp, grb::NoAccumulate(),
+                   grb::Identity<bool>(), tcomp);
 
-        //GraphBLAS::print_vector(std::cerr, tcomp, "tcomp = t(>=i*delta)");
+        //grb::print_vector(std::cerr, tcomp, "tcomp = t(>=i*delta)");
 
         // while (t >= i*delta) not empty
         while (tcomp.nvals() > 0)
@@ -372,33 +365,33 @@ namespace algorithms
 
             // tBi = t .* (i*delta <= t < (i+1)*delta)
             SelectInRange<T> in_range((T)i*delta, ((T)(i + 1))*delta);
-            GraphBLAS::apply(tBi, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                             in_range, t);
-            GraphBLAS::apply(tBi, tBi, GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Identity<T>(), tBi, GraphBLAS::REPLACE);
-            //GraphBLAS::print_vector(std::cerr, tBi,
+            grb::apply(tBi, grb::NoMask(), grb::NoAccumulate(),
+                       in_range, t);
+            grb::apply(tBi, tBi, grb::NoAccumulate(),
+                       grb::Identity<T>(), tBi, grb::REPLACE);
+            //grb::print_vector(std::cerr, tBi,
             //                        "tBi<tless> = tReq([i*d, (i+1)*d))");
 
             // tm<tBi> = t
-            GraphBLAS::apply(tmasked, tBi, GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Identity<T>(), t, GraphBLAS::REPLACE);
-            //GraphBLAS::print_vector(std::cerr, tmasked, "tm = t<tBi>");
+            grb::apply(tmasked, tBi, grb::NoAccumulate(),
+                       grb::Identity<T>(), t, grb::REPLACE);
+            //grb::print_vector(std::cerr, tmasked, "tm = t<tBi>");
 
             while (tmasked.nvals() > 0)
             {
                 //std::cerr << "******************* inner *********************\n";
                 // tReq = AL' (min.+) (t .* tBi)
-                GraphBLAS::vxm(tReq, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                               GraphBLAS::MinPlusSemiring<T>(), tmasked, AL);
-                //GraphBLAS::print_vector(std::cerr, tReq, "tReq = tm*AL");
+                grb::vxm(tReq, grb::NoMask(), grb::NoAccumulate(),
+                         grb::MinPlusSemiring<T>(), tmasked, AL);
+                //grb::print_vector(std::cerr, tReq, "tReq = tm*AL");
 
                 // s = s + tBi
-                GraphBLAS::eWiseAdd(s,
-                                    GraphBLAS::NoMask(),
-                                    GraphBLAS::NoAccumulate(),
-                                    GraphBLAS::LogicalOr<bool>(),
-                                    s, tBi);
-                //GraphBLAS::print_vector(std::cerr, s, "s += tBi");
+                grb::eWiseAdd(s,
+                              grb::NoMask(),
+                              grb::NoAccumulate(),
+                              grb::LogicalOr<bool>(),
+                              s, tBi);
+                //grb::print_vector(std::cerr, s, "s += tBi");
 
                 // Don't tBi = 0
                 // tBi.clear();
@@ -407,74 +400,74 @@ namespace algorithms
                 // works if the new distances are never zero.
                 // TODO: NEED STRUCTURE ONLY MASK here
                 // tless<tReq> = tReq .< t
-                GraphBLAS::eWiseAdd(tless,
-                                    tReq,
-                                    GraphBLAS::NoAccumulate(),
-                                    GraphBLAS::LessThan<T>(),
-                                    tReq, t, GraphBLAS::REPLACE);
-                //GraphBLAS::print_vector(std::cerr, tless, "tless<tReq> = tReq .< t");
+                grb::eWiseAdd(tless,
+                              tReq,
+                              grb::NoAccumulate(),
+                              grb::LessThan<T>(),
+                              tReq, t, grb::REPLACE);
+                //grb::print_vector(std::cerr, tless, "tless<tReq> = tReq .< t");
 
                 // tBi<tless> = i*delta <= tReq < (i+1)*delta
-                GraphBLAS::apply(tBi,
-                                 tless,
-                                 GraphBLAS::NoAccumulate(),
-                                 in_range, tReq, GraphBLAS::REPLACE);
-                //GraphBLAS::apply(tnew, tnew, GraphBLAS::NoAccumulate(),
-                //                 GraphBLAS::Identity<bool>(), tnew, GraphBLAS::REPLACE);
-                //GraphBLAS::print_vector(std::cerr, tBi,
+                grb::apply(tBi,
+                           tless,
+                           grb::NoAccumulate(),
+                           in_range, tReq, grb::REPLACE);
+                //grb::apply(tnew, tnew, grb::NoAccumulate(),
+                //                 grb::Identity<bool>(), tnew, grb::REPLACE);
+                //grb::print_vector(std::cerr, tBi,
                 //                        "tBi<tless> = tReq([i*d, (i+1)*d))");
 
                 // t = min(t, tReq)
-                GraphBLAS::eWiseAdd(t,
-                                    GraphBLAS::NoMask(),
-                                    GraphBLAS::NoAccumulate(),
-                                    GraphBLAS::Min<T>(),
-                                    t, tReq);
-                //GraphBLAS::print_vector(std::cerr, t, "t = min(t, tReq)");
+                grb::eWiseAdd(t,
+                              grb::NoMask(),
+                              grb::NoAccumulate(),
+                              grb::Min<T>(),
+                              t, tReq);
+                //grb::print_vector(std::cerr, t, "t = min(t, tReq)");
 
                 // tm<tBi> = t
-                GraphBLAS::apply(tmasked, tBi, GraphBLAS::NoAccumulate(),
-                                 GraphBLAS::Identity<T>(), t, GraphBLAS::REPLACE);
-                //GraphBLAS::print_vector(std::cerr, tmasked, "tm = t<tBi>");
+                grb::apply(tmasked, tBi, grb::NoAccumulate(),
+                           grb::Identity<T>(), t, grb::REPLACE);
+                //grb::print_vector(std::cerr, tmasked, "tm = t<tBi>");
             }
             //std::cerr << "******************** end inner loop *****************\n";
 
             // (t .* s)
-            GraphBLAS::apply(tmasked, s, GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Identity<T>(), t, GraphBLAS::REPLACE);
-            //GraphBLAS::print_vector(std::cerr, tmasked, "tm = t<s>");
+            grb::apply(tmasked, s, grb::NoAccumulate(),
+                       grb::Identity<T>(), t, grb::REPLACE);
+            //grb::print_vector(std::cerr, tmasked, "tm = t<s>");
 
             // tReq = AH'(t .* s)
-            GraphBLAS::vxm(tReq,
-                           GraphBLAS::NoMask(),
-                           GraphBLAS::NoAccumulate(),
-                           GraphBLAS::MinPlusSemiring<T>(), tmasked, AH);
-            //GraphBLAS::print_vector(std::cerr, tReq, "tReq = tcomp min.+ AH");
+            grb::vxm(tReq,
+                     grb::NoMask(),
+                     grb::NoAccumulate(),
+                     grb::MinPlusSemiring<T>(), tmasked, AH);
+            //grb::print_vector(std::cerr, tReq, "tReq = tcomp min.+ AH");
 
             // t = min(t, tReq)
-            GraphBLAS::eWiseAdd(t,
-                                GraphBLAS::NoMask(),
-                                GraphBLAS::NoAccumulate(),
-                                GraphBLAS::Min<T>(), t, tReq);
-            //GraphBLAS::print_vector(std::cerr, t, "t = min(t,tReq)");
+            grb::eWiseAdd(t,
+                          grb::NoMask(),
+                          grb::NoAccumulate(),
+                          grb::Min<T>(), t, tReq);
+            //grb::print_vector(std::cerr, t, "t = min(t,tReq)");
 
             ++i;
 
             // t >= i*delta
-            GraphBLAS::apply(tcomp,
-                             GraphBLAS::NoMask(),
-                             GraphBLAS::NoAccumulate(),
-                             std::bind(GraphBLAS::GreaterEqual<T>(),
-                                       std::placeholders::_1,
-                                       static_cast<T>(i)*delta),
-                             t);
-            GraphBLAS::apply(tcomp, tcomp, GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Identity<bool>(), tcomp, GraphBLAS::REPLACE);
-            //GraphBLAS::print_vector(std::cerr, tcomp, "tcomp = t(>=i*delta)");
+            grb::apply(tcomp,
+                       grb::NoMask(),
+                       grb::NoAccumulate(),
+                       std::bind(grb::GreaterEqual<T>(),
+                                 std::placeholders::_1,
+                                 static_cast<T>(i)*delta),
+                       t);
+            grb::apply(tcomp, tcomp, grb::NoAccumulate(),
+                       grb::Identity<bool>(), tcomp, grb::REPLACE);
+            //grb::print_vector(std::cerr, tcomp, "tcomp = t(>=i*delta)");
         }
 
         // result = t
-        GraphBLAS::apply(paths, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Identity<T>(), t);
+        grb::apply(paths, grb::NoMask(), grb::NoAccumulate(),
+                   grb::Identity<T>(), t);
     }
 } // algorithms

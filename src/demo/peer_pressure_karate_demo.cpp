@@ -31,9 +31,9 @@
 #include <algorithms/cluster.hpp>
 
 //****************************************************************************
-GraphBLAS::IndexType const NUM_NODES = 34;
+grb::IndexType const NUM_NODES = 34;
 
-GraphBLAS::IndexArrayType i = {
+grb::IndexArrayType i = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     1,1,1,1,1,1,1,1,1,
     2,2,2,2,2,2,2,2,2,2,
@@ -69,7 +69,7 @@ GraphBLAS::IndexArrayType i = {
     32,32,32,32,32,32,32,32,32,32,32,32,
     33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33};
 
-GraphBLAS::IndexArrayType j = {
+grb::IndexArrayType j = {
     1,2,3,4,5,6,7,8,10,11,12,13,17,19,21,31,     //1,2,3,4,5,6,7,8,10,11,12,13,19,21,23,31,
     0,2,3,7,13,17,19,21,30,
     0,1,3,7,8,9,13,27,28,32,
@@ -108,8 +108,8 @@ GraphBLAS::IndexArrayType j = {
 //****************************************************************************
 int main(int, char**)
 {
-    GraphBLAS::Matrix<uint32_t> A_karate(NUM_NODES, NUM_NODES);
-    GraphBLAS::Matrix<uint32_t> G_karate(NUM_NODES, NUM_NODES);
+    grb::Matrix<uint32_t> A_karate(NUM_NODES, NUM_NODES);
+    grb::Matrix<uint32_t> G_karate(NUM_NODES, NUM_NODES);
     if (i.size() != j.size())
     {
         std::cerr << "Index arrays are not the same size: " << i.size()
@@ -121,13 +121,13 @@ int main(int, char**)
     G_karate.build(i.begin(), j.begin(), weights.begin(), i.size());
 
     auto Clusters =
-        GraphBLAS::scaled_identity<GraphBLAS::Matrix<bool>>(NUM_NODES);
+        grb::scaled_identity<grb::Matrix<bool>>(NUM_NODES);
 
     // Add self-loops to graph
-    GraphBLAS::eWiseAdd(A_karate,
-                        GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<uint32_t>(),
-                        G_karate, Clusters);
+    grb::eWiseAdd(A_karate,
+                  grb::NoMask(), grb::NoAccumulate(),
+                  grb::Plus<uint32_t>(),
+                  G_karate, Clusters);
 
     algorithms::peer_pressure_cluster_v2(A_karate, Clusters, 100);
 
@@ -139,8 +139,7 @@ int main(int, char**)
     }
     std::cout << std::endl;
 
-    auto Clusters2 =
-        GraphBLAS::scaled_identity<GraphBLAS::Matrix<bool>>(NUM_NODES);
+    auto Clusters2 = grb::scaled_identity<grb::Matrix<bool>>(NUM_NODES);
 
     algorithms::peer_pressure_cluster(A_karate, Clusters2, 100);
 

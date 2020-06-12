@@ -44,7 +44,7 @@
 
 //****************************************************************************
 
-namespace GraphBLAS
+namespace grb
 {
     namespace backend
     {
@@ -316,4 +316,4 @@ namespace GraphBLAS
         } // mxm
 
     } // backend
-} // GraphBLAS
+} // grb

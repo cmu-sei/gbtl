@@ -32,7 +32,7 @@
 #include <vector>
 #include <iostream>
 
-namespace GraphBLAS
+namespace grb
 {
     using IndexType = uint64_t;  /// @todo Consider template param for index type
     using IndexArrayType = std::vector<IndexType>;

@@ -32,7 +32,7 @@
 
 //****************************************************************************
 
-namespace GraphBLAS
+namespace grb
 {
     namespace backend
     {

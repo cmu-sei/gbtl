@@ -36,7 +36,7 @@
 
 #include <graphblas/graphblas.hpp>
 
-using namespace GraphBLAS;
+using namespace grb;
 
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE vector_methods_test_suite

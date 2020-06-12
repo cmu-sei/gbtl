@@ -45,35 +45,34 @@ int main()
     //    {-, -, -, -, -, -, -, -, -},
     //    {-, -, 1, -, 1, -, -, -, -};
 
-    /// @todo change scalar type to unsigned int or GraphBLAS::IndexType
-    using T = GraphBLAS::IndexType;
-    using GBMatrix = GraphBLAS::Matrix<T, GraphBLAS::DirectedMatrixTag>;
+    /// @todo change scalar type to unsigned int or grb::IndexType
+    using T = grb::IndexType;
+    using GBMatrix = grb::Matrix<T, grb::DirectedMatrixTag>;
     //T const INF(std::numeric_limits<T>::max());
 
-    GraphBLAS::IndexType const NUM_NODES = 9;
-    GraphBLAS::IndexArrayType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
-                                   4, 4, 4, 5, 6, 6, 6, 8, 8};
-    GraphBLAS::IndexArrayType j = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
-                                   2, 3, 8, 2, 1, 2, 3, 2, 4};
+    grb::IndexType const NUM_NODES = 9;
+    grb::IndexArrayType i = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
+                             4, 4, 4, 5, 6, 6, 6, 8, 8};
+    grb::IndexArrayType j = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
+                             2, 3, 8, 2, 1, 2, 3, 2, 4};
     std::vector<T> v(i.size(), 1);
 
     GBMatrix G_tn(NUM_NODES, NUM_NODES);
     G_tn.build(i.begin(), j.begin(), v.begin(), i.size());
-    GraphBLAS::print_matrix(std::cout, G_tn, "Graph adjacency matrix:");
+    grb::print_matrix(std::cout, G_tn, "Graph adjacency matrix:");
 
     // Perform a single BFS
-    GraphBLAS::Vector<T> parent_list(NUM_NODES);
-    GraphBLAS::Vector<T> root(NUM_NODES);
+    grb::Vector<T> parent_list(NUM_NODES);
+    grb::Vector<T> root(NUM_NODES);
     root.setElement(3, 1);
     algorithms::bfs(G_tn, root, parent_list);
-    GraphBLAS::print_vector(std::cout, parent_list,
-                            "Parent list for root at vertex 3");
+    grb::print_vector(std::cout, parent_list, "Parent list for root at vertex 3");
 
     // Perform BFS from all roots simultaneously (should the value be 0?)
-    //auto roots = GraphBLAS::identity<GBMatrix>(NUM_NODES, INF, 0);
+    //auto roots = grb::identity<GBMatrix>(NUM_NODES, INF, 0);
     GBMatrix roots(NUM_NODES, NUM_NODES);
-    GraphBLAS::IndexArrayType ii, jj, vv;
-    for (GraphBLAS::IndexType ix = 0; ix < NUM_NODES; ++ix)
+    grb::IndexArrayType ii, jj, vv;
+    for (grb::IndexType ix = 0; ix < NUM_NODES; ++ix)
     {
         ii.push_back(ix);
         jj.push_back(ix);
@@ -85,8 +84,7 @@ int main()
 
     algorithms::bfs_batch(G_tn, roots, G_tn_res);
 
-    GraphBLAS::print_matrix(std::cout, G_tn_res,
-                            "Parents for each root (by rows):");
+    grb::print_matrix(std::cout, G_tn_res, "Parents for each root (by rows):");
 
     return 0;
 }

@@ -35,7 +35,7 @@
 #include <iostream>
 #include <graphblas/graphblas.hpp>
 
-using namespace GraphBLAS;
+using namespace grb;
 
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE views_test_suite
@@ -65,8 +65,8 @@ BOOST_AUTO_TEST_CASE(test_mxm)
     Matrix<double, DirectedMatrixTag> answer(ans, 0);
 
     mxm(result,
-        GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-        GraphBLAS::ArithmeticSemiring<double>(),
+        grb::NoMask(), grb::NoAccumulate(),
+        grb::ArithmeticSemiring<double>(),
         mA, mB);
 
     BOOST_CHECK_EQUAL(result, answer);
@@ -98,8 +98,8 @@ BOOST_AUTO_TEST_CASE(test_mxm_masked)
     Matrix<uint8_t, DirectedMatrixTag> mask(M, 0);
 
     mxm(result,
-        mask, GraphBLAS::NoAccumulate(),
-        GraphBLAS::ArithmeticSemiring<double>(),
+        mask, grb::NoAccumulate(),
+        grb::ArithmeticSemiring<double>(),
         mA, mB);
 
     BOOST_CHECK_EQUAL(result, answer);
@@ -131,8 +131,8 @@ BOOST_AUTO_TEST_CASE(test_mxm_complemented_mask)
     Matrix<uint8_t, DirectedMatrixTag> mask(M, 0);
 
     mxm(result,
-        GraphBLAS::complement(mask), GraphBLAS::NoAccumulate(),
-        GraphBLAS::ArithmeticSemiring<double>(),
+        grb::complement(mask), grb::NoAccumulate(),
+        grb::ArithmeticSemiring<double>(),
         mA, mB);
 
     BOOST_CHECK_EQUAL(result, answer);
@@ -164,8 +164,8 @@ BOOST_AUTO_TEST_CASE(test_mxm_structure_mask)
     Matrix<uint8_t, DirectedMatrixTag> mask(M, 99);
 
     mxm(result,
-        GraphBLAS::structure(mask), GraphBLAS::NoAccumulate(),
-        GraphBLAS::ArithmeticSemiring<double>(),
+        grb::structure(mask), grb::NoAccumulate(),
+        grb::ArithmeticSemiring<double>(),
         mA, mB);
 
     BOOST_CHECK_EQUAL(result, answer);
@@ -197,9 +197,9 @@ BOOST_AUTO_TEST_CASE(test_mxm_complemented_structure_mask)
     Matrix<uint8_t, DirectedMatrixTag> mask(M, 99);
 
     mxm(result,
-        GraphBLAS::complement(GraphBLAS::structure(mask)),
-        GraphBLAS::NoAccumulate(),
-        GraphBLAS::ArithmeticSemiring<double>(),
+        grb::complement(grb::structure(mask)),
+        grb::NoAccumulate(),
+        grb::ArithmeticSemiring<double>(),
         mA, mB);
 
     BOOST_CHECK_EQUAL(result, answer);
@@ -228,8 +228,8 @@ BOOST_AUTO_TEST_CASE(test_mxm_a_transpose)
     answer.build(i_answer, j_answer, v_answer);
 
     mxm(result,
-        GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-        GraphBLAS::ArithmeticSemiring<double>(),
+        grb::NoMask(), grb::NoAccumulate(),
+        grb::ArithmeticSemiring<double>(),
         transpose(mA), mB);
 
     BOOST_CHECK_EQUAL(result, answer);
@@ -257,8 +257,8 @@ BOOST_AUTO_TEST_CASE(test_mxm_b_transpose)
     answer.build(i_answer, j_answer, v_answer);
 
     mxm(result,
-        GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-        GraphBLAS::ArithmeticSemiring<double>(),
+        grb::NoMask(), grb::NoAccumulate(),
+        grb::ArithmeticSemiring<double>(),
         mA, transpose(mB));
 
     BOOST_CHECK_EQUAL(result, answer);
@@ -286,8 +286,8 @@ BOOST_AUTO_TEST_CASE(test_mxm_a_and_b_transpose)
     answer.build(i_answer, j_answer, v_answer);
 
     mxm(result,
-        GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-        GraphBLAS::ArithmeticSemiring<double>(),
+        grb::NoMask(), grb::NoAccumulate(),
+        grb::ArithmeticSemiring<double>(),
         transpose(mA), transpose(mB));
 
     BOOST_CHECK_EQUAL(result, answer);
@@ -314,8 +314,8 @@ BOOST_AUTO_TEST_CASE(test_mxv)
     Vector<double> answer(ans, 0);
 
     mxv(result,
-        GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-        GraphBLAS::ArithmeticSemiring<double>(),
+        grb::NoMask(), grb::NoAccumulate(),
+        grb::ArithmeticSemiring<double>(),
         mA, mB);
 
     BOOST_CHECK_EQUAL(result, answer);
@@ -341,8 +341,8 @@ BOOST_AUTO_TEST_CASE(test_mxv_masked)
     Vector<uint8_t> mask(M, 0);
 
     mxv(result,
-        mask, GraphBLAS::NoAccumulate(),
-        GraphBLAS::ArithmeticSemiring<double>(),
+        mask, grb::NoAccumulate(),
+        grb::ArithmeticSemiring<double>(),
         mA, mB);
 
     BOOST_CHECK_EQUAL(result, answer);
@@ -368,8 +368,8 @@ BOOST_AUTO_TEST_CASE(test_mxv_complemented_mask)
     Vector<uint8_t> mask(M, 0);
 
     mxv(result,
-        GraphBLAS::complement(mask), GraphBLAS::NoAccumulate(),
-        GraphBLAS::ArithmeticSemiring<double>(),
+        grb::complement(mask), grb::NoAccumulate(),
+        grb::ArithmeticSemiring<double>(),
         mA, mB);
 
     BOOST_CHECK_EQUAL(result, answer);
@@ -395,8 +395,8 @@ BOOST_AUTO_TEST_CASE(test_mxv_structure_mask)
     Vector<uint8_t> mask(M, 99);
 
     mxv(result,
-        GraphBLAS::structure(mask), GraphBLAS::NoAccumulate(),
-        GraphBLAS::ArithmeticSemiring<double>(),
+        grb::structure(mask), grb::NoAccumulate(),
+        grb::ArithmeticSemiring<double>(),
         mA, mB);
 
     BOOST_CHECK_EQUAL(result, answer);
@@ -422,9 +422,9 @@ BOOST_AUTO_TEST_CASE(test_mxv_complemented_structure_mask)
     Vector<uint8_t> mask(M, 99);
 
     mxv(result,
-        GraphBLAS::complement(GraphBLAS::structure(mask)),
-        GraphBLAS::NoAccumulate(),
-        GraphBLAS::ArithmeticSemiring<double>(),
+        grb::complement(grb::structure(mask)),
+        grb::NoAccumulate(),
+        grb::ArithmeticSemiring<double>(),
         mA, mB);
 
     BOOST_CHECK_EQUAL(result, answer);

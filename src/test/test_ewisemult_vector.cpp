@@ -68,138 +68,138 @@ namespace
 // ***************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewisemult_vector_bad_dimensions)
 {
-    GraphBLAS::Vector<double> v(v3a_dense, 0.);
-    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+    grb::Vector<double> v(v3a_dense, 0.);
+    grb::Vector<double> u(v4a_dense, 0.);
 
-    GraphBLAS::Vector<double> result(3);
+    grb::Vector<double> result(3);
 
     // incompatible input dimensions
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseMult(result,
-                              GraphBLAS::NoMask(),
-                              GraphBLAS::NoAccumulate(),
-                              GraphBLAS::Times<double>(), v, u)),
-        GraphBLAS::DimensionException);
+        (grb::eWiseMult(result,
+                        grb::NoMask(),
+                        grb::NoAccumulate(),
+                        grb::Times<double>(), v, u)),
+        grb::DimensionException);
 
     // incompatible output vector dimensions
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseMult(result,
-                              GraphBLAS::NoMask(),
-                              GraphBLAS::NoAccumulate(),
-                              GraphBLAS::Times<double>(), u, u)),
-        GraphBLAS::DimensionException);
+        (grb::eWiseMult(result,
+                        grb::NoMask(),
+                        grb::NoAccumulate(),
+                        grb::Times<double>(), u, u)),
+        grb::DimensionException);
 }
 
 // ***************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewisemult_vector_reg)
 {
-    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+    grb::Vector<double> u(v4a_dense, 0.);
 
     // ewise mult with dense vector
-    GraphBLAS::Vector<double> v(twos4_dense, 0.);
-    GraphBLAS::Vector<double> ans(ans_4atwos4_dense, 0.);
+    grb::Vector<double> v(twos4_dense, 0.);
+    grb::Vector<double> ans(ans_4atwos4_dense, 0.);
 
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> result(4);
 
-    GraphBLAS::eWiseMult(result,
-                         GraphBLAS::NoMask(),
-                         GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v);
+    grb::eWiseMult(result,
+                   grb::NoMask(),
+                   grb::NoAccumulate(),
+                   grb::Times<double>(), u, v);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise mult with sparse vector
-    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
-    GraphBLAS::Vector<double> ans2(ans_4a4b_dense, 0.);
-    GraphBLAS::eWiseMult(result,
-                         GraphBLAS::NoMask(),
-                         GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v2);
+    grb::Vector<double> v2(v4b_dense, 0.);
+    grb::Vector<double> ans2(ans_4a4b_dense, 0.);
+    grb::eWiseMult(result,
+                   grb::NoMask(),
+                   grb::NoAccumulate(),
+                   grb::Times<double>(), u, v2);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise mult with empty vector
-    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
-    GraphBLAS::Vector<double> ans3(zero4_dense, 0.);
-    GraphBLAS::eWiseMult(result,
-                         GraphBLAS::NoMask(),
-                         GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v3);
+    grb::Vector<double> v3(zero4_dense, 0.);
+    grb::Vector<double> ans3(zero4_dense, 0.);
+    grb::eWiseMult(result,
+                   grb::NoMask(),
+                   grb::NoAccumulate(),
+                   grb::Times<double>(), u, v3);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
 // ***************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewisemult_vector_stored_zero_result)
 {
-    GraphBLAS::Vector<double> u(v4a_dense); //, 0.);
+    grb::Vector<double> u(v4a_dense); //, 0.);
 
     // ewise mult with dense vector
-    GraphBLAS::Vector<double> v(twos4_dense, 0.);
-    GraphBLAS::Vector<double> ans(ans_4atwos4_dense); //, 0.);
+    grb::Vector<double> v(twos4_dense, 0.);
+    grb::Vector<double> ans(ans_4atwos4_dense); //, 0.);
 
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> result(4);
 
-    GraphBLAS::eWiseMult(result,
-                         GraphBLAS::NoMask(),
-                         GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v);
+    grb::eWiseMult(result,
+                   grb::NoMask(),
+                   grb::NoAccumulate(),
+                   grb::Times<double>(), u, v);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise mult with sparse vector
-    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
-    GraphBLAS::Vector<double> ans2(ans_4a4b_dense, 0.);
+    grb::Vector<double> v2(v4b_dense, 0.);
+    grb::Vector<double> ans2(ans_4a4b_dense, 0.);
     ans2.setElement(1, 0.);
-    GraphBLAS::eWiseMult(result,
-                         GraphBLAS::NoMask(),
-                         GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v2);
+    grb::eWiseMult(result,
+                   grb::NoMask(),
+                   grb::NoAccumulate(),
+                   grb::Times<double>(), u, v2);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise mult with empty vector
-    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
-    GraphBLAS::Vector<double> ans3(zero4_dense, 0.);
-    GraphBLAS::eWiseMult(result,
-                         GraphBLAS::NoMask(),
-                         GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v3);
+    grb::Vector<double> v3(zero4_dense, 0.);
+    grb::Vector<double> ans3(zero4_dense, 0.);
+    grb::eWiseMult(result,
+                   grb::NoMask(),
+                   grb::NoAccumulate(),
+                   grb::Times<double>(), u, v3);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
 // ***************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewisemult_semiring_vector_stored_zero_result)
 {
-    GraphBLAS::Vector<double> u(v4a_dense); //, 0.);
+    grb::Vector<double> u(v4a_dense); //, 0.);
 
     // ewise mult with dense vector
-    GraphBLAS::Vector<double> v(twos4_dense, 0.);
-    GraphBLAS::Vector<double> ans(ans_4atwos4_dense); //, 0.);
+    grb::Vector<double> v(twos4_dense, 0.);
+    grb::Vector<double> ans(ans_4atwos4_dense); //, 0.);
 
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> result(4);
 
-    GraphBLAS::eWiseMult(result,
-                         GraphBLAS::NoMask(),
-                         GraphBLAS::NoAccumulate(),
-                         multiply_op(GraphBLAS::ArithmeticSemiring<double>()),
-                         u, v);
+    grb::eWiseMult(result,
+                   grb::NoMask(),
+                   grb::NoAccumulate(),
+                   multiply_op(grb::ArithmeticSemiring<double>()),
+                   u, v);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise mult with sparse vector
-    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
-    GraphBLAS::Vector<double> ans2(ans_4a4b_dense, 0.);
+    grb::Vector<double> v2(v4b_dense, 0.);
+    grb::Vector<double> ans2(ans_4a4b_dense, 0.);
     ans2.setElement(1, 0.);
-    GraphBLAS::eWiseMult(result,
-                         GraphBLAS::NoMask(),
-                         GraphBLAS::NoAccumulate(),
-                         multiply_op(GraphBLAS::ArithmeticSemiring<double>()),
-                         u, v2);
+    grb::eWiseMult(result,
+                   grb::NoMask(),
+                   grb::NoAccumulate(),
+                   multiply_op(grb::ArithmeticSemiring<double>()),
+                   u, v2);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise mult with empty vector
-    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
-    GraphBLAS::Vector<double> ans3(zero4_dense, 0.);
-    GraphBLAS::eWiseMult(result,
-                         GraphBLAS::NoMask(),
-                         GraphBLAS::NoAccumulate(),
-                         multiply_op(GraphBLAS::ArithmeticSemiring<double>()),
-                         u, v3);
+    grb::Vector<double> v3(zero4_dense, 0.);
+    grb::Vector<double> ans3(zero4_dense, 0.);
+    grb::eWiseMult(result,
+                   grb::NoMask(),
+                   grb::NoAccumulate(),
+                   multiply_op(grb::ArithmeticSemiring<double>()),
+                   u, v3);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -210,57 +210,57 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_semiring_vector_stored_zero_result)
 // ***************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewisemult_vector_masked_replace_bad_dimensions)
 {
-    GraphBLAS::Vector<double> v(v4a_dense, 0.);
-    GraphBLAS::Vector<double> u(v4b_dense, 0.);
-    GraphBLAS::Vector<double> mask(v3a_dense, 0.);
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> v(v4a_dense, 0.);
+    grb::Vector<double> u(v4b_dense, 0.);
+    grb::Vector<double> mask(v3a_dense, 0.);
+    grb::Vector<double> result(4);
 
     // incompatible Mask-Output dimensions
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseMult(result,
-                              mask,
-                              GraphBLAS::NoAccumulate(),
-                              GraphBLAS::Times<double>(), v, u, GraphBLAS::REPLACE)),
-        GraphBLAS::DimensionException);
+        (grb::eWiseMult(result,
+                        mask,
+                        grb::NoAccumulate(),
+                        grb::Times<double>(), v, u, grb::REPLACE)),
+        grb::DimensionException);
 }
 
 // ***************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewisemult_vector_masked_replace_reg)
 {
     std::vector<int> mask4_dense = {0, 1, 1, 0};
-    GraphBLAS::Vector<int> mask(mask4_dense, 0);
+    grb::Vector<int> mask(mask4_dense, 0);
 
-    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+    grb::Vector<double> u(v4a_dense, 0.);
 
     // ewise mult with dense vector
-    GraphBLAS::Vector<double> v(twos4_dense, 0.);
+    grb::Vector<double> v(twos4_dense, 0.);
     std::vector<double> ans_4atwos4_dense2 = {0, 0, 24, 0};
-    GraphBLAS::Vector<double> ans(ans_4atwos4_dense2, 0.);
+    grb::Vector<double> ans(ans_4atwos4_dense2, 0.);
 
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> result(4);
 
-    GraphBLAS::eWiseMult(result,
-                         mask,
-                         GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v, GraphBLAS::REPLACE);
+    grb::eWiseMult(result,
+                   mask,
+                   grb::NoAccumulate(),
+                   grb::Times<double>(), u, v, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise mult with sparse vector
-    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
-    GraphBLAS::Vector<double> ans2(zero4_dense, 0.);
-    GraphBLAS::eWiseMult(result,
-                         mask,
-                         GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v2, GraphBLAS::REPLACE);
+    grb::Vector<double> v2(v4b_dense, 0.);
+    grb::Vector<double> ans2(zero4_dense, 0.);
+    grb::eWiseMult(result,
+                   mask,
+                   grb::NoAccumulate(),
+                   grb::Times<double>(), u, v2, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise mult with empty vector
-    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
-    GraphBLAS::Vector<double> ans3(zero4_dense, 0.);
-    GraphBLAS::eWiseMult(result,
-                         mask,
-                         GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v3, GraphBLAS::REPLACE);
+    grb::Vector<double> v3(zero4_dense, 0.);
+    grb::Vector<double> ans3(zero4_dense, 0.);
+    grb::eWiseMult(result,
+                   mask,
+                   grb::NoAccumulate(),
+                   grb::Times<double>(), u, v3, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -268,39 +268,39 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_masked_replace_reg)
 BOOST_AUTO_TEST_CASE(test_ewisemult_vector_masked_replace_reg_stored_zero)
 {
     std::vector<int> mask4_dense = {0, 1, 1, 0};
-    GraphBLAS::Vector<int> mask(mask4_dense);//, 0);
+    grb::Vector<int> mask(mask4_dense);//, 0);
 
-    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+    grb::Vector<double> u(v4a_dense, 0.);
 
     // ewise mult with dense vector
-    GraphBLAS::Vector<double> v(twos4_dense, 0.);
+    grb::Vector<double> v(twos4_dense, 0.);
     std::vector<double> ans_4atwos4_dense2 = {0, 0, 24, 0};
-    GraphBLAS::Vector<double> ans(ans_4atwos4_dense2, 0.);
+    grb::Vector<double> ans(ans_4atwos4_dense2, 0.);
 
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> result(4);
 
-    GraphBLAS::eWiseMult(result,
-                         mask,
-                         GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v, GraphBLAS::REPLACE);
+    grb::eWiseMult(result,
+                   mask,
+                   grb::NoAccumulate(),
+                   grb::Times<double>(), u, v, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise mult with sparse vector
-    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
-    GraphBLAS::Vector<double> ans2(zero4_dense, 0.);
-    GraphBLAS::eWiseMult(result,
-                         mask,
-                         GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v2, GraphBLAS::REPLACE);
+    grb::Vector<double> v2(v4b_dense, 0.);
+    grb::Vector<double> ans2(zero4_dense, 0.);
+    grb::eWiseMult(result,
+                   mask,
+                   grb::NoAccumulate(),
+                   grb::Times<double>(), u, v2, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise mult with empty vector
-    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
-    GraphBLAS::Vector<double> ans3(zero4_dense, 0.);
-    GraphBLAS::eWiseMult(result,
-                         mask,
-                         GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v3, GraphBLAS::REPLACE);
+    grb::Vector<double> v3(zero4_dense, 0.);
+    grb::Vector<double> ans3(zero4_dense, 0.);
+    grb::eWiseMult(result,
+                   mask,
+                   grb::NoAccumulate(),
+                   grb::Times<double>(), u, v3, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -311,73 +311,73 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_masked_replace_reg_stored_zero)
 // ***************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewisemult_vector_masked_bad_dimensions)
 {
-    GraphBLAS::Vector<double> v(v4a_dense, 0.);
-    GraphBLAS::Vector<double> u(v4b_dense, 0.);
-    GraphBLAS::Vector<double> mask(v3a_dense, 0.);
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> v(v4a_dense, 0.);
+    grb::Vector<double> u(v4b_dense, 0.);
+    grb::Vector<double> mask(v3a_dense, 0.);
+    grb::Vector<double> result(4);
 
     // incompatible Mask-Output dimensions
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseMult(result,
-                              mask,
-                              GraphBLAS::NoAccumulate(),
-                              GraphBLAS::Times<double>(), v, u)),
-        GraphBLAS::DimensionException);
+        (grb::eWiseMult(result,
+                        mask,
+                        grb::NoAccumulate(),
+                        grb::Times<double>(), v, u)),
+        grb::DimensionException);
 }
 
 // ***************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewisemult_vector_masked_reg)
 {
     std::vector<int> mask4_dense = {0, 1, 1, 0};
-    GraphBLAS::Vector<int> mask(mask4_dense, 0);
+    grb::Vector<int> mask(mask4_dense, 0);
 
-    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+    grb::Vector<double> u(v4a_dense, 0.);
 
     {
         // ewise mult with dense vector
-        GraphBLAS::Vector<double> v(twos4_dense, 0.);
+        grb::Vector<double> v(twos4_dense, 0.);
 
-        GraphBLAS::Vector<double> result(twos4_dense);
+        grb::Vector<double> result(twos4_dense);
 
         std::vector<double> ans_dense = {2, 0, 24, 2};
-        GraphBLAS::Vector<double> ans(ans_dense, 0.);
+        grb::Vector<double> ans(ans_dense, 0.);
 
-        GraphBLAS::eWiseMult(result,
-                             mask,
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<double>(), u, v, GraphBLAS::MERGE);
+        grb::eWiseMult(result,
+                       mask,
+                       grb::NoAccumulate(),
+                       grb::Times<double>(), u, v, grb::MERGE);
         BOOST_CHECK_EQUAL(result, ans);
     }
 
     {
         // ewise mult with sparse vector
-        GraphBLAS::Vector<double> v2(v4b_dense, 0.);
+        grb::Vector<double> v2(v4b_dense, 0.);
 
-        GraphBLAS::Vector<double> result(twos4_dense);
+        grb::Vector<double> result(twos4_dense);
 
         std::vector<double> ans_dense = {2, 0, 0, 2};
-        GraphBLAS::Vector<double> ans2(ans_dense, 0.);
+        grb::Vector<double> ans2(ans_dense, 0.);
 
-        GraphBLAS::eWiseMult(result,
-                             mask,
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<double>(), u, v2, GraphBLAS::MERGE);
+        grb::eWiseMult(result,
+                       mask,
+                       grb::NoAccumulate(),
+                       grb::Times<double>(), u, v2, grb::MERGE);
         BOOST_CHECK_EQUAL(result, ans2);
     }
 
     {
         // ewise mult with empty vector
-        GraphBLAS::Vector<double> v3(zero4_dense, 0.);
+        grb::Vector<double> v3(zero4_dense, 0.);
 
-        GraphBLAS::Vector<double> result(twos4_dense);
+        grb::Vector<double> result(twos4_dense);
 
         std::vector<double> ans_dense = {2, 0, 0, 2};
-        GraphBLAS::Vector<double> ans3(ans_dense, 0.);
+        grb::Vector<double> ans3(ans_dense, 0.);
 
-        GraphBLAS::eWiseMult(result,
-                             mask,
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<double>(), u, v3, GraphBLAS::MERGE);
+        grb::eWiseMult(result,
+                       mask,
+                       grb::NoAccumulate(),
+                       grb::Times<double>(), u, v3, grb::MERGE);
         BOOST_CHECK_EQUAL(result, ans3);
     }
 }
@@ -387,55 +387,55 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_masked_reg_stored_zero)
 {
 
     std::vector<int> mask4_dense = {0, 1, 1, 0};
-    GraphBLAS::Vector<int> mask(mask4_dense); //, 0);
+    grb::Vector<int> mask(mask4_dense); //, 0);
 
-    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+    grb::Vector<double> u(v4a_dense, 0.);
 
     {
         // ewise mult with dense vector
-        GraphBLAS::Vector<double> v(twos4_dense, 0.);
+        grb::Vector<double> v(twos4_dense, 0.);
 
-        GraphBLAS::Vector<double> result(twos4_dense);
+        grb::Vector<double> result(twos4_dense);
 
         std::vector<double> ans_dense = {2, 0, 24, 2};
-        GraphBLAS::Vector<double> ans(ans_dense, 0.);
+        grb::Vector<double> ans(ans_dense, 0.);
 
-        GraphBLAS::eWiseMult(result,
-                             mask,
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<double>(), u, v, GraphBLAS::MERGE);
+        grb::eWiseMult(result,
+                       mask,
+                       grb::NoAccumulate(),
+                       grb::Times<double>(), u, v, grb::MERGE);
         BOOST_CHECK_EQUAL(result, ans);
     }
 
     {
         // ewise mult with sparse vector
-        GraphBLAS::Vector<double> v2(v4b_dense, 0.);
+        grb::Vector<double> v2(v4b_dense, 0.);
 
-        GraphBLAS::Vector<double> result(twos4_dense);
+        grb::Vector<double> result(twos4_dense);
 
         std::vector<double> ans_dense = {2, 0, 0, 2};
-        GraphBLAS::Vector<double> ans2(ans_dense, 0.);
+        grb::Vector<double> ans2(ans_dense, 0.);
 
-        GraphBLAS::eWiseMult(result,
-                             mask,
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<double>(), u, v2, GraphBLAS::MERGE);
+        grb::eWiseMult(result,
+                       mask,
+                       grb::NoAccumulate(),
+                       grb::Times<double>(), u, v2, grb::MERGE);
         BOOST_CHECK_EQUAL(result, ans2);
     }
 
     {
         // ewise mult with empty vector
-        GraphBLAS::Vector<double> v3(zero4_dense, 0.);
+        grb::Vector<double> v3(zero4_dense, 0.);
 
-        GraphBLAS::Vector<double> result(twos4_dense);
+        grb::Vector<double> result(twos4_dense);
 
         std::vector<double> ans_dense = {2, 0, 0, 2};
-        GraphBLAS::Vector<double> ans3(ans_dense, 0.);
+        grb::Vector<double> ans3(ans_dense, 0.);
 
-        GraphBLAS::eWiseMult(result,
-                             mask,
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<double>(), u, v3, GraphBLAS::MERGE);
+        grb::eWiseMult(result,
+                       mask,
+                       grb::NoAccumulate(),
+                       grb::Times<double>(), u, v3, grb::MERGE);
         BOOST_CHECK_EQUAL(result, ans3);
     }
 }
@@ -447,57 +447,57 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_masked_reg_stored_zero)
 // ***************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewisemult_vector_scmp_masked_replace_bad_dimensions)
 {
-    GraphBLAS::Vector<double> v(v4a_dense, 0.);
-    GraphBLAS::Vector<double> u(v4b_dense, 0.);
-    GraphBLAS::Vector<double> mask(v3a_dense, 0.);
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> v(v4a_dense, 0.);
+    grb::Vector<double> u(v4b_dense, 0.);
+    grb::Vector<double> mask(v3a_dense, 0.);
+    grb::Vector<double> result(4);
 
     // incompatible Mask-Output dimensions
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseMult(result,
-                              GraphBLAS::complement(mask),
-                              GraphBLAS::NoAccumulate(),
-                              GraphBLAS::Times<double>(), v, u, GraphBLAS::REPLACE)),
-        GraphBLAS::DimensionException);
+        (grb::eWiseMult(result,
+                        grb::complement(mask),
+                        grb::NoAccumulate(),
+                        grb::Times<double>(), v, u, grb::REPLACE)),
+        grb::DimensionException);
 }
 
 // ***************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewisemult_vector_scmp_masked_replace_reg)
 {
     std::vector<int> mask4_dense = {1, 0, 0, 1};
-    GraphBLAS::Vector<int> mask(mask4_dense, 0);
+    grb::Vector<int> mask(mask4_dense, 0);
 
-    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+    grb::Vector<double> u(v4a_dense, 0.);
 
     // ewise mult with dense vector
-    GraphBLAS::Vector<double> v(twos4_dense, 0.);
+    grb::Vector<double> v(twos4_dense, 0.);
     std::vector<double> ans_4atwos4_dense2 = {0, 0, 24, 0};
-    GraphBLAS::Vector<double> ans(ans_4atwos4_dense2, 0.);
+    grb::Vector<double> ans(ans_4atwos4_dense2, 0.);
 
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> result(4);
 
-    GraphBLAS::eWiseMult(result,
-                         GraphBLAS::complement(mask),
-                         GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v, GraphBLAS::REPLACE);
+    grb::eWiseMult(result,
+                   grb::complement(mask),
+                   grb::NoAccumulate(),
+                   grb::Times<double>(), u, v, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise mult with sparse vector
-    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
-    GraphBLAS::Vector<double> ans2(zero4_dense, 0.);
-    GraphBLAS::eWiseMult(result,
-                         GraphBLAS::complement(mask),
-                         GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v2, GraphBLAS::REPLACE);
+    grb::Vector<double> v2(v4b_dense, 0.);
+    grb::Vector<double> ans2(zero4_dense, 0.);
+    grb::eWiseMult(result,
+                   grb::complement(mask),
+                   grb::NoAccumulate(),
+                   grb::Times<double>(), u, v2, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise mult with empty vector
-    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
-    GraphBLAS::Vector<double> ans3(zero4_dense, 0.);
-    GraphBLAS::eWiseMult(result,
-                         GraphBLAS::complement(mask),
-                         GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v3, GraphBLAS::REPLACE);
+    grb::Vector<double> v3(zero4_dense, 0.);
+    grb::Vector<double> ans3(zero4_dense, 0.);
+    grb::eWiseMult(result,
+                   grb::complement(mask),
+                   grb::NoAccumulate(),
+                   grb::Times<double>(), u, v3, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -505,39 +505,39 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_scmp_masked_replace_reg)
 BOOST_AUTO_TEST_CASE(test_ewisemult_vector_scmp_masked_replace_reg_stored_zero)
 {
     std::vector<int> mask4_dense = {1, 0, 0, 1};
-    GraphBLAS::Vector<int> mask(mask4_dense);//, 0);
+    grb::Vector<int> mask(mask4_dense);//, 0);
 
-    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+    grb::Vector<double> u(v4a_dense, 0.);
 
     // ewise mult with dense vector
-    GraphBLAS::Vector<double> v(twos4_dense, 0.);
+    grb::Vector<double> v(twos4_dense, 0.);
     std::vector<double> ans_4atwos4_dense2 = {0, 0, 24, 0};
-    GraphBLAS::Vector<double> ans(ans_4atwos4_dense2, 0.);
+    grb::Vector<double> ans(ans_4atwos4_dense2, 0.);
 
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> result(4);
 
-    GraphBLAS::eWiseMult(result,
-                         GraphBLAS::complement(mask),
-                         GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v, GraphBLAS::REPLACE);
+    grb::eWiseMult(result,
+                   grb::complement(mask),
+                   grb::NoAccumulate(),
+                   grb::Times<double>(), u, v, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise mult with sparse vector
-    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
-    GraphBLAS::Vector<double> ans2(zero4_dense, 0.);
-    GraphBLAS::eWiseMult(result,
-                         GraphBLAS::complement(mask),
-                         GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v2, GraphBLAS::REPLACE);
+    grb::Vector<double> v2(v4b_dense, 0.);
+    grb::Vector<double> ans2(zero4_dense, 0.);
+    grb::eWiseMult(result,
+                   grb::complement(mask),
+                   grb::NoAccumulate(),
+                   grb::Times<double>(), u, v2, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise mult with empty vector
-    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
-    GraphBLAS::Vector<double> ans3(zero4_dense, 0.);
-    GraphBLAS::eWiseMult(result,
-                         GraphBLAS::complement(mask),
-                         GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Times<double>(), u, v3, GraphBLAS::REPLACE);
+    grb::Vector<double> v3(zero4_dense, 0.);
+    grb::Vector<double> ans3(zero4_dense, 0.);
+    grb::eWiseMult(result,
+                   grb::complement(mask),
+                   grb::NoAccumulate(),
+                   grb::Times<double>(), u, v3, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -548,73 +548,73 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_scmp_masked_replace_reg_stored_zero)
 // ***************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewisemult_vector_scmp_masked_bad_dimensions)
 {
-    GraphBLAS::Vector<double> v(v4a_dense, 0.);
-    GraphBLAS::Vector<double> u(v4b_dense, 0.);
-    GraphBLAS::Vector<double> mask(v3a_dense, 0.);
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> v(v4a_dense, 0.);
+    grb::Vector<double> u(v4b_dense, 0.);
+    grb::Vector<double> mask(v3a_dense, 0.);
+    grb::Vector<double> result(4);
 
     // incompatible Mask-Output dimensions
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseMult(result,
-                              GraphBLAS::complement(mask),
-                              GraphBLAS::NoAccumulate(),
-                              GraphBLAS::Times<double>(), v, u)),
-        GraphBLAS::DimensionException);
+        (grb::eWiseMult(result,
+                        grb::complement(mask),
+                        grb::NoAccumulate(),
+                        grb::Times<double>(), v, u)),
+        grb::DimensionException);
 }
 
 // ***************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewisemult_vector_scmp_masked_reg)
 {
     std::vector<int> mask4_dense = {1, 0, 0, 1};
-    GraphBLAS::Vector<int> mask(mask4_dense, 0);
+    grb::Vector<int> mask(mask4_dense, 0);
 
-    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+    grb::Vector<double> u(v4a_dense, 0.);
 
     {
         // ewise mult with dense vector
-        GraphBLAS::Vector<double> v(twos4_dense, 0.);
+        grb::Vector<double> v(twos4_dense, 0.);
 
-        GraphBLAS::Vector<double> result(twos4_dense);
+        grb::Vector<double> result(twos4_dense);
 
         std::vector<double> ans_dense = {2, 0, 24, 2};
-        GraphBLAS::Vector<double> ans(ans_dense, 0.);
+        grb::Vector<double> ans(ans_dense, 0.);
 
-        GraphBLAS::eWiseMult(result,
-                             GraphBLAS::complement(mask),
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<double>(), u, v, GraphBLAS::MERGE);
+        grb::eWiseMult(result,
+                       grb::complement(mask),
+                       grb::NoAccumulate(),
+                       grb::Times<double>(), u, v, grb::MERGE);
         BOOST_CHECK_EQUAL(result, ans);
     }
 
     {
         // ewise mult with sparse vector
-        GraphBLAS::Vector<double> v2(v4b_dense, 0.);
+        grb::Vector<double> v2(v4b_dense, 0.);
 
-        GraphBLAS::Vector<double> result(twos4_dense);
+        grb::Vector<double> result(twos4_dense);
 
         std::vector<double> ans_dense = {2, 0, 0, 2};
-        GraphBLAS::Vector<double> ans2(ans_dense, 0.);
+        grb::Vector<double> ans2(ans_dense, 0.);
 
-        GraphBLAS::eWiseMult(result,
-                             GraphBLAS::complement(mask),
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<double>(), u, v2, GraphBLAS::MERGE);
+        grb::eWiseMult(result,
+                       grb::complement(mask),
+                       grb::NoAccumulate(),
+                       grb::Times<double>(), u, v2, grb::MERGE);
         BOOST_CHECK_EQUAL(result, ans2);
     }
 
     {
         // ewise mult with empty vector
-        GraphBLAS::Vector<double> v3(zero4_dense, 0.);
+        grb::Vector<double> v3(zero4_dense, 0.);
 
-        GraphBLAS::Vector<double> result(twos4_dense);
+        grb::Vector<double> result(twos4_dense);
 
         std::vector<double> ans_dense = {2, 0, 0, 2};
-        GraphBLAS::Vector<double> ans3(ans_dense, 0.);
+        grb::Vector<double> ans3(ans_dense, 0.);
 
-        GraphBLAS::eWiseMult(result,
-                             GraphBLAS::complement(mask),
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<double>(), u, v3, GraphBLAS::MERGE);
+        grb::eWiseMult(result,
+                       grb::complement(mask),
+                       grb::NoAccumulate(),
+                       grb::Times<double>(), u, v3, grb::MERGE);
         BOOST_CHECK_EQUAL(result, ans3);
     }
 }
@@ -623,55 +623,55 @@ BOOST_AUTO_TEST_CASE(test_ewisemult_vector_scmp_masked_reg)
 BOOST_AUTO_TEST_CASE(test_ewisemult_vector_scmp_masked_reg_stored_zero)
 {
     std::vector<int> mask4_dense = {1, 0, 0, 1};
-    GraphBLAS::Vector<int> mask(mask4_dense); //0);
+    grb::Vector<int> mask(mask4_dense); //0);
 
-    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+    grb::Vector<double> u(v4a_dense, 0.);
 
     {
         // ewise mult with dense vector
-        GraphBLAS::Vector<double> v(twos4_dense, 0.);
+        grb::Vector<double> v(twos4_dense, 0.);
 
-        GraphBLAS::Vector<double> result(twos4_dense);
+        grb::Vector<double> result(twos4_dense);
 
         std::vector<double> ans_dense = {2, 0, 24, 2};
-        GraphBLAS::Vector<double> ans(ans_dense, 0.);
+        grb::Vector<double> ans(ans_dense, 0.);
 
-        GraphBLAS::eWiseMult(result,
-                             GraphBLAS::complement(mask),
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<double>(), u, v, GraphBLAS::MERGE);
+        grb::eWiseMult(result,
+                       grb::complement(mask),
+                       grb::NoAccumulate(),
+                       grb::Times<double>(), u, v, grb::MERGE);
         BOOST_CHECK_EQUAL(result, ans);
     }
 
     {
         // ewise mult with sparse vector
-        GraphBLAS::Vector<double> v2(v4b_dense, 0.);
+        grb::Vector<double> v2(v4b_dense, 0.);
 
-        GraphBLAS::Vector<double> result(twos4_dense);
+        grb::Vector<double> result(twos4_dense);
 
         std::vector<double> ans_dense = {2, 0, 0, 2};
-        GraphBLAS::Vector<double> ans2(ans_dense, 0.);
+        grb::Vector<double> ans2(ans_dense, 0.);
 
-        GraphBLAS::eWiseMult(result,
-                             GraphBLAS::complement(mask),
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<double>(), u, v2, GraphBLAS::MERGE);
+        grb::eWiseMult(result,
+                       grb::complement(mask),
+                       grb::NoAccumulate(),
+                       grb::Times<double>(), u, v2, grb::MERGE);
         BOOST_CHECK_EQUAL(result, ans2);
     }
 
     {
         // ewise mult with empty vector
-        GraphBLAS::Vector<double> v3(zero4_dense, 0.);
+        grb::Vector<double> v3(zero4_dense, 0.);
 
-        GraphBLAS::Vector<double> result(twos4_dense);
+        grb::Vector<double> result(twos4_dense);
 
         std::vector<double> ans_dense = {2, 0, 0, 2};
-        GraphBLAS::Vector<double> ans3(ans_dense, 0.);
+        grb::Vector<double> ans3(ans_dense, 0.);
 
-        GraphBLAS::eWiseMult(result,
-                             GraphBLAS::complement(mask),
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<double>(), u, v3, GraphBLAS::MERGE);
+        grb::eWiseMult(result,
+                       grb::complement(mask),
+                       grb::NoAccumulate(),
+                       grb::Times<double>(), u, v3, grb::MERGE);
         BOOST_CHECK_EQUAL(result, ans3);
     }
 }

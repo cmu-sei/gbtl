@@ -35,8 +35,8 @@
 namespace algorithms
 {
     GEN_GRAPHBLAS_SEMIRING(PlusEqualSemiring,
-                           GraphBLAS::PlusMonoid,
-                           GraphBLAS::Equal)
+                           grb::PlusMonoid,
+                           grb::Equal)
 }
 
 namespace algorithms
@@ -55,25 +55,25 @@ namespace algorithms
      *         assigned.
      */
     template <typename MatrixT>
-    GraphBLAS::IndexArrayType get_cluster_assignments(MatrixT cluster_matrix)
+    grb::IndexArrayType get_cluster_assignments(MatrixT cluster_matrix)
     {
         using T = typename MatrixT::ScalarType;
 
-        GraphBLAS::IndexType num_nodes(cluster_matrix.nrows());
+        grb::IndexType num_nodes(cluster_matrix.nrows());
 
-        GraphBLAS::IndexType nnz = cluster_matrix.nvals();
-        GraphBLAS::IndexArrayType cluster_ids(nnz), vertex_ids(nnz);
+        grb::IndexType nnz = cluster_matrix.nvals();
+        grb::IndexArrayType cluster_ids(nnz), vertex_ids(nnz);
         std::vector<T> vals(nnz);
         cluster_matrix.extractTuples(cluster_ids.begin(),
                                      vertex_ids.begin(),
                                      vals.begin());
 
         std::vector<double> max_vals(num_nodes, -1.0);
-        GraphBLAS::IndexArrayType cluster_assignments(
+        grb::IndexArrayType cluster_assignments(
             num_nodes,
-            std::numeric_limits<GraphBLAS::IndexType>::max());
+            std::numeric_limits<grb::IndexType>::max());
 
-        for (GraphBLAS::IndexType idx = 0; idx < vals.size(); ++idx)
+        for (grb::IndexType idx = 0; idx < vals.size(); ++idx)
         {
             if (max_vals[vertex_ids[idx]] < vals[idx])
             {
@@ -98,26 +98,24 @@ namespace algorithms
      *         assigned.
      */
     template <typename MatrixT>
-    GraphBLAS::Vector<GraphBLAS::IndexType> get_cluster_assignments_v2(
+    grb::Vector<grb::IndexType> get_cluster_assignments_v2(
         MatrixT const &cluster_matrix)
     {
-        GraphBLAS::IndexType num_clusters(cluster_matrix.nrows());
-        GraphBLAS::IndexType num_nodes(cluster_matrix.ncols());
+        grb::IndexType num_clusters(cluster_matrix.nrows());
+        grb::IndexType num_nodes(cluster_matrix.ncols());
 
-        GraphBLAS::Vector<GraphBLAS::IndexType> clusters(num_nodes);
-        GraphBLAS::Vector<GraphBLAS::IndexType> index_of_vec(num_clusters);
-        std::vector<GraphBLAS::IndexType> indices;
-        for (GraphBLAS::IndexType ix=0; ix<num_clusters; ++ix)
+        grb::Vector<grb::IndexType> clusters(num_nodes);
+        grb::Vector<grb::IndexType> index_of_vec(num_clusters);
+        for (grb::IndexType ix=0; ix<num_clusters; ++ix)
         {
-            indices.push_back(ix);
+            index_of_vec.setElement(ix, ix);
         }
-        index_of_vec.build(indices, indices);
 
-        // return a GraphBLAS::Vector with cluster assignments
-        GraphBLAS::vxm(clusters,
-                       GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                       GraphBLAS::MaxFirstSemiring<GraphBLAS::IndexType>(),
-                       index_of_vec, cluster_matrix);
+        // return a grb::Vector with cluster assignments
+        grb::vxm(clusters,
+                 grb::NoMask(), grb::NoAccumulate(),
+                 grb::MaxFirstSemiring<grb::IndexType>(),
+                 index_of_vec, cluster_matrix);
 
         return clusters;
     }
@@ -154,110 +152,107 @@ namespace algorithms
      */
     template<typename MatrixT, typename RealT = double>
     void peer_pressure_cluster(
-        MatrixT const            &graph,
-        GraphBLAS::Matrix<bool>  &C,
-        unsigned int  max_iters = std::numeric_limits<unsigned int>::max())
+        MatrixT const     &graph,
+        grb::Matrix<bool> &C,
+        unsigned int       max_iters = std::numeric_limits<unsigned int>::max())
     {
         using T = typename MatrixT::ScalarType;
 
-        GraphBLAS::IndexType num_rows(graph.nrows());
-        GraphBLAS::IndexType num_cols(graph.ncols());
+        grb::IndexType num_rows(graph.nrows());
+        grb::IndexType num_cols(graph.ncols());
 
         if (num_rows != num_cols)
         {
-            throw GraphBLAS::DimensionException();
+            throw grb::DimensionException();
         }
 
         // assert C dimensions should be same as graph.
         if (num_rows != C.nrows() ||
             num_cols != C.ncols())
         {
-            throw GraphBLAS::DimensionException();
+            throw grb::DimensionException();
         }
 
-        GraphBLAS::IndexType num_vertices = num_cols;
+        grb::IndexType num_vertices = num_cols;
 
-        //GraphBLAS::print_matrix(std::cerr, graph, "GRAPH");
+        //grb::print_matrix(std::cerr, graph, "GRAPH");
 
         // used for breaking ties.
-        GraphBLAS::Matrix<GraphBLAS::IndexType> cluster_num_mat(num_vertices,
-                                                                num_vertices);
-        std::vector<GraphBLAS::IndexType> indices;
-        std::vector<GraphBLAS::IndexType> cluster_num; // 1-based
-        for (GraphBLAS::IndexType ix=0; ix<num_vertices; ++ix)
+        /// @todo figure out how to remove "+ 1"
+        grb::Matrix<grb::IndexType> cluster_num_mat(num_vertices,
+                                                    num_vertices);
+        for (grb::IndexType ix=0; ix<num_vertices; ++ix)
         {
-            indices.push_back(ix);
-            cluster_num.push_back(ix + 1);
+            cluster_num_mat.setElement(ix, ix, ix + 1);
         }
-        cluster_num_mat.build(indices, indices, cluster_num);
-        //GraphBLAS::print_matrix(std::cerr, cluster_num_mat, "cluster_num_mat");
+        //grb::print_matrix(std::cerr, cluster_num_mat, "cluster_num_mat");
 
-        GraphBLAS::Matrix<RealT> A(num_vertices, num_vertices);
-        GraphBLAS::apply(A,
-                         GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Identity<T,RealT>(),
-                         graph);
-        GraphBLAS::normalize_rows(A);
-        //GraphBLAS::print_matrix(std::cerr, A, "row normalized graph");
+        grb::Matrix<RealT> A(num_vertices, num_vertices);
+        grb::apply(A,
+                   grb::NoMask(), grb::NoAccumulate(),
+                   grb::Identity<T,RealT>(),
+                   graph);
+        grb::normalize_rows(A);
+        //grb::print_matrix(std::cerr, A, "row normalized graph");
 
-        //GraphBLAS::print_matrix(std::cerr, C, "cluster_approx");
+        //grb::print_matrix(std::cerr, C, "cluster_approx");
 
-        GraphBLAS::Vector<RealT> m(num_vertices);
-        GraphBLAS::Matrix<bool>  Cf(num_vertices, num_vertices);
-        GraphBLAS::Matrix<RealT> Tally(num_vertices, num_vertices);
+        grb::Vector<RealT> m(num_vertices);
+        grb::Matrix<bool>  Cf(num_vertices, num_vertices);
+        grb::Matrix<RealT> Tally(num_vertices, num_vertices);
 
         for (unsigned int iters = 0; iters < max_iters; ++iters)
         {
             //std::cerr << "===================== Iteration " << iters << std::endl;
-            GraphBLAS::mxm(Tally,
-                           GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                           GraphBLAS::ArithmeticSemiring<RealT>(),
-                           C, A);
-            //GraphBLAS::print_matrix(std::cerr, Tally, "Tally");
+            grb::mxm(Tally,
+                     grb::NoMask(), grb::NoAccumulate(),
+                     grb::ArithmeticSemiring<RealT>(),
+                     C, A);
+            //grb::print_matrix(std::cerr, Tally, "Tally");
 
             // Find the largest element (max vote) in each column
-            GraphBLAS::reduce(m,
-                              GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                              GraphBLAS::Max<RealT>(),
-                              GraphBLAS::transpose(Tally)); //col reduce
-            //GraphBLAS::print_vector(std::cerr, m, "col_max(Tally)");
+            grb::reduce(m,
+                        grb::NoMask(), grb::NoAccumulate(),
+                        grb::Max<RealT>(),
+                        grb::transpose(Tally)); //col reduce
+            //grb::print_vector(std::cerr, m, "col_max(Tally)");
 
-            auto m_mat(GraphBLAS::diag<GraphBLAS::Matrix<RealT>>(m));
+            auto m_mat(grb::diag<grb::Matrix<RealT>>(m));
             //print_matrix(std::cout, m_mat, "diag(col_max)");
 
-            GraphBLAS::mxm(Cf,
-                           GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                           PlusEqualSemiring<RealT, RealT, bool>(),
-                           Tally, m_mat);
-            //GraphBLAS::print_matrix(std::cerr, Cf, "Next cluster mat");
+            grb::mxm(Cf,
+                     grb::NoMask(), grb::NoAccumulate(),
+                     PlusEqualSemiring<RealT, RealT, bool>(),
+                     Tally, m_mat);
+            //grb::print_matrix(std::cerr, Cf, "Next cluster mat");
 
             // -------------------------------------------------------------
             // Need to pick one element per column (break any ties by picking
             // highest cluster number per column)
-            GraphBLAS::mxm(Tally,
-                           Cf, GraphBLAS::NoAccumulate(),
-                           GraphBLAS::ArithmeticSemiring<RealT>(),
-                           cluster_num_mat, Cf, GraphBLAS::REPLACE);
-            //GraphBLAS::print_matrix(std::cerr, Tally,
+            grb::mxm(Tally,
+                     Cf, grb::NoAccumulate(),
+                     grb::ArithmeticSemiring<RealT>(),
+                     cluster_num_mat, Cf, grb::REPLACE);
+            //grb::print_matrix(std::cerr, Tally,
             //                        "Next cluster mat x clusternum");
-            GraphBLAS::reduce(m,
-                              GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                              GraphBLAS::Max<RealT>(),
-                              GraphBLAS::transpose(Tally)); //col reduce
+            grb::reduce(m,
+                        grb::NoMask(), grb::NoAccumulate(),
+                        grb::Max<RealT>(),
+                        grb::transpose(Tally)); //col reduce
             //print_vector(std::cout, m, "col max(Tally)");
-            m_mat = GraphBLAS::diag<GraphBLAS::Matrix<RealT>>(m);
-            GraphBLAS::mxm(Cf,
-                           GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                           PlusEqualSemiring<RealT, RealT, bool>(),
-                           Tally, m_mat);
-            //GraphBLAS::print_matrix(std::cerr, Cf, "Next cluster mat, no ties");
+            m_mat = grb::diag<grb::Matrix<RealT>>(m);
+            grb::mxm(Cf,
+                     grb::NoMask(), grb::NoAccumulate(),
+                     PlusEqualSemiring<RealT, RealT, bool>(),
+                     Tally, m_mat);
+            //grb::print_matrix(std::cerr, Cf, "Next cluster mat, no ties");
 
             // mask out unselected ties (annihilate).
-            GraphBLAS::apply(Cf,
-                             Cf, GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Identity<bool>(),
-                             Cf, GraphBLAS::REPLACE);
-            //GraphBLAS::print_matrix(std::cerr, Cf, "Next cluster mat, masked");
+            grb::apply(Cf,
+                       Cf, grb::NoAccumulate(),
+                       grb::Identity<bool>(),
+                       Cf, grb::REPLACE);
+            //grb::print_matrix(std::cerr, Cf, "Next cluster mat, masked");
 
             if (Cf == C)
             {
@@ -295,13 +290,12 @@ namespace algorithms
      *         vertex <code>j</code> belongs to cluster <code>i</code>.
      */
     template <typename MatrixT>
-    GraphBLAS::Matrix<bool> peer_pressure_cluster(
-        MatrixT const &graph,
-        unsigned int   max_iters = std::numeric_limits<unsigned int>::max())
+    grb::Matrix<bool> peer_pressure_cluster(
+        MatrixT const  &graph,
+        unsigned int    max_iters = std::numeric_limits<unsigned int>::max())
     {
         // assign each vertex to its own cluster (boolean matrix)
-        auto C(
-            GraphBLAS::scaled_identity<GraphBLAS::Matrix<bool>>(graph.nrows()));
+        auto C(grb::scaled_identity<grb::Matrix<bool>>(graph.nrows()));
         peer_pressure_cluster(graph, C, max_iters);
         return C;
     }
@@ -328,99 +322,96 @@ namespace algorithms
      */
     template<typename MatrixT, typename RealT = double>
     void peer_pressure_cluster_v2(
-        MatrixT const            &graph,
-        GraphBLAS::Matrix<bool>  &C,
-        unsigned int  max_iters = std::numeric_limits<unsigned int>::max())
+        MatrixT const      &graph,
+        grb::Matrix<bool>  &C,
+        unsigned int        max_iters = std::numeric_limits<unsigned int>::max())
     {
         using T = typename MatrixT::ScalarType;
 
-        GraphBLAS::IndexType num_rows(graph.nrows());
-        GraphBLAS::IndexType num_cols(graph.ncols());
+        grb::IndexType num_rows(graph.nrows());
+        grb::IndexType num_cols(graph.ncols());
 
         if (num_rows != num_cols)
         {
-            throw GraphBLAS::DimensionException();
+            throw grb::DimensionException();
         }
 
         // assert C dimensions should be same as graph.
         if (num_rows != C.nrows() ||
             num_cols != C.ncols())
         {
-            throw GraphBLAS::DimensionException();
+            throw grb::DimensionException();
         }
 
-        GraphBLAS::IndexType num_vertices = num_cols;
+        grb::IndexType num_vertices = num_cols;
 
         // used for breaking ties.
-        GraphBLAS::Matrix<GraphBLAS::IndexType> cluster_num_mat(num_vertices,
-                                                                num_vertices);
-        std::vector<GraphBLAS::IndexType> indices;
-        std::vector<GraphBLAS::IndexType> cluster_num;
-        for (GraphBLAS::IndexType ix=0; ix<num_vertices; ++ix)
+        /// @todo Figure out way to not add 1.
+        grb::Matrix<grb::IndexType> cluster_num_mat(num_vertices,
+                                                    num_vertices);
+        for (grb::IndexType ix=0; ix<num_vertices; ++ix)
         {
-            indices.push_back(ix);
-            cluster_num.push_back(ix + 1);
+            cluster_num_mat.setElement(ix, ix, ix + 1);
         }
-        cluster_num_mat.build(indices, indices, cluster_num);
 
         // Option: normalize the rows of G (using double scalar type)
         MatrixT A(num_vertices, num_vertices);
-        GraphBLAS::apply(A,
-                         GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Identity<T,RealT>(),
-                         graph);
+        grb::apply(A,
+                   grb::NoMask(), grb::NoAccumulate(),
+                   grb::Identity<T,RealT>(),
+                   graph);
         // Disabling normalization across rows
-        //GraphBLAS::normalize_rows(A);
-        //GraphBLAS::print_matrix(std::cout, A, "Row normalized graph");
+        //grb::normalize_rows(A);
+        //grb::print_matrix(std::cout, A, "Row normalized graph");
 
-        GraphBLAS::Vector<RealT> m(num_vertices);
-        GraphBLAS::Matrix<bool>  Cf(num_vertices, num_vertices);
-        GraphBLAS::Matrix<RealT> Tally(num_vertices, num_vertices);
+        grb::Vector<RealT> m(num_vertices);
+        grb::Matrix<bool>  Cf(num_vertices, num_vertices);
+        grb::Matrix<RealT> Tally(num_vertices, num_vertices);
 
         for (unsigned int iters = 0; iters < max_iters; ++iters)
         {
-            GraphBLAS::mxm(Tally,
-                           GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                           GraphBLAS::ArithmeticSemiring<RealT>(),
-                           C, A);
+            grb::mxm(Tally,
+                     grb::NoMask(), grb::NoAccumulate(),
+                     grb::ArithmeticSemiring<RealT>(),
+                     C, A);
 
             // Find the largest element (max vote) in each column
-            GraphBLAS::reduce(m,
-                              GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                              GraphBLAS::Max<RealT>(),
-                              GraphBLAS::transpose(Tally)); //col reduce
+            grb::reduce(m,
+                        grb::NoMask(), grb::NoAccumulate(),
+                        grb::Max<RealT>(),
+                        grb::transpose(Tally)); //col reduce
 
-            auto m_mat(GraphBLAS::diag<GraphBLAS::Matrix<RealT>>(m));
+            auto m_mat(grb::diag<grb::Matrix<RealT>>(m));
 
-            GraphBLAS::mxm(Cf,
-                           GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                           PlusEqualSemiring<RealT, RealT, bool>(),
-                           Tally, m_mat);
+            grb::mxm(Cf,
+                     grb::NoMask(), grb::NoAccumulate(),
+                     PlusEqualSemiring<RealT, RealT, bool>(),
+                     Tally, m_mat);
 
             // -------------------------------------------------------------
             // Need to pick one element per column (break any ties by picking
             // highest cluster number per column)
-            GraphBLAS::mxm(Tally,
-                           Cf, GraphBLAS::NoAccumulate(),
-                           GraphBLAS::ArithmeticSemiring<RealT>(),
-                           cluster_num_mat, Cf, GraphBLAS::REPLACE);
+            grb::mxm(Tally,
+                     Cf, grb::NoAccumulate(),
+                     grb::ArithmeticSemiring<RealT>(),
+                     cluster_num_mat, Cf, grb::REPLACE);
 
-            GraphBLAS::reduce(m,
-                              GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                              GraphBLAS::Max<RealT>(),
-                              GraphBLAS::transpose(Tally)); //col reduce
+            grb::reduce(m,
+                        grb::NoMask(), grb::NoAccumulate(),
+                        grb::Max<RealT>(),
+                        grb::transpose(Tally)); //col reduce
 
-            m_mat = GraphBLAS::diag<GraphBLAS::Matrix<RealT>>(m);
-            GraphBLAS::mxm(Cf,
-                           GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                           PlusEqualSemiring<RealT, RealT, bool>(),
-                           Tally, m_mat);
+            m_mat = grb::diag<grb::Matrix<RealT>>(m);
+            grb::mxm(Cf,
+                     grb::NoMask(), grb::NoAccumulate(),
+                     PlusEqualSemiring<RealT, RealT, bool>(),
+                     Tally, m_mat);
 
             // mask out unselected ties (annihilate).
-            GraphBLAS::apply(Cf,
-                             Cf, GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Identity<bool>(),
-                             Cf, GraphBLAS::REPLACE);
+            grb::apply(Cf,
+                       Cf, grb::NoAccumulate(),
+                       grb::Identity<bool>(),
+                       Cf, grb::REPLACE);
 
             if (Cf == C)
             {
@@ -441,90 +432,90 @@ namespace algorithms
      *                      recommended that graph has self loops added.
      * @param[in] e         The power parameter (default 2).
      * @param[in] r         The inflation parameter (default 2).
-     * @param[in] max_iters The maximum number of iterations to run if
-     *                      convergence doesn't occur first (oscillation common)
      * @param[in] convergence_threshold  If the mean-squared difference in the
      *                      cluster_matrix of two successive iterations falls
      *                      below this threshold the algorithm will return the
      *                      last computed matrix.
+     * @param[in] max_iters The maximum number of iterations to run if
+     *                      convergence doesn't occur first (oscillation common)
      *
      * @return A matrix whose columns correspond to the vertices, and vertices
      *         with the same (max) value in a given row belong to the
      *         same cluster.
      */
     template<typename MatrixT, typename RealT=double>
-    GraphBLAS::Matrix<RealT> markov_cluster(
-        MatrixT const        &graph,
-        GraphBLAS::IndexType  e = 2,
-        GraphBLAS::IndexType  r = 2,
-        unsigned int          max_iters = std::numeric_limits<unsigned int>::max(),
-        double                convergence_threshold = 1.0e-16)
+    grb::Matrix<RealT> markov_cluster(
+        MatrixT const  &graph,
+        grb::IndexType  e = 2,
+        grb::IndexType  r = 2,
+        double          convergence_threshold = 1.0e-16,
+        unsigned int    max_iters = std::numeric_limits<unsigned int>::max())
     {
-        using RealMatrixT = GraphBLAS::Matrix<RealT>;
+        using RealMatrixT = grb::Matrix<RealT>;
 
-        GraphBLAS::IndexType rows(graph.nrows());
-        GraphBLAS::IndexType cols(graph.ncols());
+        grb::IndexType rows(graph.nrows());
+        grb::IndexType cols(graph.ncols());
         if (rows != cols)
         {
-            throw GraphBLAS::DimensionException();
+            throw grb::DimensionException();
         }
 
         // A = (RealT)graph
         RealMatrixT Anorm(rows, cols);
-        GraphBLAS::apply(Anorm,
-                         GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                         GraphBLAS::Identity<RealT>(),
-                         graph);
-        GraphBLAS::normalize_cols(Anorm);
-        //GraphBLAS::print_matrix(std::cout, Anorm, "Anorm");
+        grb::apply(Anorm,
+                   grb::NoMask(), grb::NoAccumulate(),
+                   grb::Identity<RealT>(),
+                   graph);
+        grb::normalize_cols(Anorm);
+        //grb::print_matrix(std::cout, Anorm, "Anorm");
 
         for (unsigned int iter = 0; iter < max_iters; ++iter)
         {
             //std::cout << "================= ITERATION " << iter << "============="
             //          << std::endl;
-            //GraphBLAS::print_matrix(std::cout, Anorm, "A(col norm)");
+            //grb::print_matrix(std::cout, Anorm, "A(col norm)");
 
             // Power Expansion: compute Anorm^e.
             RealMatrixT Apower(Anorm);
-            for (GraphBLAS::IndexType k = 0; k < (e - 1); ++k)
+            for (grb::IndexType k = 0; k < (e - 1); ++k)
             {
-                GraphBLAS::mxm(Apower,
-                               Apower, GraphBLAS::NoAccumulate(),
-                               GraphBLAS::ArithmeticSemiring<RealT>(),
-                               Apower, Anorm, GraphBLAS::REPLACE);
+                grb::mxm(Apower,
+                         Apower, grb::NoAccumulate(),
+                         grb::ArithmeticSemiring<RealT>(),
+                         Apower, Anorm, grb::REPLACE);
             }
 
-            //GraphBLAS::print_matrix(std::cout, Apower, "Apower = Anorm^e");
+            //grb::print_matrix(std::cout, Apower, "Apower = Anorm^e");
 
             // Inflate. element wise raise to power r, normalize columns
             RealMatrixT Ainfl(Apower);
-            for (GraphBLAS::IndexType k = 0; k < (r - 1); ++k)
+            for (grb::IndexType k = 0; k < (r - 1); ++k)
             {
-                GraphBLAS::eWiseMult(Ainfl,
-                                     Ainfl,
-                                     GraphBLAS::NoAccumulate(),
-                                     GraphBLAS::Times<RealT>(),
-                                     Ainfl, Apower, GraphBLAS::REPLACE);
+                grb::eWiseMult(Ainfl,
+                               Ainfl,
+                               grb::NoAccumulate(),
+                               grb::Times<RealT>(),
+                               Ainfl, Apower, grb::REPLACE);
             }
-            //GraphBLAS::print_matrix(std::cout, Ainfl, "Ainfl = Apower .^ r");
-            GraphBLAS::normalize_cols(Ainfl);
-            //GraphBLAS::print_matrix(std::cout, Ainfl, "*** new Anorm ***");
+            //grb::print_matrix(std::cout, Ainfl, "Ainfl = Apower .^ r");
+            grb::normalize_cols(Ainfl);
+            //grb::print_matrix(std::cout, Ainfl, "*** new Anorm ***");
 
             // Compute mean squared error
             RealMatrixT E(rows, cols);
-            GraphBLAS::eWiseAdd(E,
-                                GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                                GraphBLAS::Minus<RealT>(),
-                                Anorm, Ainfl);
-            GraphBLAS::eWiseMult(E,
-                                 GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                                 GraphBLAS::Times<RealT>(),
-                                 E, E);
+            grb::eWiseAdd(E,
+                          grb::NoMask(), grb::NoAccumulate(),
+                          grb::Minus<RealT>(),
+                          Anorm, Ainfl);
+            grb::eWiseMult(E,
+                           grb::NoMask(), grb::NoAccumulate(),
+                           grb::Times<RealT>(),
+                           E, E);
             RealT mean_squared_error(0.);
-            GraphBLAS::reduce(mean_squared_error,
-                              GraphBLAS::NoAccumulate(),
-                              GraphBLAS::PlusMonoid<RealT>(),
-                              E);
+            grb::reduce(mean_squared_error,
+                        grb::NoAccumulate(),
+                        grb::PlusMonoid<RealT>(),
+                        E);
             mean_squared_error /= ((double)rows*(double)rows);
             //std::cout << "****|error|^2/N^2 = " << mean_squared_error << std::endl;
 

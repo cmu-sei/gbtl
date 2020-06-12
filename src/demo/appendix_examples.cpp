@@ -30,7 +30,7 @@
 #include <graphblas/graphblas.hpp>
 #include <algorithms/appendix_algorithms.hpp>
 
-using namespace GraphBLAS;
+using namespace grb;
 
 //****************************************************************************
 IndexType const NUM_NODES = 34;

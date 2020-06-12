@@ -32,7 +32,7 @@
 
 #include <graphblas/graphblas.hpp>
 
-using namespace GraphBLAS;
+using namespace grb;
 
 //****************************************************************************
 namespace
@@ -89,7 +89,7 @@ namespace
             mxm(wavefront,
                 complement(levels), NoAccumulate(),
                 LogicalSemiring<IndexType>(),
-                wavefront, graph, GraphBLAS::REPLACE);
+                wavefront, graph, REPLACE);
         }
     }
 }

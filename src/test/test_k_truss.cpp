@@ -37,7 +37,7 @@
 #include <graphblas/graphblas.hpp>
 #include <algorithms/k_truss.hpp>
 
-using namespace GraphBLAS;
+using namespace grb;
 using namespace algorithms;
 
 #define BOOST_TEST_MAIN
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(k_truss_test_basic)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(k_truss_test2)
 {
-    GraphBLAS::IndexArrayType i = {
+    grb::IndexArrayType i = {
         0, 0, 0, 0, 0,
         1, 1, 1, 1,
         2, 2, 2, 2,
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(k_truss_test2)
         10,10,10,10,10,
         11,11,11};
 
-    GraphBLAS::IndexArrayType j = {
+    grb::IndexArrayType j = {
         0, 1, 5, 6, 9,
         0, 1, 2, 4,
         1, 2, 3, 4,
@@ -154,8 +154,8 @@ BOOST_AUTO_TEST_CASE(k_truss_test_peer_pressure1)
 {
     IndexType num_nodes(5);
     IndexType num_edges(5);
-    GraphBLAS::IndexArrayType i = {0, 0, 1, 1, 2, 2, 3, 3, 4, 4};
-    GraphBLAS::IndexArrayType j = {0, 1, 1, 2, 0, 2, 0, 3, 3, 4};
+    grb::IndexArrayType i = {0, 0, 1, 1, 2, 2, 3, 3, 4, 4};
+    grb::IndexArrayType j = {0, 1, 1, 2, 0, 2, 0, 3, 3, 4};
     std::vector<int> v(i.size(), 1);
     Matrix<double> E(num_edges, num_nodes);
     E.build(i.begin(), j.begin(), v.begin(), v.size());
@@ -174,22 +174,22 @@ BOOST_AUTO_TEST_CASE(k_truss_test_peer_pressure1)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(k_truss_test_peer_pressure2)
 {
-    GraphBLAS::IndexArrayType i = {0, 0, 0, 0,
-                                   1, 1, 1, 1,
-                                   2, 2, 2, 2,
-                                   3, 3, 3, 3,
-                                   4, 4, 4, 4,
-                                   5, 5, 5, 5, 5,
-                                   6, 6, 6,
-                                   7, 7, 7, 7};
-    GraphBLAS::IndexArrayType j = {0, 2, 3, 6,
-                                   1, 2, 3, 7,
-                                   0, 2, 4, 6,
-                                   0, 1, 3, 5,
-                                   0, 2, 4, 6,
-                                   1, 3, 5, 6, 7,
-                                   0, 4, 6,
-                                   1, 3, 5, 7};
+    grb::IndexArrayType i = {0, 0, 0, 0,
+                             1, 1, 1, 1,
+                             2, 2, 2, 2,
+                             3, 3, 3, 3,
+                             4, 4, 4, 4,
+                             5, 5, 5, 5, 5,
+                             6, 6, 6,
+                             7, 7, 7, 7};
+    grb::IndexArrayType j = {0, 2, 3, 6,
+                             1, 2, 3, 7,
+                             0, 2, 4, 6,
+                             0, 1, 3, 5,
+                             0, 2, 4, 6,
+                             1, 3, 5, 6, 7,
+                             0, 4, 6,
+                             1, 3, 5, 7};
 
     // create an incidence matrix from the data
     IndexType num_edges = 0;
@@ -259,8 +259,8 @@ BOOST_AUTO_TEST_CASE(k_truss2_test_basic)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(k_truss2_test2)
 {
-    GraphBLAS::IndexArrayType i = {
-           0, 0, 0, 0,
+    grb::IndexArrayType i = {
+        0, 0, 0, 0,
         1,    1, 1,
         2,    2, 2,
         3,    3, 3, 3,
@@ -273,8 +273,8 @@ BOOST_AUTO_TEST_CASE(k_truss2_test2)
         10,10,10,   10,
         11,11   };
 
-    GraphBLAS::IndexArrayType j = {
-           1, 5, 6, 9,
+    grb::IndexArrayType j = {
+        1, 5, 6, 9,
         0,    2, 4,
         1,    3, 4,
         2,    7, 8, 10,
@@ -312,8 +312,8 @@ BOOST_AUTO_TEST_CASE(k_truss2_test_peer_pressure1)
 {
     IndexType num_nodes(5);
 
-    GraphBLAS::IndexArrayType i = {0, 1, 2, 1, 2, 0, 3, 0, 4, 3};
-    GraphBLAS::IndexArrayType j = {1, 0, 1, 2, 0, 2, 0, 3, 3, 4};
+    grb::IndexArrayType i = {0, 1, 2, 1, 2, 0, 3, 0, 4, 3};
+    grb::IndexArrayType j = {1, 0, 1, 2, 0, 2, 0, 3, 3, 4};
     std::vector<int> v(i.size(), 1);
     Matrix<double> A(num_nodes, num_nodes);
     A.build(i.begin(), j.begin(), v.begin(), v.size());
@@ -331,22 +331,22 @@ BOOST_AUTO_TEST_CASE(k_truss2_test_peer_pressure1)
 BOOST_AUTO_TEST_CASE(k_truss2_test_peer_pressure2)
 {
 
-    GraphBLAS::IndexArrayType i = {0, 0, 0, 0,
-                                   1, 1, 1, 1,
-                                   2, 2, 2, 2,
-                                   3, 3, 3, 3,
-                                   4, 4, 4, 4,
-                                   5, 5, 5, 5, 5,
-                                   6, 6, 6,
-                                   7, 7, 7, 7};
-    GraphBLAS::IndexArrayType j = {0, 2, 3, 6,
-                                   1, 2, 3, 7,
-                                   0, 2, 4, 6,
-                                   0, 1, 3, 5,
-                                   0, 2, 4, 6,
-                                   1, 3, 5, 6, 7,
-                                   0, 4, 6,
-                                   1, 3, 5, 7};
+    grb::IndexArrayType i = {0, 0, 0, 0,
+                             1, 1, 1, 1,
+                             2, 2, 2, 2,
+                             3, 3, 3, 3,
+                             4, 4, 4, 4,
+                             5, 5, 5, 5, 5,
+                             6, 6, 6,
+                             7, 7, 7, 7};
+    grb::IndexArrayType j = {0, 2, 3, 6,
+                             1, 2, 3, 7,
+                             0, 2, 4, 6,
+                             0, 1, 3, 5,
+                             0, 2, 4, 6,
+                             1, 3, 5, 6, 7,
+                             0, 4, 6,
+                             1, 3, 5, 7};
 
     // create an adjacency matrix equivalent to the incidence matrix produced in a previous test
     IndexType num_nodes = 0;

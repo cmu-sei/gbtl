@@ -35,7 +35,7 @@
 #include <graphblas/graphblas.hpp>
 #include "Timer.hpp"
 
-using namespace GraphBLAS;
+using namespace grb;
 
 //****************************************************************************
 IndexType read_edge_list(std::string const &pathname,

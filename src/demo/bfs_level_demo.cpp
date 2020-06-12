@@ -30,8 +30,8 @@
 #include <graphblas/graphblas.hpp>
 #include <algorithms/bfs.hpp>
 
-GraphBLAS::IndexType const num_nodes = 34;
-GraphBLAS::IndexArrayType i = {
+grb::IndexType const num_nodes = 34;
+grb::IndexArrayType i = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     1,1,1,1,1,1,1,1,1,
     2,2,2,2,2,2,2,2,2,2,
@@ -67,7 +67,7 @@ GraphBLAS::IndexArrayType i = {
     32,32,32,32,32,32,32,32,32,32,32,32,
     33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33};
 
-GraphBLAS::IndexArrayType j = {
+grb::IndexArrayType j = {
     1,2,3,4,5,6,7,8,10,11,12,13,19,21,23,31,
     0,2,3,7,13,17,19,21,30,
     0,1,3,7,8,9,13,27,28,32,
@@ -108,38 +108,38 @@ GraphBLAS::IndexArrayType j = {
 int main()
 {
     // TODO Assignment from Initalizer list.
-    GraphBLAS::Matrix<unsigned int>  G_karate(num_nodes, num_nodes);
+    grb::Matrix<unsigned int>  G_karate(num_nodes, num_nodes);
     std::vector<unsigned int> weights(i.size(), 1);
 
     G_karate.build(i.begin(), j.begin(), weights.begin(), i.size());
 
     // Trying the row vector approach
-    GraphBLAS::Matrix<unsigned int>  root(1, num_nodes);
+    grb::Matrix<unsigned int>  root(1, num_nodes);
     // pick an arbitrary root:
     root.setElement(0, 30, 1);
 
-    GraphBLAS::Matrix<unsigned int> levels1(1, num_nodes);
-    GraphBLAS::Matrix<unsigned int> levels(1, num_nodes);
+    grb::Matrix<unsigned int> levels1(1, num_nodes);
+    grb::Matrix<unsigned int> levels(1, num_nodes);
 
     algorithms::bfs_level(G_karate, root, levels1);
 
 //    std::cout << "Graph: " << std::endl;
-//    GraphBLAS::print_matrix(std::cout, G_karate);
+//    grb::print_matrix(std::cout, G_karate);
     std::cout << "bfs_level output" << std::endl;
     std::cout << "root:" << std::endl;
-    GraphBLAS::print_matrix(std::cout, root);
+    grb::print_matrix(std::cout, root);
     std::cout << "levels:" << std::endl;
-    GraphBLAS::print_matrix(std::cout, levels1);
+    grb::print_matrix(std::cout, levels1);
 
     algorithms::batch_bfs_level_masked(G_karate, root, levels);
 
 //    std::cout << "Graph: " << std::endl;
-//    GraphBLAS::print_matrix(std::cout, G_karate);
+//    grb::print_matrix(std::cout, G_karate);
     std::cout << std::endl;
     std::cout << "root:" << std::endl;
-    GraphBLAS::print_matrix(std::cout, root);
+    grb::print_matrix(std::cout, root);
     std::cout << "levels:" << std::endl;
-    GraphBLAS::print_matrix(std::cout, levels);
+    grb::print_matrix(std::cout, levels);
 
     return 0;
 }

@@ -48,51 +48,50 @@ namespace algorithms
      *                       from vertex u to vertex v.
      */
     template<typename MatrixT>
-    GraphBLAS::Matrix<typename MatrixT::ScalarType> apsp(MatrixT const &graph)
+    grb::Matrix<typename MatrixT::ScalarType> apsp(MatrixT const &graph)
     {
         using T = typename MatrixT::ScalarType;
 
-        GraphBLAS::IndexType num_vertices(graph.nrows());
+        grb::IndexType num_vertices(graph.nrows());
         if (num_vertices != graph.ncols())
         {
-            throw GraphBLAS::DimensionException();
+            throw grb::DimensionException();
         }
 
-        auto Distances(
-            GraphBLAS::scaled_identity<GraphBLAS::Matrix<T>>(num_vertices, 0));
-        GraphBLAS::eWiseAdd(Distances,
-                            GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                            GraphBLAS::Plus<T>(),
-                            Distances,
-                            graph);
-        GraphBLAS::Matrix<T> col_k(num_vertices, 1);
-        GraphBLAS::IndexArrayType row_indices(1);
-        GraphBLAS::Matrix<T> row_k(1, num_vertices);
+        auto Distances(grb::scaled_identity<grb::Matrix<T>>(num_vertices, 0));
+        grb::eWiseAdd(Distances,
+                      grb::NoMask(), grb::NoAccumulate(),
+                      grb::Plus<T>(),
+                      Distances,
+                      graph);
+        grb::Matrix<T> col_k(num_vertices, 1);
+        grb::IndexArrayType row_indices(1);
+        grb::Matrix<T> row_k(1, num_vertices);
 
-        for (GraphBLAS::IndexType k = 0; k < num_vertices; ++k)
+        for (grb::IndexType k = 0; k < num_vertices; ++k)
         {
             row_indices[0] = k;
-            GraphBLAS::extract(row_k,
-                               GraphBLAS::NoMask(),
-                               GraphBLAS::NoAccumulate(),
-                               Distances,
-                               row_indices, GraphBLAS::AllIndices());
+            grb::extract(row_k,
+                         grb::NoMask(),
+                         grb::NoAccumulate(),
+                         Distances,
+                         row_indices, grb::AllIndices());
 
-            GraphBLAS::extract(col_k,
-                               GraphBLAS::NoMask(),
-                               GraphBLAS::NoAccumulate(),
-                               Distances,
-                               GraphBLAS::AllIndices(), row_indices);
+            grb::extract(col_k,
+                         grb::NoMask(),
+                         grb::NoAccumulate(),
+                         Distances,
+                         grb::AllIndices(), row_indices);
 
-            GraphBLAS::mxm(Distances,
-                           GraphBLAS::NoMask(),
-                           GraphBLAS::Min<T>(),
-                           GraphBLAS::MinPlusSemiring<T>(),
-                           col_k, row_k);
+            grb::mxm(Distances,
+                     grb::NoMask(),
+                     grb::Min<T>(),
+                     grb::MinPlusSemiring<T>(),
+                     col_k, row_k);
 
             //std::cout << "============== Distances for Iteration " << k
             //          << std::endl;
-            //GraphBLAS::print_matrix(std::cout, Distances, "Distances");
+            //grb::print_matrix(std::cout, Distances, "Distances");
         }
         return Distances;
     }

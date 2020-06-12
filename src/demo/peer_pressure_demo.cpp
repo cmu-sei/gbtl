@@ -30,7 +30,7 @@
 #include <graphblas/graphblas.hpp>
 #include <algorithms/cluster.hpp>
 
-using namespace GraphBLAS;
+using namespace grb;
 
 //****************************************************************************
 int main()

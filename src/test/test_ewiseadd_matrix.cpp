@@ -36,7 +36,7 @@
 
 #include <graphblas/graphblas.hpp>
 
-using namespace GraphBLAS;
+using namespace grb;
 
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE ewiseadd_matrix_test_suite
@@ -109,26 +109,26 @@ namespace
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_bad_dimensions)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(m3x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(m3x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m4x3_dense, 0.);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(3, 3);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result(3, 3);
 
     // incompatible input dimensions
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseAdd(Result,
-                             GraphBLAS::NoMask(),
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Plus<double>(), mA, mB)),
-        GraphBLAS::DimensionException);
+        (grb::eWiseAdd(Result,
+                             grb::NoMask(),
+                             grb::NoAccumulate(),
+                             grb::Plus<double>(), mA, mB)),
+        grb::DimensionException);
 
     // incompatible output matrix dimensions
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseAdd(Result,
-                             GraphBLAS::NoMask(),
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Plus<double>(), mB, mB)),
-        GraphBLAS::DimensionException);
+        (grb::eWiseAdd(Result,
+                             grb::NoMask(),
+                             grb::NoAccumulate(),
+                             grb::Plus<double>(), mB, mB)),
+        grb::DimensionException);
 }
 
 //****************************************************************************
@@ -206,80 +206,80 @@ BOOST_AUTO_TEST_CASE(test_eWiseadd_matrix_semiring)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_reg)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> A(m3x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> A(m3x3_dense, 0.);
 
     // ewise add with dense matrix
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> B(twos3x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(
+    grb::Matrix<double, grb::DirectedMatrixTag> B(twos3x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Ans(
         ans_twos3x3_dense, 0.);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(3,3);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result(3,3);
 
-    GraphBLAS::eWiseAdd(Result,
-                        GraphBLAS::NoMask(),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), A, B);
+    grb::eWiseAdd(Result,
+                        grb::NoMask(),
+                        grb::NoAccumulate(),
+                        grb::Plus<double>(), A, B);
     BOOST_CHECK_EQUAL(Result, Ans);
 
     // ewise add with sparse matrix
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> B2(eye3x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans2(
+    grb::Matrix<double, grb::DirectedMatrixTag> B2(eye3x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Ans2(
         ans_eye3x3_dense, 0.);
-    GraphBLAS::eWiseAdd(Result,
-                        GraphBLAS::NoMask(),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), A, B2);
+    grb::eWiseAdd(Result,
+                        grb::NoMask(),
+                        grb::NoAccumulate(),
+                        grb::Plus<double>(), A, B2);
     BOOST_CHECK_EQUAL(Result, Ans2);
 
     // ewise add with empty matrix
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> B3(zero3x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans3(
+    grb::Matrix<double, grb::DirectedMatrixTag> B3(zero3x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Ans3(
         m3x3_dense, 0.);
-    GraphBLAS::eWiseAdd(Result,
-                        GraphBLAS::NoMask(),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), A, B3);
+    grb::eWiseAdd(Result,
+                        grb::NoMask(),
+                        grb::NoAccumulate(),
+                        grb::Plus<double>(), A, B3);
     BOOST_CHECK_EQUAL(Result, Ans3);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_matrix_reg)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> A(m3x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> A(m3x3_dense, 0.);
 
     // ewise add with dense matrix
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> B(twos3x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(
+    grb::Matrix<double, grb::DirectedMatrixTag> B(twos3x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Ans(
         ans_twos3x3_dense, 0.);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(3,3);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result(3,3);
 
-    GraphBLAS::eWiseAdd(Result,
-                        GraphBLAS::NoMask(),
-                        GraphBLAS::NoAccumulate(),
-                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
+    grb::eWiseAdd(Result,
+                        grb::NoMask(),
+                        grb::NoAccumulate(),
+                        add_monoid(grb::ArithmeticSemiring<double>()),
                         A, B);
     BOOST_CHECK_EQUAL(Result, Ans);
 
     // ewise add with sparse matrix
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> B2(eye3x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans2(
+    grb::Matrix<double, grb::DirectedMatrixTag> B2(eye3x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Ans2(
         ans_eye3x3_dense, 0.);
-    GraphBLAS::eWiseAdd(Result,
-                        GraphBLAS::NoMask(),
-                        GraphBLAS::NoAccumulate(),
-                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
+    grb::eWiseAdd(Result,
+                        grb::NoMask(),
+                        grb::NoAccumulate(),
+                        add_monoid(grb::ArithmeticSemiring<double>()),
                         A, B2);
     BOOST_CHECK_EQUAL(Result, Ans2);
 
     // ewise add with empty matrix
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> B3(zero3x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans3(
+    grb::Matrix<double, grb::DirectedMatrixTag> B3(zero3x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Ans3(
         m3x3_dense, 0.);
-    GraphBLAS::eWiseAdd(Result,
-                        GraphBLAS::NoMask(),
-                        GraphBLAS::NoAccumulate(),
-                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
+    grb::eWiseAdd(Result,
+                        grb::NoMask(),
+                        grb::NoAccumulate(),
+                        add_monoid(grb::ArithmeticSemiring<double>()),
                         A, B3);
     BOOST_CHECK_EQUAL(Result, Ans3);
 }
@@ -287,24 +287,24 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_matrix_reg)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_stored_zero_result)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> A(m3x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> A(m3x3_dense, 0.);
 
     // Add a stored zero
     A.setElement(1, 2, 0);
     BOOST_CHECK_EQUAL(A.nvals(), 7);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> B2(eye3x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans2(
+    grb::Matrix<double, grb::DirectedMatrixTag> B2(eye3x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Ans2(
         ans_eye3x3_dense, 0.);
     // Add a stored zero
     Ans2.setElement(1, 2, 0);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(3,3);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result(3,3);
 
-    GraphBLAS::eWiseAdd(Result,
-                        GraphBLAS::NoMask(),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), A, B2);
+    grb::eWiseAdd(Result,
+                        grb::NoMask(),
+                        grb::NoAccumulate(),
+                        grb::Plus<double>(), A, B2);
     BOOST_CHECK_EQUAL(Result.nvals(), 8);
     BOOST_CHECK_EQUAL(Result, Ans2);
 }
@@ -312,105 +312,105 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_stored_zero_result)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_a_transpose)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> A(m3x4_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> B(twos4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_twos4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(4,3);
+    grb::Matrix<double, grb::DirectedMatrixTag> A(m3x4_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> B(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result(4,3);
 
-    GraphBLAS::eWiseAdd(Result,
-                        GraphBLAS::NoMask(),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(),
+    grb::eWiseAdd(Result,
+                        grb::NoMask(),
+                        grb::NoAccumulate(),
+                        grb::Plus<double>(),
                         transpose(A), B);
     BOOST_CHECK_EQUAL(Result, Ans);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> B2(m3x4_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> B2(m3x4_dense, 0.);
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseAdd(Result,
-                             GraphBLAS::NoMask(),
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Plus<double>(),
+        (grb::eWiseAdd(Result,
+                             grb::NoMask(),
+                             grb::NoAccumulate(),
+                             grb::Plus<double>(),
                              transpose(A), A)),
-        GraphBLAS::DimensionException);
+        grb::DimensionException);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result2(3,3);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result2(3,3);
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseAdd(Result2,
-                             GraphBLAS::NoMask(),
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Plus<double>(),
+        (grb::eWiseAdd(Result2,
+                             grb::NoMask(),
+                             grb::NoAccumulate(),
+                             grb::Plus<double>(),
                              transpose(A), B)),
-        GraphBLAS::DimensionException);
+        grb::DimensionException);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_b_transpose)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> A(m3x4_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> B(twos4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_twos3x4_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(3, 4);
+    grb::Matrix<double, grb::DirectedMatrixTag> A(m3x4_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> B(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_twos3x4_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result(3, 4);
 
 
-    GraphBLAS::eWiseAdd(Result,
-                        GraphBLAS::NoMask(),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(),
+    grb::eWiseAdd(Result,
+                        grb::NoMask(),
+                        grb::NoAccumulate(),
+                        grb::Plus<double>(),
                         A, transpose(B));
     BOOST_CHECK_EQUAL(Result, Ans);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> B2(m3x4_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> B2(m3x4_dense, 0.);
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseAdd(Result,
-                             GraphBLAS::NoMask(),
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Plus<double>(),
+        (grb::eWiseAdd(Result,
+                             grb::NoMask(),
+                             grb::NoAccumulate(),
+                             grb::Plus<double>(),
                              B, transpose(B))),
-        GraphBLAS::DimensionException);
+        grb::DimensionException);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result2(3,3);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result2(3,3);
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseAdd(Result2,
-                             GraphBLAS::NoMask(),
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Plus<double>(),
+        (grb::eWiseAdd(Result2,
+                             grb::NoMask(),
+                             grb::NoAccumulate(),
+                             grb::Plus<double>(),
                              A, transpose(B))),
-        GraphBLAS::DimensionException);
+        grb::DimensionException);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_a_and_b_transpose)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> A(m4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> B(twos4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_twos3x4_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(3, 4);
+    grb::Matrix<double, grb::DirectedMatrixTag> A(m4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> B(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_twos3x4_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result(3, 4);
 
 
-    GraphBLAS::eWiseAdd(Result,
-                        GraphBLAS::NoMask(),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(),
+    grb::eWiseAdd(Result,
+                        grb::NoMask(),
+                        grb::NoAccumulate(),
+                        grb::Plus<double>(),
                         transpose(A), transpose(B));
     BOOST_CHECK_EQUAL(Result, Ans);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> B2(m3x4_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> B2(m3x4_dense, 0.);
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseAdd(Result,
-                             GraphBLAS::NoMask(),
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Plus<double>(),
+        (grb::eWiseAdd(Result,
+                             grb::NoMask(),
+                             grb::NoAccumulate(),
+                             grb::Plus<double>(),
                              transpose(Ans), transpose(B))),
-        GraphBLAS::DimensionException);
+        grb::DimensionException);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result2(3,3);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result2(3,3);
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseAdd(Result2,
-                             GraphBLAS::NoMask(),
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Plus<double>(),
+        (grb::eWiseAdd(Result2,
+                             grb::NoMask(),
+                             grb::NoAccumulate(),
+                             grb::Plus<double>(),
                              transpose(A), transpose(B))),
-        GraphBLAS::DimensionException);
+        grb::DimensionException);
 }
 
 //****************************************************************************
@@ -420,46 +420,46 @@ BOOST_AUTO_TEST_CASE(test_a_and_b_transpose)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_replace_bad_dimensions)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(twos4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Mask(twos3x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(4, 3);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Mask(twos3x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result(4, 3);
 
     // incompatible Mask-Output dimensions
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseAdd(Result,
+        (grb::eWiseAdd(Result,
                              Mask,
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Plus<double>(), mA, mB,
+                             grb::NoAccumulate(),
+                             grb::Plus<double>(), mA, mB,
                              REPLACE)),
-        GraphBLAS::DimensionException);
+        grb::DimensionException);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_replace_reg)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(twos4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m4x3_dense, 0.);
 
     std::vector<std::vector<double> > mask_dense = {{1, 1, 1},
                                                     {0, 1, 1},
                                                     {0, 0, 1},
                                                     {0, 0, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Mask(mask_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Mask(mask_dense, 0.);
 
     {
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
         std::vector<std::vector<double> > ans_dense = {{7, 8, 6},
                                                        {0, 9, 7},
                                                        {0, 0, 2},
                                                        {0, 0, 0}};
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-        GraphBLAS::eWiseAdd(Result,
+        grb::eWiseAdd(Result,
                             Mask,
-                            GraphBLAS::NoAccumulate(),
-                            GraphBLAS::Plus<double>(), mA, mB,
+                            grb::NoAccumulate(),
+                            grb::Plus<double>(), mA, mB,
                             REPLACE);
 
         BOOST_CHECK_EQUAL(Result.nvals(), 6);
@@ -467,18 +467,18 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_replace_reg)
     }
 
     {
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
         std::vector<std::vector<double> > ans_dense = {{7, 8,  6},
                                                        {0, 9,  7},
                                                        {0, 0,  2},
                                                        {0, 0,  0}};
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-        GraphBLAS::eWiseAdd(Result,
+        grb::eWiseAdd(Result,
                             Mask,
-                            GraphBLAS::Second<double>(),
-                            GraphBLAS::Plus<double>(), mA, mB,
+                            grb::Second<double>(),
+                            grb::Plus<double>(), mA, mB,
                             REPLACE);
 
         BOOST_CHECK_EQUAL(Result.nvals(), 6);
@@ -491,29 +491,29 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_replace_reg_stored_zero)
 {
     // tests a computed and stored zero
     // tests a stored zero in the mask
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(twos4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m4x3_dense, 0.);
 
     std::vector<std::vector<double> > mask_dense = {{1, 1, 1},
                                                     {0, 1, 1},
                                                     {0, 0, 1},
                                                     {0, 0, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Mask(mask_dense); //, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Mask(mask_dense); //, 0.);
     BOOST_CHECK_EQUAL(Mask.nvals(), 12);
 
     {
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
         std::vector<std::vector<double> > ans_dense = {{7, 8, 6},
                                                        {0, 9, 7},
                                                        {0, 0, 2},
                                                        {0, 0, 0}};
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-        GraphBLAS::eWiseAdd(Result,
+        grb::eWiseAdd(Result,
                             Mask,
-                            GraphBLAS::NoAccumulate(),
-                            GraphBLAS::Plus<double>(), mA, mB,
+                            grb::NoAccumulate(),
+                            grb::Plus<double>(), mA, mB,
                             REPLACE);
 
         BOOST_CHECK_EQUAL(Result.nvals(), 6);
@@ -521,18 +521,18 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_replace_reg_stored_zero)
     }
 
     {
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
         std::vector<std::vector<double> > ans_dense = {{7,  8,  6},
                                                        {0,  9,  7},
                                                        {0,  0,  2},
                                                        {0,  0,  0}};
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-        GraphBLAS::eWiseAdd(Result,
+        grb::eWiseAdd(Result,
                             Mask,
-                            GraphBLAS::Second<double>(),
-                            GraphBLAS::Plus<double>(), mA, mB,
+                            grb::Second<double>(),
+                            grb::Plus<double>(), mA, mB,
                             REPLACE);
 
         BOOST_CHECK_EQUAL(Result.nvals(), 6);
@@ -543,27 +543,27 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_replace_reg_stored_zero)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_replace_a_transpose)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(twos3x4_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(twos3x4_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m4x3_dense, 0.);
 
     std::vector<std::vector<double> > mask_dense = {{1, 1, 1},
                                                     {0, 1, 1},
                                                     {0, 0, 1},
                                                     {0, 0, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Mask(mask_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Mask(mask_dense, 0.);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
     std::vector<std::vector<double> > ans_dense = {{7, 8, 6},
                                                    {0, 9, 7},
                                                    {0, 0, 2},
                                                    {0, 0, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-    GraphBLAS::eWiseAdd(Result,
+    grb::eWiseAdd(Result,
                         Mask,
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), transpose(mA), mB,
+                        grb::NoAccumulate(),
+                        grb::Plus<double>(), transpose(mA), mB,
                         REPLACE);
 
     BOOST_CHECK_EQUAL(Result.nvals(), 6);
@@ -573,27 +573,27 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_replace_a_transpose)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_replace_b_transpose)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(twos4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m3x4_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m3x4_dense, 0.);
 
     std::vector<std::vector<double> > mask_dense = {{1, 1, 1},
                                                     {0, 1, 1},
                                                     {0, 0, 1},
                                                     {0, 0, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Mask(mask_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Mask(mask_dense, 0.);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
     std::vector<std::vector<double> > ans_dense = {{7, 8, 6},
                                                    {0, 9, 7},
                                                    {0, 0, 2},
                                                    {0, 0, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-    GraphBLAS::eWiseAdd(Result,
+    grb::eWiseAdd(Result,
                         Mask,
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), mA, transpose(mB),
+                        grb::NoAccumulate(),
+                        grb::Plus<double>(), mA, transpose(mB),
                         REPLACE);
 
     BOOST_CHECK_EQUAL(Result.nvals(), 6);
@@ -603,27 +603,27 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_replace_b_transpose)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_replace_a_and_b_transpose)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(twos3x4_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m3x4_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(twos3x4_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m3x4_dense, 0.);
 
     std::vector<std::vector<double> > mask_dense = {{1, 1, 1},
                                                     {0, 1, 1},
                                                     {0, 0, 1},
                                                     {0, 0, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Mask(mask_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Mask(mask_dense, 0.);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
     std::vector<std::vector<double> > ans_dense = {{7, 8, 6},
                                                    {0, 9, 7},
                                                    {0, 0, 2},
                                                    {0, 0, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-    GraphBLAS::eWiseAdd(Result,
+    grb::eWiseAdd(Result,
                         Mask,
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), transpose(mA), transpose(mB),
+                        grb::NoAccumulate(),
+                        grb::Plus<double>(), transpose(mA), transpose(mB),
                         REPLACE);
 
     BOOST_CHECK_EQUAL(Result.nvals(), 6);
@@ -637,63 +637,63 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_replace_a_and_b_transpose)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_bad_dimensions)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(twos4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Mask(twos3x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(4, 3);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Mask(twos3x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result(4, 3);
 
     // incompatible Mask-Output dimensions
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseAdd(Result,
+        (grb::eWiseAdd(Result,
                              Mask,
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Plus<double>(), mA, mB)),
-        GraphBLAS::DimensionException);
+                             grb::NoAccumulate(),
+                             grb::Plus<double>(), mA, mB)),
+        grb::DimensionException);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_reg)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(twos4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m4x3_dense, 0.);
 
     std::vector<std::vector<double> > mask_dense = {{1, 1, 1},
                                                     {0, 1, 1},
                                                     {0, 0, 1},
                                                     {0, 0, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Mask(mask_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Mask(mask_dense, 0.);
 
     {
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
         std::vector<std::vector<double> > ans_dense = {{7,  8,  6},
                                                        {2,  9,  7},
                                                        {2,  2,  2},
                                                        {2,  2,  2}};
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-        GraphBLAS::eWiseAdd(Result,
+        grb::eWiseAdd(Result,
                             Mask,
-                            GraphBLAS::NoAccumulate(),
-                            GraphBLAS::Plus<double>(), mA, mB);
+                            grb::NoAccumulate(),
+                            grb::Plus<double>(), mA, mB);
 
         BOOST_CHECK_EQUAL(Result.nvals(), 12);
         BOOST_CHECK_EQUAL(Result, Ans);
     }
 
     {
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
         std::vector<std::vector<double> > ans_dense = {{7,  8,  6},
                                                        {2,  9,  7},
                                                        {2,  2,  2},
                                                        {2,  2,  2}};
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-        GraphBLAS::eWiseAdd(Result,
+        grb::eWiseAdd(Result,
                             Mask,
-                            GraphBLAS::Second<double>(),
-                            GraphBLAS::Plus<double>(), mA, mB);
+                            grb::Second<double>(),
+                            grb::Plus<double>(), mA, mB);
 
         BOOST_CHECK_EQUAL(Result.nvals(), 12);
         BOOST_CHECK_EQUAL(Result, Ans);
@@ -704,46 +704,46 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_reg)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_reg_stored_zero)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(twos4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m4x3_dense, 0.);
 
     std::vector<std::vector<double> > mask_dense = {{1, 1, 1},
                                                     {0, 1, 1},
                                                     {0, 0, 1},
                                                     {0, 0, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Mask(mask_dense); //, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Mask(mask_dense); //, 0.);
 
     {
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
         std::vector<std::vector<double> > ans_dense = {{7,  8,  6},
                                                        {2,  9,  7},
                                                        {2,  2,  2},
                                                        {2,  2,  2}};
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-        GraphBLAS::eWiseAdd(Result,
+        grb::eWiseAdd(Result,
                             Mask,
-                            GraphBLAS::NoAccumulate(),
-                            GraphBLAS::Plus<double>(), mA, mB);
+                            grb::NoAccumulate(),
+                            grb::Plus<double>(), mA, mB);
 
         BOOST_CHECK_EQUAL(Result.nvals(), 12);
         BOOST_CHECK_EQUAL(Result, Ans);
     }
 
     {
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
         std::vector<std::vector<double> > ans_dense = {{7,  8,  6},
                                                        {2,  9,  7},
                                                        {2,  2,  2},
                                                        {2,  2,  2}};
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-        GraphBLAS::eWiseAdd(Result,
+        grb::eWiseAdd(Result,
                             Mask,
-                            GraphBLAS::Second<double>(),
-                            GraphBLAS::Plus<double>(), mA, mB);
+                            grb::Second<double>(),
+                            grb::Plus<double>(), mA, mB);
 
         BOOST_CHECK_EQUAL(Result.nvals(), 12);
         BOOST_CHECK_EQUAL(Result, Ans);
@@ -753,27 +753,27 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_reg_stored_zero)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_a_transpose)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(twos3x4_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(twos3x4_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m4x3_dense, 0.);
 
     std::vector<std::vector<double> > mask_dense = {{1, 1, 1},
                                                     {0, 1, 1},
                                                     {0, 0, 1},
                                                     {0, 0, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Mask(mask_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Mask(mask_dense, 0.);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
     std::vector<std::vector<double> > ans_dense = {{7,  8,  6},
                                                    {2,  9,  7},
                                                    {2,  2,  2},
                                                    {2,  2,  2}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-    GraphBLAS::eWiseAdd(Result,
+    grb::eWiseAdd(Result,
                         Mask,
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), transpose(mA), mB);
+                        grb::NoAccumulate(),
+                        grb::Plus<double>(), transpose(mA), mB);
 
     BOOST_CHECK_EQUAL(Result.nvals(), 12);
     BOOST_CHECK_EQUAL(Result, Ans);
@@ -782,27 +782,27 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_a_transpose)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_b_transpose)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(twos4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m3x4_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m3x4_dense, 0.);
 
     std::vector<std::vector<double> > mask_dense = {{1, 1, 1},
                                                     {0, 1, 1},
                                                     {0, 0, 1},
                                                     {0, 0, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Mask(mask_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Mask(mask_dense, 0.);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
     std::vector<std::vector<double> > ans_dense = {{7,  8,  6},
                                                    {2,  9,  7},
                                                    {2,  2,  2},
                                                    {2,  2,  2}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-    GraphBLAS::eWiseAdd(Result,
+    grb::eWiseAdd(Result,
                         Mask,
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), mA, transpose(mB));
+                        grb::NoAccumulate(),
+                        grb::Plus<double>(), mA, transpose(mB));
 
     BOOST_CHECK_EQUAL(Result.nvals(), 12);
     BOOST_CHECK_EQUAL(Result, Ans);
@@ -811,27 +811,27 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_b_transpose)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_a_and_b_transpose)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(twos3x4_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m3x4_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(twos3x4_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m3x4_dense, 0.);
 
     std::vector<std::vector<double> > mask_dense = {{1, 1, 1},
                                                     {0, 1, 1},
                                                     {0, 0, 1},
                                                     {0, 0, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Mask(mask_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Mask(mask_dense, 0.);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
     std::vector<std::vector<double> > ans_dense = {{7,  8,  6},
                                                    {2,  9,  7},
                                                    {2,  2,  2},
                                                    {2,  2,  2}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-    GraphBLAS::eWiseAdd(Result,
+    grb::eWiseAdd(Result,
                         Mask,
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), transpose(mA), transpose(mB));
+                        grb::NoAccumulate(),
+                        grb::Plus<double>(), transpose(mA), transpose(mB));
 
     BOOST_CHECK_EQUAL(Result.nvals(), 12);
     BOOST_CHECK_EQUAL(Result, Ans);
@@ -844,46 +844,46 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_masked_a_and_b_transpose)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_replace_bad_dimensions)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(twos4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Mask(twos3x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(4, 3);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Mask(twos3x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result(4, 3);
 
     // incompatible Mask-Output dimensions
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseAdd(Result,
-                             GraphBLAS::complement(Mask),
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Plus<double>(), mA, mB,
+        (grb::eWiseAdd(Result,
+                             grb::complement(Mask),
+                             grb::NoAccumulate(),
+                             grb::Plus<double>(), mA, mB,
                              REPLACE)),
-        GraphBLAS::DimensionException);
+        grb::DimensionException);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_replace_reg)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(twos4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m4x3_dense, 0.);
 
     std::vector<std::vector<double> > mask_dense = {{0, 0, 0},
                                                     {1, 0, 0},
                                                     {1, 1, 0},
                                                     {1, 1, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Mask(mask_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Mask(mask_dense, 0.);
 
     {
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
         std::vector<std::vector<double> > ans_dense = {{7, 8, 6},
                                                        {0, 9, 7},
                                                        {0, 0, 2},
                                                        {0, 0, 0}};
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-        GraphBLAS::eWiseAdd(Result,
-                            GraphBLAS::complement(Mask),
-                            GraphBLAS::NoAccumulate(),
-                            GraphBLAS::Plus<double>(), mA, mB,
+        grb::eWiseAdd(Result,
+                            grb::complement(Mask),
+                            grb::NoAccumulate(),
+                            grb::Plus<double>(), mA, mB,
                             REPLACE);
 
         BOOST_CHECK_EQUAL(Result.nvals(), 6);
@@ -891,18 +891,18 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_replace_reg)
     }
 
     {
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
         std::vector<std::vector<double> > ans_dense = {{7, 8, 6},
                                                        {0, 9, 7},
                                                        {0, 0, 2},
                                                        {0, 0, 0}};
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-        GraphBLAS::eWiseAdd(Result,
-                            GraphBLAS::complement(Mask),
-                            GraphBLAS::Second<double>(),
-                            GraphBLAS::Plus<double>(), mA, mB,
+        grb::eWiseAdd(Result,
+                            grb::complement(Mask),
+                            grb::Second<double>(),
+                            grb::Plus<double>(), mA, mB,
                             REPLACE);
 
         BOOST_CHECK_EQUAL(Result.nvals(), 6);
@@ -915,29 +915,29 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_replace_reg_stored_zero)
 {
     // tests a computed and stored zero
     // tests a stored zero in the mask
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(twos4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m4x3_dense, 0.);
 
     std::vector<std::vector<double> > mask_dense = {{0, 0, 0},
                                                     {1, 0, 0},
                                                     {1, 1, 0},
                                                     {1, 1, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Mask(mask_dense); //, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Mask(mask_dense); //, 0.);
     BOOST_CHECK_EQUAL(Mask.nvals(), 12);
 
     {
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
         std::vector<std::vector<double> > ans_dense = {{7, 8, 6},
                                                        {0, 9, 7},
                                                        {0, 0, 2},
                                                        {0, 0, 0}};
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-        GraphBLAS::eWiseAdd(Result,
-                            GraphBLAS::complement(Mask),
-                            GraphBLAS::NoAccumulate(),
-                            GraphBLAS::Plus<double>(), mA, mB,
+        grb::eWiseAdd(Result,
+                            grb::complement(Mask),
+                            grb::NoAccumulate(),
+                            grb::Plus<double>(), mA, mB,
                             REPLACE);
 
         BOOST_CHECK_EQUAL(Result.nvals(), 6);
@@ -945,18 +945,18 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_replace_reg_stored_zero)
     }
 
     {
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
         std::vector<std::vector<double> > ans_dense = {{7, 8, 6},
                                                        {0, 9, 7},
                                                        {0, 0, 2},
                                                        {0, 0, 0}};
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-        GraphBLAS::eWiseAdd(Result,
-                            GraphBLAS::complement(Mask),
-                            GraphBLAS::Second<double>(),
-                            GraphBLAS::Plus<double>(), mA, mB,
+        grb::eWiseAdd(Result,
+                            grb::complement(Mask),
+                            grb::Second<double>(),
+                            grb::Plus<double>(), mA, mB,
                             REPLACE);
 
         BOOST_CHECK_EQUAL(Result.nvals(), 6);
@@ -967,27 +967,27 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_replace_reg_stored_zero)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_replace_a_transpose)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(twos3x4_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(twos3x4_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m4x3_dense, 0.);
 
     std::vector<std::vector<double> > mask_dense = {{0, 0, 0},
                                                     {1, 0, 0},
                                                     {1, 1, 0},
                                                     {1, 1, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Mask(mask_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Mask(mask_dense, 0.);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
     std::vector<std::vector<double> > ans_dense = {{7, 8, 6},
                                                    {0, 9, 7},
                                                    {0, 0, 2},
                                                    {0, 0, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-    GraphBLAS::eWiseAdd(Result,
-                        GraphBLAS::complement(Mask),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), transpose(mA), mB,
+    grb::eWiseAdd(Result,
+                        grb::complement(Mask),
+                        grb::NoAccumulate(),
+                        grb::Plus<double>(), transpose(mA), mB,
                         REPLACE);
 
     BOOST_CHECK_EQUAL(Result.nvals(), 6);
@@ -997,27 +997,27 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_replace_a_transpose)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_replace_b_transpose)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(twos4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m3x4_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m3x4_dense, 0.);
 
     std::vector<std::vector<double> > mask_dense = {{0, 0, 0},
                                                     {1, 0, 0},
                                                     {1, 1, 0},
                                                     {1, 1, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Mask(mask_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Mask(mask_dense, 0.);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
     std::vector<std::vector<double> > ans_dense = {{7, 8, 6},
                                                    {0, 9, 7},
                                                    {0, 0, 2},
                                                    {0, 0, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-    GraphBLAS::eWiseAdd(Result,
-                        GraphBLAS::complement(Mask),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), mA, transpose(mB),
+    grb::eWiseAdd(Result,
+                        grb::complement(Mask),
+                        grb::NoAccumulate(),
+                        grb::Plus<double>(), mA, transpose(mB),
                         REPLACE);
 
     BOOST_CHECK_EQUAL(Result.nvals(), 6);
@@ -1027,27 +1027,27 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_replace_b_transpose)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_replace_a_and_b_transpose)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(twos3x4_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m3x4_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(twos3x4_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m3x4_dense, 0.);
 
     std::vector<std::vector<double> > mask_dense = {{0, 0, 0},
                                                     {1, 0, 0},
                                                     {1, 1, 0},
                                                     {1, 1, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Mask(mask_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Mask(mask_dense, 0.);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
     std::vector<std::vector<double> > ans_dense = {{7, 8, 6},
                                                    {0, 9, 7},
                                                    {0, 0, 2},
                                                    {0, 0, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-    GraphBLAS::eWiseAdd(Result,
-                        GraphBLAS::complement(Mask),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), transpose(mA), transpose(mB),
+    grb::eWiseAdd(Result,
+                        grb::complement(Mask),
+                        grb::NoAccumulate(),
+                        grb::Plus<double>(), transpose(mA), transpose(mB),
                         REPLACE);
 
     BOOST_CHECK_EQUAL(Result.nvals(), 6);
@@ -1061,63 +1061,63 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_replace_a_and_b_transpose)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_bad_dimensions)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(twos4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Mask(twos3x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(4, 3);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Mask(twos3x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result(4, 3);
 
     // incompatible Mask-Output dimensions
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseAdd(Result,
-                             GraphBLAS::complement(Mask),
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Plus<double>(), mA, mB)),
-        GraphBLAS::DimensionException);
+        (grb::eWiseAdd(Result,
+                             grb::complement(Mask),
+                             grb::NoAccumulate(),
+                             grb::Plus<double>(), mA, mB)),
+        grb::DimensionException);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_reg)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(twos4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m4x3_dense, 0.);
 
     std::vector<std::vector<double> > mask_dense = {{0, 0, 0},
                                                     {1, 0, 0},
                                                     {1, 1, 0},
                                                     {1, 1, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Mask(mask_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Mask(mask_dense, 0.);
 
     {
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
         std::vector<std::vector<double> > ans_dense = {{7,  8,  6},
                                                        {2,  9,  7},
                                                        {2,  2,  2},
                                                        {2,  2,  2}};
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-        GraphBLAS::eWiseAdd(Result,
-                            GraphBLAS::complement(Mask),
-                            GraphBLAS::NoAccumulate(),
-                            GraphBLAS::Plus<double>(), mA, mB);
+        grb::eWiseAdd(Result,
+                            grb::complement(Mask),
+                            grb::NoAccumulate(),
+                            grb::Plus<double>(), mA, mB);
 
         BOOST_CHECK_EQUAL(Result.nvals(), 12);
         BOOST_CHECK_EQUAL(Result, Ans);
     }
 
     {
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
         std::vector<std::vector<double> > ans_dense = {{7,  8,  6},
                                                        {2,  9,  7},
                                                        {2,  2,  2},
                                                        {2,  2,  2}};
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-        GraphBLAS::eWiseAdd(Result,
-                            GraphBLAS::complement(Mask),
-                            GraphBLAS::Second<double>(),
-                            GraphBLAS::Plus<double>(), mA, mB);
+        grb::eWiseAdd(Result,
+                            grb::complement(Mask),
+                            grb::Second<double>(),
+                            grb::Plus<double>(), mA, mB);
 
         BOOST_CHECK_EQUAL(Result.nvals(), 12);
         BOOST_CHECK_EQUAL(Result, Ans);
@@ -1127,46 +1127,46 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_reg)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_reg_stored_zero)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(twos4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m4x3_dense, 0.);
 
     std::vector<std::vector<double> > mask_dense = {{0, 0, 0},
                                                     {1, 0, 0},
                                                     {1, 1, 0},
                                                     {1, 1, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Mask(mask_dense);//, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Mask(mask_dense);//, 0.);
 
     {
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
         std::vector<std::vector<double> > ans_dense = {{7,  8,  6},
                                                        {2,  9,  7},
                                                        {2,  2,  2},
                                                        {2,  2,  2}};
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-        GraphBLAS::eWiseAdd(Result,
-                            GraphBLAS::complement(Mask),
-                            GraphBLAS::NoAccumulate(),
-                            GraphBLAS::Plus<double>(), mA, mB);
+        grb::eWiseAdd(Result,
+                            grb::complement(Mask),
+                            grb::NoAccumulate(),
+                            grb::Plus<double>(), mA, mB);
 
         BOOST_CHECK_EQUAL(Result.nvals(), 12);
         BOOST_CHECK_EQUAL(Result, Ans);
     }
 
     {
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
         std::vector<std::vector<double> > ans_dense = {{7,  8,  6},
                                                        {2,  9,  7},
                                                        {2,  2,  2},
                                                        {2,  2,  2}};
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+        grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-        GraphBLAS::eWiseAdd(Result,
-                            GraphBLAS::complement(Mask),
-                            GraphBLAS::Second<double>(),
-                            GraphBLAS::Plus<double>(), mA, mB);
+        grb::eWiseAdd(Result,
+                      grb::complement(Mask),
+                      grb::Second<double>(),
+                      grb::Plus<double>(), mA, mB);
 
         BOOST_CHECK_EQUAL(Result.nvals(), 12);
         BOOST_CHECK_EQUAL(Result, Ans);
@@ -1176,27 +1176,27 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_reg_stored_zero)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_a_transpose)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(twos3x4_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(twos3x4_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m4x3_dense, 0.);
 
     std::vector<std::vector<double> > mask_dense = {{0, 0, 0},
                                                     {1, 0, 0},
                                                     {1, 1, 0},
                                                     {1, 1, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Mask(mask_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Mask(mask_dense, 0.);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
     std::vector<std::vector<double> > ans_dense = {{7,  8,  6},
                                                    {2,  9,  7},
                                                    {2,  2,  2},
                                                    {2,  2,  2}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-    GraphBLAS::eWiseAdd(Result,
-                        GraphBLAS::complement(Mask),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), transpose(mA), mB);
+    grb::eWiseAdd(Result,
+                  grb::complement(Mask),
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), transpose(mA), mB);
 
     BOOST_CHECK_EQUAL(Result.nvals(), 12);
     BOOST_CHECK_EQUAL(Result, Ans);
@@ -1205,27 +1205,27 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_a_transpose)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_b_transpose)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(twos4x3_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m3x4_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m3x4_dense, 0.);
 
     std::vector<std::vector<double> > mask_dense = {{0, 0, 0},
                                                     {1, 0, 0},
                                                     {1, 1, 0},
                                                     {1, 1, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Mask(mask_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Mask(mask_dense, 0.);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
     std::vector<std::vector<double> > ans_dense = {{7,  8,  6},
                                                    {2,  9,  7},
                                                    {2,  2,  2},
                                                    {2,  2,  2}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-    GraphBLAS::eWiseAdd(Result,
-                        GraphBLAS::complement(Mask),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), mA, transpose(mB));
+    grb::eWiseAdd(Result,
+                        grb::complement(Mask),
+                        grb::NoAccumulate(),
+                        grb::Plus<double>(), mA, transpose(mB));
 
     BOOST_CHECK_EQUAL(Result.nvals(), 12);
     BOOST_CHECK_EQUAL(Result, Ans);
@@ -1234,27 +1234,27 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_b_transpose)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_matrix_scmp_masked_a_and_b_transpose)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(twos3x4_dense, 0.);
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mB(m3x4_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(twos3x4_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m3x4_dense, 0.);
 
     std::vector<std::vector<double> > mask_dense = {{0, 0, 0},
                                                     {1, 0, 0},
                                                     {1, 1, 0},
                                                     {1, 1, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Mask(mask_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Mask(mask_dense, 0.);
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Result(twos4x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Result(twos4x3_dense, 0.);
 
     std::vector<std::vector<double> > ans_dense = {{7,  8,  6},
                                                    {2,  9,  7},
                                                    {2,  2,  2},
                                                    {2,  2,  2}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> Ans(ans_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> Ans(ans_dense, 0.);
 
-    GraphBLAS::eWiseAdd(Result,
-                        GraphBLAS::complement(Mask),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), transpose(mA), transpose(mB));
+    grb::eWiseAdd(Result,
+                  grb::complement(Mask),
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), transpose(mA), transpose(mB));
 
     BOOST_CHECK_EQUAL(Result.nvals(), 12);
     BOOST_CHECK_EQUAL(Result, Ans);

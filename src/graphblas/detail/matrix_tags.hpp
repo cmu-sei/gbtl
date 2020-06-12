@@ -29,7 +29,7 @@
 
 //****************************************************************************
 
-namespace GraphBLAS
+namespace grb
 {
     // The default matrix is sparse and directed, and the default vector is sparse,
     // so we need tags that modify that
@@ -45,6 +45,6 @@ namespace GraphBLAS
         struct DirectednessCategoryTag {};
         struct NullTag {};
     } //end detail
-}//end GraphBLAS
+}//end grb
 
 //****************************************************************************

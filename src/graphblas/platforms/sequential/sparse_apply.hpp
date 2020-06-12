@@ -41,7 +41,7 @@
 
 //******************************************************************************
 
-namespace GraphBLAS
+namespace grb
 {
     namespace backend
     {
@@ -54,7 +54,7 @@ namespace GraphBLAS
                  typename UVectorT,
                  typename ...WTagsT>
         inline void apply(
-            GraphBLAS::backend::Vector<WScalarT, WTagsT...> &w,
+            grb::backend::Vector<WScalarT, WTagsT...>       &w,
             MaskT                                     const &mask,
             AccumT                                    const &accum,
             UnaryOpT                                         op,
@@ -104,7 +104,7 @@ namespace GraphBLAS
                  typename AMatrixT,
                  typename ...CTagsT>
         inline void apply(
-            GraphBLAS::backend::Matrix<CScalarT, CTagsT...> &C,
+            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             UnaryOpT                                         op,
@@ -159,7 +159,7 @@ namespace GraphBLAS
                  typename AMatrixT,
                  typename ...CTagsT>
         inline void apply(
-            GraphBLAS::backend::Matrix<CScalarT, CTagsT...> &C,
+            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             UnaryOpT                                         op,
@@ -218,7 +218,7 @@ namespace GraphBLAS
                  typename UVectorT,
                  typename ...WTagsT>
         inline void apply_binop_1st(
-            GraphBLAS::backend::Vector<WScalarT, WTagsT...> &w,
+            grb::backend::Vector<WScalarT, WTagsT...>       &w,
             MaskT                                     const &mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -273,7 +273,7 @@ namespace GraphBLAS
                  typename ValueT,
                  typename ...WTagsT>
         inline void apply_binop_2nd(
-            GraphBLAS::backend::Vector<WScalarT, WTagsT...> &w,
+            grb::backend::Vector<WScalarT, WTagsT...>       &w,
             MaskT                                     const &mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -331,7 +331,7 @@ namespace GraphBLAS
                  typename AMatrixT,
                  typename ...CTagsT>
         inline void apply_binop_1st(
-            GraphBLAS::backend::Matrix<CScalarT, CTagsT...> &C,
+            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -391,7 +391,7 @@ namespace GraphBLAS
                  typename AMatrixT,
                  typename ...CTagsT>
         inline void apply_binop_1st(
-            GraphBLAS::backend::Matrix<CScalarT, CTagsT...> &C,
+            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -453,7 +453,7 @@ namespace GraphBLAS
                  typename ValueT,
                  typename ...CTagsT>
         inline void apply_binop_2nd(
-            GraphBLAS::backend::Matrix<CScalarT, CTagsT...> &C,
+            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -515,7 +515,7 @@ namespace GraphBLAS
                  typename ValueT,
                  typename ...CTagsT>
         inline void apply_binop_2nd(
-            GraphBLAS::backend::Matrix<CScalarT, CTagsT...> &C,
+            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,

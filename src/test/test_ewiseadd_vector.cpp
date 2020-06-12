@@ -70,193 +70,193 @@ namespace
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_bad_dimensions)
 {
-    GraphBLAS::Vector<double> v(v3a_dense, 0.);
-    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+    grb::Vector<double> v(v3a_dense, 0.);
+    grb::Vector<double> u(v4a_dense, 0.);
 
-    GraphBLAS::Vector<double> result(3);
+    grb::Vector<double> result(3);
 
     // incompatible input dimensions
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseAdd(result,
-                             GraphBLAS::NoMask(),
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Plus<double>(), v, u)),
-        GraphBLAS::DimensionException);
+        (grb::eWiseAdd(result,
+                       grb::NoMask(),
+                       grb::NoAccumulate(),
+                       grb::Plus<double>(), v, u)),
+        grb::DimensionException);
 
     // incompatible output vector dimensions
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseAdd(result,
-                             GraphBLAS::NoMask(),
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Plus<double>(), u, u)),
-        GraphBLAS::DimensionException);
+        (grb::eWiseAdd(result,
+                       grb::NoMask(),
+                       grb::NoAccumulate(),
+                       grb::Plus<double>(), u, u)),
+        grb::DimensionException);
 
     // Additional tests.
-    GraphBLAS::Vector<double> a(v3a_dense, 0.);
-    GraphBLAS::Vector<double> b(v4a_dense, 0.);
-    GraphBLAS::Vector<double> result_a(3);
-    GraphBLAS::Vector<double> result_b(4);
+    grb::Vector<double> a(v3a_dense, 0.);
+    grb::Vector<double> b(v4a_dense, 0.);
+    grb::Vector<double> result_a(3);
+    grb::Vector<double> result_b(4);
 
     // w0 m0 u1 v1
     BOOST_CHECK_THROW(
-            (GraphBLAS::eWiseAdd(result_a,
-                                 a,
-                                 GraphBLAS::NoAccumulate(),
-                                 GraphBLAS::Plus<double>(),
-                                 b,
-                                 b)),
-            GraphBLAS::DimensionException);
+        (grb::eWiseAdd(result_a,
+                       a,
+                       grb::NoAccumulate(),
+                       grb::Plus<double>(),
+                       b,
+                       b)),
+        grb::DimensionException);
 
     // w0 m1 u0 v0
     BOOST_CHECK_THROW(
-            (GraphBLAS::eWiseAdd(result_a,
-                                 b,
-                                 GraphBLAS::NoAccumulate(),
-                                 GraphBLAS::Plus<double>(),
-                                 a,
-                                 a)),
-            GraphBLAS::DimensionException);
+        (grb::eWiseAdd(result_a,
+                       b,
+                       grb::NoAccumulate(),
+                       grb::Plus<double>(),
+                       a,
+                       a)),
+        grb::DimensionException);
 
     // w1 m0 u0 v1
     BOOST_CHECK_THROW(
-            (GraphBLAS::eWiseAdd(result_b,
-                                 a,
-                                 GraphBLAS::NoAccumulate(),
-                                 GraphBLAS::Plus<double>(),
-                                 a,
-                                 b)),
-            GraphBLAS::DimensionException);
+        (grb::eWiseAdd(result_b,
+                       a,
+                       grb::NoAccumulate(),
+                       grb::Plus<double>(),
+                       a,
+                       b)),
+        grb::DimensionException);
 
     // w1 m1 u1 v0
     BOOST_CHECK_THROW(
-            (GraphBLAS::eWiseAdd(result_b,
-                                 b,
-                                 GraphBLAS::NoAccumulate(),
-                                 GraphBLAS::Plus<double>(),
-                                 b,
-                                 a)),
-            GraphBLAS::DimensionException);
+        (grb::eWiseAdd(result_b,
+                       b,
+                       grb::NoAccumulate(),
+                       grb::Plus<double>(),
+                       b,
+                       a)),
+        grb::DimensionException);
 
     // w1 m0 u1 v1
     BOOST_CHECK_THROW(
-            (GraphBLAS::eWiseAdd(result_b,
-                                 a,
-                                 GraphBLAS::NoAccumulate(),
-                                 GraphBLAS::Plus<double>(),
-                                 b,
-                                 b)),
-            GraphBLAS::DimensionException);
+        (grb::eWiseAdd(result_b,
+                       a,
+                       grb::NoAccumulate(),
+                       grb::Plus<double>(),
+                       b,
+                       b)),
+        grb::DimensionException);
 
     // w0 m1 u1 v1
     BOOST_CHECK_THROW(
-            (GraphBLAS::eWiseAdd(result_a,
-                                 b,
-                                 GraphBLAS::NoAccumulate(),
-                                 GraphBLAS::Plus<double>(),
-                                 b,
-                                 b)),
-            GraphBLAS::DimensionException);
+        (grb::eWiseAdd(result_a,
+                       b,
+                       grb::NoAccumulate(),
+                       grb::Plus<double>(),
+                       b,
+                       b)),
+        grb::DimensionException);
 
     // w0 no u1 v0
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseAdd(result_a,
-                             GraphBLAS::NoMask(),
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Plus<double>(),
-                             b,
-                             a)),
-        GraphBLAS::DimensionException);
+        (grb::eWiseAdd(result_a,
+                       grb::NoMask(),
+                       grb::NoAccumulate(),
+                       grb::Plus<double>(),
+                       b,
+                       a)),
+        grb::DimensionException);
 
     // w1 no u1 v0
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseAdd(result_b,
-                             GraphBLAS::NoMask(),
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Plus<double>(),
-                             b,
-                             a)),
-        GraphBLAS::DimensionException);
+        (grb::eWiseAdd(result_b,
+                       grb::NoMask(),
+                       grb::NoAccumulate(),
+                       grb::Plus<double>(),
+                       b,
+                       a)),
+        grb::DimensionException);
 
     // w1 no u0 v0
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseAdd(result_b,
-                             GraphBLAS::NoMask(),
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Plus<double>(),
-                             a,
-                             a)),
-        GraphBLAS::DimensionException);
+        (grb::eWiseAdd(result_b,
+                       grb::NoMask(),
+                       grb::NoAccumulate(),
+                       grb::Plus<double>(),
+                       a,
+                       a)),
+        grb::DimensionException);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_reg)
 {
-    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+    grb::Vector<double> u(v4a_dense, 0.);
 
     // ewise add with dense vector
-    GraphBLAS::Vector<double> v(twos4_dense, 0.);
-    GraphBLAS::Vector<double> ans(ans_4atwos4_dense, 0.);
+    grb::Vector<double> v(twos4_dense, 0.);
+    grb::Vector<double> ans(ans_4atwos4_dense, 0.);
 
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> result(4);
 
-    GraphBLAS::eWiseAdd(result,
-                        GraphBLAS::NoMask(),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v);
+    grb::eWiseAdd(result,
+                  grb::NoMask(),
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
-    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
-    GraphBLAS::Vector<double> ans2(ans_4a4b_dense, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        GraphBLAS::NoMask(),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v2);
+    grb::Vector<double> v2(v4b_dense, 0.);
+    grb::Vector<double> ans2(ans_4a4b_dense, 0.);
+    grb::eWiseAdd(result,
+                  grb::NoMask(),
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v2);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
-    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
-    GraphBLAS::Vector<double> ans3(v4a_dense, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        GraphBLAS::NoMask(),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v3);
+    grb::Vector<double> v3(zero4_dense, 0.);
+    grb::Vector<double> ans3(v4a_dense, 0.);
+    grb::eWiseAdd(result,
+                  grb::NoMask(),
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v3);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_stored_zero_result)
 {
-    GraphBLAS::Vector<double> u(v4a_dense); //, 0.);
+    grb::Vector<double> u(v4a_dense); //, 0.);
 
     // ewise add with dense vector
-    GraphBLAS::Vector<double> v(twos4_dense, 0.);
-    GraphBLAS::Vector<double> ans(ans_4atwos4_dense); //, 0.);
+    grb::Vector<double> v(twos4_dense, 0.);
+    grb::Vector<double> ans(ans_4atwos4_dense); //, 0.);
 
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> result(4);
 
-    GraphBLAS::eWiseAdd(result,
-                        GraphBLAS::NoMask(),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v);
+    grb::eWiseAdd(result,
+                  grb::NoMask(),
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
-    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
-    GraphBLAS::Vector<double> ans2(ans_4a4b_dense); //, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        GraphBLAS::NoMask(),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v2);
+    grb::Vector<double> v2(v4b_dense, 0.);
+    grb::Vector<double> ans2(ans_4a4b_dense); //, 0.);
+    grb::eWiseAdd(result,
+                  grb::NoMask(),
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v2);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
-    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
-    GraphBLAS::Vector<double> ans3(v4a_dense);//, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        GraphBLAS::NoMask(),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v3);
+    grb::Vector<double> v3(zero4_dense, 0.);
+    grb::Vector<double> ans3(v4a_dense);//, 0.);
+    grb::eWiseAdd(result,
+                  grb::NoMask(),
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v3);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -267,60 +267,60 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_stored_zero_result)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_replace_bad_dimensions)
 {
-    GraphBLAS::Vector<double> v(v4a_dense, 0.);
-    GraphBLAS::Vector<double> u(v4b_dense, 0.);
-    GraphBLAS::Vector<double> mask(v3a_dense, 0.);
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> v(v4a_dense, 0.);
+    grb::Vector<double> u(v4b_dense, 0.);
+    grb::Vector<double> mask(v3a_dense, 0.);
+    grb::Vector<double> result(4);
 
     // incompatible Mask-Output dimensions
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseAdd(result,
-                             mask,
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Plus<double>(), v, u,
-                             GraphBLAS::REPLACE)),
-        GraphBLAS::DimensionException);
+        (grb::eWiseAdd(result,
+                       mask,
+                       grb::NoAccumulate(),
+                       grb::Plus<double>(), v, u,
+                       grb::REPLACE)),
+        grb::DimensionException);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_replace_reg)
 {
     std::vector<int> mask4_dense = {0, 1, 1, 0};
-    GraphBLAS::Vector<int> mask(mask4_dense, 0);
+    grb::Vector<int> mask(mask4_dense, 0);
 
-    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+    grb::Vector<double> u(v4a_dense, 0.);
 
     // ewise add with dense vector
-    GraphBLAS::Vector<double> v(twos4_dense, 0.);
+    grb::Vector<double> v(twos4_dense, 0.);
     std::vector<double> ans_4atwos4_dense2 = {0, 2, 14, 0};
-    GraphBLAS::Vector<double> ans(ans_4atwos4_dense2, 0.);
+    grb::Vector<double> ans(ans_4atwos4_dense2, 0.);
 
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> result(4);
 
-    GraphBLAS::eWiseAdd(result,
-                        mask,
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v, GraphBLAS::REPLACE);
+    grb::eWiseAdd(result,
+                  mask,
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
-    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
+    grb::Vector<double> v2(v4b_dense, 0.);
     std::vector<double> answer2 = {0, 1, 12, 0};
-    GraphBLAS::Vector<double> ans2(answer2, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        mask,
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v2, GraphBLAS::REPLACE);
+    grb::Vector<double> ans2(answer2, 0.);
+    grb::eWiseAdd(result,
+                  mask,
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v2, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
-    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
+    grb::Vector<double> v3(zero4_dense, 0.);
     std::vector<double> answer3 = {0, 0, 12, 0};
-    GraphBLAS::Vector<double> ans3(answer3, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        mask,
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v3, GraphBLAS::REPLACE);
+    grb::Vector<double> ans3(answer3, 0.);
+    grb::eWiseAdd(result,
+                  mask,
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v3, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -328,41 +328,41 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_replace_reg)
 BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_replace_reg_stored_zero)
 {
     std::vector<int> mask4_dense = {0, 1, 1, 0};
-    GraphBLAS::Vector<int> mask(mask4_dense); //, 0);
+    grb::Vector<int> mask(mask4_dense); //, 0);
 
-    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+    grb::Vector<double> u(v4a_dense, 0.);
 
     // ewise add with dense vector
-    GraphBLAS::Vector<double> v(twos4_dense, 0.);
+    grb::Vector<double> v(twos4_dense, 0.);
     std::vector<double> ans_4atwos4_dense2 = {0, 2, 14, 0};
-    GraphBLAS::Vector<double> ans(ans_4atwos4_dense2, 0.);
+    grb::Vector<double> ans(ans_4atwos4_dense2, 0.);
 
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> result(4);
 
-    GraphBLAS::eWiseAdd(result,
-                        mask,
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v, GraphBLAS::REPLACE);
+    grb::eWiseAdd(result,
+                  mask,
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
-    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
+    grb::Vector<double> v2(v4b_dense, 0.);
     std::vector<double> answer2 = {0, 1, 12, 0};
-    GraphBLAS::Vector<double> ans2(answer2, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        mask,
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v2, GraphBLAS::REPLACE);
+    grb::Vector<double> ans2(answer2, 0.);
+    grb::eWiseAdd(result,
+                  mask,
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v2, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
-    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
+    grb::Vector<double> v3(zero4_dense, 0.);
     std::vector<double> answer3 = {0, 0, 12, 0};
-    GraphBLAS::Vector<double> ans3(answer3, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        mask,
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v3, GraphBLAS::REPLACE);
+    grb::Vector<double> ans3(answer3, 0.);
+    grb::eWiseAdd(result,
+                  mask,
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v3, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -370,44 +370,44 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_replace_reg_stored_zero)
 BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_vector_masked_replace_reg_stored_zero)
 {
     std::vector<int> mask4_dense = {0, 1, 1, 0};
-    GraphBLAS::Vector<int> mask(mask4_dense); //, 0);
+    grb::Vector<int> mask(mask4_dense); //, 0);
 
-    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+    grb::Vector<double> u(v4a_dense, 0.);
 
     // ewise add with dense vector
-    GraphBLAS::Vector<double> v(twos4_dense, 0.);
+    grb::Vector<double> v(twos4_dense, 0.);
     std::vector<double> ans_4atwos4_dense2 = {0, 2, 14, 0};
-    GraphBLAS::Vector<double> ans(ans_4atwos4_dense2, 0.);
+    grb::Vector<double> ans(ans_4atwos4_dense2, 0.);
 
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> result(4);
 
-    GraphBLAS::eWiseAdd(result,
-                        mask,
-                        GraphBLAS::NoAccumulate(),
-                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
-                        u, v, GraphBLAS::REPLACE);
+    grb::eWiseAdd(result,
+                  mask,
+                  grb::NoAccumulate(),
+                  add_monoid(grb::ArithmeticSemiring<double>()),
+                  u, v, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
-    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
+    grb::Vector<double> v2(v4b_dense, 0.);
     std::vector<double> answer2 = {0, 1, 12, 0};
-    GraphBLAS::Vector<double> ans2(answer2, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        mask,
-                        GraphBLAS::NoAccumulate(),
-                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
-                        u, v2, GraphBLAS::REPLACE);
+    grb::Vector<double> ans2(answer2, 0.);
+    grb::eWiseAdd(result,
+                  mask,
+                  grb::NoAccumulate(),
+                  add_monoid(grb::ArithmeticSemiring<double>()),
+                  u, v2, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
-    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
+    grb::Vector<double> v3(zero4_dense, 0.);
     std::vector<double> answer3 = {0, 0, 12, 0};
-    GraphBLAS::Vector<double> ans3(answer3, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        mask,
-                        GraphBLAS::NoAccumulate(),
-                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
-                        u, v3, GraphBLAS::REPLACE);
+    grb::Vector<double> ans3(answer3, 0.);
+    grb::eWiseAdd(result,
+                  mask,
+                  grb::NoAccumulate(),
+                  add_monoid(grb::ArithmeticSemiring<double>()),
+                  u, v3, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -418,59 +418,59 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_vector_masked_replace_reg_stored_zer
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_bad_dimensions)
 {
-    GraphBLAS::Vector<double> v(v4a_dense, 0.);
-    GraphBLAS::Vector<double> u(v4b_dense, 0.);
-    GraphBLAS::Vector<double> mask(v3a_dense, 0.);
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> v(v4a_dense, 0.);
+    grb::Vector<double> u(v4b_dense, 0.);
+    grb::Vector<double> mask(v3a_dense, 0.);
+    grb::Vector<double> result(4);
 
     // incompatible Mask-Output dimensions
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseAdd(result,
-                             mask,
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Plus<double>(), v, u, GraphBLAS::MERGE)),
-        GraphBLAS::DimensionException);
+        (grb::eWiseAdd(result,
+                       mask,
+                       grb::NoAccumulate(),
+                       grb::Plus<double>(), v, u, grb::MERGE)),
+        grb::DimensionException);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_reg)
 {
     std::vector<int> mask4_dense = {0, 1, 1, 0};
-    GraphBLAS::Vector<int> mask(mask4_dense, 0);
+    grb::Vector<int> mask(mask4_dense, 0);
 
-    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+    grb::Vector<double> u(v4a_dense, 0.);
 
     // ewise add with dense vector
-    GraphBLAS::Vector<double> v(twos4_dense, 0.);
+    grb::Vector<double> v(twos4_dense, 0.);
     std::vector<double> ans_4atwos4_dense2 = {0, 2, 14, 0};
-    GraphBLAS::Vector<double> ans(ans_4atwos4_dense2, 0.);
+    grb::Vector<double> ans(ans_4atwos4_dense2, 0.);
 
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> result(4);
 
-    GraphBLAS::eWiseAdd(result,
-                        mask,
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v, GraphBLAS::MERGE);
+    grb::eWiseAdd(result,
+                  mask,
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v, grb::MERGE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
-    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
+    grb::Vector<double> v2(v4b_dense, 0.);
     std::vector<double> answer2 = {0, 1, 12, 0};
-    GraphBLAS::Vector<double> ans2(answer2, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        mask,
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v2, GraphBLAS::MERGE);
+    grb::Vector<double> ans2(answer2, 0.);
+    grb::eWiseAdd(result,
+                  mask,
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v2, grb::MERGE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
-    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
+    grb::Vector<double> v3(zero4_dense, 0.);
     std::vector<double> answer3 = {0, 0, 12, 0};
-    GraphBLAS::Vector<double> ans3(answer3, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        mask,
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v3, GraphBLAS::MERGE);
+    grb::Vector<double> ans3(answer3, 0.);
+    grb::eWiseAdd(result,
+                  mask,
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v3, grb::MERGE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -478,41 +478,41 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_reg)
 BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_reg_stored_zero)
 {
     std::vector<int> mask4_dense = {0, 1, 1, 0};
-    GraphBLAS::Vector<int> mask(mask4_dense); //, 0);
+    grb::Vector<int> mask(mask4_dense); //, 0);
 
-    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+    grb::Vector<double> u(v4a_dense, 0.);
 
     // ewise add with dense vector
-    GraphBLAS::Vector<double> v(twos4_dense, 0.);
+    grb::Vector<double> v(twos4_dense, 0.);
     std::vector<double> ans_4atwos4_dense2 = {0, 2, 14, 0};
-    GraphBLAS::Vector<double> ans(ans_4atwos4_dense2, 0.);
+    grb::Vector<double> ans(ans_4atwos4_dense2, 0.);
 
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> result(4);
 
-    GraphBLAS::eWiseAdd(result,
-                        mask,
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v, GraphBLAS::MERGE);
+    grb::eWiseAdd(result,
+                  mask,
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v, grb::MERGE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
-    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
+    grb::Vector<double> v2(v4b_dense, 0.);
     std::vector<double> answer2 = {0, 1, 12, 0};
-    GraphBLAS::Vector<double> ans2(answer2, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        mask,
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v2, GraphBLAS::MERGE);
+    grb::Vector<double> ans2(answer2, 0.);
+    grb::eWiseAdd(result,
+                  mask,
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v2, grb::MERGE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
-    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
+    grb::Vector<double> v3(zero4_dense, 0.);
     std::vector<double> answer3 = {0, 0, 12, 0};
-    GraphBLAS::Vector<double> ans3(answer3, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        mask,
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v3, GraphBLAS::MERGE);
+    grb::Vector<double> ans3(answer3, 0.);
+    grb::eWiseAdd(result,
+                  mask,
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v3, grb::MERGE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -520,44 +520,44 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_masked_reg_stored_zero)
 BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_vector_masked_reg_stored_zero)
 {
     std::vector<int> mask4_dense = {0, 1, 1, 0};
-    GraphBLAS::Vector<int> mask(mask4_dense); //, 0);
+    grb::Vector<int> mask(mask4_dense); //, 0);
 
-    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+    grb::Vector<double> u(v4a_dense, 0.);
 
     // ewise add with dense vector
-    GraphBLAS::Vector<double> v(twos4_dense, 0.);
+    grb::Vector<double> v(twos4_dense, 0.);
     std::vector<double> ans_4atwos4_dense2 = {0, 2, 14, 0};
-    GraphBLAS::Vector<double> ans(ans_4atwos4_dense2, 0.);
+    grb::Vector<double> ans(ans_4atwos4_dense2, 0.);
 
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> result(4);
 
-    GraphBLAS::eWiseAdd(result,
-                        mask,
-                        GraphBLAS::NoAccumulate(),
-                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
-                        u, v, GraphBLAS::MERGE);
+    grb::eWiseAdd(result,
+                  mask,
+                  grb::NoAccumulate(),
+                  add_monoid(grb::ArithmeticSemiring<double>()),
+                  u, v, grb::MERGE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
-    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
+    grb::Vector<double> v2(v4b_dense, 0.);
     std::vector<double> answer2 = {0, 1, 12, 0};
-    GraphBLAS::Vector<double> ans2(answer2, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        mask,
-                        GraphBLAS::NoAccumulate(),
-                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
-                        u, v2, GraphBLAS::MERGE);
+    grb::Vector<double> ans2(answer2, 0.);
+    grb::eWiseAdd(result,
+                  mask,
+                  grb::NoAccumulate(),
+                  add_monoid(grb::ArithmeticSemiring<double>()),
+                  u, v2, grb::MERGE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
-    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
+    grb::Vector<double> v3(zero4_dense, 0.);
     std::vector<double> answer3 = {0, 0, 12, 0};
-    GraphBLAS::Vector<double> ans3(answer3, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        mask,
-                        GraphBLAS::NoAccumulate(),
-                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
-                        u, v3, GraphBLAS::MERGE);
+    grb::Vector<double> ans3(answer3, 0.);
+    grb::eWiseAdd(result,
+                  mask,
+                  grb::NoAccumulate(),
+                  add_monoid(grb::ArithmeticSemiring<double>()),
+                  u, v3, grb::MERGE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -568,60 +568,60 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_vector_masked_reg_stored_zero)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_replace_bad_dimensions)
 {
-    GraphBLAS::Vector<double> v(v4a_dense, 0.);
-    GraphBLAS::Vector<double> u(v4b_dense, 0.);
-    GraphBLAS::Vector<double> mask(v3a_dense, 0.);
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> v(v4a_dense, 0.);
+    grb::Vector<double> u(v4b_dense, 0.);
+    grb::Vector<double> mask(v3a_dense, 0.);
+    grb::Vector<double> result(4);
 
     // incompatible Mask-Output dimensions
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseAdd(result,
-                             GraphBLAS::complement(mask),
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Plus<double>(), v, u,
-                             GraphBLAS::MERGE)),
-        GraphBLAS::DimensionException);
+        (grb::eWiseAdd(result,
+                       grb::complement(mask),
+                       grb::NoAccumulate(),
+                       grb::Plus<double>(), v, u,
+                       grb::MERGE)),
+        grb::DimensionException);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_replace_reg)
 {
     std::vector<int> mask4_dense = {1, 0, 0, 1};
-    GraphBLAS::Vector<int> mask(mask4_dense, 0);
+    grb::Vector<int> mask(mask4_dense, 0);
 
-    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+    grb::Vector<double> u(v4a_dense, 0.);
 
     // ewise add with dense vector
-    GraphBLAS::Vector<double> v(twos4_dense, 0.);
+    grb::Vector<double> v(twos4_dense, 0.);
     std::vector<double> ans_4atwos4_dense2 = {0, 2, 14, 0};
-    GraphBLAS::Vector<double> ans(ans_4atwos4_dense2, 0.);
+    grb::Vector<double> ans(ans_4atwos4_dense2, 0.);
 
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> result(4);
 
-    GraphBLAS::eWiseAdd(result,
-                        GraphBLAS::complement(mask),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v, GraphBLAS::REPLACE);
+    grb::eWiseAdd(result,
+                  grb::complement(mask),
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
-    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
+    grb::Vector<double> v2(v4b_dense, 0.);
     std::vector<double> answer2 = {0, 1, 12, 0};
-    GraphBLAS::Vector<double> ans2(answer2, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        GraphBLAS::complement(mask),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v2, GraphBLAS::REPLACE);
+    grb::Vector<double> ans2(answer2, 0.);
+    grb::eWiseAdd(result,
+                  grb::complement(mask),
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v2, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
-    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
+    grb::Vector<double> v3(zero4_dense, 0.);
     std::vector<double> answer3 = {0, 0, 12, 0};
-    GraphBLAS::Vector<double> ans3(answer3, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        GraphBLAS::complement(mask),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v3, GraphBLAS::REPLACE);
+    grb::Vector<double> ans3(answer3, 0.);
+    grb::eWiseAdd(result,
+                  grb::complement(mask),
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v3, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -629,41 +629,41 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_replace_reg)
 BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_replace_reg_stored_zero)
 {
     std::vector<int> mask4_dense = {1, 0, 0, 1};
-    GraphBLAS::Vector<int> mask(mask4_dense); //, 0);
+    grb::Vector<int> mask(mask4_dense); //, 0);
 
-    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+    grb::Vector<double> u(v4a_dense, 0.);
 
     // ewise add with dense vector
-    GraphBLAS::Vector<double> v(twos4_dense, 0.);
+    grb::Vector<double> v(twos4_dense, 0.);
     std::vector<double> ans_4atwos4_dense2 = {0, 2, 14, 0};
-    GraphBLAS::Vector<double> ans(ans_4atwos4_dense2, 0.);
+    grb::Vector<double> ans(ans_4atwos4_dense2, 0.);
 
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> result(4);
 
-    GraphBLAS::eWiseAdd(result,
-                        GraphBLAS::complement(mask),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v, GraphBLAS::REPLACE);
+    grb::eWiseAdd(result,
+                  grb::complement(mask),
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
-    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
+    grb::Vector<double> v2(v4b_dense, 0.);
     std::vector<double> answer2 = {0, 1, 12, 0};
-    GraphBLAS::Vector<double> ans2(answer2, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        GraphBLAS::complement(mask),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v2, GraphBLAS::REPLACE);
+    grb::Vector<double> ans2(answer2, 0.);
+    grb::eWiseAdd(result,
+                  grb::complement(mask),
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v2, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
-    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
+    grb::Vector<double> v3(zero4_dense, 0.);
     std::vector<double> answer3 = {0, 0, 12, 0};
-    GraphBLAS::Vector<double> ans3(answer3, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        GraphBLAS::complement(mask),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v3, GraphBLAS::REPLACE);
+    grb::Vector<double> ans3(answer3, 0.);
+    grb::eWiseAdd(result,
+                  grb::complement(mask),
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v3, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -671,44 +671,44 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_replace_reg_stored_zero)
 BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_vector_scmp_masked_replace_reg_stored_zero)
 {
     std::vector<int> mask4_dense = {1, 0, 0, 1};
-    GraphBLAS::Vector<int> mask(mask4_dense); //, 0);
+    grb::Vector<int> mask(mask4_dense); //, 0);
 
-    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+    grb::Vector<double> u(v4a_dense, 0.);
 
     // ewise add with dense vector
-    GraphBLAS::Vector<double> v(twos4_dense, 0.);
+    grb::Vector<double> v(twos4_dense, 0.);
     std::vector<double> ans_4atwos4_dense2 = {0, 2, 14, 0};
-    GraphBLAS::Vector<double> ans(ans_4atwos4_dense2, 0.);
+    grb::Vector<double> ans(ans_4atwos4_dense2, 0.);
 
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> result(4);
 
-    GraphBLAS::eWiseAdd(result,
-                        GraphBLAS::complement(mask),
-                        GraphBLAS::NoAccumulate(),
-                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
-                        u, v, GraphBLAS::REPLACE);
+    grb::eWiseAdd(result,
+                  grb::complement(mask),
+                  grb::NoAccumulate(),
+                  add_monoid(grb::ArithmeticSemiring<double>()),
+                  u, v, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
-    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
+    grb::Vector<double> v2(v4b_dense, 0.);
     std::vector<double> answer2 = {0, 1, 12, 0};
-    GraphBLAS::Vector<double> ans2(answer2, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        GraphBLAS::complement(mask),
-                        GraphBLAS::NoAccumulate(),
-                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
-                        u, v2, GraphBLAS::REPLACE);
+    grb::Vector<double> ans2(answer2, 0.);
+    grb::eWiseAdd(result,
+                  grb::complement(mask),
+                  grb::NoAccumulate(),
+                  add_monoid(grb::ArithmeticSemiring<double>()),
+                  u, v2, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
-    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
+    grb::Vector<double> v3(zero4_dense, 0.);
     std::vector<double> answer3 = {0, 0, 12, 0};
-    GraphBLAS::Vector<double> ans3(answer3, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        GraphBLAS::complement(mask),
-                        GraphBLAS::NoAccumulate(),
-                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
-                        u, v3, GraphBLAS::REPLACE);
+    grb::Vector<double> ans3(answer3, 0.);
+    grb::eWiseAdd(result,
+                  grb::complement(mask),
+                  grb::NoAccumulate(),
+                  add_monoid(grb::ArithmeticSemiring<double>()),
+                  u, v3, grb::REPLACE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -719,59 +719,59 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_vector_scmp_masked_replace_reg_store
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_bad_dimensions)
 {
-    GraphBLAS::Vector<double> v(v4a_dense, 0.);
-    GraphBLAS::Vector<double> u(v4b_dense, 0.);
-    GraphBLAS::Vector<double> mask(v3a_dense, 0.);
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> v(v4a_dense, 0.);
+    grb::Vector<double> u(v4b_dense, 0.);
+    grb::Vector<double> mask(v3a_dense, 0.);
+    grb::Vector<double> result(4);
 
     // incompatible Mask-Output dimensions
     BOOST_CHECK_THROW(
-        (GraphBLAS::eWiseAdd(result,
-                             GraphBLAS::complement(mask),
-                             GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Plus<double>(), v, u, GraphBLAS::MERGE)),
-        GraphBLAS::DimensionException);
+        (grb::eWiseAdd(result,
+                       grb::complement(mask),
+                       grb::NoAccumulate(),
+                       grb::Plus<double>(), v, u, grb::MERGE)),
+        grb::DimensionException);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_reg)
 {
     std::vector<int> mask4_dense = {1, 0, 0, 1};
-    GraphBLAS::Vector<int> mask(mask4_dense, 0);
+    grb::Vector<int> mask(mask4_dense, 0);
 
-    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+    grb::Vector<double> u(v4a_dense, 0.);
 
     // ewise add with dense vector
-    GraphBLAS::Vector<double> v(twos4_dense, 0.);
+    grb::Vector<double> v(twos4_dense, 0.);
     std::vector<double> ans_4atwos4_dense2 = {0, 2, 14, 0};
-    GraphBLAS::Vector<double> ans(ans_4atwos4_dense2, 0.);
+    grb::Vector<double> ans(ans_4atwos4_dense2, 0.);
 
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> result(4);
 
-    GraphBLAS::eWiseAdd(result,
-                        GraphBLAS::complement(mask),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v, GraphBLAS::MERGE);
+    grb::eWiseAdd(result,
+                  grb::complement(mask),
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v, grb::MERGE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
-    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
+    grb::Vector<double> v2(v4b_dense, 0.);
     std::vector<double> answer2 = {0, 1, 12, 0};
-    GraphBLAS::Vector<double> ans2(answer2, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        GraphBLAS::complement(mask),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v2, GraphBLAS::MERGE);
+    grb::Vector<double> ans2(answer2, 0.);
+    grb::eWiseAdd(result,
+                  grb::complement(mask),
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v2, grb::MERGE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
-    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
+    grb::Vector<double> v3(zero4_dense, 0.);
     std::vector<double> answer3 = {0, 0, 12, 0};
-    GraphBLAS::Vector<double> ans3(answer3, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        GraphBLAS::complement(mask),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v3, GraphBLAS::MERGE);
+    grb::Vector<double> ans3(answer3, 0.);
+    grb::eWiseAdd(result,
+                  grb::complement(mask),
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v3, grb::MERGE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -779,41 +779,41 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_reg)
 BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_reg_stored_zero)
 {
     std::vector<int> mask4_dense = {1, 0, 0, 1};
-    GraphBLAS::Vector<int> mask(mask4_dense); //, 0);
+    grb::Vector<int> mask(mask4_dense); //, 0);
 
-    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+    grb::Vector<double> u(v4a_dense, 0.);
 
     // ewise add with dense vector
-    GraphBLAS::Vector<double> v(twos4_dense, 0.);
+    grb::Vector<double> v(twos4_dense, 0.);
     std::vector<double> ans_4atwos4_dense2 = {0, 2, 14, 0};
-    GraphBLAS::Vector<double> ans(ans_4atwos4_dense2, 0.);
+    grb::Vector<double> ans(ans_4atwos4_dense2, 0.);
 
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> result(4);
 
-    GraphBLAS::eWiseAdd(result,
-                        GraphBLAS::complement(mask),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v, GraphBLAS::MERGE);
+    grb::eWiseAdd(result,
+                  grb::complement(mask),
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v, grb::MERGE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
-    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
+    grb::Vector<double> v2(v4b_dense, 0.);
     std::vector<double> answer2 = {0, 1, 12, 0};
-    GraphBLAS::Vector<double> ans2(answer2, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        GraphBLAS::complement(mask),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v2, GraphBLAS::MERGE);
+    grb::Vector<double> ans2(answer2, 0.);
+    grb::eWiseAdd(result,
+                  grb::complement(mask),
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v2, grb::MERGE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
-    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
+    grb::Vector<double> v3(zero4_dense, 0.);
     std::vector<double> answer3 = {0, 0, 12, 0};
-    GraphBLAS::Vector<double> ans3(answer3, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        GraphBLAS::complement(mask),
-                        GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(), u, v3, GraphBLAS::MERGE);
+    grb::Vector<double> ans3(answer3, 0.);
+    grb::eWiseAdd(result,
+                  grb::complement(mask),
+                  grb::NoAccumulate(),
+                  grb::Plus<double>(), u, v3, grb::MERGE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -821,44 +821,44 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_scmp_masked_reg_stored_zero)
 BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_vector_scmp_masked_reg_stored_zero)
 {
     std::vector<int> mask4_dense = {1, 0, 0, 1};
-    GraphBLAS::Vector<int> mask(mask4_dense); //, 0);
+    grb::Vector<int> mask(mask4_dense); //, 0);
 
-    GraphBLAS::Vector<double> u(v4a_dense, 0.);
+    grb::Vector<double> u(v4a_dense, 0.);
 
     // ewise add with dense vector
-    GraphBLAS::Vector<double> v(twos4_dense, 0.);
+    grb::Vector<double> v(twos4_dense, 0.);
     std::vector<double> ans_4atwos4_dense2 = {0, 2, 14, 0};
-    GraphBLAS::Vector<double> ans(ans_4atwos4_dense2, 0.);
+    grb::Vector<double> ans(ans_4atwos4_dense2, 0.);
 
-    GraphBLAS::Vector<double> result(4);
+    grb::Vector<double> result(4);
 
-    GraphBLAS::eWiseAdd(result,
-                        GraphBLAS::complement(mask),
-                        GraphBLAS::NoAccumulate(),
-                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
-                        u, v, GraphBLAS::MERGE);
+    grb::eWiseAdd(result,
+                  grb::complement(mask),
+                  grb::NoAccumulate(),
+                  add_monoid(grb::ArithmeticSemiring<double>()),
+                  u, v, grb::MERGE);
     BOOST_CHECK_EQUAL(result, ans);
 
     // ewise add with sparse vector
-    GraphBLAS::Vector<double> v2(v4b_dense, 0.);
+    grb::Vector<double> v2(v4b_dense, 0.);
     std::vector<double> answer2 = {0, 1, 12, 0};
-    GraphBLAS::Vector<double> ans2(answer2, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        GraphBLAS::complement(mask),
-                        GraphBLAS::NoAccumulate(),
-                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
-                        u, v2, GraphBLAS::MERGE);
+    grb::Vector<double> ans2(answer2, 0.);
+    grb::eWiseAdd(result,
+                  grb::complement(mask),
+                  grb::NoAccumulate(),
+                  add_monoid(grb::ArithmeticSemiring<double>()),
+                  u, v2, grb::MERGE);
     BOOST_CHECK_EQUAL(result, ans2);
 
     // ewise add with empty vector
-    GraphBLAS::Vector<double> v3(zero4_dense, 0.);
+    grb::Vector<double> v3(zero4_dense, 0.);
     std::vector<double> answer3 = {0, 0, 12, 0};
-    GraphBLAS::Vector<double> ans3(answer3, 0.);
-    GraphBLAS::eWiseAdd(result,
-                        GraphBLAS::complement(mask),
-                        GraphBLAS::NoAccumulate(),
-                        add_monoid(GraphBLAS::ArithmeticSemiring<double>()),
-                        u, v3, GraphBLAS::MERGE);
+    grb::Vector<double> ans3(answer3, 0.);
+    grb::eWiseAdd(result,
+                  grb::complement(mask),
+                  grb::NoAccumulate(),
+                  add_monoid(grb::ArithmeticSemiring<double>()),
+                  u, v3, grb::MERGE);
     BOOST_CHECK_EQUAL(result, ans3);
 }
 
@@ -869,23 +869,23 @@ BOOST_AUTO_TEST_CASE(test_ewiseadd_semiring_vector_scmp_masked_reg_stored_zero)
 //***************************************************************************
 BOOST_AUTO_TEST_CASE(test_ewiseadd_vector_accum)
 {
-    GraphBLAS::Vector<double> v(v3a_dense, 0.);
-    GraphBLAS::Vector<double> u(twos3_dense, 0.);
+    grb::Vector<double> v(v3a_dense, 0.);
+    grb::Vector<double> u(twos3_dense, 0.);
 
-    GraphBLAS::Vector<double> result1({1, 1, 1}, 0.);
-    GraphBLAS::Vector<double> ans1({15, 3, 10}, 0.);
-    GraphBLAS::eWiseAdd(result1,
-                        GraphBLAS::NoMask(),
-                        GraphBLAS::Plus<double>(),
-                        GraphBLAS::Plus<double>(), u, v);
+    grb::Vector<double> result1({1, 1, 1}, 0.);
+    grb::Vector<double> ans1({15, 3, 10}, 0.);
+    grb::eWiseAdd(result1,
+                  grb::NoMask(),
+                  grb::Plus<double>(),
+                  grb::Plus<double>(), u, v);
     BOOST_CHECK_EQUAL(result1, ans1);
 
-    GraphBLAS::Vector<double> result2({1, 1, 1}, 0.);
-    GraphBLAS::Vector<double> ans2({-13, -1, -8}, 0.);
-    GraphBLAS::eWiseAdd(result2,
-                        GraphBLAS::NoMask(),
-                        GraphBLAS::Minus<double>(),
-                        GraphBLAS::Plus<double>(), u, v);
+    grb::Vector<double> result2({1, 1, 1}, 0.);
+    grb::Vector<double> ans2({-13, -1, -8}, 0.);
+    grb::eWiseAdd(result2,
+                  grb::NoMask(),
+                  grb::Minus<double>(),
+                  grb::Plus<double>(), u, v);
     BOOST_CHECK_EQUAL(result2, ans2);
 }
 

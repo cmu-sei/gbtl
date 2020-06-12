@@ -52,26 +52,7 @@
 #undef GB_INCLUDE_BACKEND_VECTOR
 #endif
 
-// 5. Specify the include file that defines the pretty_print and
-// pretty_print_matrix functions.
-#if(GB_INCLUDE_BACKEND_UTILITY)
-#include <graphblas/platforms/GB_BACKEND_NAME/utility.hpp>
-#undef GB_INCLUDE_BACKEND_UTILITY
-#endif
-
-// 6. Specify the include file that defines the platform's TransposeView class
-#if(GB_INCLUDE_BACKEND_TRANSPOSE_VIEW)
-#include <graphblas/platforms/GB_BACKEND_NAME/TransposeView.hpp>
-#undef GB_INCLUDE_BACKEND_TRANSPOSE_VIEW
-#endif
-
-// 7. Specify the include file that defines the platform's ComplementView class
-#if(GB_INCLUDE_BACKEND_COMPLEMENT_VIEW)
-#include <graphblas/platforms/GB_BACKEND_NAME/ComplementView.hpp>
-#undef GB_INCLUDE_BACKEND_COMPLEMENT_VIEW
-#endif
-
-// 8. Specify the include file(s) that defines the platform's
+// 5. Specify the include file(s) that defines the platform's
 // operations functions.
 #if(GB_INCLUDE_BACKEND_OPERATIONS)
 #include <graphblas/platforms/GB_BACKEND_NAME/operations.hpp>

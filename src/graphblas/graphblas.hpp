@@ -33,7 +33,7 @@
 #define GRB_VERSION    1
 #define GRB_SUBVERSION 3
 
-namespace GraphBLAS
+namespace grb
 {
     auto getVersion()
     {

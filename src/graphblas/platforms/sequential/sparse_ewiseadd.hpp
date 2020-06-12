@@ -42,7 +42,7 @@
 
 //****************************************************************************
 
-namespace GraphBLAS
+namespace grb
 {
     namespace backend
     {
@@ -57,7 +57,7 @@ namespace GraphBLAS
                  typename VVectorT,
                  typename ...WTagsT>
         inline void eWiseAdd(
-            GraphBLAS::backend::Vector<WScalarT, WTagsT...> &w,
+            grb::backend::Vector<WScalarT, WTagsT...>       &w,
             MaskT                                     const &mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -104,7 +104,7 @@ namespace GraphBLAS
                  typename BMatrixT,
                  typename ...CTagsT>
         inline void eWiseAdd(
-            GraphBLAS::backend::Matrix<CScalarT, CTagsT...> &C,
+            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -177,7 +177,7 @@ namespace GraphBLAS
                  typename BMatrixT,
                  typename ...CTagsT>
         inline void eWiseAdd(
-            GraphBLAS::backend::Matrix<CScalarT, CTagsT...> &C,
+            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -189,8 +189,8 @@ namespace GraphBLAS
             auto const &A(AT.m_mat);
 
             AMatrixT Atran(A.ncols(), A.nrows());
-            GraphBLAS::backend::transpose(Atran, NoMask(), NoAccumulate(), A, REPLACE);
-            GraphBLAS::backend::eWiseAdd(C, Mask, accum, op, Atran, B, outp);
+            grb::backend::transpose(Atran, NoMask(), NoAccumulate(), A, REPLACE);
+            grb::backend::eWiseAdd(C, Mask, accum, op, Atran, B, outp);
         } // ewisemult
 
         //**********************************************************************
@@ -204,7 +204,7 @@ namespace GraphBLAS
                  typename BMatrixT,
                  typename ...CTagsT>
         inline void eWiseAdd(
-            GraphBLAS::backend::Matrix<CScalarT, CTagsT...> &C,
+            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -216,8 +216,8 @@ namespace GraphBLAS
             auto const &B(BT.m_mat);
 
             AMatrixT Btran(B.ncols(), B.nrows());
-            GraphBLAS::backend::transpose(Btran, NoMask(), NoAccumulate(), B, REPLACE);
-            GraphBLAS::backend::eWiseAdd(C, Mask, accum, op, A, Btran, outp);
+            grb::backend::transpose(Btran, NoMask(), NoAccumulate(), B, REPLACE);
+            grb::backend::eWiseAdd(C, Mask, accum, op, A, Btran, outp);
         } // ewisemult
 
         //**********************************************************************
@@ -231,7 +231,7 @@ namespace GraphBLAS
                  typename BMatrixT,
                  typename ...CTagsT>
         inline void eWiseAdd(
-            GraphBLAS::backend::Matrix<CScalarT, CTagsT...> &C,
+            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -303,4 +303,4 @@ namespace GraphBLAS
         } // ewisemult
 
     } // backend
-} // GraphBLAS
+} // grb

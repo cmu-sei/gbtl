@@ -40,7 +40,7 @@
 
 #include <graphblas/graphblas.hpp>
 
-using namespace GraphBLAS;
+using namespace grb;
 
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE apply_test_suite
@@ -120,24 +120,24 @@ BOOST_AUTO_TEST_CASE(sparse_apply_matrix_nomask_noaccum)
     std::vector<std::vector<double>> matA = {{8, 1, 6},
                                              {3, 5, 7},
                                              {4, 9, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(matA, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(matA, 0);
 
     std::vector<std::vector<double>> matC = {{1, 2, 3},
                                              {4, 5, 6},
                                              {7, 8, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mC(matC, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> mC(matC, 0);
 
     std::vector<std::vector<double>> matAnswer = {{-8, -1, -6},
                                                   {-3, -5, -7},
                                                   {-4, -9,  0}};
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> answer(matAnswer, 0);
 
-    GraphBLAS::apply(mC,
-                     GraphBLAS::NoMask(),
-                     GraphBLAS::NoAccumulate(),
-                     GraphBLAS::AdditiveInverse<double>(),
-                     mA);
+    grb::apply(mC,
+               grb::NoMask(),
+               grb::NoAccumulate(),
+               grb::AdditiveInverse<double>(),
+               mA);
 
     BOOST_CHECK_EQUAL(mC, answer);
 }
@@ -148,29 +148,29 @@ BOOST_AUTO_TEST_CASE(sparse_apply_matrix_mask_merge_noaccum)
     std::vector<std::vector<double>> matA = {{8, 1, 6},
                                              {3, 5, 7},
                                              {4, 9, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(matA, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(matA, 0);
 
     std::vector<std::vector<double>> matC = {{1, 2, 3},
                                              {4, 5, 6},
                                              {7, 8, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mC(matC, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> mC(matC, 0);
 
 
     std::vector<std::vector<bool>> matMask = {{true, false, false},
                                               {true, true,  false,},
                                               {true, true,  true}};
-    GraphBLAS::Matrix<bool, GraphBLAS::DirectedMatrixTag> mask(matMask, false);
+    grb::Matrix<bool, grb::DirectedMatrixTag> mask(matMask, false);
 
     std::vector<std::vector<double>> matAnswer = {{-8, 2,  3},
                                                   {-3, -5, 6},
                                                   {-4, -9, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> answer(matAnswer, 0);
 
-    GraphBLAS::apply(mC,
-                     mask,
-                     GraphBLAS::NoAccumulate(),
-                     GraphBLAS::AdditiveInverse<double>(),
-                     mA);
+    grb::apply(mC,
+               mask,
+               grb::NoAccumulate(),
+               grb::AdditiveInverse<double>(),
+               mA);
 
     BOOST_CHECK_EQUAL(mC, answer);
 }
@@ -181,30 +181,30 @@ BOOST_AUTO_TEST_CASE(sparse_apply_matrix_mask_replace_noaccum)
     std::vector<std::vector<double>> matA = {{8, 1, 6},
                                              {3, 5, 7},
                                              {4, 9, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(matA, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(matA, 0);
 
     std::vector<std::vector<double>> matC = {{1, 2, 3},
                                              {4, 5, 6},
                                              {7, 8, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mC(matC, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> mC(matC, 0);
 
 
     std::vector<std::vector<bool>> matMask = {{true, false, false},
                                               {true, true,  false,},
                                               {true, true,  true}};
-    GraphBLAS::Matrix<bool, GraphBLAS::DirectedMatrixTag> mask(matMask, false);
+    grb::Matrix<bool, grb::DirectedMatrixTag> mask(matMask, false);
 
     std::vector<std::vector<double>> matAnswer = {{-8, 0,  0},
                                                   {-3, -5, 0},
                                                   {-4, -9, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> answer(matAnswer, 0);
 
-    GraphBLAS::apply(mC,
-                     mask,
-                     GraphBLAS::NoAccumulate(),
-                     GraphBLAS::AdditiveInverse<double>(),
-                     mA,
-                     REPLACE);
+    grb::apply(mC,
+               mask,
+               grb::NoAccumulate(),
+               grb::AdditiveInverse<double>(),
+               mA,
+               REPLACE);
 
     BOOST_CHECK_EQUAL(mC, answer);
 }
@@ -319,24 +319,24 @@ BOOST_AUTO_TEST_CASE(sparse_apply_matrix_nomask_plus_accum)
     std::vector<std::vector<double>> matA = {{8, 1, 6},
                                              {3, 5, 7},
                                              {4, 9, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(matA, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(matA, 0);
 
     std::vector<std::vector<double>> matC = {{1, 2, 3},
                                              {4, 5, 6},
                                              {7, 8, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mC(matC, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> mC(matC, 0);
 
     std::vector<std::vector<double>> matAnswer = {{-7, 1, -3},
                                                   { 1, 0, -1},
                                                   { 3,-1,  1337}};
     // NOTE: The accum results in an explicit zero
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 1337);
+    grb::Matrix<double, grb::DirectedMatrixTag> answer(matAnswer, 1337);
 
-    GraphBLAS::apply(mC,
-                     GraphBLAS::NoMask(),
-                     GraphBLAS::Plus<double>(),
-                     GraphBLAS::AdditiveInverse<double>(),
-                     mA);
+    grb::apply(mC,
+               grb::NoMask(),
+               grb::Plus<double>(),
+               grb::AdditiveInverse<double>(),
+               mA);
 
     BOOST_CHECK_EQUAL(mC, answer);
 }
@@ -551,19 +551,19 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_bad_dimension)
 BOOST_AUTO_TEST_CASE(sparse_apply_vector_nomask_noaccum)
 {
     std::vector<double> vecA = {8, 0, 6, 0};
-    GraphBLAS::Vector<double> vA(vecA, 0);
+    grb::Vector<double> vA(vecA, 0);
 
     std::vector<double> vecC = {1, 2, 0, 0};
-    GraphBLAS::Vector<double> vC(vecC, 0);
+    grb::Vector<double> vC(vecC, 0);
 
     std::vector<double> vecAnswer = {-8, 0, -6,  0};
-    GraphBLAS::Vector<double> answer(vecAnswer, 0);
+    grb::Vector<double> answer(vecAnswer, 0);
 
-    GraphBLAS::apply(vC,
-                     GraphBLAS::NoMask(),
-                     GraphBLAS::NoAccumulate(),
-                     GraphBLAS::AdditiveInverse<double>(),
-                     vA);
+    grb::apply(vC,
+               grb::NoMask(),
+               grb::NoAccumulate(),
+               grb::AdditiveInverse<double>(),
+               vA);
 
     BOOST_CHECK_EQUAL(vC, answer);
 }
@@ -573,20 +573,20 @@ BOOST_AUTO_TEST_CASE(sparse_apply_vector_nomask_noaccum)
 BOOST_AUTO_TEST_CASE(sparse_apply_vector_nomask_noaccum_bool)
 {
     std::vector<bool> vecA = {true, false, true, false};
-    GraphBLAS::Vector<bool> vA(vecA, false);
+    grb::Vector<bool> vA(vecA, false);
 
     std::vector<bool> vecC = {true, true, false, false};
-    GraphBLAS::Vector<bool> vC(vecC, false);
+    grb::Vector<bool> vC(vecC, false);
 
     std::vector<bool> vecAnswer = {false, true, false, true};
-    GraphBLAS::Vector<bool> answer(vecAnswer, true);
+    grb::Vector<bool> answer(vecAnswer, true);
 
-    GraphBLAS::apply(vC,
-                     GraphBLAS::NoMask(),
-                     GraphBLAS::NoAccumulate(),
-                     GraphBLAS::LogicalNot<bool>(),
-                     vA,
-                     GraphBLAS::REPLACE);
+    grb::apply(vC,
+               grb::NoMask(),
+               grb::NoAccumulate(),
+               grb::LogicalNot<bool>(),
+               vA,
+               grb::REPLACE);
 
     BOOST_CHECK_EQUAL(vC, answer);
 }
@@ -596,20 +596,20 @@ BOOST_AUTO_TEST_CASE(sparse_apply_vector_nomask_noaccum_bool)
 BOOST_AUTO_TEST_CASE(sparse_apply_vector_nomask_noaccum_int)
 {
     std::vector<int> vecA = {1, 0, 1, 0};
-    GraphBLAS::Vector<int> vA(vecA, 0);
+    grb::Vector<int> vA(vecA, 0);
 
     std::vector<int> vecC = {1, 1, 0, 0};
-    GraphBLAS::Vector<int> vC(vecC, 0);
+    grb::Vector<int> vC(vecC, 0);
 
     std::vector<int> vecAnswer = {-1, 0, -1, 0};
-    GraphBLAS::Vector<int> answer(vecAnswer, 0);
+    grb::Vector<int> answer(vecAnswer, 0);
 
-    GraphBLAS::apply(vC,
-                     GraphBLAS::NoMask(),
-                     GraphBLAS::NoAccumulate(),
-                     GraphBLAS::AdditiveInverse<int>(),
-                     vA,
-                     GraphBLAS::MERGE);
+    grb::apply(vC,
+               grb::NoMask(),
+               grb::NoAccumulate(),
+               grb::AdditiveInverse<int>(),
+               vA,
+               grb::MERGE);
 
     BOOST_CHECK_EQUAL(vC, answer);
 }
@@ -618,22 +618,22 @@ BOOST_AUTO_TEST_CASE(sparse_apply_vector_nomask_noaccum_int)
 BOOST_AUTO_TEST_CASE(sparse_apply_vector_mask_merge_noaccum)
 {
     std::vector<double> vecA = {8, 8, 0, 0, 6, 6, 0, 0};
-    GraphBLAS::Vector<double> vA(vecA, 0);
+    grb::Vector<double> vA(vecA, 0);
 
     std::vector<double> vecC = {1, 1, 2, 2, 0, 0, 0, 0};
-    GraphBLAS::Vector<double> vC(vecC, 0);
+    grb::Vector<double> vC(vecC, 0);
 
     std::vector<bool> vecMask = {true, false, true, false, true, false, true, false};
-    GraphBLAS::Vector<bool> mask(vecMask, false);
+    grb::Vector<bool> mask(vecMask, false);
 
     std::vector<double> vecAnswer = {-8, 1, 0, 2, -6, 0, 0, 0};
-    GraphBLAS::Vector<double> answer(vecAnswer, 0);
+    grb::Vector<double> answer(vecAnswer, 0);
 
-    GraphBLAS::apply(vC,
-                     mask,
-                     GraphBLAS::NoAccumulate(),
-                     GraphBLAS::AdditiveInverse<double>(),
-                     vA);
+    grb::apply(vC,
+               mask,
+               grb::NoAccumulate(),
+               grb::AdditiveInverse<double>(),
+               vA);
 
     BOOST_CHECK_EQUAL(vC, answer);
 }
@@ -642,23 +642,23 @@ BOOST_AUTO_TEST_CASE(sparse_apply_vector_mask_merge_noaccum)
 BOOST_AUTO_TEST_CASE(sparse_apply_vector_mask_replace_noaccum)
 {
     std::vector<double> vecA = {8, 8, 0, 0, 6, 6, 0, 0};
-    GraphBLAS::Vector<double> vA(vecA, 0);
+    grb::Vector<double> vA(vecA, 0);
 
     std::vector<double> vecC = {1, 1, 2, 2, 0, 0, 0, 0};
-    GraphBLAS::Vector<double> vC(vecC, 0);
+    grb::Vector<double> vC(vecC, 0);
 
     std::vector<bool> vecMask = {true, false, true, false, true, false, true, false};
-    GraphBLAS::Vector<bool> mask(vecMask, false);
+    grb::Vector<bool> mask(vecMask, false);
 
     std::vector<double> vecAnswer = {-8, 0, 0, 0, -6, 0, 0, 0};
-    GraphBLAS::Vector<double> answer(vecAnswer, 0);
+    grb::Vector<double> answer(vecAnswer, 0);
 
-    GraphBLAS::apply(vC,
-                     mask,
-                     GraphBLAS::NoAccumulate(),
-                     GraphBLAS::AdditiveInverse<double>(),
-                     vA,
-                     REPLACE);
+    grb::apply(vC,
+               mask,
+               grb::NoAccumulate(),
+               grb::AdditiveInverse<double>(),
+               vA,
+               REPLACE);
 
     BOOST_CHECK_EQUAL(vC, answer);
 }
@@ -753,20 +753,20 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_noaccum)
 BOOST_AUTO_TEST_CASE(sparse_apply_vector_accum)
 {
     std::vector<double> vecA = {8, 0, 6, 0};
-    GraphBLAS::Vector<double> vA(vecA, 0);
+    grb::Vector<double> vA(vecA, 0);
 
     std::vector<double> vecC = {8, 2, 0, 0};
-    GraphBLAS::Vector<double> vC(vecC, 0);
+    grb::Vector<double> vC(vecC, 0);
 
     // NOTE: The accum results in an explicit zero
     std::vector<double> vecAnswer = {0, 2, -6,  666};
-    GraphBLAS::Vector<double> answer(vecAnswer, 666);
+    grb::Vector<double> answer(vecAnswer, 666);
 
-    GraphBLAS::apply(vC,
-                     GraphBLAS::NoMask(),
-                     GraphBLAS::Plus<double>(),
-                     GraphBLAS::AdditiveInverse<double>(),
-                     vA);
+    grb::apply(vC,
+               grb::NoMask(),
+               grb::Plus<double>(),
+               grb::AdditiveInverse<double>(),
+               vA);
 
     BOOST_CHECK_EQUAL(vC, answer);
 }
@@ -868,36 +868,36 @@ BOOST_AUTO_TEST_CASE(bind_sparse_apply_matrix_nomask_noaccum)
     std::vector<std::vector<double>> matA = {{8, 1, 6},
                                              {3, 5, 7},
                                              {4, 9, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(matA, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(matA, 0);
 
     std::vector<std::vector<double>> matC = {{1, 2, 3},
                                              {4, 5, 6},
                                              {7, 8, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mC(matC, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> mC(matC, 0);
 
     std::vector<std::vector<double>> matAnswer = {{-8, -1, -6},
                                                   {-3, -5, -7},
                                                   {-4, -9,  0}};
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> answer(matAnswer, 0);
 
-    GraphBLAS::apply(mC,
-                     GraphBLAS::NoMask(),
-                     GraphBLAS::NoAccumulate(),
-                     std::bind(GraphBLAS::Times<double>(),
-                               -1.0,
-                               std::placeholders::_1),
-                     mA);
+    grb::apply(mC,
+               grb::NoMask(),
+               grb::NoAccumulate(),
+               std::bind(grb::Times<double>(),
+                         -1.0,
+                         std::placeholders::_1),
+               mA);
 
     BOOST_CHECK_EQUAL(mC, answer);
 
-    GraphBLAS::apply(mC,
-                     GraphBLAS::NoMask(),
-                     GraphBLAS::NoAccumulate(),
-                     std::bind(GraphBLAS::Times<double>(),
-                               std::placeholders::_1,
-                               -1.0),
-                     mA);
+    grb::apply(mC,
+               grb::NoMask(),
+               grb::NoAccumulate(),
+               std::bind(grb::Times<double>(),
+                         std::placeholders::_1,
+                         -1.0),
+               mA);
 
     BOOST_CHECK_EQUAL(mC, answer);
 }
@@ -908,7 +908,7 @@ BOOST_AUTO_TEST_CASE(bind_sparse_apply_matrix_mask_merge_noaccum)
     std::vector<std::vector<double>> matA = {{8, 1, 6},
                                              {3, 5, 7},
                                              {4, 9, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(matA, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(matA, 0);
 
     std::vector<std::vector<double>> matC = {{1, 2, 3},
                                              {4, 5, 6},
@@ -917,36 +917,36 @@ BOOST_AUTO_TEST_CASE(bind_sparse_apply_matrix_mask_merge_noaccum)
     std::vector<std::vector<bool>> matMask = {{true, false, false},
                                               {true, true,  false,},
                                               {true, true,  true}};
-    GraphBLAS::Matrix<bool, GraphBLAS::DirectedMatrixTag> mask(matMask, false);
+    grb::Matrix<bool, grb::DirectedMatrixTag> mask(matMask, false);
 
     std::vector<std::vector<double>> matAnswer = {{-8, 2,  3},
                                                   {-3, -5, 6},
                                                   {-4, -9, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> answer(matAnswer, 0);
 
     {
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mC(matC, 0);
+        grb::Matrix<double, grb::DirectedMatrixTag> mC(matC, 0);
 
-        GraphBLAS::apply(mC,
-                         mask,
-                         GraphBLAS::NoAccumulate(),
-                         std::bind(GraphBLAS::Times<double>(),
-                               -1.0,
-                               std::placeholders::_1),
-                         mA);
+        grb::apply(mC,
+                   mask,
+                   grb::NoAccumulate(),
+                   std::bind(grb::Times<double>(),
+                             -1.0,
+                             std::placeholders::_1),
+                   mA);
 
         BOOST_CHECK_EQUAL(mC, answer);
     }
     {
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mC(matC, 0);
+        grb::Matrix<double, grb::DirectedMatrixTag> mC(matC, 0);
 
-        GraphBLAS::apply(mC,
-                         mask,
-                         GraphBLAS::NoAccumulate(),
-                         std::bind(GraphBLAS::Times<double>(),
-                                   std::placeholders::_1,
-                                   -1.0),
-                         mA);
+        grb::apply(mC,
+                   mask,
+                   grb::NoAccumulate(),
+                   std::bind(grb::Times<double>(),
+                             std::placeholders::_1,
+                             -1.0),
+                   mA);
 
         BOOST_CHECK_EQUAL(mC, answer);
     }
@@ -958,7 +958,7 @@ BOOST_AUTO_TEST_CASE(bind_sparse_apply_matrix_mask_replace_noaccum)
     std::vector<std::vector<double>> matA = {{8, 1, 6},
                                              {3, 5, 7},
                                              {4, 9, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(matA, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(matA, 0);
 
     std::vector<std::vector<double>> matC = {{1, 2, 3},
                                              {4, 5, 6},
@@ -968,36 +968,36 @@ BOOST_AUTO_TEST_CASE(bind_sparse_apply_matrix_mask_replace_noaccum)
     std::vector<std::vector<bool>> matMask = {{true, false, false},
                                               {true, true,  false,},
                                               {true, true,  true}};
-    GraphBLAS::Matrix<bool, GraphBLAS::DirectedMatrixTag> mask(matMask, false);
+    grb::Matrix<bool, grb::DirectedMatrixTag> mask(matMask, false);
 
     std::vector<std::vector<double>> matAnswer = {{-8, 0,  0},
                                                   {-3, -5, 0},
                                                   {-4, -9, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> answer(matAnswer, 0);
 
     {
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mC(matC, 0);
-        GraphBLAS::apply(mC,
-                         mask,
-                         GraphBLAS::NoAccumulate(),
-                         std::bind(GraphBLAS::Times<double>(),
-                                   -1.0,
-                                   std::placeholders::_1),
-                         mA,
-                         GraphBLAS::REPLACE);
+        grb::Matrix<double, grb::DirectedMatrixTag> mC(matC, 0);
+        grb::apply(mC,
+                   mask,
+                   grb::NoAccumulate(),
+                   std::bind(grb::Times<double>(),
+                             -1.0,
+                             std::placeholders::_1),
+                   mA,
+                   grb::REPLACE);
 
         BOOST_CHECK_EQUAL(mC, answer);
     }
     {
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mC(matC, 0);
-        GraphBLAS::apply(mC,
-                         mask,
-                         GraphBLAS::NoAccumulate(),
-                         std::bind(GraphBLAS::Times<double>(),
-                                   std::placeholders::_1,
-                                   -1.0),
-                         mA,
-                         GraphBLAS::REPLACE);
+        grb::Matrix<double, grb::DirectedMatrixTag> mC(matC, 0);
+        grb::apply(mC,
+                   mask,
+                   grb::NoAccumulate(),
+                   std::bind(grb::Times<double>(),
+                             std::placeholders::_1,
+                             -1.0),
+                   mA,
+                   grb::REPLACE);
 
         BOOST_CHECK_EQUAL(mC, answer);
     }
@@ -1035,7 +1035,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdmat_test_noaccum)
         apply(C,
               NoMask(),
               NoAccumulate(),
-              std::bind(GraphBLAS::Plus<double>(),
+              std::bind(grb::Plus<double>(),
                         0.5,
                         std::placeholders::_1),
               A);
@@ -1045,7 +1045,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdmat_test_noaccum)
         apply(C2,
               NoMask(),
               NoAccumulate(),
-              std::bind(GraphBLAS::Plus<double>(),
+              std::bind(grb::Plus<double>(),
                         std::placeholders::_1,
                         0.5),
               A);
@@ -1063,7 +1063,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdmat_test_noaccum)
         apply(C,
               M,
               NoAccumulate(),
-              std::bind(GraphBLAS::Plus<double>(),
+              std::bind(grb::Plus<double>(),
                         0.5,
                         std::placeholders::_1),
               A,
@@ -1074,7 +1074,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdmat_test_noaccum)
         apply(C2,
               M,
               NoAccumulate(),
-              std::bind(GraphBLAS::Plus<double>(),
+              std::bind(grb::Plus<double>(),
                         std::placeholders::_1,
                         0.5),
               A,
@@ -1093,7 +1093,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdmat_test_noaccum)
         apply(C,
               M,
               NoAccumulate(),
-              std::bind(GraphBLAS::Plus<double>(),
+              std::bind(grb::Plus<double>(),
                         0.5,
                         std::placeholders::_1),
               A,
@@ -1104,7 +1104,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdmat_test_noaccum)
         apply(C2,
               M,
               NoAccumulate(),
-              std::bind(GraphBLAS::Plus<double>(),
+              std::bind(grb::Plus<double>(),
                         std::placeholders::_1,
                         0.5),
               A,
@@ -1123,7 +1123,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdmat_test_noaccum)
         apply(C,
               complement(M),
               NoAccumulate(),
-              std::bind(GraphBLAS::Plus<double>(),
+              std::bind(grb::Plus<double>(),
                         0.5,
                         std::placeholders::_1),
               A,
@@ -1134,7 +1134,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdmat_test_noaccum)
         apply(C2,
               complement(M),
               NoAccumulate(),
-              std::bind(GraphBLAS::Plus<double>(),
+              std::bind(grb::Plus<double>(),
                         std::placeholders::_1,
                         0.5),
               A,
@@ -1152,7 +1152,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdmat_test_noaccum)
         apply(C,
               complement(M),
               NoAccumulate(),
-              std::bind(GraphBLAS::Plus<double>(),
+              std::bind(grb::Plus<double>(),
                         0.5,
                         std::placeholders::_1),
               A,
@@ -1163,7 +1163,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdmat_test_noaccum)
         apply(C2,
               complement(M),
               NoAccumulate(),
-              std::bind(GraphBLAS::Plus<double>(),
+              std::bind(grb::Plus<double>(),
                         std::placeholders::_1,
                         0.5),
               A,
@@ -1178,7 +1178,7 @@ BOOST_AUTO_TEST_CASE(bind_sparse_apply_matrix_nomask_plus_accum)
     std::vector<std::vector<double>> matA = {{8, 1, 6},
                                              {3, 5, 7},
                                              {4, 9, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(matA, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(matA, 0);
 
     std::vector<std::vector<double>> matC = {{1, 2, 3},
                                              {4, 5, 6},
@@ -1188,29 +1188,29 @@ BOOST_AUTO_TEST_CASE(bind_sparse_apply_matrix_nomask_plus_accum)
                                                   { 1, 0, -1},
                                                   { 3,-1,  1337}};
     // NOTE: The accum results in an explicit zero
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 1337);
+    grb::Matrix<double, grb::DirectedMatrixTag> answer(matAnswer, 1337);
 
     {
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mC(matC, 0);
-        GraphBLAS::apply(mC,
-                         GraphBLAS::NoMask(),
-                         GraphBLAS::Plus<double>(),
-                         std::bind(GraphBLAS::Times<double>(),
-                                   -1.0,
-                                   std::placeholders::_1),
-                         mA);
+        grb::Matrix<double, grb::DirectedMatrixTag> mC(matC, 0);
+        grb::apply(mC,
+                   grb::NoMask(),
+                   grb::Plus<double>(),
+                   std::bind(grb::Times<double>(),
+                             -1.0,
+                             std::placeholders::_1),
+                   mA);
 
         BOOST_CHECK_EQUAL(mC, answer);
     }
     {
-        GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mC(matC, 0);
-        GraphBLAS::apply(mC,
-                         GraphBLAS::NoMask(),
-                         GraphBLAS::Plus<double>(),
-                         std::bind(GraphBLAS::Times<double>(),
-                                   std::placeholders::_1,
-                                   -1.0),
-                         mA);
+        grb::Matrix<double, grb::DirectedMatrixTag> mC(matC, 0);
+        grb::apply(mC,
+                   grb::NoMask(),
+                   grb::Plus<double>(),
+                   std::bind(grb::Times<double>(),
+                             std::placeholders::_1,
+                             -1.0),
+                   mA);
 
         BOOST_CHECK_EQUAL(mC, answer);
     }
@@ -1248,7 +1248,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdmat_test_plus_accum)
         apply(C,
               NoMask(),
               Plus<double>(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         0.5,
                         std::placeholders::_1),
               A);
@@ -1258,7 +1258,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdmat_test_plus_accum)
         apply(C2,
               NoMask(),
               Plus<double>(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         std::placeholders::_1,
                         0.5),
               A);
@@ -1276,7 +1276,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdmat_test_plus_accum)
         apply(C,
               M,
               Plus<double>(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         0.5,
                         std::placeholders::_1),
               A,
@@ -1287,7 +1287,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdmat_test_plus_accum)
         apply(C2,
               M,
               Plus<double>(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         std::placeholders::_1,
                         0.5),
               A,
@@ -1305,7 +1305,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdmat_test_plus_accum)
         apply(C,
               M,
               Plus<double>(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         0.5,
                         std::placeholders::_1),
               A,
@@ -1316,7 +1316,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdmat_test_plus_accum)
         apply(C2,
               M,
               Plus<double>(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         std::placeholders::_1,
                         0.5),
               A,
@@ -1335,7 +1335,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdmat_test_plus_accum)
         apply(C,
               complement(M),
               Plus<double>(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         0.5,
                         std::placeholders::_1),
               A,
@@ -1346,7 +1346,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdmat_test_plus_accum)
         apply(C2,
               complement(M),
               Plus<double>(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         std::placeholders::_1,
                         0.5),
               A,
@@ -1364,7 +1364,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdmat_test_plus_accum)
         apply(C,
               complement(M),
               Plus<double>(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         0.5,
                         std::placeholders::_1),
               A,
@@ -1375,7 +1375,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdmat_test_plus_accum)
         apply(C2,
               complement(M),
               Plus<double>(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         std::placeholders::_1,
                         0.5),
               A,
@@ -1409,7 +1409,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdmat_test_second_accum)
     apply(C,
           NoMask(),
           Second<double>(),
-          std::bind(GraphBLAS::Times<double>(),
+          std::bind(grb::Times<double>(),
                     0.5,
                     std::placeholders::_1),
           A);
@@ -1419,7 +1419,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdmat_test_second_accum)
     apply(C2,
           NoMask(),
           Second<double>(),
-          std::bind(GraphBLAS::Times<double>(),
+          std::bind(grb::Times<double>(),
                     std::placeholders::_1,
                     0.5),
           A);
@@ -1459,7 +1459,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdmat_test_noaccum_transpose)
         apply(C,
               NoMask(),
               NoAccumulate(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         0.5,
                         std::placeholders::_1),
               transpose(A));
@@ -1469,7 +1469,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdmat_test_noaccum_transpose)
         apply(C2,
               NoMask(),
               NoAccumulate(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         std::placeholders::_1,
                         0.5),
               transpose(A));
@@ -1496,7 +1496,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_bad_dimension)
             (apply(w,
                    NoMask(),
                    NoAccumulate(),
-                   std::bind(GraphBLAS::Times<double>(),
+                   std::bind(grb::Times<double>(),
                              0.5,
                              std::placeholders::_1),
                    u)),
@@ -1506,7 +1506,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_bad_dimension)
             (apply(w,
                    NoMask(),
                    NoAccumulate(),
-                   std::bind(GraphBLAS::Times<double>(),
+                   std::bind(grb::Times<double>(),
                              std::placeholders::_1,
                              0.5),
                    u)),
@@ -1520,7 +1520,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_bad_dimension)
             (apply(w,
                    m,
                    NoAccumulate(),
-                   std::bind(GraphBLAS::Times<double>(),
+                   std::bind(grb::Times<double>(),
                              0.5,
                              std::placeholders::_1),
                    u)),
@@ -1529,7 +1529,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_bad_dimension)
             (apply(w,
                    m,
                    NoAccumulate(),
-                   std::bind(GraphBLAS::Times<double>(),
+                   std::bind(grb::Times<double>(),
                              std::placeholders::_1,
                              0.5),
                    u)),
@@ -1542,34 +1542,34 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_bad_dimension)
 BOOST_AUTO_TEST_CASE(bind_sparse_apply_vector_nomask_noaccum)
 {
     std::vector<double> vecA = {8, 0, 6, 0};
-    GraphBLAS::Vector<double> vA(vecA, 0);
+    grb::Vector<double> vA(vecA, 0);
 
     std::vector<double> vecC = {1, 2, 0, 0};
 
     std::vector<double> vecAnswer = {-8, 0, -6,  0};
-    GraphBLAS::Vector<double> answer(vecAnswer, 0);
+    grb::Vector<double> answer(vecAnswer, 0);
 
     {
-        GraphBLAS::Vector<double> vC(vecC, 0);
-        GraphBLAS::apply(vC,
-                         GraphBLAS::NoMask(),
-                         GraphBLAS::NoAccumulate(),
-                         std::bind(GraphBLAS::Times<double>(),
-                                   -1.0,
-                                   std::placeholders::_1),
-                         vA);
+        grb::Vector<double> vC(vecC, 0);
+        grb::apply(vC,
+                   grb::NoMask(),
+                   grb::NoAccumulate(),
+                   std::bind(grb::Times<double>(),
+                             -1.0,
+                             std::placeholders::_1),
+                   vA);
 
         BOOST_CHECK_EQUAL(vC, answer);
     }
     {
-        GraphBLAS::Vector<double> vC(vecC, 0);
-        GraphBLAS::apply(vC,
-                         GraphBLAS::NoMask(),
-                         GraphBLAS::NoAccumulate(),
-                         std::bind(GraphBLAS::Times<double>(),
-                                   std::placeholders::_1,
-                                   -1.0),
-                         vA);
+        grb::Vector<double> vC(vecC, 0);
+        grb::apply(vC,
+                   grb::NoMask(),
+                   grb::NoAccumulate(),
+                   std::bind(grb::Times<double>(),
+                             std::placeholders::_1,
+                             -1.0),
+                   vA);
 
         BOOST_CHECK_EQUAL(vC, answer);
     }
@@ -1580,34 +1580,34 @@ BOOST_AUTO_TEST_CASE(bind_sparse_apply_vector_nomask_noaccum)
 BOOST_AUTO_TEST_CASE(bind_sparse_apply_vector_nomask_noaccum_bool)
 {
     std::vector<bool> vecA = {true, false, true, false};
-    GraphBLAS::Vector<bool> vA(vecA, false);
+    grb::Vector<bool> vA(vecA, false);
 
     std::vector<bool> vecC = {true, true, false, false};
 
     std::vector<bool> vecAnswer = {true, false, true, false};
-    GraphBLAS::Vector<bool> answer(vecAnswer, false);
+    grb::Vector<bool> answer(vecAnswer, false);
 
     {
-        GraphBLAS::Vector<bool> vC(vecC, false);
-        GraphBLAS::apply(vC,
-                         GraphBLAS::NoMask(),
-                         GraphBLAS::NoAccumulate(),
-                         std::bind(GraphBLAS::LogicalXor<bool>(),
-                                   false,
-                                   std::placeholders::_1),
-                         vA);
+        grb::Vector<bool> vC(vecC, false);
+        grb::apply(vC,
+                   grb::NoMask(),
+                   grb::NoAccumulate(),
+                   std::bind(grb::LogicalXor<bool>(),
+                             false,
+                             std::placeholders::_1),
+                   vA);
 
         BOOST_CHECK_EQUAL(vC, answer);
     }
     {
-        GraphBLAS::Vector<bool> vC(vecC, false);
-        GraphBLAS::apply(vC,
-                         GraphBLAS::NoMask(),
-                         GraphBLAS::NoAccumulate(),
-                         std::bind(GraphBLAS::LogicalXor<bool>(),
-                                   std::placeholders::_1,
-                                   false),
-                         vA);
+        grb::Vector<bool> vC(vecC, false);
+        grb::apply(vC,
+                   grb::NoMask(),
+                   grb::NoAccumulate(),
+                   std::bind(grb::LogicalXor<bool>(),
+                             std::placeholders::_1,
+                             false),
+                   vA);
 
         BOOST_CHECK_EQUAL(vC, answer);
     }
@@ -1618,34 +1618,34 @@ BOOST_AUTO_TEST_CASE(bind_sparse_apply_vector_nomask_noaccum_bool)
 BOOST_AUTO_TEST_CASE(bind_sparse_apply_vector_nomask_noaccum_int)
 {
     std::vector<int> vecA = {1, 0, 1, 0};
-    GraphBLAS::Vector<int> vA(vecA, 0);
+    grb::Vector<int> vA(vecA, 0);
 
     std::vector<int> vecC = {1, 1, 0, 0};
 
     std::vector<int> vecAnswer = {2, 0, 2, 0};
-    GraphBLAS::Vector<int> answer(vecAnswer, 0);
+    grb::Vector<int> answer(vecAnswer, 0);
 
     {
-        GraphBLAS::Vector<int> vC(vecC, 0);
-        GraphBLAS::apply(vC,
-                         GraphBLAS::NoMask(),
-                         GraphBLAS::NoAccumulate(),
-                         std::bind(GraphBLAS::Plus<int>(),
-                                   1,
-                                   std::placeholders::_1),
-                         vA);
+        grb::Vector<int> vC(vecC, 0);
+        grb::apply(vC,
+                   grb::NoMask(),
+                   grb::NoAccumulate(),
+                   std::bind(grb::Plus<int>(),
+                             1,
+                             std::placeholders::_1),
+                   vA);
 
         BOOST_CHECK_EQUAL(vC, answer);
     }
     {
-        GraphBLAS::Vector<int> vC(vecC, 0);
-        GraphBLAS::apply(vC,
-                         GraphBLAS::NoMask(),
-                         GraphBLAS::NoAccumulate(),
-                         std::bind(GraphBLAS::Plus<int>(),
-                                   std::placeholders::_1,
-                                   1),
-                         vA);
+        grb::Vector<int> vC(vecC, 0);
+        grb::apply(vC,
+                   grb::NoMask(),
+                   grb::NoAccumulate(),
+                   std::bind(grb::Plus<int>(),
+                             std::placeholders::_1,
+                             1),
+                   vA);
 
         BOOST_CHECK_EQUAL(vC, answer);
     }
@@ -1655,37 +1655,37 @@ BOOST_AUTO_TEST_CASE(bind_sparse_apply_vector_nomask_noaccum_int)
 BOOST_AUTO_TEST_CASE(bind_sparse_apply_vector_mask_merge_noaccum)
 {
     std::vector<double> vecA = {8, 8, 0, 0, 6, 6, 0, 0};
-    GraphBLAS::Vector<double> vA(vecA, 0);
+    grb::Vector<double> vA(vecA, 0);
 
     std::vector<double> vecC = {1, 1, 2, 2, 0, 0, 0, 0};
 
     std::vector<bool> vecMask = {true, false, true, false, true, false, true, false};
-    GraphBLAS::Vector<bool> mask(vecMask, false);
+    grb::Vector<bool> mask(vecMask, false);
 
     std::vector<double> vecAnswer = {-8, 1, 0, 2, -6, 0, 0, 0};
-    GraphBLAS::Vector<double> answer(vecAnswer, 0);
+    grb::Vector<double> answer(vecAnswer, 0);
 
     {
-        GraphBLAS::Vector<double> vC(vecC, 0);
-        GraphBLAS::apply(vC,
-                         mask,
-                         GraphBLAS::NoAccumulate(),
-                         std::bind(GraphBLAS::Times<double>(),
-                                   -1.0,
-                                   std::placeholders::_1),
-                         vA);
+        grb::Vector<double> vC(vecC, 0);
+        grb::apply(vC,
+                   mask,
+                   grb::NoAccumulate(),
+                   std::bind(grb::Times<double>(),
+                             -1.0,
+                             std::placeholders::_1),
+                   vA);
 
         BOOST_CHECK_EQUAL(vC, answer);
     }
     {
-        GraphBLAS::Vector<double> vC(vecC, 0);
-        GraphBLAS::apply(vC,
-                         mask,
-                         GraphBLAS::NoAccumulate(),
-                         std::bind(GraphBLAS::Times<double>(),
-                                   std::placeholders::_1,
-                                   -1.0),
-                         vA);
+        grb::Vector<double> vC(vecC, 0);
+        grb::apply(vC,
+                   mask,
+                   grb::NoAccumulate(),
+                   std::bind(grb::Times<double>(),
+                             std::placeholders::_1,
+                             -1.0),
+                   vA);
 
         BOOST_CHECK_EQUAL(vC, answer);
     }
@@ -1695,40 +1695,40 @@ BOOST_AUTO_TEST_CASE(bind_sparse_apply_vector_mask_merge_noaccum)
 BOOST_AUTO_TEST_CASE(bind_sparse_apply_vector_mask_replace_noaccum)
 {
     std::vector<double> vecA = {8, 8, 0, 0, 6, 6, 0, 0};
-    GraphBLAS::Vector<double> vA(vecA, 0);
+    grb::Vector<double> vA(vecA, 0);
 
     std::vector<double> vecC = {1, 1, 2, 2, 0, 0, 0, 0};
 
     std::vector<bool> vecMask = {true, false, true, false, true, false, true, false};
-    GraphBLAS::Vector<bool> mask(vecMask, false);
+    grb::Vector<bool> mask(vecMask, false);
 
     std::vector<double> vecAnswer = {-8, 0, 0, 0, -6, 0, 0, 0};
-    GraphBLAS::Vector<double> answer(vecAnswer, 0);
+    grb::Vector<double> answer(vecAnswer, 0);
 
     {
-        GraphBLAS::Vector<double> vC(vecC, 0);
-        GraphBLAS::apply(vC,
-                         mask,
-                         GraphBLAS::NoAccumulate(),
-                         std::bind(GraphBLAS::Times<double>(),
-                                   -1.0,
-                                   std::placeholders::_1),
-                         vA,
-                         REPLACE);
+        grb::Vector<double> vC(vecC, 0);
+        grb::apply(vC,
+                   mask,
+                   grb::NoAccumulate(),
+                   std::bind(grb::Times<double>(),
+                             -1.0,
+                             std::placeholders::_1),
+                   vA,
+                   REPLACE);
 
         BOOST_CHECK_EQUAL(vC, answer);
     }
 
     {
-        GraphBLAS::Vector<double> vC(vecC, 0);
-        GraphBLAS::apply(vC,
-                         mask,
-                         GraphBLAS::NoAccumulate(),
-                         std::bind(GraphBLAS::Times<double>(),
-                                   std::placeholders::_1,
-                                   -1.0),
-                         vA,
-                         REPLACE);
+        grb::Vector<double> vC(vecC, 0);
+        grb::apply(vC,
+                   mask,
+                   grb::NoAccumulate(),
+                   std::bind(grb::Times<double>(),
+                             std::placeholders::_1,
+                             -1.0),
+                   vA,
+                   REPLACE);
 
         BOOST_CHECK_EQUAL(vC, answer);
     }
@@ -1755,7 +1755,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_noaccum)
         apply(w,
               NoMask(),
               NoAccumulate(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         -1.0,
                         std::placeholders::_1),
               u);
@@ -1765,7 +1765,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_noaccum)
         apply(w2,
               NoMask(),
               NoAccumulate(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         std::placeholders::_1,
                         -1.0),
               u);
@@ -1781,7 +1781,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_noaccum)
         apply(w,
               m,
               NoAccumulate(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         -1.0,
                         std::placeholders::_1),
               u,
@@ -1792,7 +1792,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_noaccum)
         apply(w2,
               m,
               NoAccumulate(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         std::placeholders::_1,
                         -1.0),
               u,
@@ -1808,7 +1808,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_noaccum)
         apply(w,
               m,
               NoAccumulate(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         -1.0,
                         std::placeholders::_1),
               u,
@@ -1819,7 +1819,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_noaccum)
         apply(w2,
               m,
               NoAccumulate(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         std::placeholders::_1,
                         -1.0),
               u,
@@ -1836,7 +1836,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_noaccum)
         apply(w,
               complement(m),
               NoAccumulate(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         -1.0,
                         std::placeholders::_1),
               u,
@@ -1847,7 +1847,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_noaccum)
         apply(w2,
               complement(m),
               NoAccumulate(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         std::placeholders::_1,
                         -1.0),
               u,
@@ -1863,7 +1863,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_noaccum)
         apply(w,
               complement(m),
               NoAccumulate(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         -1.0,
                         std::placeholders::_1),
               u,
@@ -1874,7 +1874,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_noaccum)
         apply(w2,
               complement(m),
               NoAccumulate(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         std::placeholders::_1,
                         -1.0),
               u,
@@ -1888,36 +1888,36 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_noaccum)
 BOOST_AUTO_TEST_CASE(bind_sparse_apply_vector_accum)
 {
     std::vector<double> vecA = {8, 0, 6, 0};
-    GraphBLAS::Vector<double> vA(vecA, 0);
+    grb::Vector<double> vA(vecA, 0);
 
     std::vector<double> vecC = {8, 2, 0, 0};
 
     // NOTE: The accum results in an explicit zero
     std::vector<double> vecAnswer = {0, 2, -6,  666};
-    GraphBLAS::Vector<double> answer(vecAnswer, 666);
+    grb::Vector<double> answer(vecAnswer, 666);
 
     {
-        GraphBLAS::Vector<double> vC(vecC, 0);
-        GraphBLAS::apply(vC,
-                         GraphBLAS::NoMask(),
-                         GraphBLAS::Plus<double>(),
-                         std::bind(GraphBLAS::Times<double>(),
-                                   -1.0,
-                                   std::placeholders::_1),
-                         vA);
+        grb::Vector<double> vC(vecC, 0);
+        grb::apply(vC,
+                   grb::NoMask(),
+                   grb::Plus<double>(),
+                   std::bind(grb::Times<double>(),
+                             -1.0,
+                             std::placeholders::_1),
+                   vA);
 
         BOOST_CHECK_EQUAL(vC, answer);
     }
 
     {
-        GraphBLAS::Vector<double> vC(vecC, 0);
-        GraphBLAS::apply(vC,
-                         GraphBLAS::NoMask(),
-                         GraphBLAS::Plus<double>(),
-                         std::bind(GraphBLAS::Times<double>(),
-                                   std::placeholders::_1,
-                                   -1.0),
-                         vA);
+        grb::Vector<double> vC(vecC, 0);
+        grb::apply(vC,
+                   grb::NoMask(),
+                   grb::Plus<double>(),
+                   std::bind(grb::Times<double>(),
+                             std::placeholders::_1,
+                             -1.0),
+                   vA);
 
         BOOST_CHECK_EQUAL(vC, answer);
     }
@@ -1944,7 +1944,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_plus_accum)
         apply(w,
               NoMask(),
               Plus<double>(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         -1.0,
                         std::placeholders::_1),
               u);
@@ -1954,7 +1954,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_plus_accum)
         apply(w2,
               NoMask(),
               Plus<double>(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         std::placeholders::_1,
                         -1.0),
               u);
@@ -1970,7 +1970,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_plus_accum)
         apply(w,
               m,
               Plus<double>(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         -1.0,
                         std::placeholders::_1),
               u,
@@ -1981,7 +1981,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_plus_accum)
         apply(w2,
               m,
               Plus<double>(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         std::placeholders::_1,
                         -1.0),
               u,
@@ -1997,7 +1997,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_plus_accum)
         apply(w2,
               m,
               Plus<double>(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         -1.0,
                         std::placeholders::_1),
               u,
@@ -2008,7 +2008,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_plus_accum)
         apply(w,
               m,
               Plus<double>(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         std::placeholders::_1,
                         -1.0),
               u,
@@ -2025,7 +2025,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_plus_accum)
         apply(w,
               complement(m),
               Plus<double>(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         -1.0,
                         std::placeholders::_1),
               u,
@@ -2036,7 +2036,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_plus_accum)
         apply(w2,
               complement(m),
               Plus<double>(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         std::placeholders::_1,
                         -1.0),
               u,
@@ -2052,7 +2052,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_plus_accum)
         apply(w,
               complement(m),
               Plus<double>(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         -1.0,
                         std::placeholders::_1),
               u,
@@ -2063,7 +2063,7 @@ BOOST_AUTO_TEST_CASE(bind_apply_stdvec_test_plus_accum)
         apply(w2,
               complement(m),
               Plus<double>(),
-              std::bind(GraphBLAS::Times<double>(),
+              std::bind(grb::Times<double>(),
                         std::placeholders::_1,
                         -1.0),
               u,

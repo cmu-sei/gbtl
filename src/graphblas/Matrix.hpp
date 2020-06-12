@@ -36,7 +36,7 @@
 #define GB_INCLUDE_BACKEND_MATRIX 1
 #include <backend_include.hpp>
 
-namespace GraphBLAS
+namespace grb
 {
     //************************************************************************
     /**
@@ -156,7 +156,7 @@ namespace GraphBLAS
         template<typename RAIteratorI,
                  typename RAIteratorJ,
                  typename RAIteratorV,
-                 typename BinaryOpT = GraphBLAS::Second<ScalarType> >
+                 typename BinaryOpT = grb::Second<ScalarType> >
         void build(RAIteratorI  i_it,
                    RAIteratorJ  j_it,
                    RAIteratorV  v_it,
@@ -180,7 +180,7 @@ namespace GraphBLAS
          *       matrix.  Unclear if the C++ should.
          */
         template<typename ValueT,
-                 typename BinaryOpT = GraphBLAS::Second<ScalarType> >
+                 typename BinaryOpT = grb::Second<ScalarType> >
         inline void build(IndexArrayType       const &row_indices,
                           IndexArrayType       const &col_indices,
                           std::vector<ValueT>  const &values,
@@ -262,7 +262,7 @@ namespace GraphBLAS
         // ================================================
         void printInfo(std::ostream &ostr) const
         {
-            ostr << "GraphBLAS::Matrix: ";
+            ostr << "grb::Matrix: ";
             m_mat.printInfo(ostr);
         }
 
@@ -300,4 +300,4 @@ namespace GraphBLAS
         ostr << std::endl;
     }
 
-} // end namespace GraphBLAS
+} // end namespace grb

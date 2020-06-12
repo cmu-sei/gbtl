@@ -39,13 +39,16 @@
 namespace
 {
     template <typename T>
-    T at(GraphBLAS::Vector<T> const &v, GraphBLAS::IndexType idx)
+    T at(grb::Vector<T> const &v,
+         grb::IndexType        idx)
     {
         return (v.hasElement(idx) ? v.extractElement(idx) : T(0));
     }
 
     template <typename T, typename... TagsT>
-    T at(GraphBLAS::Matrix<T, TagsT...> const &A, GraphBLAS::IndexType idx, GraphBLAS::IndexType idy)
+    T at(grb::Matrix<T, TagsT...> const &A,
+         grb::IndexType                  idx,
+         grb::IndexType                  idy)
     {
         return (A.hasElement(idx, idy) ? A.extractElement(idx, idy) : T(0));
     }
@@ -53,11 +56,11 @@ namespace
 
 //****************************************************************************
 template <typename MatrixT, typename VectorT>
-static void push(MatrixT const &C,
-                 MatrixT       &F,
-                 VectorT       &excess,
-                 GraphBLAS::IndexType u,
-                 GraphBLAS::IndexType v)
+static void push(MatrixT  const &C,
+                 MatrixT        &F,
+                 VectorT        &excess,
+                 grb::IndexType  u,
+                 grb::IndexType  v)
 {
     using T = typename MatrixT::ScalarType;
     T a = at(excess, u);
@@ -73,16 +76,16 @@ static void push(MatrixT const &C,
 
 //****************************************************************************
 template <typename MatrixT, typename VectorT>
-static void relabel(MatrixT const &C,
-                    MatrixT const &F,
-                    VectorT       &height,
-                    GraphBLAS::IndexType u)
+static void relabel(MatrixT  const &C,
+                    MatrixT  const &F,
+                    VectorT        &height,
+                    grb::IndexType  u)
 {
     using T = typename MatrixT::ScalarType;
-    GraphBLAS::IndexType num_nodes(C.nrows());
+    grb::IndexType num_nodes(C.nrows());
 
     T min_height = std::numeric_limits<T>::max();
-    for (GraphBLAS::IndexType v = 0; v < num_nodes; ++v)
+    for (grb::IndexType v = 0; v < num_nodes; ++v)
     {
         if ((at(C,u, v) - at(F,u, v)) > 0)
         {
@@ -96,20 +99,20 @@ static void relabel(MatrixT const &C,
 //****************************************************************************
 /// @todo Does seen have a different scalar type (IndexType)
 template <typename MatrixT, typename VectorT>
-static void discharge(MatrixT const &C,
-                      MatrixT       &F,
-                      VectorT       &excess,
-                      VectorT       &height,
-                      VectorT       &seen,
-                      GraphBLAS::IndexType u)
+static void discharge(MatrixT  const &C,
+                      MatrixT        &F,
+                      VectorT        &excess,
+                      VectorT        &height,
+                      VectorT        &seen,
+                      grb::IndexType  u)
 {
-    GraphBLAS::IndexType num_nodes(C.nrows());
+    grb::IndexType num_nodes(C.nrows());
 
     while (at(excess,u) > 0)
     {
         if (at(seen,u) < num_nodes)
         {
-            GraphBLAS::IndexType v = at(seen,u);
+            grb::IndexType v = at(seen,u);
             if (((at(C,u, v) - at(F,u, v)) > 0) &&
                 (at(height,u) > at(height,v)))
             {
@@ -164,30 +167,30 @@ namespace algorithms
      *
      * @return The value of the maximum flow that can be pushed through the
      *         source.
+     *
+     * @note This is not written in the philosphy of GraphBLAS and needs to
+     *       be replaced or removed.
      */
     template<typename MatrixT>
-    typename MatrixT::ScalarType maxflow(MatrixT const        &capacity,
-                                         GraphBLAS::IndexType  source,
-                                         GraphBLAS::IndexType  sink)
+    typename MatrixT::ScalarType maxflow_push_relabel(MatrixT  const &capacity,
+                                                      grb::IndexType  source,
+                                                      grb::IndexType  sink)
     {
         using T = typename MatrixT::ScalarType;
-        GraphBLAS::IndexType rows(capacity.nrows());
-        GraphBLAS::IndexType cols(capacity.ncols());
+        grb::IndexType rows(capacity.nrows());
+        grb::IndexType cols(capacity.ncols());
 
-        GraphBLAS::IndexType num_nodes = rows;
+        grb::IndexType num_nodes = rows;
 
         MatrixT flow(rows,cols);
 
-        //MatrixT height(1, num_nodes);
-        //MatrixT excess(1, num_nodes);
-        //MatrixT seen(1, num_nodes);
-        GraphBLAS::Vector<T> height(num_nodes);
-        GraphBLAS::Vector<T> excess(num_nodes);
-        GraphBLAS::Vector<T> seen(num_nodes);
+        grb::Vector<T> height(num_nodes);
+        grb::Vector<T> excess(num_nodes);
+        grb::Vector<T> seen(num_nodes);
 
-        std::vector<GraphBLAS::IndexType> list;
+        std::vector<grb::IndexType> list;
 
-        for (GraphBLAS::IndexType i = 0; i < num_nodes; ++i)
+        for (grb::IndexType i = 0; i < num_nodes; ++i)
         {
             if ((i != source) && (i != sink))
             {
@@ -198,24 +201,24 @@ namespace algorithms
         height.setElement(source, num_nodes);
         excess.setElement(source,
                           std::numeric_limits<T>::max());
-        for (GraphBLAS::IndexType i = 0; i < num_nodes; ++i)
+        for (grb::IndexType i = 0; i < num_nodes; ++i)
         {
             push(capacity, flow, excess, source, i);
         }
 
-        //GraphBLAS::print_matrix(std::cerr, flow, "\nFLOW");
+        //grb::print_matrix(std::cerr, flow, "\nFLOW");
 
-        GraphBLAS::IndexType  p = 0;
+        grb::IndexType  p = 0;
         while (p < (num_nodes - 2))
         {
-            GraphBLAS::IndexType u = list[p];
+            grb::IndexType u = list[p];
             T old_height = at(height, u);
             discharge(capacity, flow, excess, height, seen, u);
-            //GraphBLAS::print_matrix(std::cerr, flow, "\nFLOW after discharge");
+            //grb::print_matrix(std::cerr, flow, "\nFLOW after discharge");
 
             if (at(height,u) > old_height)
             {
-                GraphBLAS::IndexType t = list[p];
+                grb::IndexType t = list[p];
 
                 list.erase(list.begin() + p);
                 list.insert(list.begin() + 0, t);
@@ -229,17 +232,17 @@ namespace algorithms
         }
 
         //T maxflow = static_cast<T>(0);
-        //for (GraphBLAS::IndexType i = 0; i < num_nodes; ++i)
+        //for (grb::IndexType i = 0; i < num_nodes; ++i)
         //{
         //    maxflow += flow.extractElement(source, i);
         //}
-        //GraphBLAS::print_matrix(std::cerr, flow, "\nFlow");
-        GraphBLAS::Vector<T> flows(rows);
-        GraphBLAS::reduce(flows, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                          GraphBLAS::Plus<T>(), flow);
+        //grb::print_matrix(std::cerr, flow, "\nFlow");
+        grb::Vector<T> flows(rows);
+        grb::reduce(flows, grb::NoMask(), grb::NoAccumulate(),
+                    grb::Plus<T>(), flow);
         T maxflow = at(flows,source);
 
-        //GraphBLAS::print_matrix(std::cerr, flow, "Final FLOW:");
+        //grb::print_matrix(std::cerr, flow, "Final FLOW:");
         return maxflow;
     }
 
@@ -247,41 +250,41 @@ namespace algorithms
     //************************************************************************
     template<typename MatrixT>
     bool maxflow_bfs(
-        MatrixT const                                 &graph,
-        GraphBLAS::IndexType                           source,
-        GraphBLAS::IndexType                           sink,
-        GraphBLAS::Vector<GraphBLAS::IndexType> const &index_ramp,
-        GraphBLAS::Matrix<bool>                       &M)
+        MatrixT                     const &graph,
+        grb::IndexType                     source,
+        grb::IndexType                     sink,
+        grb::Vector<grb::IndexType> const &index_ramp,
+        grb::Matrix<bool>                 &M)
     {
         using T = typename MatrixT::ScalarType;
-        GraphBLAS::Vector<GraphBLAS::IndexType> parent_list(graph.nrows());
+        grb::Vector<grb::IndexType> parent_list(graph.nrows());
         parent_list.setElement(source, source);
 
-        GraphBLAS::Vector<GraphBLAS::IndexType> wavefront(graph.ncols());
+        grb::Vector<grb::IndexType> wavefront(graph.ncols());
         wavefront.setElement(source, 1ul);
 
         while ((!parent_list.hasElement(sink)) && (wavefront.nvals() > 0))
         {
             // convert all stored values to their column index
-            GraphBLAS::eWiseMult(wavefront,
-                                 GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                                 GraphBLAS::First<GraphBLAS::IndexType>(),
-                                 index_ramp, wavefront);
+            grb::eWiseMult(wavefront,
+                           grb::NoMask(), grb::NoAccumulate(),
+                           grb::First<grb::IndexType>(),
+                           index_ramp, wavefront);
 
             // First because we are left multiplying wavefront rows
             // Masking out the parent list ensures wavefront values do not
             // overlap values already stored in the parent list
-            GraphBLAS::vxm(wavefront,
-                           GraphBLAS::complement(GraphBLAS::structure(parent_list)),
-                           GraphBLAS::NoAccumulate(),
-                           GraphBLAS::MinFirstSemiring<GraphBLAS::IndexType,T,GraphBLAS::IndexType>(),
-                           wavefront, graph, GraphBLAS::REPLACE);
+            grb::vxm(wavefront,
+                     grb::complement(grb::structure(parent_list)),
+                     grb::NoAccumulate(),
+                     grb::MinFirstSemiring<grb::IndexType,T,grb::IndexType>(),
+                     wavefront, graph, grb::REPLACE);
 
-            GraphBLAS::apply(parent_list,
-                             GraphBLAS::NoMask(),
-                             GraphBLAS::Plus<GraphBLAS::IndexType>(),
-                             GraphBLAS::Identity<GraphBLAS::IndexType>(),
-                             wavefront);
+            grb::apply(parent_list,
+                       grb::NoMask(),
+                       grb::Plus<grb::IndexType>(),
+                       grb::Identity<grb::IndexType>(),
+                       wavefront);
         }
 
         if (!parent_list.hasElement(sink))
@@ -292,10 +295,10 @@ namespace algorithms
         // Extract path from source to sink from parent list (reverse traverse)
         // build a mask
         M.clear();
-        GraphBLAS::IndexType curr_vertex(sink);
+        grb::IndexType curr_vertex(sink);
         while (curr_vertex != source)
         {
-            GraphBLAS::IndexType parent(parent_list.extractElement(curr_vertex));
+            grb::IndexType parent(parent_list.extractElement(curr_vertex));
             M.setElement(parent, curr_vertex, true);
             curr_vertex = parent;
         }
@@ -305,20 +308,20 @@ namespace algorithms
 
     //************************************************************************
     template<typename MatrixT>
-    typename MatrixT::ScalarType maxflow_ford_fulk(MatrixT const        &graph,
-                                                   GraphBLAS::IndexType  source,
-                                                   GraphBLAS::IndexType  sink)
+    typename MatrixT::ScalarType maxflow_ford_fulk(MatrixT  const &graph,
+                                                   grb::IndexType  source,
+                                                   grb::IndexType  sink)
     {
         using T = typename MatrixT::ScalarType;
-        GraphBLAS::IndexType num_nodes(graph.nrows());
+        grb::IndexType num_nodes(graph.nrows());
 
         // @todo assert graph matrix is square
 
         // create index ramp for index_of() functionality
-        GraphBLAS::Vector<GraphBLAS::IndexType> index_ramp(num_nodes);
+        grb::Vector<grb::IndexType> index_ramp(num_nodes);
         {
-            std::vector<GraphBLAS::IndexType> idx(num_nodes);
-            for (GraphBLAS::IndexType i = 0; i < num_nodes; ++i)
+            std::vector<grb::IndexType> idx(num_nodes);
+            for (grb::IndexType i = 0; i < num_nodes; ++i)
             {
                 idx[i] = i;
             }
@@ -326,78 +329,78 @@ namespace algorithms
             index_ramp.build(idx.begin(), idx.begin(), num_nodes);
         }
 
-        GraphBLAS::Matrix<bool> M(num_nodes, num_nodes);
+        grb::Matrix<bool> M(num_nodes, num_nodes);
         MatrixT F(num_nodes, num_nodes);
         MatrixT R = graph;
-        GraphBLAS::Vector<GraphBLAS::IndexType> parent_list(num_nodes);
+        grb::Vector<grb::IndexType> parent_list(num_nodes);
         T max_flow(0);
 
-        //GraphBLAS::print_matrix(std::cerr, F, "F");
-        //GraphBLAS::print_matrix(std::cerr, R, "R");
-        //GraphBLAS::print_matrix(std::cerr, graph, "graph");
+        //grb::print_matrix(std::cerr, F, "F");
+        //grb::print_matrix(std::cerr, R, "R");
+        //grb::print_matrix(std::cerr, graph, "graph");
 
-        GraphBLAS::IndexType count(0);
+        grb::IndexType count(0);
         while (maxflow_bfs(R, source, sink, index_ramp, M) &&
                count++ < graph.nvals())
         {
             //std::cerr << "----------- Iteration: " << count << " -----------\n";
-            //GraphBLAS::print_matrix(std::cerr, M, "M (path)");
+            //grb::print_matrix(std::cerr, M, "M (path)");
 
             // gamma = min(M.*R)
             T gamma;
-            GraphBLAS::Matrix<T> G(num_nodes, num_nodes);
-            GraphBLAS::eWiseMult(G, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                                 GraphBLAS::Times<T>(), M, R);
-            GraphBLAS::reduce(gamma, GraphBLAS::NoAccumulate(),
-                              GraphBLAS::MinMonoid<T>(), G);
-            //GraphBLAS::print_matrix(std::cerr, G, "M.*R");
+            grb::Matrix<T> G(num_nodes, num_nodes);
+            grb::eWiseMult(G, grb::NoMask(), grb::NoAccumulate(),
+                           grb::Times<T>(), M, R);
+            grb::reduce(gamma, grb::NoAccumulate(),
+                        grb::MinMonoid<T>(), G);
+            //grb::print_matrix(std::cerr, G, "M.*R");
             //std::cerr << "gamma = min(M.*R) = " << gamma << std::endl;
 
             // GM = gamma*M
             MatrixT GM(num_nodes, num_nodes);
-            GraphBLAS::apply(GM, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                             std::bind(GraphBLAS::Times<T>(),
-                                       std::placeholders::_1,
-                                       gamma),
-                             M);
-            //GraphBLAS::print_matrix(std::cerr, GM, "gamma*M");
+            grb::apply(GM, grb::NoMask(), grb::NoAccumulate(),
+                       std::bind(grb::Times<T>(),
+                                 std::placeholders::_1,
+                                 gamma),
+                       M);
+            //grb::print_matrix(std::cerr, GM, "gamma*M");
 
             // F += gamma(M - M')
             //   += gamma*M + (-gamma*M')
 
             // GM := GM + (-GM')
-            GraphBLAS::apply(GM, GraphBLAS::NoMask(), GraphBLAS::Plus<T>(),
-                             GraphBLAS::AdditiveInverse<T>(),
-                             GraphBLAS::transpose(GM));
+            grb::apply(GM, grb::NoMask(), grb::Plus<T>(),
+                       grb::AdditiveInverse<T>(),
+                       grb::transpose(GM));
             // F := F + GM
-            GraphBLAS::eWiseAdd(F, GraphBLAS::NoMask(),
-                                GraphBLAS::NoAccumulate(),
-                                GraphBLAS::Plus<T>(), F, GM, GraphBLAS::REPLACE);
-            //GraphBLAS::print_matrix(std::cerr, GM, "gamma(M - M')");
-            //GraphBLAS::print_matrix(std::cerr, F, "F = F + gamma(M - M')");
+            grb::eWiseAdd(F, grb::NoMask(),
+                          grb::NoAccumulate(),
+                          grb::Plus<T>(), F, GM, grb::REPLACE);
+            //grb::print_matrix(std::cerr, GM, "gamma(M - M')");
+            //grb::print_matrix(std::cerr, F, "F = F + gamma(M - M')");
 
             // R = graph - F
 
             // mF := (-F)
             MatrixT mF(num_nodes, num_nodes);
-            GraphBLAS::apply(mF, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                             GraphBLAS::AdditiveInverse<T>(), F);
+            grb::apply(mF, grb::NoMask(), grb::NoAccumulate(),
+                       grb::AdditiveInverse<T>(), F);
             // R := graph + (-F)
-            GraphBLAS::eWiseAdd(R, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                                GraphBLAS::Plus<T>(), graph, mF, GraphBLAS::REPLACE);
+            grb::eWiseAdd(R, grb::NoMask(), grb::NoAccumulate(),
+                          grb::Plus<T>(), graph, mF, grb::REPLACE);
             // Clear the zero's
-            GraphBLAS::apply(R, R, GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Identity<T>(), R, GraphBLAS::REPLACE);
-            //GraphBLAS::print_matrix(std::cerr, R, "R = graph - F");
+            grb::apply(R, R, grb::NoAccumulate(),
+                       grb::Identity<T>(), R, grb::REPLACE);
+            //grb::print_matrix(std::cerr, R, "R = graph - F");
         }
 
-        //GraphBLAS::print_matrix(std::cerr, F, "Final FLOW:");
-        GraphBLAS::Vector<T> sink_edges(num_nodes);
-        GraphBLAS::extract(sink_edges,
-                           GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                           F, GraphBLAS::AllIndices(), sink);
-        GraphBLAS::reduce(max_flow, GraphBLAS::NoAccumulate(),
-                          GraphBLAS::PlusMonoid<T>(), sink_edges);
+        //grb::print_matrix(std::cerr, F, "Final FLOW:");
+        grb::Vector<T> sink_edges(num_nodes);
+        grb::extract(sink_edges,
+                     grb::NoMask(), grb::NoAccumulate(),
+                     F, grb::AllIndices(), sink);
+        grb::reduce(max_flow, grb::NoAccumulate(),
+                    grb::PlusMonoid<T>(), sink_edges);
         //std::cerr << "Max flow = " << max_flow << std::endl;
         return max_flow;
     }

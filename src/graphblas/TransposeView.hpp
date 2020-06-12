@@ -37,7 +37,7 @@
 //****************************************************************************
 
 
-namespace GraphBLAS
+namespace grb
 {    //************************************************************************
     template<typename MatrixT>
     class TransposeView
@@ -79,4 +79,4 @@ namespace GraphBLAS
     {
         return TransposeView(get_internal_matrix(view.m_mat));
     }
-} // end namespace GraphBLAS
+} // end namespace grb

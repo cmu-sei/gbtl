@@ -34,7 +34,7 @@
 #include <vector>
 #include <graphblas/platforms/sequential/BitmapSparseVector.hpp>
 
-namespace GraphBLAS
+namespace grb
 {
     namespace backend
     {

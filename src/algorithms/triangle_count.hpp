@@ -32,6 +32,7 @@
 
 #include <graphblas/graphblas.hpp>
 
+//****************************************************************************
 namespace algorithms
 {
     /**
@@ -66,29 +67,22 @@ namespace algorithms
     typename MatrixT::ScalarType triangle_count(MatrixT const &graph)
     {
         using T = typename MatrixT::ScalarType;
-        GraphBLAS::IndexType rows(graph.nrows());
-        GraphBLAS::IndexType cols(graph.ncols());
+        grb::IndexType rows(graph.nrows());
+        grb::IndexType cols(graph.ncols());
 
         MatrixT L(rows, cols), U(rows, cols);
-        GraphBLAS::split(graph, L, U);
+        grb::split(graph, L, U);
 
         MatrixT B(rows, cols);
-        GraphBLAS::mxm(B,
-                       GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                       GraphBLAS::ArithmeticSemiring<T>(),
-                       L, U);
+        grb::mxm(B, grb::NoMask(), grb::NoAccumulate(),
+                 grb::ArithmeticSemiring<T>(), L, U);
 
         MatrixT C(rows, cols);
-        GraphBLAS::eWiseMult(C,
-                             GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<T>(),
-                             graph, B);
+        grb::eWiseMult(C, grb::NoMask(), grb::NoAccumulate(),
+                       grb::Times<T>(), graph, B);
 
         T sum = 0;
-        GraphBLAS::reduce(sum,
-                          GraphBLAS::NoAccumulate(),
-                          GraphBLAS::PlusMonoid<T>(),
-                          C);
+        grb::reduce(sum, grb::NoAccumulate(), grb::PlusMonoid<T>(), C);
         return sum / static_cast<T>(2);
     }
 
@@ -102,20 +96,14 @@ namespace algorithms
                                                        MatrixT const &U)
     {
         using T = typename MatrixT::ScalarType;
-        GraphBLAS::IndexType rows(L.nrows());
-        GraphBLAS::IndexType cols(L.ncols());
+        grb::IndexType rows(L.nrows());
+        grb::IndexType cols(L.ncols());
 
         MatrixT B(rows, cols);
-        GraphBLAS::mxm(B,
-                       L, GraphBLAS::NoAccumulate(),
-                       GraphBLAS::ArithmeticSemiring<T>(),
-                       L, U);
+        grb::mxm(B, L, grb::NoAccumulate(), grb::ArithmeticSemiring<T>(), L, U);
 
         T sum = 0;
-        GraphBLAS::reduce(sum,
-                          GraphBLAS::NoAccumulate(),
-                          GraphBLAS::PlusMonoid<T>(),
-                          B);
+        grb::reduce(sum, grb::NoAccumulate(), grb::PlusMonoid<T>(), B);
         return sum;
     }
 
@@ -128,20 +116,15 @@ namespace algorithms
     typename MatrixT::ScalarType triangle_count_masked(MatrixT const &L)
     {
         using T = typename MatrixT::ScalarType;
-        GraphBLAS::IndexType rows(L.nrows());
-        GraphBLAS::IndexType cols(L.ncols());
+        grb::IndexType rows(L.nrows());
+        grb::IndexType cols(L.ncols());
 
         MatrixT B(rows, cols);
-        GraphBLAS::mxm(B,
-                       L, GraphBLAS::NoAccumulate(),
-                       GraphBLAS::ArithmeticSemiring<T>(),
-                       L, GraphBLAS::transpose(L));
+        grb::mxm(B, L, grb::NoAccumulate(),
+                 grb::ArithmeticSemiring<T>(), L, grb::transpose(L));
 
         T sum = 0;
-        GraphBLAS::reduce(sum,
-                          GraphBLAS::NoAccumulate(),
-                          GraphBLAS::PlusMonoid<T>(),
-                          B);
+        grb::reduce(sum, grb::NoAccumulate(), grb::PlusMonoid<T>(), B);
         return sum;
     }
 
@@ -154,20 +137,14 @@ namespace algorithms
     typename MatrixT::ScalarType triangle_count_masked_noT(MatrixT const &L)
     {
         using T = typename MatrixT::ScalarType;
-        GraphBLAS::IndexType rows(L.nrows());
-        GraphBLAS::IndexType cols(L.ncols());
+        grb::IndexType rows(L.nrows());
+        grb::IndexType cols(L.ncols());
 
         MatrixT B(rows, cols);
-        GraphBLAS::mxm(B,
-                       L, GraphBLAS::NoAccumulate(),
-                       GraphBLAS::ArithmeticSemiring<T>(),
-                       L, L);
+        grb::mxm(B, L, grb::NoAccumulate(), grb::ArithmeticSemiring<T>(), L, L);
 
         T sum = 0;
-        GraphBLAS::reduce(sum,
-                          GraphBLAS::NoAccumulate(),
-                          GraphBLAS::PlusMonoid<T>(),
-                          B);
+        grb::reduce(sum, grb::NoAccumulate(), grb::PlusMonoid<T>(), B);
         return sum;
     }
 
@@ -185,33 +162,29 @@ namespace algorithms
                                                         MatrixT  const &U)
     {
         using T = typename MatrixT::ScalarType;
-        GraphBLAS::IndexType rows(L.nrows());
-        GraphBLAS::IndexType cols(L.ncols());
+        grb::IndexType rows(L.nrows());
+        grb::IndexType cols(L.ncols());
 
         MatrixT B(rows, cols);
-        GraphBLAS::mxm(B, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                       GraphBLAS::ArithmeticSemiring<T>(),
-                       L,
-                       U);  /// @todo can't use transpose(L) here as LMatrix may
-                            /// already be a TransposeView (nesting not supported)
+        grb::mxm(B, grb::NoMask(), grb::NoAccumulate(),
+                 grb::ArithmeticSemiring<T>(),
+                 L,
+                 U);  /// @todo can't use transpose(L) here as LMatrix may
+                      /// already be a TransposeView (nesting not supported)
 
         T sum = 0;
         MatrixT C(rows, cols);
-        GraphBLAS::eWiseMult(C, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<T>(),
-                             L, B, GraphBLAS::REPLACE);
+        grb::eWiseMult(C, grb::NoMask(), grb::NoAccumulate(),
+                       grb::Times<T>(), L, B, grb::REPLACE);
 
-        GraphBLAS::reduce(sum, GraphBLAS::NoAccumulate(),
-                          GraphBLAS::PlusMonoid<T>(), C);
+        grb::reduce(sum, grb::NoAccumulate(), grb::PlusMonoid<T>(), C);
 
         // for undirected graph you can stop here and return 'sum'
 
-        GraphBLAS::eWiseMult(C, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Times<T>(),
-                             U, B, GraphBLAS::REPLACE);
+        grb::eWiseMult(C, grb::NoMask(), grb::NoAccumulate(),
+                       grb::Times<T>(), U, B, grb::REPLACE);
 
-        GraphBLAS::reduce(sum, GraphBLAS::Plus<T>(),
-                          GraphBLAS::PlusMonoid<T>(), C);
+        grb::reduce(sum, grb::Plus<T>(), grb::PlusMonoid<T>(), C);
 
         return sum / static_cast<T>(2);
     }

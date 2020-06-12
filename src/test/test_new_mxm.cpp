@@ -39,7 +39,7 @@
 
 #include <boost/test/included/unit_test.hpp>
 
-using namespace GraphBLAS;
+using namespace grb;
 
 BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
@@ -83,8 +83,8 @@ namespace
              {71.0, 59.5,  0.0,    -3.0}};
 
     //static Matrix<double, DirectedMatrixTag> mAns(mAns_dense);
-    GraphBLAS::IndexArrayType i_all3x4 = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
-    GraphBLAS::IndexArrayType j_all3x4 = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
+    grb::IndexArrayType i_all3x4 = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
+    grb::IndexArrayType j_all3x4 = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
 
     static std::vector<std::vector<double> > mOnes_4x4 =
             {{1, 1, 1, 1},
@@ -221,8 +221,8 @@ BOOST_AUTO_TEST_CASE(mxm_reg)
 
     std::cout << "Test AxB" << std::endl;
     mxm(result,
-        GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-        GraphBLAS::ArithmeticSemiring<double>(),
+        grb::NoMask(), grb::NoAccumulate(),
+        grb::ArithmeticSemiring<double>(),
         mA, mB);
 
     BOOST_CHECK_EQUAL(result, answer);
@@ -255,8 +255,8 @@ BOOST_AUTO_TEST_CASE(test_a_transpose)
 
     std::cout << "Test ATxB" << std::endl;
     mxm(result,
-        GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-        GraphBLAS::ArithmeticSemiring<double>(),
+        grb::NoMask(), grb::NoAccumulate(),
+        grb::ArithmeticSemiring<double>(),
         transpose(mA), mB);
 
     BOOST_CHECK_EQUAL(result, answer);
@@ -287,8 +287,8 @@ BOOST_AUTO_TEST_CASE(test_b_transpose)
 
     std::cout << "Test AxBT" << std::endl;
     mxm(result,
-        GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-        GraphBLAS::ArithmeticSemiring<double>(),
+        grb::NoMask(), grb::NoAccumulate(),
+        grb::ArithmeticSemiring<double>(),
         mA, transpose(mB));
 
     BOOST_CHECK_EQUAL(result, answer);
@@ -319,8 +319,8 @@ BOOST_AUTO_TEST_CASE(test_a_and_b_transpose)
 
     std::cout << "Test ATxBT" << std::endl;
     mxm(result,
-        GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-        GraphBLAS::ArithmeticSemiring<double>(),
+        grb::NoMask(), grb::NoAccumulate(),
+        grb::ArithmeticSemiring<double>(),
         transpose(mA), transpose(mB));
 
     BOOST_CHECK_EQUAL(result, answer);

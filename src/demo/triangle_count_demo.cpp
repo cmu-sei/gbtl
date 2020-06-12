@@ -50,8 +50,8 @@ int main(int argc, char **argv)
 
     Timer<std::chrono::steady_clock, std::chrono::microseconds> my_timer;
 
-    GraphBLAS::IndexArrayType iL, iU, iA;
-    GraphBLAS::IndexArrayType jL, jU, jA;
+    grb::IndexArrayType iL, iU, iA;
+    grb::IndexArrayType jL, jU, jA;
     uint64_t num_rows = 0;
     uint64_t max_id = 0;
     uint64_t src, dst;
@@ -94,10 +94,10 @@ int main(int argc, char **argv)
     std::cout << "#Nodes = " << (max_id + 1) << std::endl;
 
     // sort the
-    using DegIdx = std::tuple<GraphBLAS::IndexType,GraphBLAS::IndexType>;
+    using DegIdx = std::tuple<grb::IndexType,grb::IndexType>;
     my_timer.start();
     std::vector<DegIdx> degrees(max_id + 1);
-    for (GraphBLAS::IndexType idx = 0; idx <= max_id; ++idx)
+    for (grb::IndexType idx = 0; idx <= max_id; ++idx)
     {
         degrees[idx] = {0UL, idx};
     }
@@ -128,7 +128,7 @@ int main(int argc, char **argv)
     my_timer.stop();
     std::cout << "Elapsed sort/relabel time: " << my_timer.elapsed() << " usec." << std::endl;
 
-    GraphBLAS::IndexType idx(0);
+    grb::IndexType idx(0);
     for (auto&& row : degrees)
     {
         std::cout << idx << " <-- " << std::get<1>(row)
@@ -136,12 +136,12 @@ int main(int argc, char **argv)
         idx++;
     }
 
-    GraphBLAS::IndexType NUM_NODES(max_id + 1);
+    grb::IndexType NUM_NODES(max_id + 1);
     using T = int32_t;
     std::vector<T> v(iA.size(), 1);
 
-    /// @todo change scalar type to unsigned int or GraphBLAS::IndexType
-    using MatType = GraphBLAS::Matrix<T, GraphBLAS::DirectedMatrixTag>;
+    /// @todo change scalar type to unsigned int or grb::IndexType
+    using MatType = grb::Matrix<T, grb::DirectedMatrixTag>;
 
     MatType A(NUM_NODES, NUM_NODES);
     MatType L(NUM_NODES, NUM_NODES);

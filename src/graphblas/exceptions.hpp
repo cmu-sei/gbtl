@@ -34,7 +34,7 @@
 #include <sstream>
 #include <graphblas/detail/logging.h>
 
-namespace GraphBLAS
+namespace grb
 {
     //************************************************************************
     // Execution Errors, Table 2.5(b) of Spec version 1.0.2

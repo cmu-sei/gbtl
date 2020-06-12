@@ -43,11 +43,11 @@ namespace algorithms
      *                             implies the corresponding vertex is selected.
      */
     template <typename VectorT>
-    GraphBLAS::IndexArrayType get_vertex_IDs(VectorT const &independent_set)
+    grb::IndexArrayType get_vertex_IDs(VectorT const &independent_set)
     {
         using T = typename VectorT::ScalarType;
-        GraphBLAS::IndexType set_size(independent_set.nvals());
-        GraphBLAS::IndexArrayType ans(set_size);
+        grb::IndexType set_size(independent_set.nvals());
+        grb::IndexArrayType ans(set_size);
         std::vector<T> vals(set_size);
 
         independent_set.extractTuples(ans.begin(), vals.begin());
@@ -86,28 +86,28 @@ namespace algorithms
      *
      */
     template <typename MatrixT>
-    void mis(MatrixT const            &graph,
-             GraphBLAS::Vector<bool>  &independent_set,
-             double                    seed = 0)
+    void mis(MatrixT const      &graph,
+             grb::Vector<bool>  &independent_set,
+             double              seed = 0)
     {
         std::default_random_engine             generator;
         std::uniform_real_distribution<double> distribution;
         generator.seed(seed);
 
-        GraphBLAS::IndexType num_vertices(graph.nrows());
-        GraphBLAS::IndexType cols(graph.ncols());
-        GraphBLAS::IndexType r(independent_set.size());
+        grb::IndexType num_vertices(graph.nrows());
+        grb::IndexType cols(graph.ncols());
+        grb::IndexType r(independent_set.size());
 
         if ((num_vertices != cols) || (num_vertices != r))
         {
-            throw GraphBLAS::DimensionException();
+            throw grb::DimensionException();
         }
 
-        //GraphBLAS::print_matrix(std::cout, graph, "Graph");
+        //grb::print_matrix(std::cout, graph, "Graph");
 
         using RealT = float;
-        using RealVector = GraphBLAS::Vector<RealT>;
-        using BoolVector = GraphBLAS::Vector<bool>;
+        using RealVector = grb::Vector<RealT>;
+        using BoolVector = grb::Vector<bool>;
 
         RealVector prob(num_vertices);
         RealVector neighbor_max(num_vertices);
@@ -115,81 +115,81 @@ namespace algorithms
         BoolVector new_neighbors(num_vertices);
 
         // Compute the degree of each node,
-        GraphBLAS::Vector<RealT> degrees(num_vertices);
-        GraphBLAS::reduce(degrees,
-                          GraphBLAS::NoMask(), GraphBLAS::Plus<RealT>(),
-                          GraphBLAS::PlusMonoid<RealT>(),
-                          graph);
-        //GraphBLAS::print_vector(std::cout, degrees, "degrees");
+        grb::Vector<RealT> degrees(num_vertices);
+        grb::reduce(degrees,
+                    grb::NoMask(), grb::Plus<RealT>(),
+                    grb::PlusMonoid<RealT>(),
+                    graph);
+        //grb::print_vector(std::cout, degrees, "degrees");
 
         // Start with all vertices except isolated ones as candidates (NOTE: dense!)
         BoolVector candidates(num_vertices);
-        GraphBLAS::assign(candidates,
-                          degrees,
-                          GraphBLAS::NoAccumulate(),
-                          true, GraphBLAS::AllIndices(), GraphBLAS::REPLACE);
+        grb::assign(candidates,
+                    degrees,
+                    grb::NoAccumulate(),
+                    true, grb::AllIndices(), grb::REPLACE);
 
         // Courtesy of Tim Davis: singletons are not candidates.  Add to iset
-        GraphBLAS::assign(independent_set,
-                          GraphBLAS::complement(degrees),
-                          GraphBLAS::NoAccumulate(),
-                          true, GraphBLAS::AllIndices(), GraphBLAS::REPLACE);
+        grb::assign(independent_set,
+                    grb::complement(degrees),
+                    grb::NoAccumulate(),
+                    true, grb::AllIndices(), grb::REPLACE);
 
         while (candidates.nvals() > 0)
         {
             //std::cout << "************* ITERATION ************* nnz = "
             //          << candidates.nvals() << std::endl;
-            //GraphBLAS::print_vector(std::cout, candidates, "candidates");
+            //grb::print_vector(std::cout, candidates, "candidates");
 
             // assign new random values scaled by inverse degree to
             // all non-zero elements (ensures that any ties that may
             // occur between neighbors will eventually be broken.
-            GraphBLAS::eWiseMult(
+            grb::eWiseMult(
                 prob,
-                GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+                grb::NoMask(), grb::NoAccumulate(),
                 [&](bool candidate, RealT const &degree)
                 { return static_cast<RealT>(
                         0.0001 + distribution(generator)/(1. + 2.*degree)); },
                 candidates, degrees);
-            //GraphBLAS::print_vector(std::cout, prob, "prob");
+            //grb::print_vector(std::cout, prob, "prob");
 
             // find the neighbor of each source node with the max random number
-            GraphBLAS::mxv(neighbor_max,
-                           candidates, GraphBLAS::NoAccumulate(),
-                           GraphBLAS::MaxSecondSemiring<RealT>(),
-                           graph, prob, GraphBLAS::REPLACE);
-            //GraphBLAS::print_vector(std::cout, neighbor_max, "neighbor_max");
+            grb::mxv(neighbor_max,
+                     candidates, grb::NoAccumulate(),
+                     grb::MaxSecondSemiring<RealT>(),
+                     graph, prob, grb::REPLACE);
+            //grb::print_vector(std::cout, neighbor_max, "neighbor_max");
 
             // Select source node if its probability is > neighbor_max
-            GraphBLAS::eWiseAdd(new_members,
-                                GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                                GraphBLAS::GreaterThan<RealT>(),
-                                prob, neighbor_max);
+            grb::eWiseAdd(new_members,
+                          grb::NoMask(), grb::NoAccumulate(),
+                          grb::GreaterThan<RealT>(),
+                          prob, neighbor_max);
             // Note the result above IS DENSE, I can add the following apply (or
             // many other operations to make it sparse (just add itself as the
             // mask).
-            GraphBLAS::apply(new_members,
-                             new_members, GraphBLAS::NoAccumulate(),
-                             GraphBLAS::Identity<bool>(),
-                             new_members, GraphBLAS::REPLACE);
-            //GraphBLAS::print_vector(std::cout, new_members, "new_members");
+            grb::apply(new_members,
+                       new_members, grb::NoAccumulate(),
+                       grb::Identity<bool>(),
+                       new_members, grb::REPLACE);
+            //grb::print_vector(std::cout, new_members, "new_members");
 
             // Add new members to independent set.
-            GraphBLAS::eWiseAdd(independent_set,
-                                GraphBLAS::NoMask(), //new_members, //
-                                GraphBLAS::NoAccumulate(),
-                                GraphBLAS::LogicalOr<bool>(),
-                                independent_set, new_members);
-            //GraphBLAS::print_vector(std::cout, independent_set, "IS");
+            grb::eWiseAdd(independent_set,
+                          grb::NoMask(), //new_members, //
+                          grb::NoAccumulate(),
+                          grb::LogicalOr<bool>(),
+                          independent_set, new_members);
+            //grb::print_vector(std::cout, independent_set, "IS");
 
             // Remove new_members selected for independent set from candidates
-            GraphBLAS::eWiseMult(candidates,
-                                 GraphBLAS::complement(new_members),
-                                 GraphBLAS::NoAccumulate(),
-                                 GraphBLAS::LogicalAnd<bool>(),
-                                 candidates, candidates, GraphBLAS::REPLACE);
-            //GraphBLAS::print_vector(std::cout, candidates,
-            //                        "candidates (sans new_members)");
+            grb::eWiseMult(candidates,
+                           grb::complement(new_members),
+                           grb::NoAccumulate(),
+                           grb::LogicalAnd<bool>(),
+                           candidates, candidates, grb::REPLACE);
+            //grb::print_vector(std::cout, candidates,
+            //                  "candidates (sans new_members)");
 
             if (candidates.nvals() == 0)
             {
@@ -197,21 +197,21 @@ namespace algorithms
             }
 
             // Neighbors of new members can also be removed
-            GraphBLAS::mxv(new_neighbors,
-                           candidates, GraphBLAS::NoAccumulate(),
-                           GraphBLAS::LogicalSemiring<bool>(),
-                           graph, new_members);  // REPLACE doesn't seem needed
-            //GraphBLAS::print_vector(std::cout, new_neighbors,
-            //                        "new_member neighbors");
+            grb::mxv(new_neighbors,
+                     candidates, grb::NoAccumulate(),
+                     grb::LogicalSemiring<bool>(),
+                     graph, new_members);  // REPLACE doesn't seem needed
+            //grb::print_vector(std::cout, new_neighbors,
+            //                  "new_member neighbors");
 
             // Zero out candidates of new member neighbors
-            GraphBLAS::eWiseMult(candidates,
-                                 GraphBLAS::complement(new_neighbors),
-                                 GraphBLAS::NoAccumulate(),
-                                 GraphBLAS::LogicalAnd<bool>(),
-                                 candidates, candidates, GraphBLAS::REPLACE);
-            //GraphBLAS::print_vector(std::cout, candidates,
-            //                        "candidates (sans new_members' neighbors)");
+            grb::eWiseMult(candidates,
+                           grb::complement(new_neighbors),
+                           grb::NoAccumulate(),
+                           grb::LogicalAnd<bool>(),
+                           candidates, candidates, grb::REPLACE);
+            //grb::print_vector(std::cout, candidates,
+            //                  "candidates (sans new_members' neighbors)");
         }
 
     }

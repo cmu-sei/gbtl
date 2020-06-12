@@ -31,7 +31,7 @@
 #include <vector>
 
 #include <graphblas/graphblas.hpp>
-using namespace GraphBLAS;
+using namespace grb;
 
 //****************************************************************************
 int main(int, char**)

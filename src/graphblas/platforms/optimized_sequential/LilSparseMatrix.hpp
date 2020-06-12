@@ -37,7 +37,7 @@
 
 //****************************************************************************
 
-namespace GraphBLAS
+namespace grb
 {
     namespace backend
     {
@@ -642,7 +642,7 @@ namespace GraphBLAS
                     else // row_index > next entry to insert
                     {
                         // This should not happen
-                        throw GraphBLAS::PanicException(
+                        throw grb::PanicException(
                             "LilSparseMatrix::setCol() INTERNAL ERROR");
                     }
                 }
@@ -805,4 +805,4 @@ namespace GraphBLAS
 
     } // namespace backend
 
-} // namespace GraphBLAS
+} // namespace grb

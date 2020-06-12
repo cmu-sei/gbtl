@@ -35,7 +35,7 @@
 #include <iostream>
 #include <graphblas/graphblas.hpp>
 
-using namespace GraphBLAS;
+using namespace grb;
 
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE get_version_test_suite
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_get_version)
 {
-    auto [version, subversion] = GraphBLAS::getVersion();
+    auto [version, subversion] = grb::getVersion();
 
     BOOST_CHECK_EQUAL(version, 1U);
     BOOST_CHECK_EQUAL(subversion, 3U);

@@ -41,7 +41,7 @@
 
 #include <boost/test/included/unit_test.hpp>
 
-using namespace GraphBLAS;
+using namespace grb;
 
 BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 

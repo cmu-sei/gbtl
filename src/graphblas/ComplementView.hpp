@@ -33,7 +33,7 @@
 //****************************************************************************
 //****************************************************************************
 
-namespace GraphBLAS
+namespace grb
 {
     //************************************************************************
     template<typename MatrixT>
@@ -121,4 +121,4 @@ namespace GraphBLAS
         return VectorComplementView(get_internal_vector(view.m_vec));
     }
 
-} // end namespace GraphBLAS
+} // end namespace grb

@@ -37,7 +37,7 @@
 #include <algorithms/maxflow.hpp>
 #include <graphblas/graphblas.hpp>
 
-using namespace GraphBLAS;
+using namespace grb;
 
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE maxflow_test_suite
@@ -47,7 +47,7 @@ using namespace GraphBLAS;
 BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(maxflow_test)
+BOOST_AUTO_TEST_CASE(maxflow_push_relabel_test)
 {
     IndexArrayType i = {0, 0, 1, 2, 2, 3, 4, 4};
     IndexArrayType j = {1, 3, 2, 3, 5, 4, 1, 5};
@@ -55,13 +55,13 @@ BOOST_AUTO_TEST_CASE(maxflow_test)
     Matrix<double, DirectedMatrixTag> m1(6, 6);
     m1.build(i, j, v);
 
-    //GraphBLAS::print_matrix(std::cerr, m1, "\nGraph");
-    auto result = algorithms::maxflow(m1, 0, 5);
+    //grb::print_matrix(std::cerr, m1, "\nGraph");
+    auto result = algorithms::maxflow_push_relabel(m1, 0, 5);
     BOOST_CHECK_EQUAL(result, 14);
 }
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(maxflow_test2)
+BOOST_AUTO_TEST_CASE(maxflow_push_relabel_test2)
 {
     //       s   1  2  3  4  5  6  t
     //  m1({{-, 10, 5,15, -, -, -, -},   // s = 0
@@ -79,8 +79,8 @@ BOOST_AUTO_TEST_CASE(maxflow_test2)
     Matrix<double, DirectedMatrixTag> m1(8, 8);
     m1.build(i, j, v);
 
-    //GraphBLAS::print_matrix(std::cerr, m1, "\nGraph");
-    auto result = algorithms::maxflow(m1, 0, 7);
+    //grb::print_matrix(std::cerr, m1, "\nGraph");
+    auto result = algorithms::maxflow_push_relabel(m1, 0, 7);
     BOOST_CHECK_EQUAL(result, 28);
 }
 
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(maxflow_ford_fulk_test)
     Matrix<double, DirectedMatrixTag> m1(6, 6);
     m1.build(i, j, v);
 
-    //GraphBLAS::print_matrix(std::cerr, m1, "\nGraph");
+    //grb::print_matrix(std::cerr, m1, "\nGraph");
     auto result = algorithms::maxflow_ford_fulk(m1, 0, 5);
     BOOST_CHECK_EQUAL(result, 14);
 }
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(maxflow_ford_fulk_test_counter_example)
     Matrix<double, DirectedMatrixTag> m1(7, 7);
     m1.build(i, j, v);
 
-    //GraphBLAS::print_matrix(std::cerr, m1, "\nGraph");
+    //grb::print_matrix(std::cerr, m1, "\nGraph");
     auto result = algorithms::maxflow_ford_fulk(m1, 0, 5);
     BOOST_CHECK_EQUAL(result, 11);
 }
@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE(maxflow_ford_fulk_test2)
     Matrix<double, DirectedMatrixTag> m1(8, 8);
     m1.build(i, j, v);
 
-    //GraphBLAS::print_matrix(std::cerr, m1, "\nGraph");
+    //grb::print_matrix(std::cerr, m1, "\nGraph");
     auto result = algorithms::maxflow_ford_fulk(m1, 0, 7);
     BOOST_CHECK_EQUAL(result, 28);
 }
@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_CASE(maxflow_ford_fulk_test2_bidirectional)
     Matrix<double, DirectedMatrixTag> m1(8, 8);
     m1.build(i, j, v);
 
-    //GraphBLAS::print_matrix(std::cerr, m1, "\nGraph");
+    //grb::print_matrix(std::cerr, m1, "\nGraph");
     auto result = algorithms::maxflow_ford_fulk(m1, 0, 7);
     BOOST_CHECK_EQUAL(result, 30);
 }

@@ -37,7 +37,7 @@
 #include <graphblas/graphblas.hpp>
 #include <algorithms/triangle_count.hpp>
 
-using namespace GraphBLAS;
+using namespace grb;
 using namespace algorithms;
 
 #define BOOST_TEST_MAIN
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(test_triangle_count_masked)
     testtriangle.build(ar.begin(), ac.begin(), av.begin(), av.size());
 
     Matrix<double, DirectedMatrixTag> L(5,5), U(5,5);
-    GraphBLAS::split(testtriangle, L, U);
+    grb::split(testtriangle, L, U);
 
     IndexType result = triangle_count_masked(L);
     BOOST_CHECK_EQUAL(result, 4);
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(test_triangle_count_masked_noT)
     testtriangle.build(ar.begin(), ac.begin(), av.begin(), av.size());
 
     Matrix<double, DirectedMatrixTag> L(5,5), U(5,5);
-    GraphBLAS::split(testtriangle, L, U);
+    grb::split(testtriangle, L, U);
 
     IndexType result = triangle_count_masked_noT(L);
     BOOST_CHECK_EQUAL(result, 4);
@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE(test_triangle_counting_newGBTL)
     std::vector<double> av={1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
     Matrix<double, DirectedMatrixTag> testtriangle(5,5), L(5,5), U(5,5);
     testtriangle.build(ar.begin(), ac.begin(), av.begin(), av.size());
-    GraphBLAS::split(testtriangle, L, U);
+    grb::split(testtriangle, L, U);
 
     IndexType result = triangle_count_newGBTL(L, U);
     BOOST_CHECK_EQUAL(result, 4);

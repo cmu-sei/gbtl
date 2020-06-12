@@ -37,7 +37,7 @@
 #include <algorithms/mst.hpp>
 #include <graphblas/graphblas.hpp>
 
-using namespace GraphBLAS;
+using namespace grb;
 using namespace algorithms;
 
 #define BOOST_TEST_MAIN
@@ -58,19 +58,19 @@ BOOST_AUTO_TEST_CASE(mst_test_with_weight_one)
     std::vector<double> v_m1(i_m1.size(), 1);
     Matrix<double> m1(NUM_NODES, NUM_NODES);
     m1.build(i_m1, j_m1, v_m1);
-    GraphBLAS::print_matrix(std::cout, m1, "GRAPH***");
+    grb::print_matrix(std::cout, m1, "GRAPH***");
 
     std::vector<IndexType> ans = {99, 0, 4, 1, 3, 2};
-    GraphBLAS::Vector<IndexType> answer(ans, 99);
+    grb::Vector<IndexType> answer(ans, 99);
 
-    GraphBLAS::Vector<GraphBLAS::IndexType> parents(NUM_NODES);
+    grb::Vector<grb::IndexType> parents(NUM_NODES);
     auto result = mst(m1, parents);
 
     BOOST_CHECK_EQUAL(result, NUM_NODES - 1.0);
     BOOST_CHECK_EQUAL(parents, answer);
 
     std::cout << "MST weight = " << result << std::endl;
-    GraphBLAS::print_vector(std::cout, parents, "MST parent list");
+    grb::print_vector(std::cout, parents, "MST parent list");
 }
 
 //****************************************************************************
@@ -85,19 +85,19 @@ BOOST_AUTO_TEST_CASE(mst_test_with_weight_various)
                                 1, 1, 1, 1, 1, 2, 1};
     Matrix<double> m1(NUM_NODES, NUM_NODES);
     m1.build(i_m1, j_m1, v_m1);
-    GraphBLAS::print_matrix(std::cout, m1, "GRAPH***");
+    grb::print_matrix(std::cout, m1, "GRAPH***");
 
     std::vector<IndexType> ans = {99, 4, 4, 4, 0, 4};
-    GraphBLAS::Vector<IndexType> answer(ans, 99);
+    grb::Vector<IndexType> answer(ans, 99);
 
-    GraphBLAS::Vector<GraphBLAS::IndexType> parents(NUM_NODES);
+    grb::Vector<grb::IndexType> parents(NUM_NODES);
     auto result = mst(m1, parents);
 
     BOOST_CHECK_EQUAL(result, NUM_NODES - 1.0);
     BOOST_CHECK_EQUAL(parents, answer);
 
     std::cout << "MST weight = " << result << std::endl;
-    GraphBLAS::print_vector(std::cout, parents, "MST parent list");
+    grb::print_vector(std::cout, parents, "MST parent list");
 }
 
 //****************************************************************************
@@ -124,12 +124,12 @@ BOOST_AUTO_TEST_CASE(mst_test_with_weights)
                                 2, 1, 6, 8,11, 1, 7, 2, 6, 7};
     Matrix<double> m1(NUM_NODES, NUM_NODES);
     m1.build(i_m1, j_m1, v_m1);
-    GraphBLAS::print_matrix(std::cout, m1, "GRAPH***");
+    grb::print_matrix(std::cout, m1, "GRAPH***");
 
     std::vector<IndexType> ans = {99, 0, 1, 2, 3, 2, 5, 6, 2};
-    GraphBLAS::Vector<IndexType> answer(ans, 99);
+    grb::Vector<IndexType> answer(ans, 99);
 
-    GraphBLAS::Vector<IndexType> parents(NUM_NODES);
+    grb::Vector<IndexType> parents(NUM_NODES);
     auto result = mst(m1, parents);
 
     BOOST_CHECK_EQUAL(result, 37);
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE(mst_test_with_weights)
 
     //BOOST_CHECK_EQUAL(result, correct_weight);
     std::cout << "MST weight = " << result << std::endl;
-    GraphBLAS::print_vector(std::cout, parents, "MST parent list");
+    grb::print_vector(std::cout, parents, "MST parent list");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

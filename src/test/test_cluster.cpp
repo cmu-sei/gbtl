@@ -37,7 +37,7 @@
 #include <graphblas/graphblas.hpp>
 #include <algorithms/cluster.hpp>
 
-using namespace GraphBLAS;
+using namespace grb;
 using namespace algorithms;
 
 #define BOOST_TEST_MAIN
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(cluster_test_markov)
 {
     IndexType const NUM_NODES = 12;
     IndexType const NUM_EDGES = 52;
-    GraphBLAS::IndexArrayType i = {
+    grb::IndexArrayType i = {
         0, 0, 0, 0, 0,
         1, 1, 1, 1,
         2, 2, 2, 2,
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(cluster_test_markov)
         10,10,10,10,10,
         11,11,11};
 
-    GraphBLAS::IndexArrayType j = {
+    grb::IndexArrayType j = {
         0, 1, 5, 6, 9,
         0, 1, 2, 4,
         1, 2, 3, 4,
@@ -84,28 +84,28 @@ BOOST_AUTO_TEST_CASE(cluster_test_markov)
 
     // Build matrix containing self loops
     m1.build(i, j, v);
-    GraphBLAS::print_matrix(std::cout, m1, "Graph + self loops");
+    grb::print_matrix(std::cout, m1, "Graph + self loops");
 
-    auto cluster_matrix = markov_cluster(m1, 2, 2, 30);
-    GraphBLAS::print_matrix(std::cout, cluster_matrix,
+    auto cluster_matrix = markov_cluster(m1, 2, 2, 1.0e-16, 30);
+    grb::print_matrix(std::cout, cluster_matrix,
                             "Cluster matrix (before threshold)");
 
     // Optional: Apply a threshold to annihilate REALLY small numbers
-    GraphBLAS::Matrix<bool> mask(NUM_NODES, NUM_NODES);
-    GraphBLAS::apply(mask,
-                     GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                     std::bind(GraphBLAS::GreaterThan<double>(),
-                               std::placeholders::_1,
-                               1.0e-8),
-                     cluster_matrix);
-    GraphBLAS::print_matrix(std::cout, mask,
+    grb::Matrix<bool> mask(NUM_NODES, NUM_NODES);
+    grb::apply(mask,
+               grb::NoMask(), grb::NoAccumulate(),
+               std::bind(grb::GreaterThan<double>(),
+                         std::placeholders::_1,
+                         1.0e-8),
+               cluster_matrix);
+    grb::print_matrix(std::cout, mask,
                             "Threshold mask");
-    GraphBLAS::apply(cluster_matrix,
-                     mask, GraphBLAS::NoAccumulate(),
-                     GraphBLAS::Identity<double>(),
-                     cluster_matrix, GraphBLAS::REPLACE);
-    GraphBLAS::print_matrix(std::cout, cluster_matrix,
-                            "Cluster matrix (after threshold)");
+    grb::apply(cluster_matrix,
+               mask, grb::NoAccumulate(),
+               grb::Identity<double>(),
+               cluster_matrix, grb::REPLACE);
+    grb::print_matrix(std::cout, cluster_matrix,
+                      "Cluster matrix (after threshold)");
 
     // Compare with the example here:
     // https://www.cs.umd.edu/class/fall2009/cmsc858l/lecs/Lec12-mcl.pdf
@@ -136,9 +136,9 @@ BOOST_AUTO_TEST_CASE(cluster_test_markov)
 BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure1)
 {
     std::cout << "============== Peer Pressure 1 ================" << std::endl;
-    GraphBLAS::IndexArrayType i_m2 = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2,
+    grb::IndexArrayType i_m2 = {0, 0, 0, 0, 1, 1, 1, 2, 2, 2,
                                       3, 3, 4, 4};
-    GraphBLAS::IndexArrayType j_m2 = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2,
+    grb::IndexArrayType j_m2 = {0, 1, 2, 3, 0, 1, 2, 0, 1, 2,
                                       3, 4, 3, 4};
     std::vector<double>       v_m2 = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                                       1, 1, 1, 1};
@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure1)
 
     auto ans2 = algorithms::peer_pressure_cluster(m2);
     auto cluster_assignments = get_cluster_assignments_v2(ans2);
-    GraphBLAS::print_vector(std::cout, cluster_assignments, "CLUSTER ASSIGNMENTS");
+    grb::print_vector(std::cout, cluster_assignments, "CLUSTER ASSIGNMENTS");
 
     BOOST_CHECK_EQUAL(cluster_assignments.extractElement(0),
                       cluster_assignments.extractElement(1));
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure1)
 BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure2)
 {
     std::cout << "============== Peer Pressure 2 ================" << std::endl;
-    GraphBLAS::IndexArrayType i_m1 = {0, 0, 0, 0,
+    grb::IndexArrayType i_m1 = {0, 0, 0, 0,
                                       1, 1, 1, 1,
                                       2, 2, 2, 2,
                                       3, 3, 3, 3,
@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure2)
                                       5, 5, 5, 5, 5,
                                       6, 6, 6,
                                       7, 7, 7, 7};
-    GraphBLAS::IndexArrayType j_m1 = {0, 2, 3, 6,
+    grb::IndexArrayType j_m1 = {0, 2, 3, 6,
                                       1, 2, 3, 7,
                                       0, 2, 4, 6,
                                       0, 1, 3, 5,
@@ -191,7 +191,7 @@ BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure2)
     auto ans = algorithms::peer_pressure_cluster(m1);
 
     auto cluster_assignments = get_cluster_assignments_v2(ans);
-    GraphBLAS::print_vector(std::cout, cluster_assignments, "CLUSTER ASSIGNMENTS");
+    grb::print_vector(std::cout, cluster_assignments, "CLUSTER ASSIGNMENTS");
 
     BOOST_CHECK_EQUAL(cluster_assignments.extractElement(0),
                       cluster_assignments.extractElement(2));
@@ -216,7 +216,7 @@ BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure_karate)
 {
     IndexType num_nodes = 34;
 
-    GraphBLAS::IndexArrayType i = {
+    grb::IndexArrayType i = {
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         1,1,1,1,1,1,1,1,1,
         2,2,2,2,2,2,2,2,2,2,
@@ -252,7 +252,7 @@ BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure_karate)
         32,32,32,32,32,32,32,32,32,32,32,32,
         33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33};
 
-    GraphBLAS::IndexArrayType j = {
+    grb::IndexArrayType j = {
         1,2,3,4,5,6,7,8,10,11,12,13,17,19,21,31,     //1,2,3,4,5,6,7,8,10,11,12,13,19,21,23,31,
         0,2,3,7,13,17,19,21,30,
         0,1,3,7,8,9,13,27,28,32,
@@ -296,21 +296,21 @@ BOOST_AUTO_TEST_CASE(cluster_test_peer_pressure_karate)
     // add the elements along the diagonal as required for convergence
     //ewiseadd(A, I34, Ai);
     Matrix<double> Ai(num_nodes, num_nodes);
-    auto I34 = GraphBLAS::scaled_identity<Matrix<double> >(num_nodes);
-    GraphBLAS::eWiseAdd(Ai,
-                        GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                        GraphBLAS::Plus<double>(),
-                        A, I34);
+    auto I34 = grb::scaled_identity<Matrix<double> >(num_nodes);
+    grb::eWiseAdd(Ai,
+                  grb::NoMask(), grb::NoAccumulate(),
+                  grb::Plus<double>(),
+                  A, I34);
 
     auto ans = algorithms::peer_pressure_cluster(Ai);
     auto cluster_assignments = get_cluster_assignments_v2(ans);
-    GraphBLAS::print_vector(std::cout, cluster_assignments,
-                            "LOUSY KARATE CLUSTER ASSIGNMENTS");
+    grb::print_vector(std::cout, cluster_assignments,
+                      "LOUSY KARATE CLUSTER ASSIGNMENTS");
 
     auto ans2 = algorithms::markov_cluster(Ai);
     auto cl2 = get_cluster_assignments_v2(ans2);
-    GraphBLAS::print_vector(std::cout, cl2,
-                            "MARKOV KARATE CLUSTER ASSIGNMENTS");
+    grb::print_vector(std::cout, cl2,
+                      "MARKOV KARATE CLUSTER ASSIGNMENTS");
 
     // auto cluster_assignments = get_cluster_assignments(ans);
     // std::cout << "[lousy karate clusters";

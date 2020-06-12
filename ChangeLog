@@ -1,11 +1,14 @@
 2020-06 Scott McMillan <smcmillan@sei.cmu.edu>
     * Version 3.0 Release. C++17 compiler required to build. This version is
       NOT backward compatible with Version 2.0 for the following reasons:
+        - namespace name "GraphBLAS" has been replaced with "grb".
         - The boolean "replace_flag" has change types to an enum with
           MERGE and REPLACE (corresponding false and true respectively).
         - Some of the names of the monoid and semiring template classes have
           been changed to more closely match C API 1.3 names
           (e.g. MaxSelect1stSemiring is now MaxFirstSemiring)
+	- Order of parameters in markov cluster has changed (swapped
+          convergence_threshold and max_iters)
     * API updated to implement new functionality included in
       GraphBLAS C API Specification version 1.3:
         - add getVersion() method (reports the C API equivalent version)
@@ -20,6 +23,7 @@
           constant for one of its inputs (Note: this requires constexpr
           processing and not recommended for C++ due to support of lambdas
           and bind objects in the original variants).
+        - add init() and wait(obj) that are NO-OP functions
     * Modern C++ idioms from C++14 and C++17 Standards included
         - removed tag_type from Matrix, Vector and "view" classes in
           favor of modern traits idioms external to the classes.

@@ -29,9 +29,8 @@
 
 #include <vector>
 #include <random>
+#include <memory>
 #include <graphblas/graphblas.hpp>
-
-namespace GrB = GraphBLAS;
 
 namespace algorithms
 {
@@ -52,25 +51,25 @@ namespace algorithms
     template <typename LevelsVectorT, typename MatrixT>
     void bfs_level_appendixB1(LevelsVectorT   &v,
                               MatrixT const   &A,
-                              GrB::IndexType   src)
+                              grb::IndexType   src)
     {
 
-        GrB::IndexType const n(A.nrows());
+        grb::IndexType const n(A.nrows());
 
         /// @todo Assert dimensions and throw DimensionException
 
-        GrB::Vector<bool> q(n);      // wavefront
+        grb::Vector<bool> q(n);      // wavefront
         q.setElement(src, true);
 
         // BFS traversal and label the vertices
-        GrB::IndexType d(0);
+        grb::IndexType d(0);
 
         do {
             ++d;
-            GrB::assign(v, q, GrB::NoAccumulate(),
-                        d, GrB::AllIndices());
-            GrB::vxm(q, GrB::complement(v), GrB::NoAccumulate(),
-                     GrB::LogicalSemiring<bool>(), q, A, GrB::REPLACE);
+            grb::assign(v, q, grb::NoAccumulate(),
+                        d, grb::AllIndices());
+            grb::vxm(q, grb::complement(v), grb::NoAccumulate(),
+                     grb::LogicalSemiring<bool>(), q, A, grb::REPLACE);
 
         } while (q.nvals() > 0);
     }
@@ -92,24 +91,24 @@ namespace algorithms
     template <typename LevelsVectorT, typename MatrixT>
     void bfs_level_appendixB2(LevelsVectorT  &v,
                               MatrixT const  &A,
-                              GrB::IndexType  src)
+                              grb::IndexType  src)
     {
-        GrB::IndexType const n(A.nrows());
+        grb::IndexType const n(A.nrows());
 
         /// @todo Assert dimensions and throw DimensionException
 
-        GrB::Vector<bool> q(n);  //wavefront
+        grb::Vector<bool> q(n);  //wavefront
         q.setElement(src, true);
 
         // BFS traversal and label the vertices
-        GrB::IndexType level(0);
+        grb::IndexType level(0);
         do {
             ++level;
-            GrB::apply(v, GrB::NoMask(), GrB::Plus<GrB::IndexType>(),
-                       GrB::Times<GrB::IndexType>(), q, level, GrB::REPLACE);
-            GrB::vxm(q, GrB::complement(v), GrB::NoAccumulate(),
-                     GrB::LogicalSemiring<bool>(), q, A,
-                     GrB::REPLACE);
+            grb::apply(v, grb::NoMask(), grb::Plus<grb::IndexType>(),
+                       grb::Times<grb::IndexType>(), q, level, grb::REPLACE);
+            grb::vxm(q, grb::complement(v), grb::NoAccumulate(),
+                     grb::LogicalSemiring<bool>(), q, A,
+                     grb::REPLACE);
 
         } while (q.nvals() > 0);
     }
@@ -133,33 +132,33 @@ namespace algorithms
               typename ParentsVectorT>
     void bfs_parent_appendixB3(ParentsVectorT &parents,
                                MatrixT const  &A,
-                               GrB::IndexType  src)
+                               grb::IndexType  src)
     {
-        GrB::IndexType const N(A.nrows());
+        grb::IndexType const N(A.nrows());
 
         // create index ramp for index_of() functionality
-        GrB::Vector<GrB::IndexType> index_ramp(N);
-        for (GrB::IndexType i = 0; i < N; ++i)
+        grb::Vector<grb::IndexType> index_ramp(N);
+        for (grb::IndexType i = 0; i < N; ++i)
             index_ramp.setElement(i, i);
 
         parents.clear();
         parents.setElement(src, src);
 
-        GrB::Vector<GrB::IndexType> q(N);
+        grb::Vector<grb::IndexType> q(N);
         q.setElement(src, 1UL);
 
         // BFS traversal and label the vertices.
         while (q.nvals() > 0) {
-            GrB::eWiseMult(q, GrB::NoMask(), GrB::NoAccumulate(),
-                           GrB::First<GrB::IndexType>(), index_ramp, q);
-            GrB::vxm(q,
-                     GrB::complement(GrB::structure(parents)),
-                     GrB::NoAccumulate(),
-                     GrB::MinFirstSemiring<GrB::IndexType>(),
+            grb::eWiseMult(q, grb::NoMask(), grb::NoAccumulate(),
+                           grb::First<grb::IndexType>(), index_ramp, q);
+            grb::vxm(q,
+                     grb::complement(grb::structure(parents)),
+                     grb::NoAccumulate(),
+                     grb::MinFirstSemiring<grb::IndexType>(),
                      q, A,
-                     GrB::REPLACE);
-            GrB::apply(parents, GrB::NoMask(), GrB::Plus<GrB::IndexType>(),
-                       GrB::Identity<GrB::IndexType>(), q);
+                     grb::REPLACE);
+            grb::apply(parents, grb::NoMask(), grb::Plus<grb::IndexType>(),
+                       grb::Identity<grb::IndexType>(), q);
         }
     }
 
@@ -178,57 +177,54 @@ namespace algorithms
     template<typename BCVectorT, typename MatrixT>
     void BC_appendixB4(BCVectorT      &delta,
                        MatrixT const  &A,
-                       GrB::IndexType  src)
+                       grb::IndexType  src)
     {
-        GrB::IndexType const n(A.nrows());
-        GrB::Matrix<int32_t> sigma(n, n);
+        grb::IndexType const n(A.nrows());
+        grb::Matrix<int32_t> sigma(n, n);
 
-        GrB::Vector<int32_t> q(n);  // wavefront/frontier
+        grb::Vector<int32_t> q(n);  // wavefront/frontier
         q.setElement(src, 1);
 
-        GrB::Vector<int32_t> p(q);  // path
+        grb::Vector<int32_t> p(q);  // path
 
-        GrB::vxm(q, GrB::complement(p), GrB::NoAccumulate(),
-                 GrB::ArithmeticSemiring<int32_t>(), q, A, GrB::REPLACE);
+        grb::vxm(q, grb::complement(p), grb::NoAccumulate(),
+                 grb::ArithmeticSemiring<int32_t>(), q, A, grb::REPLACE);
 
         // BFS phase
-        GrB::IndexType d(0);        // depth
+        grb::IndexType d(0);        // depth
 
         do {
-            GrB::assign(sigma, GrB::NoMask(), GrB::NoAccumulate(),
-                        q, d, GrB::AllIndices());
-            GrB::eWiseAdd(p, GrB::NoMask(), GrB::NoAccumulate(),
-                          GrB::Plus<int32_t>(), p, q);
-            GrB::vxm(q, GrB::complement(p), GrB::NoAccumulate(),
-                     GrB::ArithmeticSemiring<int32_t>(), q, A, GrB::REPLACE);
+            grb::assign(sigma, grb::NoMask(), grb::NoAccumulate(),
+                        q, d, grb::AllIndices());
+            grb::eWiseAdd(p, grb::NoMask(), grb::NoAccumulate(),
+                          grb::Plus<int32_t>(), p, q);
+            grb::vxm(q, grb::complement(p), grb::NoAccumulate(),
+                     grb::ArithmeticSemiring<int32_t>(), q, A, grb::REPLACE);
 
 
             ++d;
         } while (q.nvals() > 0);
 
         // BC computation phase
-        GrB::Vector<float> t1(n), t2(n), t3(n), t4(n);
-
-
-
+        grb::Vector<float> t1(n), t2(n), t3(n), t4(n);
 
         for (int i = d-1; i > 0; --i) {
-            GrB::assign(t1, GrB::NoMask(), GrB::NoAccumulate(),
-                        1.f, GrB::AllIndices());
-            GrB::eWiseAdd(t1, GrB::NoMask(), GrB::NoAccumulate(),
-                          GrB::Plus<float>(), t1, delta);
-            GrB::extract(t2, GrB::NoMask(), GrB::NoAccumulate(),
-                         GrB::transpose(sigma), GrB::AllIndices(), i);
-            GrB::eWiseMult(t2, GrB::NoMask(), GrB::NoAccumulate(),
-                           GrB::Div<float>(), t1, t2);
-            GrB::mxv(t3, GrB::NoMask(), GrB::NoAccumulate(),
-                     GrB::ArithmeticSemiring<float>(), A, t2);
-            GrB::extract(t4, GrB::NoMask(), GrB::NoAccumulate(),
-                         GrB::transpose(sigma), GrB::AllIndices(), i-1);
-            GrB::eWiseMult(t4, GrB::NoMask(), GrB::NoAccumulate(),
-                           GrB::Times<float>(), t4, t3);
-            GrB::eWiseAdd(delta, GrB::NoMask(), GrB::NoAccumulate(),
-                          GrB::Plus<float>(), delta, t4);
+            grb::assign(t1, grb::NoMask(), grb::NoAccumulate(),
+                        1.f, grb::AllIndices());
+            grb::eWiseAdd(t1, grb::NoMask(), grb::NoAccumulate(),
+                          grb::Plus<float>(), t1, delta);
+            grb::extract(t2, grb::NoMask(), grb::NoAccumulate(),
+                         grb::transpose(sigma), grb::AllIndices(), i);
+            grb::eWiseMult(t2, grb::NoMask(), grb::NoAccumulate(),
+                           grb::Div<float>(), t1, t2);
+            grb::mxv(t3, grb::NoMask(), grb::NoAccumulate(),
+                     grb::ArithmeticSemiring<float>(), A, t2);
+            grb::extract(t4, grb::NoMask(), grb::NoAccumulate(),
+                         grb::transpose(sigma), grb::AllIndices(), i-1);
+            grb::eWiseMult(t4, grb::NoMask(), grb::NoAccumulate(),
+                           grb::Times<float>(), t4, t3);
+            grb::eWiseAdd(delta, grb::NoMask(), grb::NoAccumulate(),
+                          grb::Plus<float>(), delta, t4);
         }
     }
 
@@ -249,90 +245,82 @@ namespace algorithms
     void BC_update_appendixB5(
         BCVectorT                         &delta,
         MatrixT const                     &A,
-        std::vector<GrB::IndexType> const &src)  // aka GrB::IndexArrayType
+        std::vector<grb::IndexType> const &src)  // aka grb::IndexArrayType
     {
 
-        GrB::IndexType nsver(src.size());
-        GrB::IndexType n(A.nrows());
+        grb::IndexType nsver(src.size());
+        grb::IndexType n(A.nrows());
         /// @todo assert proper dimensions and nsver > 0
 
         // index and value arrays needed to build NumSP
-        GrB::IndexArrayType GrB_ALL_nsver;     // fill with sequence
+        grb::IndexArrayType GrB_ALL_nsver;     // fill with sequence
         GrB_ALL_nsver.reserve(nsver);
-        for (GrB::IndexType idx = 0; idx < nsver; ++idx) {
+        for (grb::IndexType idx = 0; idx < nsver; ++idx) {
             GrB_ALL_nsver.push_back(idx);
         }
-
 
         // NumSP holds # of shortest paths to each vertex from each src.
         // Initialized to source vertices
         // NumSP[s[i],i] = 1 where 0 <= i < nsver; implied zero elsewhere
-        GrB::Matrix<int32_t> NumSP(n, nsver);
+        grb::Matrix<int32_t> NumSP(n, nsver);
         NumSP.build(src, GrB_ALL_nsver, std::vector<int32_t>(nsver, 1));
 
 
         // The current frontier for all BFS's (from all roots)
         // Initialized to out neighbors of each source node in src
-        GrB::Matrix<int32_t> Frontier(n, nsver);
+        grb::Matrix<int32_t> Frontier(n, nsver);
 
-        GrB::extract(Frontier, GrB::complement(NumSP), GrB::NoAccumulate(),
-                     GrB::transpose(A), GrB::AllIndices(), src, GrB::REPLACE);
-        //GrB::extract(Frontier, GrB::NoMask(), GrB::NoAccumulate(),
-        //        GrB::transpose(A), GrB::AllIndices(), src);
+        grb::extract(Frontier, grb::complement(NumSP), grb::NoAccumulate(),
+                     grb::transpose(A), grb::AllIndices(), src, grb::REPLACE);
+        //grb::extract(Frontier, grb::NoMask(), grb::NoAccumulate(),
+        //        grb::transpose(A), grb::AllIndices(), src);
 
         // std::vector manages allocation
-        std::vector<GrB::Matrix<bool>*> Sigmas;
+        std::vector<std::unique_ptr<grb::Matrix<bool>>> Sigmas;
 
         int32_t d = 0;
 
-
         // ==================== BFS phase ====================
         while (Frontier.nvals() > 0) {
-            Sigmas.push_back(new GrB::Matrix<bool>(n, nsver));
-            GrB::apply(*(Sigmas[d]), GrB::NoMask(), GrB::NoAccumulate(),
-                       GrB::Identity<int32_t, bool>(), Frontier);
+            Sigmas.emplace_back(std::make_unique<grb::Matrix<bool>>(nsver, n));
+            grb::apply(*(Sigmas[d]), grb::NoMask(), grb::NoAccumulate(),
+                       grb::Identity<int32_t, bool>(), Frontier);
 
-            GrB::eWiseAdd(NumSP, GrB::NoMask(), GrB::NoAccumulate(),
-                          GrB::Plus<int32_t>(), NumSP, Frontier);
-            GrB::mxm(Frontier, GrB::complement(NumSP), GrB::NoAccumulate(),
-                     GrB::ArithmeticSemiring<int32_t>(),
-                     GrB::transpose(A), Frontier, GrB::REPLACE);
+            grb::eWiseAdd(NumSP, grb::NoMask(), grb::NoAccumulate(),
+                          grb::Plus<int32_t>(), NumSP, Frontier);
+            grb::mxm(Frontier, grb::complement(NumSP), grb::NoAccumulate(),
+                     grb::ArithmeticSemiring<int32_t>(),
+                     grb::transpose(A), Frontier, grb::REPLACE);
             ++d;
-
         }
 
-        GrB::Matrix<float> NspInv(n, nsver);
+        grb::Matrix<float> NspInv(n, nsver);
 
-        GrB::apply(NspInv, GrB::NoMask(), GrB::NoAccumulate(),
-                   GrB::MultiplicativeInverse<float>(), NumSP);
+        grb::apply(NspInv, grb::NoMask(), grb::NoAccumulate(),
+                   grb::MultiplicativeInverse<float>(), NumSP);
 
-        GrB::Matrix<float> BCu(n, nsver);
-        GrB::assign(BCu, GrB::NoMask(), GrB::NoAccumulate(),
-                    1.0f, GrB::AllIndices(), GrB::AllIndices());
+        grb::Matrix<float> BCu(n, nsver);
+        grb::assign(BCu, grb::NoMask(), grb::NoAccumulate(),
+                    1.0f, grb::AllIndices(), grb::AllIndices());
 
-        GrB::Matrix<float> W(n, nsver);
+        grb::Matrix<float> W(n, nsver);
 
         // ================== backprop phase ==================
         for (int32_t i = d-1; i > 0; --i) {
-            GrB::eWiseMult(W, *Sigmas[i], GrB::NoAccumulate(),
-                           GrB::Times<float>(), BCu, NspInv, GrB::REPLACE);
+            grb::eWiseMult(W, *Sigmas[i], grb::NoAccumulate(),
+                           grb::Times<float>(), BCu, NspInv, grb::REPLACE);
 
-            GrB::mxm(W, *Sigmas[i-1], GrB::NoAccumulate(),
-                     GrB::ArithmeticSemiring<float>(), A, W, GrB::REPLACE);
-            GrB::eWiseMult(BCu, GrB::NoMask(), GrB::Plus<float>(),
-                           GrB::Times<float>(), W, NumSP);
+            grb::mxm(W, *Sigmas[i-1], grb::NoAccumulate(),
+                     grb::ArithmeticSemiring<float>(), A, W, grb::REPLACE);
+            grb::eWiseMult(BCu, grb::NoMask(), grb::Plus<float>(),
+                           grb::Times<float>(), W, NumSP);
         }
 
         // adjust result
-        GrB::assign(delta, GrB::NoMask(), GrB::NoAccumulate(),
-                    -1.f*nsver, GrB::AllIndices());
-        GrB::reduce(delta, GrB::NoMask(), GrB::Plus<float>(),
-                    GrB::Plus<float>(), BCu);
-
-        // Release resources
-        for (auto it = Sigmas.begin(); it != Sigmas.end(); ++it)
-            delete *it;
-
+        grb::assign(delta, grb::NoMask(), grb::NoAccumulate(),
+                    -1.f*nsver, grb::AllIndices());
+        grb::reduce(delta, grb::NoMask(), grb::Plus<float>(),
+                    grb::Plus<float>(), BCu);
     }
 
     /**
@@ -363,65 +351,65 @@ namespace algorithms
      *
      */
     template <typename MatrixT>
-    void mis_appendixB6(GrB::Vector<bool> &iset, MatrixT const &A,
+    void mis_appendixB6(grb::Vector<bool> &iset, MatrixT const &A,
                         double seed = 0.)
     {
         std::default_random_engine             generator;
         std::uniform_real_distribution<double> distribution;
         generator.seed(seed);
 
-        GrB::IndexType n(A.nrows());
+        grb::IndexType n(A.nrows());
 
-        GrB::Vector<float> prob(n);
-        GrB::Vector<float> neighbor_max(n);
-        GrB::Vector<bool>  new_members(n);
-        GrB::Vector<bool>  new_neighbors(n);
-        GrB::Vector<bool>  candidates(n);
+        grb::Vector<float> prob(n);
+        grb::Vector<float> neighbor_max(n);
+        grb::Vector<bool>  new_members(n);
+        grb::Vector<bool>  new_neighbors(n);
+        grb::Vector<bool>  candidates(n);
 
-        GrB::Vector<double> degrees(n);
-        GrB::reduce(degrees, GrB::NoMask(), GrB::NoAccumulate(), GrB::Plus<double>(), A);
+        grb::Vector<double> degrees(n);
+        grb::reduce(degrees, grb::NoMask(), grb::NoAccumulate(), grb::Plus<double>(), A);
 
         // Remove isolated vertices
-        GrB::assign(candidates, degrees, GrB::NoAccumulate(), true, GrB::AllIndices());
+        grb::assign(candidates, degrees, grb::NoAccumulate(), true, grb::AllIndices());
 
         // Add all singletons to iset
-        GrB::assign(iset, GrB::complement(degrees), GrB::NoAccumulate(),
-                    true, GrB::AllIndices(), GrB::REPLACE);
+        grb::assign(iset, grb::complement(degrees), grb::NoAccumulate(),
+                    true, grb::AllIndices(), grb::REPLACE);
 
         while (candidates.nvals() > 0) {
             // compute a random probability of each candidate scaled by inverse of degree.
-            GrB::eWiseMult(prob, GrB::NoMask(), GrB::NoAccumulate(),
+            grb::eWiseMult(prob, grb::NoMask(), grb::NoAccumulate(),
                            [&](bool candidate, float const &degree)
                            { return static_cast<float>(
                                    0.0001 + distribution(generator)/(1. + 2.*degree)); },
                            candidates, degrees);
 
             // find the max probability of all neighbors
-            GrB::mxv(neighbor_max, candidates, GrB::NoAccumulate(),
-                     GrB::MaxSecondSemiring<float>(), A, prob, GrB::REPLACE);
+            grb::mxv(neighbor_max, candidates, grb::NoAccumulate(),
+                     grb::MaxSecondSemiring<float>(), A, prob, grb::REPLACE);
 
             // Select source node if its probability is > neighbor_max
-            GrB::eWiseAdd(new_members, GrB::NoMask(), GrB::NoAccumulate(),
-                          GrB::GreaterThan<double>(), prob, neighbor_max);
-            GrB::apply(new_members, new_members, GrB::NoAccumulate(),
-                       GrB::Identity<bool>(), new_members, GrB::REPLACE);
+            grb::eWiseAdd(new_members, grb::NoMask(), grb::NoAccumulate(),
+                          grb::GreaterThan<double>(), prob, neighbor_max);
+            grb::apply(new_members, new_members, grb::NoAccumulate(),
+                       grb::Identity<bool>(), new_members, grb::REPLACE);
 
             // Add new members to independent set.
-            GrB::eWiseAdd(iset, GrB::NoMask(), GrB::NoAccumulate(),
-                          GrB::LogicalOr<bool>(), iset, new_members);
+            grb::eWiseAdd(iset, grb::NoMask(), grb::NoAccumulate(),
+                          grb::LogicalOr<bool>(), iset, new_members);
 
             // Remove new_members from set of candidates
-            GrB::eWiseMult(candidates, GrB::complement(new_members), GrB::NoAccumulate(),
-                           GrB::LogicalAnd<bool>(), candidates, candidates, GrB::REPLACE);
+            grb::eWiseMult(candidates, grb::complement(new_members), grb::NoAccumulate(),
+                           grb::LogicalAnd<bool>(), candidates, candidates, grb::REPLACE);
 
 
             if (candidates.nvals() == 0) break;
 
             // Neighbors of new members can also be removed
-            GrB::mxv(new_neighbors, candidates, GrB::NoAccumulate(),
-                     GrB::LogicalSemiring<bool>(), A, new_members);
-            GrB::eWiseMult(candidates, GrB::complement(new_neighbors), GrB::NoAccumulate(),
-                           GrB::LogicalAnd<bool>(), candidates, candidates, GrB::REPLACE);
+            grb::mxv(new_neighbors, candidates, grb::NoAccumulate(),
+                     grb::LogicalSemiring<bool>(), A, new_members);
+            grb::eWiseMult(candidates, grb::complement(new_neighbors), grb::NoAccumulate(),
+                           grb::LogicalAnd<bool>(), candidates, candidates, grb::REPLACE);
         }
     }
 
@@ -436,15 +424,14 @@ namespace algorithms
     template<typename MatrixT>
     uint64_t triangle_count_appendixB7(MatrixT const &L)
     {
-        GrB::IndexType n(L.nrows());
-        GrB::Matrix<uint64_t> C(n, n);
+        grb::IndexType n(L.nrows());
+        grb::Matrix<uint64_t> C(n, n);
 
-        GrB::mxm(C, L, GrB::NoAccumulate(),
-                 GrB::ArithmeticSemiring<uint64_t>(), L, GrB::transpose(L));
+        grb::mxm(C, L, grb::NoAccumulate(),
+                 grb::ArithmeticSemiring<uint64_t>(), L, grb::transpose(L));
 
         uint64_t count(0);
-        GrB::reduce(count, GrB::NoAccumulate(),
-                    GrB::PlusMonoid<uint64_t>(), C);
+        grb::reduce(count, grb::NoAccumulate(), grb::PlusMonoid<uint64_t>(), C);
 
         return count;
     }

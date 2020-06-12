@@ -36,7 +36,7 @@
 
 #include <graphblas/graphblas.hpp>
 
-using namespace GraphBLAS;
+using namespace grb;
 
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE assign_test_suite
@@ -64,8 +64,8 @@ BOOST_AUTO_TEST_CASE(assign_vec_test_bad_dimensions)
 
     BOOST_CHECK_THROW(
             (assign(w,
-                    GraphBLAS::NoMask(),
-                    GraphBLAS::NoAccumulate(),
+                    grb::NoMask(),
+                    grb::NoAccumulate(),
                     u,
                     vect_I)),
             DimensionException);
@@ -90,8 +90,8 @@ BOOST_AUTO_TEST_CASE(assign_vec_test_index_out_of_bounds)
 
     BOOST_CHECK_THROW(
             (assign(w,
-                    GraphBLAS::NoMask(),
-                    GraphBLAS::NoAccumulate(),
+                    grb::NoMask(),
+                    grb::NoAccumulate(),
                     u,
                     vect_I)),
             IndexOutOfBoundsException);
@@ -120,8 +120,8 @@ BOOST_AUTO_TEST_CASE(assign_vec_test_no_mask_no_accum)
     result.build(i_result, v_result);
 
     assign(c,
-           GraphBLAS::NoMask(),
-           GraphBLAS::NoAccumulate(),
+           grb::NoMask(),
+           grb::NoAccumulate(),
            a,
            vect_I);
 
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(assign_vec_test_accum)
     Vector<double> result(4);
     result.build(i_result, v_result);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::Plus<double>(),
+    assign(c, grb::NoMask(), grb::Plus<double>(),
            a, vect_I);
 
     BOOST_CHECK_EQUAL(c, result);
@@ -167,8 +167,8 @@ BOOST_AUTO_TEST_CASE(assign_vec_test_allindices_no_accum)
     Vector<double> a(4);
     a.build(i_a, v_a);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-           a, GraphBLAS::AllIndices());
+    assign(c, grb::NoMask(), grb::NoAccumulate(),
+           a, grb::AllIndices());
 
     BOOST_CHECK_EQUAL(c, a);
 }
@@ -187,10 +187,10 @@ BOOST_AUTO_TEST_CASE(assign_vec_test_allindices_accum)
     a.build(i_a, v_a);
 
     assign(c,
-           GraphBLAS::NoMask(),
-           GraphBLAS::Plus<double>(),
+           grb::NoMask(),
+           grb::Plus<double>(),
            a,
-           GraphBLAS::AllIndices());
+           grb::AllIndices());
 
     IndexArrayType i_result      = {0, 1,  2,  3};
     std::vector<double> v_result = {8, 107, 100, 100};
@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(assign_vec_test_mask_no_accum)
 
     assign(w,
            m,
-           GraphBLAS::NoAccumulate(),
+           grb::NoAccumulate(),
            u,
            v_ind);
 
@@ -276,7 +276,7 @@ BOOST_AUTO_TEST_CASE(assign_vec_test_mask_no_accum)
 
     assign(w,
            m,
-           GraphBLAS::NoAccumulate(),
+           grb::NoAccumulate(),
            u,
            v_ind,
            REPLACE);
@@ -336,7 +336,7 @@ BOOST_AUTO_TEST_CASE(assign_vec_test_mask_accum)
 
     assign(w,
            m,
-           GraphBLAS::Plus<double>(),
+           grb::Plus<double>(),
            u,
            v_ind);
 
@@ -362,7 +362,7 @@ BOOST_AUTO_TEST_CASE(assign_vec_test_mask_accum)
 
     assign(w,
            m,
-           GraphBLAS::Plus<double>(),
+           grb::Plus<double>(),
            u,
            v_ind,
            REPLACE);
@@ -393,12 +393,12 @@ BOOST_AUTO_TEST_CASE(assign_mat_test_bad_dimensions)
     IndexArrayType vect_J({1,2});
 
     BOOST_CHECK_THROW(
-        (assign(C, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+        (assign(C, grb::NoMask(), grb::NoAccumulate(),
                 A, vect_I, vect_J)),
         DimensionException);
 
     BOOST_CHECK_THROW(
-        (assign(C, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+        (assign(C, grb::NoMask(), grb::NoAccumulate(),
                 transpose(A), vect_I, vect_J)),
         DimensionException);
 }
@@ -422,7 +422,7 @@ BOOST_AUTO_TEST_CASE(assign_mat_test_index_out_of_bounds)
     IndexArrayType vect_J({1,2});
 
     BOOST_CHECK_THROW(
-        (assign(C, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+        (assign(C, grb::NoMask(), grb::NoAccumulate(),
                 A, vect_I, vect_J)),
         IndexOutOfBoundsException);
 }
@@ -432,25 +432,25 @@ BOOST_AUTO_TEST_CASE(sparse_assign_matrix_base)
 {
     std::vector<std::vector<double>> matA = {{1, 6},
                                              {9, 2}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(matA, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(matA, 0);
 
     std::vector<std::vector<double>> matAnswer = {{0, 0, 0},
                                                   {9, 0, 2},
                                                   {1, 0, 6}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> answer(matAnswer, 0);
 
     // Output space
-    GraphBLAS::IndexType M = 3;
-    GraphBLAS::IndexType N = 3;
+    grb::IndexType M = 3;
+    grb::IndexType N = 3;
 
-    GraphBLAS::IndexArrayType row_indices = {2, 1};
-    GraphBLAS::IndexArrayType col_indices = {0, 2};
+    grb::IndexArrayType row_indices = {2, 1};
+    grb::IndexArrayType col_indices = {0, 2};
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(M, N);
+    grb::Matrix<double, grb::DirectedMatrixTag> result(M, N);
 
-    GraphBLAS::assign(result,
-                      GraphBLAS::NoMask(),
-                      GraphBLAS::NoAccumulate(),
+    grb::assign(result,
+                      grb::NoMask(),
+                      grb::NoAccumulate(),
                       mA,
                       row_indices,
                       col_indices);
@@ -463,31 +463,31 @@ BOOST_AUTO_TEST_CASE(sparse_assign_matrix_mask)
 {
     std::vector<std::vector<double>> matA = {{1, 6},
                                              {9, 2}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(matA, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(matA, 0);
 
     std::vector<std::vector<double>> matAnswer = {{0, 0, 0},
                                                   {9, 0, 0},
                                                   {1, 0, 0}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> answer(matAnswer, 0);
 
     std::vector<std::vector<bool>> matMask = {{true, true, false},
                                               {true, true, false},
                                               {true, true, false}};
-    GraphBLAS::Matrix<bool, GraphBLAS::DirectedMatrixTag> mask(matMask, 0);
+    grb::Matrix<bool, grb::DirectedMatrixTag> mask(matMask, 0);
 
 
     // Output space
-    GraphBLAS::IndexType M = 3;
-    GraphBLAS::IndexType N = 3;
+    grb::IndexType M = 3;
+    grb::IndexType N = 3;
 
-    GraphBLAS::IndexArrayType row_indices = {2, 1};
-    GraphBLAS::IndexArrayType col_indices = {0, 2};
+    grb::IndexArrayType row_indices = {2, 1};
+    grb::IndexArrayType col_indices = {0, 2};
 
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> result(M, N);
+    grb::Matrix<double, grb::DirectedMatrixTag> result(M, N);
 
-    GraphBLAS::assign(result,
+    grb::assign(result,
                       mask,
-                      GraphBLAS::NoAccumulate(),
+                      grb::NoAccumulate(),
                       mA,
                       row_indices,
                       col_indices);
@@ -500,24 +500,24 @@ BOOST_AUTO_TEST_CASE(sparse_assign_matrix_accum)
 {
     std::vector<std::vector<double>> matA = {{1, 6},
                                              {9, 2}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mA(matA, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(matA, 0);
 
     std::vector<std::vector<double>> matC= {{1, 2, 3},
                                             {4, 5, 6},
                                             {7, 8, 9}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mC(matC, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> mC(matC, 0);
 
     std::vector<std::vector<double>> matAnswer = {{1,  2, 3},
                                                   {13, 5, 8},
                                                   {8,  8, 15}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> answer(matAnswer, 0);
 
-    GraphBLAS::IndexArrayType row_indices = {2, 1};
-    GraphBLAS::IndexArrayType col_indices = {0, 2};
+    grb::IndexArrayType row_indices = {2, 1};
+    grb::IndexArrayType col_indices = {0, 2};
 
-    GraphBLAS::assign(mC,
-                      GraphBLAS::NoMask(),
-                      GraphBLAS::Plus<double>(),
+    grb::assign(mC,
+                      grb::NoMask(),
+                      grb::Plus<double>(),
                       mA,
                       row_indices,
                       col_indices);
@@ -555,8 +555,8 @@ BOOST_AUTO_TEST_CASE(assign_mat_test_no_mask_no_accum)
     result.build(i_result, j_result, v_result);
 
     assign(C,
-           GraphBLAS::NoMask(),
-           GraphBLAS::NoAccumulate(),
+           grb::NoMask(),
+           grb::NoAccumulate(),
            A,
            vect_I,
            vect_J);
@@ -564,8 +564,8 @@ BOOST_AUTO_TEST_CASE(assign_mat_test_no_mask_no_accum)
     BOOST_CHECK_EQUAL(C, result);
 
     assign(C,
-           GraphBLAS::NoMask(),
-           GraphBLAS::NoAccumulate(),
+           grb::NoMask(),
+           grb::NoAccumulate(),
            transpose(A),
            vect_I,
            vect_J);
@@ -603,8 +603,8 @@ BOOST_AUTO_TEST_CASE(assign_mat_test_accum_no_mask)
     result.build(i_result, j_result, v_result);
 
     assign(c,
-           GraphBLAS::NoMask(),
-           GraphBLAS::Plus<double>(),
+           grb::NoMask(),
+           grb::Plus<double>(),
            a,
            vect_I,
            vect_J);
@@ -614,8 +614,8 @@ BOOST_AUTO_TEST_CASE(assign_mat_test_accum_no_mask)
     c.clear();
     c.build(i_c, j_c, v_c);
     assign(c,
-           GraphBLAS::NoMask(),
-           GraphBLAS::Plus<double>(),
+           grb::NoMask(),
+           grb::Plus<double>(),
            transpose(a),
            vect_I,
            vect_J);
@@ -657,8 +657,8 @@ BOOST_AUTO_TEST_CASE(assign_mat_test_allrows_no_accum)
     Matrix<double, DirectedMatrixTag> result(3, 4);
     result.build(i_result, j_result, v_result);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-           a, GraphBLAS::AllIndices(), vect_J);
+    assign(c, grb::NoMask(), grb::NoAccumulate(),
+           a, grb::AllIndices(), vect_J);
 
     BOOST_CHECK_EQUAL(c, result);
 }
@@ -697,8 +697,8 @@ BOOST_AUTO_TEST_CASE(assign_mat_test_allrows_no_accum_transpose)
     Matrix<double, DirectedMatrixTag> result(3, 4);
     result.build(i_result, j_result, v_result);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-           transpose(a), GraphBLAS::AllIndices(), vect_J);
+    assign(c, grb::NoMask(), grb::NoAccumulate(),
+           transpose(a), grb::AllIndices(), vect_J);
 
     BOOST_CHECK_EQUAL(c, result);
 }
@@ -734,8 +734,8 @@ BOOST_AUTO_TEST_CASE(assign_mat_test_allcols_no_accum_no_mask)
     Matrix<double, DirectedMatrixTag> result(3, 4);
     result.build(i_result, j_result, v_result);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-           a, vect_I, GraphBLAS::AllIndices());
+    assign(c, grb::NoMask(), grb::NoAccumulate(),
+           a, vect_I, grb::AllIndices());
 
     BOOST_CHECK_EQUAL(c, result);
 }
@@ -771,8 +771,8 @@ BOOST_AUTO_TEST_CASE(assign_mat_test_allcols_no_accum_no_mask_transpose)
     Matrix<double, DirectedMatrixTag> result(3, 4);
     result.build(i_result, j_result, v_result);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-           transpose(a), vect_I, GraphBLAS::AllIndices());
+    assign(c, grb::NoMask(), grb::NoAccumulate(),
+           transpose(a), vect_I, grb::AllIndices());
 
     BOOST_CHECK_EQUAL(c, result);
 }
@@ -800,8 +800,8 @@ BOOST_AUTO_TEST_CASE(assign_mat_test_allrowscols_no_accum_no_mask)
     Matrix<double, DirectedMatrixTag> a(3, 4);
     a.build(i_a, j_a, v_a);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-           a, GraphBLAS::AllIndices(), GraphBLAS::AllIndices());
+    assign(c, grb::NoMask(), grb::NoAccumulate(),
+           a, grb::AllIndices(), grb::AllIndices());
 
     BOOST_CHECK_EQUAL(c, a);
 }
@@ -829,8 +829,8 @@ BOOST_AUTO_TEST_CASE(assign_mat_test_allrowscols_no_accum_no_mask_transpose)
     Matrix<double, DirectedMatrixTag> a(4, 3);
     a.build(i_a, j_a, v_a);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-           transpose(a), GraphBLAS::AllIndices(), GraphBLAS::AllIndices());
+    assign(c, grb::NoMask(), grb::NoAccumulate(),
+           transpose(a), grb::AllIndices(), grb::AllIndices());
 
     Matrix<double, DirectedMatrixTag> answer(3,4);
     answer.build(j_a, i_a, v_a);
@@ -860,8 +860,8 @@ BOOST_AUTO_TEST_CASE(assign_mat_test_allrowscols_accum_no_mask)
     Matrix<double, DirectedMatrixTag> a(3, 4);
     a.build(i_a, j_a, v_a);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::Plus<double>(),
-           a, GraphBLAS::AllIndices(), GraphBLAS::AllIndices());
+    assign(c, grb::NoMask(), grb::Plus<double>(),
+           a, grb::AllIndices(), grb::AllIndices());
 
     IndexArrayType i_result    = {0, 0, 0, 1, 1, 1, 1, 2, 2, 2};
     IndexArrayType j_result    = {1, 2, 3, 0, 1, 2, 3, 0, 1, 2};
@@ -897,8 +897,8 @@ BOOST_AUTO_TEST_CASE(assign_mat_test_allrowscols_accum_no_mask_transpose)
     Matrix<double, DirectedMatrixTag> a(4, 3);
     a.build(i_a, j_a, v_a);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::Plus<double>(),
-           transpose(a), GraphBLAS::AllIndices(), GraphBLAS::AllIndices());
+    assign(c, grb::NoMask(), grb::Plus<double>(),
+           transpose(a), grb::AllIndices(), grb::AllIndices());
 
     IndexArrayType i_result    = {0, 0, 0, 1, 1, 1, 1, 2, 2, 2};
     IndexArrayType j_result    = {1, 2, 3, 0, 1, 2, 3, 0, 1, 2};
@@ -957,7 +957,7 @@ BOOST_AUTO_TEST_CASE(assign_mat_mask_no_accum)
 
     assign(C,
            M,
-           GraphBLAS::NoAccumulate(),
+           grb::NoAccumulate(),
            A,
            vec_row_idx,
            vec_col_idx);
@@ -980,7 +980,7 @@ BOOST_AUTO_TEST_CASE(assign_mat_mask_no_accum)
 
     assign(C,
            M,
-           GraphBLAS::NoAccumulate(),
+           grb::NoAccumulate(),
            A,
            vec_row_idx,
            vec_col_idx,
@@ -1035,7 +1035,7 @@ BOOST_AUTO_TEST_CASE(assign_mat_mask_no_accum_transpose)
 
     assign(C,
            M,
-           GraphBLAS::NoAccumulate(),
+           grb::NoAccumulate(),
            transpose(A),
            vec_row_idx,
            vec_col_idx);
@@ -1058,7 +1058,7 @@ BOOST_AUTO_TEST_CASE(assign_mat_mask_no_accum_transpose)
 
     assign(C,
            M,
-           GraphBLAS::NoAccumulate(),
+           grb::NoAccumulate(),
            transpose(A),
            vec_row_idx,
            vec_col_idx,
@@ -1113,7 +1113,7 @@ BOOST_AUTO_TEST_CASE(assign_mat_mask_accum)
 
     assign(C,
            M,
-           GraphBLAS::Plus<double>(),
+           grb::Plus<double>(),
            A,
            vec_row_idx,
            vec_col_idx);
@@ -1136,7 +1136,7 @@ BOOST_AUTO_TEST_CASE(assign_mat_mask_accum)
 
     assign(C,
            M,
-           GraphBLAS::Plus<double>(),
+           grb::Plus<double>(),
            A,
            vec_row_idx,
            vec_col_idx,
@@ -1192,7 +1192,7 @@ BOOST_AUTO_TEST_CASE(assign_mat_mask_accum_transpose)
 
     assign(C,
            M,
-           GraphBLAS::Plus<double>(),
+           grb::Plus<double>(),
            transpose(A),
            vec_row_idx,
            vec_col_idx);
@@ -1215,7 +1215,7 @@ BOOST_AUTO_TEST_CASE(assign_mat_mask_accum_transpose)
 
     assign(C,
            M,
-           GraphBLAS::Plus<double>(),
+           grb::Plus<double>(),
            transpose(A),
            vec_row_idx,
            vec_col_idx,
@@ -1247,7 +1247,7 @@ BOOST_AUTO_TEST_CASE(assign_col_test_bad_dimensions)
     //IndexArrayType vect_J({1,2});
 
     BOOST_CHECK_THROW(
-        (assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+        (assign(c, grb::NoMask(), grb::NoAccumulate(),
                 a, vect_I, 2)),
         DimensionException);
 }
@@ -1272,7 +1272,7 @@ BOOST_AUTO_TEST_CASE(assign_col_test_invalid_index)
     //IndexArrayType vect_J({1,2});
 
     BOOST_CHECK_THROW(
-        (assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+        (assign(c, grb::NoMask(), grb::NoAccumulate(),
                 a, vect_I, 5)),
         InvalidIndexException);
 }
@@ -1295,7 +1295,7 @@ BOOST_AUTO_TEST_CASE(assign_col_test_index_out_of_bounds)
 
     IndexArrayType vect_I2({1,5});
     BOOST_CHECK_THROW(
-        (assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+        (assign(c, grb::NoMask(), grb::NoAccumulate(),
                 a, vect_I2, 2)),
         IndexOutOfBoundsException);
 }
@@ -1326,7 +1326,7 @@ BOOST_AUTO_TEST_CASE(assign_col_test_no_accum_no_mask)
     Matrix<double, DirectedMatrixTag> result(3, 4);
     result.build(i_result, j_result, v_result);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+    assign(c, grb::NoMask(), grb::NoAccumulate(),
            a, vect_I, 1);
 
     BOOST_CHECK_EQUAL(c, result);
@@ -1356,8 +1356,8 @@ BOOST_AUTO_TEST_CASE(assign_col_test_allindices_no_accum_no_mask)
     Matrix<double, DirectedMatrixTag> result(3, 4);
     result.build(i_result, j_result, v_result);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-           a, GraphBLAS::AllIndices(), 1);
+    assign(c, grb::NoMask(), grb::NoAccumulate(),
+           a, grb::AllIndices(), 1);
 
     BOOST_CHECK_EQUAL(c, result);
 }
@@ -1388,7 +1388,7 @@ BOOST_AUTO_TEST_CASE(assign_col_test_accum_no_mask)
     Matrix<double, DirectedMatrixTag> result(3, 4);
     result.build(i_result, j_result, v_result);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::Plus<double>(),
+    assign(c, grb::NoMask(), grb::Plus<double>(),
            a, vect_I, 1);
 
     BOOST_CHECK_EQUAL(c, result);
@@ -1418,8 +1418,8 @@ BOOST_AUTO_TEST_CASE(assign_col_test_allindices_accum_no_mask)
     Matrix<double, DirectedMatrixTag> result(3, 4);
     result.build(i_result, j_result, v_result);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::Plus<double>(),
-           a, GraphBLAS::AllIndices(), 1);
+    assign(c, grb::NoMask(), grb::Plus<double>(),
+           a, grb::AllIndices(), 1);
 
     BOOST_CHECK_EQUAL(c, result);
 }
@@ -1459,7 +1459,7 @@ BOOST_AUTO_TEST_CASE(assign_col_test_mask_no_accum)
 
     assign(C,
            m,
-           GraphBLAS::NoAccumulate(),
+           grb::NoAccumulate(),
            u,
            vect_I,
            1);
@@ -1503,7 +1503,7 @@ BOOST_AUTO_TEST_CASE(assign_col_test_mask_no_accum_replace)
 
     assign(C,
            m,
-           GraphBLAS::NoAccumulate(),
+           grb::NoAccumulate(),
            u,
            vect_I,
            1,
@@ -1534,7 +1534,7 @@ BOOST_AUTO_TEST_CASE(assign_row_test_bad_dimensions)
     IndexArrayType vect_J({1});
 
     BOOST_CHECK_THROW(
-        (assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+        (assign(c, grb::NoMask(), grb::NoAccumulate(),
                 a, 1, vect_J)),
         DimensionException);
 }
@@ -1559,7 +1559,7 @@ BOOST_AUTO_TEST_CASE(assign_row_test_invalid_index)
     IndexArrayType vect_J({1,2});
 
     BOOST_CHECK_THROW(
-        (assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+        (assign(c, grb::NoMask(), grb::NoAccumulate(),
                 a, 5, vect_J)),
         InvalidIndexException);
 }
@@ -1583,7 +1583,7 @@ BOOST_AUTO_TEST_CASE(assign_row_test_index_out_of_bounds)
     IndexArrayType vect_J2({1,5});
 
     BOOST_CHECK_THROW(
-        (assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+        (assign(c, grb::NoMask(), grb::NoAccumulate(),
                 a, 2, vect_J2)),
         IndexOutOfBoundsException);
 }
@@ -1614,7 +1614,7 @@ BOOST_AUTO_TEST_CASE(assign_row_test_no_accum)
     Matrix<double, DirectedMatrixTag> result(3, 4);
     result.build(i_result, j_result, v_result);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+    assign(c, grb::NoMask(), grb::NoAccumulate(),
            a, 1, vect_J);
 
     BOOST_CHECK_EQUAL(c, result);
@@ -1644,8 +1644,8 @@ BOOST_AUTO_TEST_CASE(assign_row_test_allindices_no_accum)
     Matrix<double, DirectedMatrixTag> result(3, 4);
     result.build(i_result, j_result, v_result);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-           a, 1, GraphBLAS::AllIndices());
+    assign(c, grb::NoMask(), grb::NoAccumulate(),
+           a, 1, grb::AllIndices());
 
     BOOST_CHECK_EQUAL(c, result);
 }
@@ -1676,7 +1676,7 @@ BOOST_AUTO_TEST_CASE(assign_row_test_accum)
     Matrix<double, DirectedMatrixTag> result(3, 4);
     result.build(i_result, j_result, v_result);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::Plus<double>(),
+    assign(c, grb::NoMask(), grb::Plus<double>(),
            a, 1, vect_J);
 
     BOOST_CHECK_EQUAL(c, result);
@@ -1706,8 +1706,8 @@ BOOST_AUTO_TEST_CASE(assign_row_test_allindices_accum)
     Matrix<double, DirectedMatrixTag> result(3, 4);
     result.build(i_result, j_result, v_result);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::Plus<double>(),
-           a, 1, GraphBLAS::AllIndices());
+    assign(c, grb::NoMask(), grb::Plus<double>(),
+           a, 1, grb::AllIndices());
 
     BOOST_CHECK_EQUAL(c, result);
 }
@@ -1732,7 +1732,7 @@ BOOST_AUTO_TEST_CASE(assign_vec_constant_test_bad_dimensions)
     IndexArrayType vect_I({1,3,2});
 
     BOOST_CHECK_THROW(
-        (assign(w, m, GraphBLAS::NoAccumulate(), 3, vect_I)),
+        (assign(w, m, grb::NoAccumulate(), 3, vect_I)),
         DimensionException);
 }
 
@@ -1752,7 +1752,7 @@ BOOST_AUTO_TEST_CASE(assign_vec_constant_test_index_out_of_bounds)
     IndexArrayType vect_I({0,4});
 
     BOOST_CHECK_THROW(
-        (assign(w, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+        (assign(w, grb::NoMask(), grb::NoAccumulate(),
                 u, vect_I)),
         IndexOutOfBoundsException);
 }
@@ -1772,7 +1772,7 @@ BOOST_AUTO_TEST_CASE(assign_vec_constant_test_no_accum)
     Vector<double> result(4);
     result.build(i_result, v_result);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(), 99, vect_I);
+    assign(c, grb::NoMask(), grb::NoAccumulate(), 99, vect_I);
 
     BOOST_CHECK_EQUAL(c, result);
 }
@@ -1792,7 +1792,7 @@ BOOST_AUTO_TEST_CASE(assign_vec_constant_test_accum)
     Vector<double> result(4);
     result.build(i_result, v_result);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::Plus<double>(), 99, vect_I);
+    assign(c, grb::NoMask(), grb::Plus<double>(), 99, vect_I);
 
     BOOST_CHECK_EQUAL(c, result);
 }
@@ -1810,8 +1810,8 @@ BOOST_AUTO_TEST_CASE(assign_vec_constant_test_allindices_no_accum)
     Vector<double> result(4);
     result.build(i_result, v_result);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-           99, GraphBLAS::AllIndices());
+    assign(c, grb::NoMask(), grb::NoAccumulate(),
+           99, grb::AllIndices());
 
     BOOST_CHECK_EQUAL(c, result);
 }
@@ -1824,8 +1824,8 @@ BOOST_AUTO_TEST_CASE(assign_vec_constant_test_allindices_accum)
     Vector<double> c(4);
     c.build(i_w, v_w);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::Plus<double>(),
-           99, GraphBLAS::AllIndices());
+    assign(c, grb::NoMask(), grb::Plus<double>(),
+           99, grb::AllIndices());
 
     IndexArrayType i_result      = {0, 1,  2,  3};
     std::vector<double> v_result = {107, 108, 100, 99};
@@ -1858,7 +1858,7 @@ BOOST_AUTO_TEST_CASE(assign_mat_constant_test_bad_dimensions)
     IndexArrayType vect_J({1,2});
 
     BOOST_CHECK_THROW(
-        (assign(c, m, GraphBLAS::NoAccumulate(),
+        (assign(c, m, grb::NoAccumulate(),
                 99, vect_I, vect_J)),
         DimensionException);
 }
@@ -1876,7 +1876,7 @@ BOOST_AUTO_TEST_CASE(assign_mat_constant_test_index_out_of_bounds)
     IndexArrayType vect_J({1,2});
 
     BOOST_CHECK_THROW(
-        (assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+        (assign(c, grb::NoMask(), grb::NoAccumulate(),
                 99, vect_I, vect_J)),
         IndexOutOfBoundsException);
 }
@@ -1884,20 +1884,20 @@ BOOST_AUTO_TEST_CASE(assign_mat_constant_test_index_out_of_bounds)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(sparse_assign_const_base)
 {
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> mC(3, 3);
+    grb::Matrix<double, grb::DirectedMatrixTag> mC(3, 3);
 
     std::vector<std::vector<double>> matAnswer = {{0, 0, 0},
                                                   {1, 0, 1},
                                                   {1, 0, 1}};
-    GraphBLAS::Matrix<double, GraphBLAS::DirectedMatrixTag> answer(matAnswer, 0);
+    grb::Matrix<double, grb::DirectedMatrixTag> answer(matAnswer, 0);
 
-    GraphBLAS::IndexArrayType row_indices = {2, 1};
-    GraphBLAS::IndexArrayType col_indices = {0, 2};
+    grb::IndexArrayType row_indices = {2, 1};
+    grb::IndexArrayType col_indices = {0, 2};
 
-//    GraphBLAS::assign_constant(mC,
-    GraphBLAS::assign(mC,
-                      GraphBLAS::NoMask(),
-                      GraphBLAS::NoAccumulate(),
+//    grb::assign_constant(mC,
+    grb::assign(mC,
+                      grb::NoMask(),
+                      grb::NoAccumulate(),
                       1,
                       row_indices,
                       col_indices);
@@ -1927,7 +1927,7 @@ BOOST_AUTO_TEST_CASE(assign_mat_constant_test_no_accum)
     Matrix<double, DirectedMatrixTag> result(3, 4);
     result.build(i_result, j_result, v_result);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
+    assign(c, grb::NoMask(), grb::NoAccumulate(),
            99, vect_I, vect_J);
 
     BOOST_CHECK_EQUAL(c, result);
@@ -1955,7 +1955,7 @@ BOOST_AUTO_TEST_CASE(assign_mat_constant_test_accum)
     Matrix<double, DirectedMatrixTag> result(3, 4);
     result.build(i_result, j_result, v_result);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::Plus<double>(),
+    assign(c, grb::NoMask(), grb::Plus<double>(),
            99, vect_I, vect_J);
 
     BOOST_CHECK_EQUAL(c, result);
@@ -1983,8 +1983,8 @@ BOOST_AUTO_TEST_CASE(assign_mat_constant_test_allrows_no_accum)
     Matrix<double, DirectedMatrixTag> result(3, 4);
     result.build(i_result, j_result, v_result);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-           99, GraphBLAS::AllIndices(), vect_J);
+    assign(c, grb::NoMask(), grb::NoAccumulate(),
+           99, grb::AllIndices(), vect_J);
 
     BOOST_CHECK_EQUAL(c, result);
 }
@@ -2011,8 +2011,8 @@ BOOST_AUTO_TEST_CASE(assign_mat_constant_test_allcols_no_accum)
     Matrix<double, DirectedMatrixTag> result(3, 4);
     result.build(i_result, j_result, v_result);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-           99, vect_I, GraphBLAS::AllIndices());
+    assign(c, grb::NoMask(), grb::NoAccumulate(),
+           99, vect_I, grb::AllIndices());
 
     BOOST_CHECK_EQUAL(c, result);
 }
@@ -2036,8 +2036,8 @@ BOOST_AUTO_TEST_CASE(assign_mat_constant_test_allrowscols_no_accum)
     Matrix<double, DirectedMatrixTag> result(3, 4);
     result.build(i_result, j_result, v_result);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-           99, GraphBLAS::AllIndices(), GraphBLAS::AllIndices());
+    assign(c, grb::NoMask(), grb::NoAccumulate(),
+           99, grb::AllIndices(), grb::AllIndices());
 
     BOOST_CHECK_EQUAL(c, result);
 }
@@ -2053,8 +2053,8 @@ BOOST_AUTO_TEST_CASE(assign_mat_constant_test_allrowscols_accum)
     Matrix<double, DirectedMatrixTag> c(3, 4);
     c.build(i_c, j_c, v_c);
 
-    assign(c, GraphBLAS::NoMask(), GraphBLAS::Plus<double>(),
-           99, GraphBLAS::AllIndices(), GraphBLAS::AllIndices());
+    assign(c, grb::NoMask(), grb::Plus<double>(),
+           99, grb::AllIndices(), grb::AllIndices());
 
     IndexArrayType i_result    = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
     IndexArrayType j_result    = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};

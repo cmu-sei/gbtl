@@ -39,7 +39,7 @@
 
 //****************************************************************************
 
-namespace GraphBLAS
+namespace grb
 {
     namespace backend
     {
@@ -158,4 +158,4 @@ namespace GraphBLAS
             write_with_opt_mask_1D(w, z, mask, outp);
         }
     } // backend
-} // GraphBLAS
+} // grb

@@ -32,13 +32,10 @@
 
 #include <graphblas/graphblas.hpp>
 
-#define GB_INCLUDE_BACKEND_UTILITY 1
-#include <backend_include.hpp>
-
 //****************************************************************************
 // Miscellaneous matrix convenience functions
 //****************************************************************************
-namespace GraphBLAS
+namespace grb
 {
     //************************************************************************
     /**
@@ -69,7 +66,7 @@ namespace GraphBLAS
     template<typename MatrixT>
     MatrixT scaled_identity(IndexType                    mat_size,
                             typename MatrixT::ScalarType val =
-                                static_cast<typename MatrixT::ScalarType>(1))
+                            static_cast<typename MatrixT::ScalarType>(1))
     {
         using T = typename MatrixT::ScalarType;
         IndexArrayType indices;
@@ -81,7 +78,7 @@ namespace GraphBLAS
 
         MatrixT identity(mat_size, mat_size);
         identity.build(indices, indices, vals);
-        //GraphBLAS::print_matrix(std::cerr, identity, "SCALED IDENTITY");
+        //grb::print_matrix(std::cerr, identity, "SCALED IDENTITY");
         return identity;
     }
 
@@ -102,16 +99,16 @@ namespace GraphBLAS
 
         using T = typename MatrixT::ScalarType;
 
-        GraphBLAS::IndexType nvals(A.nvals());
+        grb::IndexType nvals(A.nvals());
 
-        GraphBLAS::IndexArrayType i(nvals), j(nvals);
+        grb::IndexArrayType i(nvals), j(nvals);
         std::vector<T> v(nvals);
         A.extractTuples(i, j, v);
 
         IndexArrayType iL,jL, iU,jU;
         std::vector<T> vL, vU;
 
-        for (GraphBLAS::IndexType idx = 0; idx < nvals; ++idx)
+        for (grb::IndexType idx = 0; idx < nvals; ++idx)
         {
             if (i[idx] < j[idx])
             {
@@ -142,15 +139,15 @@ namespace GraphBLAS
     {
         using T = typename MatrixT::ScalarType;
 
-        GraphBLAS::Vector<T> w(A.nrows());
-        GraphBLAS::reduce(w,
-                          GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                          GraphBLAS::Plus<T>(),
-                          A);
-        GraphBLAS::apply(w,
-                         GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                         GraphBLAS::MultiplicativeInverse<T>(),
-                         w);
+        grb::Vector<T> w(A.nrows());
+        grb::reduce(w,
+                    grb::NoMask(), grb::NoAccumulate(),
+                    grb::Plus<T>(),
+                    A);
+        grb::apply(w,
+                   grb::NoMask(), grb::NoAccumulate(),
+                   grb::MultiplicativeInverse<T>(),
+                   w);
 
         IndexArrayType indices(w.nvals());
         std::vector<typename MatrixT::ScalarType> vals(w.nvals());
@@ -161,10 +158,10 @@ namespace GraphBLAS
         Adiag.build(indices.begin(), indices.begin(), vals.begin(), vals.size());
 
         //Perform matrix multiply to scale rows
-        GraphBLAS::mxm(A,
-                       GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                       GraphBLAS::ArithmeticSemiring<T>(),
-                       Adiag, A);
+        grb::mxm(A,
+                 grb::NoMask(), grb::NoAccumulate(),
+                 grb::ArithmeticSemiring<T>(),
+                 Adiag, A);
     }
 
 
@@ -180,15 +177,15 @@ namespace GraphBLAS
     {
         using T = typename MatrixT::ScalarType;
 
-        GraphBLAS::Vector<T> w(A.nrows());
-        GraphBLAS::reduce(w,
-                          GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                          GraphBLAS::Plus<T>(),
-                          GraphBLAS::transpose(A));
-        GraphBLAS::apply(w,
-                         GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                         GraphBLAS::MultiplicativeInverse<T>(),
-                         w);
+        grb::Vector<T> w(A.nrows());
+        grb::reduce(w,
+                    grb::NoMask(), grb::NoAccumulate(),
+                    grb::Plus<T>(),
+                    grb::transpose(A));
+        grb::apply(w,
+                   grb::NoMask(), grb::NoAccumulate(),
+                   grb::MultiplicativeInverse<T>(),
+                   w);
 
         IndexArrayType indices(w.nvals());
         std::vector<typename MatrixT::ScalarType> vals(w.nvals());
@@ -199,9 +196,9 @@ namespace GraphBLAS
         Adiag.build(indices.begin(), indices.begin(), vals.begin(), vals.size());
 
         //Perform matrix multiply to scale rows
-        GraphBLAS::mxm(A,
-                       GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-                       GraphBLAS::ArithmeticSemiring<T>(),
-                       A, Adiag);
+        grb::mxm(A,
+                 grb::NoMask(), grb::NoAccumulate(),
+                 grb::ArithmeticSemiring<T>(),
+                 A, Adiag);
     }
 }

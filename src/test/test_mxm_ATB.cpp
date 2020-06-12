@@ -41,7 +41,7 @@
 
 #include <boost/test/included/unit_test.hpp>
 
-using namespace GraphBLAS;
+using namespace grb;
 
 BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
@@ -207,19 +207,19 @@ namespace
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_NoMask_NoAccum_ATB)
 {
-    GraphBLAS::Matrix<double> C(3, 4);
-    GraphBLAS::Matrix<double> A(AT_sparse_3x3, 0.);
-    GraphBLAS::Matrix<double> B(B_sparse_3x4, 0.);
+    grb::Matrix<double> C(3, 4);
+    grb::Matrix<double> A(AT_sparse_3x3, 0.);
+    grb::Matrix<double> B(B_sparse_3x4, 0.);
 
-    GraphBLAS::Matrix<double> answer(Answer_sparse, 0.);
+    grb::Matrix<double> answer(Answer_sparse, 0.);
 
-    GraphBLAS::mxm(C,
-                   GraphBLAS::NoMask(),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
-    for (GraphBLAS::IndexType ix = 0; ix < answer.nrows(); ++ix)
+    grb::mxm(C,
+             grb::NoMask(),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
+    for (grb::IndexType ix = 0; ix < answer.nrows(); ++ix)
     {
-        for (GraphBLAS::IndexType iy = 0; iy < answer.ncols(); ++iy)
+        for (grb::IndexType iy = 0; iy < answer.ncols(); ++iy)
         {
             BOOST_CHECK_EQUAL(C.hasElement(ix, iy), answer.hasElement(ix, iy));
             if (C.hasElement(ix, iy))
@@ -234,19 +234,19 @@ BOOST_AUTO_TEST_CASE(test_mxm_NoMask_NoAccum_ATB)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_NoMask_NoAccum_ATB_empty)
 {
-    GraphBLAS::Matrix<double> Zero(3, 3);
-    GraphBLAS::Matrix<double> Ones(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> C(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> mD(Ones_3x3, 0.);
+    grb::Matrix<double> Zero(3, 3);
+    grb::Matrix<double> Ones(Ones_3x3, 0.);
+    grb::Matrix<double> C(Ones_3x3, 0.);
+    grb::Matrix<double> mD(Ones_3x3, 0.);
 
-    GraphBLAS::mxm(C,
-                   NoMask(), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Zero), Ones);
+    grb::mxm(C,
+             NoMask(), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Zero), Ones);
     BOOST_CHECK_EQUAL(C, Zero);
 
-    GraphBLAS::mxm(mD,
-                   NoMask(), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Zero);
+    grb::mxm(mD,
+             NoMask(), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Zero);
     BOOST_CHECK_EQUAL(mD, Zero);
 }
 
@@ -261,8 +261,8 @@ BOOST_AUTO_TEST_CASE(test_mxm_NoMask_NoAccum_ATB_dense)
     Matrix<double, DirectedMatrixTag> answer(Answer_dense, 0.);
 
     mxm(result,
-        GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-        GraphBLAS::ArithmeticSemiring<double>(),
+        grb::NoMask(), grb::NoAccumulate(),
+        grb::ArithmeticSemiring<double>(),
         transpose(A), B);
 
     BOOST_CHECK_EQUAL(result, answer);
@@ -283,15 +283,15 @@ BOOST_AUTO_TEST_CASE(test_mxm_NoMask_NoAccum_ATB_emptyRowA_emptyColB)
                                                     {0, 0, 0, 0},
                                                     {9, 0, 11, 15}};
 
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> result(3, 4);
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> result(3, 4);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
-    GraphBLAS::mxm(result,
-                   GraphBLAS::NoMask(),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(result,
+             grb::NoMask(),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(result, answer);
 }
 
@@ -310,15 +310,15 @@ BOOST_AUTO_TEST_CASE(test_mxm_NoMask_NoAccum_ATB_emptyColA_emptyRowB)
                                                     {0, 1, 0, 1},
                                                     {0, 4, 0, 4}};
 
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> result(3, 4);
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> result(3, 4);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
-    GraphBLAS::mxm(result,
-                   GraphBLAS::NoMask(),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(result,
+             grb::NoMask(),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(result, answer);
 }
 
@@ -331,8 +331,8 @@ BOOST_AUTO_TEST_CASE(test_mxm_NoMask_NoAccum_ATB_ABdup)
     Matrix<double, DirectedMatrixTag> answer(Symmetric2_4x4, 0.);
 
     mxm(m3,
-        GraphBLAS::NoMask(), GraphBLAS::NoAccumulate(),
-        GraphBLAS::ArithmeticSemiring<double>(),
+        grb::NoMask(), grb::NoAccumulate(),
+        grb::ArithmeticSemiring<double>(),
         transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(m3, answer);
@@ -341,15 +341,15 @@ BOOST_AUTO_TEST_CASE(test_mxm_NoMask_NoAccum_ATB_ABdup)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_NoMask_NoAccum_ATB_ACdup)
 {
-    GraphBLAS::Matrix<double> C(AT_sparse_3x3, 0.);
-    GraphBLAS::Matrix<double> B(A_sparse_3x3, 0.);
+    grb::Matrix<double> C(AT_sparse_3x3, 0.);
+    grb::Matrix<double> B(A_sparse_3x3, 0.);
 
-    GraphBLAS::Matrix<double> answer(AA_answer_sparse, 0.);
+    grb::Matrix<double> answer(AA_answer_sparse, 0.);
 
-    GraphBLAS::mxm(C,
-                   GraphBLAS::NoMask(),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(C), B);
+    grb::mxm(C,
+             grb::NoMask(),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(C), B);
 
     BOOST_CHECK_EQUAL(C, answer);
 }
@@ -357,15 +357,15 @@ BOOST_AUTO_TEST_CASE(test_mxm_NoMask_NoAccum_ATB_ACdup)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_NoMask_NoAccum_ATB_BCdup)
 {
-    GraphBLAS::Matrix<double> A(AT_sparse_3x3, 0.);
-    GraphBLAS::Matrix<double> C(B_sparse_3x4, 0.);
+    grb::Matrix<double> A(AT_sparse_3x3, 0.);
+    grb::Matrix<double> C(B_sparse_3x4, 0.);
 
-    GraphBLAS::Matrix<double> answer(Answer_sparse, 0.);
+    grb::Matrix<double> answer(Answer_sparse, 0.);
 
-    GraphBLAS::mxm(C,
-                   GraphBLAS::NoMask(),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), C);
+    grb::mxm(C,
+             grb::NoMask(),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), C);
 
     BOOST_CHECK_EQUAL(C, answer);
 }
@@ -377,34 +377,34 @@ BOOST_AUTO_TEST_CASE(test_mxm_NoMask_NoAccum_ATB_BCdup)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_NoMask_Accum_ATB)
 {
-    GraphBLAS::Matrix<double> A(AT_dense_3x3, 0.); // 3x3
-    GraphBLAS::Matrix<double> B(B_dense_3x4, 0.); // 3x4
-    GraphBLAS::Matrix<double> result(3, 4);
-    GraphBLAS::Matrix<double> answer(Answer_dense, 0.);
+    grb::Matrix<double> A(AT_dense_3x3, 0.); // 3x3
+    grb::Matrix<double> B(B_dense_3x4, 0.); // 3x4
+    grb::Matrix<double> result(3, 4);
+    grb::Matrix<double> answer(Answer_dense, 0.);
 
-    GraphBLAS::mxm(result,
-                   GraphBLAS::NoMask(),
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(result,
+             grb::NoMask(),
+             grb::Second<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(result, answer);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_NoMask_Accum_ATB_empty)
 {
-    GraphBLAS::Matrix<double> Zero(3, 3);
-    GraphBLAS::Matrix<double> Ones(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> C(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> mD(Ones_3x3, 0.);
+    grb::Matrix<double> Zero(3, 3);
+    grb::Matrix<double> Ones(Ones_3x3, 0.);
+    grb::Matrix<double> C(Ones_3x3, 0.);
+    grb::Matrix<double> mD(Ones_3x3, 0.);
 
-    GraphBLAS::mxm(C,
-                   NoMask(), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Zero), Ones);
+    grb::mxm(C,
+             NoMask(), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Zero), Ones);
     BOOST_CHECK_EQUAL(C, Ones);
 
-    GraphBLAS::mxm(mD,
-                   NoMask(), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Zero);
+    grb::mxm(mD,
+             NoMask(), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Zero);
     BOOST_CHECK_EQUAL(mD, Ones);
 }
 
@@ -416,9 +416,9 @@ BOOST_AUTO_TEST_CASE(test_mxm_NoMask_Accum_ATB_stored_zero_result)
                                             {-1, 1, 0,  0},
                                             { 0, 0, 3, -4},
                                             { 0, 0,-3,  3}};
-    GraphBLAS::Matrix<double> A(Symmetric_4x4, 0);
-    GraphBLAS::Matrix<int> B(B_mat, 0);
-    GraphBLAS::Matrix<int> result(4, 4);
+    grb::Matrix<double> A(Symmetric_4x4, 0);
+    grb::Matrix<int> B(B_mat, 0);
+    grb::Matrix<int> result(4, 4);
 
     // use a different sentinel value so that stored zeros are preserved.
     int const NIL(666);
@@ -426,12 +426,12 @@ BOOST_AUTO_TEST_CASE(test_mxm_NoMask_Accum_ATB_stored_zero_result)
                                           { -1,   0,   6,  -8},
                                           { -2,   2,   0,  -3},
                                           {NIL, NIL,  -3,   0}};
-    GraphBLAS::Matrix<int> answer(ans, NIL);
+    grb::Matrix<int> answer(ans, NIL);
 
-    GraphBLAS::mxm(result,
-                   GraphBLAS::NoMask(),
-                   GraphBLAS::Second<int>(),
-                   GraphBLAS::ArithmeticSemiring<int>(), transpose(A), B);
+    grb::mxm(result,
+             grb::NoMask(),
+             grb::Second<int>(),
+             grb::ArithmeticSemiring<int>(), transpose(A), B);
     BOOST_CHECK_EQUAL(result, answer);
     BOOST_CHECK_EQUAL(result.nvals(), 12);
 }
@@ -440,14 +440,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_NoMask_Accum_ATB_stored_zero_result)
 BOOST_AUTO_TEST_CASE(test_mxm_NoMask_Accum_ATB_ABdup_Cempty)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> result(4, 4);
-    GraphBLAS::Matrix<double> answer(Symmetric2_4x4, 0.);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> result(4, 4);
+    grb::Matrix<double> answer(Symmetric2_4x4, 0.);
 
-    GraphBLAS::mxm(result,
-                   GraphBLAS::NoMask(),
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(result,
+             grb::NoMask(),
+             grb::Second<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -467,15 +467,15 @@ BOOST_AUTO_TEST_CASE(test_mxm_NoMask_Accum_ATB_emptyRowA_emptyColB)
                                                     {1, 1, 1, 1},
                                                     {10,1, 12, 16}};
 
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> result(Ones_3x4, 0.);
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> result(Ones_3x4, 0.);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
-    GraphBLAS::mxm(result,
-                   GraphBLAS::NoMask(),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(result,
+             grb::NoMask(),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(result, answer);
 }
 
@@ -494,15 +494,15 @@ BOOST_AUTO_TEST_CASE(test_mxm_NoMask_Accum_ATB_emptyColA_emptyRowB)
                                                     {1, 2, 1, 2},
                                                     {1, 5, 1, 5}};
 
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> result(Ones_3x4, 0.);
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> result(Ones_3x4, 0.);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
-    GraphBLAS::mxm(result,
-                   GraphBLAS::NoMask(),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(result,
+             grb::NoMask(),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(result, answer);
 }
 
@@ -522,8 +522,8 @@ BOOST_AUTO_TEST_CASE(test_mxm_NoMask_Accum_ATB_ABdup)
     Matrix<double> answer(ans, 0.);
 
     mxm(m3,
-        GraphBLAS::NoMask(), GraphBLAS::Plus<double>(),
-        GraphBLAS::ArithmeticSemiring<double>(),
+        grb::NoMask(), grb::Plus<double>(),
+        grb::ArithmeticSemiring<double>(),
         transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(m3, answer);
@@ -532,8 +532,8 @@ BOOST_AUTO_TEST_CASE(test_mxm_NoMask_Accum_ATB_ABdup)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_NoMask_Accum_ATB_ACdup)
 {
-    GraphBLAS::Matrix<double> C(AT_sparse_3x3, 0.);
-    GraphBLAS::Matrix<double> B(A_sparse_3x3, 0.);
+    grb::Matrix<double> C(AT_sparse_3x3, 0.);
+    grb::Matrix<double> B(A_sparse_3x3, 0.);
 
     // A_sparse_3x3 * A_sparse_3x3 + A_sparse_3x3
     static std::vector<std::vector<double> > ans =
@@ -542,10 +542,10 @@ BOOST_AUTO_TEST_CASE(test_mxm_NoMask_Accum_ATB_ACdup)
          {147.,  49., 90.}};
     Matrix<double> answer(ans, 0.);
 
-    GraphBLAS::mxm(C,
-                   GraphBLAS::NoMask(),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(C), B);
+    grb::mxm(C,
+             grb::NoMask(),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(C), B);
 
     BOOST_CHECK_EQUAL(C, answer);
 }
@@ -553,8 +553,8 @@ BOOST_AUTO_TEST_CASE(test_mxm_NoMask_Accum_ATB_ACdup)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_NoMask_Accum_ATB_BCdup)
 {
-    GraphBLAS::Matrix<double> A(AT_sparse_3x3, 0.);
-    GraphBLAS::Matrix<double> C(A_sparse_3x3, 0.);
+    grb::Matrix<double> A(AT_sparse_3x3, 0.);
+    grb::Matrix<double> C(A_sparse_3x3, 0.);
 
     // A_sparse_3x3 * A_sparse_3x3 + A_sparse_3x3
     static std::vector<std::vector<double> > ans =
@@ -563,10 +563,10 @@ BOOST_AUTO_TEST_CASE(test_mxm_NoMask_Accum_ATB_BCdup)
          {154.,  49., 90.}};
     Matrix<double> answer(ans, 0.);
 
-    GraphBLAS::mxm(C,
-                   GraphBLAS::NoMask(),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), C);
+    grb::mxm(C,
+             grb::NoMask(),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), C);
 
     BOOST_CHECK_EQUAL(C, answer);
 }
@@ -578,133 +578,133 @@ BOOST_AUTO_TEST_CASE(test_mxm_NoMask_Accum_ATB_BCdup)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_Mask_NoAccum_ATB)
 {
-    GraphBLAS::Matrix<double> A(AT_sparse_3x3, 0.0);
-    GraphBLAS::Matrix<double> AT(A_sparse_3x3, 0.0);
-    GraphBLAS::Matrix<double> Identity(Identity_3x3, 0.0);
+    grb::Matrix<double> A(AT_sparse_3x3, 0.0);
+    grb::Matrix<double> AT(A_sparse_3x3, 0.0);
+    grb::Matrix<double> Identity(Identity_3x3, 0.0);
 
-    GraphBLAS::Matrix<double> Empty(3, 3);
-    GraphBLAS::Matrix<double> Ones(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> C(3,3);
+    grb::Matrix<double> Empty(3, 3);
+    grb::Matrix<double> Ones(Ones_3x3, 0.);
+    grb::Matrix<double> C(3,3);
 
-    GraphBLAS::Matrix<double> MLower(Lower_3x3, 0.);
-    GraphBLAS::Matrix<double> MNotLower(NotLower_3x3, 0.);
+    grb::Matrix<double> MLower(Lower_3x3, 0.);
+    grb::Matrix<double> MNotLower(NotLower_3x3, 0.);
 
     static std::vector<std::vector<double> > A_sparse_fill_in_3x3 =
-    {{12, 7,  1},
-     {1, -5,  1},
-     {7,  1,  9}};
-    GraphBLAS::Matrix<double> AFilled(A_sparse_fill_in_3x3, 0.0);
+        {{12, 7,  1},
+         {1, -5,  1},
+         {7,  1,  9}};
+    grb::Matrix<double> AFilled(A_sparse_fill_in_3x3, 0.0);
 
 
     // Merge
     // Mempty vs Mfull vs Mlower
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   Empty, NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity);
+    grb::mxm(C,
+             Empty, NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(A), Identity);
     BOOST_CHECK_EQUAL(C, Ones);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   Ones, NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity);
+    grb::mxm(C,
+             Ones, NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(A), Identity);
     BOOST_CHECK_EQUAL(C, AT);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   AT, NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity);
+    grb::mxm(C,
+             AT, NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(A), Identity);
     BOOST_CHECK_EQUAL(C, AFilled);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   MLower, NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity);
+    grb::mxm(C,
+             MLower, NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity);
     BOOST_CHECK_EQUAL(C, Ones);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   MNotLower, NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity);
+    grb::mxm(C,
+             MNotLower, NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity);
     BOOST_CHECK_EQUAL(C, Ones);
 
     // Replace
     // Mempty vs Mfull vs Mlower
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   Empty, NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
+    grb::mxm(C,
+             Empty, NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, Empty);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   Ones, NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
+    grb::mxm(C,
+             Ones, NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, AT);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   MLower, NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
+    grb::mxm(C,
+             MLower, NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, MLower);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   MNotLower, NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
+    grb::mxm(C,
+             MNotLower, NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, MNotLower);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_Mask_NoAccum_ATBM_empty)
 {
-    GraphBLAS::Matrix<double> Empty(3, 3);
-    GraphBLAS::Matrix<double> Ones(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> C(3,3);
+    grb::Matrix<double> Empty(3, 3);
+    grb::Matrix<double> Ones(Ones_3x3, 0.);
+    grb::Matrix<double> C(3,3);
 
     // NOTE: The mask is true for any non-zero.
-    GraphBLAS::Matrix<bool> M(LowerBool_3x3, false);
+    grb::Matrix<bool> M(LowerBool_3x3, false);
 
-    GraphBLAS::Matrix<double> mUpper(NotLower_3x3, 0.);
+    grb::Matrix<double> mUpper(NotLower_3x3, 0.);
 
     // Merge
     C = Ones;
-    GraphBLAS::mxm(C,
-                   M, NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Empty), Ones);
+    grb::mxm(C,
+             M, NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Empty), Ones);
     BOOST_CHECK_EQUAL(C, mUpper);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   M, NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty);
+    grb::mxm(C,
+             M, NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty);
     BOOST_CHECK_EQUAL(C, mUpper);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   Empty, NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty);
+    grb::mxm(C,
+             Empty, NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty);
     BOOST_CHECK_EQUAL(C, Ones);
 
     // Replace
     C = Ones;
-    GraphBLAS::mxm(C,
-                   M, NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Empty), Ones, REPLACE);
+    grb::mxm(C,
+             M, NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Empty), Ones, REPLACE);
     BOOST_CHECK_EQUAL(C, Empty);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   M, NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
+    grb::mxm(C,
+             M, NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
     BOOST_CHECK_EQUAL(C, Empty);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   Empty, NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
+    grb::mxm(C,
+             Empty, NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
     BOOST_CHECK_EQUAL(C, Empty);
 
 }
@@ -720,8 +720,8 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_NoAccum_ATB_Merge_full_mask)
     Matrix<double, DirectedMatrixTag> mask(Ones_3x4, 0.);
 
     mxm(result,
-        mask, GraphBLAS::NoAccumulate(),
-        GraphBLAS::ArithmeticSemiring<double>(),
+        mask, grb::NoAccumulate(),
+        grb::ArithmeticSemiring<double>(),
         transpose(A), B);
 
     BOOST_CHECK_EQUAL(result, answer);
@@ -739,8 +739,8 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_NoAccum_ATB_mask_not_full)
     Matrix<double, DirectedMatrixTag> mask(Answer_dense, 0.);
 
     mxm(result,
-        mask, GraphBLAS::NoAccumulate(),
-        GraphBLAS::ArithmeticSemiring<double>(),
+        mask, grb::NoAccumulate(),
+        grb::ArithmeticSemiring<double>(),
         transpose(A), B);
 
     BOOST_CHECK_EQUAL(result, answer);
@@ -749,23 +749,23 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_NoAccum_ATB_mask_not_full)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_Mask_NoAccum_ATB_Merge_Cones_Mlower_stored_zero)
 {
-    GraphBLAS::Matrix<double> A(AT_dense_3x3, 0.);
-    GraphBLAS::Matrix<double> B(B_dense_3x4, 0.);
-    GraphBLAS::Matrix<double> M(Lower_3x4, 0.);
+    grb::Matrix<double> A(AT_dense_3x3, 0.);
+    grb::Matrix<double> B(B_dense_3x4, 0.);
+    grb::Matrix<double> M(Lower_3x4, 0.);
     M.setElement(0, 1, 0.);
     BOOST_CHECK_EQUAL(M.nvals(), 7);
 
-    GraphBLAS::Matrix<double> result(Ones_3x4, 0.);
+    grb::Matrix<double> result(Ones_3x4, 0.);
 
     std::vector<std::vector<double> > ans = {{114,   1,   1,  1},
                                              { 74,  97,   1,  1},
                                              {119, 157, 112,  1}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
-    GraphBLAS::mxm(result,
-                   M,
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(result,
+             M,
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(result.nvals(), 12);
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -781,36 +781,36 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_NoAccum_ATB_emptyRowA_emptyColB)
                                                {1, 0, 1, 1},
                                                {0, 0, 1, 1}};
 
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_3x4, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_3x4, 0.);
-    GraphBLAS::Matrix<double> C(3, 4);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> Lower(Lower_3x4, 0.);
+    grb::Matrix<double> Ones(Ones_3x4, 0.);
+    grb::Matrix<double> C(3, 4);
 
     // REPLACE
     std::vector<std::vector<double>> answer_vals = {{1, 0, 0, 0},
                                                     {0, 0, 0, 0},
                                                     {9, 0, 11,0}};
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   Lower,
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
+    grb::mxm(C,
+             Lower,
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
     BOOST_CHECK_EQUAL(C, answer);
 
     // Merge
     std::vector<std::vector<double>> answer_vals2 = {{1, 1, 1, 1},
                                                      {0, 0, 1, 1},
                                                      {9, 0, 11,1}};
-    GraphBLAS::Matrix<double> answer2(answer_vals2, 0.);
+    grb::Matrix<double> answer2(answer_vals2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   Lower,
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(C,
+             Lower,
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(C, answer2);
 }
 
@@ -825,36 +825,36 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_NoAccum_ATB_emptyColA_emptyRowB)
                                                {1, 0, 1, 1},
                                                {0, 0, 0, 0}};
 
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_3x4, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_3x4, 0.);
-    GraphBLAS::Matrix<double> C(3, 4);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> Lower(Lower_3x4, 0.);
+    grb::Matrix<double> Ones(Ones_3x4, 0.);
+    grb::Matrix<double> C(3, 4);
 
     // REPLACE
     std::vector<std::vector<double>> answer_vals = {{0, 0, 0, 0},
                                                     {0, 1, 0, 0},
                                                     {0, 4, 0, 0}};
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   Lower,
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
+    grb::mxm(C,
+             Lower,
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
     BOOST_CHECK_EQUAL(C, answer);
 
     // Merge
     std::vector<std::vector<double>> answer_vals2 = {{0, 1, 1, 1},
                                                      {0, 1, 1, 1},
                                                      {0, 4, 0, 1}};
-    GraphBLAS::Matrix<double> answer2(answer_vals2, 0.);
+    grb::Matrix<double> answer2(answer_vals2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   Lower,
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(C,
+             Lower,
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(C, answer2);
 }
 
@@ -869,36 +869,36 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_NoAccum_ATB_emptyRowM)
                                                {1, 0, 1},
                                                {0, 0, 1}};
 
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> NotLower(NotLower_3x3, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> C(3,3);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> NotLower(NotLower_3x3, 0.);
+    grb::Matrix<double> Ones(Ones_3x3, 0.);
+    grb::Matrix<double> C(3,3);
 
     // Replace
     std::vector<std::vector<double>> answer_vals = {{0, 0, 7},
                                                     {0, 0, 0},
                                                     {0, 0, 0}};
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   NotLower,
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
+    grb::mxm(C,
+             NotLower,
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
     BOOST_CHECK_EQUAL(C, answer);
 
     // Merge
     std::vector<std::vector<double>> answer_vals2 = {{1, 0, 7},
                                                      {1, 1, 0},
                                                      {1, 1, 1}};
-    GraphBLAS::Matrix<double> answer2(answer_vals2, 0.);
+    grb::Matrix<double> answer2(answer_vals2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   NotLower,
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(C,
+             NotLower,
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(C, answer2);
 }
 
@@ -906,23 +906,23 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_NoAccum_ATB_emptyRowM)
 BOOST_AUTO_TEST_CASE(test_mxm_Mask_NoAccum_ATB_ABdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_4x4, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> Lower(Lower_4x4, 0.);
+    grb::Matrix<double> Ones(Ones_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{2,  1,  1,  1},
                                              {3,  9,  1,  1},
                                              {2, 10, 22,  1},
                                              {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   Lower,
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(C,
+             Lower,
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -931,14 +931,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_NoAccum_ATB_ABdup)
                                               {3,  9,  0,  0},
                                               {2, 10, 22,  0},
                                               {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   Lower,
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat,
-                   REPLACE);
+    grb::mxm(C,
+             Lower,
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -947,23 +947,23 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_NoAccum_ATB_ABdup)
 BOOST_AUTO_TEST_CASE(test_mxm_Mask_NoAccum_ATB_ACdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_4x4, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> Lower(Lower_4x4, 0.);
+    grb::Matrix<double> Ones(Ones_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{2,  1,  0,  0},
                                              {3,  9,  2,  0},
                                              {2, 10, 22,  3},
                                              {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   Lower,
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(C), mat);
+    grb::mxm(C,
+             Lower,
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(C), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -972,14 +972,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_NoAccum_ATB_ACdup)
                                               {3,  9,  0,  0},
                                               {2, 10, 22,  0},
                                               {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   Lower,
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(C), mat,
-                   REPLACE);
+    grb::mxm(C,
+             Lower,
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(C), mat,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -988,32 +988,32 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_NoAccum_ATB_ACdup)
 BOOST_AUTO_TEST_CASE(test_mxm_Mask_NoAccum_ATB_BCdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_4x4, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> Lower(Lower_4x4, 0.);
+    grb::Matrix<double> Ones(Ones_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{2,  1,  0,  0},
                                              {3,  9,  2,  0},
                                              {2, 10, 22,  3},
                                              {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   Lower,
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), C);
+    grb::mxm(C,
+             Lower,
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), C);
 
     BOOST_CHECK_EQUAL(C, answer);
 
     // Double check previous operation (without duplicating)
     C = mat;
-    GraphBLAS::mxm(C,
-                   Lower,
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(C,
+             Lower,
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -1022,14 +1022,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_NoAccum_ATB_BCdup)
                                               {3,  9,  0,  0},
                                               {2, 10, 22,  0},
                                               {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   Lower,
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), C,
-                   REPLACE);
+    grb::mxm(C,
+             Lower,
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), C,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -1038,22 +1038,22 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_NoAccum_ATB_BCdup)
 BOOST_AUTO_TEST_CASE(test_mxm_Mask_NoAccum_ATB_MCdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> Lower(Lower_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{2,  0,  0,  0},
                                              {3,  9,  0,  0},
                                              {2, 10, 22,  0},
                                              {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = Lower;
-    GraphBLAS::mxm(C,
-                   C,
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(C,
+             C,
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -1062,14 +1062,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_NoAccum_ATB_MCdup)
                                               {3,  9,  0,  0},
                                               {2, 10, 22,  0},
                                               {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = Lower;
-    GraphBLAS::mxm(C,
-                   C,
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat,
-                   REPLACE);
+    grb::mxm(C,
+             C,
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -1081,31 +1081,31 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_NoAccum_ATB_MCdup)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB)
 {
-    GraphBLAS::Matrix<double> A(AT_sparse_3x3, 0.0);
-    GraphBLAS::Matrix<double> AT(A_sparse_3x3, 0.0);
-    GraphBLAS::Matrix<double> Identity(Identity_3x3, 0.0);
+    grb::Matrix<double> A(AT_sparse_3x3, 0.0);
+    grb::Matrix<double> AT(A_sparse_3x3, 0.0);
+    grb::Matrix<double> Identity(Identity_3x3, 0.0);
 
-    GraphBLAS::Matrix<double> Empty(3, 3);
-    GraphBLAS::Matrix<double> Ones(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> C(3,3);
+    grb::Matrix<double> Empty(3, 3);
+    grb::Matrix<double> Ones(Ones_3x3, 0.);
+    grb::Matrix<double> C(3,3);
 
-    GraphBLAS::Matrix<double> MLower(Lower_3x3, 0.);
-    GraphBLAS::Matrix<double> MNotLower(NotLower_3x3, 0.);
+    grb::Matrix<double> MLower(Lower_3x3, 0.);
+    grb::Matrix<double> MNotLower(NotLower_3x3, 0.);
 
     static std::vector<std::vector<double> > A_sparse_fill_in_3x3 =
-    {{12, 7,  1},
-     {1, -5,  1},
-     {7,  1,  9}};
-    GraphBLAS::Matrix<double> AFilled(A_sparse_fill_in_3x3, 0.0);
+        {{12, 7,  1},
+         {1, -5,  1},
+         {7,  1,  9}};
+    grb::Matrix<double> AFilled(A_sparse_fill_in_3x3, 0.0);
 
 
     // Merge
     // Mempty vs Mfull vs Mlower
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   Empty, Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity);
+    grb::mxm(C,
+             Empty, Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(A), Identity);
     BOOST_CHECK_EQUAL(C, Ones);
 
     //---
@@ -1115,9 +1115,9 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB)
          {8,  1, 10}};
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   AT, Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity);
+    grb::mxm(C,
+             AT, Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(A), Identity);
     BOOST_CHECK_EQUAL(C, Matrix<double>(ans, 0.));
 
     //---
@@ -1127,9 +1127,9 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB)
          {2,  2,  2}};
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   MLower, Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity);
+    grb::mxm(C,
+             MLower, Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity);
     BOOST_CHECK_EQUAL(C, Matrix<double>(ans2, 0.));
 
     //---
@@ -1139,18 +1139,18 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB)
          {1,  1,  1}};
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   MNotLower, Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity);
+    grb::mxm(C,
+             MNotLower, Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity);
     BOOST_CHECK_EQUAL(C, Matrix<double>(ans3, 0.));
 
     // Replace
     // Mempty vs Mfull vs Mlower
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   Empty, Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
+    grb::mxm(C,
+             Empty, Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, Empty);
 
     //---
@@ -1160,9 +1160,9 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB)
          {8,  1, 10}};
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   Ones, Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
+    grb::mxm(C,
+             Ones, Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, Matrix<double>(ans4, 0.));
 
     //---
@@ -1172,9 +1172,9 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB)
          {2,  2,  2}};
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   MLower, Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
+    grb::mxm(C,
+             MLower, Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, Matrix<double>(ans5, 0.));
 
     //---
@@ -1184,59 +1184,59 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB)
          {0,  0,  0}};
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   MNotLower, Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
+    grb::mxm(C,
+             MNotLower, Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, Matrix<double>(ans6, 0.));
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATBMempty)
 {
-    GraphBLAS::Matrix<double> Empty(3, 3);
-    GraphBLAS::Matrix<double> Ones(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> C(3,3);
+    grb::Matrix<double> Empty(3, 3);
+    grb::Matrix<double> Ones(Ones_3x3, 0.);
+    grb::Matrix<double> C(3,3);
 
     // NOTE: The mask is true for any non-zero.
-    GraphBLAS::Matrix<bool> M(LowerBool_3x3, false);
+    grb::Matrix<bool> M(LowerBool_3x3, false);
 
     // Merge
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   M, Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Empty), Ones);
+    grb::mxm(C,
+             M, Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Empty), Ones);
     BOOST_CHECK_EQUAL(C, Ones);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   M, Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty);
+    grb::mxm(C,
+             M, Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty);
     BOOST_CHECK_EQUAL(C, Ones);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   Empty, Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Ones);
+    grb::mxm(C,
+             Empty, Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Ones);
     BOOST_CHECK_EQUAL(C, Ones);
 
     // Replace
     C = Ones;
-    GraphBLAS::mxm(C,
-                   M, Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Empty), Ones, REPLACE);
+    grb::mxm(C,
+             M, Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Empty), Ones, REPLACE);
     BOOST_CHECK_EQUAL(C, Matrix<double>(Lower_3x3, 0.));
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   M, Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
+    grb::mxm(C,
+             M, Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
     BOOST_CHECK_EQUAL(C, Matrix<double>(Lower_3x3, 0.));
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   Empty, Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
+    grb::mxm(C,
+             Empty, Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
     BOOST_CHECK_EQUAL(C, Empty);
 }
 
@@ -1251,36 +1251,36 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB_emptyRowA_emptyColB)
                                                {1, 0, 1, 1},
                                                {0, 0, 1, 1}};
 
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_3x4, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_3x4, 0.);
-    GraphBLAS::Matrix<double> C(3, 4);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> Lower(Lower_3x4, 0.);
+    grb::Matrix<double> Ones(Ones_3x4, 0.);
+    grb::Matrix<double> C(3, 4);
 
     // REPLACE
     std::vector<std::vector<double>> answer_vals = {{2, 0, 0, 0},
                                                     {1, 1, 0, 0},
                                                     {10,1, 12,0}};
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   Lower,
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
+    grb::mxm(C,
+             Lower,
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
     BOOST_CHECK_EQUAL(C, answer);
 
     // Merge
     std::vector<std::vector<double>> answer_vals2 = {{2, 1, 1, 1},
                                                      {1, 1, 1, 1},
                                                      {10,1,12,1}};
-    GraphBLAS::Matrix<double> answer2(answer_vals2, 0.);
+    grb::Matrix<double> answer2(answer_vals2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   Lower,
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(C,
+             Lower,
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(C, answer2);
 }
 
@@ -1294,36 +1294,36 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB_emptyColA_emptyRowB)
     std::vector<std::vector<double>> B_vals = {{0, 1, 0, 1},
                                                {1, 0, 1, 1},
                                                {0, 0, 0, 0}};
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_3x4, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_3x4, 0.);
-    GraphBLAS::Matrix<double> C(3, 4);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> Lower(Lower_3x4, 0.);
+    grb::Matrix<double> Ones(Ones_3x4, 0.);
+    grb::Matrix<double> C(3, 4);
 
     // REPLACE
     std::vector<std::vector<double>> answer_vals = {{1, 0, 0, 0},
                                                     {1, 2, 0, 0},
                                                     {1, 5, 1, 0}};
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   Lower,
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
+    grb::mxm(C,
+             Lower,
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
     BOOST_CHECK_EQUAL(C, answer);
 
     // Merge
     std::vector<std::vector<double>> answer_vals2 = {{1, 1, 1, 1},
                                                      {1, 2, 1, 1},
                                                      {1, 5, 1, 1}};
-    GraphBLAS::Matrix<double> answer2(answer_vals2, 0.);
+    grb::Matrix<double> answer2(answer_vals2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   Lower,
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(C,
+             Lower,
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(C, answer2);
 }
 
@@ -1338,36 +1338,36 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB_emptyRowM)
                                                {0, 0, 0},
                                                {0, 1, 1}};
 
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> NotLower(NotLower_3x3, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> C(3,3);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> NotLower(NotLower_3x3, 0.);
+    grb::Matrix<double> Ones(Ones_3x3, 0.);
+    grb::Matrix<double> C(3,3);
 
     // Replace
     std::vector<std::vector<double>> answer_vals = {{0, 15, 7},
                                                     {0,  0, 1},
                                                     {0,  0, 0}};
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   NotLower,
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
+    grb::mxm(C,
+             NotLower,
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
     BOOST_CHECK_EQUAL(C, answer);
 
     // Merge
     std::vector<std::vector<double>> answer_vals2 = {{1,15, 7},
                                                      {1, 1, 1},
                                                      {1, 1, 1}};
-    GraphBLAS::Matrix<double> answer2(answer_vals2, 0.);
+    grb::Matrix<double> answer2(answer_vals2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   NotLower,
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(C,
+             NotLower,
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(C, answer2);
 }
 
@@ -1375,23 +1375,23 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB_emptyRowM)
 BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB_ABdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_4x4, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> Lower(Lower_4x4, 0.);
+    grb::Matrix<double> Ones(Ones_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{3,  1,  1,  1},
                                              {4, 10,  1,  1},
                                              {3, 11, 23,  1},
                                              {1,  7, 22, 26}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   Lower,
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(C,
+             Lower,
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -1400,14 +1400,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB_ABdup)
                                               {4, 10,  0,  0},
                                               {3, 11, 23,  0},
                                               {1,  7, 22, 26}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   Lower,
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat,
-                   REPLACE);
+    grb::mxm(C,
+             Lower,
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -1417,23 +1417,23 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB_ACdup)
 {
 
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_4x4, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> Lower(Lower_4x4, 0.);
+    grb::Matrix<double> Ones(Ones_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{3,  1,  0,  0},
                                              {4, 11,  2,  0},
                                              {2, 12, 25,  3},
                                              {0,  6, 24, 29}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   Lower,
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(C), mat);
+    grb::mxm(C,
+             Lower,
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(C), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -1442,14 +1442,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB_ACdup)
                                               {4, 11,  0,  0},
                                               {2, 12, 25,  0},
                                               {0,  6, 24, 29}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   Lower,
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(C), mat,
-                   REPLACE);
+    grb::mxm(C,
+             Lower,
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(C), mat,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -1458,32 +1458,32 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB_ACdup)
 BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB_BCdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_4x4, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> Lower(Lower_4x4, 0.);
+    grb::Matrix<double> Ones(Ones_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{3,  1,  0,  0},
                                              {4, 11,  2,  0},
                                              {2, 12, 25,  3},
                                              {0,  6, 24, 29}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   Lower,
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), C);
+    grb::mxm(C,
+             Lower,
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), C);
 
     BOOST_CHECK_EQUAL(C, answer);
 
     // Double check previous operation (without duplicating)
     C = mat;
-    GraphBLAS::mxm(C,
-                   Lower,
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(C,
+             Lower,
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -1492,14 +1492,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB_BCdup)
                                               {4, 11,  0,  0},
                                               {2, 12, 25,  0},
                                               {0,  6, 24, 29}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   Lower,
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), C,
-                   REPLACE);
+    grb::mxm(C,
+             Lower,
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), C,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -1508,22 +1508,22 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB_BCdup)
 BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB_MCdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> Lower(Lower_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{3,  0,  0,  0},
                                              {4, 10,  0,  0},
                                              {3, 11, 23,  0},
                                              {1,  7, 22, 26}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = Lower;
-    GraphBLAS::mxm(C,
-                   C,
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(C,
+             C,
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -1532,14 +1532,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB_MCdup)
                                               {4, 10,  0,  0},
                                               {3, 11, 23,  0},
                                               {1,  7, 22, 26}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = Lower;
-    GraphBLAS::mxm(C,
-                   C,
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat,
-                   REPLACE);
+    grb::mxm(C,
+             C,
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -1547,23 +1547,23 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB_MCdup)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB_Replace_lower_mask_result_ones)
 {
-    GraphBLAS::Matrix<double> A(AT_dense_3x3, 0.);
-    GraphBLAS::Matrix<double> B(B_dense_3x4, 0.);
-    GraphBLAS::Matrix<double> M(LowerMask_3x4, 0.);
+    grb::Matrix<double> A(AT_dense_3x3, 0.);
+    grb::Matrix<double> B(B_dense_3x4, 0.);
+    grb::Matrix<double> M(LowerMask_3x4, 0.);
     BOOST_CHECK_EQUAL(M.nvals(), 6);
 
-    GraphBLAS::Matrix<double> result(Ones_3x4, 0.);
+    grb::Matrix<double> result(Ones_3x4, 0.);
 
     std::vector<std::vector<double> > ans = {{114,   0,   0,  0},
                                              { 74,  97,   0,  0},
                                              {119, 157, 112,  0}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
-    GraphBLAS::mxm(result,
-                   M,
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B,
-                   REPLACE);
+    grb::mxm(result,
+             M,
+             grb::Second<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(result.nvals(), 6);
     BOOST_CHECK_EQUAL(result, answer);
@@ -1572,23 +1572,23 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB_Replace_lower_mask_result_ones)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB_Replace_bool_masked_result_ones)
 {
-    GraphBLAS::Matrix<double> A(AT_dense_3x3, 0.);
-    GraphBLAS::Matrix<double> B(B_dense_3x4, 0.);
-    GraphBLAS::Matrix<bool> M(LowerBool_3x4, false);
+    grb::Matrix<double> A(AT_dense_3x3, 0.);
+    grb::Matrix<double> B(B_dense_3x4, 0.);
+    grb::Matrix<bool> M(LowerBool_3x4, false);
     BOOST_CHECK_EQUAL(M.nvals(), 6);
 
-    GraphBLAS::Matrix<double> result(Ones_3x4, 0.);
+    grb::Matrix<double> result(Ones_3x4, 0.);
 
     std::vector<std::vector<double> > ans = {{114,   0,   0,  0},
                                              { 74,  97,   0,  0},
                                              {119, 157, 112,  0}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
-    GraphBLAS::mxm(result,
-                   M,
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B,
-                   REPLACE);
+    grb::mxm(result,
+             M,
+             grb::Second<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(result.nvals(), 6);
     BOOST_CHECK_EQUAL(result, answer);
@@ -1597,24 +1597,24 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB_Replace_bool_masked_result_ones)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB_Replace_mask_stored_zero_result_ones)
 {
-    GraphBLAS::Matrix<double> A(AT_dense_3x3, 0.);
-    GraphBLAS::Matrix<double> B(B_dense_3x4, 0.);
-    GraphBLAS::Matrix<double> M(Lower_3x4, 0.);
+    grb::Matrix<double> A(AT_dense_3x3, 0.);
+    grb::Matrix<double> B(B_dense_3x4, 0.);
+    grb::Matrix<double> M(Lower_3x4, 0.);
     M.setElement(0, 1, 0.);
     BOOST_CHECK_EQUAL(M.nvals(), 7);
 
-    GraphBLAS::Matrix<double> result(Ones_3x4, 0.);
+    grb::Matrix<double> result(Ones_3x4, 0.);
 
     std::vector<std::vector<double> > ans = {{114,   0,   0,  0},
                                              { 74,  97,   0,  0},
                                              {119, 157, 112,  0}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
-    GraphBLAS::mxm(result,
-                   M,
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B,
-                   REPLACE);
+    grb::mxm(result,
+             M,
+             grb::Second<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B,
+             REPLACE);
     BOOST_CHECK_EQUAL(result.nvals(), 6);
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -1622,26 +1622,26 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB_Replace_mask_stored_zero_result_one
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB_Merge_Cones_Mlower)
 {
-    GraphBLAS::Matrix<double> A(AT_dense_3x3, 0.);
-    GraphBLAS::Matrix<double> B(B_dense_3x4, 0.);
+    grb::Matrix<double> A(AT_dense_3x3, 0.);
+    grb::Matrix<double> B(B_dense_3x4, 0.);
 
     static std::vector<std::vector<double> > M_3x4 = {{1, 0, 0, 0},
                                                       {1, 1, 0, 0},
                                                       {1, 1, 1, 0}};
-    GraphBLAS::Matrix<double> M(M_3x4, 0.);
+    grb::Matrix<double> M(M_3x4, 0.);
     BOOST_CHECK_EQUAL(M.nvals(), 6);
 
-    GraphBLAS::Matrix<double> result(Ones_3x4, 0.);
+    grb::Matrix<double> result(Ones_3x4, 0.);
 
     std::vector<std::vector<double> > ans = {{114,   1,   1,  1},
                                              { 74,  97,   1,  1},
                                              {119, 157, 112,  1}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
-    GraphBLAS::mxm(result,
-                   M,
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(result,
+             M,
+             grb::Second<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(result.nvals(), 12);
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -1653,174 +1653,174 @@ BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB_Merge_Cones_Mlower)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_CompMask_NoAccum_ATB)
 {
-    GraphBLAS::Matrix<double> A(A_sparse_3x3, 0.0);
-    GraphBLAS::Matrix<double> AT(AT_sparse_3x3, 0.0);
-    GraphBLAS::Matrix<double> Identity(Identity_3x3, 0.0);
+    grb::Matrix<double> A(A_sparse_3x3, 0.0);
+    grb::Matrix<double> AT(AT_sparse_3x3, 0.0);
+    grb::Matrix<double> Identity(Identity_3x3, 0.0);
 
-    GraphBLAS::Matrix<double> Empty(3, 3);
-    GraphBLAS::Matrix<double> Ones(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> C(3,3);
+    grb::Matrix<double> Empty(3, 3);
+    grb::Matrix<double> Ones(Ones_3x3, 0.);
+    grb::Matrix<double> C(3,3);
 
-    GraphBLAS::Matrix<double> MLower(Lower_3x3, 0.);
-    GraphBLAS::Matrix<double> MNotLower(NotLower_3x3, 0.);
+    grb::Matrix<double> MLower(Lower_3x3, 0.);
+    grb::Matrix<double> MNotLower(NotLower_3x3, 0.);
 
     static std::vector<std::vector<double> > Not_AT_sparse_3x3 =
         {{0,  1,  0},
          {0,  0,  1},
          {1,  1,  0}};
-    GraphBLAS::Matrix<double> NotAT(Not_AT_sparse_3x3, 0.0);
+    grb::Matrix<double> NotAT(Not_AT_sparse_3x3, 0.0);
     static std::vector<std::vector<double> > A_sparse_fill_in_3x3 =
         {{12, 1,  7},
          {7, -5,  1},
          {1,  1,  9}};
-    GraphBLAS::Matrix<double> AFilled(A_sparse_fill_in_3x3, 0.0);
+    grb::Matrix<double> AFilled(A_sparse_fill_in_3x3, 0.0);
 
 
     // Merge
     // Mempty vs Mfull vs Mlower
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(Ones), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity);
+    grb::mxm(C,
+             complement(Ones), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(A), Identity);
     BOOST_CHECK_EQUAL(C, Ones);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(Empty), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity);
+    grb::mxm(C,
+             complement(Empty), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(A), Identity);
     BOOST_CHECK_EQUAL(C, AT);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(NotAT), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity);
+    grb::mxm(C,
+             complement(NotAT), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(A), Identity);
     BOOST_CHECK_EQUAL(C, AFilled);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(MNotLower), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity);
+    grb::mxm(C,
+             complement(MNotLower), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity);
     BOOST_CHECK_EQUAL(C, Ones);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(MLower), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity);
+    grb::mxm(C,
+             complement(MLower), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity);
     BOOST_CHECK_EQUAL(C, Ones);
 
     // Replace
     // Mempty vs Mfull vs Mlower
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(Ones), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
+    grb::mxm(C,
+             complement(Ones), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, Empty);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(Empty), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
+    grb::mxm(C,
+             complement(Empty), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, AT);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(MNotLower), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
+    grb::mxm(C,
+             complement(MNotLower), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, MLower);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(MLower), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
+    grb::mxm(C,
+             complement(MLower), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, MNotLower);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_CompMask_NoAccum_ATB_empty)
 {
-    GraphBLAS::Matrix<double> Empty(3, 3);
-    GraphBLAS::Matrix<double> Ones(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> Identity(Identity_3x3, 0.);
-    GraphBLAS::Matrix<double> C(3,3);
+    grb::Matrix<double> Empty(3, 3);
+    grb::Matrix<double> Ones(Ones_3x3, 0.);
+    grb::Matrix<double> Identity(Identity_3x3, 0.);
+    grb::Matrix<double> C(3,3);
 
     // NOTE: The mask is true for any non-zero.
-    GraphBLAS::Matrix<bool> M(LowerBool_3x3, false);
+    grb::Matrix<bool> M(LowerBool_3x3, false);
 
-    GraphBLAS::Matrix<double> mUpper(NotLower_3x3, 0.);
+    grb::Matrix<double> mUpper(NotLower_3x3, 0.);
 
     // Merge
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(mUpper), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Empty), Ones);
+    grb::mxm(C,
+             complement(mUpper), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Empty), Ones);
     BOOST_CHECK_EQUAL(C, mUpper);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(mUpper), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty);
+    grb::mxm(C,
+             complement(mUpper), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty);
     BOOST_CHECK_EQUAL(C, mUpper);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(Ones), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty);
+    grb::mxm(C,
+             complement(Ones), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty);
     BOOST_CHECK_EQUAL(C, Ones);
 
     C = Empty;
-    GraphBLAS::mxm(C,
-                   complement(Empty), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity);
+    grb::mxm(C,
+             complement(Empty), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity);
     BOOST_CHECK_EQUAL(C, Ones);
 
     // Replace
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(mUpper), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Empty), Ones, REPLACE);
+    grb::mxm(C,
+             complement(mUpper), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Empty), Ones, REPLACE);
     BOOST_CHECK_EQUAL(C, Empty);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(mUpper), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
+    grb::mxm(C,
+             complement(mUpper), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
     BOOST_CHECK_EQUAL(C, Empty);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(Ones), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
+    grb::mxm(C,
+             complement(Ones), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
     BOOST_CHECK_EQUAL(C, Empty);
 
     C = Empty;
-    GraphBLAS::mxm(C,
-                   complement(Empty), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
+    grb::mxm(C,
+             complement(Empty), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, Ones);
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_CompMask_NoAccum_ATB_Merge_Cones_Mlower_stored_zero)
 {
-    GraphBLAS::Matrix<double> A(AT_dense_3x3, 0.);
-    GraphBLAS::Matrix<double> B(B_dense_3x4, 0.);
-    GraphBLAS::Matrix<double> M(NotLower_3x4, 0.);
+    grb::Matrix<double> A(AT_dense_3x3, 0.);
+    grb::Matrix<double> B(B_dense_3x4, 0.);
+    grb::Matrix<double> M(NotLower_3x4, 0.);
     M.setElement(0, 0, 0.);
     BOOST_CHECK_EQUAL(M.nvals(), 7);
 
-    GraphBLAS::Matrix<double> result(Ones_3x4, 0.);
+    grb::Matrix<double> result(Ones_3x4, 0.);
 
     std::vector<std::vector<double> > ans = {{114,   1,   1,  1},
                                              { 74,  97,   1,  1},
                                              {119, 157, 112,  1}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
-    GraphBLAS::mxm(result,
-                   complement(M),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(result,
+             complement(M),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(result.nvals(), 12);
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -1836,36 +1836,36 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_NoAccum_ATB_emptyRowA_emptyColB)
                                                {1, 0, 1, 1},
                                                {0, 0, 1, 1}};
 
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> NotLower(NotLower_3x4, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_3x4, 0.);
-    GraphBLAS::Matrix<double> C(3, 4);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> NotLower(NotLower_3x4, 0.);
+    grb::Matrix<double> Ones(Ones_3x4, 0.);
+    grb::Matrix<double> C(3, 4);
 
     // REPLACE
     std::vector<std::vector<double>> answer_vals = {{1, 0, 0, 0},
                                                     {0, 0, 0, 0},
                                                     {9, 0, 11,0}};
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(NotLower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
+    grb::mxm(C,
+             complement(NotLower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
     BOOST_CHECK_EQUAL(C, answer);
 
     // Merge
     std::vector<std::vector<double>> answer_vals2 = {{1, 1, 1, 1},
                                                      {0, 0, 1, 1},
                                                      {9, 0, 11,1}};
-    GraphBLAS::Matrix<double> answer2(answer_vals2, 0.);
+    grb::Matrix<double> answer2(answer_vals2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(NotLower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(C,
+             complement(NotLower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(C, answer2);
 }
 
@@ -1880,36 +1880,36 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_NoAccum_ATB_emptyColA_emptyRowB)
                                                {1, 0, 1, 1},
                                                {0, 0, 0, 0}};
 
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> NotLower(NotLower_3x4, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_3x4, 0.);
-    GraphBLAS::Matrix<double> C(3, 4);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> NotLower(NotLower_3x4, 0.);
+    grb::Matrix<double> Ones(Ones_3x4, 0.);
+    grb::Matrix<double> C(3, 4);
 
     // REPLACE
     std::vector<std::vector<double>> answer_vals = {{0, 0, 0, 0},
                                                     {0, 1, 0, 0},
                                                     {0, 4, 0, 0}};
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(NotLower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
+    grb::mxm(C,
+             complement(NotLower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
     BOOST_CHECK_EQUAL(C, answer);
 
     // Merge
     std::vector<std::vector<double>> answer_vals2 = {{0, 1, 1, 1},
                                                      {0, 1, 1, 1},
                                                      {0, 4, 0, 1}};
-    GraphBLAS::Matrix<double> answer2(answer_vals2, 0.);
+    grb::Matrix<double> answer2(answer_vals2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(NotLower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(C,
+             complement(NotLower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(C, answer2);
 }
 
@@ -1924,36 +1924,36 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_NoAccum_ATB_emptyRowM)
                                                {1, 0, 1},
                                                {0, 0, 1}};
 
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_3x3, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> C(3,3);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> Lower(Lower_3x3, 0.);
+    grb::Matrix<double> Ones(Ones_3x3, 0.);
+    grb::Matrix<double> C(3,3);
 
     // Replace
     std::vector<std::vector<double>> answer_vals = {{0, 0, 7},
                                                     {0, 0, 0},
                                                     {0, 0, 0}};
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(Lower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
+    grb::mxm(C,
+             complement(Lower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
     BOOST_CHECK_EQUAL(C, answer);
 
     // Merge
     std::vector<std::vector<double>> answer_vals2 = {{1, 0, 7},
                                                      {1, 1, 0},
                                                      {1, 1, 1}};
-    GraphBLAS::Matrix<double> answer2(answer_vals2, 0.);
+    grb::Matrix<double> answer2(answer_vals2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(Lower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(C,
+             complement(Lower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(C, answer2);
 }
 
@@ -1961,23 +1961,23 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_NoAccum_ATB_emptyRowM)
 BOOST_AUTO_TEST_CASE(test_mxm_CompMask_NoAccum_ATB_ABdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> NotLower(NotLower_4x4, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> NotLower(NotLower_4x4, 0.);
+    grb::Matrix<double> Ones(Ones_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{2,  1,  1,  1},
                                              {3,  9,  1,  1},
                                              {2, 10, 22,  1},
                                              {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(NotLower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(C,
+             complement(NotLower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -1986,14 +1986,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_NoAccum_ATB_ABdup)
                                               {3,  9,  0,  0},
                                               {2, 10, 22,  0},
                                               {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(NotLower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat,
-                   REPLACE);
+    grb::mxm(C,
+             complement(NotLower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -2002,73 +2002,23 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_NoAccum_ATB_ABdup)
 BOOST_AUTO_TEST_CASE(test_mxm_CompMask_NoAccum_ATB_ACdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> NotLower(NotLower_4x4, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> NotLower(NotLower_4x4, 0.);
+    grb::Matrix<double> Ones(Ones_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{2,  1,  0,  0},
                                              {3,  9,  2,  0},
                                              {2, 10, 22,  3},
                                              {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   complement(NotLower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(C), mat);
-
-    BOOST_CHECK_EQUAL(C, answer);
-
-    // Replace
-    std::vector<std::vector<double> > ans2 = {{2,  0,  0,  0},
-                                             {3,  9,  0,  0},
-                                             {2, 10, 22,  0},
-                                             {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
-
-    C = mat;
-    GraphBLAS::mxm(C,
-                   complement(NotLower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(C), mat,
-                   REPLACE);
-
-    BOOST_CHECK_EQUAL(C, answer2);
-}
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(test_mxm_CompMask_NoAccum_ATB_BCdup)
-{
-    // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> NotLower(NotLower_4x4, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
-
-    // Merge
-    std::vector<std::vector<double> > ans = {{2,  1,  0,  0},
-                                             {3,  9,  2,  0},
-                                             {2, 10, 22,  3},
-                                             {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
-
-    C = mat;
-    GraphBLAS::mxm(C,
-                   complement(NotLower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), C);
-
-    BOOST_CHECK_EQUAL(C, answer);
-
-    // Double check previous operation (without duplicating)
-    C = mat;
-    GraphBLAS::mxm(C,
-                   complement(NotLower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(C,
+             complement(NotLower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(C), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -2077,14 +2027,64 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_NoAccum_ATB_BCdup)
                                               {3,  9,  0,  0},
                                               {2, 10, 22,  0},
                                               {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   complement(NotLower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), C,
-                   REPLACE);
+    grb::mxm(C,
+             complement(NotLower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(C), mat,
+             REPLACE);
+
+    BOOST_CHECK_EQUAL(C, answer2);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_mxm_CompMask_NoAccum_ATB_BCdup)
+{
+    // Build some matrices.
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> NotLower(NotLower_4x4, 0.);
+    grb::Matrix<double> Ones(Ones_4x4, 0.);
+    grb::Matrix<double> C(4,4);
+
+    // Merge
+    std::vector<std::vector<double> > ans = {{2,  1,  0,  0},
+                                             {3,  9,  2,  0},
+                                             {2, 10, 22,  3},
+                                             {0,  6, 21, 25}};
+    grb::Matrix<double> answer(ans, 0.);
+
+    C = mat;
+    grb::mxm(C,
+             complement(NotLower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), C);
+
+    BOOST_CHECK_EQUAL(C, answer);
+
+    // Double check previous operation (without duplicating)
+    C = mat;
+    grb::mxm(C,
+             complement(NotLower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
+
+    BOOST_CHECK_EQUAL(C, answer);
+
+    // Replace
+    std::vector<std::vector<double> > ans2 = {{2,  0,  0,  0},
+                                              {3,  9,  0,  0},
+                                              {2, 10, 22,  0},
+                                              {0,  6, 21, 25}};
+    grb::Matrix<double> answer2(ans2, 0.);
+
+    C = mat;
+    grb::mxm(C,
+             complement(NotLower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), C,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -2093,22 +2093,22 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_NoAccum_ATB_BCdup)
 BOOST_AUTO_TEST_CASE(test_mxm_CompMask_NoAccum_ATB_Replace_ABdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> result(Ones_4x4, 0.);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> result(Ones_4x4, 0.);
 
     std::vector<std::vector<double> > ans = {{2,  0,  0,  0},
                                              {3,  9,  0,  0},
                                              {2, 10, 22,  0},
                                              {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
-    GraphBLAS::Matrix<double> M(NotLower_4x4, 0.);
+    grb::Matrix<double> M(NotLower_4x4, 0.);
 
-    GraphBLAS::mxm(result,
-                   GraphBLAS::complement(M),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat,
-                   REPLACE);
+    grb::mxm(result,
+             grb::complement(M),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -2120,36 +2120,36 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_NoAccum_ATB_Replace_ABdup)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB)
 {
-    GraphBLAS::Matrix<double> A(AT_sparse_3x3, 0.0);
-    GraphBLAS::Matrix<double> Identity(Identity_3x3, 0.0);
+    grb::Matrix<double> A(AT_sparse_3x3, 0.0);
+    grb::Matrix<double> Identity(Identity_3x3, 0.0);
 
-    GraphBLAS::Matrix<double> Empty(3, 3);
-    GraphBLAS::Matrix<double> Ones(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> C(3,3);
+    grb::Matrix<double> Empty(3, 3);
+    grb::Matrix<double> Ones(Ones_3x3, 0.);
+    grb::Matrix<double> C(3,3);
 
-    GraphBLAS::Matrix<double> MLower(Lower_3x3, 0.);
-    GraphBLAS::Matrix<double> MNotLower(NotLower_3x3, 0.);
+    grb::Matrix<double> MLower(Lower_3x3, 0.);
+    grb::Matrix<double> MNotLower(NotLower_3x3, 0.);
 
     static std::vector<std::vector<double> > A_sparse_fill_in_3x3 =
-    {{12, 7,  1},
-     {1, -5,  1},
-     {7,  1,  9}};
-    GraphBLAS::Matrix<double> AFilled(A_sparse_fill_in_3x3, 0.0);
+        {{12, 7,  1},
+         {1, -5,  1},
+         {7,  1,  9}};
+    grb::Matrix<double> AFilled(A_sparse_fill_in_3x3, 0.0);
 
 
     static std::vector<std::vector<double> > Not_A_3x3 =
         {{0,  0,  1},
          {1,  0,  1},
          {0,  1,  0}};
-    GraphBLAS::Matrix<double> NotA(Not_A_3x3, 0.0);
+    grb::Matrix<double> NotA(Not_A_3x3, 0.0);
 
     // Merge
     // Mempty vs Mfull vs Mlower
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(Ones), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity);
+    grb::mxm(C,
+             complement(Ones), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(A), Identity);
     BOOST_CHECK_EQUAL(C, Ones);
 
     //---
@@ -2159,9 +2159,9 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB)
          {8,  1, 10}};
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(NotA), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity);
+    grb::mxm(C,
+             complement(NotA), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(A), Identity);
     BOOST_CHECK_EQUAL(C, Matrix<double>(ans, 0.));
 
     //---
@@ -2171,9 +2171,9 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB)
          {2,  2,  2}};
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(MNotLower), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity);
+    grb::mxm(C,
+             complement(MNotLower), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity);
     BOOST_CHECK_EQUAL(C, Matrix<double>(ans2, 0.));
 
     //---
@@ -2183,18 +2183,18 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB)
          {1,  1,  1}};
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(MLower), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity);
+    grb::mxm(C,
+             complement(MLower), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity);
     BOOST_CHECK_EQUAL(C, Matrix<double>(ans3, 0.));
 
     // Replace
     // Mempty vs Mfull vs Mlower
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(Ones), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
+    grb::mxm(C,
+             complement(Ones), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, Empty);
 
     //---
@@ -2204,9 +2204,9 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB)
          {8,  1, 10}};
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(Empty), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
+    grb::mxm(C,
+             complement(Empty), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, Matrix<double>(ans4, 0.));
 
     //---
@@ -2216,9 +2216,9 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB)
          {2,  2,  2}};
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(MNotLower), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
+    grb::mxm(C,
+             complement(MNotLower), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, Matrix<double>(ans5, 0.));
 
     //---
@@ -2228,59 +2228,59 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB)
          {0,  0,  0}};
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(MLower), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
+    grb::mxm(C,
+             complement(MLower), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, Matrix<double>(ans6, 0.));
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATBM_empty)
 {
-    GraphBLAS::Matrix<double> Empty(3, 3);
-    GraphBLAS::Matrix<double> Ones(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> C(3,3);
+    grb::Matrix<double> Empty(3, 3);
+    grb::Matrix<double> Ones(Ones_3x3, 0.);
+    grb::Matrix<double> C(3,3);
 
     // NOTE: The mask is true for any non-zero.
-    GraphBLAS::Matrix<bool> MNotLower(NotLowerBool_3x3, false);
+    grb::Matrix<bool> MNotLower(NotLowerBool_3x3, false);
 
     // Merge
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(MNotLower), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Empty), Ones);
+    grb::mxm(C,
+             complement(MNotLower), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Empty), Ones);
     BOOST_CHECK_EQUAL(C, Ones);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(MNotLower), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty);
+    grb::mxm(C,
+             complement(MNotLower), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty);
     BOOST_CHECK_EQUAL(C, Ones);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(Ones), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Ones);
+    grb::mxm(C,
+             complement(Ones), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Ones);
     BOOST_CHECK_EQUAL(C, Ones);
 
     // Replace
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(MNotLower), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Empty), Ones, REPLACE);
+    grb::mxm(C,
+             complement(MNotLower), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Empty), Ones, REPLACE);
     BOOST_CHECK_EQUAL(C, Matrix<double>(Lower_3x3, 0.));
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(MNotLower), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
+    grb::mxm(C,
+             complement(MNotLower), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
     BOOST_CHECK_EQUAL(C, Matrix<double>(Lower_3x3, 0.));
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(Ones), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
+    grb::mxm(C,
+             complement(Ones), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
     BOOST_CHECK_EQUAL(C, Empty);
 }
 
@@ -2295,36 +2295,36 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_emptyRowA_emptyColB)
                                                {1, 0, 1, 1},
                                                {0, 0, 1, 1}};
 
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> MNotLower(NotLower_3x4, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_3x4, 0.);
-    GraphBLAS::Matrix<double> C(3, 4);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> MNotLower(NotLower_3x4, 0.);
+    grb::Matrix<double> Ones(Ones_3x4, 0.);
+    grb::Matrix<double> C(3, 4);
 
     // REPLACE
     std::vector<std::vector<double>> answer_vals = {{2, 0, 0, 0},
                                                     {1, 1, 0, 0},
                                                     {10,1, 12,0}};
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(MNotLower),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
+    grb::mxm(C,
+             complement(MNotLower),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
     BOOST_CHECK_EQUAL(C, answer);
 
     // Merge
     std::vector<std::vector<double>> answer_vals2 = {{2, 1, 1, 1},
                                                      {1, 1, 1, 1},
                                                      {10,1,12,1}};
-    GraphBLAS::Matrix<double> answer2(answer_vals2, 0.);
+    grb::Matrix<double> answer2(answer_vals2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(MNotLower),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(C,
+             complement(MNotLower),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(C, answer2);
 }
 
@@ -2339,36 +2339,36 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_emptyColA_emptyRowB)
                                                {1, 0, 1, 1},
                                                {0, 0, 0, 0}};
 
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> NotLower(NotLower_3x4, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_3x4, 0.);
-    GraphBLAS::Matrix<double> C(3, 4);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> NotLower(NotLower_3x4, 0.);
+    grb::Matrix<double> Ones(Ones_3x4, 0.);
+    grb::Matrix<double> C(3, 4);
 
     // REPLACE
     std::vector<std::vector<double>> answer_vals = {{1, 0, 0, 0},
                                                     {1, 2, 0, 0},
                                                     {1, 5, 1, 0}};
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(NotLower),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
+    grb::mxm(C,
+             complement(NotLower),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
     BOOST_CHECK_EQUAL(C, answer);
 
     // Merge
     std::vector<std::vector<double>> answer_vals2 = {{1, 1, 1, 1},
                                                      {1, 2, 1, 1},
                                                      {1, 5, 1, 1}};
-    GraphBLAS::Matrix<double> answer2(answer_vals2, 0.);
+    grb::Matrix<double> answer2(answer_vals2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(NotLower),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(C,
+             complement(NotLower),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(C, answer2);
 }
 
@@ -2376,23 +2376,23 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_emptyColA_emptyRowB)
 BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_ABdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> NotLower(NotLower_4x4, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> NotLower(NotLower_4x4, 0.);
+    grb::Matrix<double> Ones(Ones_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{3,  1,  1,  1},
                                              {4, 10,  1,  1},
                                              {3, 11, 23,  1},
                                              {1,  7, 22, 26}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(NotLower),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(C,
+             complement(NotLower),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -2401,14 +2401,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_ABdup)
                                               {4, 10,  0,  0},
                                               {3, 11, 23,  0},
                                               {1,  7, 22, 26}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(NotLower),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat,
-                   REPLACE);
+    grb::mxm(C,
+             complement(NotLower),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -2418,23 +2418,23 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_ACdup)
 {
 
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> NotLower(NotLower_4x4, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> NotLower(NotLower_4x4, 0.);
+    grb::Matrix<double> Ones(Ones_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{3,  1,  0,  0},
                                              {4, 11,  2,  0},
                                              {2, 12, 25,  3},
                                              {0,  6, 24, 29}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   complement(NotLower),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(C), mat);
+    grb::mxm(C,
+             complement(NotLower),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(C), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -2443,14 +2443,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_ACdup)
                                               {4, 11,  0,  0},
                                               {2, 12, 25,  0},
                                               {0,  6, 24, 29}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   complement(NotLower),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(C), mat,
-                   REPLACE);
+    grb::mxm(C,
+             complement(NotLower),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(C), mat,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -2459,32 +2459,32 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_ACdup)
 BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_BCdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> NotLower(NotLower_4x4, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> NotLower(NotLower_4x4, 0.);
+    grb::Matrix<double> Ones(Ones_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{3,  1,  0,  0},
                                              {4, 11,  2,  0},
                                              {2, 12, 25,  3},
                                              {0,  6, 24, 29}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   complement(NotLower),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), C);
+    grb::mxm(C,
+             complement(NotLower),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), C);
 
     BOOST_CHECK_EQUAL(C, answer);
 
     // Double check previous operation (without duplicating)
     C = mat;
-    GraphBLAS::mxm(C,
-                   complement(NotLower),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(C,
+             complement(NotLower),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -2493,14 +2493,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_BCdup)
                                               {4, 11,  0,  0},
                                               {2, 12, 25,  0},
                                               {0,  6, 24, 29}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   complement(NotLower),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), C,
-                   REPLACE);
+    grb::mxm(C,
+             complement(NotLower),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), C,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -2509,22 +2509,22 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_BCdup)
 BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_MCdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> NotLower(NotLower_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> NotLower(NotLower_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{2,  1,  1,  1},
                                              {3,  9,  1,  1},
                                              {2, 10, 22,  1},
                                              {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = NotLower;
-    GraphBLAS::mxm(C,
-                   complement(C),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(C,
+             complement(C),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -2533,14 +2533,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_MCdup)
                                               {3,  9,  0,  0},
                                               {2, 10, 22,  0},
                                               {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = NotLower;
-    GraphBLAS::mxm(C,
-                   complement(C),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat,
-                   REPLACE);
+    grb::mxm(C,
+             complement(C),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -2548,23 +2548,23 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_MCdup)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_Replace_Cones_Mnlower)
 {
-    GraphBLAS::Matrix<double> A(AT_dense_3x3, 0.);
-    GraphBLAS::Matrix<double> B(B_dense_3x4, 0.);
-    GraphBLAS::Matrix<double> M(NotLower_3x4, 0.);
+    grb::Matrix<double> A(AT_dense_3x3, 0.);
+    grb::Matrix<double> B(B_dense_3x4, 0.);
+    grb::Matrix<double> M(NotLower_3x4, 0.);
     BOOST_CHECK_EQUAL(M.nvals(), 6);
 
-    GraphBLAS::Matrix<double> result(Ones_3x4, 0.);
+    grb::Matrix<double> result(Ones_3x4, 0.);
 
     std::vector<std::vector<double> > ans = {{114,   0,   0,  0},
                                              { 74,  97,   0,  0},
                                              {119, 157, 112,  0}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
-    GraphBLAS::mxm(result,
-                   GraphBLAS::complement(M),
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B,
-                   REPLACE);
+    grb::mxm(result,
+             grb::complement(M),
+             grb::Second<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B,
+             REPLACE);
     BOOST_CHECK_EQUAL(result.nvals(), 6);
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -2572,25 +2572,25 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_Replace_Cones_Mnlower)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_Replace_Mstored_zero)
 {
-    GraphBLAS::Matrix<double> A(AT_dense_3x3, 0.);
-    GraphBLAS::Matrix<double> B(B_dense_3x4, 0.);
-    GraphBLAS::Matrix<double> M(NotLower_3x4, 0.);
+    grb::Matrix<double> A(AT_dense_3x3, 0.);
+    grb::Matrix<double> B(B_dense_3x4, 0.);
+    grb::Matrix<double> M(NotLower_3x4, 0.);
 
     M.setElement(0, 0, 0.);
     BOOST_CHECK_EQUAL(M.nvals(), 7);
 
-    GraphBLAS::Matrix<double> result(Ones_3x4, 0.);
+    grb::Matrix<double> result(Ones_3x4, 0.);
 
     std::vector<std::vector<double> > ans = {{114,   0,   0,  0},
                                              { 74,  97,   0,  0},
                                              {119, 157, 112,  0}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
-    GraphBLAS::mxm(result,
-                   GraphBLAS::complement(M),
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B,
-                   REPLACE);
+    grb::mxm(result,
+             grb::complement(M),
+             grb::Second<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B,
+             REPLACE);
     BOOST_CHECK_EQUAL(result.nvals(), 6);
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -2598,22 +2598,22 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_Replace_Mstored_zero)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_Merge)
 {
-    GraphBLAS::Matrix<double> A(AT_dense_3x3, 0.);
-    GraphBLAS::Matrix<double> B(B_dense_3x4, 0.);
-    GraphBLAS::Matrix<double> M(NotLower_3x4, 0.);
+    grb::Matrix<double> A(AT_dense_3x3, 0.);
+    grb::Matrix<double> B(B_dense_3x4, 0.);
+    grb::Matrix<double> M(NotLower_3x4, 0.);
     BOOST_CHECK_EQUAL(M.nvals(), 6);
 
-    GraphBLAS::Matrix<double> result(Ones_3x4, 0.);
+    grb::Matrix<double> result(Ones_3x4, 0.);
 
     std::vector<std::vector<double> > ans = {{114,   1,   1,  1},
                                              { 74,  97,   1,  1},
                                              {119, 157, 112,  1}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
-    GraphBLAS::mxm(result,
-                   GraphBLAS::complement(M),
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(result,
+             grb::complement(M),
+             grb::Second<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(result.nvals(), 12);
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -2621,23 +2621,23 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_Merge)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_Merge_Mstored_zero)
 {
-    GraphBLAS::Matrix<double> A(AT_dense_3x3, 0.);
-    GraphBLAS::Matrix<double> B(B_dense_3x4, 0.);
-    GraphBLAS::Matrix<double> M(NotLower_3x4, 0.);
+    grb::Matrix<double> A(AT_dense_3x3, 0.);
+    grb::Matrix<double> B(B_dense_3x4, 0.);
+    grb::Matrix<double> M(NotLower_3x4, 0.);
     M.setElement(0, 0, 0.);
     BOOST_CHECK_EQUAL(M.nvals(), 7);
 
-    GraphBLAS::Matrix<double> result(Ones_3x4, 0.);
+    grb::Matrix<double> result(Ones_3x4, 0.);
 
     std::vector<std::vector<double> > ans = {{114,   1,   1,  1},
                                              { 74,  97,   1,  1},
                                              {119, 157, 112,  1}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
-    GraphBLAS::mxm(result,
-                   GraphBLAS::complement(M),
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(result,
+             grb::complement(M),
+             grb::Second<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(result.nvals(), 12);
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -2646,22 +2646,22 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_Merge_Mstored_zero)
 BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_Merge_ABdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
 
-    GraphBLAS::Matrix<double> result(Ones_4x4, 0.);
+    grb::Matrix<double> result(Ones_4x4, 0.);
 
     std::vector<std::vector<double> > ans = {{2,  1,  1,  1},
                                              {3,  9,  1,  1},
                                              {2, 10, 22,  1},
                                              {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
-    GraphBLAS::Matrix<double> M(NotLower_4x4, 0.);
+    grb::Matrix<double> M(NotLower_4x4, 0.);
 
-    GraphBLAS::mxm(result,
-                   GraphBLAS::complement(M),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(result,
+             grb::complement(M),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -2677,22 +2677,22 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_Merge_ABdup)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_StructMask_NoAccum_ATB)
 {
-    GraphBLAS::Matrix<double> A(AT_sparse_3x3, 0.0);
-    GraphBLAS::Matrix<double> AT(A_sparse_3x3, 0.0);
-    GraphBLAS::Matrix<double> Identity(Identity_3x3, 0.0);
+    grb::Matrix<double> A(AT_sparse_3x3, 0.0);
+    grb::Matrix<double> AT(A_sparse_3x3, 0.0);
+    grb::Matrix<double> Identity(Identity_3x3, 0.0);
 
-    GraphBLAS::Matrix<double> Empty(3, 3);
-    GraphBLAS::Matrix<double> Ones(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> C(3,3);
+    grb::Matrix<double> Empty(3, 3);
+    grb::Matrix<double> Ones(Ones_3x3, 0.);
+    grb::Matrix<double> C(3,3);
 
-    GraphBLAS::Matrix<double> MLower(Lower_3x3, 0.);
-    GraphBLAS::Matrix<double> MNotLower(NotLower_3x3, 0.);
+    grb::Matrix<double> MLower(Lower_3x3, 0.);
+    grb::Matrix<double> MNotLower(NotLower_3x3, 0.);
 
     static std::vector<std::vector<double> > A_sparse_fill_in_3x3 =
-    {{12, 7,  1},
-     {1, -5,  1},
-     {7,  1,  9}};
-    GraphBLAS::Matrix<double> AFilled(A_sparse_fill_in_3x3, 0.0);
+        {{12, 7,  1},
+         {1, -5,  1},
+         {7,  1,  9}};
+    grb::Matrix<double> AFilled(A_sparse_fill_in_3x3, 0.0);
 
 
     // Merge
@@ -2700,32 +2700,32 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_NoAccum_ATB)
 
     C = Ones;
     Ones.setElement(0, 0, 0.);
-    GraphBLAS::mxm(C,
-                   structure(Ones), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity);
+    grb::mxm(C,
+             structure(Ones), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(A), Identity);
     BOOST_CHECK_EQUAL(C, AT);
     Ones.setElement(0, 0, 1.);
 
     C = Ones;
     AT.setElement(0, 0, 0.);
-    GraphBLAS::mxm(C,
-                   structure(AT), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity);
+    grb::mxm(C,
+             structure(AT), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(A), Identity);
     BOOST_CHECK_EQUAL(C, AFilled);
     AT.setElement(0, 0, 12.);
 
     C = Ones;
     MLower.setElement(2, 0, 0.);
-    GraphBLAS::mxm(C,
-                   structure(MLower), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity);
+    grb::mxm(C,
+             structure(MLower), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity);
     BOOST_CHECK_EQUAL(C, Ones);
 
     C = Ones;
     MNotLower.setElement(0, 2, 0.);
-    GraphBLAS::mxm(C,
-                   structure(MNotLower), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity);
+    grb::mxm(C,
+             structure(MNotLower), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity);
     BOOST_CHECK_EQUAL(C, Ones);
 
     // Replace
@@ -2733,23 +2733,23 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_NoAccum_ATB)
 
     C = Ones;
     Ones.setElement(0, 0, 0.);
-    GraphBLAS::mxm(C,
-                   structure(Ones), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
+    grb::mxm(C,
+             structure(Ones), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, AT);
     Ones.setElement(0, 0, 1.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(MLower), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
+    grb::mxm(C,
+             structure(MLower), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
     MLower.setElement(2, 0, 1.);
     BOOST_CHECK_EQUAL(C, MLower);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(MNotLower), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
+    grb::mxm(C,
+             structure(MNotLower), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
     MNotLower.setElement(0, 2, 1.);
     BOOST_CHECK_EQUAL(C, MNotLower);
 }
@@ -2757,39 +2757,39 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_NoAccum_ATB)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_StructMask_NoAccum_ATBM_empty)
 {
-    GraphBLAS::Matrix<double> Empty(3, 3);
-    GraphBLAS::Matrix<double> Ones(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> C(3,3);
+    grb::Matrix<double> Empty(3, 3);
+    grb::Matrix<double> Ones(Ones_3x3, 0.);
+    grb::Matrix<double> C(3,3);
 
-    GraphBLAS::Matrix<bool> M(LowerBool_3x3, false);
+    grb::Matrix<bool> M(LowerBool_3x3, false);
     M.setElement(2, 0, false);
 
-    GraphBLAS::Matrix<double> mUpper(NotLower_3x3, 0.);
+    grb::Matrix<double> mUpper(NotLower_3x3, 0.);
 
     // Merge
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(M), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Empty), Ones);
+    grb::mxm(C,
+             structure(M), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Empty), Ones);
     BOOST_CHECK_EQUAL(C, mUpper);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(M), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty);
+    grb::mxm(C,
+             structure(M), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty);
     BOOST_CHECK_EQUAL(C, mUpper);
 
     // Replace
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(M), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Empty), Ones, REPLACE);
+    grb::mxm(C,
+             structure(M), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Empty), Ones, REPLACE);
     BOOST_CHECK_EQUAL(C, Empty);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(M), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
+    grb::mxm(C,
+             structure(M), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
     BOOST_CHECK_EQUAL(C, Empty);
 }
 
@@ -2805,8 +2805,8 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_NoAccum_ATB_Merge_full_mask)
     mask.setElement(0, 0, 0.);
 
     mxm(result,
-        structure(mask), GraphBLAS::NoAccumulate(),
-        GraphBLAS::ArithmeticSemiring<double>(),
+        structure(mask), grb::NoAccumulate(),
+        grb::ArithmeticSemiring<double>(),
         transpose(A), B);
 
     BOOST_CHECK_EQUAL(result, answer);
@@ -2825,8 +2825,8 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_NoAccum_ATB_mask_not_full)
     mask.setElement(0, 0, 0.);
 
     mxm(result,
-        structure(mask), GraphBLAS::NoAccumulate(),
-        GraphBLAS::ArithmeticSemiring<double>(),
+        structure(mask), grb::NoAccumulate(),
+        grb::ArithmeticSemiring<double>(),
         transpose(A), B);
 
     BOOST_CHECK_EQUAL(result, answer);
@@ -2843,37 +2843,37 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_NoAccum_ATB_emptyRowA_emptyColB)
                                                {1, 0, 1, 1},
                                                {0, 0, 1, 1}};
 
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_3x4, 0.);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> Lower(Lower_3x4, 0.);
     Lower.setElement(2, 0, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_3x4, 0.);
-    GraphBLAS::Matrix<double> C(3, 4);
+    grb::Matrix<double> Ones(Ones_3x4, 0.);
+    grb::Matrix<double> C(3, 4);
 
     // REPLACE
     std::vector<std::vector<double>> answer_vals = {{1, 0, 0, 0},
                                                     {0, 0, 0, 0},
                                                     {9, 0, 11,0}};
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(Lower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
+    grb::mxm(C,
+             structure(Lower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
     BOOST_CHECK_EQUAL(C, answer);
 
     // Merge
     std::vector<std::vector<double>> answer_vals2 = {{1, 1, 1, 1},
                                                      {0, 0, 1, 1},
                                                      {9, 0, 11,1}};
-    GraphBLAS::Matrix<double> answer2(answer_vals2, 0.);
+    grb::Matrix<double> answer2(answer_vals2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(Lower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(C,
+             structure(Lower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(C, answer2);
 }
 
@@ -2888,37 +2888,37 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_NoAccum_ATB_emptyColA_emptyRowB)
                                                {1, 0, 1, 1},
                                                {0, 0, 0, 0}};
 
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_3x4, 0.);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> Lower(Lower_3x4, 0.);
     Lower.setElement(2, 1, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_3x4, 0.);
-    GraphBLAS::Matrix<double> C(3, 4);
+    grb::Matrix<double> Ones(Ones_3x4, 0.);
+    grb::Matrix<double> C(3, 4);
 
     // REPLACE
     std::vector<std::vector<double>> answer_vals = {{0, 0, 0, 0},
                                                     {0, 1, 0, 0},
                                                     {0, 4, 0, 0}};
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(Lower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
+    grb::mxm(C,
+             structure(Lower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
     BOOST_CHECK_EQUAL(C, answer);
 
     // Merge
     std::vector<std::vector<double>> answer_vals2 = {{0, 1, 1, 1},
                                                      {0, 1, 1, 1},
                                                      {0, 4, 0, 1}};
-    GraphBLAS::Matrix<double> answer2(answer_vals2, 0.);
+    grb::Matrix<double> answer2(answer_vals2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(Lower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(C,
+             structure(Lower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(C, answer2);
 }
 
@@ -2933,37 +2933,37 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_NoAccum_ATB_emptyRowM)
                                                {1, 0, 1},
                                                {0, 0, 1}};
 
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> NotLower(NotLower_3x3, 0.);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> NotLower(NotLower_3x3, 0.);
     NotLower.setElement(0, 2, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> C(3,3);
+    grb::Matrix<double> Ones(Ones_3x3, 0.);
+    grb::Matrix<double> C(3,3);
 
     // Replace
     std::vector<std::vector<double>> answer_vals = {{0, 0, 7},
                                                     {0, 0, 0},
                                                     {0, 0, 0}};
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(NotLower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
+    grb::mxm(C,
+             structure(NotLower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
     BOOST_CHECK_EQUAL(C, answer);
 
     // Merge
     std::vector<std::vector<double>> answer_vals2 = {{1, 0, 7},
                                                      {1, 1, 0},
                                                      {1, 1, 1}};
-    GraphBLAS::Matrix<double> answer2(answer_vals2, 0.);
+    grb::Matrix<double> answer2(answer_vals2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(NotLower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(C,
+             structure(NotLower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(C, answer2);
 }
 
@@ -2971,24 +2971,24 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_NoAccum_ATB_emptyRowM)
 BOOST_AUTO_TEST_CASE(test_mxm_StructMask_NoAccum_ATB_ABdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_4x4, 0.);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> Lower(Lower_4x4, 0.);
     Lower.setElement(2, 0, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> Ones(Ones_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{2,  1,  1,  1},
                                              {3,  9,  1,  1},
                                              {2, 10, 22,  1},
                                              {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(Lower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(C,
+             structure(Lower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -2997,14 +2997,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_NoAccum_ATB_ABdup)
                                               {3,  9,  0,  0},
                                               {2, 10, 22,  0},
                                               {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(Lower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat,
-                   REPLACE);
+    grb::mxm(C,
+             structure(Lower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -3013,24 +3013,24 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_NoAccum_ATB_ABdup)
 BOOST_AUTO_TEST_CASE(test_mxm_StructMask_NoAccum_ATB_ACdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_4x4, 0.);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> Lower(Lower_4x4, 0.);
     Lower.setElement(2, 0, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> Ones(Ones_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{2,  1,  0,  0},
                                              {3,  9,  2,  0},
                                              {2, 10, 22,  3},
                                              {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   structure(Lower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(C), mat);
+    grb::mxm(C,
+             structure(Lower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(C), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -3039,14 +3039,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_NoAccum_ATB_ACdup)
                                               {3,  9,  0,  0},
                                               {2, 10, 22,  0},
                                               {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   structure(Lower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(C), mat,
-                   REPLACE);
+    grb::mxm(C,
+             structure(Lower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(C), mat,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -3055,33 +3055,33 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_NoAccum_ATB_ACdup)
 BOOST_AUTO_TEST_CASE(test_mxm_StructMask_NoAccum_ATB_BCdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_4x4, 0.);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> Lower(Lower_4x4, 0.);
     Lower.setElement(2, 0, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> Ones(Ones_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{2,  1,  0,  0},
                                              {3,  9,  2,  0},
                                              {2, 10, 22,  3},
                                              {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   structure(Lower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), C);
+    grb::mxm(C,
+             structure(Lower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), C);
 
     BOOST_CHECK_EQUAL(C, answer);
 
     // Double check previous operation (without duplicating)
     C = mat;
-    GraphBLAS::mxm(C,
-                   structure(Lower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(C,
+             structure(Lower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -3090,14 +3090,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_NoAccum_ATB_BCdup)
                                               {3,  9,  0,  0},
                                               {2, 10, 22,  0},
                                               {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   structure(Lower),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), C,
-                   REPLACE);
+    grb::mxm(C,
+             structure(Lower),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), C,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -3106,23 +3106,23 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_NoAccum_ATB_BCdup)
 BOOST_AUTO_TEST_CASE(test_mxm_StructMask_NoAccum_ATB_MCdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_4x4, 0.);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> Lower(Lower_4x4, 0.);
     Lower.setElement(2, 0, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{2,  0,  0,  0},
                                              {3,  9,  0,  0},
                                              {2, 10, 22,  0},
                                              {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = Lower;
-    GraphBLAS::mxm(C,
-                   structure(C),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(C,
+             structure(C),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -3131,14 +3131,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_NoAccum_ATB_MCdup)
                                               {3,  9,  0,  0},
                                               {2, 10, 22,  0},
                                               {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = Lower;
-    GraphBLAS::mxm(C,
-                   structure(C),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat,
-                   REPLACE);
+    grb::mxm(C,
+             structure(C),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -3150,24 +3150,24 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_NoAccum_ATB_MCdup)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB)
 {
-    GraphBLAS::Matrix<double> A(AT_sparse_3x3, 0.0);
-    GraphBLAS::Matrix<double> AT(A_sparse_3x3, 0.0);
-    GraphBLAS::Matrix<double> Identity(Identity_3x3, 0.0);
+    grb::Matrix<double> A(AT_sparse_3x3, 0.0);
+    grb::Matrix<double> AT(A_sparse_3x3, 0.0);
+    grb::Matrix<double> Identity(Identity_3x3, 0.0);
 
-    GraphBLAS::Matrix<double> Empty(3, 3);
-    GraphBLAS::Matrix<double> Ones(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> C(3,3);
+    grb::Matrix<double> Empty(3, 3);
+    grb::Matrix<double> Ones(Ones_3x3, 0.);
+    grb::Matrix<double> C(3,3);
 
-    GraphBLAS::Matrix<double> MLower(Lower_3x3, 0.);
+    grb::Matrix<double> MLower(Lower_3x3, 0.);
     MLower.setElement(2, 0, 0.);
-    GraphBLAS::Matrix<double> MNotLower(NotLower_3x3, 0.);
+    grb::Matrix<double> MNotLower(NotLower_3x3, 0.);
     MNotLower.setElement(0, 1, 0.);
 
     static std::vector<std::vector<double> > A_sparse_fill_in_3x3 =
-    {{12, 7,  1},
-     {1, -5,  1},
-     {7,  1,  9}};
-    GraphBLAS::Matrix<double> AFilled(A_sparse_fill_in_3x3, 0.0);
+        {{12, 7,  1},
+         {1, -5,  1},
+         {7,  1,  9}};
+    grb::Matrix<double> AFilled(A_sparse_fill_in_3x3, 0.0);
 
 
     // Merge
@@ -3180,9 +3180,9 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB)
 
     C = Ones;
     AT.setElement(2, 0, 0.);
-    GraphBLAS::mxm(C,
-                   structure(AT), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity);
+    grb::mxm(C,
+             structure(AT), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(A), Identity);
     BOOST_CHECK_EQUAL(C, Matrix<double>(ans, 0.));
 
     //---
@@ -3192,9 +3192,9 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB)
          {2,  2,  2}};
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(MLower), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity);
+    grb::mxm(C,
+             structure(MLower), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity);
     BOOST_CHECK_EQUAL(C, Matrix<double>(ans2, 0.));
 
     //---
@@ -3204,9 +3204,9 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB)
          {1,  1,  1}};
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(MNotLower), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity);
+    grb::mxm(C,
+             structure(MNotLower), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity);
     BOOST_CHECK_EQUAL(C, Matrix<double>(ans3, 0.));
 
     // Replace
@@ -3219,9 +3219,9 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB)
 
     C = Ones;
     Ones.setElement(0, 0, 0.);
-    GraphBLAS::mxm(C,
-                   structure(Ones), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
+    grb::mxm(C,
+             structure(Ones), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
     Ones.setElement(0, 0, 1.);
     BOOST_CHECK_EQUAL(C, Matrix<double>(ans4, 0.));
 
@@ -3232,9 +3232,9 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB)
          {2,  2,  2}};
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(MLower), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
+    grb::mxm(C,
+             structure(MLower), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, Matrix<double>(ans5, 0.));
 
     //---
@@ -3244,60 +3244,60 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB)
          {0,  0,  0}};
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(MNotLower), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
+    grb::mxm(C,
+             structure(MNotLower), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, Matrix<double>(ans6, 0.));
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATBMempty)
 {
-    GraphBLAS::Matrix<double> Empty(3, 3);
-    GraphBLAS::Matrix<double> Ones(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> C(3,3);
+    grb::Matrix<double> Empty(3, 3);
+    grb::Matrix<double> Ones(Ones_3x3, 0.);
+    grb::Matrix<double> C(3,3);
 
     // NOTE: The mask is true for any non-zero.
-    GraphBLAS::Matrix<bool> M(LowerBool_3x3, false);
+    grb::Matrix<bool> M(LowerBool_3x3, false);
     M.setElement(2, 0, false);
 
     // Merge
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(M), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Empty), Ones);
+    grb::mxm(C,
+             structure(M), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Empty), Ones);
     BOOST_CHECK_EQUAL(C, Ones);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(M), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty);
+    grb::mxm(C,
+             structure(M), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty);
     BOOST_CHECK_EQUAL(C, Ones);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(Empty), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Ones);
+    grb::mxm(C,
+             structure(Empty), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Ones);
     BOOST_CHECK_EQUAL(C, Ones);
 
     // Replace
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(M), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Empty), Ones, REPLACE);
+    grb::mxm(C,
+             structure(M), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Empty), Ones, REPLACE);
     BOOST_CHECK_EQUAL(C, Matrix<double>(Lower_3x3, 0.));
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(M), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
+    grb::mxm(C,
+             structure(M), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
     BOOST_CHECK_EQUAL(C, Matrix<double>(Lower_3x3, 0.));
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(Empty), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
+    grb::mxm(C,
+             structure(Empty), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
     BOOST_CHECK_EQUAL(C, Empty);
 }
 
@@ -3312,37 +3312,37 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB_emptyRowA_emptyColB)
                                                {1, 0, 1, 1},
                                                {0, 0, 1, 1}};
 
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_3x4, 0.);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> Lower(Lower_3x4, 0.);
     Lower.setElement(2, 0, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_3x4, 0.);
-    GraphBLAS::Matrix<double> C(3, 4);
+    grb::Matrix<double> Ones(Ones_3x4, 0.);
+    grb::Matrix<double> C(3, 4);
 
     // REPLACE
     std::vector<std::vector<double>> answer_vals = {{2, 0, 0, 0},
                                                     {1, 1, 0, 0},
                                                     {10,1, 12,0}};
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(Lower),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
+    grb::mxm(C,
+             structure(Lower),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
     BOOST_CHECK_EQUAL(C, answer);
 
     // Merge
     std::vector<std::vector<double>> answer_vals2 = {{2, 1, 1, 1},
                                                      {1, 1, 1, 1},
                                                      {10,1,12,1}};
-    GraphBLAS::Matrix<double> answer2(answer_vals2, 0.);
+    grb::Matrix<double> answer2(answer_vals2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(Lower),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(C,
+             structure(Lower),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(C, answer2);
 }
 
@@ -3356,37 +3356,37 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB_emptyColA_emptyRowB)
     std::vector<std::vector<double>> B_vals = {{0, 1, 0, 1},
                                                {1, 0, 1, 1},
                                                {0, 0, 0, 0}};
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_3x4, 0.);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> Lower(Lower_3x4, 0.);
     Lower.setElement(2, 0, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_3x4, 0.);
-    GraphBLAS::Matrix<double> C(3, 4);
+    grb::Matrix<double> Ones(Ones_3x4, 0.);
+    grb::Matrix<double> C(3, 4);
 
     // REPLACE
     std::vector<std::vector<double>> answer_vals = {{1, 0, 0, 0},
                                                     {1, 2, 0, 0},
                                                     {1, 5, 1, 0}};
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(Lower),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
+    grb::mxm(C,
+             structure(Lower),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
     BOOST_CHECK_EQUAL(C, answer);
 
     // Merge
     std::vector<std::vector<double>> answer_vals2 = {{1, 1, 1, 1},
                                                      {1, 2, 1, 1},
                                                      {1, 5, 1, 1}};
-    GraphBLAS::Matrix<double> answer2(answer_vals2, 0.);
+    grb::Matrix<double> answer2(answer_vals2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(Lower),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(C,
+             structure(Lower),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(C, answer2);
 }
 
@@ -3401,37 +3401,37 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB_emptyRowM)
                                                {0, 0, 0},
                                                {0, 1, 1}};
 
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> NotLower(NotLower_3x3, 0.);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> NotLower(NotLower_3x3, 0.);
     NotLower.setElement(0, 2, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> C(3,3);
+    grb::Matrix<double> Ones(Ones_3x3, 0.);
+    grb::Matrix<double> C(3,3);
 
     // Replace
     std::vector<std::vector<double>> answer_vals = {{0, 15, 7},
                                                     {0,  0, 1},
                                                     {0,  0, 0}};
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(NotLower),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
+    grb::mxm(C,
+             structure(NotLower),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
     BOOST_CHECK_EQUAL(C, answer);
 
     // Merge
     std::vector<std::vector<double>> answer_vals2 = {{1,15, 7},
                                                      {1, 1, 1},
                                                      {1, 1, 1}};
-    GraphBLAS::Matrix<double> answer2(answer_vals2, 0.);
+    grb::Matrix<double> answer2(answer_vals2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(NotLower),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(C,
+             structure(NotLower),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(C, answer2);
 }
 
@@ -3439,24 +3439,24 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB_emptyRowM)
 BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB_ABdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_4x4, 0.);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> Lower(Lower_4x4, 0.);
     Lower.setElement(2, 0, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> Ones(Ones_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{3,  1,  1,  1},
                                              {4, 10,  1,  1},
                                              {3, 11, 23,  1},
                                              {1,  7, 22, 26}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(Lower),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(C,
+             structure(Lower),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -3465,14 +3465,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB_ABdup)
                                               {4, 10,  0,  0},
                                               {3, 11, 23,  0},
                                               {1,  7, 22, 26}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   structure(Lower),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat,
-                   REPLACE);
+    grb::mxm(C,
+             structure(Lower),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -3482,24 +3482,24 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB_ACdup)
 {
 
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_4x4, 0.);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> Lower(Lower_4x4, 0.);
     Lower.setElement(2, 0, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> Ones(Ones_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{3,  1,  0,  0},
                                              {4, 11,  2,  0},
                                              {2, 12, 25,  3},
                                              {0,  6, 24, 29}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   structure(Lower),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(C), mat);
+    grb::mxm(C,
+             structure(Lower),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(C), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -3508,14 +3508,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB_ACdup)
                                               {4, 11,  0,  0},
                                               {2, 12, 25,  0},
                                               {0,  6, 24, 29}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   structure(Lower),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(C), mat,
-                   REPLACE);
+    grb::mxm(C,
+             structure(Lower),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(C), mat,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -3524,33 +3524,33 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB_ACdup)
 BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB_BCdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_4x4, 0.);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> Lower(Lower_4x4, 0.);
     Lower.setElement(2, 0, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> Ones(Ones_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{3,  1,  0,  0},
                                              {4, 11,  2,  0},
                                              {2, 12, 25,  3},
                                              {0,  6, 24, 29}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   structure(Lower),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), C);
+    grb::mxm(C,
+             structure(Lower),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), C);
 
     BOOST_CHECK_EQUAL(C, answer);
 
     // Double check previous operation (without duplicating)
     C = mat;
-    GraphBLAS::mxm(C,
-                   structure(Lower),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(C,
+             structure(Lower),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -3559,14 +3559,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB_BCdup)
                                               {4, 11,  0,  0},
                                               {2, 12, 25,  0},
                                               {0,  6, 24, 29}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   structure(Lower),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), C,
-                   REPLACE);
+    grb::mxm(C,
+             structure(Lower),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), C,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -3575,23 +3575,23 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB_BCdup)
 BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB_MCdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_4x4, 0.);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> Lower(Lower_4x4, 0.);
     Lower.setElement(2, 0, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{3,  0,  0,  0},
                                              {4, 10,  0,  0},
                                              {2, 11, 23,  0},
                                              {1,  7, 22, 26}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = Lower;
-    GraphBLAS::mxm(C,
-                   structure(C),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(C,
+             structure(C),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -3600,14 +3600,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB_MCdup)
                                               {4, 10,  0,  0},
                                               {2, 11, 23,  0},
                                               {1,  7, 22, 26}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = Lower;
-    GraphBLAS::mxm(C,
-                   structure(C),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat,
-                   REPLACE);
+    grb::mxm(C,
+             structure(C),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -3615,24 +3615,24 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB_MCdup)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB_Replace_lower_mask_result_ones)
 {
-    GraphBLAS::Matrix<double> A(AT_dense_3x3, 0.);
-    GraphBLAS::Matrix<double> B(B_dense_3x4, 0.);
-    GraphBLAS::Matrix<double> M(LowerMask_3x4, 0.);
+    grb::Matrix<double> A(AT_dense_3x3, 0.);
+    grb::Matrix<double> B(B_dense_3x4, 0.);
+    grb::Matrix<double> M(LowerMask_3x4, 0.);
     M.setElement(2, 0, 0.);
     BOOST_CHECK_EQUAL(M.nvals(), 6);
 
-    GraphBLAS::Matrix<double> result(Ones_3x4, 0.);
+    grb::Matrix<double> result(Ones_3x4, 0.);
 
     std::vector<std::vector<double> > ans = {{114,   0,   0,  0},
                                              { 74,  97,   0,  0},
                                              {119, 157, 112,  0}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
-    GraphBLAS::mxm(result,
-                   structure(M),
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B,
-                   REPLACE);
+    grb::mxm(result,
+             structure(M),
+             grb::Second<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(result.nvals(), 6);
     BOOST_CHECK_EQUAL(result, answer);
@@ -3641,24 +3641,24 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB_Replace_lower_mask_result_one
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB_Replace_bool_masked_result_ones)
 {
-    GraphBLAS::Matrix<double> A(AT_dense_3x3, 0.);
-    GraphBLAS::Matrix<double> B(B_dense_3x4, 0.);
-    GraphBLAS::Matrix<bool> M(LowerBool_3x4, false);
+    grb::Matrix<double> A(AT_dense_3x3, 0.);
+    grb::Matrix<double> B(B_dense_3x4, 0.);
+    grb::Matrix<bool> M(LowerBool_3x4, false);
     M.setElement(2, 0, false);
     BOOST_CHECK_EQUAL(M.nvals(), 6);
 
-    GraphBLAS::Matrix<double> result(Ones_3x4, 0.);
+    grb::Matrix<double> result(Ones_3x4, 0.);
 
     std::vector<std::vector<double> > ans = {{114,   0,   0,  0},
                                              { 74,  97,   0,  0},
                                              {119, 157, 112,  0}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
-    GraphBLAS::mxm(result,
-                   structure(M),
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B,
-                   REPLACE);
+    grb::mxm(result,
+             structure(M),
+             grb::Second<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(result.nvals(), 6);
     BOOST_CHECK_EQUAL(result, answer);
@@ -3667,27 +3667,27 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB_Replace_bool_masked_result_on
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB_Merge_Cones_Mlower)
 {
-    GraphBLAS::Matrix<double> A(AT_dense_3x3, 0.);
-    GraphBLAS::Matrix<double> B(B_dense_3x4, 0.);
+    grb::Matrix<double> A(AT_dense_3x3, 0.);
+    grb::Matrix<double> B(B_dense_3x4, 0.);
 
     static std::vector<std::vector<double> > M_3x4 = {{1, 0, 0, 0},
                                                       {1, 1, 0, 0},
                                                       {1, 1, 1, 0}};
-    GraphBLAS::Matrix<double> M(M_3x4, 0.);
+    grb::Matrix<double> M(M_3x4, 0.);
     M.setElement(2, 0, 0.);
     BOOST_CHECK_EQUAL(M.nvals(), 6);
 
-    GraphBLAS::Matrix<double> result(Ones_3x4, 0.);
+    grb::Matrix<double> result(Ones_3x4, 0.);
 
     std::vector<std::vector<double> > ans = {{114,   1,   1,  1},
                                              { 74,  97,   1,  1},
                                              {119, 157, 112,  1}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
-    GraphBLAS::mxm(result,
-                   structure(M),
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(result,
+             structure(M),
+             grb::Second<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(result.nvals(), 12);
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -3699,30 +3699,30 @@ BOOST_AUTO_TEST_CASE(test_mxm_StructMask_Accum_ATB_Merge_Cones_Mlower)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_NoAccum_ATB)
 {
-    GraphBLAS::Matrix<double> A(A_sparse_3x3, 0.0);
-    GraphBLAS::Matrix<double> AT(AT_sparse_3x3, 0.0);
-    GraphBLAS::Matrix<double> Identity(Identity_3x3, 0.0);
+    grb::Matrix<double> A(A_sparse_3x3, 0.0);
+    grb::Matrix<double> AT(AT_sparse_3x3, 0.0);
+    grb::Matrix<double> Identity(Identity_3x3, 0.0);
 
-    GraphBLAS::Matrix<double> Empty(3, 3);
-    GraphBLAS::Matrix<double> Ones(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> C(3,3);
+    grb::Matrix<double> Empty(3, 3);
+    grb::Matrix<double> Ones(Ones_3x3, 0.);
+    grb::Matrix<double> C(3,3);
 
-    GraphBLAS::Matrix<double> MLower(Lower_3x3, 0.);
+    grb::Matrix<double> MLower(Lower_3x3, 0.);
     MLower.setElement(2, 0, 0.);
-    GraphBLAS::Matrix<double> MNotLower(NotLower_3x3, 0.);
+    grb::Matrix<double> MNotLower(NotLower_3x3, 0.);
     MNotLower.setElement(0, 2, 0.);
 
     static std::vector<std::vector<double> > Not_AT_sparse_3x3 =
         {{0,  1,  0},
          {0,  0,  1},
          {1,  1,  0}};
-    GraphBLAS::Matrix<double> NotAT(Not_AT_sparse_3x3, 0.0);
+    grb::Matrix<double> NotAT(Not_AT_sparse_3x3, 0.0);
     NotAT.setElement(0, 1, 0.);
     static std::vector<std::vector<double> > A_sparse_fill_in_3x3 =
         {{12, 1,  7},
          {7, -5,  1},
          {1,  1,  9}};
-    GraphBLAS::Matrix<double> AFilled(A_sparse_fill_in_3x3, 0.0);
+    grb::Matrix<double> AFilled(A_sparse_fill_in_3x3, 0.0);
 
 
     // Merge
@@ -3730,34 +3730,34 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_NoAccum_ATB)
 
     C = Ones;
     Ones.setElement(0, 0, 0.);
-    GraphBLAS::mxm(C,
-                   complement(structure(Ones)), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity);
+    grb::mxm(C,
+             complement(structure(Ones)), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(A), Identity);
     Ones.setElement(0, 0, 1.);
     BOOST_CHECK_EQUAL(C, Ones);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(Empty)), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity);
+    grb::mxm(C,
+             complement(structure(Empty)), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(A), Identity);
     BOOST_CHECK_EQUAL(C, AT);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(NotAT)), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity);
+    grb::mxm(C,
+             complement(structure(NotAT)), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(A), Identity);
     BOOST_CHECK_EQUAL(C, AFilled);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(MNotLower)), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity);
+    grb::mxm(C,
+             complement(structure(MNotLower)), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity);
     BOOST_CHECK_EQUAL(C, Ones);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(MLower)), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity);
+    grb::mxm(C,
+             complement(structure(MLower)), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity);
     BOOST_CHECK_EQUAL(C, Ones);
 
     // Replace
@@ -3765,29 +3765,29 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_NoAccum_ATB)
 
     C = Ones;
     Ones.setElement(0, 0, 0.);
-    GraphBLAS::mxm(C,
-                   complement(structure(Ones)), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
+    grb::mxm(C,
+             complement(structure(Ones)), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, Empty);
     Ones.setElement(0, 0, 1.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(Empty)), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
+    grb::mxm(C,
+             complement(structure(Empty)), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, AT);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(MNotLower)), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
+    grb::mxm(C,
+             complement(structure(MNotLower)), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
     MLower.setElement(2, 0, 1.);
     BOOST_CHECK_EQUAL(C, MLower);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(MLower)), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
+    grb::mxm(C,
+             complement(structure(MLower)), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
     MNotLower.setElement(0, 2, 1.);
     BOOST_CHECK_EQUAL(C, MNotLower);
 }
@@ -3795,68 +3795,68 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_NoAccum_ATB)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_NoAccum_ATB_empty)
 {
-    GraphBLAS::Matrix<double> Empty(3, 3);
-    GraphBLAS::Matrix<double> Ones(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> Identity(Identity_3x3, 0.);
-    GraphBLAS::Matrix<double> C(3,3);
+    grb::Matrix<double> Empty(3, 3);
+    grb::Matrix<double> Ones(Ones_3x3, 0.);
+    grb::Matrix<double> Identity(Identity_3x3, 0.);
+    grb::Matrix<double> C(3,3);
 
-    GraphBLAS::Matrix<bool> M(LowerBool_3x3, false);
+    grb::Matrix<bool> M(LowerBool_3x3, false);
     M.setElement(2, 0, false);
 
-    GraphBLAS::Matrix<double> mUpper(NotLower_3x3, 0.);
+    grb::Matrix<double> mUpper(NotLower_3x3, 0.);
     mUpper.setElement(0, 2, 0.);
 
     // Merge
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(mUpper)), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Empty), Ones);
+    grb::mxm(C,
+             complement(structure(mUpper)), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Empty), Ones);
     mUpper.setElement(0, 2, 1.);
     BOOST_CHECK_EQUAL(C, mUpper);
 
     C = Ones;
     mUpper.setElement(0, 2, 0.);
-    GraphBLAS::mxm(C,
-                   complement(structure(mUpper)), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty);
+    grb::mxm(C,
+             complement(structure(mUpper)), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty);
     mUpper.setElement(0, 2, 1.);
     BOOST_CHECK_EQUAL(C, mUpper);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(Ones)), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty);
+    grb::mxm(C,
+             complement(structure(Ones)), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty);
     BOOST_CHECK_EQUAL(C, Ones);
 
     C = Empty;
-    GraphBLAS::mxm(C,
-                   complement(structure(Empty)), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity);
+    grb::mxm(C,
+             complement(structure(Empty)), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity);
     BOOST_CHECK_EQUAL(C, Ones);
 
     // Replace
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(mUpper)), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Empty), Ones, REPLACE);
+    grb::mxm(C,
+             complement(structure(mUpper)), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Empty), Ones, REPLACE);
     BOOST_CHECK_EQUAL(C, Empty);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(mUpper)), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
+    grb::mxm(C,
+             complement(structure(mUpper)), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
     BOOST_CHECK_EQUAL(C, Empty);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(Ones)), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
+    grb::mxm(C,
+             complement(structure(Ones)), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
     BOOST_CHECK_EQUAL(C, Empty);
 
     C = Empty;
-    GraphBLAS::mxm(C,
-                   complement(structure(Empty)), NoAccumulate(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
+    grb::mxm(C,
+             complement(structure(Empty)), NoAccumulate(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, Ones);
 }
 
@@ -3871,37 +3871,37 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_NoAccum_ATB_emptyRowA_emptyColB)
                                                {1, 0, 1, 1},
                                                {0, 0, 1, 1}};
 
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> NotLower(NotLower_3x4, 0.);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> NotLower(NotLower_3x4, 0.);
     NotLower.setElement(0, 2, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_3x4, 0.);
-    GraphBLAS::Matrix<double> C(3, 4);
+    grb::Matrix<double> Ones(Ones_3x4, 0.);
+    grb::Matrix<double> C(3, 4);
 
     // REPLACE
     std::vector<std::vector<double>> answer_vals = {{1, 0, 0, 0},
                                                     {0, 0, 0, 0},
                                                     {9, 0, 11,0}};
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(NotLower)),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
+    grb::mxm(C,
+             complement(structure(NotLower)),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
     BOOST_CHECK_EQUAL(C, answer);
 
     // Merge
     std::vector<std::vector<double>> answer_vals2 = {{1, 1, 1, 1},
                                                      {0, 0, 1, 1},
                                                      {9, 0, 11,1}};
-    GraphBLAS::Matrix<double> answer2(answer_vals2, 0.);
+    grb::Matrix<double> answer2(answer_vals2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(NotLower)),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(C,
+             complement(structure(NotLower)),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(C, answer2);
 }
 
@@ -3916,37 +3916,37 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_NoAccum_ATB_emptyColA_emptyRowB)
                                                {1, 0, 1, 1},
                                                {0, 0, 0, 0}};
 
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> NotLower(NotLower_3x4, 0.);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> NotLower(NotLower_3x4, 0.);
     NotLower.setElement(0, 2, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_3x4, 0.);
-    GraphBLAS::Matrix<double> C(3, 4);
+    grb::Matrix<double> Ones(Ones_3x4, 0.);
+    grb::Matrix<double> C(3, 4);
 
     // REPLACE
     std::vector<std::vector<double>> answer_vals = {{0, 0, 0, 0},
                                                     {0, 1, 0, 0},
                                                     {0, 4, 0, 0}};
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(NotLower)),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
+    grb::mxm(C,
+             complement(structure(NotLower)),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
     BOOST_CHECK_EQUAL(C, answer);
 
     // Merge
     std::vector<std::vector<double>> answer_vals2 = {{0, 1, 1, 1},
                                                      {0, 1, 1, 1},
                                                      {0, 4, 0, 1}};
-    GraphBLAS::Matrix<double> answer2(answer_vals2, 0.);
+    grb::Matrix<double> answer2(answer_vals2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(NotLower)),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(C,
+             complement(structure(NotLower)),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(C, answer2);
 }
 
@@ -3961,37 +3961,37 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_NoAccum_ATB_emptyRowM)
                                                {1, 0, 1},
                                                {0, 0, 1}};
 
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> Lower(Lower_3x3, 0.);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> Lower(Lower_3x3, 0.);
     Lower.setElement(2, 0, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> C(3,3);
+    grb::Matrix<double> Ones(Ones_3x3, 0.);
+    grb::Matrix<double> C(3,3);
 
     // Replace
     std::vector<std::vector<double>> answer_vals = {{0, 0, 7},
                                                     {0, 0, 0},
                                                     {0, 0, 0}};
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(Lower)),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
+    grb::mxm(C,
+             complement(structure(Lower)),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
     BOOST_CHECK_EQUAL(C, answer);
 
     // Merge
     std::vector<std::vector<double>> answer_vals2 = {{1, 0, 7},
                                                      {1, 1, 0},
                                                      {1, 1, 1}};
-    GraphBLAS::Matrix<double> answer2(answer_vals2, 0.);
+    grb::Matrix<double> answer2(answer_vals2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(Lower)),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(C,
+             complement(structure(Lower)),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(C, answer2);
 }
 
@@ -3999,24 +3999,24 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_NoAccum_ATB_emptyRowM)
 BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_NoAccum_ATB_ABdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> NotLower(NotLower_4x4, 0.);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> NotLower(NotLower_4x4, 0.);
     NotLower.setElement(0, 1, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> Ones(Ones_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{2,  1,  1,  1},
                                              {3,  9,  1,  1},
                                              {2, 10, 22,  1},
                                              {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(NotLower)),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(C,
+             complement(structure(NotLower)),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -4025,14 +4025,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_NoAccum_ATB_ABdup)
                                               {3,  9,  0,  0},
                                               {2, 10, 22,  0},
                                               {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(NotLower)),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat,
-                   REPLACE);
+    grb::mxm(C,
+             complement(structure(NotLower)),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -4041,75 +4041,24 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_NoAccum_ATB_ABdup)
 BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_NoAccum_ATB_ACdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> NotLower(NotLower_4x4, 0.);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> NotLower(NotLower_4x4, 0.);
     NotLower.setElement(0, 1, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> Ones(Ones_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{2,  1,  0,  0},
                                              {3,  9,  2,  0},
                                              {2, 10, 22,  3},
                                              {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   complement(structure(NotLower)),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(C), mat);
-
-    BOOST_CHECK_EQUAL(C, answer);
-
-    // Replace
-    std::vector<std::vector<double> > ans2 = {{2,  0,  0,  0},
-                                             {3,  9,  0,  0},
-                                             {2, 10, 22,  0},
-                                             {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
-
-    C = mat;
-    GraphBLAS::mxm(C,
-                   complement(structure(NotLower)),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(C), mat,
-                   REPLACE);
-
-    BOOST_CHECK_EQUAL(C, answer2);
-}
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_NoAccum_ATB_BCdup)
-{
-    // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> NotLower(NotLower_4x4, 0.);
-    NotLower.setElement(0, 1, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
-
-    // Merge
-    std::vector<std::vector<double> > ans = {{2,  1,  0,  0},
-                                             {3,  9,  2,  0},
-                                             {2, 10, 22,  3},
-                                             {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
-
-    C = mat;
-    GraphBLAS::mxm(C,
-                   complement(structure(NotLower)),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), C);
-
-    BOOST_CHECK_EQUAL(C, answer);
-
-    // Double check previous operation (without duplicating)
-    C = mat;
-    GraphBLAS::mxm(C,
-                   complement(structure(NotLower)),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(C,
+             complement(structure(NotLower)),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(C), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -4118,14 +4067,65 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_NoAccum_ATB_BCdup)
                                               {3,  9,  0,  0},
                                               {2, 10, 22,  0},
                                               {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   complement(structure(NotLower)),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), C,
-                   REPLACE);
+    grb::mxm(C,
+             complement(structure(NotLower)),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(C), mat,
+             REPLACE);
+
+    BOOST_CHECK_EQUAL(C, answer2);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_NoAccum_ATB_BCdup)
+{
+    // Build some matrices.
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> NotLower(NotLower_4x4, 0.);
+    NotLower.setElement(0, 1, 0.);
+    grb::Matrix<double> Ones(Ones_4x4, 0.);
+    grb::Matrix<double> C(4,4);
+
+    // Merge
+    std::vector<std::vector<double> > ans = {{2,  1,  0,  0},
+                                             {3,  9,  2,  0},
+                                             {2, 10, 22,  3},
+                                             {0,  6, 21, 25}};
+    grb::Matrix<double> answer(ans, 0.);
+
+    C = mat;
+    grb::mxm(C,
+             complement(structure(NotLower)),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), C);
+
+    BOOST_CHECK_EQUAL(C, answer);
+
+    // Double check previous operation (without duplicating)
+    C = mat;
+    grb::mxm(C,
+             complement(structure(NotLower)),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
+
+    BOOST_CHECK_EQUAL(C, answer);
+
+    // Replace
+    std::vector<std::vector<double> > ans2 = {{2,  0,  0,  0},
+                                              {3,  9,  0,  0},
+                                              {2, 10, 22,  0},
+                                              {0,  6, 21, 25}};
+    grb::Matrix<double> answer2(ans2, 0.);
+
+    C = mat;
+    grb::mxm(C,
+             complement(structure(NotLower)),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), C,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -4134,23 +4134,23 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_NoAccum_ATB_BCdup)
 BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_NoAccum_ATB_Replace_ABdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> result(Ones_4x4, 0.);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> result(Ones_4x4, 0.);
 
     std::vector<std::vector<double> > ans = {{2,  0,  0,  0},
                                              {3,  9,  0,  0},
                                              {2, 10, 22,  0},
                                              {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
-    GraphBLAS::Matrix<double> M(NotLower_4x4, 0.);
+    grb::Matrix<double> M(NotLower_4x4, 0.);
     M.setElement(0, 1, 0.);
 
-    GraphBLAS::mxm(result,
-                   GraphBLAS::complement(structure(M)),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat,
-                   REPLACE);
+    grb::mxm(result,
+             grb::complement(structure(M)),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -4162,30 +4162,30 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_NoAccum_ATB_Replace_ABdup)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB)
 {
-    GraphBLAS::Matrix<double> A(AT_sparse_3x3, 0.0);
-    GraphBLAS::Matrix<double> Identity(Identity_3x3, 0.0);
+    grb::Matrix<double> A(AT_sparse_3x3, 0.0);
+    grb::Matrix<double> Identity(Identity_3x3, 0.0);
 
-    GraphBLAS::Matrix<double> Empty(3, 3);
-    GraphBLAS::Matrix<double> Ones(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> C(3,3);
+    grb::Matrix<double> Empty(3, 3);
+    grb::Matrix<double> Ones(Ones_3x3, 0.);
+    grb::Matrix<double> C(3,3);
 
-    GraphBLAS::Matrix<double> MLower(Lower_3x3, 0.);
+    grb::Matrix<double> MLower(Lower_3x3, 0.);
     MLower.setElement(2, 0, 0.);
-    GraphBLAS::Matrix<double> MNotLower(NotLower_3x3, 0.);
+    grb::Matrix<double> MNotLower(NotLower_3x3, 0.);
     MNotLower.setElement(0, 2, 0.);
 
     static std::vector<std::vector<double> > A_sparse_fill_in_3x3 =
-    {{12, 7,  1},
-     {1, -5,  1},
-     {7,  1,  9}};
-    GraphBLAS::Matrix<double> AFilled(A_sparse_fill_in_3x3, 0.0);
+        {{12, 7,  1},
+         {1, -5,  1},
+         {7,  1,  9}};
+    grb::Matrix<double> AFilled(A_sparse_fill_in_3x3, 0.0);
 
 
     static std::vector<std::vector<double> > Not_A_3x3 =
         {{0,  0,  1},
          {1,  0,  1},
          {0,  1,  0}};
-    GraphBLAS::Matrix<double> NotA(Not_A_3x3, 0.0);
+    grb::Matrix<double> NotA(Not_A_3x3, 0.0);
     NotA.setElement(1, 0, 0.);
 
     // Merge
@@ -4193,9 +4193,9 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB)
 
     C = Ones;
     Ones.setElement(0, 0, 0.);
-    GraphBLAS::mxm(C,
-                   complement(structure(Ones)), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity);
+    grb::mxm(C,
+             complement(structure(Ones)), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(A), Identity);
     Ones.setElement(0, 0, 1.);
     BOOST_CHECK_EQUAL(C, Ones);
 
@@ -4206,9 +4206,9 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB)
          {8,  1, 10}};
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(NotA)), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity);
+    grb::mxm(C,
+             complement(structure(NotA)), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(A), Identity);
     BOOST_CHECK_EQUAL(C, Matrix<double>(ans, 0.));
 
     //---
@@ -4218,9 +4218,9 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB)
          {2,  2,  2}};
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(MNotLower)), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity);
+    grb::mxm(C,
+             complement(structure(MNotLower)), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity);
     BOOST_CHECK_EQUAL(C, Matrix<double>(ans2, 0.));
 
     //---
@@ -4230,9 +4230,9 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB)
          {1,  1,  1}};
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(MLower)), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity);
+    grb::mxm(C,
+             complement(structure(MLower)), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity);
     BOOST_CHECK_EQUAL(C, Matrix<double>(ans3, 0.));
 
     // Replace
@@ -4240,9 +4240,9 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB)
 
     C = Ones;
     Ones.setElement(0, 0, 0.);
-    GraphBLAS::mxm(C,
-                   complement(structure(Ones)), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
+    grb::mxm(C,
+             complement(structure(Ones)), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
     Ones.setElement(0, 0, 1.);
     BOOST_CHECK_EQUAL(C, Empty);
 
@@ -4253,9 +4253,9 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB)
          {8,  1, 10}};
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(Empty)), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
+    grb::mxm(C,
+             complement(structure(Empty)), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(A), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, Matrix<double>(ans4, 0.));
 
     //---
@@ -4265,9 +4265,9 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB)
          {2,  2,  2}};
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(MNotLower)), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
+    grb::mxm(C,
+             complement(structure(MNotLower)), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, Matrix<double>(ans5, 0.));
 
     //---
@@ -4277,63 +4277,63 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB)
          {0,  0,  0}};
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(MLower)), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
+    grb::mxm(C,
+             complement(structure(MLower)), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Identity, REPLACE);
     BOOST_CHECK_EQUAL(C, Matrix<double>(ans6, 0.));
 }
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATBM_empty)
 {
-    GraphBLAS::Matrix<double> Empty(3, 3);
-    GraphBLAS::Matrix<double> Ones(Ones_3x3, 0.);
-    GraphBLAS::Matrix<double> C(3,3);
+    grb::Matrix<double> Empty(3, 3);
+    grb::Matrix<double> Ones(Ones_3x3, 0.);
+    grb::Matrix<double> C(3,3);
 
     // NOTE: The mask is true for any non-zero.
-    GraphBLAS::Matrix<bool> MNotLower(NotLowerBool_3x3, false);
+    grb::Matrix<bool> MNotLower(NotLowerBool_3x3, false);
     MNotLower.setElement(0, 2, false);
 
     // Merge
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(MNotLower)), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Empty), Ones);
+    grb::mxm(C,
+             complement(structure(MNotLower)), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Empty), Ones);
     BOOST_CHECK_EQUAL(C, Ones);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(MNotLower)), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty);
+    grb::mxm(C,
+             complement(structure(MNotLower)), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty);
     BOOST_CHECK_EQUAL(C, Ones);
 
     C = Ones;
     Ones.setElement(0, 2, 0.);
-    GraphBLAS::mxm(C,
-                   complement(structure(Ones)), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Ones);
+    grb::mxm(C,
+             complement(structure(Ones)), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Ones);
     Ones.setElement(0, 2, 1.);
     BOOST_CHECK_EQUAL(C, Ones);
 
     // Replace
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(MNotLower)), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Empty), Ones, REPLACE);
+    grb::mxm(C,
+             complement(structure(MNotLower)), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Empty), Ones, REPLACE);
     BOOST_CHECK_EQUAL(C, Matrix<double>(Lower_3x3, 0.));
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(MNotLower)), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
+    grb::mxm(C,
+             complement(structure(MNotLower)), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
     BOOST_CHECK_EQUAL(C, Matrix<double>(Lower_3x3, 0.));
 
     C = Ones;
     Ones.setElement(0, 2, 0.);
-    GraphBLAS::mxm(C,
-                   complement(structure(Ones)), Plus<double>(),
-                   ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
+    grb::mxm(C,
+             complement(structure(Ones)), Plus<double>(),
+             ArithmeticSemiring<double>(), transpose(Ones), Empty, REPLACE);
     BOOST_CHECK_EQUAL(C, Empty);
 }
 
@@ -4348,37 +4348,37 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB_emptyRowA_emptyColB)
                                                {1, 0, 1, 1},
                                                {0, 0, 1, 1}};
 
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> MNotLower(NotLower_3x4, 0.);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> MNotLower(NotLower_3x4, 0.);
     MNotLower.setElement(0, 2, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_3x4, 0.);
-    GraphBLAS::Matrix<double> C(3, 4);
+    grb::Matrix<double> Ones(Ones_3x4, 0.);
+    grb::Matrix<double> C(3, 4);
 
     // REPLACE
     std::vector<std::vector<double>> answer_vals = {{2, 0, 0, 0},
                                                     {1, 1, 0, 0},
                                                     {10,1, 12,0}};
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(MNotLower)),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
+    grb::mxm(C,
+             complement(structure(MNotLower)),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
     BOOST_CHECK_EQUAL(C, answer);
 
     // Merge
     std::vector<std::vector<double>> answer_vals2 = {{2, 1, 1, 1},
                                                      {1, 1, 1, 1},
                                                      {10,1,12,1}};
-    GraphBLAS::Matrix<double> answer2(answer_vals2, 0.);
+    grb::Matrix<double> answer2(answer_vals2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(MNotLower)),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(C,
+             complement(structure(MNotLower)),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(C, answer2);
 }
 
@@ -4393,37 +4393,37 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB_emptyColA_emptyRowB)
                                                {1, 0, 1, 1},
                                                {0, 0, 0, 0}};
 
-    GraphBLAS::Matrix<double> A(A_vals, 0.);
-    GraphBLAS::Matrix<double> B(B_vals, 0.);
-    GraphBLAS::Matrix<double> NotLower(NotLower_3x4, 0.);
+    grb::Matrix<double> A(A_vals, 0.);
+    grb::Matrix<double> B(B_vals, 0.);
+    grb::Matrix<double> NotLower(NotLower_3x4, 0.);
     NotLower.setElement(0, 2, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_3x4, 0.);
-    GraphBLAS::Matrix<double> C(3, 4);
+    grb::Matrix<double> Ones(Ones_3x4, 0.);
+    grb::Matrix<double> C(3, 4);
 
     // REPLACE
     std::vector<std::vector<double>> answer_vals = {{1, 0, 0, 0},
                                                     {1, 2, 0, 0},
                                                     {1, 5, 1, 0}};
-    GraphBLAS::Matrix<double> answer(answer_vals, 0.);
+    grb::Matrix<double> answer(answer_vals, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(NotLower)),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
+    grb::mxm(C,
+             complement(structure(NotLower)),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B, REPLACE);
     BOOST_CHECK_EQUAL(C, answer);
 
     // Merge
     std::vector<std::vector<double>> answer_vals2 = {{1, 1, 1, 1},
                                                      {1, 2, 1, 1},
                                                      {1, 5, 1, 1}};
-    GraphBLAS::Matrix<double> answer2(answer_vals2, 0.);
+    grb::Matrix<double> answer2(answer_vals2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(NotLower)),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(C,
+             complement(structure(NotLower)),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(C, answer2);
 }
 
@@ -4431,24 +4431,24 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB_emptyColA_emptyRowB)
 BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB_ABdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> NotLower(NotLower_4x4, 0.);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> NotLower(NotLower_4x4, 0.);
     NotLower.setElement(0, 1, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> Ones(Ones_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{3,  1,  1,  1},
                                              {4, 10,  1,  1},
                                              {3, 11, 23,  1},
                                              {1,  7, 22, 26}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(NotLower)),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(C,
+             complement(structure(NotLower)),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -4457,14 +4457,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB_ABdup)
                                               {4, 10,  0,  0},
                                               {3, 11, 23,  0},
                                               {1,  7, 22, 26}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = Ones;
-    GraphBLAS::mxm(C,
-                   complement(structure(NotLower)),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat,
-                   REPLACE);
+    grb::mxm(C,
+             complement(structure(NotLower)),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -4474,24 +4474,24 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB_ACdup)
 {
 
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> NotLower(NotLower_4x4, 0.);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> NotLower(NotLower_4x4, 0.);
     NotLower.setElement(0, 1, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> Ones(Ones_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{3,  1,  0,  0},
                                              {4, 11,  2,  0},
                                              {2, 12, 25,  3},
                                              {0,  6, 24, 29}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   complement(structure(NotLower)),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(C), mat);
+    grb::mxm(C,
+             complement(structure(NotLower)),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(C), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -4500,14 +4500,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB_ACdup)
                                               {4, 11,  0,  0},
                                               {2, 12, 25,  0},
                                               {0,  6, 24, 29}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   complement(structure(NotLower)),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(C), mat,
-                   REPLACE);
+    grb::mxm(C,
+             complement(structure(NotLower)),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(C), mat,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -4516,33 +4516,33 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB_ACdup)
 BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB_BCdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> NotLower(NotLower_4x4, 0.);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> NotLower(NotLower_4x4, 0.);
     NotLower.setElement(0, 1, 0.);
-    GraphBLAS::Matrix<double> Ones(Ones_4x4, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> Ones(Ones_4x4, 0.);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{3,  1,  0,  0},
                                              {4, 11,  2,  0},
                                              {2, 12, 25,  3},
                                              {0,  6, 24, 29}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   complement(structure(NotLower)),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), C);
+    grb::mxm(C,
+             complement(structure(NotLower)),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), C);
 
     BOOST_CHECK_EQUAL(C, answer);
 
     // Double check previous operation (without duplicating)
     C = mat;
-    GraphBLAS::mxm(C,
-                   complement(structure(NotLower)),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(C,
+             complement(structure(NotLower)),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -4551,14 +4551,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB_BCdup)
                                               {4, 11,  0,  0},
                                               {2, 12, 25,  0},
                                               {0,  6, 24, 29}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = mat;
-    GraphBLAS::mxm(C,
-                   complement(structure(NotLower)),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), C,
-                   REPLACE);
+    grb::mxm(C,
+             complement(structure(NotLower)),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), C,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -4567,23 +4567,23 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB_BCdup)
 BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB_MCdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
-    GraphBLAS::Matrix<double> NotLower(NotLower_4x4, 0.);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> NotLower(NotLower_4x4, 0.);
     NotLower.setElement(0, 1, 0.);
-    GraphBLAS::Matrix<double> C(4,4);
+    grb::Matrix<double> C(4,4);
 
     // Merge
     std::vector<std::vector<double> > ans = {{2,  0,  1,  1},
                                              {3,  9,  1,  1},
                                              {2, 10, 22,  1},
                                              {99, 6, 21, 25}};
-    GraphBLAS::Matrix<double> answer(ans, 99.);
+    grb::Matrix<double> answer(ans, 99.);
 
     C = NotLower;
-    GraphBLAS::mxm(C,
-                   complement(structure(C)),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(C,
+             complement(structure(C)),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -4592,14 +4592,14 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB_MCdup)
                                               {3,  9,  0,  0},
                                               {2, 10, 22,  0},
                                               {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer2(ans2, 0.);
+    grb::Matrix<double> answer2(ans2, 0.);
 
     C = NotLower;
-    GraphBLAS::mxm(C,
-                   complement(structure(C)),
-                   GraphBLAS::Plus<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat,
-                   REPLACE);
+    grb::mxm(C,
+             complement(structure(C)),
+             grb::Plus<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat,
+             REPLACE);
 
     BOOST_CHECK_EQUAL(C, answer2);
 }
@@ -4607,24 +4607,24 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB_MCdup)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB_Replace_Cones_Mnlower)
 {
-    GraphBLAS::Matrix<double> A(AT_dense_3x3, 0.);
-    GraphBLAS::Matrix<double> B(B_dense_3x4, 0.);
-    GraphBLAS::Matrix<double> M(NotLower_3x4, 0.);
+    grb::Matrix<double> A(AT_dense_3x3, 0.);
+    grb::Matrix<double> B(B_dense_3x4, 0.);
+    grb::Matrix<double> M(NotLower_3x4, 0.);
     M.setElement(0, 1, 0.);
     BOOST_CHECK_EQUAL(M.nvals(), 6);
 
-    GraphBLAS::Matrix<double> result(Ones_3x4, 0.);
+    grb::Matrix<double> result(Ones_3x4, 0.);
 
     std::vector<std::vector<double> > ans = {{114,   0,   0,  0},
                                              { 74,  97,   0,  0},
                                              {119, 157, 112,  0}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
-    GraphBLAS::mxm(result,
-                   GraphBLAS::complement(structure(M)),
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B,
-                   REPLACE);
+    grb::mxm(result,
+             grb::complement(structure(M)),
+             grb::Second<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B,
+             REPLACE);
     BOOST_CHECK_EQUAL(result.nvals(), 6);
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -4632,23 +4632,23 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB_Replace_Cones_Mnlower)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB_Merge)
 {
-    GraphBLAS::Matrix<double> A(AT_dense_3x3, 0.);
-    GraphBLAS::Matrix<double> B(B_dense_3x4, 0.);
-    GraphBLAS::Matrix<double> M(NotLower_3x4, 0.);
+    grb::Matrix<double> A(AT_dense_3x3, 0.);
+    grb::Matrix<double> B(B_dense_3x4, 0.);
+    grb::Matrix<double> M(NotLower_3x4, 0.);
     M.setElement(0, 1, 0.);
     BOOST_CHECK_EQUAL(M.nvals(), 6);
 
-    GraphBLAS::Matrix<double> result(Ones_3x4, 0.);
+    grb::Matrix<double> result(Ones_3x4, 0.);
 
     std::vector<std::vector<double> > ans = {{114,   1,   1,  1},
                                              { 74,  97,   1,  1},
                                              {119, 157, 112,  1}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
-    GraphBLAS::mxm(result,
-                   GraphBLAS::complement(structure(M)),
-                   GraphBLAS::Second<double>(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(A), B);
+    grb::mxm(result,
+             grb::complement(structure(M)),
+             grb::Second<double>(),
+             grb::ArithmeticSemiring<double>(), transpose(A), B);
     BOOST_CHECK_EQUAL(result.nvals(), 12);
     BOOST_CHECK_EQUAL(result, answer);
 }
@@ -4657,23 +4657,23 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB_Merge)
 BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB_Merge_ABdup)
 {
     // Build some matrices.
-    GraphBLAS::Matrix<double> mat(Symmetric_4x4, 0.);
+    grb::Matrix<double> mat(Symmetric_4x4, 0.);
 
-    GraphBLAS::Matrix<double> result(Ones_4x4, 0.);
+    grb::Matrix<double> result(Ones_4x4, 0.);
 
     std::vector<std::vector<double> > ans = {{2,  1,  1,  1},
                                              {3,  9,  1,  1},
                                              {2, 10, 22,  1},
                                              {0,  6, 21, 25}};
-    GraphBLAS::Matrix<double> answer(ans, 0.);
+    grb::Matrix<double> answer(ans, 0.);
 
-    GraphBLAS::Matrix<double> M(NotLower_4x4, 0.);
+    grb::Matrix<double> M(NotLower_4x4, 0.);
     M.setElement(0, 1, 0.);
 
-    GraphBLAS::mxm(result,
-                   GraphBLAS::complement(structure(M)),
-                   GraphBLAS::NoAccumulate(),
-                   GraphBLAS::ArithmeticSemiring<double>(), transpose(mat), mat);
+    grb::mxm(result,
+             grb::complement(structure(M)),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(), transpose(mat), mat);
 
     BOOST_CHECK_EQUAL(result, answer);
 }

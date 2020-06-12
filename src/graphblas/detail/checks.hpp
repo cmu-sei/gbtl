@@ -32,7 +32,7 @@
 #include <backend_include.hpp>
 #include "logging.h"
 
-namespace GraphBLAS
+namespace grb
 {
 
 
@@ -251,7 +251,7 @@ namespace GraphBLAS
 
     template <typename V>
     void check_size_nindices(const V &v,
-                             const GraphBLAS::AllIndices &s,
+                             const grb::AllIndices &s,
                              const std::string &msg)
     {
     };
@@ -284,7 +284,7 @@ namespace GraphBLAS
     }
 
     template <typename V>
-    void check_nindices_within_size(const GraphBLAS::AllIndices &seq,
+    void check_nindices_within_size(const grb::AllIndices &seq,
                                     const V &vec,
                                     const std::string &msg)
     {
@@ -300,7 +300,7 @@ namespace GraphBLAS
     }
 
     template <typename M>
-    void check_nindices_within_ncols(const GraphBLAS::AllIndices &seq,
+    void check_nindices_within_ncols(const grb::AllIndices &seq,
                                      const M &mat,
                                      const std::string &msg)
     {
@@ -317,10 +317,10 @@ namespace GraphBLAS
     }
 
     template <typename M>
-    void check_nindices_within_nrows(const GraphBLAS::AllIndices &seq,
+    void check_nindices_within_nrows(const grb::AllIndices &seq,
                                      const M &mat,
                                      const std::string &msg)
     {
     }
 
-} // end namespace GraphBLAS
+} // end namespace grb
