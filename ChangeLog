@@ -7,7 +7,7 @@
         - Some of the names of the monoid and semiring template classes have
           been changed to more closely match C API 1.3 names
           (e.g. MaxSelect1stSemiring is now MaxFirstSemiring)
-	- Order of parameters in markov cluster has changed (swapped
+        - Order of parameters in markov cluster has changed (swapped
           convergence_threshold and max_iters)
     * API updated to implement new functionality included in
       GraphBLAS C API Specification version 1.3:
@@ -30,7 +30,7 @@
         - Using SFINAE techniques for template function overload
           resolution and also template type restriction (e.g. std::enable_if,
           etc) both for operators and operations.
-	- used tag dispatch to resolve overloaded template functions
+        - used tag dispatch to resolve overloaded template functions
           (e.g. apply and assign operations)
         - removed typedefs (like result_type) from within operators to
           be consistent with C++17 changes to <functional> and to support
