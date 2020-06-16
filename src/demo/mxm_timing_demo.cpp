@@ -576,7 +576,7 @@ int main(int argc, char **argv)
         ArithmeticSemiring<double>(),
         transpose(A), transpose(B));
     my_timer.stop();
-    std::cout << "C := A+.*B'                : " << my_timer.elapsed()
+    std::cout << "C := A'+.*B'                : " << my_timer.elapsed()
               << " usec, C.nvals = " << C.nvals() << std::endl;
 
     my_timer.start();
@@ -584,7 +584,7 @@ int main(int argc, char **argv)
         ArithmeticSemiring<double>(),
         transpose(A), transpose(B));
     my_timer.stop();
-    std::cout << "C := C + A+.*B'            : " << my_timer.elapsed()
+    std::cout << "C := C + A'+.*B'            : " << my_timer.elapsed()
               << " usec, C.nvals = " << C.nvals() << std::endl;
 
     my_timer.start();
@@ -592,7 +592,7 @@ int main(int argc, char **argv)
         ArithmeticSemiring<double>(),
         transpose(A), transpose(B));
     my_timer.stop();
-    std::cout << "C<M,merge> := A+.*B'       : " << my_timer.elapsed()
+    std::cout << "C<M,merge> := A'+.*B'       : " << my_timer.elapsed()
               << " usec, C.nvals = " << C.nvals() << std::endl;
 
     my_timer.start();
@@ -600,7 +600,7 @@ int main(int argc, char **argv)
         ArithmeticSemiring<double>(),
         transpose(A), transpose(B), REPLACE);
     my_timer.stop();
-    std::cout << "C<M,replace> := A+.*B'     : " << my_timer.elapsed()
+    std::cout << "C<M,replace> := A'+.*B'     : " << my_timer.elapsed()
               << " usec, C.nvals = " << C.nvals() << std::endl;
 
     my_timer.start();
@@ -608,7 +608,7 @@ int main(int argc, char **argv)
         ArithmeticSemiring<double>(),
         transpose(A), transpose(B));
     my_timer.stop();
-    std::cout << "C<M,merge> := C + A+.*B'   : " << my_timer.elapsed()
+    std::cout << "C<M,merge> := C + A'+.*B'   : " << my_timer.elapsed()
               << " usec, C.nvals = " << C.nvals() << std::endl;
 
     my_timer.start();
@@ -616,7 +616,7 @@ int main(int argc, char **argv)
         ArithmeticSemiring<double>(),
         transpose(A), transpose(B), REPLACE);
     my_timer.stop();
-    std::cout << "C<M,replace> := C + A+.*B' : " << my_timer.elapsed()
+    std::cout << "C<M,replace> := C + A'+.*B' : " << my_timer.elapsed()
               << " usec, C.nvals = " << C.nvals() << std::endl;
 
     my_timer.start();
@@ -624,7 +624,7 @@ int main(int argc, char **argv)
         ArithmeticSemiring<double>(),
         transpose(A), transpose(B));
     my_timer.stop();
-    std::cout << "C<!M,merge> := A+.*B'      : " << my_timer.elapsed()
+    std::cout << "C<!M,merge> := A'+.*B'      : " << my_timer.elapsed()
               << " usec, C.nvals = " << C.nvals() << std::endl;
 
     my_timer.start();
@@ -632,7 +632,7 @@ int main(int argc, char **argv)
         ArithmeticSemiring<double>(),
         transpose(A), transpose(B), REPLACE);
     my_timer.stop();
-    std::cout << "C<!M,replace> := A+.*B'    : " << my_timer.elapsed()
+    std::cout << "C<!M,replace> := A'+.*B'    : " << my_timer.elapsed()
               << " usec, C.nvals = " << C.nvals() << std::endl;
 
     my_timer.start();
@@ -640,7 +640,7 @@ int main(int argc, char **argv)
         ArithmeticSemiring<double>(),
         transpose(A), transpose(B));
     my_timer.stop();
-    std::cout << "C<!M,merge> := C + A+.*B'  : " << my_timer.elapsed()
+    std::cout << "C<!M,merge> := C + A'+.*B'  : " << my_timer.elapsed()
               << " usec, C.nvals = " << C.nvals() << std::endl;
 
     my_timer.start();
@@ -648,7 +648,7 @@ int main(int argc, char **argv)
         ArithmeticSemiring<double>(),
         transpose(A), transpose(B), REPLACE);
     my_timer.stop();
-    std::cout << "C<!M,replace> := C + A+.*B': " << my_timer.elapsed()
+    std::cout << "C<!M,replace> := C + A'+.*B': " << my_timer.elapsed()
               << " usec, C.nvals = " << C.nvals() << std::endl;
 
     //-------------------- structure only
@@ -658,7 +658,7 @@ int main(int argc, char **argv)
         ArithmeticSemiring<double>(),
         transpose(A), transpose(B));
     my_timer.stop();
-    std::cout << "C<s(M),merge> := A+.*B'       : " << my_timer.elapsed()
+    std::cout << "C<s(M),merge> := A'+.*B'       : " << my_timer.elapsed()
               << " usec, C.nvals = " << C.nvals() << std::endl;
 
     my_timer.start();
@@ -666,7 +666,7 @@ int main(int argc, char **argv)
         ArithmeticSemiring<double>(),
         transpose(A), transpose(B), REPLACE);
     my_timer.stop();
-    std::cout << "C<s(M),replace> := A+.*B'     : " << my_timer.elapsed()
+    std::cout << "C<s(M),replace> := A'+.*B'     : " << my_timer.elapsed()
               << " usec, C.nvals = " << C.nvals() << std::endl;
 
     my_timer.start();
@@ -674,7 +674,7 @@ int main(int argc, char **argv)
         ArithmeticSemiring<double>(),
         transpose(A), transpose(B));
     my_timer.stop();
-    std::cout << "C<s(M),merge> := C + A+.*B'   : " << my_timer.elapsed()
+    std::cout << "C<s(M),merge> := C + A'+.*B'   : " << my_timer.elapsed()
               << " usec, C.nvals = " << C.nvals() << std::endl;
 
     my_timer.start();
@@ -682,7 +682,7 @@ int main(int argc, char **argv)
         ArithmeticSemiring<double>(),
         transpose(A), transpose(B), REPLACE);
     my_timer.stop();
-    std::cout << "C<s(M),replace> := C + A+.*B' : " << my_timer.elapsed()
+    std::cout << "C<s(M),replace> := C + A'+.*B' : " << my_timer.elapsed()
               << " usec, C.nvals = " << C.nvals() << std::endl;
 
     my_timer.start();
@@ -690,7 +690,7 @@ int main(int argc, char **argv)
         ArithmeticSemiring<double>(),
         transpose(A), transpose(B));
     my_timer.stop();
-    std::cout << "C<!s(M),merge> := A+.*B'      : " << my_timer.elapsed()
+    std::cout << "C<!s(M),merge> := A'+.*B'      : " << my_timer.elapsed()
               << " usec, C.nvals = " << C.nvals() << std::endl;
 
     my_timer.start();
@@ -698,7 +698,7 @@ int main(int argc, char **argv)
         ArithmeticSemiring<double>(),
         transpose(A), transpose(B), REPLACE);
     my_timer.stop();
-    std::cout << "C<!s(M),replace> := A+.*B'    : " << my_timer.elapsed()
+    std::cout << "C<!s(M),replace> := A'+.*B'    : " << my_timer.elapsed()
               << " usec, C.nvals = " << C.nvals() << std::endl;
 
     my_timer.start();
@@ -706,7 +706,7 @@ int main(int argc, char **argv)
         ArithmeticSemiring<double>(),
         transpose(A), transpose(B));
     my_timer.stop();
-    std::cout << "C<!s(M),merge> := C + A+.*B'  : " << my_timer.elapsed()
+    std::cout << "C<!s(M),merge> := C + A'+.*B'  : " << my_timer.elapsed()
               << " usec, C.nvals = " << C.nvals() << std::endl;
 
     my_timer.start();
@@ -714,254 +714,8 @@ int main(int argc, char **argv)
         ArithmeticSemiring<double>(),
         transpose(A), transpose(B), REPLACE);
     my_timer.stop();
-    std::cout << "C<!s(M),replace> := C + A+.*B': " << my_timer.elapsed()
+    std::cout << "C<!s(M),replace> := C + A'+.*B': " << my_timer.elapsed()
               << " usec, C.nvals = " << C.nvals() << std::endl;
-
-
-#if 0
-    // The follow requires access to the internals of frontend matrix
-
-    //===================
-    // Perform matrix multiplies with reference implementation
-    std::cout << "REFERENCE IMPLEMENTATION:" << std::endl;
-
-    //===================
-    // A*B
-    //===================
-    std::cout << "REFERENCE IMPLEMENTATION: A*B" << std::endl;
-    my_timer.start();
-    backend::original_mxm(
-        C.m_mat,
-        backend::NoMask(), NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        A.m_mat, B.m_mat, false);
-    my_timer.stop();
-    std::cout << "C := A+.*B                : " << my_timer.elapsed()
-              << " usec, C.nvals = " << C.nvals() << std::endl;
-
-    my_timer.start();
-    backend::original_mxm(
-        C.m_mat,
-        backend::NoMask(), Plus<double>(),
-        ArithmeticSemiring<double>(),
-        A.m_mat, B.m_mat, false);
-    my_timer.stop();
-    std::cout << "C := C + A+.*B            : " << my_timer.elapsed()
-              << " usec, C.nvals = " << C.nvals() << std::endl;
-
-    my_timer.start();
-    backend::original_mxm(
-        C.m_mat,
-        M.m_mat, NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        A.m_mat, B.m_mat, false);
-    my_timer.stop();
-    std::cout << "C<M,merge> := A+.*B       : " << my_timer.elapsed()
-              << " usec, C.nvals = " << C.nvals() << std::endl;
-
-    my_timer.start();
-    backend::original_mxm(
-        C.m_mat,
-        M.m_mat, NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        A.m_mat, B.m_mat, REPLACE);
-    my_timer.stop();
-    std::cout << "C<M,replace> := A+.*B     : " << my_timer.elapsed()
-              << " usec, C.nvals = " << C.nvals() << std::endl;
-
-    my_timer.start();
-    backend::original_mxm(
-        C.m_mat,
-        M.m_mat, Plus<double>(),
-        ArithmeticSemiring<double>(),
-        A.m_mat, B.m_mat, false);
-    my_timer.stop();
-    std::cout << "C<M,merge> := C + A+.*B   : " << my_timer.elapsed()
-              << " usec, C.nvals = " << C.nvals() << std::endl;
-
-    my_timer.start();
-    backend::original_mxm(
-        C.m_mat,
-        M.m_mat, Plus<double>(),
-        ArithmeticSemiring<double>(),
-        A.m_mat, B.m_mat, REPLACE);
-    my_timer.stop();
-    std::cout << "C<M,replace> := A+.*B     : " << my_timer.elapsed()
-              << " usec, C.nvals = " << C.nvals() << std::endl;
-
-    my_timer.start();
-    backend::original_mxm(
-        C.m_mat,
-        backend::MatrixComplementView<BoolMatType::BackendType>(M.m_mat),
-        NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        A.m_mat, B.m_mat, false);
-    my_timer.stop();
-    std::cout << "C<!M,merge> := A+.*B      : " << my_timer.elapsed()
-              << " usec, C.nvals = " << C.nvals() << std::endl;
-
-    my_timer.start();
-    backend::original_mxm(
-        C.m_mat,
-        backend::MatrixComplementView<BoolMatType::BackendType>(M.m_mat),
-        NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        A.m_mat, B.m_mat, REPLACE);
-    my_timer.stop();
-    std::cout << "C<!M,replace> := A+.*B    : " << my_timer.elapsed()
-              << " usec, C.nvals = " << C.nvals() << std::endl;
-
-    my_timer.start();
-    backend::original_mxm(
-        C.m_mat,
-        backend::MatrixComplementView<BoolMatType::BackendType>(M.m_mat),
-        Plus<double>(),
-        ArithmeticSemiring<double>(),
-        A.m_mat, B.m_mat, false);
-    my_timer.stop();
-    std::cout << "C<!M,merge> := C + A+.*B  : " << my_timer.elapsed()
-              << " usec, C.nvals = " << C.nvals() << std::endl;
-
-    my_timer.start();
-    backend::original_mxm(
-        C.m_mat,
-        backend::MatrixComplementView<BoolMatType::BackendType>(M.m_mat),
-        Plus<double>(),
-        ArithmeticSemiring<double>(),
-        A.m_mat, B.m_mat, REPLACE);
-    my_timer.stop();
-    std::cout << "C<!M,replace> := C + A+.*B: " << my_timer.elapsed()
-              << " usec, C.nvals = " << C.nvals() << std::endl;
-
-    //===================
-    // A*B'
-    //===================
-    std::cout << "REFERENCE IMPLEMENTATION: A*B'" << std::endl;
-    my_timer.start();
-    backend::original_mxm(
-        C.m_mat,
-        backend::NoMask(), NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        A.m_mat,
-        backend::TransposeView<MatType::BackendType>(B.m_mat),
-        false);
-    my_timer.stop();
-    std::cout << "C := A+.*B'               : " << my_timer.elapsed()
-              << " usec, C.nvals = " << C.nvals() << std::endl;
-
-    my_timer.start();
-    backend::original_mxm(
-        C.m_mat,
-        backend::NoMask(), Plus<double>(),
-        ArithmeticSemiring<double>(),
-        A.m_mat,
-        backend::TransposeView<MatType::BackendType>(B.m_mat),
-        false);
-    my_timer.stop();
-    std::cout << "C := C + A+.*B'           : " << my_timer.elapsed()
-              << " usec, C.nvals = " << C.nvals() << std::endl;
-
-    my_timer.start();
-    backend::original_mxm(
-        C.m_mat,
-        M.m_mat, NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        A.m_mat,
-        backend::TransposeView<MatType::BackendType>(B.m_mat),
-        false);
-    my_timer.stop();
-    std::cout << "C<M,merge> := A+.*B'      : " << my_timer.elapsed()
-              << " usec, C.nvals = " << C.nvals() << std::endl;
-
-    my_timer.start();
-    backend::original_mxm(
-        C.m_mat,
-        M.m_mat, NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        A.m_mat,
-        backend::TransposeView<MatType::BackendType>(B.m_mat),
-        REPLACE);
-    my_timer.stop();
-    std::cout << "C<M,replace> := A+.*B'    : " << my_timer.elapsed()
-              << " usec, C.nvals = " << C.nvals() << std::endl;
-
-    my_timer.start();
-    backend::original_mxm(
-        C.m_mat,
-        M.m_mat, Plus<double>(),
-        ArithmeticSemiring<double>(),
-        A.m_mat,
-        backend::TransposeView<MatType::BackendType>(B.m_mat),
-        false);
-    my_timer.stop();
-    std::cout << "C<M,merge> := C + A+.*B'  : " << my_timer.elapsed()
-              << " usec, C.nvals = " << C.nvals() << std::endl;
-
-    my_timer.start();
-    backend::original_mxm(
-        C.m_mat,
-        M.m_mat, Plus<double>(),
-        ArithmeticSemiring<double>(),
-        A.m_mat,
-        backend::TransposeView<MatType::BackendType>(B.m_mat),
-        REPLACE);
-    my_timer.stop();
-    std::cout << "C<M,replace> := C + A+.*B': " << my_timer.elapsed()
-              << " usec, C.nvals = " << C.nvals() << std::endl;
-
-    my_timer.start();
-    backend::original_mxm(
-        C.m_mat,
-        backend::MatrixComplementView<BoolMatType::BackendType>(M.m_mat),
-        NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        A.m_mat,
-        backend::TransposeView<MatType::BackendType>(B.m_mat),
-        false);
-    my_timer.stop();
-    std::cout << "C<!M,merge> := A+.*B'     : " << my_timer.elapsed()
-              << " usec, C.nvals = " << C.nvals() << std::endl;
-
-    my_timer.start();
-    backend::original_mxm(
-        C.m_mat,
-        backend::MatrixComplementView<BoolMatType::BackendType>(M.m_mat),
-        NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        A.m_mat,
-        backend::TransposeView<MatType::BackendType>(B.m_mat),
-        REPLACE);
-    my_timer.stop();
-    std::cout << "C<!M,replace> := A+.*B'   : " << my_timer.elapsed()
-              << " usec, C.nvals = " << C.nvals() << std::endl;
-
-
-    my_timer.start();
-    backend::original_mxm(
-        C.m_mat,
-        backend::MatrixComplementView<BoolMatType::BackendType>(M.m_mat),
-        Plus<double>(),
-        ArithmeticSemiring<double>(),
-        A.m_mat,
-        backend::TransposeView<MatType::BackendType>(B.m_mat),
-        false);
-    my_timer.stop();
-    std::cout << "C<!M,merge> := C + A+.*B' : " << my_timer.elapsed()
-              << " usec, C.nvals = " << C.nvals() << std::endl;
-
-    my_timer.start();
-    backend::original_mxm(
-        C.m_mat,
-        backend::MatrixComplementView<BoolMatType::BackendType>(M.m_mat),
-        Plus<double>(),
-        ArithmeticSemiring<double>(),
-        A.m_mat,
-        backend::TransposeView<MatType::BackendType>(B.m_mat),
-        REPLACE);
-    my_timer.stop();
-    std::cout << "C<!M,replace> := C + A+.*B':" << my_timer.elapsed()
-              << " usec, C.nvals = " << C.nvals() << std::endl;
-#endif
 
     return 0;
 }

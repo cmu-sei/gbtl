@@ -155,7 +155,7 @@ int main(int argc, char **argv)
         A, u);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w<M,merge> := A+.*u       : " << my_timer.elapsed()
+    std::cout << "w<m,merge> := A+.*u       : " << my_timer.elapsed()
               << " usec, w.nvals = " << w.nvals()
               << " reduce = " << count << std::endl;
 
@@ -165,7 +165,7 @@ int main(int argc, char **argv)
         A, u, REPLACE);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w<M,replace> := A+.*u     : " << my_timer.elapsed()
+    std::cout << "w<m,replace> := A+.*u     : " << my_timer.elapsed()
               << " usec, w.nvals = " << w.nvals()
               << " reduce = " << count << std::endl;
 
@@ -175,7 +175,7 @@ int main(int argc, char **argv)
         A, u);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w<M,merge> := w + A+.*u   : " << my_timer.elapsed()
+    std::cout << "w<m,merge> := w + A+.*u   : " << my_timer.elapsed()
               << " usec, w.nvals = " << w.nvals()
               << " reduce = " << count << std::endl;
 
@@ -185,7 +185,7 @@ int main(int argc, char **argv)
         A, u, REPLACE);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w<M,replace> := w + A+.*u : " << my_timer.elapsed()
+    std::cout << "w<m,replace> := w + A+.*u : " << my_timer.elapsed()
               << " usec, w.nvals = " << w.nvals()
               << " reduce = " << count << std::endl;
 
@@ -195,7 +195,7 @@ int main(int argc, char **argv)
         A, u);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w<!M,merge> := A+.*u      : " << my_timer.elapsed()
+    std::cout << "w<!m,merge> := A+.*u      : " << my_timer.elapsed()
               << " usec, w.nvals = " << w.nvals()
               << " reduce = " << count << std::endl;
 
@@ -205,7 +205,7 @@ int main(int argc, char **argv)
         A, u, REPLACE);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w<!M,replace> := A+.*u    : " << my_timer.elapsed()
+    std::cout << "w<!m,replace> := A+.*u    : " << my_timer.elapsed()
               << " usec, w.nvals = " << w.nvals()
               << " reduce = " << count << std::endl;
 
@@ -215,7 +215,7 @@ int main(int argc, char **argv)
         A, u);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w<!M,merge> := w + A+.*u  : " << my_timer.elapsed()
+    std::cout << "w<!m,merge> := w + A+.*u  : " << my_timer.elapsed()
               << " usec, w.nvals = " << w.nvals()
               << " reduce = " << count << std::endl;
 
@@ -225,7 +225,7 @@ int main(int argc, char **argv)
         A, u, REPLACE);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w<!M,replace> := w + A+.*u: " << my_timer.elapsed()
+    std::cout << "w<!m,replace> := w + A+.*u: " << my_timer.elapsed()
               << " usec, w.nvals = " << w.nvals()
               << " reduce = " << count << std::endl;
 
@@ -236,7 +236,7 @@ int main(int argc, char **argv)
         A, u);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w<s(M),merge> := A+.*u    : " << my_timer.elapsed()
+    std::cout << "w<s(m),merge> := A+.*u    : " << my_timer.elapsed()
               << " usec, w.nvals = " << w.nvals()
               << " reduce = " << count << std::endl;
 
@@ -246,7 +246,7 @@ int main(int argc, char **argv)
         A, u, REPLACE);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w<s(M),replace> := A+.*u  : " << my_timer.elapsed()
+    std::cout << "w<s(m),replace> := A+.*u  : " << my_timer.elapsed()
               << " usec, w.nvals = " << w.nvals()
               << " reduce = " << count << std::endl;
 
@@ -256,7 +256,7 @@ int main(int argc, char **argv)
         A, u);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w<s(M),merge> := w + A+.*u   : " << my_timer.elapsed()
+    std::cout << "w<s(m),merge> := w + A+.*u   : " << my_timer.elapsed()
               << " usec, w.nvals = " << w.nvals()
               << " reduce = " << count << std::endl;
 
@@ -266,7 +266,7 @@ int main(int argc, char **argv)
         A, u, REPLACE);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w<s(M),replace> := w + A+.*u : " << my_timer.elapsed()
+    std::cout << "w<s(m),replace> := w + A+.*u : " << my_timer.elapsed()
               << " usec, w.nvals = " << w.nvals()
               << " reduce = " << count << std::endl;
 
@@ -276,7 +276,7 @@ int main(int argc, char **argv)
         A, u);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w<!s(M),merge> := A+.*u      : " << my_timer.elapsed()
+    std::cout << "w<!s(m),merge> := A+.*u      : " << my_timer.elapsed()
               << " usec, w.nvals = " << w.nvals()
               << " reduce = " << count << std::endl;
 
@@ -286,7 +286,7 @@ int main(int argc, char **argv)
         A, u, REPLACE);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w<!s(M),replace> := A+.*u    : " << my_timer.elapsed()
+    std::cout << "w<!s(m),replace> := A+.*u    : " << my_timer.elapsed()
               << " usec, w.nvals = " << w.nvals()
               << " reduce = " << count << std::endl;
 
@@ -296,7 +296,7 @@ int main(int argc, char **argv)
         A, u);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w<!s(M),merge> := w + A+.*u  : " << my_timer.elapsed()
+    std::cout << "w<!s(m),merge> := w + A+.*u  : " << my_timer.elapsed()
               << " usec, w.nvals = " << w.nvals()
               << " reduce = " << count << std::endl;
 
@@ -306,7 +306,7 @@ int main(int argc, char **argv)
         A, u, REPLACE);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w<!s(M),replace> := w + A+.*u: " << my_timer.elapsed()
+    std::cout << "w<!s(m),replace> := w + A+.*u: " << my_timer.elapsed()
               << " usec, w.nvals = " << w.nvals()
               << " reduce = " << count << std::endl;
 
@@ -341,7 +341,7 @@ int main(int argc, char **argv)
         transpose(AT), u);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w<M,merge> := A'+.*u       : " << my_timer.elapsed()
+    std::cout << "w<m,merge> := A'+.*u       : " << my_timer.elapsed()
               << " usec, w1.nvals = " << w1.nvals()
               << " reduce = " << count << std::endl;
 
@@ -351,7 +351,7 @@ int main(int argc, char **argv)
         transpose(AT), u, REPLACE);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w<M,replace> := A+.*u      : " << my_timer.elapsed()
+    std::cout << "w<m,replace> := A'+.*u      : " << my_timer.elapsed()
               << " usec, w1.nvals = " << w1.nvals()
               << " reduce = " << count << std::endl;
 
@@ -361,7 +361,7 @@ int main(int argc, char **argv)
         transpose(AT), u);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w<M,merge> := w + A'+.*u   : " << my_timer.elapsed()
+    std::cout << "w<m,merge> := w + A'+.*u   : " << my_timer.elapsed()
               << " usec, w1.nvals = " << w1.nvals()
               << " reduce = " << count << std::endl;
 
@@ -371,7 +371,7 @@ int main(int argc, char **argv)
         transpose(AT), u, REPLACE);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w<M,replace> := w + A'+.*u : " << my_timer.elapsed()
+    std::cout << "w<m,replace> := w + A'+.*u : " << my_timer.elapsed()
               << " usec, w1.nvals = " << w1.nvals()
               << " reduce = " << count << std::endl;
 
@@ -381,7 +381,7 @@ int main(int argc, char **argv)
         transpose(AT), u);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w<!M,merge> := A'+.*u      : " << my_timer.elapsed()
+    std::cout << "w<!m,merge> := A'+.*u      : " << my_timer.elapsed()
               << " usec, w1.nvals = " << w1.nvals()
               << " reduce = " << count << std::endl;
 
@@ -391,7 +391,7 @@ int main(int argc, char **argv)
         transpose(AT), u, REPLACE);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w<!M,replace> := A'+.*u    : " << my_timer.elapsed()
+    std::cout << "w<!m,replace> := A'+.*u    : " << my_timer.elapsed()
               << " usec, w1.nvals = " << w1.nvals()
               << " reduce = " << count << std::endl;
 
@@ -401,7 +401,7 @@ int main(int argc, char **argv)
         transpose(AT), u);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w<!M,merge> := w + A'+.*u  : " << my_timer.elapsed()
+    std::cout << "w<!m,merge> := w + A'+.*u  : " << my_timer.elapsed()
               << " usec, w1.nvals = " << w1.nvals()
               << " reduce = " << count << std::endl;
 
@@ -411,7 +411,7 @@ int main(int argc, char **argv)
         transpose(AT), u, REPLACE);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w<!M,replace> := w + A'+.*u: " << my_timer.elapsed()
+    std::cout << "w<!m,replace> := w + A'+.*u: " << my_timer.elapsed()
               << " usec, w1.nvals = " << w1.nvals()
               << " reduce = " << count << std::endl;
 
@@ -423,7 +423,7 @@ int main(int argc, char **argv)
         transpose(AT), u);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w<s(M),merge> := A'+.*u       : " << my_timer.elapsed()
+    std::cout << "w<s(m),merge> := A'+.*u       : " << my_timer.elapsed()
               << " usec, w1.nvals = " << w1.nvals()
               << " reduce = " << count << std::endl;
 
@@ -433,7 +433,7 @@ int main(int argc, char **argv)
         transpose(AT), u, REPLACE);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w<s(M),replace> := A+.*u      : " << my_timer.elapsed()
+    std::cout << "w<s(m),replace> := A+.*u      : " << my_timer.elapsed()
               << " usec, w1.nvals = " << w1.nvals()
               << " reduce = " << count << std::endl;
 
@@ -443,7 +443,7 @@ int main(int argc, char **argv)
         transpose(AT), u);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w<s(M),merge> := w + A'+.*u   : " << my_timer.elapsed()
+    std::cout << "w<s(m),merge> := w + A'+.*u   : " << my_timer.elapsed()
               << " usec, w1.nvals = " << w1.nvals()
               << " reduce = " << count << std::endl;
 
@@ -453,7 +453,7 @@ int main(int argc, char **argv)
         transpose(AT), u, REPLACE);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w<s(M),replace> := w + A'+.*u : " << my_timer.elapsed()
+    std::cout << "w<s(m),replace> := w + A'+.*u : " << my_timer.elapsed()
               << " usec, w1.nvals = " << w1.nvals()
               << " reduce = " << count << std::endl;
 
@@ -463,7 +463,7 @@ int main(int argc, char **argv)
         transpose(AT), u);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w<!s(M),merge> := A'+.*u      : " << my_timer.elapsed()
+    std::cout << "w<!s(m),merge> := A'+.*u      : " << my_timer.elapsed()
               << " usec, w1.nvals = " << w1.nvals()
               << " reduce = " << count << std::endl;
 
@@ -473,7 +473,7 @@ int main(int argc, char **argv)
         transpose(AT), u, REPLACE);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w<!s(M),replace> := A'+.*u    : " << my_timer.elapsed()
+    std::cout << "w<!s(m),replace> := A'+.*u    : " << my_timer.elapsed()
               << " usec, w1.nvals = " << w1.nvals()
               << " reduce = " << count << std::endl;
 
@@ -483,7 +483,7 @@ int main(int argc, char **argv)
         transpose(AT), u);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w<!s(M),merge> := w + A'+.*u  : " << my_timer.elapsed()
+    std::cout << "w<!s(m),merge> := w + A'+.*u  : " << my_timer.elapsed()
               << " usec, w1.nvals = " << w1.nvals()
               << " reduce = " << count << std::endl;
 
@@ -493,7 +493,7 @@ int main(int argc, char **argv)
         transpose(AT), u, REPLACE);
     my_timer.stop();
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w<!s(M),replace> := w + A'+.*u: " << my_timer.elapsed()
+    std::cout << "w<!s(m),replace> := w + A'+.*u: " << my_timer.elapsed()
               << " usec, w1.nvals = " << w1.nvals()
               << " reduce = " << count << std::endl;
 

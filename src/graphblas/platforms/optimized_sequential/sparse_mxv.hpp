@@ -77,8 +77,13 @@ namespace grb
                         TScalarType t_val;
                         /// @note In mxv_timing_test, if I reverse u_contents and
                         /// A[row_idx], the performance improves by a factor of 2.
-                        /// But I cannot reorder in case op in not commutative.
-                        if (dot(t_val, A[row_idx], u_contents, op))
+                        /// But I cannot reorder in case op is not commutative.
+                        ///
+                        /// I have added dot_rev() helper that reverses the two
+                        /// vectors but keeps the order correct for op.
+                        ///
+                        /// I suspect this is strictly data dependent performance
+                        if (dot_rev(t_val, A[row_idx], u_contents, op))
                         {
                             t.emplace_back(row_idx, t_val);
                         }

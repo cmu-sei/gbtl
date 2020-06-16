@@ -2,8 +2,6 @@
 #*#
 .#*
 ~$*
-*.o
-*.pyc
 *.bak
 *.map
 .DS_Store
@@ -11,8 +9,4 @@
 *.map
 autom4te.cache
 build
-data
-dist
 docs
-html
-graphblas_py.egg-info
