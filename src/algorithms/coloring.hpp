@@ -75,19 +75,19 @@ namespace algorithms
                            distribution(generator));
                    },
                    colors);
-        //grb::print_vector(std::cout, weight, "initial weights");
+        grb::print_vector(std::cout, weight, "initial weights");
 
         // loop can be parallelized
         for (ColorT color = 1; color <= N; ++color)
         {
-            //std::cout << "================== iter/color = " << color << std::endl;
+            std::cout << "================== iter/color = " << color << std::endl;
             // find the max of neighbors
             grb::vxm(max, grb::NoMask(), grb::NoAccumulate(),
                      grb::MaxFirstSemiring<ColorT>(), weight, graph);  // MaxFirst or MaxTimes?
-            //grb::print_vector(std::cout, max, "max");
+            grb::print_vector(std::cout, max, "max");
             grb::eWiseAdd(frontier, grb::NoMask(), grb::NoAccumulate(),
                           grb::GreaterThan<ColorT>(), weight, max);
-            //grb::print_vector(std::cout, frontier, "frontier");
+            grb::print_vector(std::cout, frontier, "frontier");
 
             // find all largest nodes that are uncolored.
             ColorT success(0);
@@ -97,12 +97,14 @@ namespace algorithms
                 break;
 
             // assign new color
-            grb::assign(colors, frontier, grb::NoAccumulate(), color, grb::AllIndices());
-            //grb::print_vector(std::cout, colors, "colors (with new colors)");
+            grb::assign(colors, frontier, grb::NoAccumulate(),
+                        color, grb::AllIndices());
+            grb::print_vector(std::cout, colors, "colors (with new colors)");
 
             // get rid of colored nodes in candidate set
-            grb::assign(weight, frontier, grb::NoAccumulate(), 0, grb::AllIndices());
-            //grb::print_vector(std::cout, weight, "weight (sans colored nodes)");
+            grb::assign(weight, frontier, grb::NoAccumulate(),
+                        0, grb::AllIndices());
+            grb::print_vector(std::cout, weight, "weight (sans colored nodes)");
         }
 
         return colors;

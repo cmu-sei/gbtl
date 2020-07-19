@@ -70,7 +70,7 @@ grb::IndexArrayType i = {
     28,28,28,
     29,29,29,29,
     30,30,30,30,
-    31,31,31,31,31,
+    31,31,31,31,31,31,
     32,32,32,32,32,32,32,32,32,32,32,32,
     33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33};
 
@@ -106,14 +106,54 @@ grb::IndexArrayType j = {
     2,31,33,
     23,26,32,33,
     1,8,32,33,
-    0,24,25,32,33,    //0,24,25,28,32,33,
+    0,24,25,28,32,33,
     2,8,14,15,18,20,22,23,29,30,31,33,
     8,9,13,14,15,18,19,20,22,23,26,27,28,29,30,31,32};
 
 //****************************************************************************
+template <typename T, typename ColorT>
+bool check_colors(grb::Matrix<T> const &A, grb::Vector<ColorT> const &colors)
+{
+    grb::IndexType N(A.nrows());
+    grb::Vector<ColorT> neigh_colors(N);
+    grb::Vector<T> neighbors(N);
+
+    bool success = true;
+
+    for (grb::IndexType ix = 0; ix < N; ++ix)
+    {
+        ColorT root_color(colors.extractElement(ix));
+        grb::Vector<ColorT> root(N);
+        root.setElement(ix, 1);
+
+        grb::vxm(neighbors, grb::complement(root), grb::NoAccumulate(),
+                 grb::ArithmeticSemiring<ColorT>(), root, A, grb::REPLACE);
+
+        std::cout << "====================== CHECK root = " << ix << ", color = " << root_color << std::endl;
+        grb::eWiseMult(neighbors, grb::NoMask(), grb::NoAccumulate(),
+                       grb::Second<ColorT>(), neighbors, colors);
+
+        grb::print_vector(std::cout, neighbors, "neighbor colors");
+
+        for (grb::IndexType iy = 0; iy < N; ++iy)
+        {
+            if (neighbors.hasElement(iy))
+            {
+                if (colors.extractElement(iy) == root_color)
+                {
+                    std::cout << "FAILED node: " << iy << std::endl;
+                    success = false;
+                }
+            }
+        }
+    }
+    return success;
+}
+
+//****************************************************************************
 int main(int argc, char **argv)
 {
-    using MatType = grb::Matrix<double>;
+    using MatType = grb::Matrix<unsigned int>;
     MatType A(NUM_NODES, NUM_NODES);
 
     // Read the edgelist and create the tuple arrays
@@ -124,8 +164,10 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    std::vector<double> weights(i.size(), 1.0);
+    std::vector<unsigned int> weights(i.size(), 1);
     A.build(i.begin(), j.begin(), weights.begin(), i.size());
+
+    grb::print_matrix(std::cout, A, "graph");
 
     std::cout << "Running louvain clustering..." << std::endl;
 
@@ -139,25 +181,11 @@ int main(int argc, char **argv)
         auto colors = algorithms::coloring(A, (double)seed);
         my_timer.stop();
 
+        bool passed(check_colors(A, colors));
         std::cout << seed << ": Elapsed time: " << my_timer.elapsed() << " msec."
-                  << std::endl;
+                  << (passed ? " PASSED" : " FAILED") << std::endl;
         grb::print_vector(std::cout, colors, "colors");
     }
-
-    // Perform louvain2 clustering with different random seeds
-    //===================
-    // for (int seed = 0; seed < 20; ++seed)
-    // {
-    //     my_timer.start();
-    //     auto cluster_matrix = algorithms::louvain_cluster_masked(A, (double)seed);
-    //     my_timer.stop();
-
-    //     std::cout << "Elapsed time: " << my_timer.elapsed() << " msec."
-    //               << std::endl;
-    //     auto cluster_assignments =
-    //         algorithms::get_louvain_cluster_assignments(cluster_matrix);
-    //     print_vector(std::cout, cluster_assignments, "cluster (masked) assignments");
-    // }
 
     return 0;
 }
