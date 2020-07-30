@@ -25,6 +25,9 @@
  * DM20-0442
  */
 
+// Adapted from M. Osama, M. Truong, C. Yang, A. Buluc, and J. D. Owens,
+// "Graph Coloring on the GPU", in IEEE IPDPS Workshops, 2019.
+
 #pragma once
 
 #include <vector>
@@ -77,23 +80,27 @@ namespace algorithms
                    colors);
         grb::print_vector(std::cout, weight, "initial weights");
 
+        colors.clear();
+        ColorT num_colors(0);
+
         // loop can be parallelized
         for (ColorT color = 1; color <= N; ++color)
         {
+            num_colors = color;
             std::cout << "================== iter/color = " << color << std::endl;
             // find the max of neighbors
             grb::vxm(max, grb::NoMask(), grb::NoAccumulate(),
                      grb::MaxFirstSemiring<ColorT>(), weight, graph);  // MaxFirst or MaxTimes?
             grb::print_vector(std::cout, max, "max");
-            grb::eWiseAdd(frontier, grb::NoMask(), grb::NoAccumulate(),
-                          grb::GreaterThan<ColorT>(), weight, max);
-            grb::print_vector(std::cout, frontier, "frontier");
 
             // find all largest nodes that are uncolored.
-            ColorT success(0);
-            grb::reduce(success, grb::NoAccumulate
-                        (), grb::PlusMonoid<ColorT>(), frontier);
-            if (success == 0)
+            grb::eWiseAdd(frontier, grb::NoMask(), grb::NoAccumulate(),
+                          grb::GreaterThan<ColorT>(), weight, max);
+            grb::apply(frontier, frontier, grb::NoAccumulate(),
+                       grb::Identity<bool>(), frontier, grb::REPLACE);
+            grb::print_vector(std::cout, frontier, "frontier");
+
+            if (frontier.nvals() == 0)
                 break;
 
             // assign new color
@@ -107,6 +114,7 @@ namespace algorithms
             grb::print_vector(std::cout, weight, "weight (sans colored nodes)");
         }
 
+        std::cout << "Num colors: " << num_colors << std::endl;
         return colors;
     }
 }
