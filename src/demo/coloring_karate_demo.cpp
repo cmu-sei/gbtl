@@ -129,11 +129,11 @@ bool check_colors(grb::Matrix<T> const &A, grb::Vector<ColorT> const &colors)
         grb::vxm(neighbors, grb::complement(root), grb::NoAccumulate(),
                  grb::ArithmeticSemiring<ColorT>(), root, A, grb::REPLACE);
 
-        std::cout << "====================== CHECK root = " << ix << ", color = " << root_color << std::endl;
+        //std::cout << "====================== CHECK root = " << ix << ", color = " << root_color << std::endl;
         grb::eWiseMult(neighbors, grb::NoMask(), grb::NoAccumulate(),
                        grb::Second<ColorT>(), neighbors, colors);
 
-        grb::print_vector(std::cout, neighbors, "neighbor colors");
+        //grb::print_vector(std::cout, neighbors, "neighbor colors");
 
         for (grb::IndexType iy = 0; iy < N; ++iy)
         {
@@ -167,22 +167,42 @@ int main(int argc, char **argv)
     std::vector<unsigned int> weights(i.size(), 1);
     A.build(i.begin(), j.begin(), weights.begin(), i.size());
 
-    grb::print_matrix(std::cout, A, "graph");
+    //grb::print_matrix(std::cout, A, "graph");
 
     std::cout << "Running louvain clustering..." << std::endl;
 
-    Timer<std::chrono::steady_clock> my_timer;
+    Timer<std::chrono::steady_clock, std::chrono::microseconds> my_timer;
 
     // Perform graph coloring with different seeds
     //===================
     for (int seed = 0; seed < 20; ++seed)
     {
+        grb::Vector<uint32_t> colors(NUM_NODES);
         my_timer.start();
-        auto colors = algorithms::coloring(A, (double)seed);
+        auto num_colors = algorithms::coloring(A, colors, (double)seed);
         my_timer.stop();
 
         bool passed(check_colors(A, colors));
-        std::cout << seed << ": Elapsed time: " << my_timer.elapsed() << " msec."
+        grb::print_vector(std::cout, colors, "colors");
+        std::cout << seed << ": num colors = " << num_colors
+                  << ", Elapsed time: " << my_timer.elapsed() << " usec."
+                  << (passed ? " PASSED" : " FAILED") << std::endl;
+        grb::print_vector(std::cout, colors, "colors");
+    }
+
+    // Perform MIS graph coloring with different seeds
+    //===================
+    for (int seed = 0; seed < 20; ++seed)
+    {
+        grb::Vector<uint32_t> colors(NUM_NODES);
+        my_timer.start();
+        auto num_colors = algorithms::coloring_mis(A, colors, (double)seed);
+        my_timer.stop();
+
+        bool passed(check_colors(A, colors));
+        grb::print_vector(std::cout, colors, "colors");
+        std::cout << seed << ": num colors = " << num_colors
+                  << ", Elapsed time: " << my_timer.elapsed() << " usec."
                   << (passed ? " PASSED" : " FAILED") << std::endl;
         grb::print_vector(std::cout, colors, "colors");
     }
