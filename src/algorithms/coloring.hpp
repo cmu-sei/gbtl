@@ -312,29 +312,10 @@ namespace algorithms
             throw grb::DimensionException();
         }
 
-        //std::default_random_engine             generator;
-        //std::uniform_real_distribution<double> distribution;
-        //generator.seed(seed);
-
-        //grb::Vector<ColorT> weight(N);
         grb::Vector<ColorT> max(N);
         grb::Vector<bool> iset(N);
 
         // allocate and initialize color array
-        colors.clear();
-        //grb::assign(colors, grb::NoMask(), grb::NoAccumulate(),
-        //            static_cast<ColorT>(0), grb::AllIndices());
-
-        // assign random weights to each vertex
-        // grb::apply(weight, grb::NoMask(), grb::NoAccumulate(),
-        //            [&](ColorT const &color) {
-        //                return static_cast<ColorT>(
-        //                    1 + (std::numeric_limits<ColorT>::max() - 1)*
-        //                    distribution(generator));
-        //            },
-        //            colors);
-        // grb::print_vector(std::cout, weight, "initial weights");
-
         colors.clear();
         ColorT num_colors(0);
 
@@ -343,17 +324,6 @@ namespace algorithms
         {
             num_colors = color;
             std::cout << "================== iter/color = " << color << std::endl;
-            // find the max of neighbors
-            // grb::vxm(max, grb::NoMask(), grb::NoAccumulate(),
-            //          grb::MaxFirstSemiring<ColorT>(), weight, graph);  // MaxFirst or MaxTimes?
-            // grb::print_vector(std::cout, max, "max");
-
-            // find all largest nodes that are uncolored.
-            // grb::eWiseAdd(iset, grb::NoMask(), grb::NoAccumulate(),
-            //               grb::GreaterThan<ColorT>(), weight, max);
-            // grb::apply(iset, iset, grb::NoAccumulate(),
-            //            grb::Identity<bool>(), iset, grb::REPLACE);
-            // grb::print_vector(std::cout, iset, "iset");
             mis_masked(graph, colors, iset, seed*color+color);
 
             if (iset.nvals() == 0)
@@ -363,13 +333,57 @@ namespace algorithms
             grb::assign(colors, iset, grb::NoAccumulate(),
                         color, grb::AllIndices());
             grb::print_vector(std::cout, colors, "colors (with new colors)");
-
-            // get rid of colored nodes in candidate set
-            //grb::assign(weight, iset, grb::NoAccumulate(),
-            //            0, grb::AllIndices());
-            //grb::print_vector(std::cout, weight, "weight (sans colored nodes)");
         }
 
         return num_colors - 1;
     }
-}
+
+    //************************************************************************
+    /**
+     * @brief Jones Plassman graph coloring.
+     *
+     * @param[in]  graph   Binary adjacency matrix of the graph.
+     * @param[out] colors  N-vector of color labels (integers)
+     *
+     * @retval number of unique colors
+     *
+     */
+    template<typename MatrixT, typename ColorT=uint32_t>
+    auto coloring_jonesplassman(MatrixT             const &graph,
+                                grb::Vector<ColorT>       &colors,
+                                double                     seed = 0)
+    {
+        using T = typename MatrixT::ScalarType;
+        grb::IndexType N(graph.nrows());
+
+        if (N != graph.ncols() || N != colors.size())
+        {
+            throw grb::DimensionException();
+        }
+
+        grb::Vector<ColorT> max(N);
+        grb::Vector<bool> iset(N);
+
+        // allocate and initialize color array
+        colors.clear();
+        ColorT num_colors(0);
+
+        // loop can be parallelized
+        for (ColorT color = 1; color <= N; ++color)
+        {
+            num_colors = color;
+            std::cout << "================== iter/color = " << color << std::endl;
+            jones_plassman(graph, colors, iset, seed*color+color);
+
+            if (iset.nvals() == 0)
+                break;
+
+            // assign new color
+            grb::assign(colors, iset, grb::NoAccumulate(),
+                        color, grb::AllIndices());
+            grb::print_vector(std::cout, colors, "colors (with new colors)");
+        }
+
+        return num_colors - 1;
+    }
+} // algorithms
