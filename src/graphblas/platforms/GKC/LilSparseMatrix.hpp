@@ -417,16 +417,6 @@ namespace grb
                 m_nvals = nvals;
             }
 
-            // TODO: add error checking on dimensions?
-            void swap(LilSparseMatrix<ScalarT> &rhs)
-            {
-                for (IndexType idx = 0; idx < m_data.size(); ++idx)
-                {
-                    m_data[idx].swap(rhs.m_data[idx]);
-                }
-                m_nvals = rhs.m_nvals;
-            }
-
             // Row access
             // Warning if you use this non-const row accessor then you should
             // call recomputeNvals() at some point to fix it
