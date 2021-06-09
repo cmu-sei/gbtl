@@ -32,7 +32,7 @@
 
 #include <graphblas/detail/config.hpp>
 #include <vector>
-#include <graphblas/platforms/sequential/BitmapSparseVector.hpp>
+#include <graphblas/platforms/GKC/BitmapSparseVector.hpp>
 
 namespace grb
 {

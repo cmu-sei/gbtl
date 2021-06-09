@@ -26,7 +26,7 @@
  */
 
 /**
- * Implementations of all GraphBLAS functions optimized for the sequential
+ * Implementations of all GraphBLAS functions optimized for the GKC
  * (CPU) backend.
  */
 
@@ -40,14 +40,14 @@
 #include <graphblas/algebra.hpp>
 
 // Add individual operation files here
-#include <graphblas/platforms/sequential/sparse_mxm.hpp>
-#include <graphblas/platforms/sequential/sparse_mxv.hpp>
-#include <graphblas/platforms/sequential/sparse_vxm.hpp>
-#include <graphblas/platforms/sequential/sparse_ewisemult.hpp>
-#include <graphblas/platforms/sequential/sparse_ewiseadd.hpp>
-#include <graphblas/platforms/sequential/sparse_extract.hpp>
-#include <graphblas/platforms/sequential/sparse_assign.hpp>
-#include <graphblas/platforms/sequential/sparse_apply.hpp>
-#include <graphblas/platforms/sequential/sparse_reduce.hpp>
-#include <graphblas/platforms/sequential/sparse_transpose.hpp>
-#include <graphblas/platforms/sequential/sparse_kronecker.hpp>
+#include <graphblas/platforms/GKC/sparse_mxm.hpp>
+#include <graphblas/platforms/GKC/sparse_mxv.hpp>
+#include <graphblas/platforms/GKC/sparse_vxm.hpp>
+#include <graphblas/platforms/GKC/sparse_ewisemult.hpp>
+#include <graphblas/platforms/GKC/sparse_ewiseadd.hpp>
+#include <graphblas/platforms/GKC/sparse_extract.hpp>
+#include <graphblas/platforms/GKC/sparse_assign.hpp>
+#include <graphblas/platforms/GKC/sparse_apply.hpp>
+#include <graphblas/platforms/GKC/sparse_reduce.hpp>
+#include <graphblas/platforms/GKC/sparse_transpose.hpp>
+#include <graphblas/platforms/GKC/sparse_kronecker.hpp>

@@ -31,20 +31,20 @@
 // sets of files as specified by the user.
 
 #if(GB_INCLUDE_BACKEND_ALL)
-#include <graphblas/platforms/sequential/sequential.hpp>
+#include <graphblas/platforms/GKC/GKC.hpp>
 #endif
 
 #if(GB_INCLUDE_BACKEND_MATRIX)
-#include <graphblas/platforms/sequential/Matrix.hpp>
+#include <graphblas/platforms/GKC/Matrix.hpp>
 #undef GB_INCLUDE_BACKEND_MATRIX
 #endif
 
 #if(GB_INCLUDE_BACKEND_VECTOR)
-#include <graphblas/platforms/sequential/Vector.hpp>
+#include <graphblas/platforms/GKC/Vector.hpp>
 #undef GB_INCLUDE_BACKEND_VECTOR
 #endif
 
 #if(GB_INCLUDE_BACKEND_OPERATIONS)
-#include <graphblas/platforms/sequential/operations.hpp>
+#include <graphblas/platforms/GKC/operations.hpp>
 #undef GB_INCLUDE_BACKEND_OPERATIONS
 #endif

@@ -28,7 +28,8 @@
 #pragma once
 
 #include <cstddef>
-#include <graphblas/platforms/sequential/LilSparseMatrix.hpp>
+#include <graphblas/platforms/GKC/LilSparseMatrix.hpp>
+#include <graphblas/platforms/GKC/GKCMatrix.hpp>
 
 //****************************************************************************
 
@@ -38,10 +39,10 @@ namespace grb
     {
         //********************************************************************
         template<typename ScalarT, typename... TagsT>
-        class Matrix : public LilSparseMatrix<ScalarT>
+        class Matrix : public GKCMatrix<ScalarT>
         {
         private:
-            using ParentMatrixType = LilSparseMatrix<ScalarT>;
+            using ParentMatrixType = GKCMatrix<ScalarT>;
 
         public:
             using ScalarType = ScalarT;
@@ -88,7 +89,7 @@ namespace grb
 
             void printInfo(std::ostream &os) const
             {
-                os << "Sequential Backend: ";
+                os << "Sequential GKC Backend: ";
                 ParentMatrixType::printInfo(os);
             }
         };
