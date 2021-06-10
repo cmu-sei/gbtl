@@ -177,4 +177,22 @@ namespace grb
 
         std::string m_message;
     };
+    //************************************************************************
+    /// @todo Mark: added this for partially implemented features
+    class NotImplementedException : public std::exception
+    {
+    public:
+        NotImplementedException(std::string const &msg)
+            : m_message(msg) {}
+
+        NotImplementedException() {}
+
+    private:
+        const char* what() const throw()
+        {
+            return ("NotImplementedException: " + m_message).c_str();
+        }
+
+        std::string m_message;
+    };
 }
