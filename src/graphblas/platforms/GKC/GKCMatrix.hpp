@@ -163,7 +163,6 @@ namespace grb
                     m_offsets[idx+1] = local_offset;
                 }
                 m_num_edges = local_offset;
-                // std::cout << "Got " << m_num_edges << " nonzeros." << std::endl;
 
                 // Allocate weights and neighbor lists:
                 m_neighbors.resize(m_num_edges);
@@ -177,15 +176,10 @@ namespace grb
                     for (auto col_idx = 0; col_idx < m_num_cols; col_idx++)
                     {
                         if (val[row_idx][col_idx] != zero){
-                            // std::cout << "set o i j v" << offset << " " << row_idx << " " << col_idx << " " << val[row_idx][col_idx] << std::endl;
                             m_neighbors[offset] = col_idx;
                             m_weights[offset] = val[row_idx][col_idx];
                             offset++;
                         }
-                        // else 
-                        // {
-                        //     std::cout << "Skipped value " << val[row_idx][col_idx] << std::endl;
-                        // }
                     }
                 }
             }
