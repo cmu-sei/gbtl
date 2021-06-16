@@ -45,8 +45,6 @@
 #include <graphblas/detail/config.hpp>
 #include <graphblas/detail/checks.hpp>
 
-#define GB_INCLUDE_BACKEND_TRANSPOSE_VIEW 1
-#define GB_INCLUDE_BACKEND_COMPLEMENT_VIEW 1
 #define GB_INCLUDE_BACKEND_OPERATIONS 1
 #include <backend_include.hpp>
 
@@ -211,7 +209,8 @@ namespace grb
         check_size_size(u, v, "eWiseMult(vec): u.size != v.size");
 
         backend::eWiseMult(get_internal_vector(w),
-                           get_internal_vector(mask), accum, op, get_internal_vector(u), get_internal_vector(v),
+                           get_internal_vector(mask), accum,
+                           op, get_internal_vector(u), get_internal_vector(v),
                            outp);
 
         GRB_LOG_VERBOSE("w out :" << get_internal_vector(w));
