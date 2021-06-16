@@ -32,6 +32,7 @@
 #include <typeinfo>
 #include <stdexcept>
 #include <algorithm>
+#include <numeric>
 #include <map>
 
 #include <graphblas/graphblas.hpp>
@@ -158,7 +159,7 @@ namespace grb
                     IndexType local_cols = 0;
                     for (IndexType cdx = 0; cdx < m_num_cols; cdx++)
                     {
-                        if (vals[idx][cidx] != zero)
+                        if (val[idx][cdx] != zero)
                         {
                             local_offset++;
                             local_cols++;
@@ -211,7 +212,7 @@ namespace grb
                     IndexType row_idx = *(i_it+idx);
                     IndexType col_idx = *(j_it+idx);
                     m_num_rows = std::max(m_num_rows, row_idx);
-                    m_num_cols = std::max(m_num_cols, row_col);
+                    m_num_cols = std::max(m_num_cols, col_idx);
                 }
 
                 // allocate memory
@@ -227,7 +228,7 @@ namespace grb
                     m_weighted = true;
                     m_weights.resize(m_num_edges);
                 }
-                std::fill(m_offsets.begin(), m_offsets.end(), (IndexType)0)
+                std::fill(m_offsets.begin(), m_offsets.end(), (IndexType)0);
 
                 /// compute neighborhood sizes and prefix sum
                 /// @todo use map/counter to avoid repeated order M iteration? 
@@ -271,12 +272,13 @@ namespace grb
                     // Permuted by the sorted order for m_neighbors.
                     // We need to sort the indices in m_neighbors in sections corresponding
                     // to each matrix row (each neighborhood)
-                    auto st = m_num_rows[idx];
-                    auto nd = m_num_rows[idx+1];
+                    auto st = m_offsets[idx];
+                    auto nd = m_offsets[idx+1];
                     // Use a lambda to reorder part of permutation vector based on values in 
                     // m_neighbors.
                     std::sort(permutation.begin() + st, permutation.begin()+nd, 
-                        [&] (IndexType i, IndexType j) {return compare(m_neighbors[st+i], m_neighbors[st+j])} );
+                        [&] (IndexType i, IndexType j) {
+                            return (m_neighbors[st+i] < m_neighbors[st+j]); } );
                 }
 
                 // Now we have a total permutation for the columns; apply it to m_neighbors and m_weights:
@@ -339,7 +341,7 @@ namespace grb
                         (m_num_cols == rhs.m_num_cols) &&
                         (m_num_edges == rhs.m_num_edges) &&
                         (m_weighted == rhs.m_weighted) &&
-                        (m_offsets = rhs.m_offsets) &&
+                        (m_offsets == rhs.m_offsets) &&
                         (m_neighbors == rhs.m_neighbors) && 
                         (m_weights == rhs.m_weights));
             }
@@ -518,9 +520,13 @@ namespace grb
                     if (m_neighbors[nbr_offset] == icol)
                     {
                         if (m_weighted)
+                        {
                             return m_weights[nbr_offset];
-                        else 
+                        }
+                        else
+                        {
                             return 1;
+                        }
                     }
                 }
                 /// @todo: search for element in insert lists, once those are added.
@@ -562,11 +568,15 @@ namespace grb
                     if (m_neighbors[nbr_offset] == icol)
                     {
                         if (m_weighted)
+                        {
                             m_weights[nbr_offset] = val;
                             insert_success = true;
                             break;
-                        else 
-                            throw InvalidValueException("Can't add weighted element to unweighted matrix.") 
+                        }
+                        else
+                        { 
+                            throw InvalidValueException("Can't add weighted element to unweighted matrix.");
+                        }
                     }
                     /// @todo can we assume that the neighborhoods are all sorted? 
                     /// What if some items are marked as deleted? 
@@ -618,11 +628,15 @@ namespace grb
                     if (m_neighbors[nbr_offset] == icol)
                     {
                         if (m_weighted)
+                        {
                             m_weights[nbr_offset] = merge(val, m_weights[nbr_offset]);
                             insert_success = true;
                             break;
-                        else 
-                            throw InvalidValueException("Can't add weighted element to unweighted matrix.") 
+                        }
+                        else
+                        {
+                            throw InvalidValueException("Can't add weighted element to unweighted matrix.");
+                        }
                     }
                     /// @todo can we assume that the neighborhoods are all sorted? 
                     /// What if some items are marked as deleted? 
