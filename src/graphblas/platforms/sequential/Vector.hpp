@@ -30,10 +30,10 @@
 #include <cstddef>
 #include <iostream>
 
-#include <graphblas/detail/config.hpp>
-#include <vector>
 #include <graphblas/platforms/sequential/BitmapSparseVector.hpp>
 
+//****************************************************************************
+#if 0
 namespace grb
 {
     namespace backend
@@ -85,3 +85,4 @@ namespace grb
         };
     }
 }
+#endif

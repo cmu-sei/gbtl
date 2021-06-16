@@ -28,10 +28,12 @@
 #pragma once
 
 #include <cstddef>
+#include <iostream>
+
 #include <graphblas/platforms/sequential/LilSparseMatrix.hpp>
 
 //****************************************************************************
-
+#if 0
 namespace grb
 {
     namespace backend
@@ -94,3 +96,4 @@ namespace grb
         };
     }
 }
+#endif

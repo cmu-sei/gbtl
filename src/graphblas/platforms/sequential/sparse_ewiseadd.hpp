@@ -57,7 +57,8 @@ namespace grb
                  typename VVectorT,
                  typename ...WTagsT>
         inline void eWiseAdd(
-            grb::backend::Vector<WScalarT, WTagsT...>       &w,
+            grb::backend::BitmapSparseVector<WScalarT>      &w,
+            //grb::backend::Vector<WScalarT, WTagsT...>       &w,
             MaskT                                     const &mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -104,7 +105,8 @@ namespace grb
                  typename BMatrixT,
                  typename ...CTagsT>
         inline void eWiseAdd(
-            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
+            grb::backend::LilSparseMatrix<CScalarT>         &C,
+            //grb::backend::Matrix<CScalarT, CTagsT...>       &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -177,7 +179,8 @@ namespace grb
                  typename BMatrixT,
                  typename ...CTagsT>
         inline void eWiseAdd(
-            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
+            grb::backend::LilSparseMatrix<CScalarT>         &C,
+            //grb::backend::Matrix<CScalarT, CTagsT...>       &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -204,7 +207,8 @@ namespace grb
                  typename BMatrixT,
                  typename ...CTagsT>
         inline void eWiseAdd(
-            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
+            grb::backend::LilSparseMatrix<CScalarT>         &C,
+            //grb::backend::Matrix<CScalarT, CTagsT...>       &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -231,7 +235,8 @@ namespace grb
                  typename BMatrixT,
                  typename ...CTagsT>
         inline void eWiseAdd(
-            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
+            grb::backend::LilSparseMatrix<CScalarT>         &C,
+            //grb::backend::Matrix<CScalarT, CTagsT...>       &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
