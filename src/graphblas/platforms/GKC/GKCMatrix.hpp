@@ -199,27 +199,22 @@ namespace grb
                 // scan the data to determine num_edges, num_rows, num_cols
                 // Note: assumes no duplicates:
                 m_num_edges = n;
+                m_num_rows = 0;
+                m_num_cols = 0;
                 for (IndexType idx = 0; idx < n; idx++)
                 {
                     IndexType row_idx = *(i_it+idx);
                     IndexType col_idx = *(j_it+idx);
-                    m_num_rows = std::max(m_num_rows, row_idx);
-                    m_num_cols = std::max(m_num_cols, col_idx);
+                    m_num_rows = std::max(m_num_rows, row_idx+1);
+                    m_num_cols = std::max(m_num_cols, col_idx+1);
                 }
 
                 // allocate memory
                 m_offsets.resize(m_num_rows+1);
                 m_neighbors.resize(m_num_edges);
                 /// @todo how to detect if graph is weighted?
-                if (v_it == nullptr)
-                {
-                    m_weighted = false;
-                }
-                else 
-                {
-                    m_weighted = true;
-                    m_weights.resize(m_num_edges);
-                }
+                m_weighted = true;
+                m_weights.resize(m_num_edges);
                 std::fill(m_offsets.begin(), m_offsets.end(), (IndexType)0);
 
                 /// compute neighborhood sizes and prefix sum
@@ -268,9 +263,13 @@ namespace grb
                     auto nd = m_offsets[idx+1];
                     // Use a lambda to reorder part of permutation vector based on values in 
                     // m_neighbors.
-                    std::sort(permutation.begin() + st, permutation.begin()+nd, 
-                        [&] (IndexType i, IndexType j) {
-                            return (m_neighbors[st+i] < m_neighbors[st+j]); } );
+                    if (nd > st)
+                    {
+                        // Note: only a portion of the vector is given for sort, but the indices
+                        // i and j are based on permutation.begin(), not permutation.begin() + st.
+                        std::sort(permutation.begin() + st, permutation.begin() + nd,
+                            [&](const size_t i, const size_t j) { return (m_neighbors[i] < m_neighbors[j]); });
+                    }
                 }
 
                 // Now we have a total permutation for the columns; apply it to m_neighbors and m_weights:
@@ -1082,20 +1081,22 @@ namespace grb
                 os << "(" << m_num_rows << " x " << m_num_cols << "), nvals = "
                    << nvals() << std::endl;
 
-                #if 0
+                #if 1
                 // Used to print data in storage format instead of like a matrix
-                #ifdef GRB_MATRIX_PRINT_RAW_STORAGE
+                #if 1 //def GRB_MATRIX_PRINT_RAW_STORAGE
                     for (IndexType row = 0; row < m_num_rows; ++row)
                     {
                         os << row << " :";
                         auto st = m_offsets[row];
                         auto nd = m_offsets[row+1];
                         for (IndexType ii = st; ii < nd; ii++){ 
-                            if (m_weighted)                          
+                            if (m_weighted){
                                 os << " " << m_neighbors[ii] << ":" << m_weights[ii];
-                            else (m_weighted)
+                            }
+                            else
+                            {
                                 os << " " << m_neighbors[ii] << ":" << 1;
-
+                            }
                         }
                         os << std::endl;
                     }

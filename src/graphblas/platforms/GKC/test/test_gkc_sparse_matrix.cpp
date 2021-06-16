@@ -137,6 +137,7 @@ BOOST_AUTO_TEST_CASE(gkc_test_construction_copy)
     BOOST_CHECK_EQUAL(m1, m2);
 }
 
+/*
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(gkc_test_assign_to_implied_zero)
 {
@@ -157,6 +158,7 @@ BOOST_AUTO_TEST_CASE(gkc_test_assign_to_implied_zero)
     backend::GKCMatrix<double> m2(mat, 0);
     BOOST_CHECK_EQUAL(m1, m2);
 }
+*/
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(gkc_test_assign_to_nonzero_element)
@@ -176,6 +178,29 @@ BOOST_AUTO_TEST_CASE(gkc_test_assign_to_nonzero_element)
     BOOST_CHECK_EQUAL(m1.extractElement(0, 0), mat[0][0]);
 
     backend::GKCMatrix<double> m2(mat, 0);
+    BOOST_CHECK_EQUAL(m1, m2);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(gkc_test_construct_with_build)
+{
+    // This test is contingent on the dense implicit constructor working
+    // and on equality checks working.
+    std::vector<std::vector<double>> mat = {{6, 0, 0, 4},
+                                            {7, 0, 0, 0},
+                                            {0, 0, 9, 4},
+                                            {2, 5, 0, 3},
+                                            {2, 0, 0, 1},
+                                            {0, 0, 0, 0},
+                                            {0, 1, 0, 2}};
+    // This is transposed coordinate data.
+    std::vector<IndexType> matI = {0,2,3,4,6,0,1,3,4,3,6,2};
+    std::vector<IndexType> matJ = {3,3,3,3,3,0,0,0,0,1,1,2};
+    std::vector<double> matV    = {4,4,3,1,2,6,7,2,2,5,1,9};
+
+    backend::GKCMatrix<double> m1(mat, 0);
+    backend::GKCMatrix<double> m2(matI.begin(), matJ.begin(), matV.begin(), matV.size());
+
     BOOST_CHECK_EQUAL(m1, m2);
 }
 
