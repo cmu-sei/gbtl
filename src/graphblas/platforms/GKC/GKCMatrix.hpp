@@ -111,7 +111,7 @@ namespace grb
                 m_offsets[0] = 0;
                 for (IndexType idx = 1; idx <= m_num_rows; idx++)
                 {
-                    m_offsets[idx+1] = idx * m_num_rows;
+                    m_offsets[idx] = idx * m_num_cols;
                 }
 
                 /// @todo: parallelize?
@@ -138,10 +138,7 @@ namespace grb
                 }
                 // Dense has both structure and weights.
                 m_weighted = true;
-                m_num_edges = m_num_cols * m_num_rows;
                 m_offsets.resize(m_num_rows+1);
-                m_neighbors.resize(m_num_edges);
-                m_weights.resize(m_num_edges);
                 
                 /// @todo: could preallocate a dense amount of space for
                 /// "small" number of rows and cols, and otherwise 
@@ -152,25 +149,21 @@ namespace grb
                 // and then allocate the memory. Then rescan data to place into 
                 // allocated space. 
                 m_offsets[0] = 0;
-                IndexType max_num_cols = 0;
                 IndexType local_offset = 0;
                 for (IndexType idx = 0; idx < m_num_rows; idx++)
                 {
-                    IndexType local_cols = 0;
                     for (IndexType cdx = 0; cdx < m_num_cols; cdx++)
                     {
                         if (val[idx][cdx] != zero)
                         {
                             local_offset++;
-                            local_cols++;
                         }
                     }
                     // Record offset and record if num_cols increased.
                     m_offsets[idx+1] = local_offset;
-                    max_num_cols = std::max(max_num_cols, local_cols);
                 }
                 m_num_edges = local_offset;
-                m_num_cols = max_num_cols;
+                // std::cout << "Got " << m_num_edges << " nonzeros." << std::endl;
 
                 // Allocate weights and neighbor lists:
                 m_neighbors.resize(m_num_edges);
@@ -181,13 +174,18 @@ namespace grb
                 for (auto row_idx = 0; row_idx < m_num_rows; row_idx++)
                 {
                     IndexType offset = m_offsets[row_idx];
-                    for (auto col_idx = offset; col_idx < m_num_cols; col_idx++)
+                    for (auto col_idx = 0; col_idx < m_num_cols; col_idx++)
                     {
                         if (val[row_idx][col_idx] != zero){
+                            // std::cout << "set o i j v" << offset << " " << row_idx << " " << col_idx << " " << val[row_idx][col_idx] << std::endl;
                             m_neighbors[offset] = col_idx;
                             m_weights[offset] = val[row_idx][col_idx];
                             offset++;
                         }
+                        // else 
+                        // {
+                        //     std::cout << "Skipped value " << val[row_idx][col_idx] << std::endl;
+                        // }
                     }
                 }
             }
@@ -1090,6 +1088,7 @@ namespace grb
                 os << "(" << m_num_rows << " x " << m_num_cols << "), nvals = "
                    << nvals() << std::endl;
 
+                #if 0
                 // Used to print data in storage format instead of like a matrix
                 #ifdef GRB_MATRIX_PRINT_RAW_STORAGE
                     for (IndexType row = 0; row < m_num_rows; ++row)
@@ -1152,6 +1151,7 @@ namespace grb
                         }
                         os << ((row_idx == m_num_rows - 1 ) ? "]]" : "]\n");
                     }
+                #endif
                 #endif
             }
 
