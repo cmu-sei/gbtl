@@ -27,10 +27,14 @@
 
 #pragma once
 
-#include <graphblas/platforms/GKC/Matrix.hpp>
-#include <graphblas/platforms/GKC/Vector.hpp>
+//#include <graphblas/platforms/GKC/Matrix.hpp>
+//#include <graphblas/platforms/GKC/Vector.hpp>
 
-#include <graphblas/platforms/GKC/operations.hpp>
 
 #include <graphblas/platforms/GKC/BitmapSparseVector.hpp>
 #include <graphblas/platforms/GKC/LilSparseMatrix.hpp>
+#include <graphblas/platforms/GKC/GKCMatrix.hpp>
+
+#include <graphblas/platforms/GKC/param_unpack.hpp>
+
+#include <graphblas/platforms/GKC/operations.hpp>

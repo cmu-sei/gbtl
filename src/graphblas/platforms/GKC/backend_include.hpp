@@ -35,12 +35,14 @@
 #endif
 
 #if(GB_INCLUDE_BACKEND_MATRIX)
-#include <graphblas/platforms/GKC/Matrix.hpp>
+#include <graphblas/platforms/GKC/param_unpack.hpp>
+//#include <graphblas/platforms/GKC/Matrix.hpp>
 #undef GB_INCLUDE_BACKEND_MATRIX
 #endif
 
 #if(GB_INCLUDE_BACKEND_VECTOR)
-#include <graphblas/platforms/GKC/Vector.hpp>
+#include <graphblas/platforms/GKC/param_unpack.hpp>
+//#include <graphblas/platforms/GKC/Vector.hpp>
 #undef GB_INCLUDE_BACKEND_VECTOR
 #endif
 
