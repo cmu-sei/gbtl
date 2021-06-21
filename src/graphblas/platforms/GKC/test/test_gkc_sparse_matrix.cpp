@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_CASE(gkc_test_construct_with_build)
     std::vector<double> matV    = {4,4,3,1,2,6,7,2,2,5,1,9};
 
     backend::GKCMatrix<double> m1(mat, 0);
-    backend::GKCMatrix<double> m2(matI.begin(), matJ.begin(), matV.begin(), matV.size());
+    backend::GKCMatrix<double> m2(matI.begin(), matJ.begin(), matV.begin(), matV.size(), [=](double w1, double w2){return w1;});
 
     BOOST_CHECK_EQUAL(m1, m2);
 }

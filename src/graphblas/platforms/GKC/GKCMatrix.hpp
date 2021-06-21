@@ -188,12 +188,14 @@ namespace grb
             // Similar to build method, but baked into the constructor.
             // Does not use addElement.
             template <typename RAIteratorI,
-                    typename RAIteratorJ,
-                    typename RAIteratorV>
+                      typename RAIteratorJ,
+                      typename RAIteratorV,
+                      typename DupT>
             GKCMatrix(RAIteratorI i_it,
                       RAIteratorJ j_it,
                       RAIteratorV v_it,
-                      IndexType n)
+                      IndexType n,
+                      DupT dup)
             {
                 /// @todo require random access iterators
                 // scan the data to determine num_edges, num_rows, num_cols
@@ -296,6 +298,30 @@ namespace grb
                             prev_j = j;
                             j = permutation[j];
                         }
+                    }
+                }
+                /// @todo deduplicate edges using the dup operator:
+                /// Use state bits on edges to 'delete' duplicate values
+                for (IndexType row = 0; row < m_num_rows; row++){
+                    auto st = m_offsets[row];
+                    auto nd = m_offsets[row+1];
+                    auto last_col = m_neighbors[st];
+                    for (auto col_idx = st+1; col_idx < nd; col_idx++){
+                        // Find and remove duplicate
+                        if (m_neighbors[col_idx] == last_col){
+                            // Set top bit to say that the entry is 'dead'
+                            m_neighbors[col_idx] = (IndexType)-1;
+                            /// @todo: change size of offsets
+                            /// @todo: check for negative values in 
+                            /// Parts of code that iterate over neighborhoods.
+                            // Merge the two values:
+                            /*if (m_weighted)
+                            {
+                             m_weights[first_occurrence_idx] = dup(
+                                m_weights[first_occurrence_idx], m_weights[col_idx]);
+                            } */
+                        }
+                        last_col = m_neighbors[col_idx];
                     }
                 }
             }
