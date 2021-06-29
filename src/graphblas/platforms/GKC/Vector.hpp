@@ -30,7 +30,8 @@
 #include <cstddef>
 #include <iostream>
 
-#include <graphblas/platforms/sequential/BitmapSparseVector.hpp>
+#include <graphblas/platforms/GKC/BitmapSparseVector.hpp>
+#include <graphblas/platforms/GKC/GKCSparseVector.hpp>
 
 //****************************************************************************
 #if 0
