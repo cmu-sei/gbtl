@@ -177,7 +177,25 @@ BOOST_AUTO_TEST_CASE(test_assignment)
     v2 = v1;
     BOOST_CHECK_EQUAL(v1, v2);
 }
-/*
+
+BOOST_AUTO_TEST_CASE(test_sorting)
+{
+    std::vector<IndexType> indices  = {0, 3, 4, 6, 7};
+    std::vector<double>    values   = {6, 4, 7, 9, 4};
+    std::vector<IndexType> indices2 = {3, 4, 0, 6, 7};
+    std::vector<double>    values2  = {4, 7, 6, 9, 4};
+    
+    grb::backend::GKCSparseVector<double> v1(indices.begin(), values.begin(), indices.size());
+    grb::backend::GKCSparseVector<double> v2(indices2.begin(), values2.begin(), indices2.size());
+
+    // Current semantic meaning of neq is that vector with different order but same elements is not equal.
+    BOOST_CHECK(v1 != v2);
+
+    v2.sortSelf();
+
+    BOOST_CHECK_EQUAL(v1, v2); 
+}
+
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxv_sparse_nomask_noaccum)
 {
@@ -197,7 +215,7 @@ BOOST_AUTO_TEST_CASE(test_mxv_sparse_nomask_noaccum)
                                             {6, 1, 0, 2},
                                             {6, 1, 4, 0},
                                             {6, 1, 4, 2}};
-    grb::backend::LilSparseMatrix<double> m1(mat, 0);
+    grb::backend::GKCMatrix<double> m1(mat, 0);
 
     std::vector<double> vec = {6, 0, 0, 4};
     grb::backend::GKCSparseVector<double> v1(vec, 0);
@@ -215,7 +233,8 @@ BOOST_AUTO_TEST_CASE(test_mxv_sparse_nomask_noaccum)
     grb::backend::GKCSparseVector<double> ans(answer, 0);
     BOOST_CHECK_EQUAL(ans, w);
     w.printInfo(std::cerr);
+    ans.printInfo(std::cerr);
 }
-*/
+
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -239,9 +239,13 @@ namespace grb
              * @brief Equality testing for GKC Vector.
              * @param rhs The right hand side of the equality operation.
              * @return If this GKC Vector and rhs are identical.
+             * @todo: need create sets for the vectors to compare their contents.
+             * @todo: lookup mutable keyword
              */
             bool operator==(GKCSparseVector<ScalarT> const &rhs) const
             {
+                /// @todo need to check for ordering of indices/weights. 
+                //throw NotImplementedException(); 
                 return ((m_num_vals == rhs.m_num_vals) &&
                         (m_weighted == rhs.m_weighted) &&
                         (m_num_stored_vals == rhs.m_num_stored_vals) &&
@@ -470,17 +474,51 @@ namespace grb
             // the vector is resized for the maximum number of vertices, 
             // not the amount currently stored.
             /// @todo mark: add iterator for GKC Sparse Vector
-            const std::vector<IndexType>& getIndices()
+            const std::vector<IndexType>& getIndices() const
             {
                 return m_indices;
             }
 
-            const std::vector<ScalarT>& getWeights()
+            const std::vector<ScalarT>& getWeights() const
             {
                 if (m_weighted){
                     return m_weights;
                 }
                 throw NoValueException();
+            }
+
+            void sortSelf() const // note const because sorting doesn't semantically change the vector.
+            {
+                std::vector<size_t> permutation(m_num_stored_vals);
+                // Iota from 0 generates a sequence of indices.
+                std::iota(permutation.begin(), permutation.end(), 0);
+                std::sort(permutation.begin(), permutation.end(), [&]
+                (const size_t i, const size_t j){
+                    return (m_indices[i] < m_indices[j]);
+                });
+                std::vector<bool> done(m_num_stored_vals);
+                for (IndexType i = 0; i < m_num_stored_vals; i++)
+                {
+                    // If an original location i has not been permuted, 
+                    // Find where it needs to go and continue swapping values until all are swapped.
+                    if (!done[i])
+                    {
+                        done[i] = true;
+                        size_t prev_j = i;
+                        size_t j = permutation[i];
+                        while (i!=j)
+                        {
+                            // Note that this swap loop will at most randomly access within 
+                            // one row of the matrix.
+                            std::swap(m_indices[prev_j], m_indices[j]);
+                            if (m_weighted)
+                                std::swap(m_weights[prev_j], m_weights[j]);
+                            done[j] = true;
+                            prev_j = j;
+                            j = permutation[j];
+                        }
+                    }
+                }
             }
 
             // output specific to the storage layout of this type of matrix
@@ -522,8 +560,8 @@ namespace grb
             bool m_weighted;
 
             // Two array compressed sparse vector
-            std::vector<IndexType> m_indices;
-            std::vector<ScalarType> m_weights;
+            mutable std::vector<IndexType> m_indices;
+            mutable std::vector<ScalarType> m_weights;
         };
 
     } // namespace backend

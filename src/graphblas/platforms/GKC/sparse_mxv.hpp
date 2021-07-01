@@ -162,5 +162,159 @@ namespace grb
             // Copy Z into the final output, w, considering mask and replace/merge
             write_with_opt_mask_1D(w, z, mask, outp);
         }
+        
+        //**********************************************************************
+        /// Implementation for mxv with GKC Matrix and GKC Sparse Vector: A * u
+        //**********************************************************************
+        // w, mask, and u are vectors. A is a matrix.
+        template <typename AccumT,
+                  typename MaskT,
+                  typename SemiringT,
+                  typename ScalarT>
+        inline void mxv(GKCSparseVector<ScalarT> &w,
+                        MaskT const &mask,
+                        AccumT const &accum,
+                        SemiringT op,
+                        GKCMatrix<ScalarT> const &A,
+                        GKCSparseVector<ScalarT> const &u,
+                        OutputControlEnum outp)
+        {
+            GRB_LOG_VERBOSE("w<M,z> := A +.* u");
+
+            // =================================================================
+            // Do the basic dot-product work with the semi-ring.
+            using TScalarType = typename SemiringT::result_type;
+
+            GKCSparseVector<TScalarType> t(u.nvals());
+            u.sortSelf();
+            //std::vector<std::tuple<IndexType, TScalarType> > t;
+
+            if ((A.nvals() > 0) && (u.nvals() > 0))
+            {
+                //auto u_contents(u.getContents());
+                for (IndexType row_idx = 0; row_idx < w.size(); ++row_idx) 
+                {
+                    auto AIst = A.idxBegin(row_idx);
+                    auto AInd = A.idxEnd(row_idx);
+                    auto AWst = A.wgtBegin(row_idx);
+                    auto AWnd = A.wgtEnd(row_idx);
+                    auto UIst = u.getIndices().begin();
+                    auto UInd = u.getIndices().end(); 
+                    auto UWst = u.getWeights().begin();
+                    auto UWnd = u.getWeights().end(); 
+                    // Do dot product here, into t
+                    bool value_set(false);
+                    TScalarType sum;
+                    //if (AIst < AInd && UIst < UInd) std::cout << "row idx: " << row_idx << std::endl;
+                    while (AIst < AInd && UIst < UInd)
+                    {                            
+                        if (*AIst == *UIst)
+                        {
+                            //std::cout << "AIdx: " << *AIst << " UIdx: " << *UIst << std::endl;
+                            //std::cout << "AWgt: " << *AWst<< " UWgt: " << *UWst << std::endl;
+                            if (value_set)
+                            {
+                                sum = op.add(sum, op.mult(*AWst, *UWst));
+                            }
+                            else 
+                            {                                
+                                sum = op.mult(*AWst, *UWst);
+                                value_set = true;
+                            }
+                            AIst++; AWst++;
+                            UIst++; UWst++;
+                        }
+                        else if (*AIst < *UIst)
+                        {                                
+                            AIst++; AWst++;
+                        }
+                        else 
+                        {
+                            UIst++; UWst++;
+                        }
+                        //if (value_set) std::cout << "Sum: " << sum << " ";
+                    }
+                    /// @todo: outputs control enum, masking, etc...
+                    if (value_set) w.setElement(row_idx, sum);
+                    //std::cout << std::endl;
+                }
+            }
+            w.sortSelf();
+
+            // =================================================================
+            // Accumulate into Z
+            //!!using ZScalarType = typename std::conditional_t<
+            //!!    std::is_same_v<AccumT, NoAccumulate>,
+            //!!    TScalarType,
+            //!!    decltype(accum(std::declval<typename WVectorT::ScalarType>(),
+            //!!                   std::declval<TScalarType>()))>;
+
+            //!!std::vector<std::tuple<IndexType, ZScalarType> > z;
+            //!!ewise_or_opt_accum_1D(z, w, t, accum);
+
+            // =================================================================
+            // Copy Z into the final output, w, considering mask and replace/merge
+            //!!write_with_opt_mask_1D(w, z, mask, outp);
+        }
+
+       #if 0 
+        //**********************************************************************
+        //**********************************************************************
+        //**********************************************************************
+
+/*
+        //**********************************************************************
+        /// Implementation of mxv for GKC Matrix and Sparse Vector: A' * u
+        //**********************************************************************
+        template<typename WVectorT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename SemiringT,
+                 typename AMatrixT,
+                 typename UVectorT>
+        inline void mxv(WVectorT                      &w,
+                        MaskT                   const &mask,
+                        AccumT                  const &accum,
+                        SemiringT                      op,
+                        TransposeView<AMatrixT> const &AT,
+                        UVectorT                const &u,
+                        OutputControlEnum              outp)
+        {
+            GRB_LOG_VERBOSE("w<M,z> := A' +.* u");
+            auto const &A(AT.m_mat);
+
+            // =================================================================
+            // Use axpy approach with the semi-ring.
+            using TScalarType = typename SemiringT::result_type;
+            std::vector<std::tuple<IndexType, TScalarType> > t;
+
+            if ((A.nvals() > 0) && (u.nvals() > 0))
+            {
+                for (IndexType row_idx = 0; row_idx < u.size(); ++row_idx)
+                {
+                    if (u.hasElement(row_idx) && !A[row_idx].empty())
+                    {
+                        axpy(t, op, u.extractElement(row_idx), A[row_idx]);
+                    }
+                }
+            }
+
+            // =================================================================
+            // Accumulate into Z
+            using ZScalarType = typename std::conditional_t<
+                std::is_same_v<AccumT, NoAccumulate>,
+                TScalarType,
+                decltype(accum(std::declval<typename WVectorT::ScalarType>(),
+                               std::declval<TScalarType>()))>;
+
+            std::vector<std::tuple<IndexType, ZScalarType> > z;
+            ewise_or_opt_accum_1D(z, w, t, accum);
+
+            // =================================================================
+            // Copy Z into the final output, w, considering mask and replace/merge
+            write_with_opt_mask_1D(w, z, mask, outp);
+        }
+        */
+       #endif
     } // backend
 } // grb

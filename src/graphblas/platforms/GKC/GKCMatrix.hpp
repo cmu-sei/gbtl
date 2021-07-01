@@ -697,7 +697,7 @@ namespace grb
                     /// Either mask the upper bits for the original index or shift over by one.
                     if (m_neighbors[nbr_offset] == icol)
                     {
-                        /// @todo: set structural value (m_neighbors) as invalid
+                        /// @todo: set structural value (m_neighbors) as invalid (support zombies)
                         throw NotImplementedException("Matrix remove element not implemented");
                         break;
                     }
@@ -706,6 +706,25 @@ namespace grb
                 /// @todo make this work with extra lists, which need to be enabled for things like 
                 /// extract and check if exists.
             }
+
+            size_t getRowDegree(IndexType index) const {
+                if (index < m_num_rows){
+                    return m_offsets[index + 1] - m_offsets[index];
+                }
+            }
+
+            using idx_iterator = typename std::vector<IndexType>::iterator;
+            using wgt_iterator = typename std::vector<WeightType>::iterator;
+            // Iterators for neighborhoods
+            inline idx_iterator idxBegin(IndexType idx) {return m_neighbors.begin() + m_offsets[idx]; }
+            inline wgt_iterator wgtBegin(IndexType idx) {return m_weights.begin()   + m_offsets[idx]; }
+            inline idx_iterator idxEnd(IndexType idx)   {return m_neighbors.begin() + m_offsets[idx+1]; }
+            inline wgt_iterator wgtEnd(IndexType idx)   {return m_weights.begin()   + m_offsets[idx+1]; }
+            // Const versions 
+            inline const idx_iterator idxBegin(IndexType idx) const {return m_neighbors.begin() + m_offsets[idx]; }
+            inline const wgt_iterator wgtBegin(IndexType idx) const {return m_weights.begin()   + m_offsets[idx]; }
+            inline const idx_iterator idxEnd(IndexType idx)   const {return m_neighbors.begin() + m_offsets[idx+1]; }
+            inline const wgt_iterator wgtEnd(IndexType idx)   const {return m_weights.begin()   + m_offsets[idx+1]; }
 
             /// @todo: rewrite recompute Nvals for when we have insert lists and elements
             /// pending removal? 
@@ -854,9 +873,9 @@ namespace grb
             bool m_weighted;
 
             // Three array CSR matrix
-            std::vector<IndexType> m_offsets;
-            std::vector<IndexType> m_neighbors;
-            std::vector<WeightType> m_weights;
+            mutable std::vector<IndexType> m_offsets;
+            mutable std::vector<IndexType> m_neighbors;
+            mutable std::vector<WeightType> m_weights;
 
         };
 
