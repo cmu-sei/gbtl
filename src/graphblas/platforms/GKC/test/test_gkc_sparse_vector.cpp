@@ -232,8 +232,38 @@ BOOST_AUTO_TEST_CASE(test_mxv_sparse_nomask_noaccum)
                                   36, 44, 36, 44, 36, 44, 36, 44};
     grb::backend::GKCSparseVector<double> ans(answer, 0);
     BOOST_CHECK_EQUAL(ans, w);
-    w.printInfo(std::cerr);
-    ans.printInfo(std::cerr);
+    //w.printInfo(std::cerr);
+    //ans.printInfo(std::cerr);
+}
+
+BOOST_AUTO_TEST_CASE(test_mxv_sparse_nomask_noaccum_transpose)
+{
+    using TEST_TYPE = int;
+    std::vector<std::vector<TEST_TYPE>> mat = {{0, 0, 0, 1},
+                                            {0, 0, 0, 4},
+                                            {0, 0, 9, 0},
+                                            {0, 3, 0, 1},
+                                            {0, 3, 3, 1},
+                                            {0, 1, 4, 2}};
+    grb::backend::GKCMatrix<TEST_TYPE> m1(mat, 0);
+
+    std::vector<TEST_TYPE> vec = {6, 0, 0, 4, -12, 0};
+    grb::backend::GKCSparseVector<TEST_TYPE> v1(vec, 0);
+
+    grb::backend::GKCSparseVector<TEST_TYPE> w(4);
+
+    grb::backend::mxv(w,
+                      grb::NoMask(),
+                      grb::Second<TEST_TYPE>(),
+                      grb::ArithmeticSemiring<TEST_TYPE>(),
+                      grb::TransposeView(m1), v1, REPLACE);
+    w.sortSelf(); // For equality checking to work, currently...
+
+    std::vector<TEST_TYPE> answer = { 0, -24, -36, -2};
+    grb::backend::GKCSparseVector<TEST_TYPE> ans(answer, 0);
+    BOOST_CHECK_EQUAL(ans, w);
+    //w.printInfo(std::cerr);
+    //ans.printInfo(std::cerr);
 }
 
 

@@ -307,9 +307,6 @@ namespace grb
             {
                 /// @todo make atomic? transactional?
                 m_num_stored_vals = 0;
-                /// @todo clear or resize to 0?
-                m_indices.clear();
-                m_weights.clear();
             }
 
             IndexType size() const { return m_num_vals; }
@@ -412,6 +409,36 @@ namespace grb
                     {
                         if (m_weighted){
                             m_weights[idx] = new_val;
+                        }
+                        return;
+                    }
+                }
+                // No value found; insert it:
+                m_indices[m_num_stored_vals] = index;
+                if (m_weighted){
+                    m_weights[m_num_stored_vals] = new_val;
+                }
+                m_num_stored_vals++;
+            }
+
+            template <typename SemiringT> 
+            void mergeSetElement(IndexType index, ScalarT const &new_val, SemiringT op)
+            {
+                if (index >= m_num_vals)
+                {
+                    throw IndexOutOfBoundsException();
+                }
+                if (index >= m_indices.size() || (index >= m_weights.size() && m_weighted))
+                {
+                    throw InvalidIndexException("Mismatch in internal vector size and size of vector.");
+                }
+                for (size_t idx = 0; idx < m_num_stored_vals; idx++)
+                {
+                    auto vidx = m_indices[idx];
+                    if (vidx == index)
+                    {
+                        if (m_weighted){
+                            m_weights[idx] = op.add(m_weights[idx], new_val);
                         }
                         return;
                     }
@@ -528,6 +555,9 @@ namespace grb
                 os << "backend::GKCSparseVector<" << typeid(ScalarT).name() << ">";
                 os << ", size  = " << m_num_vals;
                 os << ", nvals = " << m_num_stored_vals << std::endl;
+                os << "weighted: " << (m_weighted ? "true" : "false") << std::endl;
+                os << "m_indices.size(): " << m_indices.size() << std::endl;
+                os << "m_weights.size(): " << m_weights.size() << std::endl;
 
                 os << "[";
                 if (m_num_stored_vals > 0){
