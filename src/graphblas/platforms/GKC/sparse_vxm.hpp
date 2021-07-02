@@ -154,5 +154,43 @@ namespace grb
             write_with_opt_mask_1D(w, z, mask, outp);
         }
 
+        //**********************************************************************
+        /// Implementation for vxm with GKC Matrix and GKC Sparse Vector: u * A
+        //**********************************************************************
+        // w, mask, and u are vectors. A is a matrix.
+        template <typename AccumT,
+                  typename MaskT,
+                  typename SemiringT,
+                  typename ScalarT>
+        inline void vxm(GKCSparseVector<ScalarT> &w,
+                        MaskT const &mask,
+                        AccumT const &accum,
+                        SemiringT op,
+                        GKCSparseVector<ScalarT> const &u,
+                        GKCMatrix<ScalarT> const &A,
+                        OutputControlEnum outp)
+        {
+            // Shortcut to the equivalent mxv
+            mxv(w, mask, accum, op, grb::TransposeView(A), u, outp);
+        }
+
+        //**********************************************************************
+        /// Implementation of vxm for GKC Matrix and Sparse Vector: u * A'
+        //**********************************************************************
+        template <typename MaskT,
+                  typename AccumT,
+                  typename SemiringT,
+                  typename ScalarT>
+        inline void vxm(GKCSparseVector<ScalarT> &w,
+                        MaskT const &mask,
+                        AccumT const &accum,
+                        SemiringT op,
+                        GKCSparseVector<ScalarT> const &u,
+                        TransposeView<GKCMatrix<ScalarT>> const &AT,
+                        OutputControlEnum outp)
+        {
+            // Shortcut to the equivalent mxv
+            mxv(w, mask, accum, op, AT.m_mat, u, outp);
+        }
     } // backend
 } // grb
