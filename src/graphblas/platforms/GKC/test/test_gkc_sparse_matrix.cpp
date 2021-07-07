@@ -41,6 +41,61 @@ using namespace grb;
 BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
 //****************************************************************************
+// GKC constructor from dense matrix
+BOOST_AUTO_TEST_CASE(gkc_test_tags)
+{
+    IndexType M = 7;
+    IndexType N = 4;
+    grb::Matrix<double> m1(M, N);
+    std::cout << "\nm1\n";
+    m1.printInfo(std::cout);
+
+    grb::Matrix<double, grb::OrigTag> m2(M, N);
+    std::cout << "\nm2\n";
+    m2.printInfo(std::cout);
+
+    grb::Matrix<double, grb::DenseTag> m2a(M, N);
+    std::cout << "\nm2a\n";
+    m2a.printInfo(std::cout);
+
+    grb::Matrix<double, grb::SparseTag> m2c(M, N);
+    std::cout << "\nm2c\n";
+    m2c.printInfo(std::cout);
+
+    grb::Matrix<double, grb::SparseTag, grb::DirectedMatrixTag> m2d(M, N);
+    std::cout << "\nm2d\n";
+    m2d.printInfo(std::cout);
+
+    grb::Matrix<double, grb::GKCTag> m3(M, N);
+    std::cout << "\nm3\n";
+    m3.printInfo(std::cout);
+
+    grb::Matrix<double, grb::GKCTag, grb::DirectedMatrixTag> m3a(M, N);
+    std::cout << "\nm3a\n";
+    m3a.printInfo(std::cout);
+
+    grb::Matrix<double, grb::DirectedMatrixTag, grb::GKCTag> m3b(M, N);
+    std::cout << "\nm3b\n";
+    m3b.printInfo(std::cout);
+
+    grb::Matrix<double, grb::DirectedMatrixTag, grb::SparseTag, grb::GKCTag> m3c(M, N);
+    std::cout << "\nm3c\n";
+    m3c.printInfo(std::cout);
+
+    grb::Matrix<double, grb::DirectedMatrixTag, grb::GKCTag, grb::SparseTag> m3d(M, N);
+    std::cout << "\nm3d\n";
+    m3d.printInfo(std::cout);
+
+    grb::Matrix<double, grb::OrigTag, grb::GKCTag> m4(M, N);
+    std::cout << "\nm4\n";
+    m4.printInfo(std::cout);
+
+    grb::Matrix<double, grb::GKCTag, grb::OrigTag> m4a(M, N);
+    std::cout << "\nm4a\n";
+    m4a.printInfo(std::cout);
+}
+
+//****************************************************************************
 // GKC Matrix basic constructor
 BOOST_AUTO_TEST_CASE(gkc_test_construction_basic)
 {

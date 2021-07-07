@@ -41,6 +41,48 @@ using namespace grb;
 BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
 //****************************************************************************
+// GKC constructor from dense matrix
+BOOST_AUTO_TEST_CASE(gkc_test_tags)
+{
+    IndexType M = 3;
+    grb::Vector<double> v1(M);
+    std::cout << "\nv1\n";
+    v1.printInfo(std::cout);
+
+    grb::Vector<double, grb::OrigTag> v2(M);
+    std::cout << "\nv2\n";
+    v2.printInfo(std::cout);
+
+    grb::Vector<double, grb::DenseTag> v2a(M);
+    std::cout << "\nv2a\n";
+    v2a.printInfo(std::cout);
+
+    grb::Vector<double, grb::SparseTag> v2c(M);
+    std::cout << "\nv2c\n";
+    v2c.printInfo(std::cout);
+
+    grb::Vector<double, grb::GKCTag> v3(M);
+    std::cout << "\nv3\n";
+    v3.printInfo(std::cout);
+
+    grb::Vector<double, grb::SparseTag, grb::GKCTag> v3c(M);
+    std::cout << "\nv3c\n";
+    v3c.printInfo(std::cout);
+
+    grb::Vector<double, grb::GKCTag, grb::SparseTag> v3d(M);
+    std::cout << "\nv3d\n";
+    v3d.printInfo(std::cout);
+
+    grb::Vector<double, grb::OrigTag, grb::GKCTag> v4(M);
+    std::cout << "\nv4\n";
+    v4.printInfo(std::cout);
+
+    grb::Vector<double, grb::GKCTag, grb::OrigTag> v4a(M);
+    std::cout << "\nv4a\n";
+    v4a.printInfo(std::cout);
+}
+
+//****************************************************************************
 BOOST_AUTO_TEST_CASE(test_construction_basic)
 {
     grb::IndexType M = 7;
@@ -151,7 +193,7 @@ BOOST_AUTO_TEST_CASE(test_index_array_constrution)
     std::vector<IndexType> indices = {0, 3, 4, 6, 7};
     std::vector<double>    values  = {6 ,4, 7, 9, 4};
 
-    grb::backend::GKCSparseVector<double> v2(indices.begin(), 
+    grb::backend::GKCSparseVector<double> v2(indices.begin(),
     values.begin(), indices.size());
 
     BOOST_CHECK_EQUAL(v1, v2);
