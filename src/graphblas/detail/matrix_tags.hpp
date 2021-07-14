@@ -37,12 +37,15 @@ namespace grb
     struct UndirectedMatrixTag {};
     struct DenseTag {};
     struct SparseTag {};
+    struct GKCTag{};       // TEMPORARY to select GKC data structures
+    struct OrigTag{};      // TEMPORARY to select pre-GKC data structures
 
     namespace detail
     {
         // add category tags in the detail namespace
         struct SparsenessCategoryTag {};
         struct DirectednessCategoryTag {};
+        struct ImplementationCategoryTag {}; // TEMPORARY to select b/w data structures
         struct NullTag {};
     } //end detail
 }//end grb

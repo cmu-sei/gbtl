@@ -116,7 +116,7 @@ namespace grb
                     AMatrixT   const &A,
                     OutputControlEnum outp = MERGE)
     {
-        GRB_LOG_FN_BEGIN("mxv - 4.3.2 - vector-matrix multiply");
+        GRB_LOG_FN_BEGIN("vxm - 4.3.2 - vector-matrix multiply");
         GRB_LOG_VERBOSE("w in :" << get_internal_vector(w));
         GRB_LOG_VERBOSE("mask in : " << get_internal_vector(mask));
         GRB_LOG_VERBOSE_ACCUM(accum);
@@ -132,7 +132,7 @@ namespace grb
         backend::vxm(get_internal_vector(w), get_internal_vector(mask), accum, op, get_internal_vector(u), get_internal_matrix(A), outp);
 
         GRB_LOG_VERBOSE("w out :" << get_internal_vector(w));
-        GRB_LOG_FN_END("mxm - 4.3.2 - vector-matrix multiply");
+        GRB_LOG_FN_END("vxm - 4.3.2 - vector-matrix multiply");
     }
 
     //************************************************************************
