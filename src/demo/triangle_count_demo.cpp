@@ -57,9 +57,10 @@ int main(int argc, char **argv)
 //    {
 //        std::cout << "Row: " << row << std::endl;
 //        sscanf(row.c_str(), "%ld\t%ld", &src, &dst);
-    while (infile)
+    while (true)
     {
         infile >> src >> dst;
+        if (infile.eof()) break;
         //std::cout << "Read: " << src << ", " << dst << std::endl;
         if (src > max_id) max_id = src;
         if (dst > max_id) max_id = dst;

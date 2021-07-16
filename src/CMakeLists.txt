@@ -60,6 +60,10 @@ include_directories(${CMAKE_SOURCE_DIR} ${PLATFORM_SOURCE_DIR})
 # Compiler flags
 set(CMAKE_CXX_STANDARD 11)
 
+# require boost
+find_package(Boost REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
+
 # Build a list of all the graphblas headers.
 file(GLOB GRAPHBLAS_HEADERS graphblas/*.hpp)
 
