@@ -421,8 +421,8 @@ namespace grb
                 m_num_stored_vals++;
             }
 
-            template <typename SemiringT> 
-            void mergeSetElement(IndexType index, ScalarT const &new_val, SemiringT op)
+            template <typename BinaryOpT, typename ZScalarT> 
+            void mergeSetElement(IndexType index, ZScalarT const &new_val, BinaryOpT op)
             {
                 if (index >= m_num_vals)
                 {
@@ -438,7 +438,7 @@ namespace grb
                     if (vidx == index)
                     {
                         if (m_weighted){
-                            m_weights[idx] = op.add(m_weights[idx], new_val);
+                            m_weights[idx] = op(m_weights[idx], new_val);
                         }
                         return;
                     }
@@ -446,7 +446,13 @@ namespace grb
                 // No value found; insert it:
                 m_indices[m_num_stored_vals] = index;
                 if (m_weighted){
-                    m_weights[m_num_stored_vals] = new_val;
+                    // Make sure to correctly cast for the output of the operation, 
+                    // which in mxv is not the same as the reduction (additive) output.
+                    using ZType = decltype(op(
+                         std::declval<ScalarT>(),
+                         std::declval<ZScalarT>()
+                        ));
+                    m_weights[m_num_stored_vals] = (ZType)new_val;
                 }
                 m_num_stored_vals++;
             }
