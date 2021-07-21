@@ -513,6 +513,19 @@ namespace grb
                 }
                 throw NoValueException();
             }
+            
+            using idx_iterator = typename std::vector<IndexType>::iterator;
+            using wgt_iterator = typename std::vector<ScalarType>::iterator;
+            // Iterators for neighborhoods
+            inline idx_iterator idxBegin() {return m_indices.begin(); }
+            inline wgt_iterator wgtBegin() {return m_weights.begin(); }
+            inline idx_iterator idxEnd()   {return m_indices.begin() + m_num_stored_vals; }
+            inline wgt_iterator wgtEnd()   {return m_weights.begin() + m_num_stored_vals; }
+            // Const versions 
+            inline const idx_iterator idxBegin() const {return m_indices.begin(); }
+            inline const wgt_iterator wgtBegin() const {return m_weights.begin(); }
+            inline const idx_iterator idxEnd()   const {return m_indices.begin() + m_num_stored_vals; }
+            inline const wgt_iterator wgtEnd()   const {return m_weights.begin() + m_num_stored_vals; }
 
             void sortSelf() const // note const because sorting doesn't semantically change the vector.
             {
