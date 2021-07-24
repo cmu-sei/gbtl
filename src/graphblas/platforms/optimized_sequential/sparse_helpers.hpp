@@ -1312,7 +1312,7 @@ namespace grb
 
         // *******************************************************************
         // Only returns true if target index is found AND it evaluates to true
-        /// @todo Need to add support for STRUCTURE_ONLY
+        // or the structure flag is set.
         template <typename TupleIteratorT>
         bool advance_and_check_mask_iterator(
             TupleIteratorT       &it,
