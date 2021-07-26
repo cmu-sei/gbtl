@@ -210,6 +210,7 @@ namespace grb
                         m_weights[old_idx] = dup(m_weights[old_idx], *(v_it + idx));
                     }
                 }
+                // Todo: sort here
             }
 
             // Destructor
@@ -245,12 +246,21 @@ namespace grb
             bool operator==(GKCSparseVector<ScalarT> const &rhs) const
             {
                 /// @todo need to check for ordering of indices/weights. 
+                /// @todo need to check for only the part of each vector USED.
                 //throw NotImplementedException(); 
-                return ((m_num_vals == rhs.m_num_vals) &&
-                        (m_weighted == rhs.m_weighted) &&
-                        (m_num_stored_vals == rhs.m_num_stored_vals) &&
-                        (m_indices == rhs.m_indices) && 
-                        (m_weights == rhs.m_weights));
+                //if (this == &rhs) return true;
+                bool test1 = (m_num_vals == rhs.m_num_vals);
+                bool test2 = (m_weighted == rhs.m_weighted);
+                bool test3 = (m_num_stored_vals == rhs.m_num_stored_vals);
+                bool test4 = std::equal(m_indices.begin(), m_indices.begin() + m_num_stored_vals, rhs.m_indices.begin());
+                bool test5 = std::equal(m_weights.begin(), m_weights.begin() + m_num_stored_vals, rhs.m_weights.begin());
+                // std::cout << (test1 ? "true" : "false") << std::endl;
+                // std::cout << (test2 ? "true" : "false") << std::endl;
+                // std::cout << (test3 ? "true" : "false") << std::endl;
+                // std::cout << (test4 ? "true" : "false") << std::endl;
+                // std::cout << (test5 ? "true" : "false") << std::endl;
+                // std::cout << (m_weighted ? "true" : "false") << std::endl;
+                return ( test1 && test2 && test3 && test4 && ((m_weighted && test5) || !m_weighted) );
             }
 
             /**
@@ -301,6 +311,8 @@ namespace grb
                         m_num_stored_vals++;
                     }
                 }
+                // Todo, sort here
+
             }
             
             void clear()
@@ -419,6 +431,7 @@ namespace grb
                     m_weights[m_num_stored_vals] = new_val;
                 }
                 m_num_stored_vals++;
+                // Todo: add a sorted or not sorted flag
             }
 
             template <typename BinaryOpT, typename ZScalarT> 
@@ -455,6 +468,7 @@ namespace grb
                     m_weights[m_num_stored_vals] = (ZType)new_val;
                 }
                 m_num_stored_vals++;
+                // Todo: add a sorted or not sorted flag
             }
 
             void removeElement(IndexType index)
@@ -477,20 +491,25 @@ namespace grb
                         // so just replace with last element.
                         // NOT THREAD SAFE!
                         if (idx < m_num_stored_vals - 1){
+                            // Swap with last elem and decremement size
                             m_indices[idx] = m_indices[m_num_stored_vals - 1];
                             if (m_weighted)
                             {
                                 m_weights[idx] = m_weights[m_num_stored_vals-1];
                             }
                             m_num_stored_vals--;
+                            this->sortSelf();
+                        }
+                        else if (idx == m_num_stored_vals - 1)
+                        { // Added to handle corner case when only one elem remains.
+                            m_num_stored_vals = 0;
                         }
                         return;
                     }
                 }
                 // No value found; throw error
                 throw NoValueException();
-
-                
+                // Todo: add a sorted or not sorted flag
             }
 
             template<typename RAIteratorIT,
