@@ -381,21 +381,134 @@ namespace grb
                        IndexType    n,
                        DupT         dup)
             {
-                
-                /// @todo should this function throw an error if matrix is not empty
-
-                /// @todo should this function call clear?
-                //clear();
-
-                /// @todo mark build the matrix from empty, which means we can 
-                // stream all the iterated elements in as long as they are sorted.
-                // Are elements sorted? 
-                /// @todo REALLY INEFFICIENT: Replace with ordered stream-in
-                for (IndexType ix = 0; ix < n; ++ix)
+                /// @todo require random access iterators
+                // scan the data to determine num_edges, num_rows, num_cols
+                // Note: assumes no duplicates:
+                /*
+                m_num_edges = n;
+                m_num_rows = 0;
+                m_num_cols = 0;
+                for (IndexType idx = 0; idx < n; idx++)
                 {
-                    setElement(*i_it, *j_it, *v_it, dup);
-                    ++i_it; ++j_it; ++v_it;
-                } 
+                    IndexType row_idx = *(i_it+idx);
+                    IndexType col_idx = *(j_it+idx);
+                    m_num_rows = std::max(m_num_rows, row_idx+1);
+                    m_num_cols = std::max(m_num_cols, col_idx+1);
+                }*/
+
+                // allocate memory
+                m_offsets.resize(m_num_rows+1);
+                m_neighbors.resize(m_num_edges);
+                /// @todo how to detect if graph is weighted?
+                //m_weighted = true;
+                m_weights.resize(m_num_edges);
+                std::fill(m_offsets.begin(), m_offsets.end(), (IndexType)0);
+
+                /// compute neighborhood sizes and prefix sum
+                /// @todo use map/counter to avoid repeated order M iteration? 
+                for (IndexType idx = 0; idx < n; idx++)
+                {
+                    IndexType row_idx = *(i_it+idx);
+                    m_offsets[row_idx+1]++;
+                }
+                /// @todo: parallel prefix sum
+                for (IndexType idx = 0; idx < m_num_rows; idx++)
+                {
+                    m_offsets[idx+1] += m_offsets[idx];
+                }
+
+                /// @todo copy coordinates to appropriate locations // NOTE: need temporary size of each neighborhood till full.
+                std::map<IndexType, IndexType> counters;
+                for (IndexType idx = 0; idx < n; idx++)
+                {
+                    IndexType row_idx = *(i_it+idx);
+                    IndexType col_idx = *(j_it+idx);
+                    IndexType flat_idx = m_offsets[row_idx] + counters[row_idx];
+                    m_neighbors[flat_idx] = col_idx;
+                    if (m_weighted){
+                        m_weights[flat_idx] = *(v_it + idx);
+                    }
+                    counters[row_idx]++;
+                }
+
+                // Sort the neighborhoods in-place
+                /// @todo use a direct in-place sort for structure-only matrices. 
+                /// The following permute-sort is designed to handle having weights.
+                /// @todo use sort functions optimized for each neighborhood length
+                /// @todo process neighborhoods in chunks so we don't need to allocate an 
+                /// Order m vector for permutation.
+                std::vector<size_t> permutation(m_num_edges);
+                // Iota from 0 generates a sequence of indices.
+                std::iota(permutation.begin(), permutation.end(), 0);
+                for (size_t idx = 0; idx < m_num_rows; idx++)
+                {
+                    // The two input vectors are m_neighbors and m_weights. m_weights needs to be
+                    // Permuted by the sorted order for m_neighbors.
+                    // We need to sort the indices in m_neighbors in sections corresponding
+                    // to each matrix row (each neighborhood)
+                    auto st = m_offsets[idx];
+                    auto nd = m_offsets[idx+1];
+                    // Use a lambda to reorder part of permutation vector based on values in 
+                    // m_neighbors.
+                    if (nd > st)
+                    {
+                        // Note: only a portion of the vector is given for sort, but the indices
+                        // i and j are based on permutation.begin(), not permutation.begin() + st.
+                        std::sort(permutation.begin() + st, permutation.begin() + nd,
+                            [&](const size_t i, const size_t j) { return (m_neighbors[i] < m_neighbors[j]); });
+                    }
+                }
+
+                // Now we have a total permutation for the columns; apply it to m_neighbors and m_weights:
+                /// @todo process neighborhoods in chunks to we don't need an O(m) bool vector, 
+                /// and so that neighborhoods chunked together can be processed by diff threads.
+                std::vector<bool> done(m_num_edges);
+                for (IndexType i = 0; i < m_num_edges; i++)
+                {
+                    // If an original location i has not been permuted, 
+                    // Find where it needs to go and continue swapping values until all are swapped.
+                    if (!done[i])
+                    {
+                        done[i] = true;
+                        size_t prev_j = i;
+                        size_t j = permutation[i];
+                        while (i!=j)
+                        {
+                            // Note that this swap loop will at most randomly access within 
+                            // one row of the matrix.
+                            std::swap(m_neighbors[prev_j], m_neighbors[j]);
+                            if (m_weighted)
+                                std::swap(m_weights[prev_j], m_weights[j]);
+                            done[j] = true;
+                            prev_j = j;
+                            j = permutation[j];
+                        }
+                    }
+                }
+                /// @todo deduplicate edges using the dup operator:
+                /// Use state bits on edges to 'delete' duplicate values
+                for (IndexType row = 0; row < m_num_rows; row++){
+                    auto st = m_offsets[row];
+                    auto nd = m_offsets[row+1];
+                    auto last_col = m_neighbors[st];
+                    for (auto col_idx = st+1; col_idx < nd; col_idx++){
+                        // Find and remove duplicate
+                        if (m_neighbors[col_idx] == last_col){
+                            // Set top bit to say that the entry is 'dead'
+                            m_neighbors[col_idx] = (IndexType)-1;
+                            /// @todo: change size of offsets
+                            /// @todo: check for negative values in 
+                            /// Parts of code that iterate over neighborhoods.
+                            // Merge the two values:
+                            /*if (m_weighted)
+                            {
+                             m_weights[first_occurrence_idx] = dup(
+                                m_weights[first_occurrence_idx], m_weights[col_idx]);
+                            } */
+                        }
+                        last_col = m_neighbors[col_idx];
+                    }
+                }
             }
             
 
