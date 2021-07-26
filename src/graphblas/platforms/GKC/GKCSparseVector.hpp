@@ -517,8 +517,20 @@ namespace grb
             void extractTuples(RAIteratorIT        i_it,
                                RAIteratorVT        v_it) const
             {
-                throw NotImplementedException();
+                for (IndexType idx = 0; idx < m_num_stored_vals; ++idx)
+                {
+                    *i_it = m_indices[idx];
+                    ++i_it;
+                    if (m_weighted)
+                    {
+                        *v_it = m_weights[idx];
+                        ++v_it;
+                    }
+                }
             }
+
+            bool isWeighted() {return m_weighted;}
+
 
             // Note: this has to be const because changes to it could break 
             // the weights vector. 
