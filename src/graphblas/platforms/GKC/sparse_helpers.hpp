@@ -272,6 +272,9 @@ namespace grb
             auto v2_it = vec2.begin();
 
             // loop through both ordered sets to compute sparse dot prod
+            /// @todo Mark split this into two while loops, one for 
+            /// finding the first intersection and one to do the rest, 
+            /// so the inner if/else is not needed.
             while ((v1_it != vec1.end()) && (v2_it != vec2.end()))
             {
                 if (std::get<0>(*v2_it) == std::get<0>(*v1_it))
