@@ -25,29 +25,29 @@
  * DM20-0442
  */
 
+/**
+ * Implementations of all GraphBLAS functions optimized for the GKC
+ * (CPU) backend.
+ */
+
 #pragma once
 
-//****************************************************************************
+#include <functional>
+#include <utility>
+#include <vector>
+#include <iterator>
 
-namespace grb
-{
-    // The default matrix is sparse and directed, and the default vector is sparse,
-    // so we need tags that modify that
-    struct DirectedMatrixTag {};
-    struct UndirectedMatrixTag {};
-    struct DenseTag {};
-    struct SparseTag {};
-    struct GKCTag{};       // TEMPORARY to select GKC data structures
-    struct OrigTag{};      // TEMPORARY to select pre-GKC data structures
+#include <graphblas/algebra.hpp>
 
-    namespace detail
-    {
-        // add category tags in the detail namespace
-        struct SparsenessCategoryTag {};
-        struct DirectednessCategoryTag {};
-        struct ImplementationCategoryTag {}; // TEMPORARY to select b/w data structures
-        struct NullTag {};
-    } //end detail
-}//end grb
-
-//****************************************************************************
+// Add individual operation files here
+#include <graphblas/platforms/GKC/sparse_mxm.hpp>
+#include <graphblas/platforms/GKC/sparse_mxv.hpp>
+#include <graphblas/platforms/GKC/sparse_vxm.hpp>
+#include <graphblas/platforms/GKC/sparse_ewisemult.hpp>
+#include <graphblas/platforms/GKC/sparse_ewiseadd.hpp>
+#include <graphblas/platforms/GKC/sparse_extract.hpp>
+#include <graphblas/platforms/GKC/sparse_assign.hpp>
+#include <graphblas/platforms/GKC/sparse_apply.hpp>
+#include <graphblas/platforms/GKC/sparse_reduce.hpp>
+#include <graphblas/platforms/GKC/sparse_transpose.hpp>
+#include <graphblas/platforms/GKC/sparse_kronecker.hpp>

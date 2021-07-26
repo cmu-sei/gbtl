@@ -25,29 +25,28 @@
  * DM20-0442
  */
 
-#pragma once
+// !!!! DO NOT ADD HEADER INCLUSION PROTECTION !!!!
 
-//****************************************************************************
+// This file is a dispatch mechanism to allow us to include different
+// sets of files as specified by the user.
 
-namespace grb
-{
-    // The default matrix is sparse and directed, and the default vector is sparse,
-    // so we need tags that modify that
-    struct DirectedMatrixTag {};
-    struct UndirectedMatrixTag {};
-    struct DenseTag {};
-    struct SparseTag {};
-    struct GKCTag{};       // TEMPORARY to select GKC data structures
-    struct OrigTag{};      // TEMPORARY to select pre-GKC data structures
+#if(GB_INCLUDE_BACKEND_ALL)
+#include <graphblas/platforms/GKC/GKC.hpp>
+#endif
 
-    namespace detail
-    {
-        // add category tags in the detail namespace
-        struct SparsenessCategoryTag {};
-        struct DirectednessCategoryTag {};
-        struct ImplementationCategoryTag {}; // TEMPORARY to select b/w data structures
-        struct NullTag {};
-    } //end detail
-}//end grb
+#if(GB_INCLUDE_BACKEND_MATRIX)
+#include <graphblas/platforms/GKC/param_unpack.hpp>
+//#include <graphblas/platforms/GKC/Matrix.hpp>
+#undef GB_INCLUDE_BACKEND_MATRIX
+#endif
 
-//****************************************************************************
+#if(GB_INCLUDE_BACKEND_VECTOR)
+#include <graphblas/platforms/GKC/param_unpack.hpp>
+//#include <graphblas/platforms/GKC/Vector.hpp>
+#undef GB_INCLUDE_BACKEND_VECTOR
+#endif
+
+#if(GB_INCLUDE_BACKEND_OPERATIONS)
+#include <graphblas/platforms/GKC/operations.hpp>
+#undef GB_INCLUDE_BACKEND_OPERATIONS
+#endif

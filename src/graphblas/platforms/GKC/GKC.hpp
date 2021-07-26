@@ -27,27 +27,15 @@
 
 #pragma once
 
-//****************************************************************************
+//#include <graphblas/platforms/GKC/Matrix.hpp>
+//#include <graphblas/platforms/GKC/Vector.hpp>
 
-namespace grb
-{
-    // The default matrix is sparse and directed, and the default vector is sparse,
-    // so we need tags that modify that
-    struct DirectedMatrixTag {};
-    struct UndirectedMatrixTag {};
-    struct DenseTag {};
-    struct SparseTag {};
-    struct GKCTag{};       // TEMPORARY to select GKC data structures
-    struct OrigTag{};      // TEMPORARY to select pre-GKC data structures
 
-    namespace detail
-    {
-        // add category tags in the detail namespace
-        struct SparsenessCategoryTag {};
-        struct DirectednessCategoryTag {};
-        struct ImplementationCategoryTag {}; // TEMPORARY to select b/w data structures
-        struct NullTag {};
-    } //end detail
-}//end grb
+#include <graphblas/platforms/GKC/BitmapSparseVector.hpp>
+#include <graphblas/platforms/GKC/GKCSparseVector.hpp>
+#include <graphblas/platforms/GKC/LilSparseMatrix.hpp>
+#include <graphblas/platforms/GKC/GKCMatrix.hpp>
 
-//****************************************************************************
+#include <graphblas/platforms/GKC/param_unpack.hpp>
+
+#include <graphblas/platforms/GKC/operations.hpp>
