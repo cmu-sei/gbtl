@@ -171,7 +171,19 @@ namespace grb
 
             if (u.nvals() > 0)
             {
-                reduction(t, u.getContents(), op);
+                if constexpr (std::is_same_v<u, BitmapSparseVector<UScalarType>>()) {
+                    reduction(t, u.getContents(), op);
+                }
+                else
+                {
+                    if (u.isWeighted())
+                    {
+                        for (auto uitr = u.wgtBegin(); uitr < u.wgtEnd(); uitr++){
+                            t = op(t, *uitr);
+                        }
+                    }
+                }
+
             }
 
             // =================================================================
