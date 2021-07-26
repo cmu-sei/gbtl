@@ -87,7 +87,6 @@ namespace grb
                         w.removeElement(idx);
                     }
                 }
-                w.printInfo(std::cerr);
             } // Otherwise, if Merging, just leave values in place.
 
             if ((A.nvals() > 0) && (u.nvals() > 0))
@@ -147,11 +146,6 @@ namespace grb
                         }
                         else // Accumulate
                         {
-                            std::cout << row_idx << std::endl;
-                            if (w.hasElement(row_idx))
-                            {
-                                std::cout << "Merging " << w.extractElement(row_idx) << " and " << sum << std::endl;
-                            }
                             w.mergeSetElement(row_idx, sum, accum);
                         }
                     }
@@ -199,16 +193,13 @@ namespace grb
             // pre-existing elements not in the mask
             if (outp == REPLACE)
             {
-                w.printInfo(std::cerr);
                 for (auto idx = 0; idx < w.size(); idx++)
                 {
                     if (w.hasElement(idx) && (!mask.hasElement(idx) || !mask.extractElement(idx)))
                     {
-                        std::cout << "Removed an elem (" << idx << ", " << w.extractElement(idx) << ")" << std::endl;
                         w.removeElement(idx);
                     }
                 }
-                w.printInfo(std::cerr);
             } // Otherwise, if Merging, just leave values in place.
 
             // Use axpy approach with the semi-ring.
@@ -263,10 +254,10 @@ namespace grb
                     auto TWst = t.wgtBegin();
                     while (TIst != TInd)
                     {
-                        std::cout << *TIst << std::endl;
-                        if (w.hasElement(*TIst)){
-                            std::cout << "Merging " << w.extractElement(*TIst) << " and " << *TWst << std::endl;
-                        }
+                        // std::cout << *TIst << std::endl;
+                        // if (w.hasElement(*TIst)){
+                        //     std::cout << "Merging " << w.extractElement(*TIst) << " and " << *TWst << std::endl;
+                        // }
                         w.mergeSetElement(*TIst, *TWst, accum);
                         TIst++;
                         TWst++;

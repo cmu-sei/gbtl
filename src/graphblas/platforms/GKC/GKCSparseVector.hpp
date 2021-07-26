@@ -502,7 +502,7 @@ namespace grb
                         }
                         else if (idx == m_num_stored_vals - 1)
                         { // Added to handle corner case when only one elem remains.
-                            m_num_stored_vals = 0;
+                            m_num_stored_vals--;
                         }
                         return;
                     }

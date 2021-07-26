@@ -166,7 +166,6 @@ BOOST_AUTO_TEST_CASE(test_access_novalue_in_non_empty_vector)
 BOOST_AUTO_TEST_CASE(test_assign_to_implied_zero_and_stored_value)
 {
 
-    std::cout << "implied zero and stored value test" << std::endl;
     double zero(0);
     std::vector<double> vec = {6, zero, zero, 4, 7, zero, 9, 4};
 
@@ -619,6 +618,7 @@ BOOST_AUTO_TEST_CASE(test_vxm_sparse_mask_noaccum)
 
 BOOST_AUTO_TEST_CASE(test_vxm_sparse_mask_accum_transpose)
 {
+    std::cout << "Test start" << std::endl;
     std::vector<std::vector<double>> mat = {{0, 0, 0, 0},
                                             {0, 0, 0, 4},
                                             {0, 0, 9, 0},
@@ -644,9 +644,9 @@ BOOST_AUTO_TEST_CASE(test_vxm_sparse_mask_accum_transpose)
                                   0, 0, 0, 0, 0, 0, 0, 0};
     grb::backend::GKCSparseVector<double> w(w_vec, 0);
 
-    std::vector<double> mask_vec = {0, 1, 0, 1, 0, 1, 0, 1,
+    std::vector<char> mask_vec = {0, 1, 0, 1, 0, 1, 0, 1,
                                     1, 0, 1, 0, 1, 0, 1, 0};
-    grb::backend::GKCSparseVector<double> mask(mask_vec, 0);
+    grb::backend::GKCSparseVector<char> mask(mask_vec, 0);
 
     grb::backend::vxm(w,
                       mask,  
@@ -661,6 +661,7 @@ BOOST_AUTO_TEST_CASE(test_vxm_sparse_mask_accum_transpose)
     BOOST_CHECK_EQUAL(ans, w);
     //w.printInfo(std::cerr);
     //ans.printInfo(std::cerr);
+    std::cout << "test end" << std::endl;
 }
 
 BOOST_AUTO_TEST_CASE(test_vxm_sparse_mask_accum)
@@ -688,7 +689,7 @@ BOOST_AUTO_TEST_CASE(test_vxm_sparse_mask_accum)
                       mask,
                       grb::Plus<TEST_TYPE>(),
                       grb::ArithmeticSemiring<TEST_TYPE>(),
-                      v1, m1, MERGE);
+                      v1, m1, REPLACE);
     w.sortSelf(); // For equality checking to work, currently...
 
     std::vector<TEST_TYPE> answer = { 0, -24, 0, -2};
