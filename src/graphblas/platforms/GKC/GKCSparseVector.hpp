@@ -235,6 +235,56 @@ namespace grb
                 return *this;
             }
 
+            // Copy assignment (for diff types, has cast)
+            template <typename AltScalarT>
+            GKCSparseVector<ScalarT> &operator=(GKCSparseVector<AltScalarT> const &rhs)
+            {
+                if (this != &rhs) 
+                {
+                    if (m_num_vals != rhs.m_num_vals)
+                    {
+                        throw DimensionException("Dimensions of vectors do not match.");
+                    }    
+                    m_num_vals = rhs.m_num_vals;
+                    m_num_stored_vals = rhs.m_num_stored_vals;
+                    m_weighted = rhs.m_weighted;
+                    
+                    for (size_t idx = 0; idx < m_num_stored_vals; idx++) {
+                        m_indices[idx] = (ScalarT)rhs.m_indices[idx];
+                        if (m_weighted)
+                            m_weights[idx] = (ScalarT)rhs.m_weights[idx];
+                    }
+                }
+                return *this;
+            }
+            
+            // Move assignment
+            GKCSparseVector<ScalarT> &operator=(GKCSparseVector<ScalarT> const &&rhs)
+            {
+                if (this != &rhs) 
+                {
+                    if (m_num_vals != rhs.m_num_vals)
+                    {
+                        throw DimensionException("Dimensions of vectors do not match.");
+                    }    
+                    m_num_vals =        std::move(rhs.m_num_vals);
+                    m_num_stored_vals = std::move(rhs.m_num_stored_vals);
+                    m_weighted =        std::move(rhs.m_weighted);
+                    m_indices =         std::move(rhs.m_indices);
+                    m_weights =         std::move(rhs.m_weights); 
+                }
+                return *this;
+            }
+
+            void swap(GKCSparseVector<ScalarT> &rhs)
+            {
+                std::swap(m_num_vals, rhs.m_num_vals);
+                std::swap(m_num_stored_vals, rhs.m_num_stored_vals);
+                std::swap(m_weighted, rhs.m_weighted);
+                std::swap(m_indices, rhs.m_indices);
+                std::swap(m_weights, rhs.m_weights); 
+            }
+
             // EQUALITY OPERATORS
             /**
              * @brief Equality testing for GKC Vector.
@@ -529,8 +579,7 @@ namespace grb
                 }
             }
 
-            bool isWeighted() {return m_weighted;}
-
+            bool isWeighted() const {return m_weighted;}
 
             // Note: this has to be const because changes to it could break 
             // the weights vector. 
