@@ -171,7 +171,7 @@ namespace grb
 
             if (u.nvals() > 0)
             {
-                if constexpr (std::is_same_v<u, BitmapSparseVector<UScalarType>>()) {
+                if constexpr (std::is_same_v<UVectorT, BitmapSparseVector<UScalarType>>) {
                     reduction(t, u.getContents(), op);
                 }
                 else
