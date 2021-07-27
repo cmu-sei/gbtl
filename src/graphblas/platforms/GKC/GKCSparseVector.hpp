@@ -239,21 +239,24 @@ namespace grb
             template <typename AltScalarT>
             GKCSparseVector<ScalarT> &operator=(GKCSparseVector<AltScalarT> const &rhs)
             {
-                if (this != &rhs) 
+                // if (this != &rhs)  // Assume they are different pointers since the 
+                // ScalarT to ScalarT assignment would otherwise have been used (above)
+                if (m_num_vals != rhs.size())
                 {
-                    if (m_num_vals != rhs.m_num_vals)
-                    {
-                        throw DimensionException("Dimensions of vectors do not match.");
-                    }    
-                    m_num_vals = rhs.m_num_vals;
-                    m_num_stored_vals = rhs.m_num_stored_vals;
-                    m_weighted = rhs.m_weighted;
-                    
-                    for (size_t idx = 0; idx < m_num_stored_vals; idx++) {
-                        m_indices[idx] = (ScalarT)rhs.m_indices[idx];
-                        if (m_weighted)
-                            m_weights[idx] = (ScalarT)rhs.m_weights[idx];
-                    }
+                    throw DimensionException("Dimensions of vectors do not match.");
+                }
+                m_num_vals = rhs.size();
+                m_num_stored_vals = rhs.nvals();
+                m_weighted = rhs.isWeighted();
+
+                auto idx_itr = rhs.idxBegin();
+                auto wgt_itr = rhs.wgtBegin();
+                size_t idx = 0;
+                for ( ; idx_itr < rhs.idxEnd(); idx_itr++, wgt_itr++, idx++)
+                {
+                    m_indices[idx] = (ScalarT)(*idx_itr);
+                    if (m_weighted)
+                        m_weights[idx] = (ScalarT)(*wgt_itr);
                 }
                 return *this;
             }
