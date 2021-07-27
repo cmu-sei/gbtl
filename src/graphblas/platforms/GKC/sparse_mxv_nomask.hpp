@@ -232,7 +232,15 @@ namespace grb
                     //     TIst++;
                     //     TWst++;
                     // }
-                    w = t;
+                    if constexpr (std::is_same_v<ScalarT, TScalarType>)
+                    {
+                        //w.swap(t);
+                        w = std::move(t);
+                    }
+                    else
+                    {
+                        w = t;
+                    }
                 }
             }
         }
