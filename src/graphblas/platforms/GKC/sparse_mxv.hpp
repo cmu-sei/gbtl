@@ -197,14 +197,14 @@ namespace grb
                     w.clear();
                 }
                 else {
-                for (auto idx = 0; idx < w.size(); idx++)
-                {
-                        if (!mask.hasElement(idx) || !mask.extractElement(idx))
+                    for (auto idx = 0; idx < w.size(); idx++)
                     {
+                        if (!mask.hasElement(idx) || !mask.extractElement(idx))
+                        {
                             w.boolRemoveElement(idx);
                             // todo: remove at internal index.
+                        }
                     }
-                }
                 }
             } // Otherwise, if Merging, just leave values in place.
 
@@ -236,19 +236,19 @@ namespace grb
                     auto AWst = A.wgtBegin(*UIst);
                     for (; AIst < A.idxEnd(*UIst); AIst++, AWst++)
                     {
-                        auto res = op.mult(*UWst, *AWst);
                         if (flags[*AIst] != 0) // If allowed by the mask
                         {
+                            auto res = op.mult(*UWst, *AWst);
                             // CAS LOOP on flag
-                            const char one(1);
-                            const char two(2);
-                            while (__sync_bool_compare_and_swap(flags.data() + *AIst, one, two))
-                            {
-                            };
+                            // const char one(1);
+                            // const char two(2);
+                            // while (__sync_bool_compare_and_swap(flags.data() + *AIst, one, two))
+                            // {
+                            // };
                             // Merge element with additive operation
                             t.mergeSetElement(*AIst, res, grb::AdditiveMonoidFromSemiring(op));
                             // Release CAS LOOP on flag
-                            flags[*AIst] = one;
+                            // flags[*AIst] = one;
                         }
                     }
                 } // End loop over output vector

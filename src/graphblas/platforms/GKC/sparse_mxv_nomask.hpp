@@ -194,8 +194,8 @@ namespace grb
                     auto AInd = A.idxEnd(*UIst);
                     for ( ; AIst < AInd; AIst++, AWst++)
                     {
-                        const char one(1);
-                        const char two(2);
+                        // const char one(1);
+                        // const char two(2);
                         auto res = op.mult(*UWst, *AWst);
                         // CAS LOOP on flag
                         // while (__sync_bool_compare_and_swap(flags.data()+*AIst, one, two)){};
