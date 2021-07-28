@@ -71,7 +71,8 @@ namespace grb
                       bool weighted = true)
                 : m_num_vals(num_vals),
                   m_num_stored_vals(0),
-                  m_weighted(weighted)
+                  m_weighted(weighted),
+                  m_sorted(true)
             {
                 if (m_num_vals <= 0){
                     throw InvalidValueException();
@@ -88,7 +89,8 @@ namespace grb
                   m_num_stored_vals(num_vals),
                   m_weighted(true),
                   m_weights(num_vals, value),
-                  m_indices(num_vals)
+                  m_indices(num_vals),
+                  m_sorted(true)
             {
                 if (m_num_vals <= 0){
                     throw InvalidValueException();
@@ -107,7 +109,8 @@ namespace grb
                   m_weighted(rhs.m_weighted),
                   m_indices(rhs.m_indices),
                   m_weights(rhs.m_weights),
-                  m_num_stored_vals(rhs.m_num_stored_vals)
+                  m_num_stored_vals(rhs.m_num_stored_vals),
+                  m_sorted(rhs.m_sorted)
             {
             }
 
@@ -116,6 +119,8 @@ namespace grb
             // Sparse vector class.
             // Constructor - dense from dense vector
             GKCSparseVector(std::vector<ScalarT> const &val)
+                : m_weighted(true),
+                  m_sorted(true)
             {
                 m_num_vals = val.size();
                 // Dense has both structure and weights.
@@ -136,6 +141,8 @@ namespace grb
             // Constructor - sparse from dense vector, removing specifed implied zeros
             GKCSparseVector(std::vector<ScalarT> const &val,
                             ScalarT zero)
+                : m_weighted(true),
+                  m_sorted(true)
             {
                 m_num_vals = val.size();
                 // Dense has both structure and weights.
@@ -211,6 +218,7 @@ namespace grb
                     }
                 }
                 // Todo: sort here
+                m_sorted = false;
             }
 
             // Destructor
@@ -298,6 +306,16 @@ namespace grb
              */
             bool operator==(GKCSparseVector<ScalarT> const &rhs) const
             {
+
+                if (!isSorted() || !rhs.isSorted())
+                {
+                    std::cerr << "Warning! sorting vector for eq check!" << std::endl;
+                    if (!isSorted())
+                        sortSelf();
+                    if (!rhs.isSorted())
+                        rhs.sortSelf();
+                }
+
                 /// @todo need to check for ordering of indices/weights. 
                 /// @todo need to check for only the part of each vector USED.
                 //throw NotImplementedException(); 
@@ -551,7 +569,7 @@ namespace grb
                                 m_weights[idx] = m_weights[m_num_stored_vals-1];
                             }
                             m_num_stored_vals--;
-                            this->sortSelf();
+                            //this->sortSelf();
                         }
                         else if (idx == m_num_stored_vals - 1)
                         { // Added to handle corner case when only one elem remains.
@@ -624,6 +642,8 @@ namespace grb
             }
 
             bool isWeighted() const {return m_weighted;}
+            bool isSorted() const {return m_sorted;}
+            void setUnsorted() {m_sorted = false;}
 
             // Note: this has to be const because changes to it could break 
             // the weights vector. 
@@ -689,6 +709,7 @@ namespace grb
                         }
                     }
                 }
+                m_sorted = true;
             }
 
             // output specific to the storage layout of this type of matrix
@@ -731,6 +752,7 @@ namespace grb
             IndexType m_num_vals;
             IndexType m_num_stored_vals;
             bool m_weighted;
+            mutable bool m_sorted;
 
             // Two array compressed sparse vector
             mutable std::vector<IndexType> m_indices;
