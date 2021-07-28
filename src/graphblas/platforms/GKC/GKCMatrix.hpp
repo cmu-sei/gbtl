@@ -34,6 +34,7 @@
 #include <algorithm>
 #include <numeric>
 #include <map>
+#include <cassert>
 
 #include <graphblas/graphblas.hpp>
 #include <graphblas/indices.hpp>
@@ -396,11 +397,14 @@ namespace grb
                     m_num_cols = std::max(m_num_cols, col_idx+1);
                 }*/
 
+                auto old_num_edges = m_num_edges;
+                m_num_edges = n;
+
                 // allocate memory
                 m_offsets.resize(m_num_rows+1);
                 m_neighbors.resize(m_num_edges);
                 /// @todo how to detect if graph is weighted?
-                //m_weighted = true;
+                m_weighted = true;
                 m_weights.resize(m_num_edges);
                 std::fill(m_offsets.begin(), m_offsets.end(), (IndexType)0);
 
@@ -424,6 +428,7 @@ namespace grb
                     IndexType row_idx = *(i_it+idx);
                     IndexType col_idx = *(j_it+idx);
                     IndexType flat_idx = m_offsets[row_idx] + counters[row_idx];
+                    // assert(flat_idx < n);
                     m_neighbors[flat_idx] = col_idx;
                     if (m_weighted){
                         m_weights[flat_idx] = *(v_it + idx);
@@ -487,6 +492,7 @@ namespace grb
                 }
                 /// @todo deduplicate edges using the dup operator:
                 /// Use state bits on edges to 'delete' duplicate values
+                /*
                 for (IndexType row = 0; row < m_num_rows; row++){
                     auto st = m_offsets[row];
                     auto nd = m_offsets[row+1];
@@ -496,19 +502,21 @@ namespace grb
                         if (m_neighbors[col_idx] == last_col){
                             // Set top bit to say that the entry is 'dead'
                             m_neighbors[col_idx] = (IndexType)-1;
+                            throw NotImplementedException("Dedup is not implemented...");
                             /// @todo: change size of offsets
                             /// @todo: check for negative values in 
                             /// Parts of code that iterate over neighborhoods.
                             // Merge the two values:
-                            /*if (m_weighted)
-                            {
-                             m_weights[first_occurrence_idx] = dup(
-                                m_weights[first_occurrence_idx], m_weights[col_idx]);
-                            } */
+                            //if (m_weighted)
+                            //{
+                            // m_weights[first_occurrence_idx] = dup(
+                            //    m_weights[first_occurrence_idx], m_weights[col_idx]);
+                            //} 
                         }
                         last_col = m_neighbors[col_idx];
                     }
                 }
+                */
             }
             
 
