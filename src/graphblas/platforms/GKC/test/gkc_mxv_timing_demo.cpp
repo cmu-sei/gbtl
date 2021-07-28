@@ -37,6 +37,81 @@
 
 using namespace grb;
 
+grb::IndexType const NUM_NODES = 34;
+
+grb::IndexArrayType i = {
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    1,1,1,1,1,1,1,1,1,
+    2,2,2,2,2,2,2,2,2,2,
+    3,3,3,3,3,3,
+    4,4,4,
+    5,5,5,5,
+    6,6,6,6,
+    7,7,7,7,
+    8,8,8,8,8,
+    9,9,
+    10,10,10,
+    11,
+    12,12,
+    13,13,13,13,13,
+    14,14,
+    15,15,
+    16,16,
+    17,17,
+    18,18,
+    19,19,19,
+    20,20,
+    21,21,
+    22,22,
+    23,23,23,23,23,
+    24,24,24,
+    25,25,25,
+    26,26,
+    27,27,27,27,
+    28,28,28,
+    29,29,29,29,
+    30,30,30,30,
+    31,31,31,31,31,
+    32,32,32,32,32,32,32,32,32,32,32,32,
+    33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33};
+
+grb::IndexArrayType j = {
+    1,2,3,4,5,6,7,8,10,11,12,13,17,19,21,31,     //1,2,3,4,5,6,7,8,10,11,12,13,19,21,23,31,
+    0,2,3,7,13,17,19,21,30,
+    0,1,3,7,8,9,13,27,28,32,
+    0,1,2,7,12,13,
+    0,6,10,
+    0,6,10,16,
+    0,4,5,16,
+    0,1,2,3,
+    0,2,30,32,33,
+    2,33,
+    0,4,5,
+    0,
+    0,3,
+    0,1,2,3,33,
+    32,33,
+    32,33,
+    5,6,
+    0,1,
+    32,33,
+    0,1,33,
+    32,33,
+    0,1,
+    32,33,
+    25,27,29,32,33,
+    25,27,31,
+    23,24,31,
+    29,33,
+    2,23,24,33,
+    2,31,33,
+    23,26,32,33,
+    1,8,32,33,
+    0,24,25,32,33,    //0,24,25,28,32,33,
+    2,8,14,15,18,20,22,23,29,30,31,33,
+    8,9,13,14,15,18,19,20,22,23,26,27,28,29,30,31,32};
+
+
 //****************************************************************************
 IndexType read_edge_list(std::string const &pathname,
                          IndexArrayType    &row_indices,
@@ -74,25 +149,28 @@ IndexType read_edge_list(std::string const &pathname,
 //****************************************************************************
 int main(int argc, char **argv)
 {
+#define EXT_FILE 1
+#if EXT_FILE
     if (argc < 2)
     {
         std::cerr << "ERROR: too few arguments." << std::endl;
         std::cerr << "Usage: " << argv[0] << " <edge list file>" << std::endl;
         exit(1);
     }
-
+    
     // Read the edgelist and create the tuple arrays
-    std::string pathname(argv[1]);
     IndexArrayType iA, jA, iu;
-
+    std::string pathname(argv[1]);
     IndexType const NUM_NODES(read_edge_list(pathname, iA, jA));
+#else
+    // NUM_NODES defined at top of file if reading internal data.
+#endif
 
     using T = int32_t;
+
     using MatType = Matrix<T,GKCTag>;
     using VecType = Vector<T,GKCTag>;
     using BoolVecType = Vector<bool,GKCTag>;
-    std::vector<T> v(iA.size(), 1);
-    std::vector<bool> bv(iA.size(), true);
     MatType A(NUM_NODES, NUM_NODES);
     MatType AT(NUM_NODES, NUM_NODES);
     VecType u(NUM_NODES);
@@ -100,9 +178,17 @@ int main(int argc, char **argv)
     VecType w1(NUM_NODES);
     BoolVecType M(NUM_NODES);
 
+#if EXT_FILE
+    std::vector<T> v(iA.size(), 1);
+    std::vector<bool> bv(iA.size(), true);
     A.build(iA.begin(), jA.begin(), v.begin(), iA.size());
     AT.build(jA.begin(), iA.begin(), v.begin(), iA.size());
-    //transpose(AT, NoMask(), NoAccumulate(), A);
+    // transpose(AT, NoMask(), NoAccumulate(), A);
+#else
+    std::vector<T> weights(i.size(), 1);
+    A.build(i.begin(), j.begin(), weights.begin(), i.size());
+    AT.build(j.begin(), i.begin(), weights.begin(), i.size());
+#endif
 
     std::default_random_engine  generator;
     std::uniform_real_distribution<double> distribution;
@@ -113,6 +199,7 @@ int main(int argc, char **argv)
         if (distribution(generator) < 0.1)
             u.setElement(iu, 1);
     }
+    u.printInfo(std::cerr);
 
     std::cout << "Running algorithm(s)... M.nvals = " << M.nvals() << std::endl;
     std::cout << "u.nvals = " << u.nvals() << std::endl;
@@ -141,7 +228,9 @@ int main(int argc, char **argv)
     std::cout << "w := A+.*u                : " << my_timer.elapsed()
               << " usec, w.nvals = " << w.nvals()
               << " reduce = " << count << std::endl;
+    // w.printInfo(std::cerr);
 
+#if 1
     my_timer.start();
     mxv(w, NoMask(), Plus<double>(),
         ArithmeticSemiring<double>(),
@@ -191,6 +280,7 @@ int main(int argc, char **argv)
     std::cout << "w<m,replace> := w + A+.*u : " << my_timer.elapsed()
               << " usec, w.nvals = " << w.nvals()
               << " reduce = " << count << std::endl;
+#endif
 #if 0
     my_timer.start();
     mxv(w, complement(M), NoAccumulate(),
@@ -327,7 +417,7 @@ int main(int argc, char **argv)
     std::cout << "w := A'+.*u                : " << my_timer.elapsed()
               << " usec, w1.nvals = " << w1.nvals()
               << " reduce = " << count << std::endl;
-
+#if 1
     my_timer.start();
     mxv(w1, NoMask(), Plus<double>(),
         ArithmeticSemiring<double>(),
@@ -377,6 +467,7 @@ int main(int argc, char **argv)
     std::cout << "w<m,replace> := w + A'+.*u : " << my_timer.elapsed()
               << " usec, w1.nvals = " << w1.nvals()
               << " reduce = " << count << std::endl;
+#endif
 #if 0
     my_timer.start();
     mxv(w1, complement(M), NoAccumulate(),
@@ -501,6 +592,8 @@ int main(int argc, char **argv)
               << " reduce = " << count << std::endl;
 #endif
     bool passed = (w == w1);
+    w.printInfo(std::cerr);
+    w1.printInfo(std::cerr);
     std::cout << "Results " << (passed ? "PASSED" : "FAILED") << std::endl;
     return 0;
 }
