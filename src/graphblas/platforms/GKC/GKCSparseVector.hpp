@@ -565,6 +565,47 @@ namespace grb
                 // Todo: add a sorted or not sorted flag
             }
 
+            bool boolRemoveElement(IndexType index)
+            {
+                if (index >= m_num_vals)
+                {
+                    throw IndexOutOfBoundsException();
+                }
+                // Step 1: find element
+                if (index > m_num_vals)
+                {
+                    throw IndexOutOfBoundsException();
+                }
+                for (size_t idx = 0; idx < m_num_stored_vals; idx++)
+                {
+                    auto vidx = m_indices[idx];
+                    if (vidx == index)
+                    {
+                        // Step 2: vector doesn't need to remain sorted, 
+                        // so just replace with last element.
+                        // NOT THREAD SAFE!
+                        if (idx < m_num_stored_vals - 1){
+                            // Swap with last elem and decremement size
+                            m_indices[idx] = m_indices[m_num_stored_vals - 1];
+                            if (m_weighted)
+                            {
+                                m_weights[idx] = m_weights[m_num_stored_vals-1];
+                            }
+                            m_num_stored_vals--;
+                            this->sortSelf();
+                        }
+                        else if (idx == m_num_stored_vals - 1)
+                        { // Added to handle corner case when only one elem remains.
+                            m_num_stored_vals--;
+                        }
+                        return true;
+                    }
+                }
+                // No value found; return false
+                return false; 
+                // Todo: add a sorted or not sorted flag
+            }
+
             template<typename RAIteratorIT,
                      typename RAIteratorVT>
             void extractTuples(RAIteratorIT        i_it,
