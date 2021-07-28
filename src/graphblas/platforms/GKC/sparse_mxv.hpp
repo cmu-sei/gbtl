@@ -193,6 +193,10 @@ namespace grb
             // pre-existing elements not in the mask
             if (outp == REPLACE)
             {
+                if constexpr (std::is_same_v<AccumT, grb::NoAccumulate>){
+                    w.clear();
+                }
+                else {
                 for (auto idx = 0; idx < w.size(); idx++)
                 {
                         if (!mask.hasElement(idx) || !mask.extractElement(idx))
@@ -200,6 +204,7 @@ namespace grb
                             w.boolRemoveElement(idx);
                             // todo: remove at internal index.
                     }
+                }
                 }
             } // Otherwise, if Merging, just leave values in place.
 
