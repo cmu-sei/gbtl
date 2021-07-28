@@ -221,9 +221,9 @@ namespace grb
                 {
                     flags[idx] = 1;
                 }
-                auto UIst = u.getIndices().begin();
-                auto UInd = u.getIndices().end();
-                auto UWst = u.getWeights().begin();
+                auto UIst = u.idxBegin();
+                auto UInd = u.idxEnd();
+                auto UWst = u.wgtBegin();
                 for (; UIst < UInd; UIst++, UWst++)
                 {
                     auto AIst = A.idxBegin(*UIst);
@@ -276,6 +276,7 @@ namespace grb
                     }
                 }
             }
+            w.setUnsorted();
         }
     } // backend
 } // grb

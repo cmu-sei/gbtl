@@ -184,14 +184,15 @@ namespace grb
                 // Create flags for outputs
                 // std::vector<char> flags(w.size(), 0);
 
-                auto UIst = u.getIndices().begin();
-                auto UInd = u.getIndices().end();
-                auto UWst = u.getWeights().begin();
+                auto UIst = u.idxBegin();
+                auto UInd = u.idxEnd();
+                auto UWst = u.wgtBegin();
                 for ( ; UIst < UInd; UIst++, UWst++)
                 {
                     auto AIst = A.idxBegin(*UIst); 
                     auto AWst = A.wgtBegin(*UIst);
-                    for ( ; AIst < A.idxEnd(*UIst); AIst++, AWst++)
+                    auto AInd = A.idxEnd(*UIst);
+                    for ( ; AIst < AInd; AIst++, AWst++)
                     {
                         const char one(1);
                         const char two(2);
@@ -243,6 +244,7 @@ namespace grb
                     }
                 }
             }
+            w.setUnsorted();
         }
 
     } // backend
