@@ -82,9 +82,9 @@ namespace grb
             {
                 for (auto idx = 0; idx < w.size(); idx++)
                 {
-                    if (w.hasElement(idx) && (!mask.hasElement(idx) || !mask.extractElement(idx)))
+                    if (!mask.hasElement(idx) || !mask.extractElement(idx))
                     {
-                        w.removeElement(idx);
+                        w.boolRemoveElement(idx);
                     }
                 }
             } // Otherwise, if Merging, just leave values in place.
@@ -153,7 +153,7 @@ namespace grb
                     {
                         if constexpr (std::is_same_v<AccumT, NoAccumulate>)
                         {
-                            w.removeElement(row_idx);
+                            w.boolRemoveElement(row_idx);
                         }
                     }
                 } // End of fused mxv loop
@@ -195,9 +195,10 @@ namespace grb
             {
                 for (auto idx = 0; idx < w.size(); idx++)
                 {
-                    if (w.hasElement(idx) && (!mask.hasElement(idx) || !mask.extractElement(idx)))
+                        if (!mask.hasElement(idx) || !mask.extractElement(idx))
                     {
-                        w.removeElement(idx);
+                            w.boolRemoveElement(idx);
+                            // todo: remove at internal index.
                     }
                 }
             } // Otherwise, if Merging, just leave values in place.
