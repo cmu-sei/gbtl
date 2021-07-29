@@ -199,7 +199,6 @@ int main(int argc, char **argv)
         if (distribution(generator) < 0.1)
             u.setElement(iu, 1);
     }
-    u.printInfo(std::cerr);
 
     std::cout << "Running algorithm(s)... M.nvals = " << M.nvals() << std::endl;
     std::cout << "u.nvals = " << u.nvals() << std::endl;
@@ -592,8 +591,6 @@ int main(int argc, char **argv)
               << " reduce = " << count << std::endl;
 #endif
     bool passed = (w == w1);
-    w.printInfo(std::cerr);
-    w1.printInfo(std::cerr);
     std::cout << "Results " << (passed ? "PASSED" : "FAILED") << std::endl;
     return 0;
 }
