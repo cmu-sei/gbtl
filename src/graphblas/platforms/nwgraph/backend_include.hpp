@@ -25,30 +25,26 @@
  * DM20-0442
  */
 
-#pragma once
+// !!!! DO NOT ADD HEADER INCLUSION PROTECTION !!!!
 
-//****************************************************************************
+// This file is a dispatch mechanism to allow us to include different
+// sets of files as specified by the user.
 
-namespace grb
-{
-    // The default matrix is sparse and directed, and the default vector is sparse,
-    // so we need tags that modify that
-    struct DirectedMatrixTag {};
-    struct UndirectedMatrixTag {};
-    struct DenseTag {};
-    struct SparseTag {};
+#if(GB_INCLUDE_BACKEND_ALL)
+#include <graphblas/platforms/nwgraph/nwgraph.hpp>
+#endif
 
-    struct NWGraphTag {};  /// TEMPORARY - for nwgraph development
-    struct OrigTag {};     /// TEMPORARY
+#if(GB_INCLUDE_BACKEND_MATRIX)
+#include <graphblas/platforms/nwgraph/param_unpack.hpp>
+#undef GB_INCLUDE_BACKEND_MATRIX
+#endif
 
-    namespace detail
-    {
-        // add category tags in the detail namespace
-        struct SparsenessCategoryTag {};
-        struct DirectednessCategoryTag {};
-        struct ImplementationCategoryTag {};  /// TEMPORARY
-        struct NullTag {};
-    } //end detail
-}//end grb
+#if(GB_INCLUDE_BACKEND_VECTOR)
+#include <graphblas/platforms/nwgraph/param_unpack.hpp>
+#undef GB_INCLUDE_BACKEND_VECTOR
+#endif
 
-//****************************************************************************
+#if(GB_INCLUDE_BACKEND_OPERATIONS)
+#include <graphblas/platforms/nwgraph/operations.hpp>
+#undef GB_INCLUDE_BACKEND_OPERATIONS
+#endif

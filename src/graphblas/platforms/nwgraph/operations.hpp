@@ -25,30 +25,29 @@
  * DM20-0442
  */
 
+/**
+ * Implementations of all GraphBLAS functions optimized for the sequential
+ * (CPU) backend.
+ */
+
 #pragma once
 
-//****************************************************************************
+#include <functional>
+#include <utility>
+#include <vector>
+#include <iterator>
 
-namespace grb
-{
-    // The default matrix is sparse and directed, and the default vector is sparse,
-    // so we need tags that modify that
-    struct DirectedMatrixTag {};
-    struct UndirectedMatrixTag {};
-    struct DenseTag {};
-    struct SparseTag {};
+#include <graphblas/algebra.hpp>
 
-    struct NWGraphTag {};  /// TEMPORARY - for nwgraph development
-    struct OrigTag {};     /// TEMPORARY
-
-    namespace detail
-    {
-        // add category tags in the detail namespace
-        struct SparsenessCategoryTag {};
-        struct DirectednessCategoryTag {};
-        struct ImplementationCategoryTag {};  /// TEMPORARY
-        struct NullTag {};
-    } //end detail
-}//end grb
-
-//****************************************************************************
+// Add individual operation files here
+#include <graphblas/platforms/nwgraph/sparse_mxm.hpp>
+#include <graphblas/platforms/nwgraph/sparse_mxv.hpp>
+#include <graphblas/platforms/nwgraph/sparse_vxm.hpp>
+#include <graphblas/platforms/nwgraph/sparse_ewisemult.hpp>
+#include <graphblas/platforms/nwgraph/sparse_ewiseadd.hpp>
+#include <graphblas/platforms/nwgraph/sparse_extract.hpp>
+#include <graphblas/platforms/nwgraph/sparse_assign.hpp>
+#include <graphblas/platforms/nwgraph/sparse_apply.hpp>
+#include <graphblas/platforms/nwgraph/sparse_reduce.hpp>
+#include <graphblas/platforms/nwgraph/sparse_transpose.hpp>
+#include <graphblas/platforms/nwgraph/sparse_kronecker.hpp>

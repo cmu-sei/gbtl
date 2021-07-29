@@ -27,28 +27,8 @@
 
 #pragma once
 
-//****************************************************************************
+#include <graphblas/platforms/nwgraph/BitmapSparseVector.hpp>
+#include <graphblas/platforms/nwgraph/LilSparseMatrix.hpp>
+#include <graphblas/platforms/nwgraph/param_unpack.hpp>
 
-namespace grb
-{
-    // The default matrix is sparse and directed, and the default vector is sparse,
-    // so we need tags that modify that
-    struct DirectedMatrixTag {};
-    struct UndirectedMatrixTag {};
-    struct DenseTag {};
-    struct SparseTag {};
-
-    struct NWGraphTag {};  /// TEMPORARY - for nwgraph development
-    struct OrigTag {};     /// TEMPORARY
-
-    namespace detail
-    {
-        // add category tags in the detail namespace
-        struct SparsenessCategoryTag {};
-        struct DirectednessCategoryTag {};
-        struct ImplementationCategoryTag {};  /// TEMPORARY
-        struct NullTag {};
-    } //end detail
-}//end grb
-
-//****************************************************************************
+#include <graphblas/platforms/nwgraph/operations.hpp>
