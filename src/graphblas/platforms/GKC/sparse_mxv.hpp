@@ -35,14 +35,17 @@
 #include <graphblas/algebra.hpp>
 #include <atomic>
 
-#define GKC_MXV_V1
+// #define GKC_MXV_V1
+#define GKC_MXV_V2
 
 // Includes for compatability with exsiting GBTL "sequential" data structures and methods
 #include "sparse_mxv_old.hpp"
 // Includes for the GKC variants:
-#ifdef GKC_MXV_V1
+#if defined(GKC_MXV_V1)
 #include "mxv_v1/sparse_mxv_nomask.hpp"
 #include "mxv_v1/sparse_mxv_masked.hpp"
+#elif defined(GKC_MXV_V2)
+#include "mxv_v2_consolidated/sparse_mxv_all.hpp"
 #else
 #error "At least one GKC MxV implementation set must be included!"
 #endif

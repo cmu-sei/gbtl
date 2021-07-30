@@ -223,23 +223,24 @@ BOOST_AUTO_TEST_CASE(test_assignment)
     BOOST_CHECK_EQUAL(v1, v2);
 }
 
-BOOST_AUTO_TEST_CASE(test_sorting)
-{
-    std::vector<IndexType> indices  = {0, 3, 4, 6, 7};
-    std::vector<double>    values   = {6, 4, 7, 9, 4};
-    std::vector<IndexType> indices2 = {3, 4, 0, 6, 7};
-    std::vector<double>    values2  = {4, 7, 6, 9, 4};
+// THIS TEST IS NO LONGER VALID AS LONG AS EQUALITY CHECK PERFORMS A SORT INTERNALLY.
+// BOOST_AUTO_TEST_CASE(test_sorting)
+// {
+//     std::vector<IndexType> indices  = {0, 3, 4, 6, 7};
+//     std::vector<double>    values   = {6, 4, 7, 9, 4};
+//     std::vector<IndexType> indices2 = {3, 4, 0, 6, 7};
+//     std::vector<double>    values2  = {4, 7, 6, 9, 4};
     
-    grb::backend::GKCSparseVector<double> v1(indices.begin(), values.begin(), indices.size());
-    grb::backend::GKCSparseVector<double> v2(indices2.begin(), values2.begin(), indices2.size());
+//     grb::backend::GKCSparseVector<double> v1(indices.begin(), values.begin(), indices.size());
+//     grb::backend::GKCSparseVector<double> v2(indices2.begin(), values2.begin(), indices2.size());
 
-    // Current semantic meaning of neq is that vector with different order but same elements is not equal.
-    BOOST_CHECK(v1 != v2);
+//     // Current semantic meaning of neq is that vector with different order but same elements is not equal.
+//     //BOOST_CHECK(v1 != v2);
 
-    v2.sortSelf();
+//     v2.sortSelf();
 
-    BOOST_CHECK_EQUAL(v1, v2); 
-}
+//     BOOST_CHECK_EQUAL(v1, v2); 
+// }
 
 //****************************************************************************
 // MxV Tests

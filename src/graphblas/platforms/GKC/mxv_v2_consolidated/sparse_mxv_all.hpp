@@ -35,10 +35,6 @@
 #include <graphblas/algebra.hpp>
 #include <atomic>
 
-#include "sparse_mxv_old.hpp"
-#include "sparse_mxv_nomask.hpp"
-
-
 //****************************************************************************
 
 namespace grb
@@ -68,24 +64,41 @@ namespace grb
             GRB_LOG_VERBOSE("w<M,z> := A +.* u");
             // w = [!m.*w]+U {[m.*w]+m.*(A*u)}
             using TScalarType = typename SemiringT::result_type;
-            
-            // Accumulate is null, clear on replace due to null mask (from signature):
-            if constexpr (std::is_same_v<AccumT, grb::NoAccumulate> && outp==REPLACE){
-                w.clear();
-            }
 
-            // If we have a mask and the output control is REPLACE, delete
-            // pre-existing elements not in the mask
-            // if (outp == REPLACE)
-            // {
-            //     for (auto idx = 0; idx < w.size(); idx++)
-            //     {
-            //         if (w.hasElement(idx) && (!mask.hasElement(idx) || !mask.getElement(idx)))
-            //         {
-            //             w.removeElement(idx);
-            //         }
-            //     }
-            // } // Otherwise, if Merging, just leave values in place.
+            // Accumulate is null, clear on replace due to null mask (from signature):
+            if constexpr (std::is_same_v<AccumT, grb::NoAccumulate>)
+            {
+                if constexpr (std::is_same_v<MaskT, grb::NoMask>)
+                {
+                    w.clear();
+                }
+                else // Have mask and no accum
+                {
+                    if (outp == REPLACE)
+                    {
+                        w.clear();
+                    }
+                }
+            }
+            else if constexpr (!std::is_same_v<MaskT, grb::NoMask>)
+            // Have accumulate op AND a mask
+            {
+                if (outp == REPLACE)
+                {
+                    // If we have a mask and the output control is REPLACE, delete
+                    // pre-existing elements not in the mask
+                    for (auto idx = 0; idx < w.size(); idx++)
+                    {
+                        using MaskTypeT = typename MaskT::ScalarType;
+                        MaskTypeT val;
+                        if (!mask.boolExtractElement(idx, val))
+                        {
+                            if (!val)
+                                w.boolRemoveElement(idx);
+                        }
+                    }
+                } // Otherwise, if Merging, just leave values in place.
+            }
 
             if ((A.nvals() > 0) && (u.nvals() > 0))
             {
@@ -94,16 +107,25 @@ namespace grb
                 // for (auto && row_idx : mask.getIndices())
                 for (IndexType row_idx = 0; row_idx < A.nrows(); row_idx++)
                 {
-                    if (mask.hasElement(row_idx))
+                    bool do_compute;
+                    if constexpr (std::is_same_v<MaskT, grb::NoMask>)
+                    {
+                        do_compute = true;
+                    }
+                    else
+                    {
+                        do_compute = mask.hasElement(row_idx);
+                    }
+                    if (do_compute)
                     {
                         auto AIst = A.idxBegin(row_idx);
                         auto AInd = A.idxEnd(row_idx);
                         auto AWst = A.wgtBegin(row_idx);
                         auto AWnd = A.wgtEnd(row_idx);
-                        auto UIst = u.getIndices().begin();
-                        auto UInd = u.getIndices().end();
-                        auto UWst = u.getWeights().begin();
-                        auto UWnd = u.getWeights().end();
+                        auto UIst = u.idxBegin();
+                        auto UInd = u.idxEnd();
+                        auto UWst = u.wgtBegin();
+                        auto UWnd = u.wgtEnd();
                         // Do dot product here, into w directly
                         bool value_set(false);
                         TScalarType sum;
@@ -152,19 +174,23 @@ namespace grb
                         {
                             if constexpr (std::is_same_v<AccumT, NoAccumulate>)
                             {
-                                w.removeElement(row_idx);
+                                w.boolRemoveElement(row_idx);
                             }
                         }
                     }
-                    else if constexpr (!std::is_same_v<AccumT, NoAccumulate> && outp == REPLACE)
-                    { // Remove the element in w
-                        w.removeElement(row_idx);
+                    else // Not in mask
+                    {
+                        if constexpr (!std::is_same_v<AccumT, NoAccumulate>){
+                            if (outp == REPLACE)
+                            { // Remove the element in w
+                                w.boolRemoveElement(row_idx);
+                            }
+                        }
                     }
                 } // End of fused mxv loop
-            } // End of early exit
+            }     // End of early exit
             // w.sortSelf();
         }
-
 
         //**********************************************************************
         //**********************************************************************
@@ -194,61 +220,85 @@ namespace grb
             auto const &A(AT.m_mat);
 
             // =================================================================
-            // If we have a mask and the output control is REPLACE, delete 
-            // pre-existing elements not in the mask
-            if (outp == REPLACE)
-            {
-                for (auto idx = 0; idx < w.size(); idx++)
-                {
-                    if (w.hasElement(idx) && (!mask.hasElement(idx) || !mask.getElement(idx)))
-                    {
-                        w.removeElement(idx);
-                    }
-                }
-            } // Otherwise, if Merging, just leave values in place.
-            
             // Use axpy approach with the semi-ring.
             using TScalarType = typename SemiringT::result_type;
             // Create tmp vector to place computed values
             GKCSparseVector<TScalarType> t(w.size());
-            
-            // if constexpr (!std::is_same_v<AccumT, grb::NoAccumulate>){
-            //     flags.resize(w.nvals());
-            //     // Create a bool vector to coordinate accum vs add op
-            //     // Could be used to coordinate CAS on the vector w?
-            // }
-    
+
+            // Decision: densify mask for easy reference
+            std::vector<bool> mask_vec;
+            if constexpr (!std::is_same_v <MaskT, grb::NoMask>)
+            {
+                mask_vec = std::vector<bool>(mask.size());
+                for (auto itr = mask.idxBegin(); itr < mask.idxEnd(); itr++)
+                {
+                    mask_vec[*itr] = 1;
+                }
+            }
+
+            // Accumulate is null, clear on replace due to null mask (from signature):
+            if constexpr (std::is_same_v<AccumT, grb::NoAccumulate>)
+            {
+                if constexpr (std::is_same_v<MaskT, grb::NoMask>)
+                {
+                    w.clear();
+                }
+                else // Have mask and no accum
+                {
+                    if (outp == REPLACE)
+                    {
+                        w.clear();
+                    }
+                }
+            }
+            else if constexpr (!std::is_same_v<MaskT, grb::NoMask>)
+            // Have accumulate op AND a mask
+            {
+                if (outp == REPLACE)
+                {
+                    // If we have a mask and the output control is REPLACE, delete
+                    // pre-existing elements not in the mask
+                    for (auto idx = 0; idx < mask_vec.size(); idx++)
+                    {
+                        if (!mask_vec[idx]) // Can reverse for complement?
+                        {
+                            w.boolRemoveElement(idx);
+                        }
+                    }
+                } // Otherwise, if Merging, just leave values in place.
+            }
+
             if ((A.nvals() > 0) && (u.nvals() > 0))
             {
                 // Create flags for locking output locations
-                std::vector<char> flags(w.size(), 0);
-                for (auto && idx : mask.getIndices())
-                {
-                    flags[idx] = 1;
-                }
-                auto UIst = u.getIndices().begin();
-                auto UInd = u.getIndices().end();
-                auto UWst = u.getWeights().begin();
-                for ( ; UIst < UInd; UIst++, UWst++)
+                // std::vector<char> flags(w.size(), 0);
+                // for (auto &&idx : mask.getIndices())
+                // {
+                // flags[idx] = 1;
+                // }
+                auto UIst = u.idxBegin();
+                auto UInd = u.idxEnd();
+                auto UWst = u.wgtBegin();
+                for (; UIst < UInd; UIst++, UWst++)
                 {
                     auto AIst = A.idxBegin(*UIst);
                     auto AWst = A.wgtBegin(*UIst);
                     for (; AIst < A.idxEnd(*UIst); AIst++, AWst++)
                     {
-                        auto res = op.mult(*UWst, *AWst);
-                        if (flags[*AIst] != 0) // If allowed by the mask
+                        if (std::is_same_v<MaskT, grb::NoMask> || mask_vec[*AIst] != 0) // If allowed by the mask
                         {
+                            auto res = op.mult(*UWst, *AWst);
                             // CAS LOOP on flag
-                            const char one(1);
-                            const char two(2);
-                            while (__sync_bool_compare_and_swap(flags.data()+*AIst, one, two)){};
+                            // const char one(1);
+                            // const char two(2);
+                            // while (__sync_bool_compare_and_swap(flags.data()+*AIst, one, two)){};
                             // Merge element with additive operation
                             t.mergeSetElement(*AIst, res, grb::AdditiveMonoidFromSemiring(op));
                             // Release CAS LOOP on flag
-                            flags[*AIst] = one;
+                            // flags[*AIst] = one;
                         }
                     }
-                } // End loop over output vector
+                } // End loop over input vector
                 // Merge/accumulate if needed
                 if constexpr (!std::is_same_v<AccumT, grb::NoAccumulate>)
                 {
@@ -262,34 +312,35 @@ namespace grb
                         TWst++;
                     }
                 }
-                else
+                else // No accumulate, just merge or replace
                 {
-                    auto TIst = t.idxBegin();
-                    auto TInd = t.idxEnd();
-                    auto TWst = t.wgtBegin();
-                    while (TIst != TInd)
+                    if (outp == REPLACE)
+                    { // Set and forget
+                        if constexpr (std::is_same_v<ScalarT, TScalarType>)
+                        {
+                            //w.swap(t);
+                            w = std::move(t);
+                        }
+                        else
+                        {
+                            w = t;
+                        }
+                    }
+                    else // Merge into existing
                     {
-                        w.setElement(*TIst, *TWst);
-                        TIst++;
-                        TWst++;
+                        auto TIst = t.idxBegin();
+                        auto TInd = t.idxEnd();
+                        auto TWst = t.wgtBegin();
+                        while (TIst != TInd)
+                        {
+                            w.setElement(*TIst, *TWst);
+                            TIst++;
+                            TWst++;
+                        }
                     }
                 }
             }
-
-        // =================================================================
-        // Accumulate into Z
-        //using ZScalarType = typename std::conditional_t<
-        //    std::is_same_v<AccumT, NoAccumulate>,
-        //    TScalarType,
-        //    decltype(accum(std::declval<typename WVectorT::ScalarType>(),
-        //                   std::declval<TScalarType>()))>;
-
-        //std::vector<std::tuple<IndexType, ZScalarType> > z;
-        //ewise_or_opt_accum_1D(z, w, t, accum);
-
-        // =================================================================
-        // Copy Z into the final output, w, considering mask and replace/merge
-        //write_with_opt_mask_1D(w, z, mask, outp);
-    }
-} // backend
+            w.setUnsorted();
+        }
+    } // backend
 } // grb

@@ -220,9 +220,9 @@ namespace grb
             {
                 // Create flags for locking output locations
                 std::vector<char> flags(w.size(), 0);
-                for (auto &&idx : mask.getIndices())
+                for ( auto itr = mask.idxBegin(); itr < mask.idxEnd(); itr++)
                 {
-                    flags[idx] = 1;
+                    flags[*itr] = 1;
                 }
                 auto UIst = u.idxBegin();
                 auto UInd = u.idxEnd();

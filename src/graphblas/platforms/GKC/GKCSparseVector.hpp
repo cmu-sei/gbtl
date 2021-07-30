@@ -478,6 +478,36 @@ namespace grb
                 // No value found; throw error
                 throw NoValueException();
             }
+            
+            bool boolExtractElement(IndexType index, ScalarT & val) const
+            {
+                /// @todo mark: if vector is sorted, 
+                /// use binary search.
+                /// Need to add a 'sorted' flag that is reset if 
+                // vector is modified.
+                if (index >= m_num_vals)
+                {
+                    throw IndexOutOfBoundsException();
+                }
+                for (size_t idx = 0; idx < m_num_stored_vals; idx++)
+                {
+                    auto vidx = m_indices[idx];
+                    if (vidx == index)
+                    {
+                        if (m_weighted)
+                        {
+                            val =  m_weights[idx];
+                        }
+                        else // What to do if no weights?
+                        {
+                            val =  (ScalarT)1;
+                        }
+                        return true;
+                    }
+                }
+                val = (ScalarT)1;
+                return false;
+            }
 
             void setElement(IndexType index, ScalarT const &new_val)
             {
