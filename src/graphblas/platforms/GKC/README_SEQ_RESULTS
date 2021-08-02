@@ -1,0 +1,45 @@
+─markb1@spiralcyh-10-90-80-51 ~/gbtl/build ‹GKC*› 
+╰─$ ./bin/mxv_timing_demo ../src/demo/triangle_count_data_ca-HepTh.tsv    
+Read 51946 rows.
+#Nodes = 9877
+Running algorithm(s)... M.nvals = 1457
+u.nvals = 942
+OPTIMIZED IMPLEMENTATION: A*u
+w := A+.*u                : 367051 usec, w.nvals = 3289 reduce = 5104
+w := w + A+.*u            : 367592 usec, w.nvals = 3289 reduce = 10208
+w<m,merge> := A+.*u       : 370643 usec, w.nvals = 3289 reduce = 9460
+w<m,replace> := A+.*u     : 371471 usec, w.nvals = 485 reduce = 748
+w<m,merge> := w + A+.*u   : 371731 usec, w.nvals = 485 reduce = 1496
+w<m,replace> := w + A+.*u : 371553 usec, w.nvals = 485 reduce = 2244
+w<!m,merge> := A+.*u      : 376888 usec, w.nvals = 3289 reduce = 6600
+w<!m,replace> := A+.*u    : 375774 usec, w.nvals = 2804 reduce = 4356
+w<!m,merge> := w + A+.*u  : 373806 usec, w.nvals = 2804 reduce = 8712
+w<!m,replace> := w + A+.*u: 374099 usec, w.nvals = 2804 reduce = 13068
+w<s(m),merge> := A+.*u    : 369047 usec, w.nvals = 3289 reduce = 13816
+w<s(m),replace> := A+.*u  : 368390 usec, w.nvals = 485 reduce = 748
+w<s(m),merge> := w + A+.*u   : 368889 usec, w.nvals = 485 reduce = 1496
+w<s(m),replace> := w + A+.*u : 368729 usec, w.nvals = 485 reduce = 2244
+w<!s(m),merge> := A+.*u      : 371406 usec, w.nvals = 3289 reduce = 6600
+w<!s(m),replace> := A+.*u    : 371162 usec, w.nvals = 2804 reduce = 4356
+w<!s(m),merge> := w + A+.*u  : 373607 usec, w.nvals = 2804 reduce = 8712
+w<!s(m),replace> := w + A+.*u: 372859 usec, w.nvals = 2804 reduce = 13068
+OPTIMIZED IMPLEMENTATION: A'*u
+w := A'+.*u                : 85092 usec, w1.nvals = 3289 reduce = 5104
+w := w + A'+.*u            : 84343 usec, w1.nvals = 3289 reduce = 10208
+w<m,merge> := A'+.*u       : 85181 usec, w1.nvals = 3289 reduce = 9460
+w<m,replace> := A'+.*u      : 84639 usec, w1.nvals = 485 reduce = 748
+w<m,merge> := w + A'+.*u   : 84874 usec, w1.nvals = 485 reduce = 1496
+w<m,replace> := w + A'+.*u : 84851 usec, w1.nvals = 485 reduce = 2244
+w<!m,merge> := A'+.*u      : 88081 usec, w1.nvals = 3289 reduce = 6600
+w<!m,replace> := A'+.*u    : 87994 usec, w1.nvals = 2804 reduce = 4356
+w<!m,merge> := w + A'+.*u  : 88790 usec, w1.nvals = 2804 reduce = 8712
+w<!m,replace> := w + A'+.*u: 88929 usec, w1.nvals = 2804 reduce = 13068
+w<s(m),merge> := A'+.*u       : 85993 usec, w1.nvals = 3289 reduce = 13816
+w<s(m),replace> := A+.*u      : 85159 usec, w1.nvals = 485 reduce = 748
+w<s(m),merge> := w + A'+.*u   : 85185 usec, w1.nvals = 485 reduce = 1496
+w<s(m),replace> := w + A'+.*u : 85142 usec, w1.nvals = 485 reduce = 2244
+w<!s(m),merge> := A'+.*u      : 88086 usec, w1.nvals = 3289 reduce = 6600
+w<!s(m),replace> := A'+.*u    : 87986 usec, w1.nvals = 2804 reduce = 4356
+w<!s(m),merge> := w + A'+.*u  : 88773 usec, w1.nvals = 2804 reduce = 8712
+w<!s(m),replace> := w + A'+.*u: 88516 usec, w1.nvals = 2804 reduce = 13068
+Results PASSED

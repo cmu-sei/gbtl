@@ -1,0 +1,26 @@
+First implementation of MxV, separating mask and nomask implementations
+
+
+
+╭─markb1@spiralcyh-10-90-80-51 ~/gbtl/build ‹GKC*› 
+╰─$ ./bin/gkc_mxv_timing_demo_GKC ../src/demo/triangle_count_data_ca-HepTh.tsv
+Read 51946 rows.
+#Nodes = 9877
+Running algorithm(s)... M.nvals = 1457
+u.nvals = 942
+OPTIMIZED IMPLEMENTATION: A*u
+w := A+.*u                : 180322 usec, w.nvals = 3289 reduce = 5104
+w := w + A+.*u            : 180568 usec, w.nvals = 3289 reduce = 10208
+w<m,merge> := A+.*u       : 38395 usec, w.nvals = 3289 reduce = 9460
+w<m,replace> := A+.*u     : 1.52921e+06 usec, w.nvals = 485 reduce = 748
+w<m,merge> := w + A+.*u   : 24622 usec, w.nvals = 485 reduce = 1496
+w<m,replace> := w + A+.*u : 90374 usec, w.nvals = 485 reduce = 2244
+OPTIMIZED IMPLEMENTATION: A'*u
+w := A'+.*u                : 25808 usec, w1.nvals = 3289 reduce = 5104
+w := w + A'+.*u            : 44810 usec, w1.nvals = 3289 reduce = 10208
+w<m,merge> := A'+.*u       : 3878 usec, w1.nvals = 3289 reduce = 9460
+w<m,replace> := A'+.*u      : 1458 usec, w1.nvals = 485 reduce = 748
+w<m,merge> := w + A'+.*u   : 1467 usec, w1.nvals = 485 reduce = 1496
+w<m,replace> := w + A'+.*u : 67327 usec, w1.nvals = 485 reduce = 2244
+Warning! sorting vector for eq check!
+Results PASSED

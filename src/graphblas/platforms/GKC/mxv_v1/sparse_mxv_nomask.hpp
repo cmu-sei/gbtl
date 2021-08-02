@@ -91,10 +91,10 @@ namespace grb
                     auto AInd = A.idxEnd(row_idx);
                     auto AWst = A.wgtBegin(row_idx);
                     auto AWnd = A.wgtEnd(row_idx);
-                    auto UIst = u.getIndices().begin();
-                    auto UInd = u.getIndices().end(); 
-                    auto UWst = u.getWeights().begin();
-                    auto UWnd = u.getWeights().end(); 
+                    auto UIst = u.idxBegin();
+                    auto UInd = u.idxEnd();
+                    auto UWst = u.wgtBegin();
+                    auto UWnd = u.wgtEnd();
                     // Do dot product here, into t
                     bool value_set(false);
                     TScalarType sum;

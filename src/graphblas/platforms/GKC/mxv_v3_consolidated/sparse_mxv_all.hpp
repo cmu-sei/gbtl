@@ -35,6 +35,8 @@
 #include <graphblas/algebra.hpp>
 #include <atomic>
 
+#include "sparse_helper_proto.hpp"
+
 //****************************************************************************
 
 namespace grb
@@ -80,7 +82,33 @@ namespace grb
                     }
                 }
             }
-            // Masked deletion rolled in below.
+            else
+            {
+                if constexpr (!std::is_same_v<MaskT, grb::NoMask>)
+                // Have accumulate op AND a mask
+                {
+                    if (outp == REPLACE)
+                    {
+#define V2_REPLACE_DELETE 1
+#if V2_REPLACE_DELETE
+                        intersect_delete(mask, w);
+#else
+                        // If we have a mask and the output control is REPLACE, delete
+                        // pre-existing elements not in the mask
+                        for (auto idx = 0; idx < w.size(); idx++)
+                        {
+                            using MaskTypeT = typename MaskT::ScalarType;
+                            MaskTypeT val;
+                            if (!mask.boolExtractElement(idx, val))
+                            {
+                                if (!val)
+                                    w.boolRemoveElement(idx);
+                            }
+                        }
+#endif
+                    } // Otherwise, if Merging, just leave values in place.
+                }
+            }
 
             if ((A.nvals() > 0) && (u.nvals() > 0))
             {
@@ -109,21 +137,36 @@ namespace grb
                         auto UWst = u.wgtBegin();
                         auto UWnd = u.wgtEnd();
                         // Do dot product here, into w directly
-                        bool value_set(false);
+                        bool value_set = false;
                         TScalarType sum;
                         while (AIst < AInd && UIst < UInd)
                         {
                             if (*AIst == *UIst)
                             {
-                                if (value_set)
-                                {
-                                    sum = op.add(sum, op.mult(*AWst, *UWst));
-                                }
-                                else
-                                {
-                                    sum = op.mult(*AWst, *UWst);
-                                    value_set = true;
-                                }
+                                sum = op.mult(*AWst, *UWst);
+                                value_set = true;
+                                AIst++;
+                                AWst++;
+                                UIst++;
+                                UWst++;
+                                break;
+                            }
+                            else if (*AIst < *UIst)
+                            {
+                                AIst++;
+                                AWst++;
+                            }
+                            else
+                            {
+                                UIst++;
+                                UWst++;
+                            }
+                        }
+                        while (AIst < AInd && UIst < UInd)
+                        {
+                            if (*AIst == *UIst)
+                            {
+                                sum = op.add(sum, op.mult(*AWst, *UWst));
                                 AIst++;
                                 AWst++;
                                 UIst++;
@@ -160,15 +203,16 @@ namespace grb
                             }
                         }
                     }
-                    else // Not in mask
-                    {
-                        if constexpr (!std::is_same_v<AccumT, NoAccumulate>){
-                            if (outp == REPLACE)
-                            { // Remove the element in w
-                                w.boolRemoveElement(row_idx);
-                            }
-                        }
-                    }
+                    // Not needed, done above:
+                    // else // Not in mask
+                    // {
+                    //     if constexpr (!std::is_same_v<AccumT, NoAccumulate>){
+                    //         if (outp == REPLACE)
+                    //         { // Remove the element in w
+                    //             w.boolRemoveElement(row_idx);
+                    //         }
+                    //     }
+                    // }
                 } // End of fused mxv loop
             }     // End of early exit
             // w.sortSelf();
