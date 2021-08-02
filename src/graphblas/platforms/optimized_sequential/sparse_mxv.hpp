@@ -69,7 +69,7 @@ namespace grb
 
             if ((A.nvals() > 0) && (u.nvals() > 0))
             {
-                auto u_contents(u.getContents());
+                //auto u_contents(u.getContents());
                 for (IndexType row_idx = 0; row_idx < w.size(); ++row_idx)
                 {
                     if (!A[row_idx].empty())
@@ -83,7 +83,8 @@ namespace grb
                         /// vectors but keeps the order correct for op.
                         ///
                         /// I suspect this is strictly data dependent performance
-                        if (dot_rev(t_val, A[row_idx], u_contents, op))
+                        //if (dot_rev(t_val, A[row_idx], u_contents, op))
+                        if (dot_rev_sparse_dense(t_val, A[row_idx], u, op))
                         {
                             t.emplace_back(row_idx, t_val);
                         }

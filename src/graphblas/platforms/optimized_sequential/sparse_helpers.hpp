@@ -305,6 +305,42 @@ namespace grb
         }
 
         //************************************************************************
+        /// A dot product of two sparse vectors (vectors<tuple(index,value)>)
+        template <typename D1, typename D2, typename D3, typename SemiringT>
+        bool dot_rev_sparse_dense(
+            D3                                                &ans,
+            std::vector<std::tuple<grb::IndexType,D1> > const &vec2,
+            BitmapSparseVector<D2>                      const &vec1,
+            SemiringT                                          op)
+        {
+            bool value_set(false);
+
+            if (vec2.empty() || (vec1.nvals() == 0))
+            {
+                return value_set;
+            }
+
+            for (auto&& [idx2, val2] : vec2)
+            {
+                if (vec1.get_bitmap()[idx2])
+                {
+                    if (value_set)
+                    {
+                        ans = op.add(ans, op.mult(val2,
+                                                  vec1.get_vals()[idx2]));
+                    }
+                    else
+                    {
+                        ans = op.mult(val2, vec1.get_vals()[idx2]);
+                        value_set = true;
+                    }
+                }
+            }
+
+            return value_set;
+        }
+
+        //************************************************************************
         /// A reduction of a sparse vector (vector<tuple(index,value)>) using a
         /// binary op or a monoid.
         template <typename D1, typename D3, typename BinaryOpT>
@@ -400,6 +436,151 @@ namespace grb
                     ans.emplace_back(std::get<0>(*v1_it),
                                      static_cast<D3>(std::get<1>(*v1_it)));
                     ++v1_it;
+                }
+                else // v2_it != vec2.end())
+                {
+                    ans.emplace_back(std::get<0>(*v2_it),
+                                     static_cast<D3>(std::get<1>(*v2_it)));
+                    ++v2_it;
+                }
+            }
+        }
+
+        //**********************************************************************
+        /// Apply element-wise operation to union of 2 sparse vectors, store in 3rd.
+        /// ans = op(vec1, vec2)
+        ///
+        /// @note ans must be a unique vector from either vec1 or vec2
+        template <typename D1, typename D2, typename D3, typename BinaryOpT>
+        void ewise_or_dense_sparse_v1(
+            std::vector<std::tuple<grb::IndexType,D3> >       &ans,
+            BitmapSparseVector<D1>                      const &vec1,
+            std::vector<std::tuple<grb::IndexType,D2> > const &vec2,
+            BinaryOpT                                          op)
+        {
+            if (((void*)&ans == (void*)&vec2)) // || ((void*)&ans == (void*)&vec2))
+            {
+                throw PanicException(
+                    "backend::ewise_or called with same vector for input and output.");
+            }
+
+            ans.clear();
+
+            // step through all entries of dense (while there are entries in sparse)
+            grb::IndexType v1_val_count = vec1.nvals();
+            grb::IndexType v1_idx = 0;
+
+            // point to first entries of the sparse vector
+            auto v2_it = vec2.begin();
+            for (auto&& [v2_idx, v2_val] : vec2)
+            {
+                for (; ((v1_idx < vec1.size()) && (v1_idx < v2_idx)); ++v1_idx)
+                {
+                    if (vec1.get_bitmap()[v1_idx])
+                    {
+                        ans.emplace_back(v1_idx,
+                                         static_cast<D3>(vec1.get_vals()[v1_idx]));
+                        --v1_val_count;
+                    }
+                }
+                if (v1_val_count && vec1.get_bitmap()[v1_idx] && (v1_idx == v2_idx))
+                {
+                    ans.emplace_back(
+                        v1_idx,
+                        static_cast<D3>(op(vec1.get_vals()[v1_idx], v2_val)));
+                    --v1_val_count;
+                    ++v1_idx;
+                }
+                else
+                {
+                    ans.emplace_back(v1_idx, static_cast<D3>(v2_val));
+                }
+            }
+
+            for (; v1_val_count && (v1_idx < vec1.size()); ++v1_idx)
+            {
+                if (vec1.get_bitmap()[v1_idx])
+                {
+                    ans.emplace_back(v1_idx,
+                                     static_cast<D3>(vec1.get_vals()[v1_idx]));
+                }
+            }
+        }
+        //**********************************************************************
+        /// Apply element-wise operation to union of 2 sparse vectors, store in 3rd.
+        /// ans = op(vec1, vec2)
+        ///
+        /// @note ans must be a unique vector from either vec1 or vec2
+        template <typename D1, typename D2, typename D3, typename BinaryOpT>
+        void ewise_or_dense_sparse_v2(
+            std::vector<std::tuple<grb::IndexType,D3> >       &ans,
+            BitmapSparseVector<D1>                      const &vec1,
+            std::vector<std::tuple<grb::IndexType,D2> > const &vec2,
+            BinaryOpT                                          op)
+        {
+            if (((void*)&ans == (void*)&vec2)) // || ((void*)&ans == (void*)&vec2))
+            {
+                throw PanicException(
+                    "backend::ewise_or called with same vector for input and output.");
+            }
+
+            ans.clear();
+
+            // step through all entries of dense (while there are entries in sparse)
+            grb::IndexType v1_val_count = vec1.nvals();
+            grb::IndexType v1_idx = 0;
+            while (v1_val_count && !vec1.get_bitmap()[v1_idx])
+                ++v1_idx;
+            auto v2_it(vec2.begin());
+            auto v2_end(vec2.end());
+
+            // while there are more values in either input continue to merge
+            while (v1_val_count || v2_it != v2_end)
+            {
+                if (v1_val_count && (v2_it != vec2.end()))
+                {
+                    //auto&& [v1_idx, v1_val] = *v1_it;
+                    auto&& [v2_idx, v2_val] = *v2_it;
+
+                    if (v2_idx == v1_idx)
+                    {
+                        ans.emplace_back(
+                            v1_idx,
+                            static_cast<D3>(op(vec1.get_vals()[v1_idx], v2_val)));
+                        ++v2_it;
+
+                        //++v1_it;
+                        --v1_val_count;
+                        ++v1_idx;
+                        while (v1_val_count && !vec1.get_bitmap()[v1_idx])
+                            ++v1_idx;
+                    }
+                    else if (v2_idx > v1_idx)
+                    {
+                        ans.emplace_back(
+                            v1_idx, static_cast<D3>(vec1.get_vals()[v1_idx]));
+                        //++v1_it;
+                        --v1_val_count;
+                        ++v1_idx;
+                        while (v1_val_count && !vec1.get_bitmap()[v1_idx])
+                            ++v1_idx;
+                    }
+                    else
+                    {
+                        ans.emplace_back(v2_idx, static_cast<D3>(v2_val));
+                        ++v2_it;
+                    }
+                }
+                else if (v1_val_count)
+                {
+                    ans.emplace_back(
+                        v1_idx,
+                        static_cast<D3>(vec1.get_vals()[v1_idx]));
+                    //++v1_it;
+                    --v1_val_count;
+                    ++v1_idx;
+                    while (v1_val_count && !vec1.get_bitmap()[v1_idx])
+                        ++v1_idx;
                 }
                 else // v2_it != vec2.end())
                 {
@@ -686,7 +867,8 @@ namespace grb
             BinaryOpT                                               accum)
         {
             //z.clear();
-            ewise_or(z, w.getContents(), t, accum);
+            //ewise_or(z, w.getContents(), t, accum);
+            ewise_or_dense_sparse_v2(z, w, t, accum);
         }
 
         //**********************************************************************
