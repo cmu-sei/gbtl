@@ -72,12 +72,13 @@ namespace grb
                 : m_num_vals(num_vals),
                   m_num_stored_vals(0),
                   m_weighted(weighted),
+                  m_indices(num_vals),
+                  m_bytemask(num_vals),
                   m_sorted(true)
             {
                 if (m_num_vals <= 0){
                     throw InvalidValueException();
                 }
-                m_indices.resize(m_num_vals);
                 if (m_weighted)
                     m_weights.resize(m_num_vals);
             }
@@ -90,6 +91,7 @@ namespace grb
                   m_weighted(true),
                   m_weights(num_vals, value),
                   m_indices(num_vals),
+                  m_bytemask(num_vals),
                   m_sorted(true)
             {
                 if (m_num_vals <= 0){
@@ -98,6 +100,7 @@ namespace grb
                 // Fill with ascending indices
                 for (auto idx = 0; idx < m_num_vals; idx++){
                     m_indices[idx] = idx;
+                    m_bytemask[idx] = 1;
                 }
                 // Is iota as good (and parallelizable) as the above loop?
                 //std::iota(m_indices.begin(), m_indices.end(), 0);
@@ -108,6 +111,7 @@ namespace grb
                 : m_num_vals(rhs.m_num_vals),
                   m_weighted(rhs.m_weighted),
                   m_indices(rhs.m_indices),
+                  m_bytemask(rhs.m_bytemask),
                   m_weights(rhs.m_weights),
                   m_num_stored_vals(rhs.m_num_stored_vals),
                   m_sorted(rhs.m_sorted)
@@ -127,6 +131,7 @@ namespace grb
                 m_weighted = true;
                 m_indices.resize(m_num_vals);
                 m_weights.resize(m_num_vals);
+                m_bytemask.resize(m_num_vals);
                 m_num_stored_vals = 0;
                 
                 /// @todo: parallelize?
@@ -134,6 +139,7 @@ namespace grb
                 for (auto idx = 0; idx < m_num_vals; idx++){
                     m_indices[m_num_stored_vals] = idx;
                     m_weights[m_num_stored_vals] = val[idx];
+                    m_bytemask[idx] = 1;
                     m_num_stored_vals ++;
                 }
             }
@@ -141,16 +147,15 @@ namespace grb
             // Constructor - sparse from dense vector, removing specifed implied zeros
             GKCSparseVector(std::vector<ScalarT> const &val,
                             ScalarT zero)
-                : m_weighted(true),
-                  m_sorted(true)
-            {
-                m_num_vals = val.size();
                 // Dense has both structure and weights.
-                m_weighted = true;
-                m_indices.resize(m_num_vals);
-                m_weights.resize(m_num_vals);
-                m_num_stored_vals = 0;
-                
+                : m_weighted(true),
+                  m_num_vals(val.size()),
+                  m_indices(m_num_vals),
+                  m_bytemask(m_num_vals),
+                  m_weights(m_num_vals),
+                  m_sorted(true),
+                  m_num_stored_vals(0)
+            {
                 /// @todo: parallelize?
                 // Copy values from dense vector into sparse
                 // While ignoring 'zero' elements
@@ -159,6 +164,7 @@ namespace grb
                     {
                         m_indices[m_num_stored_vals] = idx;
                         m_weights[m_num_stored_vals] = val[idx];
+                        m_bytemask[idx] = 1;
                         m_num_stored_vals ++;
                     }
                 }
@@ -192,6 +198,7 @@ namespace grb
 
                 // allocate memory
                 m_indices.resize(m_num_vals);
+                m_bytemask.resize(m_num_vals);
                 /// @todo how to detect if graph is weighted?
                 m_weighted = true;
                 m_weights.resize(m_num_vals);
@@ -201,18 +208,19 @@ namespace grb
                 for (IndexType idx = 0; idx < n; idx++)
                 {
                     IndexType vidx = *(i_it+idx);
-                    auto found_itr = already_inserted.find(vidx);
-                    if (found_itr == already_inserted.end())
+                    if (m_bytemask[vidx] == 0)//found_itr == already_inserted.end())
                     {
                         // Index not recognized, add new entry
                         already_inserted[vidx] = m_num_stored_vals;
                         m_indices[m_num_stored_vals] = vidx;
                         m_weights[m_num_stored_vals] = *(v_it + idx);
+                        m_bytemask[vidx] = 1;
                         m_num_stored_vals++;
                     }
                     else  
                     {
                         // Already have a value, so merge the weight.
+                        auto found_itr = already_inserted.find(vidx);
                         auto old_idx = found_itr->second;
                         m_weights[old_idx] = dup(m_weights[old_idx], *(v_it + idx));
                     }
@@ -238,7 +246,9 @@ namespace grb
                     m_num_stored_vals = rhs.m_num_stored_vals;
                     m_weighted = rhs.m_weighted;
                     m_indices = rhs.m_indices;
+                    m_bytemask = rhs.m_bytemask;
                     m_weights = rhs.m_weights;
+                    m_sorted = rhs.m_sorted;
                 }
                 return *this;
             }
@@ -266,6 +276,7 @@ namespace grb
                     if (m_weighted)
                         m_weights[idx] = (ScalarT)(*wgt_itr);
                 }
+                m_bytemask(rhs.m_bytemask);
                 return *this;
             }
             
@@ -283,6 +294,7 @@ namespace grb
                     m_weighted =        std::move(rhs.m_weighted);
                     m_indices =         std::move(rhs.m_indices);
                     m_weights =         std::move(rhs.m_weights); 
+                    m_bytemask =        std::move(rhs.m_bytemask);
                 }
                 return *this;
             }
@@ -294,6 +306,7 @@ namespace grb
                 std::swap(m_weighted, rhs.m_weighted);
                 std::swap(m_indices, rhs.m_indices);
                 std::swap(m_weights, rhs.m_weights); 
+                std::swap(m_bytemask, rhs.m_bytemask);
             }
 
             // EQUALITY OPERATORS
@@ -306,6 +319,18 @@ namespace grb
              */
             bool operator==(GKCSparseVector<ScalarT> const &rhs) const
             {
+                /// @todo need to check for ordering of indices/weights. 
+                /// @todo need to check for only the part of each vector USED.
+
+                bool test1 = (m_num_vals == rhs.m_num_vals);
+                bool test3 = (m_num_stored_vals == rhs.m_num_stored_vals);
+                if (!test1 || !test3) return false; // Exit early if diff sizes.
+                
+                bool test2 = (m_weighted == rhs.m_weighted);
+                if (!test2) return false; // Exit early if mismatch in weightedness
+
+                bool test2b = m_bytemask == rhs.m_bytemask;
+                if (!test2b) return false; // Early exit if element makeup is different
 
                 if (!isSorted() || !rhs.isSorted())
                 {
@@ -316,22 +341,9 @@ namespace grb
                         rhs.sortSelf();
                 }
 
-                /// @todo need to check for ordering of indices/weights. 
-                /// @todo need to check for only the part of each vector USED.
-                //throw NotImplementedException(); 
-                //if (this == &rhs) return true;
-                bool test1 = (m_num_vals == rhs.m_num_vals);
-                bool test2 = (m_weighted == rhs.m_weighted);
-                bool test3 = (m_num_stored_vals == rhs.m_num_stored_vals);
                 bool test4 = std::equal(m_indices.begin(), m_indices.begin() + m_num_stored_vals, rhs.m_indices.begin());
                 bool test5 = std::equal(m_weights.begin(), m_weights.begin() + m_num_stored_vals, rhs.m_weights.begin());
-                // std::cout << (test1 ? "true" : "false") << std::endl;
-                // std::cout << (test2 ? "true" : "false") << std::endl;
-                // std::cout << (test3 ? "true" : "false") << std::endl;
-                // std::cout << (test4 ? "true" : "false") << std::endl;
-                // std::cout << (test5 ? "true" : "false") << std::endl;
-                // std::cout << (m_weighted ? "true" : "false") << std::endl;
-                return ( test1 && test2 && test3 && test4 && ((m_weighted && test5) || !m_weighted) );
+                return ( test4 && ((m_weighted && test5) || !m_weighted) );
             }
 
             /**
@@ -360,6 +372,7 @@ namespace grb
 
                 // allocate memory
                 m_indices.resize(m_num_vals);
+                m_bytemask.resize(m_num_vals);
                 /// @todo how to detect if graph is weighted?
                 m_weighted = true;
                 m_weights.resize(m_num_vals);
@@ -369,7 +382,8 @@ namespace grb
                 for (IndexType idx = 0; idx < n; idx++)
                 {
                     IndexType vidx = *(i_it+idx);
-                    if (already_inserted[vidx] < idx + 1){
+                    if (m_bytemask[vidx] == 1)//already_inserted[vidx] < idx + 1)
+                    {
                         // Already have a value, so merge the weight.
                         auto old_idx = already_inserted[vidx] - 1;
                         m_weights[old_idx] = dup(m_weights[old_idx], *(v_it + idx));
@@ -379,11 +393,12 @@ namespace grb
                         already_inserted[vidx] = idx + 1;
                         m_indices[idx] = vidx;
                         m_weights[idx] = *(v_it + idx);
+                        m_bytemask[vidx] = 1;
                         m_num_stored_vals++;
                     }
                 }
-                // Todo, sort here
-
+                // Todo, sort here or check at runtime for monotonic index insertion.
+                m_sorted = false;
             }
             
             void clear()
@@ -391,6 +406,7 @@ namespace grb
                 /// @todo make atomic? transactional?
                 m_num_stored_vals = 0;
                 m_sorted = true;
+                std::fill(m_bytemask.begin(), m_bytemask.end(), 0);
             }
 
             IndexType size() const { return m_num_vals; }
@@ -431,6 +447,7 @@ namespace grb
                 {
                     m_num_vals = new_size;
                     m_indices.resize(new_size);
+                    m_bytemask.resize(new_size);
                     if (m_weighted) {
                         m_weights.resize(new_size);
                     }
@@ -443,10 +460,9 @@ namespace grb
                 {
                     throw IndexOutOfBoundsException();
                 }
-                for (size_t idx = 0; idx < m_num_stored_vals; idx++)
+                if (m_bytemask[index])
                 {
-                    auto vidx = m_indices[idx];
-                    if (vidx == index) return true;
+                    return true;
                 }
                 return false;
             }
@@ -461,20 +477,21 @@ namespace grb
                 {
                     throw IndexOutOfBoundsException();
                 }
-                for (size_t idx = 0; idx < m_num_stored_vals; idx++)
+                if (m_bytemask[index])
                 {
-                    auto vidx = m_indices[idx];
-                    if (vidx == index)
+                    // Only scan linear if it's there and weighted.
+                    if (m_weighted)
                     {
-                        if (m_weighted)
+                        for (size_t idx = 0; idx < m_num_stored_vals; idx++)
                         {
-                            return m_weights[idx];
-                        }
-                        else // What to do if no weights?
-                        {
-                            return (ScalarT)1;
+                            auto vidx = m_indices[idx];
+                            if (vidx == index)
+                            {
+                                return m_weights[idx];
+                            }
                         }
                     }
+                    return (ScalarT)1;
                 }
                 // No value found; throw error
                 throw NoValueException();
@@ -490,23 +507,24 @@ namespace grb
                 {
                     throw IndexOutOfBoundsException();
                 }
-                for (size_t idx = 0; idx < m_num_stored_vals; idx++)
+                if (m_bytemask[index])
                 {
-                    auto vidx = m_indices[idx];
-                    if (vidx == index)
+                    // Only scan linear if it's there.
+                    if (m_weighted)
                     {
-                        if (m_weighted)
+                        for (size_t idx = 0; idx < m_num_stored_vals; idx++)
                         {
-                            val =  m_weights[idx];
+                            auto vidx = m_indices[idx];
+                            if (vidx == index)
+                            {
+                                val = m_weights[idx];
+                                return true;
+                            }
                         }
-                        else // What to do if no weights?
-                        {
-                            val =  (ScalarT)1;
-                        }
-                        return true;
                     }
+                    val = (ScalarT)1;
+                    return true;
                 }
-                val = (ScalarT)1;
                 return false;
             }
 
@@ -516,24 +534,35 @@ namespace grb
                 {
                     throw IndexOutOfBoundsException();
                 }
-                for (size_t idx = 0; idx < m_num_stored_vals; idx++)
+                if (m_bytemask[index])
                 {
-                    auto vidx = m_indices[idx];
-                    if (vidx == index)
+                    if (m_weighted)
                     {
-                        if (m_weighted){
-                            m_weights[idx] = new_val;
+                        for (size_t idx = 0; idx < m_num_stored_vals; idx++)
+                        {
+                            auto vidx = m_indices[idx];
+                            if (vidx == index)
+                            {
+                                m_weights[idx] = new_val;
+                                return;
+                            }
                         }
+                        throw PanicException("Value is in bytemask but not in weights array for weigthed vector.");
+                    }
+                    else
+                    {
+                        // Nothing to do when unweighted, index already exists.
                         return;
                     }
                 }
                 // No value found; insert it:
                 m_indices[m_num_stored_vals] = index;
+                if (index < m_indices[m_num_stored_vals-1]) m_sorted = false;
                 if (m_weighted){
                     m_weights[m_num_stored_vals] = new_val;
                 }
+                m_bytemask[index] = 1;
                 m_num_stored_vals++;
-                // Todo: add a sorted or not sorted flag
             }
 
             template <typename BinaryOpT, typename ZScalarT> 
@@ -547,19 +576,26 @@ namespace grb
                 {
                     throw InvalidIndexException("Mismatch in internal vector size and size of vector.");
                 }
-                for (size_t idx = 0; idx < m_num_stored_vals; idx++)
+                if (m_bytemask[index])
                 {
-                    auto vidx = m_indices[idx];
-                    if (vidx == index)
+                    if (m_weighted)
                     {
-                        if (m_weighted){
-                            m_weights[idx] = op(m_weights[idx], new_val);
+                        for (size_t idx = 0; idx < m_num_stored_vals; idx++)
+                        {
+                            auto vidx = m_indices[idx];
+                            if (vidx == index)
+                            {
+                                m_weights[idx] = op(m_weights[idx], new_val);
+                                return;
+                            }
                         }
-                        return;
+                        throw PanicException("Value not found in weights array when it is in the byte array of vector.");
                     }
+                    return; // Nothing do to if there and unweighted.
                 }
                 // No value found; insert it:
                 m_indices[m_num_stored_vals] = index;
+                if (index < m_indices[m_num_stored_vals-1]) m_sorted = false;
                 if (m_weighted){
                     // Make sure to correctly cast for the output of the operation, 
                     // which in mxv is not the same as the reduction (additive) output.
@@ -569,8 +605,8 @@ namespace grb
                         ));
                     m_weights[m_num_stored_vals] = (ZType)new_val;
                 }
+                m_bytemask[index] = 1;
                 m_num_stored_vals++;
-                // Todo: add a sorted or not sorted flag
             }
 
             void removeElement(IndexType index)
@@ -584,29 +620,36 @@ namespace grb
                 {
                     throw IndexOutOfBoundsException();
                 }
-                for (size_t idx = 0; idx < m_num_stored_vals; idx++)
+                if (m_bytemask[index] == 1)
                 {
-                    auto vidx = m_indices[idx];
-                    if (vidx == index)
+                    for (size_t idx = 0; idx < m_num_stored_vals; idx++)
                     {
-                        // Step 2: vector doesn't need to remain sorted, 
-                        // so just replace with last element.
-                        // NOT THREAD SAFE!
-                        if (idx < m_num_stored_vals - 1){
-                            // Swap with last elem and decremement size
-                            m_indices[idx] = m_indices[m_num_stored_vals - 1];
-                            if (m_weighted)
+                        auto vidx = m_indices[idx];
+                        if (vidx == index)
+                        {
+                            // Step 2: vector doesn't need to remain sorted,
+                            // so just replace with last element.
+                            // NOT THREAD SAFE!
+                            if (idx < m_num_stored_vals - 1)
                             {
-                                m_weights[idx] = m_weights[m_num_stored_vals-1];
+                                // Swap with last elem and decremement size
+                                m_indices[idx] = m_indices[m_num_stored_vals - 1];
+                                if (m_weighted)
+                                {
+                                    m_weights[idx] = m_weights[m_num_stored_vals - 1];
+                                }
+                                m_num_stored_vals--;
+                                m_sorted = false;
+                                //this->sortSelf();
                             }
-                            m_num_stored_vals--;
-                            //this->sortSelf();
+                            else if (idx == m_num_stored_vals - 1)
+                            { // Added to handle corner case when only one elem remains.
+                                m_num_stored_vals--;
+                            }
+                            m_bytemask[index] = 0;
+                            return;
                         }
-                        else if (idx == m_num_stored_vals - 1)
-                        { // Added to handle corner case when only one elem remains.
-                            m_num_stored_vals--;
-                        }
-                        return;
+                        throw PanicException("Tried to remove element in bytemask that is not in vector internal array.");
                     }
                 }
                 // No value found; throw error
@@ -625,29 +668,36 @@ namespace grb
                 {
                     throw IndexOutOfBoundsException();
                 }
-                for (size_t idx = 0; idx < m_num_stored_vals; idx++)
+                if (m_bytemask[index] == 1)
                 {
-                    auto vidx = m_indices[idx];
-                    if (vidx == index)
+                    for (size_t idx = 0; idx < m_num_stored_vals; idx++)
                     {
-                        // Step 2: vector doesn't need to remain sorted, 
-                        // so just replace with last element.
-                        // NOT THREAD SAFE!
-                        if (idx < m_num_stored_vals - 1){
-                            // Swap with last elem and decremement size
-                            m_indices[idx] = m_indices[m_num_stored_vals - 1];
-                            if (m_weighted)
+                        auto vidx = m_indices[idx];
+                        if (vidx == index)
+                        {
+                            // Step 2: vector doesn't need to remain sorted,
+                            // so just replace with last element.
+                            // NOT THREAD SAFE!
+                            if (idx < m_num_stored_vals - 1)
                             {
-                                m_weights[idx] = m_weights[m_num_stored_vals-1];
+                                // Swap with last elem and decremement size
+                                m_indices[idx] = m_indices[m_num_stored_vals - 1];
+                                if (m_weighted)
+                                {
+                                    m_weights[idx] = m_weights[m_num_stored_vals - 1];
+                                }
+                                m_num_stored_vals--;
+                                //this->sortSelf();
+                                m_sorted = false;
                             }
-                            m_num_stored_vals--;
-                            this->sortSelf();
+                            else if (idx == m_num_stored_vals - 1)
+                            { // Added to handle corner case when only one elem remains.
+                                m_num_stored_vals--;
+                            }
+                            m_bytemask[index] = 0;
+                            return true;
                         }
-                        else if (idx == m_num_stored_vals - 1)
-                        { // Added to handle corner case when only one elem remains.
-                            m_num_stored_vals--;
-                        }
-                        return true;
+                        throw PanicException("Tried to remove element in bytemask that is not in vector internal array.");
                     }
                 }
                 // No value found; return false
@@ -679,9 +729,20 @@ namespace grb
             void truncateNVals(size_t num_to_remove)
             {
                 if (num_to_remove <= m_num_stored_vals)
+                {
+                    auto st = idxBegin() - num_to_remove;
+                    auto nd = idxEnd();
+                    for (auto itr = st; itr < nd; itr++)
+                    {
+                        m_bytemask[*itr] = 0;
+                    }
                     m_num_stored_vals -= num_to_remove;
+                }
                 else
+                {
                     m_num_stored_vals = 0;
+                    std::fill(m_bytemask.begin(), m_bytemask.end(), 0);
+                }
             }
 
             // Note: this has to be const because changes to it could break 
@@ -792,6 +853,7 @@ namespace grb
             IndexType m_num_stored_vals;
             bool m_weighted;
             mutable bool m_sorted;
+            std::vector<unsigned char> m_bytemask;
 
             // Two array compressed sparse vector
             mutable std::vector<IndexType> m_indices;

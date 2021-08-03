@@ -95,39 +95,6 @@ namespace grb
                 {
                     auto row_idx = *(mask.idxBegin() + idx);
 
-                    // Masked approach
-                    // z = m.*[w + A(+.*)u]
-                    // w = [!m.*w] U [z]   // if merge // distribute dense or distribute sparse from largest
-                    // w = z               // if not merge
-                    // Need fast sort at the end, when threaded.
-
-
-                    // Vector 0....20
-
-/*
-                    Load balancing on sparse with dense assigment of indices.
-                    0 3 5 8 9 11 13
-                    3 threads
-
-                    thread 1
-                    0 3
-
-                    thread 2
-                    5 8
-
-                    thread 3 
-                    9 11 13
-
-                    thread 1 is responsible for 
-                    0..(5-1)
-
-                    thread 2 is responsible for 
-                    5..(9-1)
-
-                    thread 3 has
-                    9..(N-1)
-*/
-
                     // Todo: missing non-structural check above.
                     auto AIst = A.idxBegin(row_idx);
                     auto AInd = A.idxEnd(row_idx);
