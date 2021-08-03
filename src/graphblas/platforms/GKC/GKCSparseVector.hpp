@@ -390,6 +390,7 @@ namespace grb
             {
                 /// @todo make atomic? transactional?
                 m_num_stored_vals = 0;
+                m_sorted = true;
             }
 
             IndexType size() const { return m_num_vals; }
@@ -674,6 +675,14 @@ namespace grb
             bool isWeighted() const {return m_weighted;}
             bool isSorted() const {return m_sorted;}
             void setUnsorted() {m_sorted = false;}
+
+            void truncateNVals(size_t num_to_remove)
+            {
+                if (num_to_remove <= m_num_stored_vals)
+                    m_num_stored_vals -= num_to_remove;
+                else
+                    m_num_stored_vals = 0;
+            }
 
             // Note: this has to be const because changes to it could break 
             // the weights vector. 
