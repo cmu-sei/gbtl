@@ -37,8 +37,6 @@
 
 #include "sparse_helper_proto.hpp"
 
-#include "../test/Timer.hpp"
-
 //****************************************************************************
 
 namespace grb
@@ -64,12 +62,13 @@ namespace grb
                         GKCSparseVector<ScalarT> const &u,
                         OutputControlEnum outp)
         {
-    Timer<std::chrono::steady_clock, std::chrono::microseconds> my_timer;
-    Timer<std::chrono::steady_clock, std::chrono::microseconds> my_timer2;
-    size_t dots = 0;
-    double dots_time = 0;
-
-    my_timer2.start();
+#ifdef INST_TIMING_MVX
+            Timer<std::chrono::steady_clock, std::chrono::microseconds> my_timer;
+            Timer<std::chrono::steady_clock, std::chrono::microseconds> my_timer2;
+            size_t dots = 0;
+            double dots_time = 0;
+            my_timer2.start();
+#endif
             // Assumption: we have a non-null mask
             GRB_LOG_VERBOSE("w<M,z> := A +.* u");
             // w = [!m.*w]+U {[m.*w]+m.*(A*u)}
@@ -137,7 +136,9 @@ namespace grb
                     if (do_compute)
                     {
                         // Dot product begin
+#ifdef INST_TIMING_MVX
                         my_timer.start();
+#endif
                         auto AIst = A.idxBegin(row_idx);
                         auto AInd = A.idxEnd(row_idx);
                         auto AWst = A.wgtBegin(row_idx);
@@ -194,9 +195,11 @@ namespace grb
                             }
                         }
                         // Dot end
+#ifdef INST_TIMING_MVX
                         my_timer.stop();
                         dots_time += my_timer.elapsed();
                         dots ++;
+#endif
                         // Handle accumulation:
                         if (value_set)
                         {
@@ -230,9 +233,10 @@ namespace grb
                 } // End of fused mxv loop
             }     // End of early exit
             // w.sortSelf();
+#ifdef INST_TIMING_MVX
             my_timer2.stop();
             std::cerr << my_timer2.elapsed() << ", " << dots << ", " << dots_time << std::endl;
-
+#endif
         }
 
         //**********************************************************************

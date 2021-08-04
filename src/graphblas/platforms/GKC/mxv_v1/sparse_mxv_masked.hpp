@@ -64,6 +64,13 @@ namespace grb
             GRB_LOG_VERBOSE("w<M,z> := A +.* u");
             // w = [!m.*w]+U {[m.*w]+m.*(A*u)}
             using TScalarType = typename SemiringT::result_type;
+#ifdef INST_TIMING_MVX
+            Timer<std::chrono::steady_clock, std::chrono::microseconds> my_timer;
+            Timer<std::chrono::steady_clock, std::chrono::microseconds> my_timer2;
+            size_t dots = 0;
+            double dots_time = 0;
+            my_timer2.start();
+#endif
 
             // Accumulate is null, clear on replace due to null mask (from signature):
             // if constexpr (std::is_same_v<AccumT, grb::NoAccumulate>){
@@ -94,40 +101,7 @@ namespace grb
                 for (auto idx = 0; idx < mask.nvals(); idx++)
                 {
                     auto row_idx = *(mask.idxBegin() + idx);
-
-                    // Masked approach
-                    // z = m.*[w + A(+.*)u]
-                    // w = [!m.*w] U [z]   // if merge // distribute dense or distribute sparse from largest
-                    // w = z               // if not merge
-                    // Need fast sort at the end, when threaded.
-
-
-                    // Vector 0....20
-
-/*
-                    Load balancing on sparse with dense assigment of indices.
-                    0 3 5 8 9 11 13
-                    3 threads
-
-                    thread 1
-                    0 3
-
-                    thread 2
-                    5 8
-
-                    thread 3 
-                    9 11 13
-
-                    thread 1 is responsible for 
-                    0..(5-1)
-
-                    thread 2 is responsible for 
-                    5..(9-1)
-
-                    thread 3 has
-                    9..(N-1)
-*/
-
+                    
                     // Todo: missing non-structural check above.
                     auto AIst = A.idxBegin(row_idx);
                     auto AInd = A.idxEnd(row_idx);
@@ -140,6 +114,9 @@ namespace grb
                     // Do dot product here, into w directly
                     bool value_set(false);
                     TScalarType sum;
+#ifdef INST_TIMING_MVX
+                        my_timer.start();
+#endif
                     while (AIst < AInd && UIst < UInd)
                     {
                         if (*AIst == *UIst)
@@ -169,6 +146,11 @@ namespace grb
                             UWst++;
                         }
                     }
+#ifdef INST_TIMING_MVX
+                        my_timer.stop();
+                        dots_time += my_timer.elapsed();
+                        dots ++;
+#endif
                     // Handle accumulation:
                     if (value_set)
                     {
@@ -191,6 +173,10 @@ namespace grb
                 } // End of fused mxv loop
             }     // End of early exit
             // w.sortSelf();
+#ifdef INST_TIMING_MVX
+            my_timer2.stop();
+            std::cerr << my_timer2.elapsed() << ", " << dots << ", " << dots_time << std::endl;
+#endif
         }
 
         //**********************************************************************
