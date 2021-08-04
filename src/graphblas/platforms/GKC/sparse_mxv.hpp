@@ -37,7 +37,7 @@
 
 #include "test/Timer.hpp"
 
-#define INST_TIMING_MVX
+// #define INST_TIMING_MVX
 
 #define GKC_MXV_V3
 
