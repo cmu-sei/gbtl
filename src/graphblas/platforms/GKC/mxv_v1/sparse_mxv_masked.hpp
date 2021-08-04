@@ -64,6 +64,13 @@ namespace grb
             GRB_LOG_VERBOSE("w<M,z> := A +.* u");
             // w = [!m.*w]+U {[m.*w]+m.*(A*u)}
             using TScalarType = typename SemiringT::result_type;
+#ifdef INST_TIMING_MVX
+            Timer<std::chrono::steady_clock, std::chrono::microseconds> my_timer;
+            Timer<std::chrono::steady_clock, std::chrono::microseconds> my_timer2;
+            size_t dots = 0;
+            double dots_time = 0;
+            my_timer2.start();
+#endif
 
             // Accumulate is null, clear on replace due to null mask (from signature):
             // if constexpr (std::is_same_v<AccumT, grb::NoAccumulate>){
@@ -94,7 +101,6 @@ namespace grb
                 for (auto idx = 0; idx < mask.nvals(); idx++)
                 {
                     auto row_idx = *(mask.idxBegin() + idx);
-
                     // Todo: missing non-structural check above.
                     auto AIst = A.idxBegin(row_idx);
                     auto AInd = A.idxEnd(row_idx);
@@ -107,6 +113,9 @@ namespace grb
                     // Do dot product here, into w directly
                     bool value_set(false);
                     TScalarType sum;
+#ifdef INST_TIMING_MVX
+                        my_timer.start();
+#endif
                     while (AIst < AInd && UIst < UInd)
                     {
                         if (*AIst == *UIst)
@@ -136,6 +145,11 @@ namespace grb
                             UWst++;
                         }
                     }
+#ifdef INST_TIMING_MVX
+                        my_timer.stop();
+                        dots_time += my_timer.elapsed();
+                        dots ++;
+#endif
                     // Handle accumulation:
                     if (value_set)
                     {
@@ -158,6 +172,10 @@ namespace grb
                 } // End of fused mxv loop
             }     // End of early exit
             // w.sortSelf();
+#ifdef INST_TIMING_MVX
+            my_timer2.stop();
+            std::cerr << my_timer2.elapsed() << ", " << dots << ", " << dots_time << std::endl;
+#endif
         }
 
         //**********************************************************************

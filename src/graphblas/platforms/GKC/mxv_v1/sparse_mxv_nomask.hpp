@@ -61,6 +61,13 @@ namespace grb
             GRB_LOG_VERBOSE("w<M,z> := A +.* u");
             // std::cout << "Hi! DOT" << std::endl;
             // w = w + (A*u)
+#ifdef INST_TIMING_MVX
+            Timer<std::chrono::steady_clock, std::chrono::microseconds> my_timer;
+            Timer<std::chrono::steady_clock, std::chrono::microseconds> my_timer2;
+            size_t dots = 0;
+            double dots_time = 0;
+            my_timer2.start();
+#endif
 
             // Accumulate is null, clear on replace due to null mask (from signature):
             if constexpr (std::is_same_v<AccumT, grb::NoAccumulate>) w.clear();
@@ -99,6 +106,9 @@ namespace grb
                     bool value_set(false);
                     TScalarType sum;
                     //if (AIst < AInd && UIst < UInd) std::cout << "row idx: " << row_idx << std::endl;
+#ifdef INST_TIMING_MVX
+                        my_timer.start();
+#endif
                     while (AIst < AInd && UIst < UInd)
                     {                            
                         if (*AIst == *UIst)
@@ -127,6 +137,11 @@ namespace grb
                         }
                         //if (value_set) std::cout << "Sum: " << sum << " ";
                     }
+#ifdef INST_TIMING_MVX
+                        my_timer.stop();
+                        dots_time += my_timer.elapsed();
+                        dots ++;
+#endif
                     /// @todo: outputs control enum, masking, etc...
                     // Handle accumulation:
                     if (value_set) {
@@ -143,6 +158,10 @@ namespace grb
                 }
             }
             // w.sortSelf();
+#ifdef INST_TIMING_MVX
+            my_timer2.stop();
+            std::cerr << my_timer2.elapsed() << ", " << dots << ", " << dots_time << std::endl;
+#endif
         }
 
         //**********************************************************************

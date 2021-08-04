@@ -35,6 +35,10 @@
 #include <graphblas/algebra.hpp>
 #include <atomic>
 
+#include "test/Timer.hpp"
+
+#define INST_TIMING_MVX
+
 #define GKC_MXV_V3
 
 // Includes for compatability with exsiting GBTL "sequential" data structures and methods

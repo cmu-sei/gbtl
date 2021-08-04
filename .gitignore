@@ -8,6 +8,6 @@
 .tox
 *.map
 autom4te.cache
-build
+build*/
 docs
 .vscode/
