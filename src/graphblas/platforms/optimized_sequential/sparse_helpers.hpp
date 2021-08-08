@@ -305,9 +305,9 @@ namespace grb
         }
 
         //************************************************************************
-        /// A dot product of two sparse vectors (vectors<tuple(index,value)>)
+        /// A dot product of two vectors (vec1 sparse, vec2 dense storage))
         template <typename D1, typename D2, typename D3, typename SemiringT>
-        bool dot_rev_sparse_dense(
+        bool dot_sparse_dense(
             D3                                                &ans,
             std::vector<std::tuple<grb::IndexType,D1> > const &vec2,
             BitmapSparseVector<D2>                      const &vec1,
@@ -1333,7 +1333,7 @@ namespace grb
         void write_with_opt_mask_1D(
             WVectorT                                           &w,
             std::vector<std::tuple<IndexType, ZScalarT>> const &z,
-            MaskT const                                        &mask,
+            MaskT                                        const &mask,
             OutputControlEnum                                   outp)
         {
             using WScalarType = typename WVectorT::ScalarType;
@@ -1398,10 +1398,10 @@ namespace grb
                   typename ZScalarT,
                   typename MaskT>
         void write_with_opt_mask_1D(
-            WVectorT                                               &w,
-            std::vector<std::tuple<IndexType, ZScalarT>>     const &z,
-            grb::VectorStructuralComplementView<MaskT>       const &mask,
-            OutputControlEnum                                       outp)
+            WVectorT                                           &w,
+            std::vector<std::tuple<IndexType, ZScalarT>> const &z,
+            grb::VectorStructuralComplementView<MaskT>   const &mask,
+            OutputControlEnum                                   outp)
         {
             using WScalarType = typename WVectorT::ScalarType;
             std::vector<std::tuple<IndexType, WScalarType> > tmp_row;
@@ -1413,6 +1413,7 @@ namespace grb
             // Now, set the new one.  Yes, we can optimize this later
             w.setContents(tmp_row);
         }
+
 
         //**********************************************************************
         // Vector version specialized for no mask
@@ -1426,6 +1427,51 @@ namespace grb
         {
             //sparse_copy(w, z);
             w.setContents(z);
+        }
+
+        //**********************************************************************
+        // Do one of the following...
+        // w          = z,
+        // w<    m,r> = z,
+        // w<   !m,r> = z,
+        // w< s(m),r> = z,
+        // w<!s(m),r> = z,
+        //
+        // w and mask are dense storage, z is sparse
+        template <typename WScalarT,
+                  typename ZScalarT,
+                  typename MaskT>
+        void write_with_opt_mask_1D_sparse_dense(
+            BitmapSparseVector<WScalarT>                       &w,
+            std::vector<std::tuple<IndexType, ZScalarT>> const &z,
+            MaskT                                        const &mask,
+            OutputControlEnum                                   outp)
+        {
+            if (outp == REPLACE)
+            {
+                w.clear();
+                for (auto&& [idx, val] : z)
+                {
+                    if (check_mask(mask, idx))
+                    {
+                        w.setElementNoCheck(idx, val);
+                    }
+                }
+            }
+            else // MERGE
+            {
+                for (auto&& [idx, val] : z)
+                {
+                    if (check_mask(mask, idx))
+                    {
+                        w.setElementNoCheck(idx, val);
+                    }
+                    else
+                    {
+                        w.removeElementNoCheck(idx);
+                    }
+                }
+            }
         }
 
         //********************************************************************
@@ -1511,6 +1557,79 @@ namespace grb
 
             GRB_LOG_FN_END("advance_and_check_mask_iterator: result = " << tmp);
             return tmp;
+        }
+
+        // *******************************************************************
+        // Operate directly on the BitmapSparseVector.
+        //
+        // Only returns true if target index is found AND it evaluates to true
+        // or the structure flag is set.
+        template <typename MScalarT>
+        inline  bool check_mask(
+            BitmapSparseVector<MScalarT> const &mask,
+            bool                                structure_flag,
+            bool                                complement_flag,
+            IndexType                           target_index)
+        {
+            GRB_LOG_FN_BEGIN("check_mask: s/c flags = "
+                             << structure_flag << "/" << complement_flag
+                             << ", tgt = " << target_index);
+
+            bool tmp =
+                (complement_flag !=
+                 (mask.hasElementNoCheck(target_index) &&
+                  (structure_flag || mask.extractElementNoCheck(target_index))));
+
+            GRB_LOG_FN_END("check_mask: result = " << tmp);
+            return tmp;
+        }
+
+        //**********************************************************************
+        template <typename MScalarT>
+        inline bool check_mask(
+            BitmapSparseVector<MScalarT> const &mask,
+            IndexType                           target_index)
+        {
+            //std::cout << "-";
+            return check_mask(mask, false, false, target_index);
+        }
+
+        //**********************************************************************
+        template <typename MaskT>
+        inline bool check_mask(
+            grb::VectorComplementView<MaskT> const &mask,
+            IndexType                               target_index)
+        {
+            //std::cout << "C";
+            return check_mask(mask.m_vec, false, true, target_index);
+        }
+
+        //**********************************************************************
+        template <typename MaskT>
+        inline bool check_mask(
+            grb::VectorStructureView<MaskT> const &mask,
+            IndexType                              target_index)
+        {
+            //std::cout << "S";
+            return check_mask(mask.m_vec, true, false, target_index);
+        }
+
+        //**********************************************************************
+        template <typename MaskT>
+        inline bool check_mask(
+            grb::VectorStructuralComplementView<MaskT> const &mask,
+            IndexType                                         target_index)
+        {
+            //std::cout << "X";
+            return check_mask(mask.m_vec, true, true, target_index);
+        }
+
+        //**********************************************************************
+        inline bool check_mask(NoMask const &mask,
+                               IndexType     target_index)
+        {
+            //std::cout << "N";
+            return true;
         }
 
         //**********************************************************************

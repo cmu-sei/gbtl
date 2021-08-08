@@ -376,6 +376,11 @@ namespace grb
                 return m_bitmap[index];
             }
 
+            bool hasElementNoCheck(IndexType index) const
+            {
+                return m_bitmap[index];
+            }
+
             /**
              * @brief Access the elements of this BitmapSparseVector given index.
              *
@@ -402,6 +407,11 @@ namespace grb
                 return m_vals[index];
             }
 
+            ScalarT extractElementNoCheck(IndexType index) const
+            {
+                return m_vals[index];
+            }
+
             /// @todo Not certain about this implementation
             void setElement(IndexType      index,
                             ScalarT const &new_val)
@@ -418,6 +428,18 @@ namespace grb
                 }
             }
 
+            /// @todo Not certain about this implementation
+            void setElementNoCheck(IndexType      index,
+                                   ScalarT const &new_val)
+            {
+                m_vals[index] = new_val;
+                if (m_bitmap[index] == false)
+                {
+                    ++m_nvals;
+                    m_bitmap[index] = true;
+                }
+            }
+
             void removeElement(IndexType index)
             {
                 if (index >= m_size)
@@ -425,6 +447,15 @@ namespace grb
                     throw IndexOutOfBoundsException();
                 }
 
+                if (m_bitmap[index] == true)
+                {
+                    --m_nvals;
+                    m_bitmap[index] = false;
+                }
+            }
+
+            void removeElementNoCheck(IndexType index)
+            {
                 if (m_bitmap[index] == true)
                 {
                     --m_nvals;
