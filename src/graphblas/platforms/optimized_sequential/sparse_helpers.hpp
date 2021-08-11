@@ -717,108 +717,6 @@ namespace grb
 
 
         //**********************************************************************
-        template <typename ZScalarT,
-                  typename WVectorT,
-                  typename TScalarT,
-                  typename SequenceT,
-                  typename BinaryOpT >
-        void ewise_or_stencil_opt_accum_1D(
-            std::vector<std::tuple<grb::IndexType,ZScalarT>>       &z,
-            WVectorT const                                         &w,
-            std::vector<std::tuple<grb::IndexType,TScalarT>> const &t,
-            SequenceT const                                        &indices,
-            BinaryOpT                                               accum)
-        {
-            // If there is an accumulate operations, do nothing with the stencil
-            ewise_or(z, w.getContents(), t, accum);
-        }
-
-        //**********************************************************************
-        template <typename ZScalarT,
-                  typename WVectorT,
-                  typename TScalarT,
-                  typename SequenceT>
-        void ewise_or_stencil_opt_accum_1D(
-            std::vector<std::tuple<grb::IndexType,ZScalarT>>       &z,
-            WVectorT const                                         &w,
-            std::vector<std::tuple<grb::IndexType,TScalarT>> const &t,
-            SequenceT const                                        &indices,
-            grb::NoAccumulate)
-        {
-            // If there is no accumulate we need to annihilate stored values
-            // in w that fall in the stencil
-            ewise_or_stencil(z, w.getContents(), t, indices);
-        }
-
-
-        //**********************************************************************
-        template < typename ZMatrixT,
-                   typename CMatrixT,
-                   typename TMatrixT,
-                   typename RowSequenceT,
-                   typename ColSequenceT,
-                   typename BinaryOpT >
-        void ewise_or_stencil_opt_accum(ZMatrixT           &Z,
-                                        CMatrixT     const &C,
-                                        TMatrixT     const &T,
-                                        RowSequenceT const &row_indices,
-                                        ColSequenceT const &col_indices,
-                                        BinaryOpT           accum)
-        {
-            // If there is an accumulate operation, do nothing with the stencil
-            using ZScalarType = typename ZMatrixT::ScalarType;
-            using ZRowType = std::vector<std::tuple<IndexType,ZScalarType> >;
-
-            ZRowType tmp_row;
-            IndexType nRows(Z.nrows());
-
-            for (IndexType row_idx = 0; row_idx < nRows; ++row_idx)
-            {
-                ewise_or(tmp_row, C[row_idx], T[row_idx], accum);
-                Z.setRow(row_idx, tmp_row);
-            }
-        }
-
-        //**********************************************************************
-        template < typename ZMatrixT,
-                   typename CMatrixT,
-                   typename TMatrixT,
-                   typename RowSequenceT,
-                   typename ColSequenceT>
-        void ewise_or_stencil_opt_accum(ZMatrixT           &Z,
-                                        CMatrixT     const &C,
-                                        TMatrixT     const &T,
-                                        RowSequenceT const &row_indices,
-                                        ColSequenceT const &col_indices,
-                                        grb::NoAccumulate)
-        {
-            // If there is no accumulate, we need to annihilate stored values
-            // in C that fall in the stencil
-            using ZScalarType = typename ZMatrixT::ScalarType;
-            using ZRowType = std::vector<std::tuple<IndexType,ZScalarType> >;
-
-            ZRowType tmp_row;
-            IndexType nRows(Z.nrows());
-
-            for (IndexType row_idx = 0; row_idx < nRows; ++row_idx)
-            {
-                if (searchIndices(row_indices, row_idx))
-                {
-                    // Row Stenciled. merge C, T, using col stencil\n";
-                    ewise_or_stencil(tmp_row, C[row_idx], T[row_idx],
-                                     col_indices);
-                    Z.setRow(row_idx, tmp_row);
-                }
-                else
-                {
-                    // Row not stenciled.  Take row from C only
-                    // There should be nothing in T for this row
-                    Z.setRow(row_idx, C[row_idx]);
-                }
-            }
-        }
-
-        //**********************************************************************
         template < typename ZMatrixT,
                    typename CMatrixT,
                    typename TMatrixT,
@@ -1452,7 +1350,7 @@ namespace grb
                 w.clear();
                 for (auto&& [idx, val] : z)
                 {
-                    if (check_mask(mask, idx))
+                    if (check_mask_1D(mask, idx))
                     {
                         w.setElementNoCheck(idx, val);
                     }
@@ -1462,7 +1360,7 @@ namespace grb
             {
                 for (auto&& [idx, val] : z)
                 {
-                    if (check_mask(mask, idx))
+                    if (check_mask_1D(mask, idx))
                     {
                         w.setElementNoCheck(idx, val);
                     }
@@ -1559,13 +1457,16 @@ namespace grb
             return tmp;
         }
 
-        // *******************************************************************
+        //**********************************************************************
+        //**********************************************************************
+        // Check to see if 1D-mask allows writing
         // Operate directly on the BitmapSparseVector.
         //
         // Only returns true if target index is found AND it evaluates to true
         // or the structure flag is set.
+        //**********************************************************************
         template <typename MScalarT>
-        inline  bool check_mask(
+        inline  bool check_mask_1D(
             BitmapSparseVector<MScalarT> const &mask,
             bool                                structure_flag,
             bool                                complement_flag,
@@ -1584,51 +1485,42 @@ namespace grb
             return tmp;
         }
 
-        //**********************************************************************
         template <typename MScalarT>
-        inline bool check_mask(
+        inline bool check_mask_1D(
             BitmapSparseVector<MScalarT> const &mask,
             IndexType                           target_index)
         {
-            //std::cout << "-";
-            return check_mask(mask, false, false, target_index);
+            return check_mask_1D(mask, false, false, target_index);
         }
 
-        //**********************************************************************
         template <typename MaskT>
-        inline bool check_mask(
+        inline bool check_mask_1D(
             grb::VectorComplementView<MaskT> const &mask,
             IndexType                               target_index)
         {
             //std::cout << "C";
-            return check_mask(mask.m_vec, false, true, target_index);
+            return check_mask_1D(mask.m_vec, false, true, target_index);
         }
 
-        //**********************************************************************
         template <typename MaskT>
-        inline bool check_mask(
+        inline bool check_mask_1D(
             grb::VectorStructureView<MaskT> const &mask,
             IndexType                              target_index)
         {
-            //std::cout << "S";
-            return check_mask(mask.m_vec, true, false, target_index);
+            return check_mask_1D(mask.m_vec, true, false, target_index);
         }
 
-        //**********************************************************************
         template <typename MaskT>
-        inline bool check_mask(
+        inline bool check_mask_1D(
             grb::VectorStructuralComplementView<MaskT> const &mask,
             IndexType                                         target_index)
         {
-            //std::cout << "X";
-            return check_mask(mask.m_vec, true, true, target_index);
+            return check_mask_1D(mask.m_vec, true, true, target_index);
         }
 
-        //**********************************************************************
-        inline bool check_mask(NoMask const &mask,
-                               IndexType     target_index)
+        inline bool check_mask_1D(NoMask const &mask,
+                                  IndexType     target_index)
         {
-            //std::cout << "N";
             return true;
         }
 

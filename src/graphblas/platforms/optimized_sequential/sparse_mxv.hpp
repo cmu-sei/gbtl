@@ -36,8 +36,6 @@
 
 #include "sparse_helpers.hpp"
 
-#define GRAPHBLAS_LOGGING_LEVEL 1
-
 //****************************************************************************
 
 namespace grb
@@ -221,7 +219,7 @@ namespace grb
                 for (IndexType row_idx = 0; row_idx < w.size(); ++row_idx)
                 {
                     bool element_set = false;
-                    if (check_mask(mask, row_idx))
+                    if (check_mask_1D(mask, row_idx))
                     {
                         //w.removeElementNoCheck(row_idx);
                         if (!A[row_idx].empty())
@@ -269,22 +267,25 @@ namespace grb
             using TScalarType = typename SemiringT::result_type;
 #if defined(ORIGINAL_CODE)
             std::vector<std::tuple<IndexType, TScalarType> > t;
-#else
+#endif
+
             // =================================================================
             // Accumulate into Z
             using ZScalarType =
                 decltype(accum(std::declval<typename WVectorT::ScalarType>(),
                                std::declval<TScalarType>()));
             std::vector<std::tuple<IndexType, ZScalarType> > z;
-#endif
 
             if ((A.nvals() > 0) && (u.nvals() > 0))
             {
                 //auto u_contents(u.getContents());
                 for (IndexType row_idx = 0; row_idx < w.size(); ++row_idx)
                 {
-                    //if ((check_mask(mask, row_idx) && !A[row_idx].empty()))
+#if defined(ORIGINAL_CODE)
                     if ( !A[row_idx].empty() )
+#else
+                    if (check_mask_1D(mask, row_idx) && !A[row_idx].empty())
+#endif
                     {
                         TScalarType t_val;
                         if (dot_sparse_dense(t_val, A[row_idx], u, op))
@@ -368,7 +369,7 @@ namespace grb
             {
                 for (IndexType row_idx = 0; row_idx < u.size(); ++row_idx)
                 {
-                    if (u.hasElement(row_idx) && !A[row_idx].empty())
+                    if (u.hasElementNoCheck(row_idx) && !A[row_idx].empty())
                     {
                         axpy(t, op, u.extractElement(row_idx), A[row_idx]);
                     }

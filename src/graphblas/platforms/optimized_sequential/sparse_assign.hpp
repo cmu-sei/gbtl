@@ -46,6 +46,113 @@ namespace grb
 {
     namespace backend
     {
+
+        //**********************************************************************
+        // for sparse_assign
+        template <typename ZScalarT,
+                  typename WVectorT,
+                  typename TScalarT,
+                  typename SequenceT,
+                  typename BinaryOpT >
+        void ewise_or_stencil_opt_accum_1D(
+            std::vector<std::tuple<grb::IndexType,ZScalarT>>       &z,
+            WVectorT const                                         &w,
+            std::vector<std::tuple<grb::IndexType,TScalarT>> const &t,
+            SequenceT const                                        &indices,
+            BinaryOpT                                               accum)
+        {
+            // If there is an accumulate operations, do nothing with the stencil
+            ewise_or(z, w.getContents(), t, accum);
+        }
+
+        //**********************************************************************
+        // for sparse_assign
+        template <typename ZScalarT,
+                  typename WVectorT,
+                  typename TScalarT,
+                  typename SequenceT>
+        void ewise_or_stencil_opt_accum_1D(
+            std::vector<std::tuple<grb::IndexType,ZScalarT>>       &z,
+            WVectorT const                                         &w,
+            std::vector<std::tuple<grb::IndexType,TScalarT>> const &t,
+            SequenceT const                                        &indices,
+            grb::NoAccumulate)
+        {
+            // If there is no accumulate we need to annihilate stored values
+            // in w that fall in the stencil
+            ewise_or_stencil(z, w.getContents(), t, indices);
+        }
+
+
+        //**********************************************************************
+        // for sparse_assign
+        template < typename ZMatrixT,
+                   typename CMatrixT,
+                   typename TMatrixT,
+                   typename RowSequenceT,
+                   typename ColSequenceT,
+                   typename BinaryOpT >
+        void ewise_or_stencil_opt_accum(ZMatrixT           &Z,
+                                        CMatrixT     const &C,
+                                        TMatrixT     const &T,
+                                        RowSequenceT const &row_indices,
+                                        ColSequenceT const &col_indices,
+                                        BinaryOpT           accum)
+        {
+            // If there is an accumulate operation, do nothing with the stencil
+            using ZScalarType = typename ZMatrixT::ScalarType;
+            using ZRowType = std::vector<std::tuple<IndexType,ZScalarType> >;
+
+            ZRowType tmp_row;
+            IndexType nRows(Z.nrows());
+
+            for (IndexType row_idx = 0; row_idx < nRows; ++row_idx)
+            {
+                ewise_or(tmp_row, C[row_idx], T[row_idx], accum);
+                Z.setRow(row_idx, tmp_row);
+            }
+        }
+
+        //**********************************************************************
+        // for sparse_assign
+        template < typename ZMatrixT,
+                   typename CMatrixT,
+                   typename TMatrixT,
+                   typename RowSequenceT,
+                   typename ColSequenceT>
+        void ewise_or_stencil_opt_accum(ZMatrixT           &Z,
+                                        CMatrixT     const &C,
+                                        TMatrixT     const &T,
+                                        RowSequenceT const &row_indices,
+                                        ColSequenceT const &col_indices,
+                                        grb::NoAccumulate)
+        {
+            // If there is no accumulate, we need to annihilate stored values
+            // in C that fall in the stencil
+            using ZScalarType = typename ZMatrixT::ScalarType;
+            using ZRowType = std::vector<std::tuple<IndexType,ZScalarType> >;
+
+            ZRowType tmp_row;
+            IndexType nRows(Z.nrows());
+
+            for (IndexType row_idx = 0; row_idx < nRows; ++row_idx)
+            {
+                if (searchIndices(row_indices, row_idx))
+                {
+                    // Row Stenciled. merge C, T, using col stencil\n";
+                    ewise_or_stencil(tmp_row, C[row_idx], T[row_idx],
+                                     col_indices);
+                    Z.setRow(row_idx, tmp_row);
+                }
+                else
+                {
+                    // Row not stenciled.  Take row from C only
+                    // There should be nothing in T for this row
+                    Z.setRow(row_idx, C[row_idx]);
+                }
+            }
+        }
+
         //********************************************************************
         struct IndexCompare
         {
