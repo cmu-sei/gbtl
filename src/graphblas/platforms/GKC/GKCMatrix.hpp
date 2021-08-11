@@ -834,6 +834,21 @@ namespace grb
                 }
             }
 
+            IndexType * getIA()
+            {
+                return m_offsets.data();
+            }
+
+            IndexType * getJA()
+            {
+                return m_neighbors.data();
+            }
+
+            ScalarT * getVA()
+            {
+                return m_weights.data();
+            }
+
             using idx_iterator = typename std::vector<IndexType>::iterator;
             using wgt_iterator = typename std::vector<WeightType>::iterator;
             // Iterators for neighborhoods

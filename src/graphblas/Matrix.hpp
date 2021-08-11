@@ -266,8 +266,8 @@ namespace grb
             return ostr;
         }
 
-    private:
         BackendType m_mat;
+    private:
 
         // FRIEND FUNCTIONS
 
