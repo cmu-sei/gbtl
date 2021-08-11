@@ -251,7 +251,7 @@ C<!s(M),replace> := C + A'.*B'	32098	289946		96294
 //===============================================
 
 Ubuntu 18.04.1 LTS
-g++ 9.2.1 with -O3
+g++ 9.4.0 with -g (DEBUG BUILD)
 Intel Core i9-9900 @ 3.1GHz, single threaded
 
 $ bin/mxv_timing_demo ../src/demo/triangle_count_data_ca-HepTh.tsv 
@@ -299,4 +299,56 @@ w<!s(m),merge> := A'+.*u      	57484	58238.6	61081	3289	6600
 w<!s(m),replace> := A'+.*u    	57147	58213.1	61082	2804	4356
 w<!s(m),merge> := w + A'+.*u  	57609	58384.5	59870	2804	8712
 w<!s(m),replace> := w + A'+.*u	57385	58397.3	60346	2804	13068
+Results PASSED
+
+//===============================================
+
+Ubuntu 18.04.1 LTS
+g++ 9.4.0 with -03 (RELEASE BUILD)
+Intel Core i9-9900 @ 3.1GHz, single threaded
+
+smcmillan@ubuntu ~/github/gbtl/build_sparse_dense (sparse_dense_dot) $ bin/mxv_timing_demo ../src/demo/triangle_count_data_ca-HepTh.tsv 
+Read 51946 rows.
+#Nodes = 9877
+Running algorithm(s)... M.nvals = 1457
+u.nvals = 942
+OPTIMIZED IMPLEMENTATION: A*u
+Function                      	min	avg	max	w.nvals	checksum
+w := A+.*u                    	164	182.05	383	3289	5104
+w := w + A+.*u                	164	241.05	619	3289	10208
+w<m,merge> := A+.*u           	42	46.85	73	3289	9460
+w<m,replace> := A+.*u         	45	52.55	156	485	748
+w<m,merge> := w + A+.*u       	49	51.2	59	485	1496
+w<m,replace> := w + A+.*u     	49	59.3	131	485	2244
+w<!m,merge> := A+.*u          	160	181.6	353	3289	6600
+w<!m,replace> := A+.*u        	159	211.55	359	2804	4356
+w<!m,merge> := w + A+.*u      	172	196.1	325	2804	8712
+w<!m,replace> := w + A+.*u    	173	187.75	307	2804	13068
+w<s(m),merge> := A+.*u        	41	44.15	58	3289	13816
+w<s(m),replace> := A+.*u      	45	50.25	106	485	748
+w<s(m),merge> := w + A+.*u    	53	65	202	485	1496
+w<s(m),replace> := w + A+.*u  	52	52.85	59	485	2244
+w<!s(m),merge> := A+.*u       	159	195.7	321	3289	6600
+w<!s(m),replace> := A+.*u     	157	168.35	274	2804	4356
+w<!s(m),merge> := w + A+.*u   	173	189.9	310	2804	8712
+w<!s(m),replace> := w + A+.*u 	174	197.55	411	2804	13068
+OPTIMIZED IMPLEMENTATION: A'*u
+w := A'+.*u                   	1009	1146.45	1716	3289	5104
+w := w + A'+.*u               	1033	1219.8	2417	3289	10208
+w<m,merge> := A'+.*u          	1071	1282.65	1807	3289	9460
+w<m,replace> := A'+.*u        	1059	1281.85	2625	485	748
+w<m,merge> := w + A'+.*u      	1061	1309.7	1909	485	1496
+w<m,replace> := w + A'+.*u    	1057	1171.35	1506	485	2244
+w<!m,merge> := A'+.*u         	1290	1900.2	2855	3289	6600
+w<!m,replace> := A'+.*u       	1210	1455.6	2300	2804	4356
+w<!m,merge> := w + A'+.*u     	1250	1462.3	1931	2804	8712
+w<!m,replace> := w + A'+.*u   	1169	1371.7	2054	2804	13068
+w<s(m),merge> := A'+.*u       	1106	1242.75	1654	3289	13816
+w<s(m),replace> := A+.*u      	1095	1299.6	2065	485	748
+w<s(m),merge> := w + A'+.*u   	1087	1182.2	1360	485	1496
+w<s(m),replace> := w + A'+.*u 	1083	1219.45	1627	485	2244
+w<!s(m),merge> := A'+.*u      	1119	1267.95	1899	3289	6600
+w<!s(m),replace> := A'+.*u    	1118	1318.8	2000	2804	4356
+w<!s(m),merge> := w + A'+.*u  	1159	1335.7	1768	2804	8712
+w<!s(m),replace> := w + A'+.*u	1144	1278.3	2076	2804	13068
 Results PASSED

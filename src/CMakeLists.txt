@@ -27,12 +27,24 @@ cmake_minimum_required(VERSION 2.8)
 
 project(GRAPHBLAS_TEMPLATE_LIBRARY_3)
 
+#-------------------------------------------------------------------------------
+# determine build type
+#-------------------------------------------------------------------------------
+
+# For development only, not for end-users:
+# set ( CMAKE_BUILD_TYPE Debug )
+
+if ( NOT CMAKE_BUILD_TYPE )
+    set ( CMAKE_BUILD_TYPE Release )
+endif ( )
+
 # For debugging
 message("CMake SRC: ${CMAKE_SOURCE_DIR}")
 message("Project Name: ${PROJECT_NAME}")
 message("Bin Directory: ${CMAKE_BINARY_DIR}")
 message("Project Name: ${CMAKE_SOURCE_DIR}")
 message("Project Bin Directory: ${PROJECT_BINARY_DIR}")
+message("Build type: ${CMAKE_BUILD_TYPE}")
 
 # Default platform is sequential
 if (NOT PLATFORM)
