@@ -34,6 +34,8 @@ project(GRAPHBLAS_TEMPLATE_LIBRARY_3)
 # For development only, not for end-users:
 # set ( CMAKE_BUILD_TYPE Debug )
 
+# Could also be: RelWithDebInfo
+
 if ( NOT CMAKE_BUILD_TYPE )
     set ( CMAKE_BUILD_TYPE Release )
 endif ( )
