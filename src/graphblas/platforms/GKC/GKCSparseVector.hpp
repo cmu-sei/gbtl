@@ -78,8 +78,10 @@ namespace grb
                     throw InvalidValueException();
                 }
                 m_indices.resize(m_num_vals);
+		m_bitmap.resize(m_num_vals);
                 if (m_weighted)
                     m_weights.resize(m_num_vals);
+		
             }
 
             // Create GKC Sparse Vector with default weight/value
@@ -98,7 +100,8 @@ namespace grb
                 // Fill with ascending indices
                 for (auto idx = 0; idx < m_num_vals; idx++){
                     m_indices[idx] = idx;
-                }
+		    m_bitmap[idx] = true;
+                }		
                 // Is iota as good (and parallelizable) as the above loop?
                 //std::iota(m_indices.begin(), m_indices.end(), 0);
             }
@@ -110,7 +113,8 @@ namespace grb
                   m_indices(rhs.m_indices),
                   m_weights(rhs.m_weights),
                   m_num_stored_vals(rhs.m_num_stored_vals),
-                  m_sorted(rhs.m_sorted)
+                  m_sorted(rhs.m_sorted),
+		  m_bitmap(rhs.m_bitmap)
             {
             }
 
@@ -127,15 +131,19 @@ namespace grb
                 m_weighted = true;
                 m_indices.resize(m_num_vals);
                 m_weights.resize(m_num_vals);
+		m_bitmap.resize(m_num_vals);
                 m_num_stored_vals = 0;
                 
                 /// @todo: parallelize?
                 // Copy values from dense vector into sparse
+		/*
                 for (auto idx = 0; idx < m_num_vals; idx++){
                     m_indices[m_num_stored_vals] = idx;
                     m_weights[m_num_stored_vals] = val[idx];
                     m_num_stored_vals ++;
                 }
+		
+		*/
             }
 
             // Constructor - sparse from dense vector, removing specifed implied zeros
@@ -149,6 +157,7 @@ namespace grb
                 m_weighted = true;
                 m_indices.resize(m_num_vals);
                 m_weights.resize(m_num_vals);
+                m_bitmap.resize(m_num_vals);		
                 m_num_stored_vals = 0;
                 
                 /// @todo: parallelize?
@@ -158,7 +167,8 @@ namespace grb
                     if (val[idx] != zero)
                     {
                         m_indices[m_num_stored_vals] = idx;
-                        m_weights[m_num_stored_vals] = val[idx];
+                        m_weights[idx] = val[idx];
+			m_bitmap[idx] = val[idx];
                         m_num_stored_vals ++;
                     }
                 }
@@ -239,6 +249,7 @@ namespace grb
                     m_weighted = rhs.m_weighted;
                     m_indices = rhs.m_indices;
                     m_weights = rhs.m_weights;
+		    m_bitmap = rhs.m_bitmap;
                 }
                 return *this;
             }
@@ -256,7 +267,8 @@ namespace grb
                 m_num_vals = rhs.size();
                 m_num_stored_vals = rhs.nvals();
                 m_weighted = rhs.isWeighted();
-
+		//m_bitmap = rhs.m_bitmap();
+		
                 auto idx_itr = rhs.idxBegin();
                 auto wgt_itr = rhs.wgtBegin();
                 size_t idx = 0;
@@ -282,7 +294,8 @@ namespace grb
                     m_num_stored_vals = std::move(rhs.m_num_stored_vals);
                     m_weighted =        std::move(rhs.m_weighted);
                     m_indices =         std::move(rhs.m_indices);
-                    m_weights =         std::move(rhs.m_weights); 
+                    m_weights =         std::move(rhs.m_weights);
+		    m_bitmap = std::move(rhs.m_bitmap);
                 }
                 return *this;
             }
@@ -293,7 +306,8 @@ namespace grb
                 std::swap(m_num_stored_vals, rhs.m_num_stored_vals);
                 std::swap(m_weighted, rhs.m_weighted);
                 std::swap(m_indices, rhs.m_indices);
-                std::swap(m_weights, rhs.m_weights); 
+                std::swap(m_weights, rhs.m_weights);
+                std::swap(m_bitmap, rhs.m_bitmap); 		
             }
 
             // EQUALITY OPERATORS
@@ -391,6 +405,9 @@ namespace grb
                 /// @todo make atomic? transactional?
                 m_num_stored_vals = 0;
                 m_sorted = true;
+
+		for (int i = 0; i != size(); ++i)
+		  m_bitmap[i] = false;
             }
 
             IndexType size() const { return m_num_vals; }
@@ -403,6 +420,7 @@ namespace grb
              * @param[in]  new_num_cols  New number of columns (zero is invalid)
              *
              */
+	  /*
             void resize(IndexType new_size)
             {
                 // Invalid values check by frontend
@@ -436,9 +454,10 @@ namespace grb
                     }
                 } 
             }
-
+	  */
             bool hasElement(IndexType index) const
             {
+	      /*
                 if (index >= m_num_vals)
                 {
                     throw IndexOutOfBoundsException();
@@ -449,6 +468,8 @@ namespace grb
                     if (vidx == index) return true;
                 }
                 return false;
+	      */
+	      return m_bitmap[index];
             }
 
             ScalarT extractElement(IndexType index) const
@@ -461,6 +482,15 @@ namespace grb
                 {
                     throw IndexOutOfBoundsException();
                 }
+
+		if (!m_bitmap[index])
+		  throw NoValueException();
+		else if (m_weighted)
+		  return m_weights[index];
+		else
+		  return (ScalarT)1; //this should throw unweighted exception.
+
+		/*
                 for (size_t idx = 0; idx < m_num_stored_vals; idx++)
                 {
                     auto vidx = m_indices[idx];
@@ -478,6 +508,7 @@ namespace grb
                 }
                 // No value found; throw error
                 throw NoValueException();
+		*/
             }
             
             bool boolExtractElement(IndexType index, ScalarT & val) const
@@ -490,6 +521,8 @@ namespace grb
                 {
                     throw IndexOutOfBoundsException();
                 }
+		
+		/*
                 for (size_t idx = 0; idx < m_num_stored_vals; idx++)
                 {
                     auto vidx = m_indices[idx];
@@ -507,7 +540,13 @@ namespace grb
                     }
                 }
                 val = (ScalarT)1;
-                return false;
+		*/
+		
+		if (m_bitmap[index] && m_weighted)
+		    val = m_weights[index];		
+		else
+		    val = (ScalarT)1;
+                return m_bitmap[index];//false;
             }
 
             void setElement(IndexType index, ScalarT const &new_val)
@@ -516,6 +555,16 @@ namespace grb
                 {
                     throw IndexOutOfBoundsException();
                 }
+
+		auto idx = index;
+
+		if (!m_bitmap[idx])
+		  m_num_stored_vals++;
+		
+		m_weights[idx] = new_val;
+		m_bitmap[idx] = true;
+		
+		/*
                 for (size_t idx = 0; idx < m_num_stored_vals; idx++)
                 {
                     auto vidx = m_indices[idx];
@@ -534,6 +583,7 @@ namespace grb
                 }
                 m_num_stored_vals++;
                 // Todo: add a sorted or not sorted flag
+		*/		
             }
 
             template <typename BinaryOpT, typename ZScalarT> 
@@ -547,6 +597,32 @@ namespace grb
                 {
                     throw InvalidIndexException("Mismatch in internal vector size and size of vector.");
                 }
+
+		if (m_bitmap[index])
+		  {
+		    if (m_weighted){
+		      m_weights[index] = op(m_weights[index], new_val);
+		    }
+		    else{
+		      //no weights reqiured
+		    }
+		  }
+		else{
+		  m_bitmap[index] = true;
+		  if (m_weighted){
+                    // Make sure to correctly cast for the output of the operation, 
+                    // which in mxv is not the same as the reduction (additive) output.
+                    using ZType = decltype(op(
+                         std::declval<ScalarT>(),
+                         std::declval<ZScalarT>()
+					      ));
+                    m_weights[index] = (ZType)new_val;
+		  }
+		  m_num_stored_vals++;
+		  
+		}
+		
+		/*
                 for (size_t idx = 0; idx < m_num_stored_vals; idx++)
                 {
                     auto vidx = m_indices[idx];
@@ -571,6 +647,7 @@ namespace grb
                 }
                 m_num_stored_vals++;
                 // Todo: add a sorted or not sorted flag
+		*/
             }
 
             void removeElement(IndexType index)
@@ -579,6 +656,7 @@ namespace grb
                 {
                     throw IndexOutOfBoundsException();
                 }
+		/*
                 // Step 1: find element
                 if (index > m_num_vals)
                 {
@@ -609,8 +687,12 @@ namespace grb
                         return;
                     }
                 }
+		*/
                 // No value found; throw error
-                throw NoValueException();
+		if (!m_bitmap[index])
+		  throw NoValueException();
+		else
+		  m_bitmap[index] = false;
                 // Todo: add a sorted or not sorted flag
             }
 
@@ -625,6 +707,14 @@ namespace grb
                 {
                     throw IndexOutOfBoundsException();
                 }
+
+		bool was_set = m_bitmap[index];
+		if (was_set){
+		  m_num_stored_vals -= 1;
+		  was_set = false;
+		}
+		
+		/*
                 for (size_t idx = 0; idx < m_num_stored_vals; idx++)
                 {
                     auto vidx = m_indices[idx];
@@ -650,16 +740,21 @@ namespace grb
                         return true;
                     }
                 }
+		*/
+		
                 // No value found; return false
-                return false; 
+                return was_set; 
                 // Todo: add a sorted or not sorted flag
             }
-
+	  /*
             template<typename RAIteratorIT,
                      typename RAIteratorVT>
             void extractTuples(RAIteratorIT        i_it,
                                RAIteratorVT        v_it) const
             {
+
+	      
+	      
                 for (IndexType idx = 0; idx < m_num_stored_vals; ++idx)
                 {
                     *i_it = m_indices[idx];
@@ -670,12 +765,15 @@ namespace grb
                         ++v_it;
                     }
                 }
+	      
             }
+	  */
 
             bool isWeighted() const {return m_weighted;}
             bool isSorted() const {return m_sorted;}
             void setUnsorted() {m_sorted = false;}
 
+	  
             void truncateNVals(size_t num_to_remove)
             {
                 if (num_to_remove <= m_num_stored_vals)
@@ -683,6 +781,7 @@ namespace grb
                 else
                     m_num_stored_vals = 0;
             }
+	  
 
             // Note: this has to be const because changes to it could break 
             // the weights vector. 
@@ -708,14 +807,32 @@ namespace grb
             // Iterators for neighborhoods
             inline idx_iterator idxBegin() {return m_indices.begin(); }
             inline wgt_iterator wgtBegin() {return m_weights.begin(); }
-            inline idx_iterator idxEnd()   {return m_indices.begin() + m_num_stored_vals; }
-            inline wgt_iterator wgtEnd()   {return m_weights.begin() + m_num_stored_vals; }
+	  inline idx_iterator idxEnd()   {return m_indices.end();}//begin() + m_num_stored_vals; }
+	  inline wgt_iterator wgtEnd()   {return m_weights.end();}//begin() + m_num_stored_vals; }
             // Const versions 
             inline const idx_iterator idxBegin() const {return m_indices.begin(); }
             inline const wgt_iterator wgtBegin() const {return m_weights.begin(); }
-            inline const idx_iterator idxEnd()   const {return m_indices.begin() + m_num_stored_vals; }
-            inline const wgt_iterator wgtEnd()   const {return m_weights.begin() + m_num_stored_vals; }
+	  inline const idx_iterator idxEnd()   const {return m_indices.end();}//begin() + m_num_stored_vals; }
+	  inline const wgt_iterator wgtEnd()   const {return m_weights.end();}//begin() + m_num_stored_vals; }
 
+
+
+	    ScalarT operator[](idx_iterator idx)
+	    {
+	      //if (m_bitmap[*idx])
+	      //return m_weights[*idx];
+	      return extractElement(*idx);
+	    }
+
+	  
+	    ScalarT operator[](IndexType idx) const
+	    {
+	      //if (m_bitmap[*idx])
+	      //return m_weights[*idx];
+	      return extractElement(idx);
+	    }
+	  
+	  
             void sortSelf() const // note const because sorting doesn't semantically change the vector.
             {
                 std::vector<size_t> permutation(m_num_stored_vals);
@@ -796,6 +913,8 @@ namespace grb
             // Two array compressed sparse vector
             mutable std::vector<IndexType> m_indices;
             mutable std::vector<ScalarType> m_weights;
+
+  	    mutable std::vector<bool> m_bitmap;
         };
 
     } // namespace backend

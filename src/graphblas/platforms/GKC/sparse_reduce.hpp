@@ -178,9 +178,12 @@ namespace grb
                 {
                     if (u.isWeighted())
                     {
-                        for (auto uitr = u.wgtBegin(); uitr < u.wgtEnd(); uitr++){
-                            t = op(t, *uitr);
-                        }
+		      //                        for (auto uitr = u.wgtBegin(); uitr < u.wgtEnd(); uitr++){
+		      //                            t = op(t, *uitr);
+		      //                        }
+		      for (auto uitr = 0; uitr != u.size(); ++uitr)
+			if (u.hasElement(uitr))
+			  t = op(t, u[uitr]);
                     }
                 }
 

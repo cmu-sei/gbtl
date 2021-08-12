@@ -96,10 +96,12 @@ namespace grb
                 {
                     if (outp == REPLACE)
                     {
+		      /*		      
 #define V2_REPLACE_DELETE 1
 #if V2_REPLACE_DELETE
                         intersect_delete(mask, w);
 #else
+		      */
                         // If we have a mask and the output control is REPLACE, delete
                         // pre-existing elements not in the mask
                         for (auto idx = 0; idx < w.size(); idx++)
@@ -112,7 +114,7 @@ namespace grb
                                     w.boolRemoveElement(idx);
                             }
                         }
-#endif
+			//#endif
                     } // Otherwise, if Merging, just leave values in place.
                 }
             }
@@ -140,60 +142,34 @@ namespace grb
                         my_timer.start();
 #endif
                         auto AIst = A.idxBegin(row_idx);
-                        auto AInd = A.idxEnd(row_idx);
+			auto AInd = A.idxEnd(row_idx);
                         auto AWst = A.wgtBegin(row_idx);
-                        auto AWnd = A.wgtEnd(row_idx);
-                        auto UIst = u.idxBegin();
-                        auto UInd = u.idxEnd();
-                        auto UWst = u.wgtBegin();
-                        auto UWnd = u.wgtEnd();
+			//                        auto AWnd = A.wgtEnd(row_idx);
+			//                        auto UIst = u.idxBegin();
+			//                        auto UInd = u.idxEnd();
+			
+			//                        auto UWst = u.wgtBegin();
+			//                        auto UWnd = u.wgtEnd();
                         // Do dot product here, into w directly
                         bool value_set = false;
                         TScalarType sum;
-                        while (AIst < AInd && UIst < UInd)
-                        {
-                            if (*AIst == *UIst)
-                            {
-                                sum = op.mult(*AWst, *UWst);
-                                value_set = true;
-                                AIst++;
-                                AWst++;
-                                UIst++;
-                                UWst++;
-                                break;
-                            }
-                            else if (*AIst < *UIst)
-                            {
-                                AIst++;
-                                AWst++;
-                            }
-                            else
-                            {
-                                UIst++;
-                                UWst++;
-                            }
-                        }
-                        while (AIst < AInd && UIst < UInd)
-                        {
-                            if (*AIst == *UIst)
-                            {
-                                sum = op.add(sum, op.mult(*AWst, *UWst));
-                                AIst++;
-                                AWst++;
-                                UIst++;
-                                UWst++;
-                            }
-                            else if (*AIst < *UIst)
-                            {
-                                AIst++;
-                                AWst++;
-                            }
-                            else
-                            {
-                                UIst++;
-                                UWst++;
-                            }
-                        }
+			
+			for (auto AIst = A.idxBegin(row_idx);
+			     AIst != AInd;
+			     ++AIst, ++AWst)
+			  {			    
+			    if (u.hasElement(*AIst)){
+			      auto uw = u[*AIst];
+			      if (value_set)
+				sum = op.add(sum, op.mult(*AWst, uw));
+			      else
+				{
+				  sum = op.mult(*AWst, uw);
+				  value_set = true;
+				}
+			    }
+			  }
+
                         // Dot end
 #ifdef INST_TIMING_MVX
                         my_timer.stop();
@@ -216,7 +192,7 @@ namespace grb
                         {
                             if constexpr (std::is_same_v<AccumT, NoAccumulate>)
                             {
-                                w.boolRemoveElement(row_idx);
+			      w.boolRemoveElement(row_idx);
                             }
                         }
                     }
@@ -266,6 +242,9 @@ namespace grb
             // w = [!m.*w]+U {[m.*w]+m.*(A'*u)}
             auto const &A(AT.m_mat);
 
+	    vxm(w, mask, accum, op, u, A, outp);
+	    /*
+	    
             // =================================================================
             // Use axpy approach with the semi-ring.
             using TScalarType = typename SemiringT::result_type;
@@ -309,7 +288,7 @@ namespace grb
                     {
                         if (!mask_vec[idx]) // Can reverse for complement?
                         {
-                            w.boolRemoveElement(idx);
+			  w.boolRemoveElement(idx);
                         }
                     }
                 } // Otherwise, if Merging, just leave values in place.
@@ -388,6 +367,7 @@ namespace grb
                 }
             }
             w.setUnsorted();
+	    */
         }
     } // backend
 } // grb

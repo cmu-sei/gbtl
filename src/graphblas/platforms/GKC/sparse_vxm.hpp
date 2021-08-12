@@ -32,6 +32,7 @@
 #include <vector>
 #include <iterator>
 #include <iostream>
+#include <bitset>
 #include <graphblas/algebra.hpp>
 
 #include "sparse_helpers.hpp"
@@ -44,7 +45,8 @@ namespace grb
     {
         //********************************************************************
         /// Implementation of 4.3.2 vxm: u * A
-        //********************************************************************
+      //********************************************************************
+      
         template<typename WVectorT,
                  typename MaskT,
                  typename AccumT,
@@ -100,7 +102,8 @@ namespace grb
         //********************************************************************
         /// Implementation of 4.3.2 vxm: u * A'
         //********************************************************************
-        template<typename WVectorT,
+      
+      template<typename WVectorT,
                  typename MaskT,
                  typename AccumT,
                  typename SemiringT,
@@ -116,7 +119,7 @@ namespace grb
         {
             GRB_LOG_VERBOSE("w<M,z> := u +.* A'");
             auto const &A(AT.m_mat);
-
+	    
             // =================================================================
             // Do the basic dot-product work with the semi-ring.
             using TScalarType = typename SemiringT::result_type;
@@ -152,8 +155,9 @@ namespace grb
             // =================================================================
             // Copy Z into the final output, w, considering mask and replace/merge
             write_with_opt_mask_1D(w, z, mask, outp);
+	    
         }
-
+      
         //**********************************************************************
         /// Implementation for vxm with GKC Matrix and GKC Sparse Vector: u * A
         //**********************************************************************
@@ -171,8 +175,118 @@ namespace grb
                         OutputControlEnum outp)
         {
             // Shortcut to the equivalent mxv
-            mxv(w, mask, accum, op, grb::TransposeView(A), u, outp);
-        }
+	    //   mxv(w, mask, accum, op, grb::TransposeView(A), u, outp);
+	    //	 std::cout<<"DEFAULT AXPY"<<std::endl;
+
+	    //this needs to be default axpy implementation
+	  std::vector<bool> accum_val(w.size(), false);
+	  //	  accum_val.resize(w.size());
+	    
+	  if ((A.nvals() > 0) && (u.nvals() > 0)){
+	  
+	    if constexpr (std::is_same_v<AccumT, grb::NoAccumulate>)
+	      {
+		if constexpr (std::is_same_v<MaskT, grb::NoMask>)
+		  {
+                    w.clear();
+		  }
+		else  //these is a mask, but no accumulate
+		  {
+		    if (outp == REPLACE)
+		      w.clear();		    
+		  }
+	      }
+	    else
+	      {
+		if constexpr (!std::is_same_v<MaskT, grb::NoMask>)
+		  {  //accumulate && mask
+
+		    if (outp == REPLACE)
+		      {
+			//remove all elements that are not in mask
+			for (auto idx = 0; idx < w.size(); idx++)
+			  {
+                            using MaskTypeT = typename MaskT::ScalarType;
+                            MaskTypeT val;
+                            if (!mask.boolExtractElement(idx, val))
+			      {
+                                if (!val)
+				  w.boolRemoveElement(idx);
+			      }
+			  }
+		      }
+		  }
+	      }
+	    
+	    for (IndexType idx = 0; idx != u.size(); ++idx)
+	      {
+		if (u.hasElement(idx)){ 
+		  
+		  ScalarT uw = u[idx];		  
+		  
+		  for (auto aitr = A.idxBegin(idx), awitr = A.wgtBegin(idx);
+		       aitr != A.idxEnd(idx); ++aitr, ++awitr)
+		    {
+		      if constexpr (std::is_same_v<MaskT, grb::NoMask>)
+			{
+			  if (w.hasElement(*aitr))
+			    {
+			      ScalarT val = op.add(w[*aitr], op.mult(*awitr, uw));
+			      w.setElement(*aitr, val);
+			    }
+			  else
+			    {
+			      ScalarT val = op.mult(*awitr, uw);
+			      w.setElement(*aitr, val);
+			    }
+			}
+		      else
+			{  // masked cases
+			  //case: M !A R
+			  //case: M !A !R
+			  if constexpr (std::is_same_v<AccumT, grb::NoAccumulate>)
+			    {
+			      if (mask.hasElement(*aitr))
+				{
+				  if (w.hasElement(*aitr)  && 
+				      (outp == REPLACE || accum_val[*aitr])
+				      )
+				    {
+				      ScalarT val = op.add(w[*aitr], op.mult(*awitr, uw));
+				      w.setElement(*aitr, val);
+				    }
+				  else{
+				    ScalarT val = op.mult(*awitr, uw);
+				    w.setElement(*aitr, val);
+				    if (outp != REPLACE)
+				      accum_val[*aitr] = true;				    
+				  }
+				}
+			    }
+			  else
+			    { //mask accum version
+			      if (mask.hasElement(*aitr))
+				{
+				  if (w.hasElement(*aitr))
+				    {
+				      ScalarT val = op.add(w[*aitr], op.mult(*awitr, uw));
+				      w.setElement(*aitr, val);
+				    }
+				  else
+				    {
+				      ScalarT val = op.mult(*awitr, uw);
+				      w.setElement(*aitr, val);
+				    }
+				  
+				}
+			    }
+
+			}
+		    }
+		}	      
+	      }
+	  }
+	}
 
         //**********************************************************************
         /// Implementation of vxm for GKC Matrix and Sparse Vector: u * A'
