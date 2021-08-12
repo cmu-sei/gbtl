@@ -247,6 +247,7 @@ int main(int argc, char **argv)
     //===================
     // A*u
     //===================
+    /*
     std::cout << "RAW DENSE GKC: A*u" << std::endl;
     std::cout << "Function                      \tmin\tavg\tmax\tw.nvals\tchecksum\n";
 
@@ -296,7 +297,59 @@ int main(int argc, char **argv)
               << "\t" << num_vals << "\t" << count << std::endl;
 
     //----------
+    */
 
+    //===================
+    // A*u
+    //===================
+    std::cout << "RAW SPARSE GKC: A*u" << std::endl;
+    std::cout << "Function                      \tmin\tavg\tmax\tw.nvals\tchecksum\n";
+
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        //w = wtmp;
+        vec2_elems = 0;
+        for (size_t idx = 0; idx < NUM_NODES; idx++)
+        {
+            vec2_dense[idx] = 0;
+            vec2_bmap[idx] = 0;
+            vec2_elems = 0;
+        }
+        my_timer.start();
+        // mxv(w, NoMask(), NoAccumulate(),
+        //     ArithmeticSemiring<double>(),
+        //     A, u);
+        dot_kernel_bfs(A.m_mat.getIA(), A.m_mat.getJA(), A.m_mat.getVA(), NUM_NODES, 
+                         vec1_dense, vec2_dense, vec1_sparse, vec2_sparse, vec1_elems, vec2_elems);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    // wtmp = w;
+    // vec2_elems = 0;
+    // for (size_t idx = 0; idx < NUM_NODES; idx++)
+    // {
+    //     vec2_dense[idx] = 0;
+    // }
+    // reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
+    // T num_vals = w.nvals();
+    num_vals = vec2_elems;
+    reduc_total = 0;
+    for (size_t idx = 0; idx < vec2_elems; idx++)
+    {
+        reduc_total += vec2_dense[vec2_sparse[idx]];
+    }
+    count = reduc_total;
+    std::cout << "w := A+.*u                    \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << num_vals << "\t" << count << std::endl;
+
+    //----------
+    
     //===================
     // A*u
     //===================
@@ -354,56 +407,6 @@ int main(int argc, char **argv)
     //----------
 
 
-    //===================
-    // A*u
-    //===================
-    std::cout << "RAW SPARSE GKC: A*u" << std::endl;
-    std::cout << "Function                      \tmin\tavg\tmax\tw.nvals\tchecksum\n";
-
-    //----------
-    accum_time=0.; min_time=1.0e38; max_time=0.;
-    for (int ix=0; ix<NUM_TRIALS; ++ix)
-    {
-        //w = wtmp;
-        vec2_elems = 0;
-        for (size_t idx = 0; idx < NUM_NODES; idx++)
-        {
-            vec2_dense[idx] = 0;
-            vec2_bmap[idx] = 0;
-            vec2_elems = 0;
-        }
-        my_timer.start();
-        // mxv(w, NoMask(), NoAccumulate(),
-        //     ArithmeticSemiring<double>(),
-        //     A, u);
-        dot_kernel_bfs(A.m_mat.getIA(), A.m_mat.getJA(), A.m_mat.getVA(), NUM_NODES, 
-                         vec1_dense, vec2_dense, vec1_sparse, vec2_sparse, vec1_elems, vec2_elems);
-        my_timer.stop();
-        double t = my_timer.elapsed();
-        accum_time += t;
-        min_time = std::min(t, min_time);
-        max_time = std::max(t, max_time);
-    }
-    // wtmp = w;
-    // vec2_elems = 0;
-    // for (size_t idx = 0; idx < NUM_NODES; idx++)
-    // {
-    //     vec2_dense[idx] = 0;
-    // }
-    // reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    // T num_vals = w.nvals();
-    num_vals = vec2_elems;
-    reduc_total = 0;
-    for (size_t idx = 0; idx < vec2_elems; idx++)
-    {
-        reduc_total += vec2_dense[vec2_sparse[idx]];
-    }
-    count = reduc_total;
-    std::cout << "w := A+.*u                    \t"
-              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << num_vals << "\t" << count << std::endl;
-
-    //----------
 
     // bool passed = (w == w1);
     // std::cout << "Results " << (passed ? "PASSED" : "FAILED") << std::endl;
