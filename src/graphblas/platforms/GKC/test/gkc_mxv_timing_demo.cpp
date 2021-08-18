@@ -349,8 +349,8 @@ int main(int argc, char **argv)
               << "\t" << w.nvals() << "\t" << count << std::endl;
 
     //----------
+#if 1 // Complement tests for dot
     accum_time=0.; min_time=1.0e38; max_time=0.;
-#if 0
     for (int ix=0; ix<NUM_TRIALS; ++ix)
     {
         w = wtmp;

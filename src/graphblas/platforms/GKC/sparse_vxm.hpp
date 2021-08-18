@@ -41,270 +41,291 @@
 
 namespace grb
 {
-    namespace backend
+  namespace backend
+  {
+    //********************************************************************
+    /// Implementation of 4.3.2 vxm: u * A
+    //********************************************************************
+
+    template <typename WVectorT,
+              typename MaskT,
+              typename AccumT,
+              typename SemiringT,
+              typename UVectorT,
+              typename AMatrixT>
+    inline void vxm(WVectorT &w,
+                    MaskT const &mask,
+                    AccumT const &accum,
+                    SemiringT op,
+                    UVectorT const &u,
+                    AMatrixT const &A,
+                    OutputControlEnum outp)
     {
-        //********************************************************************
-        /// Implementation of 4.3.2 vxm: u * A
-      //********************************************************************
-      
-        template<typename WVectorT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename UVectorT,
-                 typename AMatrixT>
-        inline void vxm(WVectorT          &w,
-                        MaskT       const &mask,
-                        AccumT      const &accum,
-                        SemiringT          op,
-                        UVectorT    const &u,
-                        AMatrixT    const &A,
-                        OutputControlEnum  outp)
+      GRB_LOG_VERBOSE("w<M,z> := u +.* A");
+
+      // =================================================================
+      // Use axpy approach with the semi-ring.
+      using TScalarType = typename SemiringT::result_type;
+      std::vector<std::tuple<IndexType, TScalarType>> t;
+
+      if ((A.nvals() > 0) && (u.nvals() > 0))
+      {
+        for (IndexType row_idx = 0; row_idx < u.size(); ++row_idx)
         {
-            GRB_LOG_VERBOSE("w<M,z> := u +.* A");
+          if (u.hasElement(row_idx) && !A[row_idx].empty())
+          {
+            axpy(t, op, u.extractElement(row_idx), A[row_idx]);
+          }
+        }
+      }
 
-            // =================================================================
-            // Use axpy approach with the semi-ring.
-            using TScalarType = typename SemiringT::result_type;
-            std::vector<std::tuple<IndexType, TScalarType> > t;
+      // =================================================================
+      // Accumulate into Z
+      using ZScalarType = typename std::conditional_t<
+          std::is_same_v<AccumT, NoAccumulate>,
+          TScalarType,
+          decltype(accum(std::declval<typename WVectorT::ScalarType>(),
+                         std::declval<TScalarType>()))>;
 
-            if ((A.nvals() > 0) && (u.nvals() > 0))
+      std::vector<std::tuple<IndexType, ZScalarType>> z;
+      ewise_or_opt_accum_1D(z, w, t, accum);
+
+      // =================================================================
+      // Copy Z into the final output, w, considering mask and replace/merge
+      write_with_opt_mask_1D(w, z, mask, outp);
+    }
+
+    //**********************************************************************
+    //**********************************************************************
+    //**********************************************************************
+
+    //********************************************************************
+    /// Implementation of 4.3.2 vxm: u * A'
+    //********************************************************************
+
+    template <typename WVectorT,
+              typename MaskT,
+              typename AccumT,
+              typename SemiringT,
+              typename AMatrixT,
+              typename UVectorT>
+    inline void vxm(WVectorT &w,
+                    MaskT const &mask,
+                    AccumT const &accum,
+                    SemiringT op,
+                    UVectorT const &u,
+                    TransposeView<AMatrixT> const &AT,
+                    OutputControlEnum outp)
+    {
+      GRB_LOG_VERBOSE("w<M,z> := u +.* A'");
+      auto const &A(AT.m_mat);
+
+      // =================================================================
+      // Do the basic dot-product work with the semi-ring.
+      using TScalarType = typename SemiringT::result_type;
+      std::vector<std::tuple<IndexType, TScalarType>> t;
+
+      if ((A.nvals() > 0) && (u.nvals() > 0))
+      {
+        auto u_contents(u.getContents());
+        for (IndexType row_idx = 0; row_idx < w.size(); ++row_idx)
+        {
+          if (!A[row_idx].empty())
+          {
+            TScalarType t_val;
+            if (dot(t_val, u_contents, A[row_idx], op))
             {
-                for (IndexType row_idx = 0; row_idx < u.size(); ++row_idx)
-                {
-                    if (u.hasElement(row_idx) && !A[row_idx].empty())
-                    {
-                        axpy(t, op, u.extractElement(row_idx), A[row_idx]);
-                    }
-                }
+              t.emplace_back(row_idx, t_val);
             }
-
-            // =================================================================
-            // Accumulate into Z
-            using ZScalarType = typename std::conditional_t<
-                std::is_same_v<AccumT, NoAccumulate>,
-                TScalarType,
-                decltype(accum(std::declval<typename WVectorT::ScalarType>(),
-                               std::declval<TScalarType>()))>;
-
-            std::vector<std::tuple<IndexType, ZScalarType> > z;
-            ewise_or_opt_accum_1D(z, w, t, accum);
-
-            // =================================================================
-            // Copy Z into the final output, w, considering mask and replace/merge
-            write_with_opt_mask_1D(w, z, mask, outp);
+          }
         }
+      }
 
-        //**********************************************************************
-        //**********************************************************************
-        //**********************************************************************
+      // =================================================================
+      // Accumulate into Z
+      using ZScalarType = typename std::conditional_t<
+          std::is_same_v<AccumT, NoAccumulate>,
+          TScalarType,
+          decltype(accum(std::declval<typename WVectorT::ScalarType>(),
+                         std::declval<TScalarType>()))>;
 
-        //********************************************************************
-        /// Implementation of 4.3.2 vxm: u * A'
-        //********************************************************************
-      
-      template<typename WVectorT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename AMatrixT,
-                 typename UVectorT>
-        inline void vxm(WVectorT                      &w,
-                        MaskT                   const &mask,
-                        AccumT                  const &accum,
-                        SemiringT                      op,
-                        UVectorT                const &u,
-                        TransposeView<AMatrixT> const &AT,
-                        OutputControlEnum              outp)
+      std::vector<std::tuple<IndexType, ZScalarType>> z;
+      ewise_or_opt_accum_1D(z, w, t, accum);
+
+      // =================================================================
+      // Copy Z into the final output, w, considering mask and replace/merge
+      write_with_opt_mask_1D(w, z, mask, outp);
+    }
+
+    //**********************************************************************
+    /// Implementation for vxm with GKC Matrix and GKC Sparse Vector: u * A
+    //**********************************************************************
+    // w, mask, and u are vectors. A is a matrix.
+    template <typename AccumT,
+              typename MaskT,
+              typename SemiringT,
+              typename ScalarT>
+    inline void vxm(GKCSparseVector<ScalarT> &w,
+                    MaskT const &mask,
+                    AccumT const &accum,
+                    SemiringT op,
+                    GKCSparseVector<ScalarT> const &u,
+                    GKCMatrix<ScalarT> const &A,
+                    OutputControlEnum outp)
+    {
+      // Shortcut to the equivalent mxv
+      //   mxv(w, mask, accum, op, grb::TransposeView(A), u, outp);
+      //	 std::cout<<"DEFAULT AXPY"<<std::endl;
+
+      //this needs to be default axpy implementation
+      std::vector<bool> accum_val(w.size(), false);
+      //	  accum_val.resize(w.size());
+
+      if ((A.nvals() > 0) && (u.nvals() > 0))
+      {
+
+        if constexpr (std::is_same_v<AccumT, grb::NoAccumulate>)
         {
-            GRB_LOG_VERBOSE("w<M,z> := u +.* A'");
-            auto const &A(AT.m_mat);
-	    
-            // =================================================================
-            // Do the basic dot-product work with the semi-ring.
-            using TScalarType = typename SemiringT::result_type;
-            std::vector<std::tuple<IndexType, TScalarType> > t;
+          if constexpr (std::is_same_v<MaskT, grb::NoMask>)
+          {
+            w.clear();
+          }
+          else //these is a mask, but no accumulate
+          {
+            if (outp == REPLACE)
+              w.clear();
+          }
+        }
+        else
+        {
+          if constexpr (!std::is_same_v<MaskT, grb::NoMask>)
+          { //accumulate && mask
 
-            if ((A.nvals() > 0) && (u.nvals() > 0))
+            if (outp == REPLACE)
             {
-                auto u_contents(u.getContents());
-                for (IndexType row_idx = 0; row_idx < w.size(); ++row_idx)
+              //remove all elements that are not in mask
+              for (auto idx = 0; idx < w.size(); idx++)
+              {
+                bool remove;
+                if constexpr (is_complement_v<MaskT>)
                 {
-                    if (!A[row_idx].empty())
-                    {
-                        TScalarType t_val;
-                        if (dot(t_val, u_contents, A[row_idx], op))
-                        {
-                            t.emplace_back(row_idx, t_val);
-                        }
-                    }
+                  auto inner_mask = mask.m_vec;
+                  using MaskTypeT = typename decltype(mask_inner)::ScalarType;
+                  MaskTypeT val;
+                  remove = mask_inner.boolExtractElement(idx, val);
+                  remove &= val; // Reverse for later logic
                 }
+                else
+                {
+                  using MaskTypeT = typename MaskT::ScalarType;
+                  MaskTypeT val;
+                  remove = !mask.boolExtractElement(idx, val);
+                  remove |= !val;
+                }
+                if (remove)
+                {
+                    w.boolRemoveElement(idx);
+                }
+              }
             }
-
-            // =================================================================
-            // Accumulate into Z
-            using ZScalarType = typename std::conditional_t<
-                std::is_same_v<AccumT, NoAccumulate>,
-                TScalarType,
-                decltype(accum(std::declval<typename WVectorT::ScalarType>(),
-                               std::declval<TScalarType>()))>;
-
-            std::vector<std::tuple<IndexType, ZScalarType> > z;
-            ewise_or_opt_accum_1D(z, w, t, accum);
-
-            // =================================================================
-            // Copy Z into the final output, w, considering mask and replace/merge
-            write_with_opt_mask_1D(w, z, mask, outp);
-	    
+          }
         }
-      
-        //**********************************************************************
-        /// Implementation for vxm with GKC Matrix and GKC Sparse Vector: u * A
-        //**********************************************************************
-        // w, mask, and u are vectors. A is a matrix.
-        template <typename AccumT,
-                  typename MaskT,
-                  typename SemiringT,
-                  typename ScalarT>
-        inline void vxm(GKCSparseVector<ScalarT> &w,
-                        MaskT const &mask,
-                        AccumT const &accum,
-                        SemiringT op,
-                        GKCSparseVector<ScalarT> const &u,
-                        GKCMatrix<ScalarT> const &A,
-                        OutputControlEnum outp)
+        if constexpr (!std::is_same_v<grb::NoMask, MaskT> &&
+                      is_complement_v<MaskT>)
         {
-            // Shortcut to the equivalent mxv
-	    //   mxv(w, mask, accum, op, grb::TransposeView(A), u, outp);
-	    //	 std::cout<<"DEFAULT AXPY"<<std::endl;
-
-	    //this needs to be default axpy implementation
-	  std::vector<bool> accum_val(w.size(), false);
-	  //	  accum_val.resize(w.size());
-	    
-	  if ((A.nvals() > 0) && (u.nvals() > 0)){
-	  
-	    if constexpr (std::is_same_v<AccumT, grb::NoAccumulate>)
-	      {
-		if constexpr (std::is_same_v<MaskT, grb::NoMask>)
-		  {
-                    w.clear();
-		  }
-		else  //these is a mask, but no accumulate
-		  {
-		    if (outp == REPLACE)
-		      w.clear();		    
-		  }
-	      }
-	    else
-	      {
-		if constexpr (!std::is_same_v<MaskT, grb::NoMask>)
-		  {  //accumulate && mask
-
-		    if (outp == REPLACE)
-		      {
-			//remove all elements that are not in mask
-			for (auto idx = 0; idx < w.size(); idx++)
-			  {
-                            using MaskTypeT = typename MaskT::ScalarType;
-                            MaskTypeT val;
-                            if (!mask.boolExtractElement(idx, val))
-			      {
-                                if (!val)
-				  w.boolRemoveElement(idx);
-			      }
-			  }
-		      }
-		  }
-	      }
-	    
-	    for (IndexType idx = 0; idx != u.size(); ++idx)
-	      {
-		if (u.hasElement(idx)){ 
-		  
-		  ScalarT uw = u[idx];		  
-		  
-		  for (auto aitr = A.idxBegin(idx), awitr = A.wgtBegin(idx);
-		       aitr != A.idxEnd(idx); ++aitr, ++awitr)
-		    {
-		      if constexpr (std::is_same_v<MaskT, grb::NoMask>)
-			{
-			  if (w.hasElement(*aitr))
-			    {
-			      ScalarT val = op.add(w[*aitr], op.mult(*awitr, uw));
-			      w.setElement(*aitr, val);
-			    }
-			  else
-			    {
-			      ScalarT val = op.mult(*awitr, uw);
-			      w.setElement(*aitr, val);
-			    }
-			}
-		      else
-			{  // masked cases
-			  //case: M !A R
-			  //case: M !A !R
-			  if constexpr (std::is_same_v<AccumT, grb::NoAccumulate>)
-			    {
-			      if (mask.hasElement(*aitr))
-				{
-				  if (w.hasElement(*aitr)  && 
-				      (outp == REPLACE || accum_val[*aitr])
-				      )
-				    {
-				      ScalarT val = op.add(w[*aitr], op.mult(*awitr, uw));
-				      w.setElement(*aitr, val);
-				    }
-				  else{
-				    ScalarT val = op.mult(*awitr, uw);
-				    w.setElement(*aitr, val);
-				    if (outp != REPLACE)
-				      accum_val[*aitr] = true;				    
-				  }
-				}
-			    }
-			  else
-			    { //mask accum version
-			      if (mask.hasElement(*aitr))
-				{
-				  if (w.hasElement(*aitr))
-				    {
-				      ScalarT val = op.add(w[*aitr], op.mult(*awitr, uw));
-				      w.setElement(*aitr, val);
-				    }
-				  else
-				    {
-				      ScalarT val = op.mult(*awitr, uw);
-				      w.setElement(*aitr, val);
-				    }
-				  
-				}
-			    }
-
-			}
-		    }
-		}	      
-	      }
-	  }
-	}
-
-        //**********************************************************************
-        /// Implementation of vxm for GKC Matrix and Sparse Vector: u * A'
-        //**********************************************************************
-        template <typename MaskT,
-                  typename AccumT,
-                  typename SemiringT,
-                  typename ScalarT>
-        inline void vxm(GKCSparseVector<ScalarT> &w,
-                        MaskT const &mask,
-                        AccumT const &accum,
-                        SemiringT op,
-                        GKCSparseVector<ScalarT> const &u,
-                        TransposeView<GKCMatrix<ScalarT>> const &AT,
-                        OutputControlEnum outp)
-        {
-            // Shortcut to the equivalent mxv
-            mxv(w, mask, accum, op, AT.m_mat, u, outp);
+          auto inner_mask = mask.m_vec;
         }
-    } // backend
+        else
+        {
+          auto inner_mask = mask.m_vec;
+        }
+
+        for (IndexType idx = 0; idx != u.size(); ++idx)
+        {
+          if (u.hasElement(idx))
+          {
+
+            ScalarT uw = u[idx];
+
+            for (auto aitr = A.idxBegin(idx), awitr = A.wgtBegin(idx);
+                 aitr != A.idxEnd(idx); ++aitr, ++awitr)
+            {
+              if constexpr (std::is_same_v<MaskT, grb::NoMask>)
+              {
+                if (w.hasElement(*aitr))
+                {
+                  ScalarT val = op.add(w[*aitr], op.mult(*awitr, uw));
+                  w.setElement(*aitr, val);
+                }
+                else
+                {
+                  ScalarT val = op.mult(*awitr, uw);
+                  w.setElement(*aitr, val);
+                }
+              }
+              else
+              { // masked cases
+                //case: M !A R
+                //case: M !A !R
+                if constexpr (std::is_same_v<AccumT, grb::NoAccumulate>)
+                {
+                  if (inner_mask.hasElement(*aitr) && inner_mask.getElement(*aitr))
+                  {
+                    if (w.hasElement(*aitr) &&
+                        (outp == REPLACE || accum_val[*aitr]))
+                    {
+                      ScalarT val = op.add(w[*aitr], op.mult(*awitr, uw));
+                      w.setElement(*aitr, val);
+                    }
+                    else
+                    {
+                      ScalarT val = op.mult(*awitr, uw);
+                      w.setElement(*aitr, val);
+                      if (outp != REPLACE)
+                        accum_val[*aitr] = true;
+                    }
+                  }
+                }
+                else
+                { //mask accum version
+                  if (inner_mask.hasElement(*aitr))
+                  {
+                    if (w.hasElement(*aitr))
+                    {
+                      ScalarT val = op.add(w[*aitr], op.mult(*awitr, uw));
+                      w.setElement(*aitr, val);
+                    }
+                    else
+                    {
+                      ScalarT val = op.mult(*awitr, uw);
+                      w.setElement(*aitr, val);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    //**********************************************************************
+    /// Implementation of vxm for GKC Matrix and Sparse Vector: u * A'
+    //**********************************************************************
+    template <typename MaskT,
+              typename AccumT,
+              typename SemiringT,
+              typename ScalarT>
+    inline void vxm(GKCSparseVector<ScalarT> &w,
+                    MaskT const &mask,
+                    AccumT const &accum,
+                    SemiringT op,
+                    GKCSparseVector<ScalarT> const &u,
+                    TransposeView<GKCMatrix<ScalarT>> const &AT,
+                    OutputControlEnum outp)
+    {
+      // Shortcut to the equivalent mxv
+      mxv(w, mask, accum, op, AT.m_mat, u, outp);
+    }
+  } // backend
 } // grb

@@ -88,36 +88,7 @@ namespace grb
                         w.clear();
                     }
                 }
-            }
-            else
-            {
-                if constexpr (!std::is_same_v<MaskT, grb::NoMask>)
-                // Have accumulate op AND a mask
-                {
-                    if (outp == REPLACE)
-                    {
-		      /*		      
-#define V2_REPLACE_DELETE 1
-#if V2_REPLACE_DELETE
-                        intersect_delete(mask, w);
-#else
-		      */
-                        // If we have a mask and the output control is REPLACE, delete
-                        // pre-existing elements not in the mask
-                        for (auto idx = 0; idx < w.size(); idx++)
-                        {
-                            using MaskTypeT = typename MaskT::ScalarType;
-                            MaskTypeT val;
-                            if (!mask.boolExtractElement(idx, val))
-                            {
-                                if (!val)
-                                    w.boolRemoveElement(idx);
-                            }
-                        }
-			//#endif
-                    } // Otherwise, if Merging, just leave values in place.
-                }
-            }
+            } // Other side is handled at bottom of main for loop.
 
             if ((A.nvals() > 0) && (u.nvals() > 0))
             {
@@ -130,10 +101,28 @@ namespace grb
                     if constexpr (std::is_same_v<MaskT, grb::NoMask>)
                     {
                         do_compute = true;
+                        /// @todo: can a null mask be complemented?
                     }
                     else
                     {
-                        do_compute = mask.hasElement(row_idx);
+                        // Handle two cases: normal mask, complement
+                        if constexpr (is_complement_v<MaskT>)
+                        {
+                            auto mask_inner = mask.m_vec;
+                            using MaskTypeT = typename decltype(mask_inner)::ScalarType;
+                            MaskTypeT test_val;
+                            // do_compute = !mask_inner.hasElement(row_idx);
+                            do_compute = !mask_inner.boolExtractElement(row_idx, test_val);
+                            do_compute |= !(bool)test_val;
+                        }
+                        else // Just a standard vector, no view
+                        {
+                            using MaskTypeT = typename MaskT::ScalarType;
+                            MaskTypeT test_val;
+                            // do_compute = mask.hasElement(row_idx);
+                            do_compute = mask.boolExtractElement(row_idx, test_val);
+                            do_compute &= (bool)test_val;
+                        }
                     }
                     if (do_compute)
                     {
@@ -142,39 +131,40 @@ namespace grb
                         my_timer.start();
 #endif
                         auto AIst = A.idxBegin(row_idx);
-			auto AInd = A.idxEnd(row_idx);
+                        auto AInd = A.idxEnd(row_idx);
                         auto AWst = A.wgtBegin(row_idx);
-			//                        auto AWnd = A.wgtEnd(row_idx);
-			//                        auto UIst = u.idxBegin();
-			//                        auto UInd = u.idxEnd();
-			
-			//                        auto UWst = u.wgtBegin();
-			//                        auto UWnd = u.wgtEnd();
+                        //                        auto AWnd = A.wgtEnd(row_idx);
+                        //                        auto UIst = u.idxBegin();
+                        //                        auto UInd = u.idxEnd();
+
+                        //                        auto UWst = u.wgtBegin();
+                        //                        auto UWnd = u.wgtEnd();
                         // Do dot product here, into w directly
                         bool value_set = false;
                         TScalarType sum;
-			
-			for (auto AIst = A.idxBegin(row_idx);
-			     AIst != AInd;
-			     ++AIst, ++AWst)
-			  {			    
-			    if (u.hasElement(*AIst)){
-			      auto uw = u[*AIst];
-			      if (value_set)
-				sum = op.add(sum, op.mult(*AWst, uw));
-			      else
-				{
-				  sum = op.mult(*AWst, uw);
-				  value_set = true;
-				}
-			    }
-			  }
+
+                        for (auto AIst = A.idxBegin(row_idx);
+                             AIst != AInd;
+                             ++AIst, ++AWst)
+                        {
+                            if (u.hasElement(*AIst))
+                            {
+                                auto uw = u[*AIst];
+                                if (value_set)
+                                    sum = op.add(sum, op.mult(*AWst, uw));
+                                else
+                                {
+                                    sum = op.mult(*AWst, uw);
+                                    value_set = true;
+                                }
+                            }
+                        }
 
                         // Dot end
 #ifdef INST_TIMING_MVX
                         my_timer.stop();
                         dots_time += my_timer.elapsed();
-                        dots ++;
+                        dots++;
 #endif
                         // Handle accumulation:
                         if (value_set)
@@ -192,23 +182,55 @@ namespace grb
                         {
                             if constexpr (std::is_same_v<AccumT, NoAccumulate>)
                             {
-			      w.boolRemoveElement(row_idx);
+                                w.boolRemoveElement(row_idx);
                             }
                         }
                     }
-                    // Not needed, done above:
-                    // else // Not in mask
-                    // {
-                    //     if constexpr (!std::is_same_v<AccumT, NoAccumulate>){
-                    //         if (outp == REPLACE)
-                    //         { // Remove the element in w
-                    //             w.boolRemoveElement(row_idx);
-                    //         }
-                    //     }
-                    // }
+                    else // This side is only taken when not in (complemented) mask
+                    {
+                        // if we have accumulate, outp is REPLACE, and mask is false:
+                        if constexpr (!std::is_same_v<AccumT, grb::NoAccumulate>)
+                        {
+                            if (outp == REPLACE)
+                                w.boolRemoveElement(row_idx);
+                        }
+                    }
                 } // End of fused mxv loop
             }     // End of early exit
-            // w.sortSelf();
+            else  // Need to cleanup values not deleted...
+            {
+                if constexpr (!std::is_same_v<MaskT, grb::NoMask> &&
+                              !std::is_same_v<AccumT, grb::NoAccumulate>)
+                // Have accumulate op AND a mask
+                {
+                    if (outp == REPLACE)
+                    {
+                        // If we have a mask and the output control is REPLACE, delete
+                        // pre-existing elements not in the mask
+                        for (auto idx = 0; idx < w.size(); idx++)
+                        {
+                            bool remove;
+                            if constexpr (is_complement_v<MaskT>)
+                            {
+                                auto mask_inner = mask.m_vec;
+                                using MaskTypeT = typename decltype(mask_inner)::ScalarType;
+                                MaskTypeT val;
+                                remove = mask_inner.boolExtractElement(idx, val);
+                                remove &= val; // Reverse for later logic
+                            }
+                            else // Just a standard vector, no view
+                            {
+                                using MaskTypeT = typename MaskT::ScalarType;
+                                MaskTypeT val;
+                                remove = !mask.boolExtractElement(idx, val);
+                                remove |= !val;
+                            }
+                            if (remove) // Remove if NOT in the mask.
+                                w.boolRemoveElement(idx);
+                        }
+                    } 
+                }
+            }
 #ifdef INST_TIMING_MVX
             my_timer2.stop();
             std::cerr << my_timer2.elapsed() << ", " << dots << ", " << dots_time << std::endl;
@@ -242,8 +264,8 @@ namespace grb
             // w = [!m.*w]+U {[m.*w]+m.*(A'*u)}
             auto const &A(AT.m_mat);
 
-	    vxm(w, mask, accum, op, u, A, outp);
-	    /*
+            vxm(w, mask, accum, op, u, A, outp);
+            /*
 	    
             // =================================================================
             // Use axpy approach with the semi-ring.
