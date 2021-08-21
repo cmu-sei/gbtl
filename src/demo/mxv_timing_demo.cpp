@@ -517,6 +517,10 @@ int main(int argc, char **argv)
     // A'*x
     //===================
     std::cout << "OPTIMIZED IMPLEMENTATION: A'*u" << std::endl;
+
+    // warm up
+    mxv(w1, NoMask(), NoAccumulate(), ArithmeticSemiring<double>(), transpose(AT), u);
+
     w1.clear(); wtmp.clear();
 
     //----------
@@ -769,7 +773,7 @@ int main(int argc, char **argv)
     }
     wtmp = w1;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w<s(m),replace> := A+.*u      \t"
+    std::cout << "w<s(m),replace> := A'+.*u     \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << w1.nvals() << "\t" << count << std::endl;
 

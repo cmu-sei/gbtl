@@ -267,8 +267,8 @@ namespace grb
                 return !(*this == rhs);
             }
 
+        public:
             // METHODS
-
             void clear()
             {
                 m_nvals = 0;
@@ -507,7 +507,93 @@ namespace grb
                 mat.printInfo(os);
                 return os;
             }
+#if 0
+            // =======================================
+            // Iterator class
+            // =======================================
+            // a forward iterator only...for now.
+            class iterator
+            {
+            public:
+                iterator(BitmapSparseVector<ScalarT> &vec,
+                         grb::IndexType               curr = 0) :
+                    m_bsvec(vec), m_curr(curr)
+                {
+                    //std::cout << "Constructed: size = " << m_bsvec.m_size
+                    //          << ", nvals = " << m_bsvec.m_nvals << std::endl;
+                    if (!m_bsvec.m_bitmap[m_curr] && m_curr < m_bsvec.m_size)
+                        advance();
+                    //std::cout << "ctor DONE" << std::endl;
+                }
 
+                std::tuple<grb::IndexType, ScalarT&> operator*()
+                {
+                    return std::tuple<grb::IndexType, ScalarT&>(
+                        m_curr, m_bsvec.m_vals[m_curr]);
+                }
+
+                iterator &operator++()
+                {
+                    //std::cout << "operator++" << std::endl;
+                    advance();
+                    return *this;
+                }
+
+                iterator &operator++(int)
+                {
+                    advance();
+                    return iterator(m_bsvec, m_curr++);
+                }
+
+                bool operator==(iterator const &rhs)
+                {
+                    return (&m_bsvec == &rhs.m_bsvec) && (m_curr == rhs.m_curr);
+                }
+
+                bool operator!=(iterator const &rhs)
+                {
+                    return !operator==(rhs);
+                }
+
+            private:
+                void advance()
+                {
+                    while (++m_curr < m_bsvec.m_size && !m_bsvec.m_bitmap[m_curr])
+                    {
+                        //std::cout << "advanced: " << m_curr << std::endl;
+                    }
+                    //std::cout << "advance DONE: " << m_curr << std::endl;
+                }
+
+            private:
+                BitmapSparseVector<ScalarT> &m_bsvec;
+                grb::IndexType               m_curr;  // current location
+            };
+
+            friend class iterator;
+
+        public:
+            iterator begin()
+            {
+                return iterator(*this);
+            }
+
+            const iterator begin() const
+            {
+                return const_iterator(*this);
+            }
+
+            iterator end()
+            {
+                return iterator(*this, m_size);
+            }
+
+            const iterator end() const
+            {
+                return iterator(*this, m_size);
+            }
+#endif
+        public:
             std::vector<bool>    const &get_bitmap() const { return m_bitmap; }
             std::vector<ScalarT> const &get_vals() const   { return m_vals; }
 

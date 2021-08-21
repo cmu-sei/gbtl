@@ -788,6 +788,8 @@ namespace grb
             }
         }
 
+
+        //**********************************************************************
         //**********************************************************************
         template <typename ZScalarT,
                   typename WScalarT,
@@ -1525,6 +1527,127 @@ namespace grb
         }
 
         //**********************************************************************
+        //**********************************************************************
+        template <typename WScalarT,
+                  typename MaskT,
+                  typename AccumT,
+                  typename TScalarT>
+        void opt_accum_with_opt_mask_1D(BitmapSparseVector<WScalarT>       &w,
+                                        MaskT                              &mask,
+                                        AccumT                              accum,
+                                        BitmapSparseVector<TScalarT> const &t,
+                                        OutputControlEnum                   outp)
+        {
+            for (grb::IndexType idx = 0; idx < w.size(); ++idx)
+            {
+                if (check_mask_1D(mask, idx))
+                {
+                    if (t.hasElementNoCheck(idx))
+                    {
+                        if (w.hasElementNoCheck(idx))
+                        {
+                            w.setElementNoCheck(
+                                idx, accum(w.extractElementNoCheck(idx),
+                                           t.extractElementNoCheck(idx)));
+                        }
+                        else
+                        {
+                            w.setElementNoCheck(idx, t.extractElementNoCheck(idx));
+                        }
+                    }
+                    else
+                    {
+                        w.removeElementNoCheck(idx);
+                    }
+                }
+                else if (outp == REPLACE)
+                {
+                    w.removeElementNoCheck(idx);
+                }
+            }
+        }
+
+        //**********************************************************************
+        template <typename WScalarT,
+                  typename MaskT,
+                  typename TScalarT>
+        void opt_accum_with_opt_mask_1D(BitmapSparseVector<WScalarT>       &w,
+                                        MaskT                              &mask,
+                                        grb::NoAccumulate                   accum,
+                                        BitmapSparseVector<TScalarT> const &t,
+                                        OutputControlEnum                   outp)
+        {
+            for (grb::IndexType idx = 0; idx < w.size(); ++idx)
+            {
+                if (check_mask_1D(mask, idx))
+                {
+                    if (t.hasElementNoCheck(idx))
+                    {
+                        w.setElementNoCheck(idx, t.extractElementNoCheck(idx));
+                    }
+                    else
+                    {
+                        w.removeElementNoCheck(idx);
+                    }
+                }
+                else if (outp == REPLACE)
+                {
+                    w.removeElementNoCheck(idx);
+                }
+            }
+        }
+
+        //**********************************************************************
+        template <typename WScalarT,
+                  typename AccumT,
+                  typename TScalarT>
+        void opt_accum_with_opt_mask_1D(BitmapSparseVector<WScalarT>       &w,
+                                        grb::NoMask                  const &m,
+                                        AccumT                              accum,
+                                        BitmapSparseVector<TScalarT> const &t,
+                                        OutputControlEnum                   outp)
+        {
+            for (grb::IndexType idx = 0; idx < w.size(); ++idx)
+            {
+                if (t.hasElementNoCheck(idx))
+                {
+                    if (w.hasElementNoCheck(idx))
+                    {
+                        w.setElementNoCheck(idx,
+                                            accum(w.extractElementNoCheck(idx),
+                                                  t.extractElementNoCheck(idx)));
+                    }
+                    else
+                    {
+                        w.setElementNoCheck(idx, t.extractElementNoCheck(idx));
+                    }
+                }
+            }
+        }
+
+        //**********************************************************************
+        template <typename WScalarT,
+                  typename TScalarT>
+        void opt_accum_with_opt_mask_1D(BitmapSparseVector<WScalarT>       &w,
+                                        grb::NoMask const &,
+                                        grb::NoAccumulate ,
+                                        BitmapSparseVector<TScalarT> const &t,
+                                        OutputControlEnum )
+        {
+            /// @todo implement move and/or swap when t and w same type
+            /// @todo move/swap the bitmap regardless of type
+
+            w.clear();
+            for (grb::IndexType idx = 0; idx < w.size(); ++idx)
+            {
+                if (t.hasElementNoCheck(idx))
+                {
+                    w.setElementNoCheck(idx, t.extractElementNoCheck(idx));
+                }
+            }
+        }
+
+        //**********************************************************************
         /// accumulate one sparse vector with another (applying op in intersection).
         ///  "xpey = x plus equals y"
         /// vec1 += vec2
@@ -1597,6 +1720,58 @@ namespace grb
                                     std::make_tuple(j, static_cast<CScalarT>(t_j)));
                     ++c_it;
                 }
+            }
+            GRB_LOG_FN_END("axpy");
+        }
+
+        // *******************************************************************
+        /// perform the following operation on sparse vectors implemented as
+        /// vector<tuple<Index, value>>
+        ///
+        /// c += a_ik*b[:]
+        template<typename CScalarT,
+                 typename SemiringT,
+                 typename AScalarT,
+                 typename BScalarT>
+        void axpy(
+            BitmapSparseVector<CScalarT>                       &c,
+            SemiringT                                           semiring,
+            AScalarT                                            a,
+            std::vector<std::tuple<IndexType, BScalarT>> const &b)
+        {
+            GRB_LOG_FN_BEGIN("axpy(dense c)");
+            //auto c_it = c.begin();
+
+            for (auto&& [j, b_j] : b)
+            {
+                GRB_LOG_VERBOSE("j = " << j);
+
+                auto t_j(semiring.mult(a, b_j));
+                GRB_LOG_VERBOSE("temp = " << t_j);
+
+                if (c.hasElementNoCheck(j))
+                {
+                    c.setElementNoCheck(j, semiring.add(c.extractElementNoCheck(j),
+                                                        t_j));
+                }
+                // // scan through C_row to find insert/merge point
+                // if (advance_and_check_tuple_iterator(c_it, c.end(), j))
+                // {
+                //     GRB_LOG_VERBOSE("Accumulating");
+                //     std::get<1>(*c_it) = semiring.add(std::get<1>(*c_it), t_j);
+                //     ++c_it;
+                // }
+                else
+                {
+                    c.setElementNoCheck(j, t_j);
+                }
+                // else
+                // {
+                //     GRB_LOG_VERBOSE("Inserting");
+                //     c_it = c.insert(c_it,
+                //                     std::make_tuple(j, static_cast<CScalarT>(t_j)));
+                //     ++c_it;
+                // }
             }
             GRB_LOG_FN_END("axpy");
         }

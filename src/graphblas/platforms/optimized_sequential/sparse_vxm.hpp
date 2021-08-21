@@ -60,37 +60,7 @@ namespace grb
                         OutputControlEnum  outp)
         {
             GRB_LOG_VERBOSE("w<M,z> := u +.* A");
-
-            // =================================================================
-            // Use axpy approach with the semi-ring.
-            using TScalarType = typename SemiringT::result_type;
-            std::vector<std::tuple<IndexType, TScalarType> > t;
-
-            if ((A.nvals() > 0) && (u.nvals() > 0))
-            {
-                for (IndexType row_idx = 0; row_idx < u.size(); ++row_idx)
-                {
-                    if (u.hasElement(row_idx) && !A[row_idx].empty())
-                    {
-                        axpy(t, op, u.extractElement(row_idx), A[row_idx]);
-                    }
-                }
-            }
-
-            // =================================================================
-            // Accumulate into Z
-            using ZScalarType = typename std::conditional_t<
-                std::is_same_v<AccumT, NoAccumulate>,
-                TScalarType,
-                decltype(accum(std::declval<typename WVectorT::ScalarType>(),
-                               std::declval<TScalarType>()))>;
-
-            std::vector<std::tuple<IndexType, ZScalarType> > z;
-            ewise_or_opt_accum_1D(z, w, t, accum);
-
-            // =================================================================
-            // Copy Z into the final output, w, considering mask and replace/merge
-            write_with_opt_mask_1D(w, z, mask, outp);
+            backend::mxv(w, mask, accum, op, grb::TransposeView<AMatrixT>(A), u, outp);
         }
 
         //**********************************************************************
@@ -115,43 +85,7 @@ namespace grb
                         OutputControlEnum              outp)
         {
             GRB_LOG_VERBOSE("w<M,z> := u +.* A'");
-            auto const &A(AT.m_mat);
-
-            // =================================================================
-            // Do the basic dot-product work with the semi-ring.
-            using TScalarType = typename SemiringT::result_type;
-            std::vector<std::tuple<IndexType, TScalarType> > t;
-
-            if ((A.nvals() > 0) && (u.nvals() > 0))
-            {
-                auto u_contents(u.getContents());
-                for (IndexType row_idx = 0; row_idx < w.size(); ++row_idx)
-                {
-                    if (!A[row_idx].empty())
-                    {
-                        TScalarType t_val;
-                        if (dot(t_val, u_contents, A[row_idx], op))
-                        {
-                            t.emplace_back(row_idx, t_val);
-                        }
-                    }
-                }
-            }
-
-            // =================================================================
-            // Accumulate into Z
-            using ZScalarType = typename std::conditional_t<
-                std::is_same_v<AccumT, NoAccumulate>,
-                TScalarType,
-                decltype(accum(std::declval<typename WVectorT::ScalarType>(),
-                               std::declval<TScalarType>()))>;
-
-            std::vector<std::tuple<IndexType, ZScalarType> > z;
-            ewise_or_opt_accum_1D(z, w, t, accum);
-
-            // =================================================================
-            // Copy Z into the final output, w, considering mask and replace/merge
-            write_with_opt_mask_1D(w, z, mask, outp);
+            backend::mxv(w, mask, accum, op, AT.m_mat, u, outp);
         }
 
     } // backend

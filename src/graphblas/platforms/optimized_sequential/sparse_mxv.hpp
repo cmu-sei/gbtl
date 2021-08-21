@@ -289,7 +289,7 @@ namespace grb
             // =================================================================
             // Use axpy approach with the semi-ring.
             using TScalarType = typename SemiringT::result_type;
-            std::vector<std::tuple<IndexType, TScalarType> > t;
+            BitmapSparseVector<TScalarType> t(w.size());
 
             if ((A.nvals() > 0) && (u.nvals() > 0))
             {
@@ -297,25 +297,20 @@ namespace grb
                 {
                     if (u.hasElementNoCheck(row_idx) && !A[row_idx].empty())
                     {
-                        axpy(t, op, u.extractElement(row_idx), A[row_idx]);
+                        axpy(t, op, u.extractElementNoCheck(row_idx), A[row_idx]);
                     }
                 }
             }
 
             // =================================================================
-            // Accumulate into Z
+            // Accumulate into final output, w, considering mask and replace/merge
             using ZScalarType = typename std::conditional_t<
                 std::is_same_v<AccumT, NoAccumulate>,
                 TScalarType,
                 decltype(accum(std::declval<typename WVectorT::ScalarType>(),
                                std::declval<TScalarType>()))>;
 
-            std::vector<std::tuple<IndexType, ZScalarType> > z;
-            ewise_or_opt_accum_1D(z, w, t, accum);
-
-            // =================================================================
-            // Copy Z into the final output, w, considering mask and replace/merge
-            write_with_opt_mask_1D(w, z, mask, outp);
+            opt_accum_with_opt_mask_1D(w, mask, accum, t, outp);
         }
     } // backend
 } // grb

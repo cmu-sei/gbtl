@@ -65,3 +65,52 @@ w<!s(m),replace> := A'+.*u    	1118	1318.8	2000	2804	4356
 w<!s(m),merge> := w + A'+.*u  	1159	1335.7	1768	2804	8712
 w<!s(m),replace> := w + A'+.*u	1144	1278.3	2076	2804	13068
 Results PASSED
+
+After addressing axpy with Mark and Tze Meng
+
+$ bin/mxv_timing_demo ../src/demo/triangle_count_data_ca-HepTh.tsv 
+Read 51946 rows.
+#Nodes = 9877
+Running algorithm(s)... M.nvals = 1457
+u.nvals = 942
+OPTIMIZED IMPLEMENTATION: A*u
+Function                      	min	avg	max	w.nvals	checksum
+w := A+.*u                    	191	279	744	3289	5104
+w := w + A+.*u                	212	424.5	2261	3289	10208
+w<m,merge> := A+.*u           	65	72.25	111	3289	9460
+w<m,replace> := A+.*u         	59	145	1700	485	748
+w<m,merge> := w + A+.*u       	75	211.45	813	485	1496
+w<m,replace> := w + A+.*u     	68	83.8	135	485	2244
+w<!m,merge> := A+.*u          	191	222.5	368	3289	6600
+w<!m,replace> := A+.*u        	184	214.45	432	2804	4356
+w<!m,merge> := w + A+.*u      	200	236.95	419	2804	8712
+w<!m,replace> := w + A+.*u    	224	467.15	2411	2804	13068
+w<s(m),merge> := A+.*u        	68	164.5	915	3289	13816
+w<s(m),replace> := A+.*u      	62	100.45	762	485	748
+w<s(m),merge> := w + A+.*u    	73	79.35	125	485	1496
+w<s(m),replace> := w + A+.*u  	72	108.3	455	485	2244
+w<!s(m),merge> := A+.*u       	208	252.75	398	3289	6600
+w<!s(m),replace> := A+.*u     	206	316.8	1532	2804	4356
+w<!s(m),merge> := w + A+.*u   	203	266.65	599	2804	8712
+w<!s(m),replace> := w + A+.*u 	220	380.1	1033	2804	13068
+OPTIMIZED IMPLEMENTATION: A'*u
+w := A'+.*u                   	85	123	453	3289	5104
+w := w + A'+.*u               	88	107.05	330	3289	10208
+w<m,merge> := A'+.*u          	88	102.7	275	3289	9460
+w<m,replace> := A'+.*u        	99	104.45	126	485	748
+w<m,merge> := w + A'+.*u      	79	170.15	473	485	1496
+w<m,replace> := w + A'+.*u    	85	225.3	1031	485	2244
+w<!m,merge> := A'+.*u         	98	118.65	169	3289	6600
+w<!m,replace> := A'+.*u       	97	168.45	768	2804	4356
+w<!m,merge> := w + A'+.*u     	97	196.55	671	2804	8712
+w<!m,replace> := w + A'+.*u   	97	114.25	174	2804	13068
+w<s(m),merge> := A'+.*u       	85	106.1	310	3289	13816
+w<s(m),replace> := A'+.*u     	99	113.85	165	485	748
+w<s(m),merge> := w + A'+.*u   	79	93.8	142	485	1496
+w<s(m),replace> := w + A'+.*u 	83	128.2	194	485	2244
+w<!s(m),merge> := A'+.*u      	125	193.25	640	3289	6600
+w<!s(m),replace> := A'+.*u    	104	120.75	243	2804	4356
+w<!s(m),merge> := w + A'+.*u  	99	116.05	334	2804	8712
+w<!s(m),replace> := w + A'+.*u	98	116.3	304	2804	13068
+Results PASSED
+
