@@ -30,7 +30,7 @@
 #include <cstddef>
 #include <type_traits>
 #include <graphblas/detail/config.hpp>
-#include <graphblas/detail/matrix_tags.hpp>
+#include <graphblas/detail/param_unpack.hpp>
 #include <graphblas/types.hpp>
 
 #define GB_INCLUDE_BACKEND_VECTOR 1
@@ -44,7 +44,14 @@ namespace grb
     {
     public:
         using ScalarType = ScalarT;
-        using BackendType = typename backend::Vector<ScalarT, TagsT...>;
+        using BackendType = typename detail::vector_generator::result<
+            ScalarT,
+            detail::SparsenessCategoryTag,
+            TagsT... ,
+            detail::NullTag >::type;
+
+        // current equivalent:
+        //using BackendType = grb::backend::Vector<ScalarT>;
 
         Vector() = delete;
 
