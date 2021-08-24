@@ -35,12 +35,12 @@
 #endif
 
 #if(GB_INCLUDE_BACKEND_MATRIX)
-#include <graphblas/platforms/metall/param_unpack.hpp>
+#include <graphblas/platforms/metall/Matrix.hpp>
 #undef GB_INCLUDE_BACKEND_MATRIX
 #endif
 
 #if(GB_INCLUDE_BACKEND_VECTOR)
-#include <graphblas/platforms/metall/param_unpack.hpp>
+#include <graphblas/platforms/metall/Vector.hpp>
 #undef GB_INCLUDE_BACKEND_VECTOR
 #endif
 
