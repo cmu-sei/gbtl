@@ -157,6 +157,43 @@ namespace grb
       write_with_opt_mask_1D(w, z, mask, outp);
     }
 
+    template <typename VecT>
+    VecT const & get_inner_mask(VectorComplementView<VecT> const & m)
+    {
+      return m.m_vec; 
+    }
+    
+    template <typename VecT>
+    VecT const & get_inner_mask(VectorStructureView<VecT> const & m)
+    {
+      return m.m_vec; 
+    }
+
+    template <typename VecT>
+    VecT const & get_inner_mask(VectorStructuralComplementView<VecT> const & m)
+    {
+      return m.m_vec; 
+    }
+
+    template <typename VecT>
+    VecT const & get_inner_mask(VecT const & m)
+    {
+      return m; 
+    }
+    
+    NoMask const & get_inner_mask(NoMask const & m)
+    {
+      return m; 
+    }
+
+    template <typename T1, typename T2>
+    constexpr bool is_basically_same_t = std::is_same<
+        std::remove_const_t<std::remove_reference<T1>>,
+        std::remove_const_t<std::remove_reference<T2>>>();
+
+    template <typename T>
+    using base_type = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
+
     //**********************************************************************
     /// Implementation for vxm with GKC Matrix and GKC Sparse Vector: u * A
     //**********************************************************************
@@ -180,13 +217,17 @@ namespace grb
       //this needs to be default axpy implementation
       std::vector<bool> accum_val(w.size(), false);
       //	  accum_val.resize(w.size());
+      auto mask_vec = get_inner_mask(mask);
+
+      constexpr bool comp = is_complement_v<MaskT> || is_structural_complement_v<MaskT>;
+      constexpr bool strc = is_structure_v<MaskT> || is_structural_complement_v<MaskT>;
 
       if ((A.nvals() > 0) && (u.nvals() > 0))
       {
 
         if constexpr (std::is_same_v<AccumT, grb::NoAccumulate>)
         {
-          if constexpr (std::is_same_v<MaskT, grb::NoMask>)
+          if constexpr (std::is_same_v<base_type<decltype(mask_vec)>, grb::NoMask>)
           {
             w.clear();
           }
@@ -198,29 +239,28 @@ namespace grb
         }
         else
         {
-          if constexpr (!std::is_same_v<MaskT, grb::NoMask>)
+          if constexpr (!std::is_same_v<base_type<decltype(mask_vec)>, grb::NoMask>)
           { //accumulate && mask
-
+            using MaskTypeT = typename base_type<decltype(mask_vec)>::ScalarType;
             if (outp == REPLACE)
             {
               //remove all elements that are not in mask
               for (auto idx = 0; idx < w.size(); idx++)
               {
                 bool remove;
-                if constexpr (is_complement_v<MaskT>)
+                MaskTypeT val;
+                if constexpr (!strc)
                 {
-                  auto inner_mask = mask.m_vec;
-                  using MaskTypeT = typename decltype(mask_inner)::ScalarType;
-                  MaskTypeT val;
-                  remove = mask_inner.boolExtractElement(idx, val);
-                  remove &= val; // Reverse for later logic
-                }
-                else
-                {
-                  using MaskTypeT = typename MaskT::ScalarType;
-                  MaskTypeT val;
-                  remove = !mask.boolExtractElement(idx, val);
+                  remove = !mask_vec.boolExtractElement(idx, val);
                   remove |= !val;
+                }
+                else 
+                {
+                  remove = !mask_vec.hasElement(idx);
+                }
+                if constexpr (comp)
+                {
+                  remove = !remove;
                 }
                 if (remove)
                 {
@@ -229,15 +269,6 @@ namespace grb
               }
             }
           }
-        }
-        if constexpr (!std::is_same_v<grb::NoMask, MaskT> &&
-                      is_complement_v<MaskT>)
-        {
-          auto inner_mask = mask.m_vec;
-        }
-        else
-        {
-          auto inner_mask = mask.m_vec;
         }
 
         for (IndexType idx = 0; idx != u.size(); ++idx)
@@ -250,7 +281,7 @@ namespace grb
             for (auto aitr = A.idxBegin(idx), awitr = A.wgtBegin(idx);
                  aitr != A.idxEnd(idx); ++aitr, ++awitr)
             {
-              if constexpr (std::is_same_v<MaskT, grb::NoMask>)
+              if constexpr (std::is_same_v<base_type<decltype(mask_vec)>, grb::NoMask>)
               {
                 if (w.hasElement(*aitr))
                 {
@@ -267,9 +298,11 @@ namespace grb
               { // masked cases
                 //case: M !A R
                 //case: M !A !R
+                using MaskTypeT = typename base_type<decltype(mask_vec)>::ScalarType;
+                MaskTypeT val;
                 if constexpr (std::is_same_v<AccumT, grb::NoAccumulate>)
                 {
-                  if (inner_mask.hasElement(*aitr) && inner_mask.getElement(*aitr))
+                  if (comp ^ (mask_vec.boolExtractElement(*aitr, val) && (strc || val)))
                   {
                     if (w.hasElement(*aitr) &&
                         (outp == REPLACE || accum_val[*aitr]))
@@ -288,7 +321,7 @@ namespace grb
                 }
                 else
                 { //mask accum version
-                  if (inner_mask.hasElement(*aitr))
+                  if (comp ^ (mask_vec.boolExtractElement(*aitr, val) && (strc || val)))
                   {
                     if (w.hasElement(*aitr))
                     {

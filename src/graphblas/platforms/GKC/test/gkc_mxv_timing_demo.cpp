@@ -672,7 +672,7 @@ int main(int argc, char **argv)
               << " usec, w1.nvals = " << w1.nvals()
               << " reduce = " << count << std::endl;
 #endif
-#if 0
+#if 1
     my_timer.start();
     mxv(w1, complement(M), NoAccumulate(),
         ArithmeticSemiring<double>(),
@@ -714,7 +714,8 @@ int main(int argc, char **argv)
               << " reduce = " << count << std::endl;
 
     //-----
-
+#endif
+#if 0
     my_timer.start();
     mxv(w1, structure(M), NoAccumulate(),
         ArithmeticSemiring<double>(),

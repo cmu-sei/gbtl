@@ -43,6 +43,44 @@ namespace grb
 {
     namespace backend
     {
+
+        template <typename VecT>
+        VecT const &get_inner_mask_2(VectorComplementView<VecT> const &m)
+        {
+            return m.m_vec;
+        }
+
+        template <typename VecT>
+        VecT const &get_inner_mask_2(VectorStructureView<VecT> const &m)
+        {
+            return m.m_vec;
+        }
+
+        template <typename VecT>
+        VecT const &get_inner_mask_2(VectorStructuralComplementView<VecT> const &m)
+        {
+            return m.m_vec;
+        }
+
+        template <typename VecT>
+        VecT const &get_inner_mask_2(VecT const &m)
+        {
+            return m;
+        }
+
+        NoMask const &get_inner_mask_2(NoMask const &m)
+        {
+            return m;
+        }
+
+        // template <typename T1, typename T2>
+        // constexpr bool is_basically_same_t = std::is_same<
+        //     std::remove_const_t<std::remove_reference<T1>>,
+        //     std::remove_const_t<std::remove_reference<T2>>>();
+
+        template <typename T>
+        using base_type = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
+
         //**********************************************************************
         /// Implementation for mxv with GKC Matrix and GKC Sparse Vector: A * u
         // Designed for general case of masking and with a null or non-null accumulator.
@@ -73,6 +111,11 @@ namespace grb
             GRB_LOG_VERBOSE("w<M,z> := A +.* u");
             // w = [!m.*w]+U {[m.*w]+m.*(A*u)}
             using TScalarType = typename SemiringT::result_type;
+
+            auto mask_vec = get_inner_mask_2(mask);
+
+            constexpr bool comp = is_complement_v<MaskT> || is_structural_complement_v<MaskT>;
+            constexpr bool strc = is_structure_v<MaskT> || is_structural_complement_v<MaskT>;
 
             // Accumulate is null, clear on replace due to null mask (from signature):
             if constexpr (std::is_same_v<AccumT, grb::NoAccumulate>)
@@ -105,24 +148,10 @@ namespace grb
                     }
                     else
                     {
+                        using MaskTypeT = typename base_type<decltype(mask_vec)>::ScalarType;
+                        MaskTypeT val;
                         // Handle two cases: normal mask, complement
-                        if constexpr (is_complement_v<MaskT>)
-                        {
-                            auto mask_inner = mask.m_vec;
-                            using MaskTypeT = typename decltype(mask_inner)::ScalarType;
-                            MaskTypeT test_val;
-                            // do_compute = !mask_inner.hasElement(row_idx);
-                            do_compute = !mask_inner.boolExtractElement(row_idx, test_val);
-                            do_compute |= !(bool)test_val;
-                        }
-                        else // Just a standard vector, no view
-                        {
-                            using MaskTypeT = typename MaskT::ScalarType;
-                            MaskTypeT test_val;
-                            // do_compute = mask.hasElement(row_idx);
-                            do_compute = mask.boolExtractElement(row_idx, test_val);
-                            do_compute &= (bool)test_val;
-                        }
+                        do_compute = (comp ^ (mask_vec.boolExtractElement(row_idx, val) && (strc || val)));
                     }
                     if (do_compute)
                     {
@@ -210,25 +239,27 @@ namespace grb
                         for (auto idx = 0; idx < w.size(); idx++)
                         {
                             bool remove;
-                            if constexpr (is_complement_v<MaskT>)
+                            using MaskTypeT = typename base_type<decltype(mask_vec)>::ScalarType;
+                            MaskTypeT val;
+                            if constexpr (!strc)
                             {
-                                auto mask_inner = mask.m_vec;
-                                using MaskTypeT = typename decltype(mask_inner)::ScalarType;
-                                MaskTypeT val;
-                                remove = mask_inner.boolExtractElement(idx, val);
-                                remove &= val; // Reverse for later logic
-                            }
-                            else // Just a standard vector, no view
-                            {
-                                using MaskTypeT = typename MaskT::ScalarType;
-                                MaskTypeT val;
-                                remove = !mask.boolExtractElement(idx, val);
+                                remove = !mask_vec.boolExtractElement(idx, val);
                                 remove |= !val;
                             }
-                            if (remove) // Remove if NOT in the mask.
+                            else
+                            {
+                                remove = !mask_vec.hasElement(idx);
+                            }
+                            if constexpr (comp)
+                            {
+                                remove = !remove;
+                            }
+                            if (remove)
+                            {
                                 w.boolRemoveElement(idx);
+                            }
                         }
-                    } 
+                    }
                 }
             }
 #ifdef INST_TIMING_MVX
