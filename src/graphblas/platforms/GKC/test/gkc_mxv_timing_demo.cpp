@@ -435,7 +435,7 @@ int main(int argc, char **argv)
 
     //----
     #endif
-    #if 0
+    #if 1
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
     for (int ix=0; ix<NUM_TRIALS; ++ix)
@@ -522,7 +522,7 @@ int main(int argc, char **argv)
 
     //----------
     #endif
-    #if 0
+    #if 1
     accum_time=0.; min_time=1.0e38; max_time=0.;
     for (int ix=0; ix<NUM_TRIALS; ++ix)
     {
@@ -715,7 +715,7 @@ int main(int argc, char **argv)
 
     //-----
 #endif
-#if 0
+#if 1
     my_timer.start();
     mxv(w1, structure(M), NoAccumulate(),
         ArithmeticSemiring<double>(),
