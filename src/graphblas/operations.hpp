@@ -45,8 +45,6 @@
 #include <graphblas/detail/config.hpp>
 #include <graphblas/detail/checks.hpp>
 
-#define GB_INCLUDE_BACKEND_TRANSPOSE_VIEW 1
-#define GB_INCLUDE_BACKEND_COMPLEMENT_VIEW 1
 #define GB_INCLUDE_BACKEND_OPERATIONS 1
 #include <backend_include.hpp>
 
@@ -764,13 +762,13 @@ namespace grb
     }
 
     // 4.3.8.2: matrix variant
-    template<typename PMatrixT,
+    template<typename CScalarT,
              typename MaskT,
              typename AccumT,
              typename UnaryOpT,
              typename AMatrixT,
              typename ...CTagsT>
-    inline void apply(PMatrixT                       &C,
+    inline void apply(Matrix<CScalarT, CTagsT...> &C,
                       MaskT                 const &Mask,
                       AccumT                const &accum,
                       UnaryOpT                     op,
@@ -874,7 +872,7 @@ namespace grb
     }
 
     // 4.3.8.4: matrix binaryop variants
-    template<typename PMatrixT,
+    template<typename CScalarT,
              typename MaskT,
              typename AccumT,
              typename BinaryOpT,
@@ -882,7 +880,7 @@ namespace grb
              typename SecondT,
              typename ...CTagsT>
     inline void apply(
-        PMatrixT             &C,
+        Matrix<CScalarT, CTagsT...> &C,
         MaskT                 const &Mask,
         AccumT                const &accum,
         BinaryOpT                    op,

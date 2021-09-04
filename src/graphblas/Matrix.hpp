@@ -30,7 +30,7 @@
 #include <cstddef>
 #include <type_traits>
 #include <graphblas/detail/config.hpp>
-#include <graphblas/detail/param_unpack.hpp>
+#include <graphblas/detail/matrix_tags.hpp>
 #include <graphblas/types.hpp>
 
 #define GB_INCLUDE_BACKEND_MATRIX 1
@@ -52,20 +52,7 @@ namespace grb
     {
     public:
         using ScalarType = ScalarT;
-
-/*
-        using BackendType = typename detail::matrix_generator::result<
-            ScalarT,
-            detail::SparsenessCategoryTag,
-            detail::DirectednessCategoryTag,
-            TagsT... ,
-            detail::NullTag,
-            detail::NullTag >::type;
-
-
-*/
-        using BackendType = grb::backend::LilSparseMatrix<ScalarT, allocator_t>;
-
+        using BackendType = typename backend::Matrix<ScalarT, allocator_t, TagsT...>;
 
         /**
          * @brief Construct an empty matrix with the specified shape.

@@ -30,9 +30,10 @@ int main(int argc, char **argv)
     my_timer.start();
     {
         std::ifstream infile(pathname);
-        while (infile)
+        while (true)
         {
             infile >> src >> dst;
+            if (infile.eof()) break;
             //std::cout << "Read: " << src << ", " << dst << std::endl;
             if (src > max_id) max_id = src;
             if (dst > max_id) max_id = dst;

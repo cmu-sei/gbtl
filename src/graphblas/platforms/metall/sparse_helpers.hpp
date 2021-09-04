@@ -308,10 +308,10 @@ namespace grb
         //************************************************************************
         /// A reduction of a sparse vector (vector<tuple(index,value)>) using a
         /// binary op or a monoid.
-        template <typename D3, typename BinaryOpT, typename vec_t>
+        template <typename D3, typename vec_t, typename BinaryOpT>
         bool reduction(
             D3                                                &ans,
-            vec_t         const &vec,
+            vec_t         const                               &vec,
             BinaryOpT                                          op)
         {
             if (vec.empty())

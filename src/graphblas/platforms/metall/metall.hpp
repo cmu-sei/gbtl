@@ -27,10 +27,9 @@
 
 #pragma once
 
-#include <graphblas/platforms/metall/Matrix.hpp>
-#include <graphblas/platforms/metall/Vector.hpp>
+#include <graphblas/platforms/metall/BitmapSparseVector.hpp>
+#include <graphblas/platforms/metall/LilSparseMatrix.hpp>
+#include <graphblas/platforms/metall/param_unpack.hpp>
 
 #include <graphblas/platforms/metall/operations.hpp>
 
-#include <graphblas/platforms/metall/BitmapSparseVector.hpp>
-#include <graphblas/platforms/metall/LilSparseMatrix.hpp>

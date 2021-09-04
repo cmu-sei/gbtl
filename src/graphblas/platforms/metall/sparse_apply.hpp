@@ -54,7 +54,7 @@ namespace grb
                  typename UVectorT,
                  typename ...WTagsT>
         inline void apply(
-            grb::backend::Vector<WScalarT, WTagsT...>       &w,
+            grb::backend::BitmapSparseVector<WScalarT, WTagsT...>       &w,
             MaskT                                     const &mask,
             AccumT                                    const &accum,
             UnaryOpT                                         op,
@@ -97,14 +97,14 @@ namespace grb
 
         //**********************************************************************
         // Implementation of 4.3.8.2 Matrix variant of Apply: C<M,z> := op(A)
-        template<typename PMatrixT,
+        template<typename CScalarT,
                  typename MaskT,
                  typename AccumT,
                  typename UnaryOpT,
                  typename AMatrixT,
                  typename ...CTagsT>
         inline void apply(
-            PMatrixT                                           &C,
+            grb::backend::LilSparseMatrix<CScalarT, CTagsT...> &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             UnaryOpT                                         op,
@@ -159,7 +159,7 @@ namespace grb
                  typename AMatrixT,
                  typename ...CTagsT>
         inline void apply(
-            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
+            grb::backend::LilSparseMatrix<CScalarT, CTagsT...>       &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             UnaryOpT                                         op,
@@ -218,7 +218,7 @@ namespace grb
                  typename UVectorT,
                  typename ...WTagsT>
         inline void apply_binop_1st(
-            grb::backend::Vector<WScalarT, WTagsT...>       &w,
+            grb::backend::BitmapSparseVector<WScalarT, WTagsT...>       &w,
             MaskT                                     const &mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -273,7 +273,7 @@ namespace grb
                  typename ValueT,
                  typename ...WTagsT>
         inline void apply_binop_2nd(
-            grb::backend::Vector<WScalarT, WTagsT...>       &w,
+            grb::backend::BitmapSparseVector<WScalarT, WTagsT...>       &w,
             MaskT                                     const &mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -331,7 +331,7 @@ namespace grb
                  typename AMatrixT,
                  typename ...CTagsT>
         inline void apply_binop_1st(
-            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
+            grb::backend::LilSparseMatrix<CScalarT, CTagsT...>       &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -391,7 +391,7 @@ namespace grb
                  typename AMatrixT,
                  typename ...CTagsT>
         inline void apply_binop_1st(
-            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
+            grb::backend::LilSparseMatrix<CScalarT, CTagsT...>       &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -453,7 +453,7 @@ namespace grb
                  typename ValueT,
                  typename ...CTagsT>
         inline void apply_binop_2nd(
-            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
+            grb::backend::LilSparseMatrix<CScalarT, CTagsT...>       &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -515,7 +515,7 @@ namespace grb
                  typename ValueT,
                  typename ...CTagsT>
         inline void apply_binop_2nd(
-            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
+            grb::backend::LilSparseMatrix<CScalarT, CTagsT...>       &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,

@@ -74,9 +74,8 @@ file(GLOB GRAPHBLAS_HEADERS graphblas/*.hpp)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 
-
-# Make demos
-file( GLOB TEST_SOURCES LIST_DIRECTORIES false ${CMAKE_SOURCE_DIR}/demo/metall_demo/*.cpp )
+# Make metall demos
+file( GLOB TEST_SOURCES LIST_DIRECTORIES false ${CMAKE_SOURCE_DIR}/demo/metall_*.cpp )
 foreach( testsourcefile ${TEST_SOURCES} )
     get_filename_component(justname ${testsourcefile} NAME)
     string( REPLACE ".cpp" "" testname ${justname} )
@@ -84,5 +83,5 @@ foreach( testsourcefile ${TEST_SOURCES} )
     add_executable( ${testname} ${testsourcefile} ${GRAPHBLAS_HEADERS})
 endforeach( testsourcefile ${TEST_SOURCES} )
 
-configure_file(${CMAKE_SOURCE_DIR}/demo/metall_demo/facebook_combined.txt ${CMAKE_BINARY_DIR}/bin/facebook_combined.txt COPYONLY)
+configure_file(${CMAKE_SOURCE_DIR}/demo/triangle_count_data_ca-HepTh.tsv ${CMAKE_BINARY_DIR}/bin/triangle_count_data_ca-HepTh.tsv COPYONLY)
 
