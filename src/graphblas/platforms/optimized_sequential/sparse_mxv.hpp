@@ -241,17 +241,17 @@ namespace grb
                                 }
                                 else
                                 {
-                                    z.emplace_back(row_idx, (ZScalarType)t_val);
+                                    z.emplace_back(row_idx,
+                                                   static_cast<ZScalarType>(t_val));
                                 }
                             }
                         }
-                    }
-                    else
-                    {
-                        if ((!std::is_same_v<AccumT, grb::NoAccumulate>) &&
-                            (w.get_bitmap()[row_idx]))
+                        else if ((!std::is_same_v<AccumT, grb::NoAccumulate>) &&
+                                 (w.get_bitmap()[row_idx]))
                         {
-                            z.emplace_back(row_idx, w.get_vals()[row_idx]);
+                            z.emplace_back(
+                                row_idx,
+                                static_cast<ZScalarType>(w.get_vals()[row_idx]));
                         }
                     }
                 }
@@ -283,9 +283,8 @@ namespace grb
                         UVectorT                const &u,
                         OutputControlEnum              outp)
         {
-            GRB_LOG_VERBOSE("w<M,z> := A' +.* u");
+            GRB_LOG_VERBOSE("w<M,r> := A' +.* u");
             auto const &A(AT.m_mat);
-
             // =================================================================
             // Use axpy approach with the semi-ring.
             using TScalarType = typename SemiringT::result_type;
