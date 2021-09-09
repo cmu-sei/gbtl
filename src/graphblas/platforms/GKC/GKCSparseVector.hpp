@@ -894,7 +894,7 @@ namespace grb
             mutable std::vector<IndexType> m_indices;
             mutable std::vector<ScalarType> m_weights;
 
-            mutable std::vector<bool> m_bitmap;
+            mutable std::vector<char> m_bitmap;
         };
 
     } // namespace backend
