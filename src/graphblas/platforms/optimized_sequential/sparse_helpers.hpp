@@ -506,6 +506,7 @@ namespace grb
                 }
             }
         }
+
         //**********************************************************************
         /// Apply element-wise operation to union of 2 sparse vectors, store in 3rd.
         /// ans = op(vec1, vec2)
@@ -587,6 +588,91 @@ namespace grb
                     ans.emplace_back(std::get<0>(*v2_it),
                                      static_cast<D3>(std::get<1>(*v2_it)));
                     ++v2_it;
+                }
+            }
+        }
+
+        //**********************************************************************
+        /// Apply element-wise operation to union of 2 sparse vectors, store in 3rd.
+        /// ans = op(vec1, vec2)
+        ///
+        /// @note ans must be a unique vector from either vec1 or vec2
+        template <typename D1, typename D2, typename D3, typename BinaryOpT>
+        void ewise_or_dense_dense_v1(
+            std::vector<std::tuple<grb::IndexType,D3> >       &ans,
+            BitmapSparseVector<D1>                      const &vec1,
+            BitmapSparseVector<D2>                      const &vec2,
+            BinaryOpT                                          op)
+        {
+            ans.clear();
+
+            // step through all entries of both inputs while there are values
+            grb::IndexType v1_val_count = vec1.nvals();
+            grb::IndexType v2_val_count = vec2.nvals();
+            for (grb::IndexType idx = 0;
+                 idx < vec1.size() && (v1_val_count || v2_val_count);
+                 ++idx)
+            {
+                if (v1_val_count && vec1.get_bitmap()[idx])
+                {
+                    --v1_val_count;
+                    if (v2_val_count && vec2.get_bitmap()[idx])
+                    {
+                        --v2_val_count;
+                        ans.emplace_back(
+                            idx, static_cast<D3>(op(vec1.get_vals()[idx],
+                                                    vec2.get_vals()[idx])));
+                    }
+                    else
+                    {
+                        ans.emplace_back(idx,
+                                         static_cast<D3>(vec1.get_vals()[idx]));
+                    }
+                }
+                else if (v2_val_count && vec2.get_bitmap()[idx])
+                {
+                    --v2_val_count;
+                    ans.emplace_back(idx,
+                                     static_cast<D3>(vec2.get_vals()[idx]));
+                }
+            }
+        }
+
+        //**********************************************************************
+        /// Apply element-wise operation to union of 2 sparse vectors, store in 3rd.
+        /// ans = op(vec1, vec2)
+        ///
+        /// @note ans must be a unique vector from either vec1 or vec2
+        template <typename D1, typename D2, typename D3, typename BinaryOpT>
+        void ewise_or_dense_dense_v2(
+            std::vector<std::tuple<grb::IndexType,D3> >       &ans,
+            BitmapSparseVector<D1>                      const &vec1,
+            BitmapSparseVector<D2>                      const &vec2,
+            BinaryOpT                                          op)
+        {
+            ans.clear();
+
+            // step through all entries of both inputs while there are values
+            for (grb::IndexType idx = 0; idx < vec1.size(); ++idx)
+            {
+                if (vec1.get_bitmap()[idx])
+                {
+                    if (vec2.get_bitmap()[idx])
+                    {
+                        ans.emplace_back(
+                            idx, static_cast<D3>(op(vec1.get_vals()[idx],
+                                                    vec2.get_vals()[idx])));
+                    }
+                    else
+                    {
+                        ans.emplace_back(idx,
+                                         static_cast<D3>(vec1.get_vals()[idx]));
+                    }
+                }
+                else if (vec2.get_bitmap()[idx])
+                {
+                    ans.emplace_back(idx,
+                                     static_cast<D3>(vec2.get_vals()[idx]));
                 }
             }
         }
@@ -832,7 +918,7 @@ namespace grb
             auto v1_it = vec1.begin();
             auto v2_it = vec2.begin();
 
-            // loop through both ordered sets to compute ewise_or
+            // loop through both ordered sets to compute ewise_and
             while ((v1_it != vec1.end()) && (v2_it != vec2.end()))
             {
                 if (std::get<0>(*v2_it) == std::get<0>(*v1_it))
@@ -851,6 +937,31 @@ namespace grb
                 else
                 {
                     ++v2_it;
+                }
+            }
+        }
+
+        //************************************************************************
+        /// Apply element-wise operation to intersection of sparse vectors.
+        template <typename D1, typename D2, typename D3, typename BinaryOpT>
+        void ewise_and_dense_dense_v2(
+            std::vector<std::tuple<grb::IndexType,D3> >       &ans,
+            BitmapSparseVector<D1>                      const &vec1,
+            BitmapSparseVector<D2>                      const &vec2,
+            BinaryOpT                                          op)
+        {
+            ans.clear();
+
+            // todo: early exit if either input vector is empty?
+
+            // scan through both bitmaps to compute ewise_and
+            for (grb::IndexType idx = 0; idx < vec1.size(); ++idx)
+            {
+                if (vec1.get_bitmap()[idx] && vec2.get_bitmap()[idx])
+                {
+                    ans.emplace_back(
+                        idx, static_cast<D3>(op(vec1.get_vals()[idx],
+                                                vec2.get_vals()[idx])));
                 }
             }
         }
@@ -1554,10 +1665,6 @@ namespace grb
                         {
                             w.setElementNoCheck(idx, t.extractElementNoCheck(idx));
                         }
-                    }
-                    else
-                    {
-                        w.removeElementNoCheck(idx);
                     }
                 }
                 else if (outp == REPLACE)
