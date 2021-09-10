@@ -47,9 +47,10 @@ IndexType read_edge_list(std::string const &pathname,
     uint64_t num_rows = 0;
     uint64_t src, dst;
 
-    while (infile)
+    while (true)
     {
         infile >> src >> dst;
+        if (infile.eof()) break;
         //std::cout << "Read: " << src << ", " << dst << std::endl;
         max_id = std::max(max_id, src);
         max_id = std::max(max_id, dst);
