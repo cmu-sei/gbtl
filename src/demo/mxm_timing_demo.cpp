@@ -44,13 +44,33 @@ IndexType read_edge_list(std::string const &pathname,
 {
     std::ifstream infile(pathname);
     IndexType max_id = 0;
+    IndexType min_id = 1; // Assuming 1 or 0 based indexing; nothing else
     uint64_t num_rows = 0;
     uint64_t src, dst;
 
-    while (true)
+    std::string line;
+    // First pass to get min ID
+    while (std::getline( infile, line) )
     {
-        infile >> src >> dst;
         if (infile.eof()) break;
+        
+        std::istringstream l(line);
+        l >> src >> dst; // And discard the rest (weights)
+        min_id = std::min(min_id, std::min(src, dst));
+    }
+    infile.clear(); // Reset EOF flag
+    infile.seekg(0, std::ios_base::beg); // Reset infile to start
+    // std::cout << "Min vertex ID: " << min_id << std::endl;
+
+    while (std::getline( infile, line) )
+    {
+        if (infile.eof()) break;
+        
+        std::istringstream l(line);
+        l >> src >> dst; // And discard the rest (weights)
+        src -= min_id;
+        dst -= min_id;
+
         //std::cout << "Read: " << src << ", " << dst << std::endl;
         max_id = std::max(max_id, src);
         max_id = std::max(max_id, dst);
