@@ -33,6 +33,7 @@
 
 #include <graphblas/platforms/GKC/BitmapSparseVector.hpp>
 #include <graphblas/platforms/GKC/GKCSparseVector.hpp>
+#include <graphblas/platforms/GKC/GKCDenseVector.hpp>
 #include <graphblas/platforms/GKC/LilSparseMatrix.hpp>
 #include <graphblas/platforms/GKC/GKCMatrix.hpp>
 

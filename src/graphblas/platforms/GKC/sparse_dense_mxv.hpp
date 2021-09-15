@@ -35,7 +35,7 @@
 #include <graphblas/algebra.hpp>
 #include <atomic>
 
-#include "sparse_helper_proto.hpp"
+// #include "sparse_helper_proto.hpp"
 
 //****************************************************************************
 
@@ -43,8 +43,46 @@ namespace grb
 {
     namespace backend
     {
+
+        template <typename VecT>
+        VecT const &get_inner_mask_2(VectorComplementView<VecT> const &m)
+        {
+            return m.m_vec;
+        }
+
+        template <typename VecT>
+        VecT const &get_inner_mask_2(VectorStructureView<VecT> const &m)
+        {
+            return m.m_vec;
+        }
+
+        template <typename VecT>
+        VecT const &get_inner_mask_2(VectorStructuralComplementView<VecT> const &m)
+        {
+            return m.m_vec;
+        }
+
+        template <typename VecT>
+        VecT const &get_inner_mask_2(VecT const &m)
+        {
+            return m;
+        }
+
+        NoMask const &get_inner_mask_2(NoMask const &m)
+        {
+            return m;
+        }
+
+        // template <typename T1, typename T2>
+        // constexpr bool is_basically_same_t = std::is_same<
+        //     std::remove_const_t<std::remove_reference<T1>>,
+        //     std::remove_const_t<std::remove_reference<T2>>>();
+
+        template <typename T>
+        using base_type = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
+
         //**********************************************************************
-        /// Implementation for mxv with GKC Matrix and GKC Sparse Vector: A * u
+        /// Implementation for mxv with GKC Matrix and GKC Dense Vector: A * u
         // Designed for general case of masking and with a null or non-null accumulator.
         // w = [!m.*w]+U {[m.*w]+m.*(A*u)}
         // DOT PRODUCT
@@ -54,12 +92,12 @@ namespace grb
                   typename MaskT,
                   typename SemiringT,
                   typename ScalarT>
-        inline void mxv(GKCSparseVector<ScalarT> &w,
+        inline void mxv(GKCDenseVector<ScalarT> &w,
                         MaskT const &mask,
                         AccumT const &accum,
                         SemiringT op,
                         GKCMatrix<ScalarT> const &A,
-                        GKCSparseVector<ScalarT> const &u,
+                        GKCDenseVector<ScalarT> const &u,
                         OutputControlEnum outp)
         {
 #ifdef INST_TIMING_MVX
@@ -73,6 +111,11 @@ namespace grb
             GRB_LOG_VERBOSE("w<M,z> := A +.* u");
             // w = [!m.*w]+U {[m.*w]+m.*(A*u)}
             using TScalarType = typename SemiringT::result_type;
+
+            auto mask_vec = get_inner_mask_2(mask);
+
+            constexpr bool comp = is_complement_v<MaskT> || is_structural_complement_v<MaskT>;
+            constexpr bool strc = is_structure_v<MaskT> || is_structural_complement_v<MaskT>;
 
             // Accumulate is null, clear on replace due to null mask (from signature):
             if constexpr (std::is_same_v<AccumT, grb::NoAccumulate>)
@@ -88,34 +131,7 @@ namespace grb
                         w.clear();
                     }
                 }
-            }
-            else
-            {
-                if constexpr (!std::is_same_v<MaskT, grb::NoMask>)
-                // Have accumulate op AND a mask
-                {
-                    if (outp == REPLACE)
-                    {
-#define V2_REPLACE_DELETE 1
-#if V2_REPLACE_DELETE
-                        intersect_delete(mask, w);
-#else
-                        // If we have a mask and the output control is REPLACE, delete
-                        // pre-existing elements not in the mask
-                        for (auto idx = 0; idx < w.size(); idx++)
-                        {
-                            using MaskTypeT = typename MaskT::ScalarType;
-                            MaskTypeT val;
-                            if (!mask.boolExtractElement(idx, val))
-                            {
-                                if (!val)
-                                    w.boolRemoveElement(idx);
-                            }
-                        }
-#endif
-                    } // Otherwise, if Merging, just leave values in place.
-                }
-            }
+            } // Other side is handled at bottom of main for loop.
 
             if ((A.nvals() > 0) && (u.nvals() > 0))
             {
@@ -128,10 +144,14 @@ namespace grb
                     if constexpr (std::is_same_v<MaskT, grb::NoMask>)
                     {
                         do_compute = true;
+                        /// @todo: can a null mask be complemented?
                     }
                     else
                     {
-                        do_compute = mask.hasElement(row_idx);
+                        using MaskTypeT = typename base_type<decltype(mask_vec)>::ScalarType;
+                        MaskTypeT val;
+                        // Handle two cases: normal mask, complement
+                        do_compute = (comp ^ (mask_vec.boolExtractElement(row_idx, val) && (strc || val)));
                     }
                     if (do_compute)
                     {
@@ -142,63 +162,38 @@ namespace grb
                         auto AIst = A.idxBegin(row_idx);
                         auto AInd = A.idxEnd(row_idx);
                         auto AWst = A.wgtBegin(row_idx);
-                        auto AWnd = A.wgtEnd(row_idx);
-                        auto UIst = u.idxBegin();
-                        auto UInd = u.idxEnd();
-                        auto UWst = u.wgtBegin();
-                        auto UWnd = u.wgtEnd();
+                        //                        auto AWnd = A.wgtEnd(row_idx);
+                        //                        auto UIst = u.idxBegin();
+                        //                        auto UInd = u.idxEnd();
+
+                        //                        auto UWst = u.wgtBegin();
+                        //                        auto UWnd = u.wgtEnd();
                         // Do dot product here, into w directly
                         bool value_set = false;
                         TScalarType sum;
-                        while (AIst < AInd && UIst < UInd)
+
+                        for (auto AIst = A.idxBegin(row_idx);
+                             AIst != AInd;
+                             ++AIst, ++AWst)
                         {
-                            if (*AIst == *UIst)
+                            if (u.hasElement(*AIst))
                             {
-                                sum = op.mult(*AWst, *UWst);
-                                value_set = true;
-                                AIst++;
-                                AWst++;
-                                UIst++;
-                                UWst++;
-                                break;
-                            }
-                            else if (*AIst < *UIst)
-                            {
-                                AIst++;
-                                AWst++;
-                            }
-                            else
-                            {
-                                UIst++;
-                                UWst++;
+                                auto uw = u[*AIst];
+                                if (value_set)
+                                    sum = op.add(sum, op.mult(*AWst, uw));
+                                else
+                                {
+                                    sum = op.mult(*AWst, uw);
+                                    value_set = true;
+                                }
                             }
                         }
-                        while (AIst < AInd && UIst < UInd)
-                        {
-                            if (*AIst == *UIst)
-                            {
-                                sum = op.add(sum, op.mult(*AWst, *UWst));
-                                AIst++;
-                                AWst++;
-                                UIst++;
-                                UWst++;
-                            }
-                            else if (*AIst < *UIst)
-                            {
-                                AIst++;
-                                AWst++;
-                            }
-                            else
-                            {
-                                UIst++;
-                                UWst++;
-                            }
-                        }
+
                         // Dot end
 #ifdef INST_TIMING_MVX
                         my_timer.stop();
                         dots_time += my_timer.elapsed();
-                        dots ++;
+                        dots++;
 #endif
                         // Handle accumulation:
                         if (value_set)
@@ -220,19 +215,53 @@ namespace grb
                             }
                         }
                     }
-                    // Not needed, done above:
-                    // else // Not in mask
-                    // {
-                    //     if constexpr (!std::is_same_v<AccumT, NoAccumulate>){
-                    //         if (outp == REPLACE)
-                    //         { // Remove the element in w
-                    //             w.boolRemoveElement(row_idx);
-                    //         }
-                    //     }
-                    // }
+                    else // This side is only taken when not in (complemented) mask
+                    {
+                        // if we have accumulate, outp is REPLACE, and mask is false:
+                        if constexpr (!std::is_same_v<AccumT, grb::NoAccumulate>)
+                        {
+                            if (outp == REPLACE)
+                                w.boolRemoveElement(row_idx);
+                        }
+                    }
                 } // End of fused mxv loop
             }     // End of early exit
-            // w.sortSelf();
+            else  // Need to cleanup values not deleted...
+            {
+                if constexpr (!std::is_same_v<MaskT, grb::NoMask> &&
+                              !std::is_same_v<AccumT, grb::NoAccumulate>)
+                // Have accumulate op AND a mask
+                {
+                    if (outp == REPLACE)
+                    {
+                        // If we have a mask and the output control is REPLACE, delete
+                        // pre-existing elements not in the mask
+                        for (auto idx = 0; idx < w.size(); idx++)
+                        {
+                            bool remove;
+                            using MaskTypeT = typename base_type<decltype(mask_vec)>::ScalarType;
+                            MaskTypeT val;
+                            if constexpr (!strc)
+                            {
+                                remove = !mask_vec.boolExtractElement(idx, val);
+                                remove |= !val;
+                            }
+                            else
+                            {
+                                remove = !mask_vec.hasElement(idx);
+                            }
+                            if constexpr (comp)
+                            {
+                                remove = !remove;
+                            }
+                            if (remove)
+                            {
+                                w.boolRemoveElement(idx);
+                            }
+                        }
+                    }
+                }
+            }
 #ifdef INST_TIMING_MVX
             my_timer2.stop();
             std::cerr << my_timer2.elapsed() << ", " << dots << ", " << dots_time << std::endl;
@@ -244,7 +273,7 @@ namespace grb
         //**********************************************************************
 
         //**********************************************************************
-        /// Implementation for mxv with GKC Matrix and GKC Sparse Vector: A' * u
+        /// Implementation for mxv with GKC Matrix and GKC Dense Vector: A' * u
         // Designed for general case of masking and with a non-null accumulator.
         // w = [!m.*w]+U {[m.*w]+m.*(A'*u)}
         // AXPY (Ax + y) approach
@@ -254,23 +283,26 @@ namespace grb
             typename AccumT,
             typename SemiringT,
             typename ScalarT>
-        inline void mxv(GKCSparseVector<ScalarT> &w,
+        inline void mxv(GKCDenseVector<ScalarT> &w,
                         MaskT const &mask,
                         AccumT const &accum,
                         SemiringT op,
                         TransposeView<GKCMatrix<ScalarT>> const &AT,
-                        GKCSparseVector<ScalarT> const &u,
+                        GKCDenseVector<ScalarT> const &u,
                         OutputControlEnum outp)
         {
             GRB_LOG_VERBOSE("w<M,z> := A' +.* u");
             // w = [!m.*w]+U {[m.*w]+m.*(A'*u)}
             auto const &A(AT.m_mat);
 
+            vxm(w, mask, accum, op, u, A, outp);
+            /*
+	    
             // =================================================================
             // Use axpy approach with the semi-ring.
             using TScalarType = typename SemiringT::result_type;
             // Create tmp vector to place computed values
-            GKCSparseVector<TScalarType> t(w.size());
+            GKCDenseVector<TScalarType> t(w.size());
 
             // Decision: densify mask for easy reference
             std::vector<bool> mask_vec;
@@ -309,7 +341,7 @@ namespace grb
                     {
                         if (!mask_vec[idx]) // Can reverse for complement?
                         {
-                            w.boolRemoveElement(idx);
+			  w.boolRemoveElement(idx);
                         }
                     }
                 } // Otherwise, if Merging, just leave values in place.
@@ -388,6 +420,7 @@ namespace grb
                 }
             }
             w.setUnsorted();
+	    */
         }
     } // backend
 } // grb
