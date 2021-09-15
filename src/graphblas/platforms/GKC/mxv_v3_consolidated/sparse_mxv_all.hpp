@@ -35,7 +35,7 @@
 #include <graphblas/algebra.hpp>
 #include <atomic>
 
-#include "sparse_helper_proto.hpp"
+// #include "sparse_helper_proto.hpp"
 
 //****************************************************************************
 
@@ -82,7 +82,7 @@ namespace grb
         using base_type = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
 
         //**********************************************************************
-        /// Implementation for mxv with GKC Matrix and GKC Sparse Vector: A * u
+        /// Implementation for mxv with GKC Matrix and GKC Dense Vector: A * u
         // Designed for general case of masking and with a null or non-null accumulator.
         // w = [!m.*w]+U {[m.*w]+m.*(A*u)}
         // DOT PRODUCT
@@ -92,12 +92,12 @@ namespace grb
                   typename MaskT,
                   typename SemiringT,
                   typename ScalarT>
-        inline void mxv(GKCSparseVector<ScalarT> &w,
+        inline void mxv(GKCDenseVector<ScalarT> &w,
                         MaskT const &mask,
                         AccumT const &accum,
                         SemiringT op,
                         GKCMatrix<ScalarT> const &A,
-                        GKCSparseVector<ScalarT> const &u,
+                        GKCDenseVector<ScalarT> const &u,
                         OutputControlEnum outp)
         {
 #ifdef INST_TIMING_MVX
@@ -273,7 +273,7 @@ namespace grb
         //**********************************************************************
 
         //**********************************************************************
-        /// Implementation for mxv with GKC Matrix and GKC Sparse Vector: A' * u
+        /// Implementation for mxv with GKC Matrix and GKC Dense Vector: A' * u
         // Designed for general case of masking and with a non-null accumulator.
         // w = [!m.*w]+U {[m.*w]+m.*(A'*u)}
         // AXPY (Ax + y) approach
@@ -283,12 +283,12 @@ namespace grb
             typename AccumT,
             typename SemiringT,
             typename ScalarT>
-        inline void mxv(GKCSparseVector<ScalarT> &w,
+        inline void mxv(GKCDenseVector<ScalarT> &w,
                         MaskT const &mask,
                         AccumT const &accum,
                         SemiringT op,
                         TransposeView<GKCMatrix<ScalarT>> const &AT,
-                        GKCSparseVector<ScalarT> const &u,
+                        GKCDenseVector<ScalarT> const &u,
                         OutputControlEnum outp)
         {
             GRB_LOG_VERBOSE("w<M,z> := A' +.* u");
@@ -302,7 +302,7 @@ namespace grb
             // Use axpy approach with the semi-ring.
             using TScalarType = typename SemiringT::result_type;
             // Create tmp vector to place computed values
-            GKCSparseVector<TScalarType> t(w.size());
+            GKCDenseVector<TScalarType> t(w.size());
 
             // Decision: densify mask for easy reference
             std::vector<bool> mask_vec;

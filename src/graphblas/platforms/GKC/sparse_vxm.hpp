@@ -195,18 +195,18 @@ namespace grb
     using base_type = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
 
     //**********************************************************************
-    /// Implementation for vxm with GKC Matrix and GKC Sparse Vector: u * A
+    /// Implementation for vxm with GKC Matrix and GKC Dense Vector: u * A
     //**********************************************************************
     // w, mask, and u are vectors. A is a matrix.
     template <typename AccumT,
               typename MaskT,
               typename SemiringT,
               typename ScalarT>
-    inline void vxm(GKCSparseVector<ScalarT> &w,
+    inline void vxm(GKCDenseVector<ScalarT> &w,
                     MaskT const &mask,
                     AccumT const &accum,
                     SemiringT op,
-                    GKCSparseVector<ScalarT> const &u,
+                    GKCDenseVector<ScalarT> const &u,
                     GKCMatrix<ScalarT> const &A,
                     OutputControlEnum outp)
     {
@@ -343,17 +343,17 @@ namespace grb
     }
 
     //**********************************************************************
-    /// Implementation of vxm for GKC Matrix and Sparse Vector: u * A'
+    /// Implementation of vxm for GKC Matrix and Dense Vector: u * A'
     //**********************************************************************
     template <typename MaskT,
               typename AccumT,
               typename SemiringT,
               typename ScalarT>
-    inline void vxm(GKCSparseVector<ScalarT> &w,
+    inline void vxm(GKCDenseVector<ScalarT> &w,
                     MaskT const &mask,
                     AccumT const &accum,
                     SemiringT op,
-                    GKCSparseVector<ScalarT> const &u,
+                    GKCDenseVector<ScalarT> const &u,
                     TransposeView<GKCMatrix<ScalarT>> const &AT,
                     OutputControlEnum outp)
     {
