@@ -171,22 +171,27 @@ namespace grb
 
             if (u.nvals() > 0)
             {
-                if constexpr (std::is_same_v<UVectorT, BitmapSparseVector<UScalarType>>) {
+                if constexpr (std::is_same_v<UVectorT, BitmapSparseVector<UScalarType>>) 
+                {
                     reduction(t, u.getContents(), op);
                 }
-                else
+                else if constexpr (std::is_same_v<UVectorT, GKCSparseVector<UScalarType>>) 
                 {
                     if (u.isWeighted())
                     {
-		      //                        for (auto uitr = u.wgtBegin(); uitr < u.wgtEnd(); uitr++){
-		      //                            t = op(t, *uitr);
-		      //                        }
-		      for (auto uitr = 0; uitr != u.size(); ++uitr)
-			if (u.hasElement(uitr))
-			  t = op(t, u[uitr]);
+                        for (auto uitr = u.wgtBegin(); uitr < u.wgtEnd(); uitr++)
+                        {
+                            t = op(t, *uitr);
+                        }
                     }
                 }
-
+                else if constexpr (std::is_same_v<UVectorT, GKCDenseVector<UScalarType>>) 
+                {
+                    if (u.isWeighted())
+                        for (auto uitr = 0; uitr != u.size(); ++uitr)
+                            if (u.hasElement(uitr))
+                                t = op(t, u[uitr]);
+                }
             }
 
             // =================================================================

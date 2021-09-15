@@ -743,7 +743,7 @@ int main(int argc, char **argv)
     std::cout << "w<m,replace> := w + A'+.*u    \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << w1.nvals() << "\t" << count << std::endl;
-
+#if 1
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
     for (int ix=0; ix<NUM_TRIALS; ++ix)
@@ -997,6 +997,8 @@ int main(int argc, char **argv)
     std::cout << "w<!s(m),replace> := w + A'+.*u\t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << w1.nvals() << "\t" << count << std::endl;
+
+#endif
 
     bool passed = (w == w1);
     std::cout << "Results " << (passed ? "PASSED" : "FAILED") << std::endl;

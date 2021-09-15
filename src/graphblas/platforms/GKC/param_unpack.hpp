@@ -34,6 +34,7 @@
 
 #include <graphblas/platforms/GKC/GKCMatrix.hpp>
 #include <graphblas/platforms/GKC/GKCSparseVector.hpp>
+#include <graphblas/platforms/GKC/GKCDenseVector.hpp>
 
 //this file contains the variadic template parameters unpacking utility.
 
@@ -184,13 +185,24 @@ namespace grb
                     Tags... >::type;
             };
 
-            // special case returns the backend GKC vector type
+            // special case returns the backend GKC dense vector type
             template<typename ScalarT,
                      typename Implementation, typename Sparseness,
                      typename... TagsT>
             struct result<ScalarT,
                           Implementation, Sparseness,
                           grb::GKCTag, TagsT...>
+            {
+                using type = GKCDenseVector<ScalarT>;
+            };
+            
+            // special case returns the backend GKC sparse vector type
+            template<typename ScalarT,
+                     typename Implementation, typename Sparseness,
+                     typename... TagsT>
+            struct result<ScalarT,
+                          Implementation, Sparseness,
+                          grb::GKCTag, grb::SparseTag, TagsT...>
             {
                 using type = GKCSparseVector<ScalarT>;
             };
