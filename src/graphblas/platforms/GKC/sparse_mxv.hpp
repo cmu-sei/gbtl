@@ -37,25 +37,11 @@
 
 #include "test/Timer.hpp"
 
-// #define INST_TIMING_MVX
-
-#define GKC_MXV_V3
-
 // Includes for compatability with exsiting GBTL "sequential" data structures and methods
 #include "sparse_mxv_old.hpp"
 // Includes for the GKC variants:
-#if defined(GKC_MXV_V1)
-#include "mxv_v1/sparse_mxv_nomask.hpp"
-#include "mxv_v1/sparse_mxv_masked.hpp"
-#elif defined(GKC_MXV_V2)
-#include "mxv_v2_consolidated/sparse_mxv_all.hpp"
-#elif defined(GKC_MXV_V3)
-#include "mxv_v3_consolidated/sparse_mxv_all.hpp"
-#elif defined(GKC_MXV_V4)
-#include "mxv_v4_consolidated/sparse_mxv_all.hpp"
-#else
-#error "At least one GKC MxV implementation set must be included!"
-#endif
+#include "sparse_sparse_mxv.hpp"
+#include "sparse_dense_mxv.hpp"
 
 
 // This header is a landing point to include mxv implementations.
