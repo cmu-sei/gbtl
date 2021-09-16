@@ -96,6 +96,54 @@ BOOST_AUTO_TEST_CASE(test_vxm_bad_dimensions)
 }
 
 //****************************************************************************
+BOOST_AUTO_TEST_CASE(test_input_output_aliasing)
+{
+    grb::IndexType const NUM_NODES = 7;
+    std::vector<grb::IndexType> row_indices = {0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6};
+    std::vector<grb::IndexType> col_indices = {1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4};
+    std::vector<double> values(row_indices.size(), 1.);
+
+    std::vector<double> answer = {0, 0, 0.5, 0, 0.5, 0, 0};
+    grb::Vector<double> ans(answer, 0.);
+
+    grb::Matrix<double> graph(NUM_NODES, NUM_NODES);
+    graph.build(row_indices.begin(), col_indices.begin(),
+                      values.begin(), values.size());
+
+    grb::Vector<double> weights(NUM_NODES);
+    weights.setElement(5, 0.5);
+
+    grb::Vector<bool> mask(NUM_NODES);
+    mask.setElement(2, true);
+    mask.setElement(4, true);
+    mask.setElement(6, true);
+
+    grb::vxm(weights,
+             mask, //*(search[idx - 1]),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(),
+             weights,
+             grb::transpose(graph),
+             grb::REPLACE);
+
+    BOOST_CHECK_EQUAL(ans, weights);
+
+    //--------------------
+    weights.clear();
+    weights.setElement(5, 0.5);
+
+    grb::vxm(weights,
+             grb::NoMask(),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(),
+             weights,
+             grb::transpose(graph),
+             grb::REPLACE);
+
+    BOOST_CHECK_EQUAL(ans, weights);
+}
+
+//****************************************************************************
 BOOST_AUTO_TEST_CASE(test_vxm_reg)
 {
     grb::Matrix<double, grb::DirectedMatrixTag> mA(m3x3_dense, 0.);

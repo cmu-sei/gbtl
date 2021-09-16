@@ -99,17 +99,16 @@ namespace grb
                  typename SemiringT,
                  typename AScalarT,
                  typename UVectorT>
-        inline void mxv(WVectorT           &w,
-                        NoMask       const &mask,
-                        NoAccumulate const &accum,
-                        SemiringT           op,
-                        LilSparseMatrix<AScalarT>     const &A,
-                        UVectorT     const &u,
-                        OutputControlEnum  outp)
+        inline void mxv_dot_nomask_noaccum_noalias(
+            WVectorT                        &w,
+            NoMask                    const &mask,
+            NoAccumulate              const &accum,
+            SemiringT                        op,
+            LilSparseMatrix<AScalarT> const &A,
+            UVectorT                  const &u,
+            OutputControlEnum                outp)
         {
-            //mxv_dot_nomask_noaccum(w, op, A, u);
-            GRB_LOG_VERBOSE("w := A +.* u");
-            w.clear();
+            w.clear();  // ERROR if u and w are same vector
 
             // =================================================================
             // Do the basic dot-product work with the semi-ring.
@@ -128,6 +127,33 @@ namespace grb
                         }
                     }
                 }
+            }
+        }
+        //**********************************************************************
+        template<typename WVectorT,
+                 typename SemiringT,
+                 typename AScalarT,
+                 typename UVectorT>
+        inline void mxv(WVectorT                        &w,
+                        NoMask                    const &mask,
+                        NoAccumulate              const &accum,
+                        SemiringT                        op,
+                        LilSparseMatrix<AScalarT> const &A,
+                        UVectorT                  const &u,
+                        OutputControlEnum                outp)
+        {
+            //mxv_dot_nomask_noaccum(w, op, A, u);
+            GRB_LOG_VERBOSE("w := A +.* u");
+
+            if ((void*)&u == (void*)&w)
+            {
+                WVectorT w_tmp(w.size());
+                mxv_dot_nomask_noaccum_noalias(w_tmp, mask, accum, op, A, u, outp);
+                w = w_tmp;
+            }
+            else
+            {
+                mxv_dot_nomask_noaccum_noalias(w, mask, accum, op, A, u, outp);
             }
         }
 
@@ -188,24 +214,22 @@ namespace grb
                  typename SemiringT,
                  typename AScalarT,
                  typename UVectorT>
-        inline void mxv(WVectorT           &w,
-                        MaskT        const &mask,
-                        NoAccumulate const &accum,
-                        SemiringT           op,
-                        LilSparseMatrix<AScalarT>     const &A,
-                        UVectorT     const &u,
-                        OutputControlEnum   outp)
+        inline void mxv_dot_mask_noaccum_noalias(
+            WVectorT                        &w,
+            MaskT                     const &mask,
+            NoAccumulate              const &accum,
+            SemiringT                        op,
+            LilSparseMatrix<AScalarT> const &A,
+            UVectorT                  const &u,
+            OutputControlEnum                outp)
         {
-            //mxv_dot_mask_noaccum(w, mask, op, A, u, outp);
-            GRB_LOG_VERBOSE("w<M,r> := (A +.* u)");
-
             // =================================================================
             // Do the basic dot-product work with the semi-ring.
             using TScalarType = typename SemiringT::result_type;
             std::vector<std::tuple<IndexType, TScalarType> > t;
 
             if (outp == REPLACE)
-                w.clear();
+                w.clear();  // ERROR if either u or mask are same vector as w
 
             if ((A.nvals() > 0) && (u.nvals() > 0))
             {
@@ -234,6 +258,35 @@ namespace grb
                         }
                     }
                 }
+            }
+        }
+
+        //**********************************************************************
+        template<typename WVectorT,
+                 typename MaskT,
+                 typename SemiringT,
+                 typename AScalarT,
+                 typename UVectorT>
+        inline void mxv(WVectorT           &w,
+                        MaskT        const &mask,
+                        NoAccumulate const &accum,
+                        SemiringT           op,
+                        LilSparseMatrix<AScalarT>     const &A,
+                        UVectorT     const &u,
+                        OutputControlEnum   outp)
+        {
+            //mxv_dot_mask_noaccum(w, mask, op, A, u, outp);
+            GRB_LOG_VERBOSE("w<M,r> := (A +.* u)");
+
+            if (((void*)&u == (void*)&w) || ((void*)&mask == (void*)&w))
+            {
+                WVectorT w_tmp(w.size());
+                mxv_dot_mask_noaccum_noalias(w_tmp, mask, accum, op, A, u, outp);
+                w = w_tmp; // TODO move or swap
+            }
+            else
+            {
+                mxv_dot_mask_noaccum_noalias(w, mask, accum, op, A, u, outp);
             }
         }
 

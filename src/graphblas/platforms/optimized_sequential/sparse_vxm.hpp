@@ -92,28 +92,6 @@ namespace grb
         //**********************************************************************
         //**********************************************************************
 
-        //********************************************************************
-        /// Implementation of 4.3.2 vxm: u * A'
-        //********************************************************************
-        // template<typename WVectorT,
-        //          typename MaskT,
-        //          typename AccumT,
-        //          typename SemiringT,
-        //          typename AMatrixT,
-        //          typename UVectorT>
-        // inline void vxm(WVectorT                      &w,
-        //                 MaskT                   const &mask,
-        //                 AccumT                  const &accum,
-        //                 SemiringT                      op,
-        //                 UVectorT                const &u,
-        //                 TransposeView<AMatrixT> const &AT,
-        //                 OutputControlEnum              outp)
-        // {
-        //     GRB_LOG_VERBOSE("w<M,z> := u +.* A'");
-        //     backend::mxv(w, mask, accum, op, AT.m_mat, u, outp);
-        // }
-
-
         //**********************************************************************
         /// Implementation for 4.3.2 vxm: u * A'
         //**********************************************************************
@@ -121,18 +99,17 @@ namespace grb
                  typename SemiringT,
                  typename UVectorT,
                  typename AMatrixT>
-        inline void vxm(WVectorT           &w,
-                        NoMask       const &mask,
-                        NoAccumulate const &accum,
-                        SemiringT           op,
-                        UVectorT     const &u,
-                        TransposeView<AMatrixT> const &AT,
-                        OutputControlEnum  outp)
+        inline void vxm_dot_nomask_noaccum_noalias(
+            WVectorT                      &w,
+            NoMask                  const &mask,
+            NoAccumulate            const &accum,
+            SemiringT                      op,
+            UVectorT                const &u,
+            TransposeView<AMatrixT> const &AT,
+            OutputControlEnum              outp)
         {
-            //mxv_dot_nomask_noaccum(w, op, A, u);
-            GRB_LOG_VERBOSE("w := u +.* A'");
             auto const &A(AT.m_mat);
-            w.clear();
+            w.clear();  // ERROR if u and w are same vector
 
             // =================================================================
             // Do the basic dot-product work with the semi-ring.
@@ -151,6 +128,34 @@ namespace grb
                         }
                     }
                 }
+            }
+        }
+        //**********************************************************************
+        template<typename WVectorT,
+                 typename SemiringT,
+                 typename UVectorT,
+                 typename AMatrixT>
+        inline void vxm(WVectorT                      &w,
+                        NoMask                  const &mask,
+                        NoAccumulate            const &accum,
+                        SemiringT                      op,
+                        UVectorT                const &u,
+                        TransposeView<AMatrixT> const &AT,
+                        OutputControlEnum              outp)
+        {
+            //mxv_dot_nomask_noaccum(w, op, A, u);
+            GRB_LOG_VERBOSE("w := u +.* A'");
+            auto const &A(AT.m_mat);
+
+            if ((void*)&u == (void*)&w)
+            {
+                WVectorT w_tmp(w.size());
+                vxm_dot_nomask_noaccum_noalias(w_tmp, mask, accum, op, u, AT, outp);
+                w = w_tmp;
+            }
+            else
+            {
+                vxm_dot_nomask_noaccum_noalias(w, mask, accum, op, u, AT, outp);
             }
         }
 
@@ -212,16 +217,15 @@ namespace grb
                  typename SemiringT,
                  typename UVectorT,
                  typename AMatrixT>
-        inline void vxm(WVectorT           &w,
-                        MaskT        const &mask,
-                        NoAccumulate const &accum,
-                        SemiringT           op,
-                        UVectorT     const &u,
-                        TransposeView<AMatrixT> const &AT,
-                        OutputControlEnum   outp)
+        inline void vxm_dot_mask_noaccum_noalias(
+            WVectorT                      &w,
+            MaskT                   const &mask,
+            NoAccumulate            const &accum,
+            SemiringT                      op,
+            UVectorT                const &u,
+            TransposeView<AMatrixT> const &AT,
+            OutputControlEnum              outp)
         {
-            //mxv_dot_mask_noaccum(w, mask, op, A, u, outp);
-            GRB_LOG_VERBOSE("w<M,r> := (u +.* A')");
             auto const &A(AT.m_mat);
 
             // =================================================================
@@ -230,7 +234,7 @@ namespace grb
             std::vector<std::tuple<IndexType, TScalarType> > t;
 
             if (outp == REPLACE)
-                w.clear();
+                w.clear();  // ERROR if either u or mask are same vector as w
 
             if ((A.nvals() > 0) && (u.nvals() > 0))
             {
@@ -259,6 +263,35 @@ namespace grb
                         }
                     }
                 }
+            }
+        }
+
+        //**********************************************************************
+        template<typename WVectorT,
+                 typename MaskT,
+                 typename SemiringT,
+                 typename UVectorT,
+                 typename AMatrixT>
+        inline void vxm(WVectorT                      &w,
+                        MaskT                   const &mask,
+                        NoAccumulate            const &accum,
+                        SemiringT                      op,
+                        UVectorT                const &u,
+                        TransposeView<AMatrixT> const &AT,
+                        OutputControlEnum              outp)
+        {
+            //mxv_dot_mask_noaccum(w, mask, op, A, u, outp);
+            GRB_LOG_VERBOSE("w<M,r> := (u +.* A')");
+
+            if (((void*)&u == (void*)&w) || ((void*)&mask == (void*)&w))
+            {
+                WVectorT w_tmp(w.size());
+                vxm_dot_mask_noaccum_noalias(w_tmp, mask, accum, op, u, AT, outp);
+                w = w_tmp;  // TODO move or swap
+            }
+            else
+            {
+                vxm_dot_mask_noaccum_noalias(w, mask, accum, op, u, AT, outp);
             }
         }
 
