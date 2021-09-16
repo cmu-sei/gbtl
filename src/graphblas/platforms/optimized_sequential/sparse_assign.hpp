@@ -46,6 +46,130 @@ namespace grb
 {
     namespace backend
     {
+        //********************************************************************
+        // AllIndices SUPPORT
+        // This is where we turn AllIndices into the correct range
+        template <typename SequenceT>
+        bool searchIndices(SequenceT seq, IndexType tgt)
+        {
+            // This branch assumes sequence is unordered.
+            for (auto it : seq)
+            {
+                if (it == tgt) return true;
+            }
+            return false;
+        }
+
+        //********************************************************************
+        bool searchIndices(AllIndices seq, IndexType tgt)
+        {
+            return true;
+        }
+
+        //**********************************************************************
+        /// Apply element-wise operation to union on sparse vectors.
+        /// Indices in the stencil indicate where elements of vec2 should be
+        /// used (whether there is a stored value or not); otherwise the value
+        /// in vec1 should be taken.  Note: that it is assumed that if a value
+        /// is stored in vec2 then the corresponding location is contained in
+        /// stencil indices.
+        ///
+        /// Truth table (for each element, i, of the answer, where '-' means
+        /// no stored value):
+        ///
+        ///  vec1_i   vec2   s_i   ans_i
+        ///    -        -     -      -
+        ///    -        -     x      -
+        ///    -        x --> x    vec2_i
+        ///    x        -     -    vec1_i
+        ///    x        -     x      -    (take vec1_i which is no stored value)
+        ///    x        x --> x    vec1_i
+        ///
+        /// \tparam D1
+        /// \tparam D2
+        /// \tparam D3
+        /// \tparam SequenceT  Could be a out of order subset of indices
+        ///
+        /// \param ans   A row of the answer (Z or z), starts empty
+        /// \param vec1  A row of the output container (C or w), indices increasing order
+        /// \param vec2  A row of the T (or t) container, indices in increasing order
+        /// \param stencil_indices  Assumed to not be in order
+        ///
+        template <typename D1, typename D2, typename D3, typename SequenceT>
+        void ewise_or_stencil(
+            std::vector<std::tuple<grb::IndexType,D3> >       &ans,
+            std::vector<std::tuple<grb::IndexType,D1> > const &vec1,
+            std::vector<std::tuple<grb::IndexType,D2> > const &vec2,
+            SequenceT                                          stencil_indices)
+        {
+            ans.clear();
+
+            //auto stencil_it = stencil_indices.begin();
+            //if (v1_it)
+            //while ((stencil_it != stencil_indices.end()) &&
+            //       (*stencil_it < std::get<0>(*v1_it)))
+            //{
+            //    ++stencil_it;
+            //}
+
+            D1 v1_val;
+            D2 v2_val;
+            grb::IndexType v1_idx, v2_idx;
+
+            // loop through both ordered sets to compute ewise_or
+            auto v1_it = vec1.begin();
+            auto v2_it = vec2.begin();
+            while ((v1_it != vec1.end()) || (v2_it != vec2.end()))
+            {
+                if ((v1_it != vec1.end()) && (v2_it != vec2.end()))
+                {
+                    std::tie(v1_idx, v1_val) = *v1_it;
+                    std::tie(v2_idx, v2_val) = *v2_it;
+
+                    // If v1 and v2 both have stored values, it is assumed index
+                    // is in stencil_indices so v2 should be stored
+                    if (v2_idx == v1_idx)
+                    {
+                        ans.emplace_back(v2_idx, static_cast<D3>(v2_val));
+
+                        ++v2_it;
+                        ++v1_it;
+                    }
+                    // In this case v1 has a value and not v2.  We need to search
+                    // stencil indices to see if index is present
+                    else if (v1_idx < v2_idx) // advance v1 and annihilate
+                    {
+                        if (!searchIndices(stencil_indices, v1_idx))
+                        {
+                            ans.emplace_back(v1_idx, static_cast<D3>(v1_val));
+                        }
+                        ++v1_it;
+                    }
+                    else
+                    {
+                        //std::cerr << "Copying v2, Advancing v2_it" << std::endl;
+                        ans.emplace_back(v2_idx, static_cast<D3>(v2_val));
+                        ++v2_it;
+                    }
+                }
+                else if (v1_it != vec1.end())  // vec2 exhausted
+                {
+                    std::tie(v1_idx, v1_val) = *v1_it;
+
+                    if (!searchIndices(stencil_indices, v1_idx))
+                    {
+                        ans.emplace_back(v1_idx, static_cast<D3>(v1_val));
+                    }
+                    ++v1_it;
+                }
+                else // v2_it != vec2.end()) and vec1 exhausted
+                {
+                    std::tie(v2_idx, v2_val) = *v2_it;
+                    ans.emplace_back(v2_idx, static_cast<D3>(v2_val));
+                    ++v2_it;
+                }
+            }
+        }
 
         //**********************************************************************
         // for sparse_assign

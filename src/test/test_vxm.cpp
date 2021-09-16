@@ -120,6 +120,35 @@ BOOST_AUTO_TEST_CASE(test_vxm_reg)
 }
 
 //****************************************************************************
+BOOST_AUTO_TEST_CASE(test_vxm_noncommutative_multiply)
+{
+    std::vector<double> ans3 = {12, 0, 3};
+    std::vector<double> ans4 = {1, 0, 7};
+
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(m3x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m4x3_dense, 0.);
+    grb::Vector<double> u3(u3_dense, 0.);
+    grb::Vector<double> u4(u4_dense, 0.);
+    grb::Vector<double> result(3);
+    grb::Vector<double> ansA(ans3, 0.);
+    grb::Vector<double> ansB(ans4, 0.);
+
+    std::cerr << "***MINSECOND\n";
+    grb::vxm(result,
+             grb::NoMask(),
+             grb::NoAccumulate(),
+             grb::MinSecondSemiring<double>(), u3, grb::transpose(mA));
+    BOOST_CHECK_EQUAL(result, ansA);
+
+    std::cerr << "***MINSECOND\n";
+    grb::vxm(result,
+             grb::NoMask(),
+             grb::NoAccumulate(),
+             grb::MinSecondSemiring<double>(), u3, mA);
+    BOOST_CHECK_EQUAL(result, ansB);
+}
+
+//****************************************************************************
 BOOST_AUTO_TEST_CASE(test_vxm_stored_zero_result)
 {
     // Build some matrices.
@@ -658,6 +687,5 @@ BOOST_AUTO_TEST_CASE(test_vxm_scmp_masked_a_transpose)
     BOOST_CHECK_EQUAL(result.nvals(), 3);
     BOOST_CHECK_EQUAL(result, answer);
 }
-
 
 BOOST_AUTO_TEST_SUITE_END()

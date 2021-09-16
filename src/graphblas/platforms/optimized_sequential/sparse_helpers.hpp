@@ -47,21 +47,6 @@ namespace grb
 {
     namespace backend
     {
-        template <typename ScalarT>
-        void print_vec(std::ostream &os, std::string label,
-                       std::vector<std::tuple<IndexType, ScalarT> > vec)
-        {
-            os << label << " ";
-            bool first = true;
-
-            for (auto&& [idx, val] : vec)
-            {
-                os << (!first ? "," : " ") << idx << ":" << val;
-                first = false;
-            }
-            os << std::endl;
-        }
-
         //**********************************************************************
 
         template <typename DstMatrixT,
@@ -139,7 +124,7 @@ namespace grb
                 ++iter;
             }
         }
-
+#if 0
         //**********************************************************************
         /// Perform the dot product of a row of a matrix with a sparse vector
         /// without pulling the indices out of the vector first.
@@ -203,6 +188,58 @@ namespace grb
         //************************************************************************
         /// A dot product of two sparse vectors (vectors<tuple(index,value)>)
         template <typename D1, typename D2, typename D3, typename SemiringT>
+        bool dot_rev(D3                                                &ans,
+                     std::vector<std::tuple<grb::IndexType,D1> > const &vec2,
+                     std::vector<std::tuple<grb::IndexType,D2> > const &vec1,
+                     SemiringT                                          op)
+        {
+            bool value_set(false);
+
+            if (vec2.empty() || vec1.empty())
+            {
+                return value_set;
+            }
+
+            // point to first entries of the vectors
+            auto v1_it = vec1.begin();
+            auto v2_it = vec2.begin();
+
+            // loop through both ordered sets to compute sparse dot prod
+            while ((v1_it != vec1.end()) && (v2_it != vec2.end()))
+            {
+                if (std::get<0>(*v2_it) == std::get<0>(*v1_it))
+                {
+                    if (value_set)
+                    {
+                        ans = op.add(ans, op.mult(std::get<1>(*v2_it),
+                                                  std::get<1>(*v1_it)));
+                    }
+                    else
+                    {
+                        ans = op.mult(std::get<1>(*v2_it),
+                                      std::get<1>(*v1_it));
+                        value_set = true;
+                    }
+
+                    ++v2_it;
+                    ++v1_it;
+                }
+                else if (std::get<0>(*v2_it) > std::get<0>(*v1_it))
+                {
+                    ++v1_it;
+                }
+                else
+                {
+                    ++v2_it;
+                }
+            }
+
+            return value_set;
+        }
+#endif
+        //************************************************************************
+        /// A dot product of two sparse vectors (vectors<tuple(index,value)>)
+        template <typename D1, typename D2, typename D3, typename SemiringT>
         bool dot(D3                                                &ans,
                  std::vector<std::tuple<grb::IndexType,D1> > const &vec1,
                  std::vector<std::tuple<grb::IndexType,D2> > const &vec2,
@@ -253,51 +290,42 @@ namespace grb
         }
 
         //************************************************************************
-        /// A dot product of two sparse vectors (vectors<tuple(index,value)>)
+        /// A dot product of two vectors (vec1 sparse, vec2 dense storage))
         template <typename D1, typename D2, typename D3, typename SemiringT>
-        bool dot_rev(D3                                                &ans,
-                     std::vector<std::tuple<grb::IndexType,D1> > const &vec2,
-                     std::vector<std::tuple<grb::IndexType,D2> > const &vec1,
-                     SemiringT                                          op)
+        bool dot_sparse_dense(
+            D3                                                &ans,
+            std::vector<std::tuple<grb::IndexType,D1> > const &lhs,
+            BitmapSparseVector<D2>                      const &rhs,
+            SemiringT                                          op)
         {
             bool value_set(false);
 
-            if (vec2.empty() || vec1.empty())
+            if (lhs.empty() || (rhs.nvals() == 0))
             {
                 return value_set;
             }
 
-            // point to first entries of the vectors
-            auto v1_it = vec1.begin();
-            auto v2_it = vec2.begin();
-
-            // loop through both ordered sets to compute sparse dot prod
-            while ((v1_it != vec1.end()) && (v2_it != vec2.end()))
+            for (auto&& [idx, val] : lhs)
             {
-                if (std::get<0>(*v2_it) == std::get<0>(*v1_it))
+                if (rhs.get_bitmap()[idx])
                 {
+                    std::cerr << "dot_sd: i=" << idx << ", multop("<< val << ","
+                              << rhs.get_vals()[idx] << ") = "
+                              << op.mult(val, rhs.get_vals()[idx]) << std::endl;
                     if (value_set)
                     {
-                        ans = op.add(ans, op.mult(std::get<1>(*v2_it),
-                                                  std::get<1>(*v1_it)));
+                        std::cerr << "dot_sd: addop(" << ans << ","
+                                  << op.mult(val, rhs.get_vals()[idx]) << ") = "
+                                  << op.add(ans, op.mult(val, rhs.get_vals()[idx]))
+                                  << std::endl;
+                        ans = op.add(ans, op.mult(val,
+                                                  rhs.get_vals()[idx]));
                     }
                     else
                     {
-                        ans = op.mult(std::get<1>(*v2_it),
-                                      std::get<1>(*v1_it));
+                        ans = op.mult(val, rhs.get_vals()[idx]);
                         value_set = true;
                     }
-
-                    ++v2_it;
-                    ++v1_it;
-                }
-                else if (std::get<0>(*v2_it) > std::get<0>(*v1_it))
-                {
-                    ++v1_it;
-                }
-                else
-                {
-                    ++v2_it;
                 }
             }
 
@@ -307,76 +335,36 @@ namespace grb
         //************************************************************************
         /// A dot product of two vectors (vec1 sparse, vec2 dense storage))
         template <typename D1, typename D2, typename D3, typename SemiringT>
-        bool dot_sparse_dense(
+        bool dot_dense_sparse(
             D3                                                &ans,
-            std::vector<std::tuple<grb::IndexType,D1> > const &vec2,
-            BitmapSparseVector<D2>                      const &vec1,
+            BitmapSparseVector<D2>                      const &lhs,
+            std::vector<std::tuple<grb::IndexType,D1> > const &rhs,
             SemiringT                                          op)
         {
             bool value_set(false);
 
-            if (vec2.empty() || (vec1.nvals() == 0))
+            if (rhs.empty() || (lhs.nvals() == 0))
             {
                 return value_set;
             }
 
-            for (auto&& [idx2, val2] : vec2)
+            for (auto&& [idx, val] : rhs)
             {
-                if (vec1.get_bitmap()[idx2])
+                if (lhs.get_bitmap()[idx])
                 {
                     if (value_set)
                     {
-                        ans = op.add(ans, op.mult(val2,
-                                                  vec1.get_vals()[idx2]));
+                        ans = op.add(ans, op.mult(lhs.get_vals()[idx], val));
                     }
                     else
                     {
-                        ans = op.mult(val2, vec1.get_vals()[idx2]);
+                        ans = op.mult(lhs.get_vals()[idx], val);
                         value_set = true;
                     }
                 }
             }
 
             return value_set;
-        }
-
-        //************************************************************************
-        /// A reduction of a sparse vector (vector<tuple(index,value)>) using a
-        /// binary op or a monoid.
-        template <typename D1, typename D3, typename BinaryOpT>
-        bool reduction(
-            D3                                                &ans,
-            std::vector<std::tuple<grb::IndexType,D1> > const &vec,
-            BinaryOpT                                          op)
-        {
-            if (vec.empty())
-            {
-                return false;
-            }
-
-            using D3ScalarType =
-                decltype(op(std::declval<D1>(), std::declval<D1>()));
-            D3ScalarType tmp;
-
-            if (vec.size() == 1)
-            {
-                tmp = static_cast<D3ScalarType>(std::get<1>(vec[0]));
-            }
-            else
-            {
-                /// @note Since op is associative and commutative left to right
-                /// ordering is not strictly required.
-                tmp = op(std::get<1>(vec[0]), std::get<1>(vec[1]));
-
-                /// @todo replace with call to std::reduce?
-                for (size_t idx = 2; idx < vec.size(); ++idx)
-                {
-                    tmp = op(tmp, std::get<1>(vec[idx]));
-                }
-            }
-
-            ans = static_cast<D3>(tmp);
-            return true;
         }
 
         //**********************************************************************
@@ -470,8 +458,7 @@ namespace grb
             grb::IndexType v1_val_count = vec1.nvals();
             grb::IndexType v1_idx = 0;
 
-            // point to first entries of the sparse vector
-            auto v2_it = vec2.begin();
+            // Step through elements of sparse vector
             for (auto&& [v2_idx, v2_val] : vec2)
             {
                 for (; ((v1_idx < vec1.size()) && (v1_idx < v2_idx)); ++v1_idx)
@@ -677,130 +664,8 @@ namespace grb
             }
         }
 
-        //********************************************************************
-        // ALL SUPPORT
-        // This is where we turn alls into the correct range
-
-        template <typename SequenceT>
-        bool searchIndices(SequenceT seq, IndexType n)
-        {
-            for (auto it : seq)
-            {
-                if (it == n) return true;
-            }
-            return false;
-        }
-
-        bool searchIndices(AllIndices seq, IndexType n)
-        {
-            return true;
-        }
-
         //**********************************************************************
-        /// Apply element-wise operation to union on sparse vectors.
-        /// Indices in the stencil indicate where elements of vec2 should be
-        /// used (whether there is a stored value or not); otherwise the value
-        /// in vec1 should be taken.  Note: that it is assumed that if a value
-        /// is stored in vec2 then the corresponding location is contained in
-        /// stencil indices.
-        ///
-        /// Truth table (for each element, i, of the answer, where '-' means
-        /// no stored value):
-        ///
-        ///  vec1_i   vec2   s_i   ans_i
-        ///    -        -     -      -
-        ///    -        -     x      -
-        ///    -        x --> x    vec2_i
-        ///    x        -     -    vec1_i
-        ///    x        -     x      -    (take vec1_i which is no stored value)
-        ///    x        x --> x    vec1_i
-        ///
-        /// \tparam D1
-        /// \tparam D2
-        /// \tparam D3
-        /// \tparam SequenceT  Could be a out of order subset of indices
-        ///
-        /// \param ans   A row of the answer (Z or z), starts empty
-        /// \param vec1  A row of the output container (C or w), indices increasing order
-        /// \param vec2  A row of the T (or t) container, indices in increasing order
-        /// \param stencil_indices  Assumed to not be in order
-        ///
-        template <typename D1, typename D2, typename D3, typename SequenceT>
-        void ewise_or_stencil(
-            std::vector<std::tuple<grb::IndexType,D3> >       &ans,
-            std::vector<std::tuple<grb::IndexType,D1> > const &vec1,
-            std::vector<std::tuple<grb::IndexType,D2> > const &vec2,
-            SequenceT                                          stencil_indices)
-        {
-            ans.clear();
-
-            //auto stencil_it = stencil_indices.begin();
-            //if (v1_it)
-            //while ((stencil_it != stencil_indices.end()) &&
-            //       (*stencil_it < std::get<0>(*v1_it)))
-            //{
-            //    ++stencil_it;
-            //}
-
-            D1 v1_val;
-            D2 v2_val;
-            grb::IndexType v1_idx, v2_idx;
-
-            // loop through both ordered sets to compute ewise_or
-            auto v1_it = vec1.begin();
-            auto v2_it = vec2.begin();
-            while ((v1_it != vec1.end()) || (v2_it != vec2.end()))
-            {
-                if ((v1_it != vec1.end()) && (v2_it != vec2.end()))
-                {
-                    std::tie(v1_idx, v1_val) = *v1_it;
-                    std::tie(v2_idx, v2_val) = *v2_it;
-
-                    // If v1 and v2 both have stored values, it is assumed index
-                    // is in stencil_indices so v2 should be stored
-                    if (v2_idx == v1_idx)
-                    {
-                        ans.emplace_back(v2_idx, static_cast<D3>(v2_val));
-
-                        ++v2_it;
-                        ++v1_it;
-                    }
-                    // In this case v1 has a value and not v2.  We need to search
-                    // stencil indices to see if index is present
-                    else if (v1_idx < v2_idx) // advance v1 and annihilate
-                    {
-                        if (!searchIndices(stencil_indices, v1_idx))
-                        {
-                            ans.emplace_back(v1_idx, static_cast<D3>(v1_val));
-                        }
-                        ++v1_it;
-                    }
-                    else
-                    {
-                        //std::cerr << "Copying v2, Advancing v2_it" << std::endl;
-                        ans.emplace_back(v2_idx, static_cast<D3>(v2_val));
-                        ++v2_it;
-                    }
-                }
-                else if (v1_it != vec1.end())  // vec2 exhausted
-                {
-                    std::tie(v1_idx, v1_val) = *v1_it;
-
-                    if (!searchIndices(stencil_indices, v1_idx))
-                    {
-                        ans.emplace_back(v1_idx, static_cast<D3>(v1_val));
-                    }
-                    ++v1_it;
-                }
-                else // v2_it != vec2.end()) and vec1 exhausted
-                {
-                    std::tie(v2_idx, v2_val) = *v2_it;
-                    ans.emplace_back(v2_idx, static_cast<D3>(v2_val));
-                    ++v2_it;
-                }
-            }
-        }
-
+        //**********************************************************************
 
         //**********************************************************************
         template < typename ZMatrixT,
@@ -831,7 +696,7 @@ namespace grb
         template < typename ZMatrixT,
                    typename CMatrixT,
                    typename TMatrixT>
-        void ewise_or_opt_accum(ZMatrixT               &Z,
+        void ewise_or_opt_accum(ZMatrixT                &Z,
                                 CMatrixT          const &C,
                                 TMatrixT          const &T,
                                 grb::NoAccumulate )
@@ -874,33 +739,8 @@ namespace grb
             }
         }
 
-
-        //**********************************************************************
-        //**********************************************************************
-        template <typename ZScalarT,
-                  typename WScalarT,
-                  typename TScalarT,
-                  typename BinaryOpT>
-        void opt_accum_scalar(ZScalarT       &z,
-                              WScalarT const &w,
-                              TScalarT const &t,
-                              BinaryOpT       accum)
-        {
-            z = static_cast<ZScalarT>(accum(w, t));
-        }
-
-        //**********************************************************************
-        // Specialized version that gets used when we don't have an accumulator
-        template <typename ZScalarT,
-                  typename WScalarT,
-                  typename TScalarT>
-        void opt_accum_scalar(ZScalarT                &z,
-                              WScalarT          const &w,
-                              TScalarT          const &t,
-                              grb::NoAccumulate        accum)
-        {
-            z = static_cast<ZScalarT>(t);
-        }
+        //************************************************************************
+        //************************************************************************
 
         //************************************************************************
         /// Apply element-wise operation to intersection of sparse vectors.
@@ -942,7 +782,7 @@ namespace grb
         }
 
         //************************************************************************
-        /// Apply element-wise operation to intersection of sparse vectors.
+        /// Apply element-wise operation to intersection of dense vectors.
         template <typename D1, typename D2, typename D3, typename BinaryOpT>
         void ewise_and_dense_dense_v2(
             std::vector<std::tuple<grb::IndexType,D3> >       &ans,
@@ -979,7 +819,7 @@ namespace grb
          * If outp == MERGE:
          *
          * \f[ L(C) = {(i,j,Zij):(i,j) \in (ind(C) \cap ind(\neg M))} \cup
-         *            {(i,j,Zij):(i,j) \in (ind(Z) \cap ind(\neg M))} \f]
+         *            {(i,j,Zij):(i,j) \in (ind(Z) \cap ind(M))} \f]
          *
          * @tparam CScalarT The scalar type of the C vector input AND result.
          * @tparam ZScalarT The scalar type of the Z vector input.
@@ -1105,7 +945,7 @@ namespace grb
                 {
                     mask_tuples.emplace_back(ix, true);
                 }
-                else
+                else // ix == std::get<0>(*it)
                 {
                     if (static_cast<bool>(std::get<1>(*it)) == false)
                     {
@@ -1135,7 +975,7 @@ namespace grb
                 {
                     mask_tuples.emplace_back(ix, true);
                 }
-                else
+                else // ix == std::get<0>(*it), so skip
                 {
                     ++it;
                 }
@@ -1143,6 +983,9 @@ namespace grb
 
             return mask_tuples;
         }
+
+        //**********************************************************************
+        //**********************************************************************
 
         //**********************************************************************
         // Matrix version
@@ -1337,6 +1180,9 @@ namespace grb
         }
 
         //**********************************************************************
+        //**********************************************************************
+
+        //**********************************************************************
         // Vector version
         template <typename WVectorT,
                   typename ZScalarT,
@@ -1441,6 +1287,9 @@ namespace grb
         }
 
         //**********************************************************************
+        //**********************************************************************
+
+        //**********************************************************************
         // Do one of the following...
         // w          = z,
         // w<    m,r> = z,
@@ -1484,42 +1333,6 @@ namespace grb
                 }
             }
         }
-
-        //********************************************************************
-        // Index-out-of-bounds is an execution error and a responsibility of
-        // the backend.
-        template <typename SequenceT>
-        void check_index_array_content(SequenceT   const &array,
-                                       IndexType          dim,
-                                       std::string const &msg)
-        {
-            if (!IsAllSequence(array))
-            {
-                for (auto ix : array)
-                {
-                    if (ix >= dim)
-                    {
-                        throw IndexOutOfBoundsException(msg);
-                    }
-                }
-            }
-        }
-
-        //********************************************************************
-        // ALL SUPPORT
-        // This is where we turns alls into the correct range
-
-        template <typename SequenceT>
-        SequenceT setupIndices(SequenceT seq, IndexType n)
-        {
-            return seq;
-        }
-
-        IndexSequenceRange setupIndices(AllIndices seq, IndexType n)
-        {
-            return IndexSequenceRange(0, n);
-        }
-
 
         //********************************************************************
         // mxm helpers (may be of more general use).
@@ -1792,19 +1605,19 @@ namespace grb
         /// perform the following operation on sparse vectors implemented as
         /// vector<tuple<Index, value>>
         ///
-        /// c += a_ik*b[:]
+        /// t += a_ik*b[:]
         template<typename CScalarT,
                  typename SemiringT,
                  typename AScalarT,
                  typename BScalarT>
         void axpy(
-            std::vector<std::tuple<IndexType, CScalarT>>       &c,
+            std::vector<std::tuple<IndexType, CScalarT>>       &t,
             SemiringT                                           semiring,
             AScalarT                                            a,
             std::vector<std::tuple<IndexType, BScalarT>> const &b)
         {
             GRB_LOG_FN_BEGIN("axpy");
-            auto c_it = c.begin();
+            auto t_it = t.begin();
 
             for (auto&& [j, b_j] : b)
             {
@@ -1814,18 +1627,18 @@ namespace grb
                 GRB_LOG_VERBOSE("temp = " << t_j);
 
                 // scan through C_row to find insert/merge point
-                if (advance_and_check_tuple_iterator(c_it, c.end(), j))
+                if (advance_and_check_tuple_iterator(t_it, t.end(), j))
                 {
                     GRB_LOG_VERBOSE("Accumulating");
-                    std::get<1>(*c_it) = semiring.add(std::get<1>(*c_it), t_j);
-                    ++c_it;
+                    std::get<1>(*t_it) = semiring.add(std::get<1>(*t_it), t_j);
+                    ++t_it;
                 }
                 else
                 {
                     GRB_LOG_VERBOSE("Inserting");
-                    c_it = c.insert(c_it,
+                    t_it = t.insert(t_it,
                                     std::make_tuple(j, static_cast<CScalarT>(t_j)));
-                    ++c_it;
+                    ++t_it;
                 }
             }
             GRB_LOG_FN_END("axpy");
@@ -1835,19 +1648,19 @@ namespace grb
         /// perform the following operation on sparse vectors implemented as
         /// vector<tuple<Index, value>>
         ///
-        /// c += a_ik*b[:]
+        /// t += a_ik*b[:]
         template<typename CScalarT,
                  typename SemiringT,
                  typename AScalarT,
                  typename BScalarT>
         void axpy(
-            BitmapSparseVector<CScalarT>                       &c,
+            BitmapSparseVector<CScalarT>                       &t,
             SemiringT                                           semiring,
             AScalarT                                            a,
             std::vector<std::tuple<IndexType, BScalarT>> const &b)
         {
-            GRB_LOG_FN_BEGIN("axpy(dense c)");
-            //auto c_it = c.begin();
+            GRB_LOG_FN_BEGIN("axpy(dense t)");
+            //auto t_it = t.begin();
 
             for (auto&& [j, b_j] : b)
             {
@@ -1856,29 +1669,15 @@ namespace grb
                 auto t_j(semiring.mult(a, b_j));
                 GRB_LOG_VERBOSE("temp = " << t_j);
 
-                if (c.hasElementNoCheck(j))
+                if (t.hasElementNoCheck(j))
                 {
-                    c.setElementNoCheck(j, semiring.add(c.extractElementNoCheck(j),
+                    t.setElementNoCheck(j, semiring.add(t.extractElementNoCheck(j),
                                                         t_j));
                 }
-                // // scan through C_row to find insert/merge point
-                // if (advance_and_check_tuple_iterator(c_it, c.end(), j))
-                // {
-                //     GRB_LOG_VERBOSE("Accumulating");
-                //     std::get<1>(*c_it) = semiring.add(std::get<1>(*c_it), t_j);
-                //     ++c_it;
-                // }
                 else
                 {
-                    c.setElementNoCheck(j, t_j);
+                    t.setElementNoCheck(j, t_j);
                 }
-                // else
-                // {
-                //     GRB_LOG_VERBOSE("Inserting");
-                //     c_it = c.insert(c_it,
-                //                     std::make_tuple(j, static_cast<CScalarT>(t_j)));
-                //     ++c_it;
-                // }
             }
             GRB_LOG_FN_END("axpy");
         }
@@ -1887,14 +1686,52 @@ namespace grb
         /// perform the following operation on sparse vectors implemented as
         /// vector<tuple<Index, value>>
         ///
-        /// c<[m[:]]> += a_ik*b[:]
+        /// t += b[:]*a_ik
         template<typename CScalarT,
+                 typename SemiringT,
+                 typename AScalarT,
+                 typename BScalarT>
+        void axpy(
+            BitmapSparseVector<CScalarT>                       &t,
+            SemiringT                                           semiring,
+            std::vector<std::tuple<IndexType, BScalarT>> const &b,
+            AScalarT                                            a)
+        {
+            GRB_LOG_FN_BEGIN("axpy(dense t)");
+            //auto t_it = t.begin();
+
+            for (auto&& [j, b_j] : b)
+            {
+                GRB_LOG_VERBOSE("j = " << j);
+
+                auto t_j(semiring.mult(b_j, a));
+                GRB_LOG_VERBOSE("temp = " << t_j);
+
+                if (t.hasElementNoCheck(j))
+                {
+                    t.setElementNoCheck(j, semiring.add(t.extractElementNoCheck(j),
+                                                        t_j));
+                }
+                else
+                {
+                    t.setElementNoCheck(j, t_j);
+                }
+            }
+            GRB_LOG_FN_END("axpy");
+        }
+
+        // *******************************************************************
+        /// perform the following operation on sparse vectors implemented as
+        /// vector<tuple<Index, value>>
+        ///
+        /// t<[m[:]]> += a_ik*b[:]
+        template<typename TScalarT,
                  typename MScalarT,
                  typename SemiringT,
                  typename AScalarT,
                  typename BScalarT>
         void masked_axpy(
-            std::vector<std::tuple<IndexType, CScalarT>>       &c,
+            std::vector<std::tuple<IndexType, TScalarT>>       &t,
             std::vector<std::tuple<IndexType, MScalarT>> const &m,
             bool                                                structure_flag,
             bool                                                complement_flag,
@@ -1906,11 +1743,11 @@ namespace grb
 
             if (m.empty() && complement_flag)
             {
-                axpy(c, semiring, a, b);
+                axpy(t, semiring, a, b);
                 return;
             }
 
-            auto c_it = c.begin();
+            auto t_it = t.begin();
             auto m_it = m.begin();
 
             for (auto const &b_elt : b)
@@ -1932,18 +1769,18 @@ namespace grb
                 GRB_LOG_VERBOSE("temp = " << t_j);
 
                 // scan through C_row to find insert/merge point
-                if (advance_and_check_tuple_iterator(c_it, c.end(), j))
+                if (advance_and_check_tuple_iterator(t_it, t.end(), j))
                 {
                     GRB_LOG_VERBOSE("Accumulating");
-                    std::get<1>(*c_it) = semiring.add(std::get<1>(*c_it), t_j);
-                    ++c_it;
+                    std::get<1>(*t_it) = semiring.add(std::get<1>(*t_it), t_j);
+                    ++t_it;
                 }
                 else
                 {
                     GRB_LOG_VERBOSE("Inserting");
-                    c_it = c.insert(c_it,
-                                    std::make_tuple(j, static_cast<CScalarT>(t_j)));
-                    ++c_it;
+                    t_it = t.insert(t_it,
+                                    std::make_tuple(j, static_cast<TScalarT>(t_j)));
+                    ++t_it;
                 }
             }
             GRB_LOG_FN_END("masked_axpy");
@@ -2088,6 +1925,45 @@ namespace grb
             }
 
             GRB_LOG_FN_END("masked_merge.v2");
+        }
+
+        //********************************************************************
+        // For assign and extract
+        //********************************************************************
+
+        //********************************************************************
+        // Index-out-of-bounds is an execution error maybe a responsibility of
+        // the backend, but maybe it belongs in graphblas/detail
+        template <typename SequenceT>
+        void check_index_array_content(SequenceT   const &array,
+                                       IndexType          dim,
+                                       std::string const &msg)
+        {
+            if (!IsAllSequence(array))
+            {
+                for (auto ix : array)
+                {
+                    if (ix >= dim)
+                    {
+                        throw IndexOutOfBoundsException(msg);
+                    }
+                }
+            }
+        }
+
+        //********************************************************************
+        // AllIndices SUPPORT
+        // This is where we turns alls into the correct range
+
+        template <typename SequenceT>
+        SequenceT setupIndices(SequenceT seq, IndexType n)
+        {
+            return seq;
+        }
+
+        IndexSequenceRange setupIndices(AllIndices seq, IndexType n)
+        {
+            return IndexSequenceRange(0, n);
         }
 
     } // backend

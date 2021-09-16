@@ -130,6 +130,38 @@ BOOST_AUTO_TEST_CASE(test_mxv_reg)
 }
 
 //****************************************************************************
+BOOST_AUTO_TEST_CASE(test_mxv_noncommutative_multiply)
+{
+    std::vector<double> ans3 = {1, 0, 7};
+    std::vector<double> ans4 = {1, 0, 1};
+
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(m3x3_dense, 0.);
+    grb::Matrix<double, grb::DirectedMatrixTag> mB(m3x4_dense, 0.);
+    grb::Vector<double> u3(u3_dense, 0.);
+    grb::Vector<double> u4(u4_dense, 0.);
+    grb::Vector<double> result(3);
+    grb::Vector<double> ansA(ans3, 0.);
+    grb::Vector<double> ansB(ans4, 0.);
+    std::cerr << "***MINFIRST\n";
+    grb::mxv(result,
+             grb::NoMask(),
+             grb::NoAccumulate(),
+             grb::MinFirstSemiring<double>(),
+             mA,
+             u3);
+    BOOST_CHECK_EQUAL(result, ansA);
+
+    std::cerr << "***MINFIRST\n";
+    grb::mxv(result,
+             grb::NoMask(),
+             grb::NoAccumulate(),
+             grb::MinFirstSemiring<double>(),
+             mB,
+             u4);
+    BOOST_CHECK_EQUAL(result, ansB);
+}
+
+//****************************************************************************
 BOOST_AUTO_TEST_CASE(test_mxv_stored_zero_result)
 {
     // Build some matrices.
@@ -777,6 +809,5 @@ BOOST_AUTO_TEST_CASE(mxv_reg)
              v4);
     BOOST_CHECK_EQUAL(result, ans4);
 }
-
 
 BOOST_AUTO_TEST_SUITE_END()

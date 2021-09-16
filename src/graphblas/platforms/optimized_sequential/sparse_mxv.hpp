@@ -43,6 +43,56 @@ namespace grb
     namespace backend
     {
         //**********************************************************************
+        /// Implementation of 4.3.3 mxv: w<m,r> = w + A' * u
+        //**********************************************************************
+        template<typename WVectorT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename SemiringT,
+                 typename AMatrixT,
+                 typename UVectorT>
+        inline void mxv(WVectorT                      &w,
+                        MaskT                   const &mask,
+                        AccumT                  const &accum,
+                        SemiringT                      op,
+                        TransposeView<AMatrixT> const &AT,
+                        UVectorT                const &u,
+                        OutputControlEnum              outp)
+        {
+            GRB_LOG_VERBOSE("w<M,r> := A' +.* u");
+            auto const &A(AT.m_mat);
+            // =================================================================
+            // Use axpy approach with the semi-ring.
+            using TScalarType = typename SemiringT::result_type;
+            BitmapSparseVector<TScalarType> t(w.size());
+
+            if ((A.nvals() > 0) && (u.nvals() > 0))
+            {
+                for (IndexType row_idx = 0; row_idx < u.size(); ++row_idx)
+                {
+                    if (u.hasElementNoCheck(row_idx) && !A[row_idx].empty())
+                    {
+                        axpy(t, op, A[row_idx], u.extractElementNoCheck(row_idx));
+                    }
+                }
+            }
+
+            // =================================================================
+            // Accumulate into final output, w, considering mask and replace/merge
+            using ZScalarType = typename std::conditional_t<
+                std::is_same_v<AccumT, NoAccumulate>,
+                TScalarType,
+                decltype(accum(std::declval<typename WVectorT::ScalarType>(),
+                               std::declval<TScalarType>()))>;
+
+            opt_accum_with_opt_mask_1D(w, mask, accum, t, outp);
+        }
+
+        //**********************************************************************
+        //**********************************************************************
+        //**********************************************************************
+
+        //**********************************************************************
         /// Implementation for 4.3.3 mxv: A * u
         //**********************************************************************
         template<typename WVectorT,
@@ -260,56 +310,6 @@ namespace grb
             // =================================================================
             // Copy Z into the final output, w, considering mask and replace/merge
             write_with_opt_mask_1D_sparse_dense(w, z, mask, outp);
-        }
-
-        //**********************************************************************
-        //**********************************************************************
-        //**********************************************************************
-
-        //**********************************************************************
-        /// Implementation of 4.3.3 mxv: w<m,r> = w + A' * u
-        //**********************************************************************
-        template<typename WVectorT,
-                 typename MaskT,
-                 typename AccumT,
-                 typename SemiringT,
-                 typename AMatrixT,
-                 typename UVectorT>
-        inline void mxv(WVectorT                      &w,
-                        MaskT                   const &mask,
-                        AccumT                  const &accum,
-                        SemiringT                      op,
-                        TransposeView<AMatrixT> const &AT,
-                        UVectorT                const &u,
-                        OutputControlEnum              outp)
-        {
-            GRB_LOG_VERBOSE("w<M,r> := A' +.* u");
-            auto const &A(AT.m_mat);
-            // =================================================================
-            // Use axpy approach with the semi-ring.
-            using TScalarType = typename SemiringT::result_type;
-            BitmapSparseVector<TScalarType> t(w.size());
-
-            if ((A.nvals() > 0) && (u.nvals() > 0))
-            {
-                for (IndexType row_idx = 0; row_idx < u.size(); ++row_idx)
-                {
-                    if (u.hasElementNoCheck(row_idx) && !A[row_idx].empty())
-                    {
-                        axpy(t, op, u.extractElementNoCheck(row_idx), A[row_idx]);
-                    }
-                }
-            }
-
-            // =================================================================
-            // Accumulate into final output, w, considering mask and replace/merge
-            using ZScalarType = typename std::conditional_t<
-                std::is_same_v<AccumT, NoAccumulate>,
-                TScalarType,
-                decltype(accum(std::declval<typename WVectorT::ScalarType>(),
-                               std::declval<TScalarType>()))>;
-
-            opt_accum_with_opt_mask_1D(w, mask, accum, t, outp);
         }
     } // backend
 } // grb
