@@ -122,30 +122,82 @@ BOOST_AUTO_TEST_CASE(test_vxm_reg)
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(test_vxm_noncommutative_multiply)
 {
-    std::vector<double> ans3 = {12, 0, 3};
+    std::vector<double> ans3 = {12, 1, 3};
+    std::vector<double> ans3mask = {12, 1, 0};
+    std::vector<double> ans3acc  = {24, 2, 3};
+    std::vector<double> ans3both = {36, 3, 3};
+
     std::vector<double> ans4 = {1, 0, 7};
+    std::vector<double> ans4mask = {1, 0, 0};
+    std::vector<double> ans4acc  = {2, 0, 7};
+    std::vector<double> ans4both = {3, 0, 7};
 
     grb::Matrix<double, grb::DirectedMatrixTag> mA(m3x3_dense, 0.);
-    grb::Matrix<double, grb::DirectedMatrixTag> mB(m4x3_dense, 0.);
     grb::Vector<double> u3(u3_dense, 0.);
-    grb::Vector<double> u4(u4_dense, 0.);
     grb::Vector<double> result(3);
     grb::Vector<double> ansA(ans3, 0.);
+    grb::Vector<double> ansAmask(ans3mask, 0.);
+    grb::Vector<double> ansAacc (ans3acc,  0.);
+    grb::Vector<double> ansAboth(ans3both, 0.);
     grb::Vector<double> ansB(ans4, 0.);
+    grb::Vector<double> ansBmask(ans4mask, 0.);
+    grb::Vector<double> ansBacc (ans4acc,  0.);
+    grb::Vector<double> ansBboth(ans4both, 0.);
 
-    std::cerr << "***MINSECOND\n";
     grb::vxm(result,
              grb::NoMask(),
              grb::NoAccumulate(),
              grb::MinSecondSemiring<double>(), u3, grb::transpose(mA));
     BOOST_CHECK_EQUAL(result, ansA);
 
-    std::cerr << "***MINSECOND\n";
+    //mask
+    grb::vxm(result,
+             u3,
+             grb::NoAccumulate(),
+             grb::MinSecondSemiring<double>(), u3, grb::transpose(mA), grb::REPLACE);
+    BOOST_CHECK_EQUAL(result, ansAmask);
+
+    //accum
+    grb::vxm(result,
+             grb::NoMask(),
+             grb::Plus<double>(),
+             grb::MinSecondSemiring<double>(), u3, grb::transpose(mA));
+    BOOST_CHECK_EQUAL(result, ansAacc);
+
+    //mask+accum
+    grb::vxm(result,
+             u3,
+             grb::Plus<double>(),
+             grb::MinSecondSemiring<double>(), u3, grb::transpose(mA), grb::MERGE);
+    BOOST_CHECK_EQUAL(result, ansAboth);
+
+    //===============================
     grb::vxm(result,
              grb::NoMask(),
              grb::NoAccumulate(),
              grb::MinSecondSemiring<double>(), u3, mA);
     BOOST_CHECK_EQUAL(result, ansB);
+
+    //mask
+    grb::vxm(result,
+             u3,
+             grb::NoAccumulate(),
+             grb::MinSecondSemiring<double>(), u3, mA, grb::REPLACE);
+    BOOST_CHECK_EQUAL(result, ansBmask);
+
+    //accum
+    grb::vxm(result,
+             grb::NoMask(),
+             grb::Plus<double>(),
+             grb::MinSecondSemiring<double>(), u3, mA);
+    BOOST_CHECK_EQUAL(result, ansBacc);
+
+    //mask+accum
+    grb::vxm(result,
+             u3,
+             grb::Plus<double>(),
+             grb::MinSecondSemiring<double>(), u3, mA, grb::MERGE);
+    BOOST_CHECK_EQUAL(result, ansBboth);
 }
 
 //****************************************************************************

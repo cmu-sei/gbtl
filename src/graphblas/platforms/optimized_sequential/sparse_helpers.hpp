@@ -309,15 +309,8 @@ namespace grb
             {
                 if (rhs.get_bitmap()[idx])
                 {
-                    std::cerr << "dot_sd: i=" << idx << ", multop("<< val << ","
-                              << rhs.get_vals()[idx] << ") = "
-                              << op.mult(val, rhs.get_vals()[idx]) << std::endl;
                     if (value_set)
                     {
-                        std::cerr << "dot_sd: addop(" << ans << ","
-                                  << op.mult(val, rhs.get_vals()[idx]) << ") = "
-                                  << op.add(ans, op.mult(val, rhs.get_vals()[idx]))
-                                  << std::endl;
                         ans = op.add(ans, op.mult(val,
                                                   rhs.get_vals()[idx]));
                     }
