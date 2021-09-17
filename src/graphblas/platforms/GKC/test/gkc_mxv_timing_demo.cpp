@@ -33,7 +33,7 @@
 #define GRAPHBLAS_DEBUG 1
 
 #include <graphblas/graphblas.hpp>
-#include "Timer.hpp"
+#include "Timer_gkc.hpp"
 
 using namespace grb;
 

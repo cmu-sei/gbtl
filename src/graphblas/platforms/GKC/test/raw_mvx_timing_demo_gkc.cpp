@@ -33,7 +33,7 @@
 #include <chrono>
 #include <graphblas/graphblas.hpp>
 #include "raw_gkc_mxv.hpp"
-#include "Timer.hpp"
+#include "Timer_gkc.hpp"
 
 using namespace grb;
 

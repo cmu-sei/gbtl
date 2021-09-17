@@ -35,7 +35,7 @@
 #include <graphblas/algebra.hpp>
 #include <atomic>
 
-#include "test/Timer.hpp"
+// #include "test/Timer_gkc.hpp"
 
 // Includes for compatability with exsiting GBTL "sequential" data structures and methods
 #include "sparse_mxv_old.hpp"
