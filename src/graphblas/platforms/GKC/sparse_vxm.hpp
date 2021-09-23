@@ -215,7 +215,7 @@ namespace grb
       //	 std::cout<<"DEFAULT AXPY"<<std::endl;
 
       //this needs to be default axpy implementation
-      std::vector<bool> accum_val(w.size(), false);
+      // std::vector<bool> accum_val(w.size(), false);
       //	  accum_val.resize(w.size());
       auto mask_vec = get_inner_mask(mask);
 
@@ -271,6 +271,10 @@ namespace grb
           }
         }
 
+        using TScalarType = typename SemiringT::result_type;
+        GKCDenseVector<TScalarType> t(w.size());
+
+        #pragma omp parallel for
         for (IndexType idx = 0; idx != u.size(); ++idx)
         {
           if (u.hasElement(idx))
@@ -278,20 +282,21 @@ namespace grb
 
             ScalarT uw = u[idx];
 
+            #pragma omp parallel for
             for (auto aitr = A.idxBegin(idx), awitr = A.wgtBegin(idx);
                  aitr != A.idxEnd(idx); ++aitr, ++awitr)
             {
               if constexpr (std::is_same_v<base_type<decltype(mask_vec)>, grb::NoMask>)
               {
-                if (w.hasElement(*aitr))
+                if (t.hasElement(*aitr))
                 {
-                  ScalarT val = op.add(w[*aitr], op.mult(*awitr, uw));
-                  w.setElement(*aitr, val);
+                  ScalarT val = op.add(t[*aitr], op.mult(*awitr, uw));
+                  t.setElement(*aitr, val);
                 }
                 else
                 {
                   ScalarT val = op.mult(*awitr, uw);
-                  w.setElement(*aitr, val);
+                  t.setElement(*aitr, val);
                 }
               }
               else
@@ -300,42 +305,106 @@ namespace grb
                 //case: M !A !R
                 using MaskTypeT = typename base_type<decltype(mask_vec)>::ScalarType;
                 MaskTypeT val;
-                if constexpr (std::is_same_v<AccumT, grb::NoAccumulate>)
-                {
+                // if constexpr (std::is_same_v<AccumT, grb::NoAccumulate>)
+                // {
                   if (comp ^ (mask_vec.boolExtractElement(*aitr, val) && (strc || val)))
                   {
-                    if (w.hasElement(*aitr) &&
-                        (outp == REPLACE || accum_val[*aitr]))
+                    if (t.hasElement(*aitr) ) //&&
+                        // (outp == REPLACE || accum_val[*aitr]))
                     {
-                      ScalarT val = op.add(w[*aitr], op.mult(*awitr, uw));
-                      w.setElement(*aitr, val);
+                      ScalarT val = op.add(t[*aitr], op.mult(*awitr, uw));
+                      t.setElement(*aitr, val);
                     }
                     else
                     {
                       ScalarT val = op.mult(*awitr, uw);
-                      w.setElement(*aitr, val);
-                      if (outp != REPLACE)
-                        accum_val[*aitr] = true;
+                      t.setElement(*aitr, val);
+                      // if (outp != REPLACE)
+                      //   accum_val[*aitr] = true;
                     }
                   }
+                // }
+                // else
+                // { //mask accum version
+                //   if (comp ^ (mask_vec.boolExtractElement(*aitr, val) && (strc || val)))
+                //   {
+                //     if (w.hasElement(*aitr))
+                //     {
+                //       ScalarT val = op.add(w[*aitr], op.mult(*awitr, uw));
+                //       w.setElement(*aitr, val);
+                //     }
+                //     else
+                //     {
+                //       ScalarT val = op.mult(*awitr, uw);
+                //       w.setElement(*aitr, val);
+                //     }
+                //   }
+                // }
+              }
+            }
+          }
+        } // End for loop over all AXPYs
+        // Merge the result
+        // (Replace/Merge, Accum/NoAccum)
+        #pragma omp parallel for
+        for (IndexType idx = 0; idx != w.size(); ++idx)
+        {
+          // TODO handle no mask!
+          if constexpr (std::is_same_v<base_type<decltype(mask_vec)>, grb::NoMask>)
+          {
+            // Merge everything in (no mask)
+            // Two cases: accumulate or no accum
+            if constexpr (!std::is_same_v<AccumT, grb::NoAccumulate>)
+            {
+              // "If accum is NULL, z=t", hence w = z = t (with casting)
+              if constexpr (std::is_same_v<TScalarType, ScalarT>)
+              {
+                w = std::move(t);
+              }
+              else
+              {
+                w = t;
+              }
+              break;
+            }
+            else // Need to put values in t into w
+            {
+              if (t.hasElement(idx))
+              {
+                w.mergeSetElement(idx, t[idx], accum);
+              }
+            }
+          }
+          else
+          {
+            using MaskTypeT = typename base_type<decltype(mask_vec)>::ScalarType;
+            MaskTypeT val;
+            if (comp ^ (mask_vec.boolExtractElement(idx, val) && (strc || val)))
+            {
+              if constexpr (!std::is_same_v<AccumT, grb::NoAccumulate>)
+              {
+                if (t.hasElement(idx))
+                {
+                  w.mergeSetElement(idx, t[idx], accum);
+                  // Merge set element takes care of case where it's not already there
+                } // If t has no element, nothing to do
+              }
+              else
+              {
+                if (t.hasElement(idx))
+                {
+                  w.setElement(idx, t[idx]);
                 }
                 else
-                { //mask accum version
-                  if (comp ^ (mask_vec.boolExtractElement(*aitr, val) && (strc || val)))
-                  {
-                    if (w.hasElement(*aitr))
-                    {
-                      ScalarT val = op.add(w[*aitr], op.mult(*awitr, uw));
-                      w.setElement(*aitr, val);
-                    }
-                    else
-                    {
-                      ScalarT val = op.mult(*awitr, uw);
-                      w.setElement(*aitr, val);
-                    }
-                  }
+                {
+                  w.boolRemoveElement(idx);
                 }
               }
+            } // Not in mask, handle replace
+            // Merge/Replace, Accum/NoAccum
+            else if (outp == REPLACE)
+            {
+              w.boolRemoveElement(idx);
             }
           }
         }
