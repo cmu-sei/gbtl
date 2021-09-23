@@ -114,15 +114,28 @@ grb::IndexArrayType j = {
 
 //****************************************************************************
 IndexType read_edge_list(std::string const &pathname,
-                         IndexArrayType    &row_indices,
-                         IndexArrayType    &col_indices)
+                         IndexArrayType &row_indices,
+                         IndexArrayType &col_indices)
 {
     std::ifstream infile(pathname);
     IndexType max_id = 0;
+    IndexType min_id = 1; // Assuming 1 or 0 based indexing; nothing else
     uint64_t num_rows = 0;
     uint64_t src, dst;
 
     std::string line;
+    // First pass to get min ID
+    while (std::getline( infile, line) )
+    {
+        if (infile.eof()) break;
+        
+        std::istringstream l(line);
+        l >> src >> dst; // And discard the rest (weights)
+        min_id = std::min(min_id, std::min(src, dst));
+    }
+    infile.clear(); // Reset EOF flag
+    infile.seekg(0, std::ios_base::beg); // Reset infile to start
+    // std::cout << "Min vertex ID: " << min_id << std::endl;
 
     while (std::getline( infile, line) )
     {
@@ -130,6 +143,8 @@ IndexType read_edge_list(std::string const &pathname,
         
         std::istringstream l(line);
         l >> src >> dst; // And discard the rest (weights)
+        src -= min_id;
+        dst -= min_id;
 
         //std::cout << "Read: " << src << ", " << dst << std::endl;
         max_id = std::max(max_id, src);
@@ -224,7 +239,7 @@ int main(int argc, char **argv)
     // A*u
     //===================
     std::cout << "GKC IMPLEMENTATION: A*u" << std::endl;
-    std::cout << "Function                      \tmin\tavg\tmax\tw.nvals\tchecksum\n";
+    std::cout << "Function                      \tmin\tavg\tmax\tw.nvals\tchecksum\tMTEPS\n";
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -245,7 +260,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
     std::cout << "w := A+.*u                    \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w.nvals() << "\t" << count << std::endl;
+              << "\t" << w.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -266,7 +281,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
     std::cout << "w := w + A+.*u                \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w.nvals() << "\t" << count << std::endl;
+              << "\t" << w.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -287,7 +302,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
     std::cout << "w<m,merge> := A+.*u           \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w.nvals() << "\t" << count << std::endl;
+              << "\t" << w.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -308,7 +323,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
     std::cout << "w<m,replace> := A+.*u         \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w.nvals() << "\t" << count << std::endl;
+              << "\t" << w.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -329,7 +344,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
     std::cout << "w<m,merge> := w + A+.*u       \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w.nvals() << "\t" << count << std::endl;
+              << "\t" << w.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -350,7 +365,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
     std::cout << "w<m,replace> := w + A+.*u     \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w.nvals() << "\t" << count << std::endl;
+              << "\t" << w.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
 #if 1 // Complement tests for dot
@@ -372,7 +387,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
     std::cout << "w<!m,merge> := A+.*u          \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w.nvals() << "\t" << count << std::endl;
+              << "\t" << w.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -393,7 +408,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
     std::cout << "w<!m,replace> := A+.*u        \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w.nvals() << "\t" << count << std::endl;
+              << "\t" << w.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -414,7 +429,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
     std::cout << "w<!m,merge> := w + A+.*u      \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w.nvals() << "\t" << count << std::endl;
+              << "\t" << w.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -435,7 +450,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
     std::cout << "w<!m,replace> := w + A+.*u    \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w.nvals() << "\t" << count << std::endl;
+              << "\t" << w.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----
     #endif
@@ -459,7 +474,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
     std::cout << "w<s(m),merge> := A+.*u        \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w.nvals() << "\t" << count << std::endl;
+              << "\t" << w.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -480,7 +495,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
     std::cout << "w<s(m),replace> := A+.*u      \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w.nvals() << "\t" << count << std::endl;
+              << "\t" << w.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -501,7 +516,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
     std::cout << "w<s(m),merge> := w + A+.*u    \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w.nvals() << "\t" << count << std::endl;
+              << "\t" << w.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -522,7 +537,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
     std::cout << "w<s(m),replace> := w + A+.*u  \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w.nvals() << "\t" << count << std::endl;
+              << "\t" << w.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     #endif
@@ -545,7 +560,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
     std::cout << "w<!s(m),merge> := A+.*u       \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w.nvals() << "\t" << count << std::endl;
+              << "\t" << w.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -566,7 +581,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
     std::cout << "w<!s(m),replace> := A+.*u     \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w.nvals() << "\t" << count << std::endl;
+              << "\t" << w.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -587,7 +602,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
     std::cout << "w<!s(m),merge> := w + A+.*u   \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w.nvals() << "\t" << count << std::endl;
+              << "\t" << w.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -608,7 +623,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
     std::cout << "w<!s(m),replace> := w + A+.*u \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w.nvals() << "\t" << count << std::endl;
+              << "\t" << w.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 #endif
 
     std::cout << "GKC IMPLEMENTATION: A'*u" << std::endl;
@@ -637,7 +652,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
     std::cout << "w := A'+.*u                   \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w1.nvals() << "\t" << count << std::endl;
+              << "\t" << w1.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -658,7 +673,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
     std::cout << "w := w + A'+.*u               \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w1.nvals() << "\t" << count << std::endl;
+              << "\t" << w1.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -679,7 +694,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
     std::cout << "w<m,merge> := A'+.*u          \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w1.nvals() << "\t" << count << std::endl;
+              << "\t" << w1.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -700,7 +715,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
     std::cout << "w<m,replace> := A'+.*u        \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w1.nvals() << "\t" << count << std::endl;
+              << "\t" << w1.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -721,7 +736,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
     std::cout << "w<m,merge> := w + A'+.*u      \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w1.nvals() << "\t" << count << std::endl;
+              << "\t" << w1.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -742,7 +757,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
     std::cout << "w<m,replace> := w + A'+.*u    \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w1.nvals() << "\t" << count << std::endl;
+              << "\t" << w1.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 #if 1
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -763,7 +778,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
     std::cout << "w<!m,merge> := A'+.*u         \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w1.nvals() << "\t" << count << std::endl;
+              << "\t" << w1.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -784,7 +799,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
     std::cout << "w<!m,replace> := A'+.*u       \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w1.nvals() << "\t" << count << std::endl;
+              << "\t" << w1.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -805,7 +820,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
     std::cout << "w<!m,merge> := w + A'+.*u     \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w1.nvals() << "\t" << count << std::endl;
+              << "\t" << w1.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -826,7 +841,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
     std::cout << "w<!m,replace> := w + A'+.*u   \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w1.nvals() << "\t" << count << std::endl;
+              << "\t" << w1.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //-----
 
@@ -849,7 +864,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
     std::cout << "w<s(m),merge> := A'+.*u       \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w1.nvals() << "\t" << count << std::endl;
+              << "\t" << w1.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -870,7 +885,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
     std::cout << "w<s(m),replace> := A'+.*u     \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w1.nvals() << "\t" << count << std::endl;
+              << "\t" << w1.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -891,7 +906,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
     std::cout << "w<s(m),merge> := w + A'+.*u   \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w1.nvals() << "\t" << count << std::endl;
+              << "\t" << w1.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -912,7 +927,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
     std::cout << "w<s(m),replace> := w + A'+.*u \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w1.nvals() << "\t" << count << std::endl;
+              << "\t" << w1.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -933,7 +948,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
     std::cout << "w<!s(m),merge> := A'+.*u      \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w1.nvals() << "\t" << count << std::endl;
+              << "\t" << w1.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -954,7 +969,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
     std::cout << "w<!s(m),replace> := A'+.*u    \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w1.nvals() << "\t" << count << std::endl;
+              << "\t" << w1.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -975,7 +990,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
     std::cout << "w<!s(m),merge> := w + A'+.*u  \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w1.nvals() << "\t" << count << std::endl;
+              << "\t" << w1.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
     //----------
     accum_time=0.; min_time=1.0e38; max_time=0.;
@@ -996,7 +1011,7 @@ int main(int argc, char **argv)
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
     std::cout << "w<!s(m),replace> := w + A'+.*u\t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
-              << "\t" << w1.nvals() << "\t" << count << std::endl;
+              << "\t" << w1.nvals() << "\t" << count << "\t" << (double)A.nvals()/(accum_time/NUM_TRIALS) << std::endl;;
 
 #endif
 
