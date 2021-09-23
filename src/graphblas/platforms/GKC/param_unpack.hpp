@@ -222,7 +222,7 @@ namespace grb
                      typename InputTag>
             struct result<ScalarT, Implementation,  Sparseness, InputTag>
             {
-                using type = BitmapSparseVector<ScalarT>;
+                using type = GKCSparseVector<ScalarT>;
             };
         };
 
