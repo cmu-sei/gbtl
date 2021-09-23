@@ -56,6 +56,7 @@ namespace grb
         {
         public:
             using ScalarType = ScalarT;
+            using BitT = char;
 
             // Constructor with some default values
             /**
@@ -242,13 +243,14 @@ namespace grb
                 m_num_vals = rhs.size();
                 m_num_stored_vals = rhs.nvals();
                 m_weighted = rhs.isWeighted();
-                m_bitmap = rhs.m_bitmap();
+                m_bitmap = rhs.getBitmap();
 
                 if (m_weighted)
                 {
+                    auto w_ref = rhs.getWeights();
                     for (size_t idx = 0; idx < m_num_vals; idx++)
                     {
-                        m_weights[idx] = (ScalarT)(rhs.m_weights[idx]);
+                        m_weights[idx] = (ScalarT)(w_ref[idx]);
                     }
                 }
                 return *this;
@@ -648,6 +650,8 @@ namespace grb
                 throw NoValueException();
             }
 
+            std::vector<BitT> getBitmap() const {return m_bitmap;}
+
             using wgt_iterator = typename std::vector<ScalarType>::iterator;
             // Iterators for neighborhoods
             inline wgt_iterator wgtBegin() { return m_weights.begin(); }
@@ -716,7 +720,7 @@ namespace grb
             // Two array compressed sparse vector
             std::vector<ScalarType> m_weights;
 
-            std::vector<char> m_bitmap;
+            std::vector<BitT> m_bitmap;
         };
 
     } // namespace backend
