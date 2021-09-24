@@ -29,6 +29,7 @@
 #include <fstream>
 #include <chrono>
 #include <random>
+#include <omp.h>
 
 #define GRAPHBLAS_DEBUG 1
 
@@ -223,6 +224,7 @@ int main(int argc, char **argv)
     std::cout << "Running algorithm(s)... M.nvals = " << M.nvals() << std::endl;
     std::cout << "u.nvals = " << u.nvals() << std::endl;
     T count(0);
+    std::cout << "Running with " << omp_get_max_threads() << " threads" << std::endl;
 
     Timer<std::chrono::steady_clock, std::chrono::microseconds> my_timer;
 
