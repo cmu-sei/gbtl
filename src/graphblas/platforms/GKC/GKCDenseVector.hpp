@@ -186,6 +186,7 @@ namespace grb
                     itm = false;
 
                 // Copy data from iterators into vector
+                #pragma omp parallel for
                 for (IndexType idx = 0; idx < n; idx++)
                 {
                     IndexType vidx = *(i_it + idx);
@@ -194,6 +195,7 @@ namespace grb
                     {
                         // Index not recognized, add new entry
                         m_bitmap[vidx] = true;
+                        // #pragma omp atomic
                         m_num_stored_vals++;
                         if (m_weighted)
                             m_weights[vidx] = *(v_it + idx);
@@ -248,6 +250,7 @@ namespace grb
                 if (m_weighted)
                 {
                     auto w_ref = rhs.getWeights();
+                    #pragma omp parallel for
                     for (size_t idx = 0; idx < m_num_vals; idx++)
                     {
                         m_weights[idx] = (ScalarT)(w_ref[idx]);
@@ -359,6 +362,7 @@ namespace grb
                     itm = false;
 
                 // Copy data from iterators into vector
+                #pragma omp parallel for
                 for (IndexType idx = 0; idx < n; idx++)
                 {
                     IndexType vidx = *(i_it + idx);
@@ -367,6 +371,7 @@ namespace grb
                     {
                         // Index not recognized, add new entry
                         m_bitmap[vidx] = true;
+                        // #pragma omp atomic
                         m_num_stored_vals++;
                         if (m_weighted)
                             m_weights[vidx] = *(v_it + idx);
@@ -382,9 +387,9 @@ namespace grb
 
             void clear()
             {
-                /// @todo make atomic? transactional?
+                // / @todo make atomic? transactional?
                 m_num_stored_vals = 0;
-
+                #pragma omp parallel for
                 for (int i = 0; i != size(); ++i)
                     m_bitmap[i] = false;
             }
@@ -530,7 +535,10 @@ namespace grb
                 auto idx = index;
 
                 if (!m_bitmap[idx])
+                {
+                    // #pragma omp atomic
                     m_num_stored_vals++;
+                }
 
                 m_weights[idx] = new_val;
                 m_bitmap[idx] = true;
@@ -591,6 +599,7 @@ namespace grb
                             std::declval<ZScalarT>()));
                         m_weights[index] = (ZType)new_val;
                     }
+                    // #pragma omp atomic
                     m_num_stored_vals++;
                 }
             }
@@ -607,6 +616,7 @@ namespace grb
                 else
                 {
                     m_bitmap[index] = false;
+                    // #pragma omp atomic
                     m_num_stored_vals--;
                 }
             }
@@ -626,11 +636,23 @@ namespace grb
                 bool was_set = m_bitmap[index];
                 if (was_set)
                 {
-                    m_num_stored_vals -= 1;
+                    // #pragma omp atomic
+                    m_num_stored_vals --;
                     m_bitmap[index] = false;
                 }
                 return was_set;
             }
+
+/*
+            void bulkRemoveElements(std::vector<IndexType> indices)
+            {
+                size_t rm_count = 0
+                for (auto && idx : indices)
+                {
+
+                }
+            }
+            */
 
             bool isWeighted() const { return m_weighted; }
 
