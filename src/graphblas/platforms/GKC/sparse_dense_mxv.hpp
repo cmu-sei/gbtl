@@ -117,27 +117,15 @@ namespace grb
             constexpr bool comp = is_complement_v<MaskT> || is_structural_complement_v<MaskT>;
             constexpr bool strc = is_structure_v<MaskT> || is_structural_complement_v<MaskT>;
 
-            // Accumulate is null, clear on replace due to null mask (from signature):
-            if constexpr (std::is_same_v<AccumT, grb::NoAccumulate>)
-            {
-                if constexpr (std::is_same_v<MaskT, grb::NoMask>)
-                {
-                    w.clear();
-                }
-                else // Have mask and no accum
-                {
-                    if (outp == REPLACE)
-                    {
-                        w.clear();
-                    }
-                }
-            } // Other side is handled at bottom of main for loop.
+
+            
 
             if ((A.nvals() > 0) && (u.nvals() > 0))
             {
                 // Iterate over set values in mask, matching with
                 // non-empty entries in u and rows in A
                 // for (auto && row_idx : mask.getIndices())
+                #pragma omp parallel for
                 for (IndexType row_idx = 0; row_idx < A.nrows(); row_idx++)
                 {
                     bool do_compute;
@@ -162,12 +150,6 @@ namespace grb
                         auto AIst = A.idxBegin(row_idx);
                         auto AInd = A.idxEnd(row_idx);
                         auto AWst = A.wgtBegin(row_idx);
-                        //                        auto AWnd = A.wgtEnd(row_idx);
-                        //                        auto UIst = u.idxBegin();
-                        //                        auto UInd = u.idxEnd();
-
-                        //                        auto UWst = u.wgtBegin();
-                        //                        auto UWnd = u.wgtEnd();
                         // Do dot product here, into w directly
                         bool value_set = false;
                         TScalarType sum;
@@ -209,9 +191,10 @@ namespace grb
                         }
                         else
                         {
-                            if constexpr (std::is_same_v<AccumT, NoAccumulate>)
+                            if constexpr (std::is_same_v<AccumT, NoAccumulate> && !std::is_same_v<MaskT, grb::NoMask>)
                             {
-                                w.boolRemoveElement(row_idx);
+                                if (outp!=REPLACE)
+                                    w.boolRemoveElement(row_idx);
                             }
                         }
                     }
@@ -236,6 +219,7 @@ namespace grb
                     {
                         // If we have a mask and the output control is REPLACE, delete
                         // pre-existing elements not in the mask
+                        // #pragma omp parallel for
                         for (auto idx = 0; idx < w.size(); idx++)
                         {
                             bool remove;
@@ -260,6 +244,25 @@ namespace grb
                             }
                         }
                     }
+                }
+                else 
+                {
+                    // Todo: fix this branch 
+                    // Accumulate is null, clear on replace due to null mask (from signature):
+                    if constexpr (std::is_same_v<AccumT, grb::NoAccumulate>)
+                    {
+                        if constexpr (std::is_same_v<MaskT, grb::NoMask>)
+                        {
+                            w.clear();
+                        }
+                        else // Have mask and no accum
+                        {
+                            if (outp == REPLACE)
+                            {
+                                w.clear();
+                            }
+                        }
+                    } // Other side is handled at bottom of main for loop.
                 }
             }
 #ifdef INST_TIMING_MVX
