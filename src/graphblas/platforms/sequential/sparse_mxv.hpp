@@ -142,7 +142,7 @@ namespace grb
                 {
                     if (u.hasElement(row_idx) && !A[row_idx].empty())
                     {
-                        axpy(t, op, u.extractElement(row_idx), A[row_idx]);
+                        axpy(t, op, A[row_idx], u.extractElement(row_idx));
                     }
                 }
             }
