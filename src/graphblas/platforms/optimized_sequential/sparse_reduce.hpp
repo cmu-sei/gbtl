@@ -107,6 +107,46 @@ namespace grb
             return true;
         }
 
+        //************************************************************************
+        /// A reduction of a sparse vector (vector<tuple(index,value)>) using a
+        /// binary op or a monoid.
+        template <typename D1, typename D3, typename BinaryOpT>
+        bool reduction(
+            D3                           &ans,
+            BitmapSparseVector<D1> const &vec,
+            BinaryOpT                     op)
+        {
+            if (vec.nvals() == 0)
+            {
+                return false;
+            }
+
+            using D3ScalarType =
+                decltype(op(std::declval<D1>(), std::declval<D1>()));
+            D3ScalarType tmp;
+
+            bool val_set = false;
+            for (grb::IndexType ix = 0; ix < vec.size(); ++ix)
+            {
+                if (vec.hasElementNoCheck(ix))
+                {
+                    if (val_set)
+                    {
+                        tmp = op(tmp, vec.extractElementNoCheck(ix));
+                    }
+                    else
+                    {
+                        val_set = true;
+                        tmp = static_cast<D3ScalarType>(
+                            vec.extractElementNoCheck(ix));
+                    }
+                }
+            }
+
+            ans = static_cast<D3>(tmp);
+            return true;
+        }
+
         //********************************************************************
         /// Implementation of 4.3.9.1 reduce: Standard Matrix to Vector variant:
         /// w<m,z> := op_j(A[:,j])
@@ -236,7 +276,7 @@ namespace grb
 
             if (u.nvals() > 0)
             {
-                reduction(t, u.getContents(), op);
+                reduction(t, u, op);
             }
 
             // =================================================================

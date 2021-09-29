@@ -69,8 +69,13 @@ namespace grb
 
             if (u.nvals() > 0)
             {
-                for (auto&& [idx, val] : u.getContents()) {
-                    t_contents.emplace_back(idx, op(val));
+                for (grb::IndexType idx = 0; idx < u.size(); ++idx)
+                {
+                    if (u.hasElementNoCheck(idx))
+                    {
+                        t_contents.emplace_back(
+                            idx, op(u.extractElementNoCheck(idx)));
+                    }
                 }
             }
 
@@ -232,8 +237,13 @@ namespace grb
 
             if (u.nvals() > 0)
             {
-                for (auto&& [idx, u_val] : u.getContents()) {
-                    t_contents.emplace_back(idx, op(val, u_val));
+                for (grb::IndexType idx = 0; idx < u.size(); ++idx)
+                {
+                    if (u.hasElementNoCheck(idx))
+                    {
+                        t_contents.emplace_back(
+                            idx, op(val, u.extractElementNoCheck(idx)));
+                    }
                 }
             }
 
@@ -287,8 +297,13 @@ namespace grb
 
             if (u.nvals() > 0)
             {
-                for (auto&& [idx, u_val] : u.getContents()) {
-                    t_contents.emplace_back(idx, op(u_val, val));
+                for (grb::IndexType idx = 0; idx < u.size(); ++idx)
+                {
+                    if (u.hasElementNoCheck(idx))
+                    {
+                        t_contents.emplace_back(
+                            idx, op(u.extractElementNoCheck(idx), val));
+                    }
                 }
             }
 

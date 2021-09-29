@@ -94,6 +94,52 @@ namespace grb
             }
         }
 
+        //**********************************************************************
+        /**
+         * Extracts a series of values from the vector based on the passed in
+         * indices.
+         * @tparam CScalarT  The type of the output scalar.
+         * @tparam AScalarT  The type of the input scalar.
+         * @tparam SequenceT A random access iterator into a container of indices
+         *
+         * @param vec_dest The output vector.
+         * @param vec_src  The input vector.
+         * @param begin    Iterator at begining of sequence of indices to extract.
+         * @param end      Iterator at end of sequence of indices to extract.
+         */
+        template<typename CScalarT,
+                 typename AScalarT,
+                 typename IteratorT>
+        void vectorExtract(
+            std::vector<std::tuple<IndexType, CScalarT> >       &vec_dest,
+            BitmapSparseVector<AScalarT>                  const &vec_src,
+            IteratorT           begin,
+            IteratorT           end)
+        {
+            // This is expensive but the indices can be duplicates and
+            // out of order.
+
+            vec_dest.clear();
+
+            GRB_LOG_VERBOSE("vectorExtract: sizeof(vec_src): " << vec_src.size());
+
+            IndexType out_idx = 0;
+            for (auto col_it = begin; col_it != end; ++col_it, ++out_idx)
+            {
+                GRB_LOG_VERBOSE("out_idx = " << out_idx);
+                IndexType wanted_idx = *col_it;
+
+                // Search through the outputs find one that matches.
+                if (vec_src.hasElementNoCheck(wanted_idx))
+                {
+                    vec_dest.emplace_back(
+                        out_idx,
+                        static_cast<CScalarT>(
+                            vec_src.extractElementNoCheck(wanted_idx)));
+                }
+            }
+        }
+
         // *******************************************************************
         template<typename CScalarT,
                  typename AScalarT,
@@ -101,6 +147,18 @@ namespace grb
         void vectorExtract(
                 std::vector<std::tuple<IndexType, CScalarT> >       &vec_dest,
                 std::vector<std::tuple<IndexType, AScalarT> > const &vec_src,
+                SequenceT                                            indices)
+        {
+            vectorExtract(vec_dest, vec_src, indices.begin(), indices.end());
+        }
+
+        // *******************************************************************
+        template<typename CScalarT,
+                 typename AScalarT,
+                 typename SequenceT>
+        void vectorExtract(
+                std::vector<std::tuple<IndexType, CScalarT> >       &vec_dest,
+                BitmapSparseVector<AScalarT>                  const &vec_src,
                 SequenceT                                            indices)
         {
             vectorExtract(vec_dest, vec_src, indices.begin(), indices.end());
@@ -330,9 +388,8 @@ namespace grb
             // Extract to T
             using UScalarType =typename UVectorT::ScalarType;
             std::vector<std::tuple<IndexType, UScalarType> > t;
-            vectorExtract(t, u.getContents(),
-                          setupIndices(indices,
-                                       std::min(w.size(), u.size())));
+            vectorExtract(t, u,
+                          setupIndices(indices, std::min(w.size(), u.size())));
 
             GRB_LOG_VERBOSE("t: " << t);
 

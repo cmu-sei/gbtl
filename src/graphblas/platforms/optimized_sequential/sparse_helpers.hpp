@@ -709,7 +709,6 @@ namespace grb
             BinaryOpT                                               accum)
         {
             //z.clear();
-            //ewise_or(z, w.getContents(), t, accum);
             ewise_or_dense_sparse_v2(z, w, t, accum);
         }
 

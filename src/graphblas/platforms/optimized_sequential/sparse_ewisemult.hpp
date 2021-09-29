@@ -74,7 +74,6 @@ namespace grb
 
             if ((u.nvals() > 0) && (v.nvals() > 0))
             {
-                //ewise_and(t_contents, u.getContents(), v.getContents(), op);
                 ewise_and_dense_dense_v2(t_contents, u, v, op);
             }
 

@@ -172,6 +172,102 @@ namespace grb
         }
 
         //**********************************************************************
+        /// Apply element-wise operation to union on sparse vectors.
+        /// Indices in the stencil indicate where elements of vec2 should be
+        /// used (whether there is a stored value or not); otherwise the value
+        /// in vec1 should be taken.  Note: that it is assumed that if a value
+        /// is stored in vec2 then the corresponding location is contained in
+        /// stencil indices.
+        ///
+        /// Truth table (for each element, i, of the answer, where '-' means
+        /// no stored value):
+        ///
+        ///  vec1_i   vec2   s_i   ans_i
+        ///    -        -     -      -
+        ///    -        -     x      -
+        ///    -        x --> x    vec2_i
+        ///    x        -     -    vec1_i
+        ///    x        -     x      -    (take vec1_i which is no stored value)
+        ///    x        x --> x    vec1_i
+        ///
+        /// \tparam D1
+        /// \tparam D2
+        /// \tparam D3
+        /// \tparam SequenceT  Could be a out of order subset of indices
+        ///
+        /// \param ans   A row of the answer (Z or z), starts empty
+        /// \param vec1  A row of the output container (C or w), indices increasing order
+        /// \param vec2  A row of the T (or t) container, indices in increasing order
+        /// \param stencil_indices  Assumed to not be in order
+        ///
+        template <typename D1, typename D2, typename D3, typename SequenceT>
+        void ewise_or_stencil_dense_sparse(
+            std::vector<std::tuple<grb::IndexType,D3> >       &ans,
+            BitmapSparseVector<D1>                      const &vec1,
+            std::vector<std::tuple<grb::IndexType,D2> > const &vec2,
+            SequenceT                                          stencil_indices)
+        {
+            ans.clear();
+
+            D2 v2_val;
+            grb::IndexType v1_idx, v2_idx;
+
+            // loop through both ordered sets to compute ewise_or
+            //auto v1_it = vec1.begin();
+            auto v2_it = vec2.begin();
+            if (v2_it != vec2.end())
+            {
+                std::tie(v2_idx, v2_val) = *v2_it;
+            }
+
+            //while ((v1_it != vec1.end()) || (v2_it != vec2.end()))
+            for (v1_idx = 0; v1_idx < vec1.size(); ++v1_idx)
+            {
+                if (v2_it != vec2.end())
+                {
+                    // If v1 and v2 both have stored values, it is assumed index
+                    // is in stencil_indices so v2 should be stored
+                    if (vec1.hasElementNoCheck(v1_idx) && (v2_idx == v1_idx))
+                    {
+                        ans.emplace_back(v2_idx, static_cast<D3>(v2_val));
+
+                        ++v2_it;  std::tie(v2_idx, v2_val) = *v2_it;
+                    }
+                    // In this case v1 has a value and not v2.  We need to search
+                    // stencil indices to see if index is present
+                    else if (vec1.hasElementNoCheck(v1_idx) &&
+                             (v1_idx < v2_idx))
+                    {
+                        // advance v1 and annihilate
+                        if (!searchIndices(stencil_indices, v1_idx))
+                        {
+                            ans.emplace_back(
+                                v1_idx,
+                                static_cast<D3>(
+                                    vec1.extractElementNoCheck(v1_idx)));
+                        }
+                    }
+                    else if (v1_idx == v2_idx)
+                    {
+                        //std::cerr << "Copying v2, Advancing v2_it" << std::endl;
+                        ans.emplace_back(v2_idx, static_cast<D3>(v2_val));
+                        ++v2_it;  std::tie(v2_idx, v2_val) = *v2_it;
+                    }
+                }
+                else if (vec1.hasElementNoCheck(v1_idx))  // vec2 exhausted
+                {
+                    if (!searchIndices(stencil_indices, v1_idx))
+                    {
+                        ans.emplace_back(
+                            v1_idx,
+                            static_cast<D3>(
+                                vec1.extractElementNoCheck(v1_idx)));
+                    }
+                }
+            }
+        }
+
+        //**********************************************************************
         // for sparse_assign
         template <typename ZScalarT,
                   typename WVectorT,
@@ -186,7 +282,7 @@ namespace grb
             BinaryOpT                                               accum)
         {
             // If there is an accumulate operations, do nothing with the stencil
-            ewise_or(z, w.getContents(), t, accum);
+            ewise_or_dense_sparse_v2(z, w, t, accum);
         }
 
         //**********************************************************************
@@ -204,7 +300,7 @@ namespace grb
         {
             // If there is no accumulate we need to annihilate stored values
             // in w that fall in the stencil
-            ewise_or_stencil(z, w.getContents(), t, indices);
+            ewise_or_stencil_dense_sparse(z, w, t, indices);
         }
 
 
@@ -376,6 +472,32 @@ namespace grb
         }
 
         //********************************************************************
+        template <typename TScalarT,
+                  typename AScalarT>
+        void vectorExpand(
+            std::vector<std::tuple<IndexType, TScalarT>>        &vec_dest,
+            BitmapSparseVector<AScalarT>                  const &vec_src,
+            std::vector<std::tuple<IndexType, IndexType>> const &Indices)
+        {
+            vec_dest.clear();
+            // The Indices are pairs of (output_index, input_index)
+            // We do it this way, so we get the output in the right
+            // order to begin with
+
+            // Walk the output/input pairs building the output in correct order.
+            for (auto&& [dest_idx, src_idx] : Indices)
+            {
+                if (vec_src.hasElementNoCheck(src_idx))
+                {
+                    vec_dest.emplace_back(
+                        dest_idx,
+                        static_cast<TScalarT>(
+                            vec_src.extractElementNoCheck(src_idx)));
+                }
+            }
+        }
+
+        //********************************************************************
         // non-transposed case.
         template<typename TScalarT,
                  typename AScalarT,
@@ -529,8 +651,7 @@ namespace grb
             // Expand to t
             using UScalarType = typename UVectorT::ScalarType;
             std::vector<std::tuple<IndexType, UScalarType> > t;
-            auto u_contents(u.getContents());
-            vectorExpand(t, u_contents, oi_pairs);
+            vectorExpand(t, u, oi_pairs);
 
             GRB_LOG_VERBOSE("t: " << t);
 
