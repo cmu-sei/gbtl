@@ -32,9 +32,9 @@
 
 #define GRAPHBLAS_DEBUG 1
 
-#include <graphblas/graphblas.hpp>
-#include <algorithms/triangle_count.hpp>
 #include "Timer.hpp"
+#include <graphblas/graphblas.hpp>
+#include "read_edge_list.hpp"
 
 using namespace grb;
 
@@ -42,48 +42,28 @@ std::default_random_engine  generator;
 std::uniform_real_distribution<double> distribution;
 
 //****************************************************************************
-IndexType read_edge_list(std::string const &pathname,
-                         IndexArrayType &Arow_indices,
-                         IndexArrayType &Acol_indices,
-                         IndexArrayType &Brow_indices,
-                         IndexArrayType &Bcol_indices)
+void separate_indices(IndexArrayType const &row_indices,
+                      IndexArrayType const &col_indices,
+                      IndexArrayType &Arow_indices,
+                      IndexArrayType &Acol_indices,
+                      IndexArrayType &Brow_indices,
+                      IndexArrayType &Bcol_indices)
 {
-    std::ifstream infile(pathname);
-    IndexType max_id = 0;
-    uint64_t num_rows = 0;
-    uint64_t src, dst;
-
-    while (true)
+    for (size_t ix = 0; ix < row_indices.size(); ++ix)
     {
-        infile >> src >> dst;
-        if (infile.eof()) break;
-        //std::cout << "Read: " << src << ", " << dst << std::endl;
-        max_id = std::max(max_id, src);
-        max_id = std::max(max_id, dst);
-
-        //if (src > max_id) max_id = src;
-        //if (dst > max_id) max_id = dst;
-
         if (distribution(generator) < 0.85)
         {
-            Arow_indices.push_back(src);
-            Acol_indices.push_back(dst);
+            Arow_indices.push_back(row_indices[ix]);
+            Acol_indices.push_back(col_indices[ix]);
         }
 
         if (distribution(generator) < 0.85)
         {
-            Brow_indices.push_back(src);
-            Bcol_indices.push_back(dst);
+            Brow_indices.push_back(row_indices[ix]);
+            Bcol_indices.push_back(col_indices[ix]);
         }
-
-        ++num_rows;
     }
-    std::cout << "Read " << num_rows << " rows." << std::endl;
-    std::cout << "#Nodes = " << (max_id + 1) << std::endl;
-
-    return (max_id + 1);
 }
-
 
 //****************************************************************************
 int main(int argc, char **argv)
@@ -97,7 +77,7 @@ int main(int argc, char **argv)
 
     // Read the edgelist and create the tuple arrays
     std::string pathname(argv[1]);
-    IndexArrayType iA, jA, iB, jB;
+    IndexArrayType ii, jj, iA, jA, iB, jB;
 
     using T = int32_t;
     using MatType = Matrix<T>;
@@ -105,7 +85,8 @@ int main(int argc, char **argv)
     using VecType = Vector<T>;
     using BoolVecType = Vector<bool>;
 
-    IndexType const NUM_NODES(read_edge_list(pathname, iA, jA, iB, jB));
+    IndexType const NUM_NODES(read_edge_list(pathname, ii, jj));
+    separate_indices(ii, jj, iA, jA, iB, jB);
     std::vector<T> vA(iA.size(), 1);
     std::vector<T> vB(iB.size(), 1);
 

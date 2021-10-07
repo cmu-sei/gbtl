@@ -251,7 +251,7 @@ namespace grb
 
             return value_set;
         }
-
+#if 0
         //************************************************************************
         /// A dot product of two sparse vectors (vectors<tuple(index,value)>)
         template <typename D1, typename D2, typename D3, typename SemiringT>
@@ -303,7 +303,7 @@ namespace grb
 
             return value_set;
         }
-
+#endif
         //************************************************************************
         /// A reduction of a sparse vector (vector<tuple(index,value)>) using a
         /// binary op or a monoid.

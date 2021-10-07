@@ -507,7 +507,7 @@ namespace grb
                 mat.printInfo(os);
                 return os;
             }
-#if 1
+#if 0
             // =======================================
             // Iterator class
             // =======================================
