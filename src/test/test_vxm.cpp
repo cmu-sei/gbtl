@@ -96,6 +96,54 @@ BOOST_AUTO_TEST_CASE(test_vxm_bad_dimensions)
 }
 
 //****************************************************************************
+BOOST_AUTO_TEST_CASE(test_input_output_aliasing)
+{
+    grb::IndexType const NUM_NODES = 7;
+    std::vector<grb::IndexType> row_indices = {0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6};
+    std::vector<grb::IndexType> col_indices = {1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4};
+    std::vector<double> values(row_indices.size(), 1.);
+
+    std::vector<double> answer = {0, 0, 0.5, 0, 0.5, 0, 0};
+    grb::Vector<double> ans(answer, 0.);
+
+    grb::Matrix<double> graph(NUM_NODES, NUM_NODES);
+    graph.build(row_indices.begin(), col_indices.begin(),
+                      values.begin(), values.size());
+
+    grb::Vector<double> weights(NUM_NODES);
+    weights.setElement(5, 0.5);
+
+    grb::Vector<bool> mask(NUM_NODES);
+    mask.setElement(2, true);
+    mask.setElement(4, true);
+    mask.setElement(6, true);
+
+    grb::vxm(weights,
+             mask, //*(search[idx - 1]),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(),
+             weights,
+             grb::transpose(graph),
+             grb::REPLACE);
+
+    BOOST_CHECK_EQUAL(ans, weights);
+
+    //--------------------
+    weights.clear();
+    weights.setElement(5, 0.5);
+
+    grb::vxm(weights,
+             grb::NoMask(),
+             grb::NoAccumulate(),
+             grb::ArithmeticSemiring<double>(),
+             weights,
+             grb::transpose(graph),
+             grb::REPLACE);
+
+    BOOST_CHECK_EQUAL(ans, weights);
+}
+
+//****************************************************************************
 BOOST_AUTO_TEST_CASE(test_vxm_reg)
 {
     grb::Matrix<double, grb::DirectedMatrixTag> mA(m3x3_dense, 0.);
@@ -659,5 +707,89 @@ BOOST_AUTO_TEST_CASE(test_vxm_scmp_masked_a_transpose)
     BOOST_CHECK_EQUAL(result, answer);
 }
 
+//****************************************************************************
+// Testing non-commutativity of multiply
+//****************************************************************************
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_vxm_noncommutative_multiply)
+{
+    std::vector<double> ans3 = {12, 1, 3};
+    std::vector<double> ans3mask = {12, 1, 0};
+    std::vector<double> ans3acc  = {24, 2, 3};
+    std::vector<double> ans3both = {36, 3, 3};
+
+    std::vector<double> ans4 = {1, 0, 7};
+    std::vector<double> ans4mask = {1, 0, 0};
+    std::vector<double> ans4acc  = {2, 0, 7};
+    std::vector<double> ans4both = {3, 0, 7};
+
+    grb::Matrix<double, grb::DirectedMatrixTag> mA(m3x3_dense, 0.);
+    grb::Vector<double> u3(u3_dense, 0.);
+    grb::Vector<double> result(3);
+    grb::Vector<double> ansA(ans3, 0.);
+    grb::Vector<double> ansAmask(ans3mask, 0.);
+    grb::Vector<double> ansAacc (ans3acc,  0.);
+    grb::Vector<double> ansAboth(ans3both, 0.);
+    grb::Vector<double> ansB(ans4, 0.);
+    grb::Vector<double> ansBmask(ans4mask, 0.);
+    grb::Vector<double> ansBacc (ans4acc,  0.);
+    grb::Vector<double> ansBboth(ans4both, 0.);
+
+    grb::vxm(result,
+             grb::NoMask(),
+             grb::NoAccumulate(),
+             grb::MinSecondSemiring<double>(), u3, grb::transpose(mA));
+    BOOST_CHECK_EQUAL(result, ansA);
+
+    //mask
+    grb::vxm(result,
+             u3,
+             grb::NoAccumulate(),
+             grb::MinSecondSemiring<double>(), u3, grb::transpose(mA), grb::REPLACE);
+    BOOST_CHECK_EQUAL(result, ansAmask);
+
+    //accum
+    grb::vxm(result,
+             grb::NoMask(),
+             grb::Plus<double>(),
+             grb::MinSecondSemiring<double>(), u3, grb::transpose(mA));
+    BOOST_CHECK_EQUAL(result, ansAacc);
+
+    //mask+accum
+    grb::vxm(result,
+             u3,
+             grb::Plus<double>(),
+             grb::MinSecondSemiring<double>(), u3, grb::transpose(mA), grb::MERGE);
+    BOOST_CHECK_EQUAL(result, ansAboth);
+
+    //===============================
+    grb::vxm(result,
+             grb::NoMask(),
+             grb::NoAccumulate(),
+             grb::MinSecondSemiring<double>(), u3, mA);
+    BOOST_CHECK_EQUAL(result, ansB);
+
+    //mask
+    grb::vxm(result,
+             u3,
+             grb::NoAccumulate(),
+             grb::MinSecondSemiring<double>(), u3, mA, grb::REPLACE);
+    BOOST_CHECK_EQUAL(result, ansBmask);
+
+    //accum
+    grb::vxm(result,
+             grb::NoMask(),
+             grb::Plus<double>(),
+             grb::MinSecondSemiring<double>(), u3, mA);
+    BOOST_CHECK_EQUAL(result, ansBacc);
+
+    //mask+accum
+    grb::vxm(result,
+             u3,
+             grb::Plus<double>(),
+             grb::MinSecondSemiring<double>(), u3, mA, grb::MERGE);
+    BOOST_CHECK_EQUAL(result, ansBboth);
+}
 
 BOOST_AUTO_TEST_SUITE_END()

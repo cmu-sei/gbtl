@@ -11,3 +11,4 @@ autom4te.cache
 build
 docs
 .vscode/
+build*/

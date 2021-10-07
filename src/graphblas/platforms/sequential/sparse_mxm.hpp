@@ -281,8 +281,8 @@ namespace grb
                 {
                     if (A[k].empty()) continue;
 
-                    // T[i] += (b_ik*A[k])  // must reduce in D3
-                    axpy(T_row, op, b_ik, A[k]);
+                    // T[i] += (A[k]*b_ik)  // must reduce in D3
+                    axpy(T_row, op, A[k], b_ik);
                 }
 
                 //C.setCol(i, T_row); // this is a push_back form of setCol

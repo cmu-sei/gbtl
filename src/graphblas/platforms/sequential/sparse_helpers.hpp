@@ -251,7 +251,7 @@ namespace grb
 
             return value_set;
         }
-
+#if 0
         //************************************************************************
         /// A dot product of two sparse vectors (vectors<tuple(index,value)>)
         template <typename D1, typename D2, typename D3, typename SemiringT>
@@ -303,7 +303,7 @@ namespace grb
 
             return value_set;
         }
-
+#endif
         //************************************************************************
         /// A reduction of a sparse vector (vector<tuple(index,value)>) using a
         /// binary op or a monoid.
@@ -1403,6 +1403,49 @@ namespace grb
                     c_it = c.insert(c_it,
                                     std::make_tuple(j, static_cast<CScalarT>(t_j)));
                     ++c_it;
+                }
+            }
+            GRB_LOG_FN_END("axpy");
+        }
+
+        // *******************************************************************
+        /// perform the following operation on sparse vectors implemented as
+        /// vector<tuple<Index, value>>
+        ///
+        /// t += a[:]*b_kj
+        template<typename CScalarT,
+                 typename SemiringT,
+                 typename AScalarT,
+                 typename BScalarT>
+        void axpy(
+            std::vector<std::tuple<IndexType, CScalarT>>       &t,
+            SemiringT                                           semiring,
+            std::vector<std::tuple<IndexType, BScalarT>> const &a,
+            AScalarT                                            b)
+        {
+            GRB_LOG_FN_BEGIN("axpy");
+            auto t_it = t.begin();
+
+            for (auto&& [j, a_j] : a)
+            {
+                GRB_LOG_VERBOSE("j = " << j);
+
+                auto t_j(semiring.mult(a_j, b));
+                GRB_LOG_VERBOSE("temp = " << t_j);
+
+                // scan through C_row to find insert/merge point
+                if (advance_and_check_tuple_iterator(t_it, t.end(), j))
+                {
+                    GRB_LOG_VERBOSE("Accumulating");
+                    std::get<1>(*t_it) = semiring.add(std::get<1>(*t_it), t_j);
+                    ++t_it;
+                }
+                else
+                {
+                    GRB_LOG_VERBOSE("Inserting");
+                    t_it = t.insert(t_it,
+                                    std::make_tuple(j, static_cast<CScalarT>(t_j)));
+                    ++t_it;
                 }
             }
             GRB_LOG_FN_END("axpy");
