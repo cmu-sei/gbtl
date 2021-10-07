@@ -47,12 +47,12 @@ namespace grb
      *       template tags and/or arguments.
      *
      */
-    template<typename ScalarT, typename... TagsT>
+    template<typename ScalarT, typename allocator_t = std::allocator<char>, typename... TagsT>
     class Matrix
     {
     public:
         using ScalarType = ScalarT;
-        using BackendType = typename backend::Matrix<ScalarT, TagsT...>;
+        using BackendType = typename backend::Matrix<ScalarT, allocator_t, TagsT...>;
 
         /**
          * @brief Construct an empty matrix with the specified shape.
@@ -63,8 +63,8 @@ namespace grb
          * @param[in] num_rows  Number of rows in the matrix
          * @param[in] num_cols  Number of columns in the matrix
          */
-        Matrix(IndexType num_rows, IndexType num_cols)
-            : m_mat(num_rows, num_cols)
+        Matrix(IndexType num_rows, IndexType num_cols, allocator_t allocator = allocator_t())
+            : m_mat(num_rows, num_cols, allocator)
         {
         }
 
@@ -73,7 +73,7 @@ namespace grb
          *
          * @param[in] rhs   The matrix to copy.
          */
-        Matrix(Matrix<ScalarT, TagsT...> const &rhs)
+        Matrix(Matrix<ScalarT, allocator_t, TagsT...> const &rhs)
             : m_mat(rhs.m_mat)
         {
         }
@@ -109,8 +109,8 @@ namespace grb
         ~Matrix() { }
 
         /// @todo Should assignment work only if dimensions are same?
-        Matrix<ScalarT, TagsT...> &
-        operator=(Matrix<ScalarT, TagsT...> const &rhs)
+        Matrix<ScalarT, allocator_t, TagsT...> &
+        operator=(Matrix<ScalarT, allocator_t, TagsT...> const &rhs)
         {
             if (this != &rhs)
             {
@@ -122,12 +122,12 @@ namespace grb
 
 
         /// @todo need to change to mix and match internal types
-        bool operator==(Matrix<ScalarT, TagsT...> const &rhs) const
+        bool operator==(Matrix<ScalarT, allocator_t, TagsT...> const &rhs) const
         {
             return (m_mat == rhs.m_mat);
         }
 
-        bool operator!=(Matrix<ScalarT, TagsT...> const &rhs) const
+        bool operator!=(Matrix<ScalarT, allocator_t, TagsT...> const &rhs) const
         {
             //return !(m_mat == rhs.m_mat);
             return !(*this == rhs);
@@ -284,9 +284,9 @@ namespace grb
     };
 
     /// @deprecated
-    template<typename ScalarT, typename... TagsT>
+    template<typename ScalarT, typename allocator_t, typename... TagsT>
     void print_matrix(std::ostream                     &ostr,
-                      Matrix<ScalarT, TagsT...> const  &mat,
+                      Matrix<ScalarT, allocator_t, TagsT...> const  &mat,
                       std::string const                &label = "")
     {
         ostr << label << ":" << std::endl;

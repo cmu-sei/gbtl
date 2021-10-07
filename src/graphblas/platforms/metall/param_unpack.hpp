@@ -89,10 +89,11 @@ namespace grb
             // recursive call: shaves off one of the tags and puts it in the right
             // place (no error checking yet)
             template<typename ScalarT, typename Sparseness, typename Directedness,
-                typename InputTag, typename... TagsT>
+                typename InputTag,typename allocator_t = std::allocator<char>, typename... TagsT>
             struct result {
                 using type = typename result<
                     ScalarT,
+                    allocator_t,
                     typename substitute<Sparseness, InputTag >::type,
                     typename substitute<Directedness, InputTag >::type,
                     TagsT...>::type;
@@ -105,18 +106,19 @@ namespace grb
                 using type = LilSparseMatrix<ScalarT>;
             };
 
-            // base case returns the matrix from the backend
-            template<typename ScalarT, typename Sparseness, typename Directedness, typename InputTag>
-            struct result<ScalarT, Sparseness, Directedness, InputTag>
+            // base case returns the matrix from the metall backend
+            template<typename ScalarT, typename Sparseness, typename Directedness, typename allocator_t>
+            struct result<ScalarT, Sparseness, Directedness, allocator_t>
             {
-                using type = LilSparseMatrix<ScalarT>;
+                using type = LilSparseMatrix<ScalarT, allocator_t>;
             };
         };
 
         // helper to replace backend Matrix class
-        template<typename ScalarT, typename... TagsT>
+        template<typename ScalarT, typename allocator_t = std::allocator<char>, typename... TagsT>
         using Matrix = typename matrix_generator::result<
             ScalarT,
+            allocator_t,
             detail::SparsenessCategoryTag,
             detail::DirectednessCategoryTag,
             TagsT...,

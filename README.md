@@ -151,6 +151,9 @@ $ doxygen
 
 All documentation is built in the 'docs' subdirectory.
 
+Readme for metall platform is at gbtl/tree/metall/src/graphblas/platforms/metall
+
+
 ## Acknowledgments and Disclaimers
 
 GraphBLAS Template Library (GBTL), Version 3.0 includes and/or can make use

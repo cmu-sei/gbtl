@@ -1,29 +1,4 @@
-# GraphBLAS Template Library (GBTL), Version 3.0
-#
-# Copyright 2020 Carnegie Mellon University, Battelle Memorial Institute, and
-# Authors.
-#
-# THIS MATERIAL WAS PREPARED AS AN ACCOUNT OF WORK SPONSORED BY AN AGENCY OF
-# THE UNITED STATES GOVERNMENT.  NEITHER THE UNITED STATES GOVERNMENT NOR THE
-# UNITED STATES DEPARTMENT OF ENERGY, NOR THE UNITED STATES DEPARTMENT OF
-# DEFENSE, NOR CARNEGIE MELLON UNIVERSITY, NOR BATTELLE, NOR ANY OF THEIR
-# EMPLOYEES, NOR ANY JURISDICTION OR ORGANIZATION THAT HAS COOPERATED IN THE
-# DEVELOPMENT OF THESE MATERIALS, MAKES ANY WARRANTY, EXPRESS OR IMPLIED, OR
-# ASSUMES ANY LEGAL LIABILITY OR RESPONSIBILITY FOR THE ACCURACY, COMPLETENESS,
-# OR USEFULNESS OR ANY INFORMATION, APPARATUS, PRODUCT, SOFTWARE, OR PROCESS
-# DISCLOSED, OR REPRESENTS THAT ITS USE WOULD NOT INFRINGE PRIVATELY OWNED
-# RIGHTS.
-#
-# Released under a BSD-style license, please see LICENSE file or contact
-# permission@sei.cmu.edu for full terms.
-#
-# [DISTRIBUTION STATEMENT A] This material has been approved for public release
-# and unlimited distribution.  Please see Copyright notice for non-US
-# Government use and distribution.
-#
-# DM20-0442
-
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.21.1)
 
 project(GRAPHBLAS_TEMPLATE_LIBRARY_3)
 
@@ -36,7 +11,7 @@ message("Project Bin Directory: ${PROJECT_BINARY_DIR}")
 
 # Default platform is sequential
 if (NOT PLATFORM)
-    set(PLATFORM sequential)
+    set(PLATFORM metall)
 endif()
 
 message("Configuring platform: ${PLATFORM}")
@@ -55,12 +30,41 @@ message("Configured platform: ${PLATFORM}")
 # This seems hokey that we need to include the root as our directory
 include_directories(${CMAKE_SOURCE_DIR} ${PLATFORM_SOURCE_DIR})
 
-# Compiler flags
-set(CMAKE_CXX_STANDARD 17)
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
-find_package(Boost REQUIRED)
+if (("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"))
+   if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.1)
+      message(FATAL_ERROR "GCC version must be at least 8.1")
+   endif ()
+endif ()
+
+set (Boost_NO_BOOST_CMAKE ON)
+find_package(Boost 1.64)
+
+
+if (Boost_FOUND)
+# Just a sanity check
+    if (NOT Boost_INCLUDE_DIRS)
+        message(FATAL_ERROR "Something is wrong: Boost_INCLUDE_DIRS is empty although Boost_FOUND is true.")
+    endif()
+else ()
+    message(FATAL_ERROR "Can not find Boost C++ Libraries")
+endif ()
 include_directories(${Boost_INCLUDE_DIRS})
+
+if (METALL_ROOT)
+	find_path(METALL_INCLUDE_DIR metall/metall.hpp PATHS ${METALL_ROOT}/include REQUIRED)
+else ()
+	find_path(METALL_INCLUDE_DIR metall/metall.hpp REQUIRED)
+endif ()
+
+include_directories(${METALL_INCLUDE_DIR})
+
+message("Metall Path: ${METALL_INCLUDE_DIR}")
+
+
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pthread")
 
 # Build a list of all the graphblas headers.
 file(GLOB GRAPHBLAS_HEADERS graphblas/*.hpp)
@@ -69,8 +73,9 @@ file(GLOB GRAPHBLAS_HEADERS graphblas/*.hpp)
 # with settings and config files. Note the library dependency is not in here.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-### Make basic tests
-file( GLOB TEST_SOURCES LIST_DIRECTORIES false ${CMAKE_SOURCE_DIR}/test/*.cpp )
+
+# Make metall demos
+file( GLOB TEST_SOURCES LIST_DIRECTORIES false ${CMAKE_SOURCE_DIR}/demo/metall_*.cpp )
 foreach( testsourcefile ${TEST_SOURCES} )
     get_filename_component(justname ${testsourcefile} NAME)
     string( REPLACE ".cpp" "" testname ${justname} )
@@ -78,20 +83,5 @@ foreach( testsourcefile ${TEST_SOURCES} )
     add_executable( ${testname} ${testsourcefile} ${GRAPHBLAS_HEADERS})
 endforeach( testsourcefile ${TEST_SOURCES} )
 
-### Make extra PLATFORM-specific tests
-file( GLOB TEST_SOURCES LIST_DIRECTORIES false ${PLATFORM_SOURCE_DIR}/test/*.cpp )
-foreach( testsourcefile ${TEST_SOURCES} )
-    get_filename_component(justname ${testsourcefile} NAME)
-    string( REPLACE ".cpp" "" testname ${justname} )
-    message("Adding: ${testname}_${PLATFORM} ")
-    add_executable( ${testname}_${PLATFORM} ${testsourcefile} ${GRAPHBLAS_HEADERS})
-endforeach( testsourcefile ${TEST_SOURCES} )
+configure_file(${CMAKE_SOURCE_DIR}/demo/triangle_count_data_ca-HepTh.tsv ${CMAKE_BINARY_DIR}/bin/triangle_count_data_ca-HepTh.tsv COPYONLY)
 
-## Make demos
-file( GLOB TEST_SOURCES LIST_DIRECTORIES false ${CMAKE_SOURCE_DIR}/demo/*.cpp )
-foreach( testsourcefile ${TEST_SOURCES} )
-    get_filename_component(justname ${testsourcefile} NAME)
-    string( REPLACE ".cpp" "" testname ${justname} )
-    message("Adding: ${testname}")
-    add_executable( ${testname} ${testsourcefile} ${GRAPHBLAS_HEADERS})
-endforeach( testsourcefile ${TEST_SOURCES} )

@@ -25,11 +25,29 @@
  * DM20-0442
  */
 
+/**
+ * Implementations of all GraphBLAS functions optimized for the metall 
+ * (CPU) backend.
+ */
+
 #pragma once
 
-#include <graphblas/platforms/metall/BitmapSparseVector.hpp>
-#include <graphblas/platforms/metall/LilSparseMatrix.hpp>
-#include <graphblas/platforms/metall/param_unpack.hpp>
+#include <functional>
+#include <utility>
+#include <vector>
+#include <iterator>
 
-#include <graphblas/platforms/metall/operations.hpp>
+#include <graphblas/algebra.hpp>
 
+// Add individual operation files here
+#include <graphblas/platforms/metall/sparse_mxm.hpp>
+#include <graphblas/platforms/metall/sparse_mxv.hpp>
+#include <graphblas/platforms/metall/sparse_vxm.hpp>
+#include <graphblas/platforms/metall/sparse_ewisemult.hpp>
+#include <graphblas/platforms/metall/sparse_ewiseadd.hpp>
+#include <graphblas/platforms/metall/sparse_extract.hpp>
+#include <graphblas/platforms/metall/sparse_assign.hpp>
+#include <graphblas/platforms/metall/sparse_apply.hpp>
+#include <graphblas/platforms/metall/sparse_reduce.hpp>
+#include <graphblas/platforms/metall/sparse_transpose.hpp>
+#include <graphblas/platforms/metall/sparse_kronecker.hpp>

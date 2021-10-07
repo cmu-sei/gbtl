@@ -90,7 +90,7 @@ namespace grb
     inline constexpr bool is_vector_v<Vector<ScalarT, Tags...>> = true;
 
     //************************************************************************
-    template<typename ScalarT, typename... TagsT> class Matrix;
+    template<typename ScalarT,typename Metall_Manager_Alloc_Type, typename... TagsT> class Matrix;
 
     template <class>
     inline constexpr bool is_matrix_v = false;
