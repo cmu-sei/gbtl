@@ -47,9 +47,10 @@ IndexType read_edge_list(std::string const &pathname,
     uint64_t num_rows = 0;
     uint64_t src, dst;
 
-    while (infile)
+    while (true)
     {
         infile >> src >> dst;
+        if (infile.eof()) break;
         //std::cout << "Read: " << src << ", " << dst << std::endl;
         max_id = std::max(max_id, src);
         max_id = std::max(max_id, dst);
@@ -86,7 +87,7 @@ int main(int argc, char **argv)
     IndexType const NUM_NODES(read_edge_list(pathname, iA, jA));
 
     using T = int32_t;
-    using MatType = Matrix<T>;
+    using MatType = Matrix<T>; //, NWGraphTag>;
     using BoolMatType = Matrix<bool>;
     std::vector<T> v(iA.size(), 1);
     std::vector<bool> bv(iA.size(), true);
