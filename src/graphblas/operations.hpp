@@ -949,10 +949,95 @@ namespace grb
     }
 
     //************************************************************************
+    // Select
+    //************************************************************************
+
+    // 4.3.9.1: vector variant
+    template<typename WScalarT,
+             typename MaskT,
+             typename AccumT,
+             typename IndexUnaryOpT,
+             typename UVectorT,
+             typename ValueT,
+             typename ...WTagsT>
+    inline void select(Vector<WScalarT, WTagsT...> &w,
+                       MaskT                 const &mask,
+                       AccumT                const &accum,
+                       IndexUnaryOpT                op,
+                       UVectorT              const &u,
+                       ValueT                       val,
+                       OutputControlEnum            outp = MERGE)
+    {
+        GRB_LOG_FN_BEGIN("select - 4.3.8.1 - vector variant");
+        GRB_LOG_VERBOSE("w in: " << get_internal_vector(w));
+        GRB_LOG_VERBOSE("mask in: " << get_internal_vector(mask));
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE_OP(op);
+        GRB_LOG_VERBOSE("u in: " << get_internal_vector(u));
+        GRB_LOG_VERBOSE("val in: " << val);
+        GRB_LOG_VERBOSE_OUTP(outp);
+
+        check_size_size(w, mask, "select(vec): w.size != mask.size");
+        check_size_size(w, u, "select(vec): w.size != u.size");
+
+        backend::select(get_internal_vector(w),
+                        get_internal_vector(mask),
+                        accum, op,
+                        get_internal_vector(u),
+                        val,
+                        outp);
+
+        GRB_LOG_VERBOSE("w out: " << get_internal_vector(w));
+        GRB_LOG_FN_END("select - 4.3.9.1 - vector variant");
+    }
+
+    // 4.3.9.2: matrix variant
+    template<typename CScalarT,
+             typename MaskT,
+             typename AccumT,
+             typename IndexUnaryOpT,
+             typename AMatrixT,
+             typename ValueT,
+             typename ...CTagsT>
+    inline void select(Matrix<CScalarT, CTagsT...> &C,
+                       MaskT                 const &Mask,
+                       AccumT                const &accum,
+                       IndexUnaryOpT                op,
+                       AMatrixT              const &A,
+                       ValueT                       val,
+                       OutputControlEnum            outp = MERGE)
+    {
+
+        GRB_LOG_FN_BEGIN("select - 4.3.9.2 - matrix variant");
+        GRB_LOG_VERBOSE("C in: " << get_internal_matrix(C));
+        GRB_LOG_VERBOSE("Mask in: " << get_internal_matrix(Mask));
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE_OP(op);
+        GRB_LOG_VERBOSE("A in: " << A);
+        GRB_LOG_VERBOSE("val in: " << val);
+        GRB_LOG_VERBOSE_OUTP(outp);
+
+        check_ncols_ncols(C, Mask, "select(mat): C.ncols != Mask.ncols");
+        check_nrows_nrows(C, Mask, "select(mat): C.nrows != Mask.nrows");
+        check_ncols_ncols(C, A, "select(mat): C.ncols != A.ncols");
+        check_nrows_nrows(C, A, "select(mat): C.nrows != A.nrows");
+
+        backend::select(get_internal_matrix(C),
+                        get_internal_matrix(Mask),
+                        accum, op,
+                        get_internal_matrix(A),
+                        val,
+                        outp);
+
+        GRB_LOG_VERBOSE("C out: " << get_internal_matrix(C));
+        GRB_LOG_FN_END("select - 4.3.9.2 - matrix variant");
+    }
+
+    //************************************************************************
     // reduce
     //************************************************************************
 
-    // 4.3.9.1: reduce - Standard matrix to vector variant
+    // 4.3.10.1: reduce - Standard matrix to vector variant
     // matrix to column vector variant (row reduce, use transpose for col reduce)
     template<typename WVectorT,
              typename MaskT,
@@ -966,7 +1051,7 @@ namespace grb
                        AMatrixT    const &A,
                        OutputControlEnum  outp = MERGE)
     {
-        GRB_LOG_FN_BEGIN("reduce - 4.3.9.1 - matrix to vector variant");
+        GRB_LOG_FN_BEGIN("reduce - 4.3.10.1 - matrix to vector variant");
         GRB_LOG_VERBOSE("w in: " << get_internal_vector(w));
         GRB_LOG_VERBOSE("mask in: " << get_internal_vector(mask));
         GRB_LOG_VERBOSE_ACCUM(accum);
@@ -984,10 +1069,10 @@ namespace grb
                         outp);
 
         GRB_LOG_VERBOSE("w out: " << get_internal_vector(w));
-        GRB_LOG_FN_END("reduce - 4.3.9.1 - matrix to vector variant");
+        GRB_LOG_FN_END("reduce - 4.3.10.1 - matrix to vector variant");
     }
 
-    // 4.3.9.2: reduce - vector-scalar variant
+    // 4.3.10.2: reduce - vector-scalar variant
     template<typename ValueT,
              typename AccumT,
              typename MonoidT, // monoid only
@@ -999,7 +1084,7 @@ namespace grb
             MonoidT                            op,
             Vector<UScalarT, UTagsT...> const &u)
     {
-        GRB_LOG_FN_BEGIN("reduce - 4.3.9.2 - vector to scalar variant");
+        GRB_LOG_FN_BEGIN("reduce - 4.3.10.2 - vector to scalar variant");
         GRB_LOG_VERBOSE("val in: " << val);
         GRB_LOG_VERBOSE_ACCUM(accum);
         GRB_LOG_VERBOSE_OP(op);
@@ -1010,10 +1095,10 @@ namespace grb
                                          get_internal_vector(u));
 
         GRB_LOG_VERBOSE("val out: " << val);
-        GRB_LOG_FN_END("reduce - 4.3.9.2 - vector to scalar variant");
+        GRB_LOG_FN_END("reduce - 4.3.10.2 - vector to scalar variant");
     }
 
-    // 4.3.9.3: reduce - matrix-scalar variant
+    // 4.3.10.3: reduce - matrix-scalar variant
     /// @note We aren't supporting transpose of matrix here. The spec does not
     /// require support.
     template<typename ValueT,
@@ -1027,7 +1112,7 @@ namespace grb
             MonoidT                            op,
             Matrix<AScalarT, ATagsT...> const &A)
     {
-        GRB_LOG_FN_BEGIN("reduce - 4.3.9.3 - matrix to scalar variant");
+        GRB_LOG_FN_BEGIN("reduce - 4.3.10.3 - matrix to scalar variant");
         GRB_LOG_VERBOSE("val in: " << val);
         GRB_LOG_VERBOSE_ACCUM(accum);
         GRB_LOG_VERBOSE_OP(op);
@@ -1038,14 +1123,14 @@ namespace grb
                                          get_internal_matrix(A));
 
         GRB_LOG_VERBOSE("val out: " << val);
-        GRB_LOG_FN_END("reduce - 4.3.9.3 - matrix to scalar variant");
+        GRB_LOG_FN_END("reduce - 4.3.10.3 - matrix to scalar variant");
     }
 
     //************************************************************************
     // Transpose
     //************************************************************************
 
-    // 4.3.10: transpose
+    // 4.3.11: transpose
     template<typename CMatrixT,
              typename MaskT,
              typename AccumT,
@@ -1078,7 +1163,7 @@ namespace grb
     // Kronecker product
     //************************************************************************
 
-    // 4.3.11: Kronecker product
+    // 4.3.12: Kronecker product
     template<typename CMatrixT,
              typename MaskT,
              typename AccumT,

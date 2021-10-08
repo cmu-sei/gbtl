@@ -33,6 +33,7 @@
 #include <functional>
 #include <limits>
 #include <utility>
+#include <array>
 
 namespace grb
 {
@@ -639,5 +640,20 @@ namespace grb
     {
         return AdditiveMonoidFromSemiring<SemiringT>(sr);
     }
+
+    //************************************************************************
+    // Index unary ops
+    //************************************************************************
+
+    template<typename D1>
+    struct RowLessEqual
+    {
+        inline bool operator()(D1                                     rhs,
+                               std::initializer_list<grb::IndexType>  indices,
+                               grb::IndexType                         val) const
+        {
+            return (indices.begin()[0] <= val);
+        }
+    };
 
 } // namespace grb
