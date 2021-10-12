@@ -75,7 +75,7 @@ namespace grb
                 for (grb::IndexType idx = 0; idx < u.size(); ++idx)
                 {
                     if (u.hasElement(idx) &&
-                        op(u.extractElement(idx), {idx}, val))
+                        op(u.extractElement(idx), idx, val))
                     {
                         t_contents.emplace_back(idx,
                                                 u.extractElement(idx));
@@ -135,7 +135,7 @@ namespace grb
             {
                 for (auto&& [col_idx, a_val] : A[row_idx])
                 {
-                    if (op(a_val, {row_idx, col_idx}, val))
+                    if (op(a_val, row_idx, col_idx, val))
                     {
                         T[row_idx].emplace_back(col_idx, a_val);
                     }
@@ -197,7 +197,7 @@ namespace grb
                 for (auto&& [col_idx, a_val] : A[row_idx])
                 {
                     // idx's swapped for transpose of A
-                    if (op(a_val, {col_idx, row_idx}, val))
+                    if (op(a_val, col_idx, row_idx, val))
                     {
                         T[col_idx].emplace_back(row_idx, a_val);
                     }

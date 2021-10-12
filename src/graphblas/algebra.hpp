@@ -644,15 +644,273 @@ namespace grb
     //************************************************************************
     // Index unary ops
     //************************************************************************
+    template<typename T, typename I>
+    struct RowIndex
+    {
+        inline I operator()(T               rhs,
+                            grb::IndexType  row_idx,
+                            I               val) const
+        {
+            return static_cast<I>(row_idx) + val;
+        }
 
-    template<typename D1>
+        inline I operator()(T               rhs,
+                            grb::IndexType  row_idx,
+                            grb::IndexType  col_idx,
+                            I               val) const
+        {
+            return static_cast<I>(row_idx) + val;
+        }
+    };
+
+    template<typename T, typename I>
+    struct ColIndex
+    {
+        inline I operator()(T               rhs,
+                            grb::IndexType  row_idx,
+                            grb::IndexType  col_idx,
+                            I               val) const
+        {
+            return static_cast<I>(col_idx) + val;
+        }
+    };
+
+    template<typename T, typename I>
+    struct DiagIndex
+    {
+        inline I operator()(T               rhs,
+                            grb::IndexType  row_idx,
+                            grb::IndexType  col_idx,
+                            I               val) const
+        {
+            return static_cast<I>(col_idx) - static_cast<I>(row_idx) + val;
+        }
+    };
+
+    //************************************************************************
+    template<typename T, typename I>
+    struct Tril
+    {
+        inline bool operator()(T               rhs,
+                               grb::IndexType  row_idx,
+                               grb::IndexType  col_idx,
+                               I               val) const
+        {
+            return (static_cast<I>(col_idx) <= static_cast<I>(row_idx) + val);
+        }
+    };
+
+    template<typename T, typename I>
+    struct Triu
+    {
+        inline bool operator()(T               rhs,
+                               grb::IndexType  row_idx,
+                               grb::IndexType  col_idx,
+                               I               val) const
+        {
+            return (static_cast<I>(col_idx) >= static_cast<I>(row_idx) + val);
+        }
+    };
+
+    template<typename T, typename I>
+    struct Diag
+    {
+        inline bool operator()(T               rhs,
+                               grb::IndexType  row_idx,
+                               grb::IndexType  col_idx,
+                               I               val) const
+        {
+            return (static_cast<I>(col_idx) == static_cast<I>(row_idx) + val);
+        }
+    };
+
+    template<typename T, typename I>
+    struct OffDiag
+    {
+        inline bool operator()(T               rhs,
+                               grb::IndexType  row_idx,
+                               grb::IndexType  col_idx,
+                               I               val) const
+        {
+            return (static_cast<I>(col_idx) != static_cast<I>(row_idx) + val);
+        }
+    };
+
+    template<typename T>
     struct RowLessEqual
     {
-        inline bool operator()(D1                                     rhs,
-                               std::initializer_list<grb::IndexType>  indices,
-                               grb::IndexType                         val) const
+        inline bool operator()(T               rhs,
+                               grb::IndexType  row_idx,
+                               grb::IndexType  val) const
         {
-            return (indices.begin()[0] <= val);
+            return (row_idx <= val);
+        }
+
+        inline bool operator()(T               rhs,
+                               grb::IndexType  row_idx,
+                               grb::IndexType  col_idx,
+                               grb::IndexType  val) const
+        {
+            return (row_idx <= val);
+        }
+    };
+
+    template<typename T>
+    struct RowGreater
+    {
+        inline bool operator()(T               rhs,
+                               grb::IndexType  row_idx,
+                               grb::IndexType  val) const
+        {
+            return (row_idx > val);
+        }
+
+        inline bool operator()(T               rhs,
+                               grb::IndexType  row_idx,
+                               grb::IndexType  col_idx,
+                               grb::IndexType  val) const
+        {
+            return (row_idx > val);
+        }
+    };
+
+    template<typename T, typename... Args>
+    struct ColLessEqual
+    {
+        inline bool operator()(T               rhs,
+                               grb::IndexType  row_idx,
+                               grb::IndexType  col_idx,
+                               grb::IndexType  val) const
+        {
+            return (col_idx <= val);
+        }
+    };
+
+    template<typename T, typename... Args>
+    struct ColGreater
+    {
+        inline bool operator()(T               rhs,
+                               grb::IndexType  row_idx,
+                               grb::IndexType  col_idx,
+                               grb::IndexType  val) const
+        {
+            return (col_idx > val);
+        }
+    };
+
+    //************************************************************************
+
+    template<typename T>
+    struct ValueEqual
+    {
+        inline bool operator()(T               rhs,
+                               grb::IndexType  row_idx,
+                               T               val) const
+        {
+            return (rhs == val);
+        }
+
+        inline bool operator()(T               rhs,
+                               grb::IndexType  row_idx,
+                               grb::IndexType  col_idx,
+                               T               val) const
+        {
+            return (rhs == val);
+        }
+    };
+
+    template<typename T>
+    struct ValueNotEqual
+    {
+        inline bool operator()(T               rhs,
+                               grb::IndexType  row_idx,
+                               T               val) const
+        {
+            return (rhs != val);
+        }
+
+        inline bool operator()(T               rhs,
+                               grb::IndexType  row_idx,
+                               grb::IndexType  col_idx,
+                               T               val) const
+        {
+            return (rhs != val);
+        }
+    };
+
+    template<typename T>
+    struct ValueLess
+    {
+        inline bool operator()(T               rhs,
+                               grb::IndexType  row_idx,
+                               T               val) const
+        {
+            return (rhs < val);
+        }
+
+        inline bool operator()(T               rhs,
+                               grb::IndexType  row_idx,
+                               grb::IndexType  col_idx,
+                               T               val) const
+        {
+            return (rhs < val);
+        }
+    };
+
+    template<typename T>
+    struct ValueLessEqual
+    {
+        inline bool operator()(T               rhs,
+                               grb::IndexType  row_idx,
+                               T               val) const
+        {
+            return (rhs <= val);
+        }
+
+        inline bool operator()(T               rhs,
+                               grb::IndexType  row_idx,
+                               grb::IndexType  col_idx,
+                               T               val) const
+        {
+            return (rhs <= val);
+        }
+    };
+
+    template<typename T>
+    struct ValueGreater
+    {
+        inline bool operator()(T               rhs,
+                               grb::IndexType  row_idx,
+                               T               val) const
+        {
+            return (rhs > val);
+        }
+
+        inline bool operator()(T               rhs,
+                               grb::IndexType  row_idx,
+                               grb::IndexType  col_idx,
+                               T               val) const
+        {
+            return (rhs > val);
+        }
+    };
+
+    template<typename T>
+    struct ValueGreaterEqual
+    {
+        inline bool operator()(T               rhs,
+                               grb::IndexType  row_idx,
+                               T               val) const
+        {
+            return (rhs >= val);
+        }
+
+        inline bool operator()(T               rhs,
+                               grb::IndexType  row_idx,
+                               grb::IndexType  col_idx,
+                               T               val) const
+        {
+            return (rhs >= val);
         }
     };
 
