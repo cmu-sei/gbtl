@@ -563,15 +563,15 @@ namespace grb
                  typename MaskT,
                  typename AccumT,
                  typename BinaryOpT,
-                 typename ValueT,
-                 typename UVectorT>
+                 typename UVectorT,
+                 typename ValueT>
         inline void apply_index_unaryop(
             grb::backend::BitmapSparseVector<WScalarT>      &w,
             MaskT                                     const &mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
-            ValueT                                    const &val,
             UVectorT                                  const &u,
+            ValueT                                    const &val,
             OutputControlEnum                                outp)
         {
             GRB_LOG_VERBOSE("w<m,z> := op(u, ind(u), val)");
@@ -618,15 +618,15 @@ namespace grb
                  typename MaskT,
                  typename AccumT,
                  typename BinaryOpT,
-                 typename ValueT,
-                 typename AMatrixT>
+                 typename AMatrixT,
+                 typename ValueT>
         inline void apply_index_unaryop(
             grb::backend::LilSparseMatrix<CScalarT>         &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
-            ValueT                                    const &val,
             AMatrixT                                  const &A,
+            ValueT                                    const &val,
             OutputControlEnum                                outp)
         {
             GRB_LOG_VERBOSE("C<M,z> := op(A, ind(A), val)");
@@ -678,15 +678,15 @@ namespace grb
                  typename MaskT,
                  typename AccumT,
                  typename BinaryOpT,
-                 typename ValueT,
-                 typename AMatrixT>
+                 typename AMatrixT,
+                 typename ValueT>
         inline void apply_index_unaryop(
             grb::backend::LilSparseMatrix<CScalarT>         &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
-            ValueT                                    const &val,
             TransposeView<AMatrixT>                   const &AT,
+            ValueT                                    const &val,
             OutputControlEnum                                outp)
         {
             GRB_LOG_VERBOSE("C<M,z> := op(A, ind(A), val)");

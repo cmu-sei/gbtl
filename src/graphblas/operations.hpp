@@ -955,16 +955,16 @@ namespace grb
              typename MaskT,
              typename AccumT,
              typename IndexUnaryOpT,
-             typename ValueT,
              typename UVectorT,
+             typename ValueT,
              typename ...WTagsT>
     inline void apply(
         Vector<WScalarT, WTagsT...> &w,
         MaskT                 const &mask,
         AccumT                const &accum,
         IndexUnaryOpT                op,
-        ValueT                const &val,
         UVectorT              const &u,
+        ValueT                const &val,
         OutputControlEnum            outp = MERGE)
     {
         constexpr bool u_is_vector = is_vector_v<UVectorT>;
@@ -975,8 +975,8 @@ namespace grb
         GRB_LOG_VERBOSE("mask in: " << get_internal_vector(mask));
         GRB_LOG_VERBOSE_ACCUM(accum);
         GRB_LOG_VERBOSE_OP(op);
-        GRB_LOG_VERBOSE("val in: " << val);
         GRB_LOG_VERBOSE("u in: " << get_internal_vector(u));
+        GRB_LOG_VERBOSE("val in: " << val);
         GRB_LOG_VERBOSE_OUTP(outp);
 
         check_size_size(w, mask, "apply(vec,iuop): w.size != mask.size");
@@ -985,8 +985,8 @@ namespace grb
         backend::apply_index_unaryop(get_internal_vector(w),
                                      get_internal_vector(mask),
                                      accum, op,
-                                     val,
                                      get_internal_vector(u),
+                                     val,
                                      outp);
 
         GRB_LOG_VERBOSE("w out: " << get_internal_vector(w));
@@ -998,16 +998,16 @@ namespace grb
              typename MaskT,
              typename AccumT,
              typename IndexUnaryOpT,
-             typename ValueT,
              typename AMatrixT,
+             typename ValueT,
              typename ...CTagsT>
     inline void apply(
         Matrix<CScalarT, CTagsT...> &C,
         MaskT                 const &Mask,
         AccumT                const &accum,
         IndexUnaryOpT                op,
-        ValueT                const &val,
         AMatrixT              const &A,
+        ValueT                const &val,
         OutputControlEnum            outp = MERGE)
     {
         constexpr bool A_is_matrix = is_matrix_v<AMatrixT>;
@@ -1018,8 +1018,8 @@ namespace grb
         GRB_LOG_VERBOSE("Mask in: " << get_internal_matrix(Mask));
         GRB_LOG_VERBOSE_ACCUM(accum);
         GRB_LOG_VERBOSE_OP(op);
-        GRB_LOG_VERBOSE("val in: " << val);
         GRB_LOG_VERBOSE("A in: " << get_internal_matrix(A));
+        GRB_LOG_VERBOSE("val in: " << val);
         GRB_LOG_VERBOSE_OUTP(outp);
 
         check_ncols_ncols(C, Mask, "apply(mat,binop): C.ncols != Mask.ncols");
@@ -1030,8 +1030,8 @@ namespace grb
         backend::apply_index_unaryop(get_internal_matrix(C),
                                      get_internal_matrix(Mask),
                                      accum, op,
-                                     val,
                                      get_internal_matrix(A),
+                                     val,
                                      outp);
 
         GRB_LOG_VERBOSE("C out: " << get_internal_matrix(C));

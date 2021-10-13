@@ -105,7 +105,10 @@ namespace algorithms
         do {
             ++level;
             grb::apply(v, grb::NoMask(), grb::Plus<grb::IndexType>(),
-                       grb::Times<grb::IndexType>(), q, level, grb::REPLACE);
+                       std::bind(grb::Times<grb::IndexType>(),
+                                 std::placeholders::_1,
+                                 level),
+                       q, grb::REPLACE);
             grb::vxm(q, grb::complement(v), grb::NoAccumulate(),
                      grb::LogicalSemiring<bool>(), q, A,
                      grb::REPLACE);
