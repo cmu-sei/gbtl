@@ -798,7 +798,7 @@ namespace grb
         GRB_LOG_VERBOSE("C out: " << get_internal_matrix(C));
         GRB_LOG_FN_END("apply - 4.3.8.2 - matrix variant");
     }
-
+#if 0
     // 4.3.8.3: vector binaryop variants
     template<typename WScalarT,
              typename MaskT,
@@ -947,6 +947,97 @@ namespace grb
             GRB_LOG_FN_END("apply - 4.3.8.4 - matrix binaryop bind2nd variant");
         }
     }
+#endif
+//****************************************************************************
+
+    // 4.3.8.5: vector index unaryop variant
+    template<typename WScalarT,
+             typename MaskT,
+             typename AccumT,
+             typename IndexUnaryOpT,
+             typename ValueT,
+             typename UVectorT,
+             typename ...WTagsT>
+    inline void apply(
+        Vector<WScalarT, WTagsT...> &w,
+        MaskT                 const &mask,
+        AccumT                const &accum,
+        IndexUnaryOpT                op,
+        ValueT                const &val,
+        UVectorT              const &u,
+        OutputControlEnum            outp = MERGE)
+    {
+        constexpr bool u_is_vector = is_vector_v<UVectorT>;
+        static_assert(u_is_vector, "applyi(vec) isn't going to work");
+
+        GRB_LOG_FN_BEGIN("apply - 4.3.8.5 - vector index unaryop variant");
+        GRB_LOG_VERBOSE("w in: " << get_internal_vector(w));
+        GRB_LOG_VERBOSE("mask in: " << get_internal_vector(mask));
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE_OP(op);
+        GRB_LOG_VERBOSE("val in: " << val);
+        GRB_LOG_VERBOSE("u in: " << get_internal_vector(u));
+        GRB_LOG_VERBOSE_OUTP(outp);
+
+        check_size_size(w, mask, "apply(vec,iuop): w.size != mask.size");
+        check_size_size(w, u,    "apply(vec,iuop): w.size != u.size");
+
+        backend::apply_index_unaryop(get_internal_vector(w),
+                                     get_internal_vector(mask),
+                                     accum, op,
+                                     get_internal_vector(u),
+                                     val,
+                                     outp);
+
+        GRB_LOG_VERBOSE("w out: " << get_internal_vector(w));
+        GRB_LOG_FN_END("apply - 4.3.8.5 - vector index unaryop variant");
+    }
+
+    // 4.3.8.6: matrix index unaryop variant
+    template<typename CScalarT,
+             typename MaskT,
+             typename AccumT,
+             typename IndexUnaryOpT,
+             typename ValueT,
+             typename AMatrixT,
+             typename ...CTagsT>
+    inline void apply(
+        Matrix<CScalarT, CTagsT...> &C,
+        MaskT                 const &Mask,
+        AccumT                const &accum,
+        IndexUnaryOpT                op,
+        ValueT                const &val,
+        AMatrixT              const &A,
+        OutputControlEnum            outp = MERGE)
+    {
+        constexpr bool A_is_matrix = is_matrix_v<AMatrixT>;
+        static_assert(A_is_matrix, "applyi(mat) isn't going to work");
+
+        GRB_LOG_FN_BEGIN("apply - 4.3.8.6 - matrix index unaryop variant");
+        GRB_LOG_VERBOSE("C in: " << get_internal_matrix(C));
+        GRB_LOG_VERBOSE("Mask in: " << get_internal_matrix(Mask));
+        GRB_LOG_VERBOSE_ACCUM(accum);
+        GRB_LOG_VERBOSE_OP(op);
+        GRB_LOG_VERBOSE("val in: " << val);
+        GRB_LOG_VERBOSE("A in: " << get_internal_matrix(A));
+        GRB_LOG_VERBOSE_OUTP(outp);
+
+        check_ncols_ncols(C, Mask, "apply(mat,binop): C.ncols != Mask.ncols");
+        check_nrows_nrows(C, Mask, "apply(mat,binop): C.nrows != Mask.nrows");
+        check_ncols_ncols(C, A, "apply(mat,binop): C.ncols != A.ncols");
+        check_nrows_nrows(C, A, "apply(mat,binop): C.nrows != A.nrows");
+
+        backend::apply_index_unaryop(get_internal_matrix(C),
+                                     get_internal_matrix(Mask),
+                                     accum, op,
+                                     get_internal_matrix(A),
+                                     val,
+                                     outp);
+
+        GRB_LOG_VERBOSE("C out: " << get_internal_matrix(C));
+        GRB_LOG_FN_END("apply - 4.3.8.6 - matrix index unaryop variant");
+    }
+
 
     //************************************************************************
     // Select

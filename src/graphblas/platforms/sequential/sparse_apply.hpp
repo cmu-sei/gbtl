@@ -555,5 +555,49 @@ namespace grb
             // Copy Z into the final output considering mask and replace/merge
             write_with_opt_mask(C, Z, Mask, outp);
         }
+
+        //**********************************************************************
+        // Implementation of 4.3.8.5 Vector index unary op variant of Apply
+        // w<m,z> := op(u, ind(u), val)
+        template<typename WScalarT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename BinaryOpT,
+                 typename ValueT,
+                 typename UVectorT>
+        inline void apply_index_unaryop(
+            grb::backend::BitmapSparseVector<WScalarT>      &w,
+            MaskT                                     const &mask,
+            AccumT                                    const &accum,
+            BinaryOpT                                        op,
+            ValueT                                    const &val,
+            UVectorT                                  const &u,
+            OutputControlEnum                                outp)
+        {
+            GRB_LOG_VERBOSE("w<m,z> := op(u, ind(u), val)");
+        }
+
+
+        //**********************************************************************
+        // Implementation of 4.3.8.4 Matrix variant of Apply w/ binaryop+bind1st
+        // C<M,z> := op(A, ind(A), val)
+        /// @note this is not necessary in the C++ API, here for demonstration.
+        template<typename CScalarT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename BinaryOpT,
+                 typename ValueT,
+                 typename AMatrixT>
+        inline void apply_index_unaryop(
+            grb::backend::LilSparseMatrix<CScalarT>         &C,
+            MaskT                                     const &Mask,
+            AccumT                                    const &accum,
+            BinaryOpT                                        op,
+            ValueT                                    const &val,
+            AMatrixT                                  const &A,
+            OutputControlEnum                                outp)
+        {
+            GRB_LOG_VERBOSE("C<M,z> := op(A, ind(A), val)");
+        }
     }
 }
