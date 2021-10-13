@@ -985,8 +985,8 @@ namespace grb
         backend::apply_index_unaryop(get_internal_vector(w),
                                      get_internal_vector(mask),
                                      accum, op,
-                                     get_internal_vector(u),
                                      val,
+                                     get_internal_vector(u),
                                      outp);
 
         GRB_LOG_VERBOSE("w out: " << get_internal_vector(w));
@@ -1030,8 +1030,8 @@ namespace grb
         backend::apply_index_unaryop(get_internal_matrix(C),
                                      get_internal_matrix(Mask),
                                      accum, op,
-                                     get_internal_matrix(A),
                                      val,
+                                     get_internal_matrix(A),
                                      outp);
 
         GRB_LOG_VERBOSE("C out: " << get_internal_matrix(C));
