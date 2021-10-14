@@ -76,7 +76,7 @@ namespace grb
                 {
                     if (check_mask_1D(mask, idx) &&
                         u.hasElementNoCheck(idx) &&
-                        op(u.extractElementNoCheck(idx), {idx}, val))
+                        op(u.extractElementNoCheck(idx), idx, val))
                     {
                         t_contents.emplace_back(idx,
                                                 u.extractElementNoCheck(idx));
@@ -136,7 +136,7 @@ namespace grb
             {
                 for (auto&& [col_idx, a_val] : A[row_idx])
                 {
-                    if (op(a_val, {row_idx, col_idx}, val))
+                    if (op(a_val, row_idx, col_idx, val))
                     {
                         T[row_idx].emplace_back(col_idx, a_val);
                     }
@@ -198,7 +198,7 @@ namespace grb
                 for (auto&& [col_idx, a_val] : A[row_idx])
                 {
                     // idx's swapped for transpose of A
-                    if (op(a_val, {col_idx, row_idx}, val))
+                    if (op(a_val, col_idx, row_idx, val))
                     {
                         T[col_idx].emplace_back(row_idx, a_val);
                     }
