@@ -774,7 +774,7 @@ namespace grb
         }
     };
 
-    template<typename T, typename... Args>
+    template<typename T>
     struct ColLessEqual
     {
         inline bool operator()(T               rhs,
@@ -786,7 +786,7 @@ namespace grb
         }
     };
 
-    template<typename T, typename... Args>
+    template<typename T>
     struct ColGreater
     {
         inline bool operator()(T               rhs,
