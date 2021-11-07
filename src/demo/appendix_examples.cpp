@@ -108,7 +108,7 @@ IndexArrayType j = {
     8,9,13,14,15,18,19,20,22,23,26,27,28,29,30,31,32};
 
 //****************************************************************************
-void test_bfs_level_B1()
+void test_bfs_level_C1()
 {
     std::cout << "======== Testing Appendix B.1 code" << std::endl;
     {
@@ -116,18 +116,18 @@ void test_bfs_level_B1()
         IndexType const START_INDEX(5);
 
         IndexArrayType r = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
-                                       4, 4, 4, 5, 6, 6, 6, 8, 8};
+                            4, 4, 4, 5, 6, 6, 6, 8, 8};
         IndexArrayType c = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
-                                       2, 3, 8, 2, 1, 2, 3, 2, 4};
+                            2, 3, 8, 2, 1, 2, 3, 2, 4};
         std::vector<IndexType> v(r.size(), 1);
 
         Matrix<IndexType> G_tn(NUM_NODES, NUM_NODES);
         G_tn.build(r, c, v);
 
         Vector<IndexType> levels(NUM_NODES);
-        algorithms::bfs_level_appendixB1(levels, G_tn, START_INDEX);
+        algorithms::bfs_level_appendixC1(levels, G_tn, START_INDEX);
 
-        print_vector(std::cout, levels, "bfs_level (B1 test):");
+        print_vector(std::cout, levels, "bfs_level (C1 test):");
 
     }
 
@@ -140,16 +140,16 @@ void test_bfs_level_B1()
 
         Vector<IndexType> levels(NUM_NODES);
 
-        algorithms::bfs_level_appendixB1(levels, A, 0UL);
+        algorithms::bfs_level_appendixC1(levels, A, 0UL);
 
-        print_vector(std::cout, levels, "Levels (B1, karate, s=0)");
+        print_vector(std::cout, levels, "Levels (C1, karate, s=0)");
     }
 }
 
 //****************************************************************************
-void test_bfs_level_B2()
+void test_bfs_level_C2()
 {
-    std::cout << "======== Testing Appendix B.2 code" << std::endl;
+    std::cout << "======== Testing Appendix C.2 code" << std::endl;
     {
         IndexType const NUM_NODES(9);
         IndexType const START_INDEX(5);
@@ -164,9 +164,9 @@ void test_bfs_level_B2()
         G_tn.build(r, c, v);
 
         Vector<IndexType> levels(NUM_NODES);
-        algorithms::bfs_level_appendixB2(levels, G_tn, START_INDEX);
+        algorithms::bfs_level_appendixC2(levels, G_tn, START_INDEX);
 
-        print_vector(std::cout, levels, "bfs_level (B2 test):");
+        print_vector(std::cout, levels, "bfs_level (C2 test):");
 
     }
 
@@ -179,16 +179,16 @@ void test_bfs_level_B2()
 
         Vector<IndexType> levels(NUM_NODES);
 
-        algorithms::bfs_level_appendixB2(levels, A, 0UL);
+        algorithms::bfs_level_appendixC2(levels, A, 0UL);
 
-        print_vector(std::cout, levels, "Levels (B2, karate, s=0)");
+        print_vector(std::cout, levels, "Levels (C2, karate, s=0)");
     }
 }
 
 //****************************************************************************
-void test_bfs_parent_B3()
+void test_bfs_parent_C3()
 {
-    std::cout << "======== Testing Appendix B.3 code" << std::endl;
+    std::cout << "======== Testing Appendix C.3 code" << std::endl;
     {
         IndexType const NUM_NODES(9);
         IndexType const START_INDEX(5);
@@ -203,9 +203,9 @@ void test_bfs_parent_B3()
         G_tn.build(r, c, v);
 
         Vector<IndexType> parents(NUM_NODES);
-        algorithms::bfs_parent_appendixB3(parents, G_tn, START_INDEX);
+        algorithms::bfs_parent_appendixC3(parents, G_tn, START_INDEX);
 
-        print_vector(std::cout, parents, "bfs_parent (B3 test):");
+        print_vector(std::cout, parents, "bfs_parent (C3 test):");
 
     }
 
@@ -218,16 +218,16 @@ void test_bfs_parent_B3()
 
         Vector<IndexType> parents(NUM_NODES);
 
-        algorithms::bfs_parent_appendixB3(parents, A, 0UL);
+        algorithms::bfs_parent_appendixC3(parents, A, 0UL);
 
-        print_vector(std::cout, parents, "Parents (B3, karate, s=0)");
+        print_vector(std::cout, parents, "Parents (C3, karate, s=0)");
     }
 }
 
 //****************************************************************************
-void test_BC_B4()
+void test_BC_C4()
 {
-    std::cout << "======== Testing Appendix B.4 code" << std::endl;
+    std::cout << "======== Testing Appendix C.4 code" << std::endl;
     {
         IndexType const NUM_NODES(9);
         IndexType const START_INDEX(5);
@@ -242,9 +242,9 @@ void test_BC_B4()
         G_tn.build(r, c, v);
 
         Vector<double> delta(NUM_NODES);
-        algorithms::BC_appendixB4(delta, G_tn, START_INDEX);
+        algorithms::BC_appendixC4(delta, G_tn, START_INDEX);
 
-        print_vector(std::cout, delta, "BC delta (B4 test)");
+        print_vector(std::cout, delta, "BC delta (C4 test)");
     }
 
     // ---------------------
@@ -258,10 +258,10 @@ void test_BC_B4()
         Vector<IndexType> parents(NUM_NODES);
 
         Vector<double> delta(NUM_NODES);
-        algorithms::BC_appendixB4(delta, A, source);
+        algorithms::BC_appendixC4(delta, A, source);
         eWiseAdd(bc, NoMask(), NoAccumulate(), Plus<double>(), bc, delta);
 
-        std::cout << "BC delta (B4, karate, s=" << source << ")";
+        std::cout << "BC delta (C4, karate, s=" << source << ")";
         print_vector(std::cout, delta, "");
     }
 
@@ -269,17 +269,17 @@ void test_BC_B4()
 }
 
 //****************************************************************************
-void test_BC_batch_B5()
+void test_BC_batch_C5()
 {
-    std::cout << "======== Testing Appendix B.5 code" << std::endl;
+    std::cout << "======== Testing Appendix C.5 code" << std::endl;
     {
         IndexType const NUM_NODES(9);
         IndexType const START_INDEX(5);
 
         IndexArrayType r = {0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
-                                       4, 4, 4, 5, 6, 6, 6, 8, 8};
+                            4, 4, 4, 5, 6, 6, 6, 8, 8};
         IndexArrayType c = {3, 3, 6, 4, 5, 6, 8, 0, 1, 4, 6,
-                                       2, 3, 8, 2, 1, 2, 3, 2, 4};
+                            2, 3, 8, 2, 1, 2, 3, 2, 4};
         std::vector<IndexType> v(r.size(), 1);
 
         Matrix<IndexType> G_tn(NUM_NODES, NUM_NODES);
@@ -287,9 +287,9 @@ void test_BC_batch_B5()
 
         IndexArrayType sources = {START_INDEX};
         Vector<double> delta(NUM_NODES);
-        algorithms::BC_update_appendixB5(delta, G_tn, sources);
+        algorithms::BC_update_appendixC5(delta, G_tn, sources);
 
-        print_vector(std::cout, delta, "BC_batch delta (B5 test)");
+        print_vector(std::cout, delta, "BC_batch delta (C5 test)");
     }
 
     // ---------------------
@@ -303,16 +303,16 @@ void test_BC_batch_B5()
 
         IndexArrayType sources = {0, 9, 18, 27};
         Vector<double> delta(NUM_NODES);
-        algorithms::BC_update_appendixB5(delta, A, sources);
+        algorithms::BC_update_appendixC5(delta, A, sources);
 
-        print_vector(std::cout, delta, "BC_batch delta (B5, karate, s={0,9,18,27})");
+        print_vector(std::cout, delta, "BC_batch delta (C5, karate, s={0,9,18,27})");
     }
 }
 
 //****************************************************************************
-void test_MIS_B6()
+void test_MIS_C6()
 {
-    std::cout << "======== Testing Appendix B.6 code" << std::endl;
+    std::cout << "======== Testing Appendix C.6 code" << std::endl;
     {
         IndexType const NUM_NODES(9);
 
@@ -326,9 +326,9 @@ void test_MIS_B6()
         G_tn.build(r, c, v);
 
         Vector<bool> iset(NUM_NODES);
-        algorithms::mis_appendixB6(iset, G_tn);
+        algorithms::mis_appendixC6(iset, G_tn);
 
-        print_vector(std::cout, iset, "MIS i-set (B6 test)");
+        print_vector(std::cout, iset, "MIS i-set (C6 test)");
     }
 
     // ---------------------
@@ -341,16 +341,16 @@ void test_MIS_B6()
         Vector<IndexType> parents(NUM_NODES);
 
         Vector<bool> iset(NUM_NODES);
-        algorithms::mis_appendixB6(iset, A);
+        algorithms::mis_appendixC6(iset, A);
 
-        print_vector(std::cout, iset, "MIS i-set (B6 karate)");
+        print_vector(std::cout, iset, "MIS i-set (C6 karate)");
     }
 }
 
 //****************************************************************************
-void test_triangle_count_B7()
+void test_triangle_count_C7()
 {
-    std::cout << "======== Testing Appendix B.7 code" << std::endl;
+    std::cout << "======== Testing Appendix C.7 code" << std::endl;
     {
         //Matrix<double, DirectedMatrixTag> testtriangle(
         //                       {{0,1,1,1,0},
@@ -365,10 +365,7 @@ void test_triangle_count_B7()
         Matrix<double> A(5,5);
         A.build(ar.begin(), ac.begin(), av.begin(), av.size());
 
-        Matrix<double> L(5,5), U(5,5);
-        split(A, L, U);
-
-        uint64_t tc = algorithms::triangle_count_appendixB7(L);
+        uint64_t tc = algorithms::triangle_count_appendixC7(A);
         std::cout << "Number of triangles (test 4): " << tc << std::endl;
     }
 
@@ -379,10 +376,7 @@ void test_triangle_count_B7()
         std::vector<uint32_t> weights(i.size(), 1U);
         A.build(i.begin(), j.begin(), weights.begin(), i.size());
 
-        Matrix<uint32_t> L(NUM_NODES,NUM_NODES), U(NUM_NODES,NUM_NODES);
-        split(A, L, U);
-
-        uint64_t tc = algorithms::triangle_count_appendixB7(L);
+        uint64_t tc = algorithms::triangle_count_appendixC7(A);
         std::cout << "Number of triangles (karate): " << tc << std::endl;
     }
 }
@@ -397,12 +391,12 @@ int main(int, char**)
         return -1;
     }
 
-    test_bfs_level_B1();
-    test_bfs_level_B2();
-    test_bfs_parent_B3();
-    test_BC_B4();
-    test_BC_batch_B5();
-    test_MIS_B6();
-    test_triangle_count_B7();
+    test_bfs_level_C1();
+    test_bfs_level_C2();
+    test_bfs_parent_C3();
+    test_BC_C4();
+    test_BC_batch_C5();
+    test_MIS_C6();
+    test_triangle_count_C7();
     return 0;
 }
