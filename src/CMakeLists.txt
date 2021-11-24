@@ -23,7 +23,7 @@
 #
 # DM20-0442
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.10)
 
 project(GRAPHBLAS_TEMPLATE_LIBRARY_3)
 
@@ -56,8 +56,16 @@ message("Configured platform: ${PLATFORM}")
 include_directories(${CMAKE_SOURCE_DIR} ${PLATFORM_SOURCE_DIR})
 
 # Compiler flags
-set(CMAKE_CXX_STANDARD 17)
+if (PLATFORM STREQUAL "nwgraph")
+  set(CMAKE_CXX_STANDARD 20)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/opt/intel/oneapi/tbb/2021.1.1/include -I${CMAKE_SOURCE_DIR}/../../NWgr/include -L/opt/intel/oneapi/tbb/2021.1.1/lib/intel64/gcc4.8 -ltbb")
+  message("nwgraph platform require C++20: ${CMAKE_CXX_FLAGS}")
+else()
+  set(CMAKE_CXX_STANDARD 17)
+endif()
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+
+
 
 # Build a list of all the graphblas headers.
 file(GLOB GRAPHBLAS_HEADERS graphblas/*.hpp)

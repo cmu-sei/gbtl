@@ -80,12 +80,14 @@ int main(int argc, char **argv)
         exit(1);
     }
 
+    Timer<std::chrono::steady_clock, std::chrono::microseconds> my_timer;
+    my_timer.start();
+#if 0
     // Read the edgelist and create the tuple arrays
     std::string pathname(argv[1]);
     IndexArrayType iA, jA;
 
     IndexType const NUM_NODES(read_edge_list(pathname, iA, jA));
-
     using T = int32_t;
     using MatType = Matrix<T>; //, NWGraphTag>;
     using BoolMatType = Matrix<bool>;
@@ -98,16 +100,43 @@ int main(int argc, char **argv)
     A.build(iA.begin(), jA.begin(), v.begin(), iA.size());
     //B.build(iA.begin(), jA.begin(), v.begin(), iA.size());
     //M.build(iA.begin(), jA.begin(), bv.begin(), iA.size());
-
-    std::cout << "Running algorithm(s)... nvals = " << M.nvals() << std::endl;
-
-    Timer<std::chrono::steady_clock, std::chrono::microseconds> my_timer;
     //MatType C(NUM_NODES, NUM_NODES);
-    //mxm(C,
-    //    NoMask(),
-    //    NoAccumulate(),
-    //    ArithmeticSemiring<double>(),
-    //    A, B);
+#else
+    IndexType const NUM_ROWS = 3;
+    IndexType const NUM_COLS = 3;
+    using T = double;
 
+    // Note: size of dimensions require at ccnstruction
+    Matrix<T> A(NUM_ROWS, NUM_COLS);
+    Matrix<T> B(NUM_ROWS, NUM_COLS);
+    Matrix<T> C(NUM_ROWS, NUM_COLS);
+
+    // initialize matrices
+    IndexArrayType Ai = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    IndexArrayType Aj = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+    std::vector<T> Av = {3, 1, 4, 1, 5, 9, 2, 6, 7};
+
+    // initialize matrices
+    IndexArrayType Bi = {0, 0, 0, 1, 1,    2,    2};
+    IndexArrayType Bj = {0, 1, 2, 0, 1,    0,    2};
+    std::vector<T> Bv = {8, 6, 7, 5, 3,    9,    9};
+
+    A.build(Ai.begin(), Aj.begin(), Av.begin(), Ai.size());
+    B.build(Bi.begin(), Bj.begin(), Bv.begin(), Bi.size());
+
+    print_matrix(std::cout, A, "Matrix A");
+    print_matrix(std::cout, B, "Matrix B");
+#endif
+
+    std::cout << "A: " << A.nvals() << std::endl;
+    std::cout << "B: " << B.nvals() << std::endl;
+
+#if 0
+    mxm(C,
+        NoMask(),
+        NoAccumulate(),
+        ArithmeticSemiring<double>(),
+        A, B);
+#endif
     return 0;
 }

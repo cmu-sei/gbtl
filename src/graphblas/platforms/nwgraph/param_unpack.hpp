@@ -30,6 +30,7 @@
 #include <graphblas/detail/matrix_tags.hpp>
 
 #include <graphblas/platforms/nwgraph/LilSparseMatrix.hpp>
+#include <graphblas/platforms/nwgraph/NWGraphMatrix.hpp>
 #include <graphblas/platforms/nwgraph/BitmapSparseVector.hpp>
 
 //#include <graphblas/platforms/GKC/GKCMatrix.hpp>
@@ -71,7 +72,7 @@ namespace grb
 
         template<>
         struct substitute<grb::detail::ImplementationCategoryTag, grb::detail::NullTag> {
-            using type = grb::OrigTag; // default implementation
+            using type = grb::NWGraphTag; // default implementation
         };
 
         //--
@@ -138,7 +139,18 @@ namespace grb
                           Implementation, Sparseness, Directedness,
                           grb::NWGraphTag, TagsT...>
             {
-                using type = LilSparseMatrix<ScalarT>; //NWGraphMatrix<ScalarT>;
+                using type = NWGraphMatrix<ScalarT>;
+            };
+
+            // special case returns the backend NWGraph matrix type
+            template<typename ScalarT,
+                     typename Implementation, typename Sparseness, typename Directedness,
+                     typename... TagsT>
+            struct result<ScalarT,
+                          Implementation, Sparseness, Directedness,
+                          grb::OrigTag, TagsT...>
+            {
+                using type = LilSparseMatrix<ScalarT>;
             };
 
             // null tag shortcut:
@@ -148,7 +160,7 @@ namespace grb
                           Implementation, Sparseness, Directedness,
                           grb::detail::NullTag, grb::detail::NullTag, grb::detail::NullTag>
             {
-                using type = LilSparseMatrix<ScalarT>;
+                using type = NWGraphMatrix<ScalarT>;
             };
 
             // base case returns the matrix from the backend
@@ -157,7 +169,7 @@ namespace grb
                      typename InputTag>
             struct result<ScalarT, Implementation, Sparseness, Directedness, InputTag>
             {
-                using type = LilSparseMatrix<ScalarT>;
+                using type = NWGraphMatrix<ScalarT>;
             };
         };
 
