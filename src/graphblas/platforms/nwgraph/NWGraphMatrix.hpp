@@ -72,7 +72,7 @@ namespace grb
             ~NWGraphMatrix()
             {}
 
-            IndexType nrows() const { return base::num_vertices()[0]; } //num_vertices(*this); } // tag_invoke creates this CPO  // m_num_rows; }
+            IndexType nrows() const { return nw::graph::num_vertices(*this); } // CPO
             IndexType ncols() const { return m_num_cols; }
             IndexType nvals() const { return base::num_edges(); } //m_nvals; }
 
