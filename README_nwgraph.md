@@ -15,6 +15,7 @@ For the lastest release:
 For the specific release currently tested:
 
 `sudo apt-get install intel-oneapi-tbb-2021.1.1`
+`sudo apt-get install intel-oneapi-tbb-devel-2021.1.1`
 
 Installed in /opt/intel/oneapi/tbb/2021.1.1/
 
