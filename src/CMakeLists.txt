@@ -23,21 +23,29 @@
 #
 # DM20-0442
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.17)
 
-project(GRAPHBLAS_TEMPLATE_LIBRARY_3)
+# -----------------------------------------------------------------------------
+# Extend the module path so we can find our custom modules
+# -----------------------------------------------------------------------------
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../cmake)
+#list(APPEND CMAKE_MODULE_PATH /opt/intel/onapi/tbb/latest/modulefiles)
+
+project(GRAPHBLAS_TEMPLATE_LIBRARY VERSION 3.0.1 DESCRIPTION "NWGraph platform")
 
 # For debugging
-message("CMake SRC: ${CMAKE_SOURCE_DIR}")
-message("Project Name: ${PROJECT_NAME}")
-message("Bin Directory: ${CMAKE_BINARY_DIR}")
-message("Project Name: ${CMAKE_SOURCE_DIR}")
-message("Project Bin Directory: ${PROJECT_BINARY_DIR}")
+message("Project Name:     ${PROJECT_NAME}")
+message("Project Version:  ${PROJECT_VERSION}")
+message("Source Directory: ${CMAKE_SOURCE_DIR}")
+message("Bin Directory:    ${CMAKE_BINARY_DIR}")
+message("Module path:      ${CMAKE_MODULE_PATH}")
 
 # Default platform is sequential
 if (NOT PLATFORM)
     set(PLATFORM sequential)
 endif()
+
+#------------------------------------------------------------------------------
 
 message("Configuring platform: ${PLATFORM}")
 
@@ -48,18 +56,42 @@ else()
     message(FATAL_ERROR "Specified platform directory does not exist.")
 endif()
 
+list(APPEND EXTRA_LIBS "")
+list(APPEND EXTRA_LIB_DIRS "")
+
+if (PLATFORM STREQUAL "nwgraph")
+  # TODO find_package(nwgraph) HARDCODED FOR NOW
+  set(NWGRAPH_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/../../NWgr/include" )
+  
+  set(ENV{TBB_ROOT} "/opt/intel/onapi/tbb/latest/")
+  find_package(TBB REQUIRED)
+  if (TBB_FOUND)
+    message("TBB FOUND")
+    message("TBB Version:  ${TBB_VERSION_MAJOR}.${TBB_VERSION_MINOR}.${TBB_INTERFACE_VERSION}")
+    message("TBB_INCLUDE_DIRS: ${TBB_INCLUDE_DIRS}")
+    message("TBB_LIBRARIES ${TBB_LIBRARIES}")
+    #include_directories( ${TBB_INCLUDE_DIRS} )
+    #list(APPEND EXTRA_LIBS "tbb")
+    #list(APPEND EXTRA_LIB_DIRS "")
+  else()
+    unset(CACHE)
+    message(FATAL_ERROR "TBB package not found.")
+  endif()
+endif()
+
 message("Configured platform: ${PLATFORM}")
+
+#------------------------------------------------------------------------------
 
 # https://stackoverflow.com/questions/14306642/adding-multiple-executables-in-cmake
 
-# This seems hokey that we need to include the root as our directory
-include_directories(${CMAKE_SOURCE_DIR} ${PLATFORM_SOURCE_DIR})
+#include_directories( ${CMAKE_SOURCE_DIR} ${PLATFORM_SOURCE_DIR} )
 
 # Compiler flags
 if (PLATFORM STREQUAL "nwgraph")
   set(CMAKE_CXX_STANDARD 20)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/opt/intel/oneapi/tbb/2021.1.1/include -I${CMAKE_SOURCE_DIR}/../../NWgr/include -L/opt/intel/oneapi/tbb/2021.1.1/lib/intel64/gcc4.8 -ltbb")
-  message("nwgraph platform require C++20: ${CMAKE_CXX_FLAGS}")
+  #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/opt/intel/oneapi/tbb/2021.1.1/include -I${CMAKE_SOURCE_DIR}/../../NWgr/include -L/opt/intel/oneapi/tbb/2021.1.1/lib/intel64/gcc4.8 -ltbb")
+  #message("nwgraph platform require C++20: ${CMAKE_CXX_FLAGS}")
 else()
   set(CMAKE_CXX_STANDARD 17)
 endif()
@@ -81,6 +113,19 @@ foreach( testsourcefile ${TEST_SOURCES} )
     string( REPLACE ".cpp" "" testname ${justname} )
     message("Adding: ${testname}")
     add_executable( ${testname} ${testsourcefile} ${GRAPHBLAS_HEADERS})
+    target_link_libraries( ${testname} ${TBB_LIBRARIES} )
+    target_include_directories(
+      ${testname}
+      PUBLIC ${CMAKE_SOURCE_DIR}
+      PRIVATE ${PLATFORM_SOURCE_DIR}
+      )
+    if (PLATFORM STREQUAL "nwgraph")
+      target_include_directories(
+        ${testname}
+        PUBLIC ${TBB_INCLUDE_DIRS}
+        PUBLIC ${NWGRAPH_INCLUDE_DIRECTORIES}
+        )
+    endif()
 endforeach( testsourcefile ${TEST_SOURCES} )
 
 ### Make extra PLATFORM-specific tests
@@ -90,6 +135,19 @@ foreach( testsourcefile ${TEST_SOURCES} )
     string( REPLACE ".cpp" "" testname ${justname} )
     message("Adding: ${testname}_${PLATFORM} ")
     add_executable( ${testname}_${PLATFORM} ${testsourcefile} ${GRAPHBLAS_HEADERS})
+    target_link_libraries( ${testname} ${TBB_LIBRARIES} )
+    target_include_directories(
+      ${testname}
+      PUBLIC ${CMAKE_SOURCE_DIR}
+      PRIVATE ${PLATFORM_SOURCE_DIR}
+      )
+    if (PLATFORM STREQUAL "nwgraph")
+      target_include_directories(
+        ${testname}
+        PUBLIC ${TBB_INCLUDE_DIRS}
+        PUBLIC ${NWGRAPH_INCLUDE_DIRECTORIES}
+        )
+    endif()
 endforeach( testsourcefile ${TEST_SOURCES} )
 
 ## Make demos
@@ -99,4 +157,17 @@ foreach( testsourcefile ${TEST_SOURCES} )
     string( REPLACE ".cpp" "" testname ${justname} )
     message("Adding: ${testname}")
     add_executable( ${testname} ${testsourcefile} ${GRAPHBLAS_HEADERS})
+    target_link_libraries( ${testname} ${TBB_LIBRARIES} )
+    target_include_directories(
+      ${testname}
+      PUBLIC ${CMAKE_SOURCE_DIR}
+      PRIVATE ${PLATFORM_SOURCE_DIR}
+      )
+    if (PLATFORM STREQUAL "nwgraph")
+      target_include_directories(
+        ${testname}
+        PUBLIC ${TBB_INCLUDE_DIRS}
+        PUBLIC ${NWGRAPH_INCLUDE_DIRECTORIES}
+        )
+    endif()
 endforeach( testsourcefile ${TEST_SOURCES} )
