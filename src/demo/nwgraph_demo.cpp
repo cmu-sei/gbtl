@@ -73,6 +73,10 @@ IndexType read_edge_list(std::string const &pathname,
 //****************************************************************************
 int main(int argc, char **argv)
 {
+    Timer<std::chrono::steady_clock, std::chrono::microseconds> my_timer;
+    my_timer.start();
+
+#if 0
     if (argc < 2)
     {
         std::cerr << "ERROR: too few arguments." << std::endl;
@@ -80,9 +84,6 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    Timer<std::chrono::steady_clock, std::chrono::microseconds> my_timer;
-    my_timer.start();
-#if 0
     // Read the edgelist and create the tuple arrays
     std::string pathname(argv[1]);
     IndexArrayType iA, jA;
@@ -126,17 +127,26 @@ int main(int argc, char **argv)
 
     print_matrix(std::cout, A, "Matrix A");
     print_matrix(std::cout, B, "Matrix B");
+
+//  SparseMatrix C {
+//    { { 0,  65 }, { 1, 21 }, { 2, 57 } },
+//    { { 0, 114 }, { 1, 21 }, { 2, 88 } },
+//    { { 0, 109 }, { 1, 30 }, { 2, 77 } },
+//  };
 #endif
 
     std::cout << "A: " << A.nvals() << std::endl;
     std::cout << "B: " << B.nvals() << std::endl;
 
-#if 0
+#if 1
     mxm(C,
         NoMask(),
         NoAccumulate(),
         ArithmeticSemiring<double>(),
         A, B);
 #endif
+    my_timer.stop();
+    std::cout << "Elapsed time: " << my_timer.elapsed()/1000.0 << " sec."
+              << std::endl;
     return 0;
 }

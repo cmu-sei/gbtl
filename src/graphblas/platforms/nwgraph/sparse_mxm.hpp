@@ -30,6 +30,7 @@
 #include <functional>
 #include <utility>
 #include <vector>
+#include <map>
 #include <iterator>
 #include <iostream>
 #include <chrono>
@@ -37,6 +38,9 @@
 #include <graphblas/detail/logging.h>
 #include <graphblas/types.hpp>
 #include <graphblas/algebra.hpp>
+
+#include <nwgraph/edge_list.hpp>
+#include <nwgraph/util/util.hpp>
 
 #include "sparse_helpers.hpp"
 #include "LilSparseMatrix.hpp"
@@ -48,6 +52,67 @@ namespace grb
 {
     namespace backend
     {
+        //**********************************************************************
+        template<typename CMatrixT,
+                 //typename MMatrixT,
+                 //typename AccumT,
+                 typename SemiringT,
+                 typename AMatrixT,
+                 typename BMatrixT>
+        inline void mxm(CMatrixT            &C,
+                        grb::NoMask const       &,
+                        grb::NoAccumulate const &,
+                        SemiringT            op,
+                        AMatrixT    const   &A,
+                        BMatrixT    const   &B,
+                        OutputControlEnum    outp)
+        {
+            GRB_LOG_VERBOSE("C<M,z> := (A*B)");
+
+            using CScalarType = typename CMatrixT::ScalarType;
+
+            // =================================================================
+            // Code from nw::graph::spMatspMat
+            using TScalarType = typename SemiringT::result_type;
+            nw::graph::edge_list<nw::graph::directedness::directed,
+                                 CScalarType> edges(0);
+            edges.open_for_push_back();
+
+            using vertex_id_type = nw::graph::vertex_id_t<AMatrixT>;
+
+            for (vertex_id_type i = 0; i < nw::graph::num_vertices(A); ++i)
+            {
+                std::map<size_t, TScalarType> Ci_tmp;
+
+                for (auto && [k, a_ik] : A[i]) {
+                    for (auto && [j, b_kj] : B[k]) {
+                        // TODO: Do we really want semiring support.  If so,
+                        // what is best way to deal with additive identity?
+                        CScalarType tmp = op.mult(a_ik, b_kj);    // C_ij partial product
+
+                        if (Ci_tmp.find(j) != Ci_tmp.end()) {
+                            Ci_tmp[j] = op.add(Ci_tmp[j], tmp);
+                        }
+                        else
+                        {
+                            Ci_tmp[j] = tmp;
+                        }
+                    }
+                }
+
+                // extract from the map and put in edge_list
+                for (auto &&elt : Ci_tmp) {
+                    edges.push_back(i, elt.first, static_cast<CScalarType>(elt.second));
+                    std::cout << i << "," << elt.first << ": " << elt.second << std::endl;
+                }
+            }
+
+            edges.close_for_push_back();
+
+            // Copy edges into the final output not considering mask and replace/merge
+            //C = nw::graph::make_adjacency<0>(edges);
+        } // mxm
+#if 0
         //**********************************************************************
         /// Implementation of 4.3.1 mxm: Matrix-matrix multiply: A +.* B
         //**********************************************************************
@@ -314,6 +379,6 @@ namespace grb
             // Copy Z into the final output considering mask and replace/merge
             write_with_opt_mask(C, Z, M, outp);
         } // mxm
-
+#endif
     } // backend
 } // grb
