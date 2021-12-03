@@ -66,6 +66,7 @@ namespace grb
         Matrix(IndexType num_rows, IndexType num_cols)
             : m_mat(num_rows, num_cols)
         {
+            /// @todo assert that num_rows and num_cols are both > 0?
         }
 
         /**

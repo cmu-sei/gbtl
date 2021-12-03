@@ -144,6 +144,7 @@ int main(int argc, char **argv)
         NoAccumulate(),
         ArithmeticSemiring<double>(),
         A, B);
+    print_matrix(std::cout, C, "Matrix C");
 #endif
     my_timer.stop();
     std::cout << "Elapsed time: " << my_timer.elapsed()/1000.0 << " sec."

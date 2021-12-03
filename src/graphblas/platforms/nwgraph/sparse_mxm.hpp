@@ -74,8 +74,10 @@ namespace grb
             // =================================================================
             // Code from nw::graph::spMatspMat
             using TScalarType = typename SemiringT::result_type;
-            nw::graph::edge_list<nw::graph::directedness::directed,
-                                 CScalarType> edges(0);
+            nw::graph::index_edge_list<grb::IndexType,
+                                       nw::graph::unipartite_graph_base,
+                                       nw::graph::directedness::directed,
+                                       CScalarType> edges(0);
             edges.open_for_push_back();
 
             using vertex_id_type = nw::graph::vertex_id_t<AMatrixT>;
@@ -103,14 +105,13 @@ namespace grb
                 // extract from the map and put in edge_list
                 for (auto &&elt : Ci_tmp) {
                     edges.push_back(i, elt.first, static_cast<CScalarType>(elt.second));
-                    std::cout << i << "," << elt.first << ": " << elt.second << std::endl;
                 }
             }
 
             edges.close_for_push_back();
 
             // Copy edges into the final output not considering mask and replace/merge
-            //C = nw::graph::make_adjacency<0>(edges);
+            C = typename CMatrixT::base(edges);
         } // mxm
 #if 0
         //**********************************************************************

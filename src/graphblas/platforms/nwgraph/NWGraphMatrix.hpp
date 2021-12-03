@@ -53,6 +53,7 @@ namespace grb
         class NWGraphMatrix :
             public nw::graph::index_adjacency<0, size_t, grb::IndexType, ScalarT>
         {
+        public:
             using base = nw::graph::index_adjacency<0, size_t, grb::IndexType, ScalarT>;
 
         public:
@@ -75,6 +76,13 @@ namespace grb
             IndexType nrows() const { return nw::graph::num_vertices(*this); } // CPO
             IndexType ncols() const { return m_num_cols; }
             IndexType nvals() const { return base::num_edges(); } //m_nvals; }
+
+            NWGraphMatrix &operator=(base const &rhs) {
+                if (this != &rhs)    {
+                    base::operator=(rhs);
+                }
+                return *this;
+            }
 
             // EQUALITY OPERATORS
             /**
@@ -129,11 +137,55 @@ namespace grb
                 os << "(" << nrows() << " x " << ncols() << "), nvals = "
                    << nvals() << std::endl;
 
+#ifdef GRB_MATRIX_PRINT_RAW_STORAGE
                 for (typename base::vertex_id_type i = 0; i < nrows(); ++i)  {
                     for (auto && [j, v_ij] : (*this)[i]) {
                         os << i << "," << j << "," << v_ij << std::endl;
                     }
                 }
+#else
+                int const WIDTH = 5;
+                /// @todo assumes row major sorted storage
+                for (grb::IndexType i = 0; i < nrows(); ++i)  {
+                    // We like to start with a little whitespace indent
+                    os << "   [";
+
+                    auto j_it = (*this)[i].begin();
+                    grb::IndexType j_idx = ncols();
+                    grb::IndexType j = 0;
+                    ScalarType     val;
+                    if (j_it != (*this)[i].end())
+                    {
+                        std::tie(j_idx, val) = *j_it;
+                    }
+                    while (j < ncols())
+                    {
+                        if (j < j_idx)
+                        {
+                            os.width(WIDTH);
+                            os << "-";
+                        }
+                        else // j == j_idx
+                        {
+                            os.width(WIDTH);
+                            os << val;
+                            ++j_it;
+                            if (j_it != (*this)[i].end())
+                            {
+                                std::tie(j_idx, val) = *j_it;
+                            }
+                            else
+                            {
+                                j_idx = ncols();
+                            }
+                        }
+                        if (j < ncols() - 1)
+                            os << ",";
+                        ++j;
+                    }
+                    os << "]\n";
+                }
+#endif
             }
 
             friend std::ostream &operator<<(std::ostream             &os,
@@ -759,71 +811,64 @@ namespace grb
                    << nvals() << std::endl;
 
                 // Used to print data in storage format instead of like a matrix
-                #ifdef GRB_MATRIX_PRINT_RAW_STORAGE
-                    for (IndexType row = 0; row < m_data.size(); ++row)
+#ifdef GRB_MATRIX_PRINT_RAW_STORAGE
+                for (IndexType row = 0; row < m_data.size(); ++row)
+                {
+                    os << row << " :";
+                    for (auto&& [idx, val] : m_data[row])
                     {
-                        os << row << " :";
-                        for (auto&& [idx, val] : m_data[row])
-                        {
-                            os << " " << idx << ":" << val;
-                        }
-                        os << std::endl;
+                        os << " " << idx << ":" << val;
                     }
-                #else
-                    for (IndexType row_idx = 0; row_idx < m_num_rows; ++row_idx)
+                    os << std::endl;
+                }
+#else
+                for (IndexType row_idx = 0; row_idx < m_num_rows; ++row_idx)
+                {
+                    // We like to start with a little whitespace indent
+                    os << ((row_idx == 0) ? "  [[" : "   [");
+
+                    RowType const &row(m_data[row_idx]);
+                    IndexType curr_idx = 0;
+
+                    if (row.empty())
                     {
-                        // We like to start with a little whitespace indent
-                        os << ((row_idx == 0) ? "  [[" : "   [");
-
-                        RowType const &row(m_data[row_idx]);
-                        IndexType curr_idx = 0;
-
-                        if (row.empty())
+                        while (curr_idx < m_num_cols)
                         {
-                            while (curr_idx < m_num_cols)
+                            os << ((curr_idx == 0) ? " " : ",  " );
+                            ++curr_idx;
+                        }
+                    }
+                    else
+                    {
+                        // Now walk the columns.  A sparse iter would be handy here...
+                        auto row_it = row.begin();
+                        while (row_it != row.end())
+                        {
+                            auto&& [col_idx, cell_val] = *row_it;
+                            while (curr_idx < col_idx)
                             {
                                 os << ((curr_idx == 0) ? " " : ",  " );
                                 ++curr_idx;
                             }
+
+                            if (curr_idx != 0)
+                                os << ", ";
+                            os << cell_val;
+
+                            ++row_it;
+                            ++curr_idx;
                         }
-                        else
+
+                        // Fill in the rest to the end
+                        while (curr_idx < m_num_cols)
                         {
-                            // Now walk the columns.  A sparse iter would be handy here...
-                            auto row_it = row.begin();
-                            while (row_it != row.end())
-                            {
-                                auto&& [col_idx, cell_val] = *row_it;
-                                while (curr_idx < col_idx)
-                                {
-                                    os << ((curr_idx == 0) ? " " : ",  " );
-                                    ++curr_idx;
-                                }
-
-                                if (curr_idx != 0)
-                                    os << ", ";
-                                os << cell_val;
-
-                                ++row_it;
-                                ++curr_idx;
-                            }
-
-                            // Fill in the rest to the end
-                            while (curr_idx < m_num_cols)
-                            {
-                                os << ",  ";
-                                ++curr_idx;
-                            }
+                            os << ",  ";
+                            ++curr_idx;
                         }
-                        os << ((row_idx == m_num_rows - 1 ) ? "]]" : "]\n");
                     }
-                #endif
-            }
-
-            friend std::ostream &operator<<(std::ostream             &os,
-                                            NWGraphMatrix<ScalarT> const &mat)
-            {
-                mat.printInfo(os);
-                return os;
+                    os << ((row_idx == m_num_rows - 1 ) ? "]]" : "]\n");
+                }
+#endif
             }
 
         private:
