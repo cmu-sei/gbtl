@@ -60,14 +60,18 @@ namespace grb
             using ScalarType = ScalarT;
 
             // Constructor
-            NWGraphMatrix(IndexType num_rows,
-                          IndexType num_cols)
+            NWGraphMatrix(IndexType num_rows = 0,  // for semiregular
+                          IndexType num_cols = 0)  // for semiregular
                 : base(num_rows, 0),  // nrows, nvals
                   m_num_rows(num_rows),
                   m_num_cols(num_cols),
                   m_nvals(0)
             {
+                // assert positive num's or allow the null graph?
             }
+
+            // Copy ctor?
+            // Move ctor?
 
             // Destructor
             ~NWGraphMatrix()

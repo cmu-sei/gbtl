@@ -67,7 +67,7 @@ namespace grb
                         BMatrixT    const   &B,
                         OutputControlEnum    outp)
         {
-            GRB_LOG_VERBOSE("C<M,z> := (A*B)");
+            GRB_LOG_VERBOSE("C := (A*B)");
 
             using CScalarType = typename CMatrixT::ScalarType;
 
@@ -113,6 +113,70 @@ namespace grb
             // Copy edges into the final output not considering mask and replace/merge
             C = typename CMatrixT::base(edges);
         } // mxm
+
+        //**********************************************************************
+        template<typename CScalarT,
+                 typename MScalarT,
+                 //typename AccumT,
+                 typename SemiringT,
+                 typename AScalarT,
+                 typename BScalarT>
+        inline void mxm(NWGraphMatrix<CScalarT>         &C,
+                        NWGraphMatrix<MScalarT> const   &M,
+                        grb::NoAccumulate const         &,
+                        SemiringT                        op,
+                        NWGraphMatrix<AScalarT> const   &A,
+                        NWGraphMatrix<BScalarT> const   &B,
+                        OutputControlEnum                outp)
+        {
+            GRB_LOG_VERBOSE("C<M,z> := (A*B)");
+
+            // temporary: get from views of M
+            bool structure_flag = false;
+            bool complement_flag = false;
+
+            using CScalarType = CScalarT;
+
+            // =================================================================
+            // Code from nw::graph::spMatspMat
+            using TScalarType = typename SemiringT::result_type;
+            nw::graph::index_edge_list<grb::IndexType,
+                                       nw::graph::unipartite_graph_base,
+                                       nw::graph::directedness::directed,
+                                       CScalarType> edges(0);
+            edges.open_for_push_back();
+
+            using vertex_id_type = nw::graph::vertex_id_t<NWGraphMatrix<AScalarT>>;
+            std::map<vertex_id_type, TScalarType> T_row;
+
+            for (vertex_id_type i = 0; i < A.nrows(); ++i)  // compute row i of answer
+            {
+                T_row.clear();
+
+                if (!M[i].empty())
+                {
+                    for (auto && [k, a_ik] : A[i])
+                    {
+                        if (B[k].empty()) continue;
+
+                        // T[i] += M[i] .* a_ik*B[k]
+                        masked_axpy_nwgraph(T_row, M[i], structure_flag, complement_flag,
+                                            op, a_ik, B[k]);
+                    }
+                }
+
+                    // extract from the map and put in edge_list
+                for (auto &&elt : T_row) {
+                    edges.push_back(i, elt.first, static_cast<CScalarType>(elt.second));
+                }
+            }
+
+            edges.close_for_push_back();
+
+            // Copy edges into the final output not considering mask and replace/merge
+            C = typename NWGraphMatrix<CScalarT>::base(edges);
+        } // mxm
+
 #if 0
         //**********************************************************************
         /// Implementation of 4.3.1 mxm: Matrix-matrix multiply: A +.* B

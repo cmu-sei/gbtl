@@ -1475,6 +1475,61 @@ namespace grb
         }
 
         // *******************************************************************
+        /// perform the following operation on sparse vectors
+        ///
+        /// c<[m[:]]> += a_ik*b[:]
+        template<typename IndexT,
+                 typename CScalarT,
+                 typename MRowT,   // sparse row (vector) of tuple of <index_type, scalar_type>
+                 typename SemiringT,
+                 typename AScalarT,
+                 typename BRowT>   // sparse row (vector) of tuple of <index_type, scalar_type>
+        void masked_axpy_nwgraph(
+            std::map<IndexT, CScalarT>  &c,
+            MRowT const &m,
+            bool         structure_flag,
+            bool         complement_flag,
+            SemiringT    semiring,
+            AScalarT     a,
+            BRowT const &b)
+        {
+            GRB_LOG_FN_BEGIN("masked_axpy");
+
+            /// @todo short circuit
+            //if (m.empty() && complement_flag)
+            //{
+            //    axpy(c, semiring, a, b);
+            //    return;
+            //}
+
+            //auto c_it = c.begin();
+            auto m_it = m.begin();
+
+            for (auto && [j, b_j] : b)
+            {
+                GRB_LOG_VERBOSE("j = " << j);
+
+                // scan through M[i] to see if mask allows write.
+                if (advance_and_check_mask_iterator(
+                        m_it, m.end(), structure_flag, j) == complement_flag)
+                {
+                    GRB_LOG_VERBOSE("Skipping j = " << j);
+                    continue;
+                }
+
+                auto t_j(semiring.mult(a, b_j));
+                GRB_LOG_VERBOSE("temp = " << t_j);
+
+                // search c to decide insert vs. merge
+                if (c.find(j) != c.end())
+                    c[j] = semiring.add(c[j], t_j);
+                else
+                    c[j] = t_j;
+            }
+            GRB_LOG_FN_END("masked_axpy");
+        }
+
+        // *******************************************************************
         /// Perform the following operation on sparse vectors implemented as
         /// vector<tuple<Index, value>> (t assumed to be masked already)
         ///

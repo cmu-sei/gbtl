@@ -110,7 +110,7 @@ int main(int argc, char **argv)
     // Note: size of dimensions require at ccnstruction
     Matrix<T> A(NUM_ROWS, NUM_COLS);
     Matrix<T> B(NUM_ROWS, NUM_COLS);
-    Matrix<T> C(NUM_ROWS, NUM_COLS);
+    Matrix<bool> M(NUM_ROWS, NUM_COLS);
 
     // initialize matrices
     IndexArrayType Ai = {0, 0, 0, 1, 1, 1, 2, 2, 2};
@@ -122,11 +122,18 @@ int main(int argc, char **argv)
     IndexArrayType Bj = {0, 1, 2, 0, 1,    0,    2};
     std::vector<T> Bv = {8, 6, 7, 5, 3,    9,    9};
 
+    // initialize matrices
+    IndexArrayType    Mi = {0, 1, 1, 2};
+    IndexArrayType    Mj = {1, 0, 2, 1};
+    std::vector<bool> Mv = {true, true, true, true};
+
     A.build(Ai.begin(), Aj.begin(), Av.begin(), Ai.size());
     B.build(Bi.begin(), Bj.begin(), Bv.begin(), Bi.size());
+    M.build(Mi.begin(), Mj.begin(), Mv.begin(), Mi.size());
 
     print_matrix(std::cout, A, "Matrix A");
     print_matrix(std::cout, B, "Matrix B");
+    print_matrix(std::cout, M, "Matrix M");
 
 //  SparseMatrix C {
 //    { { 0,  65 }, { 1, 21 }, { 2, 57 } },
@@ -135,16 +142,27 @@ int main(int argc, char **argv)
 //  };
 #endif
 
-    std::cout << "A: " << A.nvals() << std::endl;
-    std::cout << "B: " << B.nvals() << std::endl;
-
 #if 1
-    mxm(C,
-        NoMask(),
-        NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        A, B);
-    print_matrix(std::cout, C, "Matrix C");
+    {
+        Matrix<T> C(NUM_ROWS, NUM_COLS);
+        mxm(C,
+            NoMask(),
+            NoAccumulate(),
+            ArithmeticSemiring<double>(),
+            A, B);
+        print_matrix(std::cout, C, "Matrix C = A +.* B");
+    }
+#endif
+#if 1
+    {
+        Matrix<T> C(NUM_ROWS, NUM_COLS);
+        mxm(C,
+            M,
+            NoAccumulate(),
+            ArithmeticSemiring<double>(),
+            A, B, grb::REPLACE);
+        print_matrix(std::cout, C, "Masked Matrix C<M> = A +.* B");
+    }
 #endif
     my_timer.stop();
     std::cout << "Elapsed time: " << my_timer.elapsed()/1000.0 << " sec."
