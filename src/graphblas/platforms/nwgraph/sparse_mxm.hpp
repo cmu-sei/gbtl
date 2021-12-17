@@ -53,23 +53,23 @@ namespace grb
     namespace backend
     {
         //**********************************************************************
-        template<typename CMatrixT,
-                 //typename MMatrixT,
+        template<typename CScalarT,
+                 //typename MScalarT,
                  //typename AccumT,
                  typename SemiringT,
-                 typename AMatrixT,
-                 typename BMatrixT>
-        inline void mxm(CMatrixT            &C,
-                        grb::NoMask const       &,
-                        grb::NoAccumulate const &,
-                        SemiringT            op,
-                        AMatrixT    const   &A,
-                        BMatrixT    const   &B,
-                        OutputControlEnum    outp)
+                 typename AScalarT,
+                 typename BScalarT>
+        inline void mxm(NWGraphMatrix<CScalarT>         &C,
+                        grb::NoMask             const   &,
+                        grb::NoAccumulate       const   &,
+                        SemiringT                        op,
+                        NWGraphMatrix<AScalarT> const   &A,
+                        NWGraphMatrix<BScalarT> const   &B,
+                        OutputControlEnum                outp)
         {
             GRB_LOG_VERBOSE("C := (A*B)");
 
-            using CScalarType = typename CMatrixT::ScalarType;
+            using CScalarType = CScalarT;
 
             // =================================================================
             // Code from nw::graph::spMatspMat
@@ -80,7 +80,7 @@ namespace grb
                                        CScalarType> edges(0);
             edges.open_for_push_back();
 
-            using vertex_id_type = nw::graph::vertex_id_t<AMatrixT>;
+            using vertex_id_type = nw::graph::vertex_id_t<NWGraphMatrix<AScalarT>>;
 
             for (vertex_id_type i = 0; i < nw::graph::num_vertices(A); ++i)
             {
@@ -111,7 +111,7 @@ namespace grb
             edges.close_for_push_back();
 
             // Copy edges into the final output not considering mask and replace/merge
-            C = typename CMatrixT::base(edges);
+            C = typename NWGraphMatrix<CScalarT>::base(edges);
         } // mxm
 
         //**********************************************************************
@@ -147,7 +147,7 @@ namespace grb
             edges.open_for_push_back();
 
             using vertex_id_type = nw::graph::vertex_id_t<NWGraphMatrix<AScalarT>>;
-            std::map<vertex_id_type, TScalarType> T_row;
+            std::vector<std::tuple<vertex_id_type, TScalarType>> T_row;
 
             for (vertex_id_type i = 0; i < A.nrows(); ++i)  // compute row i of answer
             {
@@ -160,14 +160,14 @@ namespace grb
                         if (B[k].empty()) continue;
 
                         // T[i] += M[i] .* a_ik*B[k]
-                        masked_axpy_nwgraph(T_row, M[i], structure_flag, complement_flag,
-                                            op, a_ik, B[k]);
+                        masked_axpy(T_row, M[i], structure_flag, complement_flag,
+                                    op, a_ik, B[k]);
                     }
                 }
 
                     // extract from the map and put in edge_list
-                for (auto &&elt : T_row) {
-                    edges.push_back(i, elt.first, static_cast<CScalarType>(elt.second));
+                for (auto && [j, t_j] : T_row) {
+                    edges.push_back(i, j, static_cast<CScalarType>(t_j));
                 }
             }
 
@@ -177,7 +177,6 @@ namespace grb
             C = typename NWGraphMatrix<CScalarT>::base(edges);
         } // mxm
 
-#if 0
         //**********************************************************************
         /// Implementation of 4.3.1 mxm: Matrix-matrix multiply: A +.* B
         //**********************************************************************
@@ -444,6 +443,6 @@ namespace grb
             // Copy Z into the final output considering mask and replace/merge
             write_with_opt_mask(C, Z, M, outp);
         } // mxm
-#endif
+
     } // backend
 } // grb

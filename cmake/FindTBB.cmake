@@ -224,8 +224,8 @@ endmacro()
 #
 # Get path, convert backslashes as ${ENV_${var}}
 #TODO HACK HARDCODED
-set(ENV{TBB_ROOT} "/opt/intel/oneapi/tbb/latest/")
-getenv_path(TBB_ROOT)
+set(TBB_ROOT $ENV{TBBROOT}) # "/opt/intel/oneapi/tbb/latest/")
+#getenv_path(TBB_ROOT)
 
 # initialize search paths
 set(TBB_PREFIX_PATH ${TBB_ROOT} ${ENV_TBB_ROOT})

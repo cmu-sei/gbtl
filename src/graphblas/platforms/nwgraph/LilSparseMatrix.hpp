@@ -718,64 +718,65 @@ namespace grb
                    << nvals() << std::endl;
 
                 // Used to print data in storage format instead of like a matrix
-                #ifdef GRB_MATRIX_PRINT_RAW_STORAGE
-                    for (IndexType row = 0; row < m_data.size(); ++row)
+#ifdef GRB_MATRIX_PRINT_RAW_STORAGE
+                for (IndexType row = 0; row < m_data.size(); ++row)
+                {
+                    os << row << " :";
+                    for (auto&& [idx, val] : m_data[row])
                     {
-                        os << row << " :";
-                        for (auto&& [idx, val] : m_data[row])
-                        {
-                            os << " " << idx << ":" << val;
-                        }
-                        os << std::endl;
+                        os << " " << idx << ":" << val;
                     }
-                #else
-                    for (IndexType row_idx = 0; row_idx < m_num_rows; ++row_idx)
+                    os << std::endl;
+                }
+#else
+                int const WIDTH = 5;
+                for (IndexType row_idx = 0; row_idx < m_num_rows; ++row_idx)
+                {
+                    // We like to start with a little whitespace indent
+                    os << "   [";
+
+                    RowType const &row(m_data[row_idx]);
+                    IndexType curr_idx = 0;
+
+                    // Now walk the columns.  A sparse iter would be handy here...
+                    auto row_it = row.begin();
+                    grb::IndexType j_idx = ncols();
+                    grb::IndexType j = 0;
+                    ScalarType val;
+
+                    if (row_it != row.end())
                     {
-                        // We like to start with a little whitespace indent
-                        os << ((row_idx == 0) ? "  [[" : "   [");
-
-                        RowType const &row(m_data[row_idx]);
-                        IndexType curr_idx = 0;
-
-                        if (row.empty())
-                        {
-                            while (curr_idx < m_num_cols)
-                            {
-                                os << ((curr_idx == 0) ? " " : ",  " );
-                                ++curr_idx;
-                            }
-                        }
-                        else
-                        {
-                            // Now walk the columns.  A sparse iter would be handy here...
-                            auto row_it = row.begin();
-                            while (row_it != row.end())
-                            {
-                                auto&& [col_idx, cell_val] = *row_it;
-                                while (curr_idx < col_idx)
-                                {
-                                    os << ((curr_idx == 0) ? " " : ",  " );
-                                    ++curr_idx;
-                                }
-
-                                if (curr_idx != 0)
-                                    os << ", ";
-                                os << cell_val;
-
-                                ++row_it;
-                                ++curr_idx;
-                            }
-
-                            // Fill in the rest to the end
-                            while (curr_idx < m_num_cols)
-                            {
-                                os << ",  ";
-                                ++curr_idx;
-                            }
-                        }
-                        os << ((row_idx == m_num_rows - 1 ) ? "]]" : "]\n");
+                        std::tie(j_idx, val) = *row_it;
                     }
-                #endif
+
+                    while (j < ncols())
+                    {
+                        if (j < j_idx)
+                        {
+                            os.width(WIDTH);
+                            os << "-";
+                        }
+                        else // j == j_idx
+                        {
+                            os.width(WIDTH);
+                            os << val;
+                            ++row_it;
+                            if (row_it != row.end())
+                            {
+                                std::tie(j_idx, val) = *row_it;
+                            }
+                            else
+                            {
+                                j_idx = ncols();
+                            }
+                        }
+                        if (j < ncols() - 1)
+                            os << ",";
+                        ++j;
+                    }
+                    os << "]\n";
+                }
+#endif
             }
 
             friend std::ostream &operator<<(std::ostream             &os,

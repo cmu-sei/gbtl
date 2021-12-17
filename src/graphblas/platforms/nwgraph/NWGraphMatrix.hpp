@@ -150,18 +150,20 @@ namespace grb
 #else
                 int const WIDTH = 5;
                 /// @todo assumes row major sorted storage
-                for (grb::IndexType i = 0; i < nrows(); ++i)  {
+                for (typename base::vertex_id_type i = 0; i < nrows(); ++i)
+                {
                     // We like to start with a little whitespace indent
                     os << "   [";
 
-                    auto j_it = (*this)[i].begin();
+                    auto row_it = (*this)[i].begin();
                     grb::IndexType j_idx = ncols();
                     grb::IndexType j = 0;
                     ScalarType     val;
-                    if (j_it != (*this)[i].end())
+                    if (row_it != (*this)[i].end())
                     {
-                        std::tie(j_idx, val) = *j_it;
+                        std::tie(j_idx, val) = *row_it;
                     }
+
                     while (j < ncols())
                     {
                         if (j < j_idx)
@@ -173,10 +175,10 @@ namespace grb
                         {
                             os.width(WIDTH);
                             os << val;
-                            ++j_it;
-                            if (j_it != (*this)[i].end())
+                            ++row_it;
+                            if (row_it != (*this)[i].end())
                             {
-                                std::tie(j_idx, val) = *j_it;
+                                std::tie(j_idx, val) = *row_it;
                             }
                             else
                             {

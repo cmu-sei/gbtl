@@ -1370,15 +1370,15 @@ namespace grb
         /// vector<tuple<Index, value>>
         ///
         /// c += a_ik*b[:]
-        template<typename CScalarT,
+        template<typename CRowT, //CScalarT,
                  typename SemiringT,
                  typename AScalarT,
-                 typename BScalarT>
+                 typename BRowT> //BScalarT>
         void axpy(
-            std::vector<std::tuple<IndexType, CScalarT>>       &c,
-            SemiringT                                           semiring,
-            AScalarT                                            a,
-            std::vector<std::tuple<IndexType, BScalarT>> const &b)
+            CRowT        &c,
+            SemiringT     semiring,
+            AScalarT      a,
+            BRowT  const &b)
         {
             GRB_LOG_FN_BEGIN("axpy");
             auto c_it = c.begin();
@@ -1400,8 +1400,7 @@ namespace grb
                 else
                 {
                     GRB_LOG_VERBOSE("Inserting");
-                    c_it = c.insert(c_it,
-                                    std::make_tuple(j, static_cast<CScalarT>(t_j)));
+                    c_it = c.insert(c_it, {j, t_j});
                     ++c_it;
                 }
             }
@@ -1413,19 +1412,19 @@ namespace grb
         /// vector<tuple<Index, value>>
         ///
         /// c<[m[:]]> += a_ik*b[:]
-        template<typename CScalarT,
-                 typename MScalarT,
+        template<typename CRowT, //CScalarT,
+                 typename MRowT, //MScalarT,
                  typename SemiringT,
                  typename AScalarT,
-                 typename BScalarT>
+                 typename BRowT> //BScalarT>
         void masked_axpy(
-            std::vector<std::tuple<IndexType, CScalarT>>       &c,
-            std::vector<std::tuple<IndexType, MScalarT>> const &m,
-            bool                                                structure_flag,
-            bool                                                complement_flag,
-            SemiringT                                           semiring,
-            AScalarT                                            a,
-            std::vector<std::tuple<IndexType, BScalarT>> const &b)
+            CRowT       &c,  //std::vector<std::tuple<IndexType, CScalarT>>       &c,
+            MRowT const &m,  //std::vector<std::tuple<IndexType, MScalarT>> const &m,
+            bool         structure_flag,
+            bool         complement_flag,
+            SemiringT    semiring,
+            AScalarT     a,
+            BRowT const &b)  //std::vector<std::tuple<IndexType, BScalarT>> const &b)
         {
             GRB_LOG_FN_BEGIN("masked_axpy");
 
@@ -1435,74 +1434,9 @@ namespace grb
                 return;
             }
 
+            //using CScalarType = CScalarT;
+
             auto c_it = c.begin();
-            auto m_it = m.begin();
-
-            for (auto const &b_elt : b)
-            {
-                IndexType    j(std::get<0>(b_elt));
-                GRB_LOG_VERBOSE("j = " << j);
-
-                // scan through M[i] to see if mask allows write.
-                if (advance_and_check_mask_iterator(
-                        m_it, m.end(), structure_flag, j) == complement_flag)
-                {
-                    GRB_LOG_VERBOSE("Skipping j = " << j);
-                    continue;
-                }
-
-                BScalarT  b_j(std::get<1>(b_elt));
-
-                auto t_j(semiring.mult(a, b_j));
-                GRB_LOG_VERBOSE("temp = " << t_j);
-
-                // scan through C_row to find insert/merge point
-                if (advance_and_check_tuple_iterator(c_it, c.end(), j))
-                {
-                    GRB_LOG_VERBOSE("Accumulating");
-                    std::get<1>(*c_it) = semiring.add(std::get<1>(*c_it), t_j);
-                    ++c_it;
-                }
-                else
-                {
-                    GRB_LOG_VERBOSE("Inserting");
-                    c_it = c.insert(c_it,
-                                    std::make_tuple(j, static_cast<CScalarT>(t_j)));
-                    ++c_it;
-                }
-            }
-            GRB_LOG_FN_END("masked_axpy");
-        }
-
-        // *******************************************************************
-        /// perform the following operation on sparse vectors
-        ///
-        /// c<[m[:]]> += a_ik*b[:]
-        template<typename IndexT,
-                 typename CScalarT,
-                 typename MRowT,   // sparse row (vector) of tuple of <index_type, scalar_type>
-                 typename SemiringT,
-                 typename AScalarT,
-                 typename BRowT>   // sparse row (vector) of tuple of <index_type, scalar_type>
-        void masked_axpy_nwgraph(
-            std::map<IndexT, CScalarT>  &c,
-            MRowT const &m,
-            bool         structure_flag,
-            bool         complement_flag,
-            SemiringT    semiring,
-            AScalarT     a,
-            BRowT const &b)
-        {
-            GRB_LOG_FN_BEGIN("masked_axpy");
-
-            /// @todo short circuit
-            //if (m.empty() && complement_flag)
-            //{
-            //    axpy(c, semiring, a, b);
-            //    return;
-            //}
-
-            //auto c_it = c.begin();
             auto m_it = m.begin();
 
             for (auto && [j, b_j] : b)
@@ -1520,11 +1454,19 @@ namespace grb
                 auto t_j(semiring.mult(a, b_j));
                 GRB_LOG_VERBOSE("temp = " << t_j);
 
-                // search c to decide insert vs. merge
-                if (c.find(j) != c.end())
-                    c[j] = semiring.add(c[j], t_j);
+                // scan through C_row to find insert/merge point
+                if (advance_and_check_tuple_iterator(c_it, c.end(), j))
+                {
+                    GRB_LOG_VERBOSE("Accumulating");
+                    std::get<1>(*c_it) = semiring.add(std::get<1>(*c_it), t_j);
+                    ++c_it;
+                }
                 else
-                    c[j] = t_j;
+                {
+                    GRB_LOG_VERBOSE("Inserting");
+                    c_it = c.insert(c_it, {j, t_j});
+                    ++c_it;
+                }
             }
             GRB_LOG_FN_END("masked_axpy");
         }
