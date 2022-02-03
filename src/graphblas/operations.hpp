@@ -968,7 +968,7 @@ namespace grb
         OutputControlEnum            outp = MERGE)
     {
         constexpr bool u_is_vector = is_vector_v<UVectorT>;
-        static_assert(u_is_vector, "applyi(vec) isn't going to work");
+        static_assert(u_is_vector, "applyi(vec): u is not a vector");
 
         GRB_LOG_FN_BEGIN("apply - 4.3.8.5 - vector index unaryop variant");
         GRB_LOG_VERBOSE("w in: " << get_internal_vector(w));
