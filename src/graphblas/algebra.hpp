@@ -273,6 +273,14 @@ namespace grb
     //-------------------------------------------------------------------------
 
     template<typename D1, typename D2 = D1, typename D3 = D1>
+    struct OneB
+    {
+        inline D3 operator()(D1, D2) const { return static_cast<D3>(1); }
+    };
+
+    //-------------------------------------------------------------------------
+
+    template<typename D1, typename D2 = D1, typename D3 = D1>
     struct First
     {
         inline D3 operator()(D1 lhs, D2 rhs) const { return lhs; }
