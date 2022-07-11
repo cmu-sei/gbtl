@@ -696,7 +696,7 @@ namespace grb
     };
 
     //************************************************************************
-    template<typename T, typename I>
+    template<typename T, typename I = int64_t>
     struct Tril
     {
         inline bool operator()(T               rhs,
@@ -708,7 +708,7 @@ namespace grb
         }
     };
 
-    template<typename T, typename I>
+    template<typename T, typename I = int64_t>
     struct Triu
     {
         inline bool operator()(T               rhs,
@@ -720,7 +720,7 @@ namespace grb
         }
     };
 
-    template<typename T, typename I>
+    template<typename T, typename I = int64_t>
     struct Diag
     {
         inline bool operator()(T               rhs,
@@ -732,7 +732,7 @@ namespace grb
         }
     };
 
-    template<typename T, typename I>
+    template<typename T, typename I = int64_t>
     struct OffDiag
     {
         inline bool operator()(T               rhs,
@@ -744,6 +744,7 @@ namespace grb
         }
     };
 
+    /// @todo Revisit default template type for val (here and next 3 classes)
     template<typename T>
     struct RowLessEqual
     {

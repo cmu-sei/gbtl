@@ -54,36 +54,7 @@ BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 //****************************************************************************
 
 //****************************************************************************
-BOOST_AUTO_TEST_CASE(sparse_select_mat_rowle)
-{
-    // | 1 1 - - |
-    // | 1 2 2 - |
-    // | - 2 3 3 |
-    // | - - 3 4 |
-
-    // Build some sparse matrices.
-    IndexArrayType i    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-    IndexArrayType j    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
-    std::vector<double> v          = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
-    Matrix<double> A(4, 4);
-    A.build(i, j, v);
-
-    IndexArrayType ia      = {0, 0, 1, 1, 1};
-    IndexArrayType ja      = {0, 1, 0, 1, 2};
-    std::vector<double> va = {1, 1, 1, 2, 2};
-    grb::Matrix<double> answer(4, 4);
-    answer.build(ia, ja, va);
-
-    Matrix<double> C(4, 4);
-    grb::select(C, grb::NoMask(), grb::NoAccumulate(),
-                grb::RowLessEqual<double>(),
-                A, 1);
-
-    BOOST_CHECK_EQUAL(C, answer);
-}
-
-//****************************************************************************
-BOOST_AUTO_TEST_CASE(sparse_select_mat_rowgreater)
+BOOST_AUTO_TEST_CASE(sparse_select_mat_tril_with_diag0)
 {
     // | 1 1 - - |
     // | 1 2 2 - |
@@ -97,20 +68,423 @@ BOOST_AUTO_TEST_CASE(sparse_select_mat_rowgreater)
     Matrix<double> A(4, 4);
     A.build(i, j, v);
 
-    IndexArrayType ia      = {2, 2, 2, 3, 3};
-    IndexArrayType ja      = {1, 2, 3, 2, 3};
-    std::vector<double> va = {2, 3, 3, 3, 4};
+    IndexArrayType ia      = {0,    1, 1,    2, 2,    3, 3};
+    IndexArrayType ja      = {0,    0, 1,    1, 2,    2, 3};
+    std::vector<double> va = {1,    1, 2,    2, 3,    3, 4};
     grb::Matrix<double> answer(4, 4);
     answer.build(ia, ja, va);
 
     Matrix<double> C(4, 4);
     grb::select(C, grb::NoMask(), grb::NoAccumulate(),
-                grb::RowGreater<double>(),
+                grb::Tril<double>(),
+                A, 0);
+
+    BOOST_CHECK_EQUAL(C, answer);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_select_mat_tril_lower)
+{
+    // | 1 1 - - |
+    // | 1 2 2 - |
+    // | - 2 3 3 |
+    // | - - 3 4 |
+
+    // Build some sparse matrices.
+    IndexArrayType i      = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j      = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
+    Matrix<double> A(4, 4);
+    A.build(i, j, v);
+
+    IndexArrayType ia      = {      1,       2,       3   };
+    IndexArrayType ja      = {      0,       1,       2   };
+    std::vector<double> va = {      1,       2,       3   };
+    grb::Matrix<double> answer(4, 4);
+    answer.build(ia, ja, va);
+
+    Matrix<double> C(4, 4);
+    grb::select(C, grb::NoMask(), grb::NoAccumulate(),
+                grb::Tril<double>(),
+                A, -1);
+
+    BOOST_CHECK_EQUAL(C, answer);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_select_mat_tril_all)
+{
+    // | 1 1 - - |
+    // | 1 2 2 - |
+    // | - 2 3 3 |
+    // | - - 3 4 |
+
+    // Build some sparse matrices.
+    IndexArrayType i      = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j      = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
+    Matrix<double> A(4, 4);
+    A.build(i, j, v);
+
+    Matrix<double> C(4, 4);
+    grb::select(C, grb::NoMask(), grb::NoAccumulate(),
+                grb::Tril<double>(),
+                A, 4);
+
+    BOOST_CHECK_EQUAL(C,A);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_select_mat_tril_none)
+{
+    // | 1 1 - - |
+    // | 1 2 2 - |
+    // | - 2 3 3 |
+    // | - - 3 4 |
+
+    // Build some sparse matrices.
+    IndexArrayType i      = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j      = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
+    Matrix<double> A(4, 4);
+    A.build(i, j, v);
+
+    Matrix<double> C(4, 4);
+    grb::select(C, grb::NoMask(), grb::NoAccumulate(),
+                grb::Tril<double>(),
+                A, -4 );
+
+    BOOST_CHECK_EQUAL(0, C.nvals());
+}
+
+//****************************************************************************
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_select_mat_triu_with_diag0)
+{
+    // | 1 1 - - |
+    // | 1 2 2 - |
+    // | - 2 3 3 |
+    // | - - 3 4 |
+
+    // Build some sparse matrices.
+    IndexArrayType i      = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j      = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
+    Matrix<double> A(4, 4);
+    A.build(i, j, v);
+
+    IndexArrayType ia      = {0, 0,    1, 1,    2, 2,    3};
+    IndexArrayType ja      = {0, 1,    1, 2,    2, 3,    3};
+    std::vector<double> va = {1, 1,    2, 2,    3, 3,    4};
+    grb::Matrix<double> answer(4, 4);
+    answer.build(ia, ja, va);
+
+    Matrix<double> C(4, 4);
+    grb::select(C, grb::NoMask(), grb::NoAccumulate(),
+                grb::Triu<double>(),
+                A, 0);
+
+    BOOST_CHECK_EQUAL(C, answer);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_select_mat_triu_upper)
+{
+    // | 1 1 - - |
+    // | 1 2 2 - |
+    // | - 2 3 3 |
+    // | - - 3 4 |
+
+    // Build some sparse matrices.
+    IndexArrayType i      = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j      = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
+    Matrix<double> A(4, 4);
+    A.build(i, j, v);
+
+    IndexArrayType ia      = {   0,       1,       2      };
+    IndexArrayType ja      = {   1,       2,       3      };
+    std::vector<double> va = {   1,       2,       3      };
+    grb::Matrix<double> answer(4, 4);
+    answer.build(ia, ja, va);
+
+    Matrix<double> C(4, 4);
+    grb::select(C, grb::NoMask(), grb::NoAccumulate(),
+                grb::Triu<double>(),
+                A,  1);
+
+    BOOST_CHECK_EQUAL(C, answer);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_select_mat_triu_all)
+{
+    // | 1 1 - - |
+    // | 1 2 2 - |
+    // | - 2 3 3 |
+    // | - - 3 4 |
+
+    // Build some sparse matrices.
+    IndexArrayType i      = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j      = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
+    Matrix<double> A(4, 4);
+    A.build(i, j, v);
+
+    Matrix<double> C(4, 4);
+    grb::select(C, grb::NoMask(), grb::NoAccumulate(),
+                grb::Triu<double>(),
+                A, -4);
+
+    BOOST_CHECK_EQUAL(C,A);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_select_mat_triu_none)
+{
+    // | 1 1 - - |
+    // | 1 2 2 - |
+    // | - 2 3 3 |
+    // | - - 3 4 |
+
+    // Build some sparse matrices.
+    IndexArrayType i      = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j      = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
+    Matrix<double> A(4, 4);
+    A.build(i, j, v);
+
+    Matrix<double> C(4, 4);
+    grb::select(C, grb::NoMask(), grb::NoAccumulate(),
+                grb::Triu<double>(),
+                A, 4);
+
+    BOOST_CHECK_EQUAL(0, C.nvals());
+}
+
+//****************************************************************************
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_select_mat_diag0)
+{
+    // | 1 1 - - |
+    // | 1 2 2 - |
+    // | - 2 3 3 |
+    // | - - 3 4 |
+
+    // Build some sparse matrices.
+    IndexArrayType i      = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j      = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
+    Matrix<double> A(4, 4);
+    A.build(i, j, v);
+
+    IndexArrayType ia      = {0,       1,       2,       3};
+    IndexArrayType ja      = {0,       1,       2,       3};
+    std::vector<double> va = {1,       2,       3,       4};
+    grb::Matrix<double> answer(4, 4);
+    answer.build(ia, ja, va);
+
+    Matrix<double> C(4, 4);
+    grb::select(C, grb::NoMask(), grb::NoAccumulate(),
+                grb::Diag<double>(),
+                A, 0);
+
+    BOOST_CHECK_EQUAL(C, answer);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_select_mat_diag_below)
+{
+    // | 1 1 - - |
+    // | 1 2 2 - |
+    // | - 2 3 3 |
+    // | - - 3 4 |
+
+    // Build some sparse matrices.
+    IndexArrayType i      = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j      = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
+    Matrix<double> A(4, 4);
+    A.build(i, j, v);
+
+    IndexArrayType ia      = {   0,       1,       2      };
+    IndexArrayType ja      = {   1,       2,       3      };
+    std::vector<double> va = {   1,       2,       3      };
+    grb::Matrix<double> answer(4, 4);
+    answer.build(ia, ja, va);
+
+    Matrix<double> C(4, 4);
+    grb::select(C, grb::NoMask(), grb::NoAccumulate(),
+                grb::Diag<double>(),
                 A, 1);
 
     BOOST_CHECK_EQUAL(C, answer);
 }
 
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_select_mat_diag_above)
+{
+    // | 1 1 - - |
+    // | 1 2 2 - |
+    // | - 2 3 3 |
+    // | - - 3 4 |
+
+    // Build some sparse matrices.
+    IndexArrayType i      = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j      = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
+    Matrix<double> A(4, 4);
+    A.build(i, j, v);
+
+    IndexArrayType ia      = {      1,       2,       3   };
+    IndexArrayType ja      = {      0,       1,       2   };
+    std::vector<double> va = {      1,       2,       3   };
+    grb::Matrix<double> answer(4, 4);
+    answer.build(ia, ja, va);
+
+    Matrix<double> C(4, 4);
+    grb::select(C, grb::NoMask(), grb::NoAccumulate(),
+                grb::Diag<double>(),
+                A, -1);
+
+    BOOST_CHECK_EQUAL(C, answer);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_select_mat_diag_none)
+{
+    // | 1 1 - - |
+    // | 1 2 2 - |
+    // | - 2 3 3 |
+    // | - - 3 4 |
+
+    // Build some sparse matrices.
+    IndexArrayType i      = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j      = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
+    Matrix<double> A(4, 4);
+    A.build(i, j, v);
+
+    Matrix<double> C(4, 4);
+    grb::select(C, grb::NoMask(), grb::NoAccumulate(),
+                grb::Diag<double>(),
+                A, 5);
+
+    BOOST_CHECK_EQUAL(C.nvals(), 0);
+}
+
+//****************************************************************************
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_select_mat_offdiag0)
+{
+    // | 1 1 - - |
+    // | 1 2 2 - |
+    // | - 2 3 3 |
+    // | - - 3 4 |
+
+    // Build some sparse matrices.
+    IndexArrayType i      = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j      = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
+    Matrix<double> A(4, 4);
+    A.build(i, j, v);
+
+    IndexArrayType ia      = {   0, 1,    1, 2,    2, 3   };
+    IndexArrayType ja      = {   1, 0,    2, 1,    3, 2   };
+    std::vector<double> va = {   1, 1,    2, 2,    3, 3   };
+    grb::Matrix<double> answer(4, 4);
+    answer.build(ia, ja, va);
+
+    Matrix<double> C(4, 4);
+    grb::select(C, grb::NoMask(), grb::NoAccumulate(),
+                grb::OffDiag<double>(),
+                A, 0);
+
+    BOOST_CHECK_EQUAL(C, answer);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_select_mat_offdiag_below)
+{
+    // | 1 1 - - |
+    // | 1 2 2 - |
+    // | - 2 3 3 |
+    // | - - 3 4 |
+
+    // Build some sparse matrices.
+    IndexArrayType i      = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j      = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
+    Matrix<double> A(4, 4);
+    A.build(i, j, v);
+
+    IndexArrayType ia      = {0,    1, 1,    2, 2,    3, 3};
+    IndexArrayType ja      = {0,    0, 1,    1, 2,    2, 3};
+    std::vector<double> va = {1,    1, 2,    2, 3,    3, 4};
+    grb::Matrix<double> answer(4, 4);
+    answer.build(ia, ja, va);
+
+    Matrix<double> C(4, 4);
+    grb::select(C, grb::NoMask(), grb::NoAccumulate(),
+                grb::OffDiag<double>(),
+                A, 1);
+
+    BOOST_CHECK_EQUAL(C, answer);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_select_mat_offdiag_above)
+{
+    // | 1 1 - - |
+    // | 1 2 2 - |
+    // | - 2 3 3 |
+    // | - - 3 4 |
+
+    // Build some sparse matrices.
+    IndexArrayType i      = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j      = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
+    Matrix<double> A(4, 4);
+    A.build(i, j, v);
+
+    IndexArrayType ia      = {0, 0,    1, 1,    2, 2,    3};
+    IndexArrayType ja      = {0, 1,    1, 2,    2, 3,    3};
+    std::vector<double> va = {1, 1,    2, 2,    3, 3,    4};
+    grb::Matrix<double> answer(4, 4);
+    answer.build(ia, ja, va);
+
+    Matrix<double> C(4, 4);
+    grb::select(C, grb::NoMask(), grb::NoAccumulate(),
+                grb::OffDiag<double>(),
+                A, -1);
+
+    BOOST_CHECK_EQUAL(C, answer);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_select_mat_offdiag_none)
+{
+    // | 1 1 - - |
+    // | 1 2 2 - |
+    // | - 2 3 3 |
+    // | - - 3 4 |
+
+    // Build some sparse matrices.
+    IndexArrayType i      = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j      = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
+    Matrix<double> A(4, 4);
+    A.build(i, j, v);
+
+    Matrix<double> C(4, 4);
+    grb::select(C, grb::NoMask(), grb::NoAccumulate(),
+                grb::OffDiag<double>(),
+                A, 5);
+
+    BOOST_CHECK_EQUAL(C, A);
+}
+
+//****************************************************************************
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(sparse_select_mat_colle)
 {
@@ -169,6 +543,65 @@ BOOST_AUTO_TEST_CASE(sparse_select_mat_colgreater)
     BOOST_CHECK_EQUAL(C, answer);
 }
 
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_select_mat_rowle)
+{
+    // | 1 1 - - |
+    // | 1 2 2 - |
+    // | - 2 3 3 |
+    // | - - 3 4 |
+
+    // Build some sparse matrices.
+    IndexArrayType i    = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j    = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v          = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
+    Matrix<double> A(4, 4);
+    A.build(i, j, v);
+
+    IndexArrayType ia      = {0, 0, 1, 1, 1};
+    IndexArrayType ja      = {0, 1, 0, 1, 2};
+    std::vector<double> va = {1, 1, 1, 2, 2};
+    grb::Matrix<double> answer(4, 4);
+    answer.build(ia, ja, va);
+
+    Matrix<double> C(4, 4);
+    grb::select(C, grb::NoMask(), grb::NoAccumulate(),
+                grb::RowLessEqual<double>(),
+                A, 1);
+
+    BOOST_CHECK_EQUAL(C, answer);
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(sparse_select_mat_rowgreater)
+{
+    // | 1 1 - - |
+    // | 1 2 2 - |
+    // | - 2 3 3 |
+    // | - - 3 4 |
+
+    // Build some sparse matrices.
+    IndexArrayType i      = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+    IndexArrayType j      = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
+    std::vector<double> v = {1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
+    Matrix<double> A(4, 4);
+    A.build(i, j, v);
+
+    IndexArrayType ia      = {2, 2, 2, 3, 3};
+    IndexArrayType ja      = {1, 2, 3, 2, 3};
+    std::vector<double> va = {2, 3, 3, 3, 4};
+    grb::Matrix<double> answer(4, 4);
+    answer.build(ia, ja, va);
+
+    Matrix<double> C(4, 4);
+    grb::select(C, grb::NoMask(), grb::NoAccumulate(),
+                grb::RowGreater<double>(),
+                A, 1);
+
+    BOOST_CHECK_EQUAL(C, answer);
+}
+
+//****************************************************************************
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(sparse_select_mat_valequal)
 {
@@ -347,6 +780,7 @@ BOOST_AUTO_TEST_CASE(sparse_select_mat_valge)
 // select standard vector
 //****************************************************************************
 
+//****************************************************************************
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(sparse_select_vec_rowle)
 {
