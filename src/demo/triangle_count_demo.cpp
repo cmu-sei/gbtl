@@ -34,6 +34,7 @@
 #include <graphblas/graphblas.hpp>
 #include <algorithms/triangle_count.hpp>
 #include "Timer.hpp"
+#include "read_edge_list.hpp"
 
 //****************************************************************************
 int main(int argc, char **argv)
@@ -47,7 +48,6 @@ int main(int argc, char **argv)
     // Read the edgelist and create the tuple arrays
     std::string pathname(argv[1]);
 
-
     Timer<std::chrono::steady_clock, std::chrono::microseconds> my_timer;
 
     grb::IndexArrayType iL, iU, iA;
@@ -57,35 +57,24 @@ int main(int argc, char **argv)
     uint64_t src, dst;
 
     my_timer.start();
+    max_id = read_edge_list(pathname, iA, jA) - 1;
+    num_rows = iA.size();
+
+    for (size_t ix = 0; ix < num_rows; ++ix)
     {
-        std::ifstream infile(pathname);
-        while (infile)
+        src = iA[ix]; dst = jA[ix];
+
+        if (src < dst)
         {
-            infile >> src >> dst;
-            //std::cout << "Read: " << src << ", " << dst << std::endl;
-            if (src > max_id) max_id = src;
-            if (dst > max_id) max_id = dst;
-
-            if (src < dst)
-            {
-                iA.push_back(src);
-                jA.push_back(dst);
-
-                iU.push_back(src);
-                jU.push_back(dst);
-            }
-            else if (dst < src)
-            {
-                iA.push_back(src);
-                jA.push_back(dst);
-
-                iL.push_back(src);
-                jL.push_back(dst);
-            }
-            // else ignore self loops
-
-            ++num_rows;
+            iU.push_back(src);
+            jU.push_back(dst);
         }
+        else if (dst < src)
+        {
+            iL.push_back(src);
+            jL.push_back(dst);
+        }
+        // else ignore self loops
     }
     my_timer.stop();
     std::cout << "Elapsed read time: " << my_timer.elapsed() << " usec." << std::endl;

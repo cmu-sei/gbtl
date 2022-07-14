@@ -32,48 +32,8 @@
 #include <graphblas/graphblas.hpp>
 #include <algorithms/page_rank.hpp>
 #include "Timer.hpp"
+#include "read_edge_list.hpp"
 
-//****************************************************************************
-template <typename T>
-auto read_triples(std::string const &pathname,
-                  bool               ignore_self_loops = true)
-{
-    Timer<std::chrono::steady_clock, std::chrono::microseconds> my_timer;
-
-    grb::IndexArrayType i, j;
-    std::vector<T> v;
-    uint64_t num_rows = 0;
-    uint64_t max_id = 0;
-
-    std::ifstream infile(pathname);
-    while (infile)
-    {
-        uint64_t src, dst;
-        T val;
-        infile >> src >> dst >> val;
-        //std::cout << "Read: " << src << ", " << dst << ", " << val << std::endl;
-        if (!ignore_self_loops || src != dst)
-        {
-            if (src > max_id) max_id = src;
-            if (dst > max_id) max_id = dst;
-
-            i.push_back(src);
-            j.push_back(dst);
-            v.push_back(val);
-        }
-
-        ++num_rows;
-    }
-
-    grb::IndexType NUM_NODES = max_id + 1;
-
-    //std::cout << "Read " << num_rows << " rows." << std::endl;
-
-    grb::Matrix<T> graph(NUM_NODES, NUM_NODES);
-    graph.build(i.begin(), j.begin(), v.begin(), i.size());
-
-    return graph;
-}
 //****************************************************************************
 int main(int argc, char **argv)
 {
@@ -83,13 +43,20 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    unsigned int const NUM_ITERS = 10; //20;
+    unsigned int const NUM_ITERS = 100;
     Timer<std::chrono::steady_clock, std::chrono::microseconds> my_timer;
 
     // Read the edgelist and create the graph
     using T = double;
+    grb::IndexArrayType i, j;
+    std::vector<T> v;
     my_timer.start();
-    auto graph = read_triples<T>(argv[1]);
+
+    grb::IndexType const NUM_NODES(read_triples<T>(argv[1], i, j, v));
+
+    grb::Matrix<T> graph(NUM_NODES, NUM_NODES);
+    graph.build(i.begin(), j.begin(), v.begin(), i.size());
+
     my_timer.stop();
 
     std::cout << "Elapsed read time: " << my_timer.elapsed() << " usec.\n";

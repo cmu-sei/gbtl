@@ -33,13 +33,15 @@
 #include <algorithms/bfs.hpp>
 #include <algorithms/bfs_do.hpp>
 #include "Timer.hpp"
+#include "read_edge_list.hpp"
 
 //****************************************************************************
 int main(int argc, char **argv)
 {
     if (argc < 2)
     {
-        std::cerr << "ERROR: too few arguments. Provide edge list file with triplets." << std::endl;
+        std::cerr << "ERROR: too few arguments. Provide edge list file with triplets."
+                  << std::endl;
         exit(1);
     }
 
@@ -53,38 +55,12 @@ int main(int argc, char **argv)
 
     grb::IndexArrayType i, j;
     std::vector<T> v;
-    uint64_t num_rows = 0;
-    uint64_t max_id = 0;
-
     my_timer.start();
-    {
-        std::ifstream infile(pathname);
-        while (infile)
-        {
-            uint64_t src, dst;
-            T val;
-            infile >> src >> dst >> val;
-            //std::cout << "Read: " << src << ", " << dst << ", " << val << std::endl;
-            if (src != dst)
-            {
-                if (src > max_id) max_id = src;
-                if (dst > max_id) max_id = dst;
-
-                i.push_back(src);
-                j.push_back(dst);
-                v.push_back(val);
-            }
-            // else ignore self loops
-
-            ++num_rows;
-        }
-    }
-    grb::IndexType NUM_NODES = max_id + 1;
-
+    grb::IndexType const NUM_NODES(read_triples<T>(argv[1], i, j, v, true));
     my_timer.stop();
-    std::cout << "Elapsed read time: " << my_timer.elapsed() << " usec." << std::endl;
 
-    std::cout << "Read " << num_rows << " rows." << std::endl;
+    std::cout << "Elapsed read time: " << my_timer.elapsed() << " usec." << std::endl;
+    std::cout << "#Edges = " << v.size()  << std::endl;
     std::cout << "#Nodes = " << NUM_NODES << std::endl;
 
     grb::Matrix<T> graph(NUM_NODES, NUM_NODES);
@@ -105,7 +81,7 @@ int main(int argc, char **argv)
     my_timer.start();
     algorithms::bfs(graph, 3UL, parent_list);
     my_timer.stop();
-    std::cout << "Elapsed read time: " << my_timer.elapsed() << " usec." << std::endl;
+    std::cout << "Elapsed BFS time: " << my_timer.elapsed() << " usec." << std::endl;
     //grb::print_vector(std::cout, parent_list, "Parent list for root at vertex 3");
     std::cout << "parent_list.nvals() = " << parent_list.nvals() << std::endl;
 
@@ -114,7 +90,7 @@ int main(int argc, char **argv)
     my_timer.start();
     algorithms::bfs_do_parents(graph, graph, 3, do_parent_list);
     my_timer.stop();
-    std::cout << "Elapsed read time: " << my_timer.elapsed() << " usec." << std::endl;
+    std::cout << "Elapsed BFS-DO time: " << my_timer.elapsed() << " usec." << std::endl;
     //grb::print_vector(std::cout, parent_list, "Parent list for root at vertex 3");
     std::cout << "do_parent_list.nvals() = " << do_parent_list.nvals() << std::endl;
 
@@ -139,7 +115,11 @@ int main(int argc, char **argv)
     }
     if (!passed)
     {
-        std::cerr << "Parent lists did not match.\n";
+        std::cerr << "ERROR: Parent lists did not match.\n";
+    }
+    else
+    {
+        std::cerr << "Parent lists match.\n";
     }
     return passed ? 0 : 1;
 }

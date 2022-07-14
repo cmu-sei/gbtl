@@ -132,7 +132,7 @@ namespace algorithms
             grb::mxv(row_degree, grb::NoMask(), grb::NoAccumulate(),
                      PlusOneSemiring<UInt>(), graph, ones);
             //grb::print_vector(std::cerr, row_degree, "Row degree");
-            std::cerr << "Finished row degree\n";
+            //std::cerr << "Finished row degree\n";
         }
 
         // set root parent to self;
@@ -233,7 +233,7 @@ namespace algorithms
 
             if (do_push)
             {
-                std::cerr << k << ", " << frontier.nvals() << ", " << parents.nvals() << ": doing push\n";
+                //std::cerr << k << ", " << frontier.nvals() << ", " << parents.nvals() << ": doing push\n";
                 grb::vxm(frontier, grb::complement(grb::structure(parents)),
                          grb::NoAccumulate(),
                          grb::MinFirstSemiring<UInt>(), frontier, graph,
@@ -241,7 +241,7 @@ namespace algorithms
             }
             else
             {
-                std::cerr << k << ", " << frontier.nvals() << ", " << parents.nvals() << ": doing pull\n";
+                //std::cerr << k << ", " << frontier.nvals() << ", " << parents.nvals() << ": doing pull\n";
                 grb::mxv(frontier, grb::complement(grb::structure(parents)),
                          grb::NoAccumulate(),
                          grb::MinSecondSemiring<UInt>(), graphT, frontier,

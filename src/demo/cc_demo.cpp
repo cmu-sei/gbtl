@@ -32,6 +32,7 @@
 #include <graphblas/graphblas.hpp>
 #include <algorithms/cc.hpp>
 #include "Timer.hpp"
+#include "read_edge_list.hpp"
 
 //****************************************************************************
 int main(int argc, char **argv)
@@ -42,9 +43,6 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    // Read the edgelist and create the tuple arrays
-    std::string pathname(argv[1]);
-
     Timer<std::chrono::steady_clock, std::chrono::microseconds> my_timer;
 
     /// @todo revisit scalar type
@@ -52,38 +50,12 @@ int main(int argc, char **argv)
 
     grb::IndexArrayType i, j;
     std::vector<T> v;
-    uint64_t num_rows = 0;
-    uint64_t max_id = 0;
-
     my_timer.start();
-    {
-        std::ifstream infile(pathname);
-        while (infile)
-        {
-            uint64_t src, dst;
-            T val;
-            infile >> src >> dst >> val;
-            //std::cout << "Read: " << src << ", " << dst << ", " << val << std::endl;
-            if (src != dst)
-            {
-                if (src > max_id) max_id = src;
-                if (dst > max_id) max_id = dst;
-
-                i.push_back(src);
-                j.push_back(dst);
-                v.push_back(val);
-            }
-            // else ignore self loops
-
-            ++num_rows;
-        }
-    }
-    grb::IndexType NUM_NODES = max_id + 1;
-
+    grb::IndexType const NUM_NODES(read_triples<T>(argv[1], i, j, v, true));
     my_timer.stop();
     std::cout << "Elapsed read time: " << my_timer.elapsed() << " usec." << std::endl;
 
-    std::cout << "Read " << num_rows << " rows." << std::endl;
+    std::cout << "#Edges = " << v.size()  << std::endl;
     std::cout << "#Nodes = " << NUM_NODES << std::endl;
 
     grb::Matrix<T> graph(NUM_NODES, NUM_NODES);
