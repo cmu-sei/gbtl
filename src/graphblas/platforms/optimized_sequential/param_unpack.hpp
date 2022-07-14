@@ -26,12 +26,11 @@
  */
 
 #pragma once
-// matrix tags should be strictly internal
-#include "matrix_tags.hpp"
+// Tags are API-defined (i.e., frontend)
+#include <graphblas/detail/matrix_tags.hpp>
 
-#define GB_INCLUDE_BACKEND_MATRIX 1
-#define GB_INCLUDE_BACKEND_VECTOR 1
-#include <backend_include.hpp>
+#include <graphblas/platforms/optimized_sequential/LilSparseMatrix.hpp>
+#include <graphblas/platforms/optimized_sequential/BitmapSparseVector.hpp>
 
 //this file contains the variadic template parameters unpacking utility.
 
@@ -40,7 +39,7 @@
 
 namespace grb
 {
-    namespace detail
+    namespace backend
     {
 
         // Substitute template to decide if a tag goes into a given slot
@@ -51,34 +50,35 @@ namespace grb
 
 
         template<>
-        struct substitute<detail::SparsenessCategoryTag, DenseTag> {
-            using type = DenseTag;
+        struct substitute<grb::detail::SparsenessCategoryTag, grb::DenseTag> {
+            using type = grb::DenseTag;
         };
 
         template<>
-        struct substitute<detail::SparsenessCategoryTag, SparseTag> {
-            using type = SparseTag;
+        struct substitute<grb::detail::SparsenessCategoryTag, grb::SparseTag> {
+            using type = grb::SparseTag;
         };
 
         template<>
-        struct substitute<detail::DirectednessCategoryTag, UndirectedMatrixTag> {
-            using type = UndirectedMatrixTag;
+        struct substitute<grb::detail::SparsenessCategoryTag, grb::detail::NullTag> {
+            using type = grb::SparseTag; // default sparseness
+        };
+
+
+        template<>
+        struct substitute<grb::detail::DirectednessCategoryTag, grb::UndirectedMatrixTag> {
+            using type = grb::UndirectedMatrixTag;
         };
 
         template<>
-        struct substitute<detail::DirectednessCategoryTag, DirectedMatrixTag> {
-            using type = DirectedMatrixTag;
+        struct substitute<grb::detail::DirectednessCategoryTag, grb::DirectedMatrixTag> {
+            using type = grb::DirectedMatrixTag;
         };
 
         template<>
-        struct substitute<detail::DirectednessCategoryTag, detail::NullTag> {
+        struct substitute<grb::detail::DirectednessCategoryTag, grb::detail::NullTag> {
             //default values
-            using type = DirectedMatrixTag; // default directedness
-        };
-
-        template<>
-        struct substitute<detail::SparsenessCategoryTag, detail::NullTag> {
-            using type = SparseTag; // default sparseness
+            using type = grb::DirectedMatrixTag; // default directedness
         };
 
 
@@ -89,61 +89,75 @@ namespace grb
             // recursive call: shaves off one of the tags and puts it in the right
             // place (no error checking yet)
             template<typename ScalarT, typename Sparseness, typename Directedness,
-                typename InputTag, typename... Tags>
+                typename InputTag, typename... TagsT>
             struct result {
-                using type = typename result<ScalarT,
-                      typename detail::substitute<Sparseness, InputTag >::type,
-                      typename detail::substitute<Directedness, InputTag >::type,
-                      Tags... >::type;
+                using type = typename result<
+                    ScalarT,
+                    typename substitute<Sparseness, InputTag >::type,
+                    typename substitute<Directedness, InputTag >::type,
+                    TagsT...>::type;
             };
 
             //null tag shortcut:
             template<typename ScalarT, typename Sparseness, typename Directedness>
-            struct result<ScalarT, Sparseness, Directedness, detail::NullTag, detail::NullTag>
+            struct result<ScalarT, Sparseness, Directedness, grb::detail::NullTag, grb::detail::NullTag>
             {
-                using type = typename backend::Matrix<ScalarT,
-                      typename detail::substitute<Sparseness, detail::NullTag >::type,
-                      typename detail::substitute<Directedness, detail::NullTag >::type >;
+                using type = LilSparseMatrix<ScalarT>;
             };
 
             // base case returns the matrix from the backend
             template<typename ScalarT, typename Sparseness, typename Directedness, typename InputTag>
             struct result<ScalarT, Sparseness, Directedness, InputTag>
             {
-                using type = typename backend::Matrix<ScalarT,
-                      typename detail::substitute<Sparseness, InputTag >::type,
-                      typename detail::substitute<Directedness, InputTag >::type > ;
+                using type = LilSparseMatrix<ScalarT>;
             };
         };
 
-        /// @todo remove directedness from the vector generator
+        // helper to replace backend Matrix class
+        template<typename ScalarT, typename... TagsT>
+        using Matrix = typename matrix_generator::result<
+            ScalarT,
+            detail::SparsenessCategoryTag,
+            detail::DirectednessCategoryTag,
+            TagsT...,
+            detail::NullTag,
+            detail::NullTag>::type;
+
+        //********************************************************************
         struct vector_generator {
             // recursive call: shaves off one of the tags and puts it in the right
             // place (no error checking yet)
             template<typename ScalarT, typename Sparseness,
                 typename InputTag, typename... Tags>
             struct result {
-                using type = typename result<ScalarT,
-                      typename detail::substitute<Sparseness, InputTag >::type,
-                      Tags... >::type;
+                using type = typename result<
+                    ScalarT,
+                    typename substitute<Sparseness, InputTag>::type,
+                    Tags... >::type;
             };
 
             //null tag shortcut:
             template<typename ScalarT, typename Sparseness>
-            struct result<ScalarT, Sparseness, detail::NullTag>
+            struct result<ScalarT, Sparseness, grb::detail::NullTag>
             {
-                using type = typename backend::Vector<ScalarT,
-                      typename detail::substitute<Sparseness, detail::NullTag >::type >;
+                using type = BitmapSparseVector<ScalarT>;
             };
 
             // base case returns the vector from the backend
             template<typename ScalarT, typename Sparseness, typename InputTag>
             struct result<ScalarT, Sparseness, InputTag>
             {
-                using type = typename backend::Vector<ScalarT,
-                      typename detail::substitute<Sparseness, InputTag >::type > ;
+                using type = BitmapSparseVector<ScalarT>;
             };
         };
 
-    }//end detail
-}
+        // helper to replace backend Vector class
+        template<typename ScalarT, typename... TagsT>
+        using Vector = typename vector_generator::result<
+            ScalarT,
+            detail::SparsenessCategoryTag,
+            TagsT... ,
+            detail::NullTag>::type;
+
+    } // namespace backend
+} // namespace grb

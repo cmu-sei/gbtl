@@ -42,7 +42,7 @@ namespace grb
     namespace backend
     {
 
-        template<typename ScalarT, typename... TagsT>
+        template<typename ScalarT>
         class LilSparseMatrix
         {
         public:
@@ -722,6 +722,7 @@ namespace grb
             // output specific to the storage layout of this type of matrix
             void printInfo(std::ostream &os) const
             {
+                os << "Sequential Backend: ";
                 os << "backend::LilSparseMatrix<" << typeid(ScalarT).name() << "> ";
                 os << "(" << m_num_rows << " x " << m_num_cols << "), nvals = "
                    << nvals() << std::endl;

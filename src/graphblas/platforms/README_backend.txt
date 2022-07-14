@@ -17,19 +17,15 @@ directory.
 2. Use GB_INCLUDE_BACKEND_ALL to specify a single include file that contains
 the include directives for all of the platform's header files
 
-3. Use GB_INCLUDE_BACKEND_MATRIX to specify the include file that defines the
-platform's Matrix base class
+3. Use GB_INCLUDE_BACKEND_MATRIX to specify the include file that defines
+the backend::Matrix type (in param_unpack.hpp in sequential).
 
-4. Use GB_INCLUDE_BACKEND_VECTOR to specify the include file that defines the
-platform's Vector base class
+4. Use GB_INCLUDE_BACKEND_VECTOR to specify the include file that defines
+the backend::Vector type (in param_unpack.hpp in sequential).
 
-5. Use GB_INCLUDE_BACKEND_UTILITY to specify the include file that defines
-the pretty_print and pretty_print_matrix functions.
-
-6. Use GB_INCLUDE_BACKEND_TRANSPOSE_VIEW to specify the include file that
-defines the platform's TransposeView class
-
-7. Use GB_INCLUDE_BACKEND_COMPLEMENT_VIEW to specify the include file that defines the platform's ComplementView class
-
-8. Use GB_INCLUDE_BACKEND_OPERATIONS to specify the include file(s) that
+5. Use GB_INCLUDE_BACKEND_OPERATIONS to specify the include file(s) that
 defines the platform's operations functions.
+
+6. Implement code (e.g., param_unpack.hpp) to map template tags from
+src/graphblas/detail/matrix_tags.hpp to backend data types for matrices
+and vectors.

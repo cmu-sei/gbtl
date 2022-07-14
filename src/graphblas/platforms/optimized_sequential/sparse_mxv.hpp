@@ -36,7 +36,6 @@
 
 #include "sparse_helpers.hpp"
 
-
 //****************************************************************************
 
 namespace grb
@@ -47,64 +46,273 @@ namespace grb
         /// Implementation for 4.3.3 mxv: A * u
         //**********************************************************************
         template<typename WVectorT,
-                 typename MaskT,
+                 typename SemiringT,
+                 typename AScalarT,
+                 typename UVectorT>
+        inline void mxv_dot_nomask_noaccum_noalias(
+            WVectorT                        &w,
+            NoMask                    const &mask,
+            NoAccumulate              const &accum,
+            SemiringT                        op,
+            LilSparseMatrix<AScalarT> const &A,
+            UVectorT                  const &u,
+            OutputControlEnum                outp)
+        {
+            w.clear();  // ERROR if u and w are same vector
+
+            // =================================================================
+            // Do the basic dot-product work with the semi-ring.
+            using TScalarType = typename SemiringT::result_type;
+
+            if ((A.nvals() > 0) && (u.nvals() > 0))
+            {
+                for (IndexType row_idx = 0; row_idx < w.size(); ++row_idx)
+                {
+                    if ( !A[row_idx].empty() )
+                    {
+                        TScalarType t_val;
+                        if (dot_sparse_dense(t_val, A[row_idx], u, op))
+                        {
+                            w.setElementNoCheck(row_idx, t_val);
+                        }
+                    }
+                }
+            }
+        }
+        //**********************************************************************
+        template<typename WVectorT,
+                 typename SemiringT,
+                 typename AScalarT,
+                 typename UVectorT>
+        inline void mxv(WVectorT                        &w,
+                        NoMask                    const &mask,
+                        NoAccumulate              const &accum,
+                        SemiringT                        op,
+                        LilSparseMatrix<AScalarT> const &A,
+                        UVectorT                  const &u,
+                        OutputControlEnum                outp)
+        {
+            //mxv_dot_nomask_noaccum(w, op, A, u);
+            GRB_LOG_VERBOSE("w := A +.* u");
+
+            if ((void*)&u == (void*)&w)
+            {
+                WVectorT w_tmp(w.size());
+                mxv_dot_nomask_noaccum_noalias(w_tmp, mask, accum, op, A, u, outp);
+                w = w_tmp;
+            }
+            else
+            {
+                mxv_dot_nomask_noaccum_noalias(w, mask, accum, op, A, u, outp);
+            }
+        }
+
+        //**********************************************************************
+        /// Implementation for 4.3.3 mxv: w + A * u
+        //**********************************************************************
+        template<typename WVectorT,
                  typename AccumT,
                  typename SemiringT,
-                 typename AMatrixT,
+                 typename AScalarT,
                  typename UVectorT>
-        inline void mxv(WVectorT          &w,
-                        MaskT       const &mask,
-                        AccumT      const &accum,
-                        SemiringT          op,
-                        AMatrixT    const &A,
-                        UVectorT    const &u,
+        inline void mxv(WVectorT           &w,
+                        NoMask       const &mask,
+                        AccumT       const &accum,
+                        SemiringT           op,
+                        LilSparseMatrix<AScalarT>     const &A,
+                        UVectorT     const &u,
                         OutputControlEnum  outp)
         {
-            GRB_LOG_VERBOSE("w<M,z> := A +.* u");
+            //mxv_dot_nomask_accum(w, accum, op, A, u);
+            GRB_LOG_VERBOSE("w := w + (A +.* u)");
 
+            // =================================================================
+            // Do the basic dot-product work with the semi-ring.
+            using TScalarType = typename SemiringT::result_type;
+
+            if ((A.nvals() > 0) && (u.nvals() > 0))
+            {
+                for (IndexType row_idx = 0; row_idx < w.size(); ++row_idx)
+                {
+                    if ( !A[row_idx].empty() )
+                    {
+                        TScalarType t_val;
+                        if (dot_sparse_dense(t_val, A[row_idx], u, op))
+                        {
+                            if (w.hasElementNoCheck(row_idx))
+                            {
+                                w.setElement(
+                                    row_idx,
+                                    accum(w.extractElementNoCheck(row_idx),
+                                          t_val));
+                            }
+                            else
+                            {
+                                w.setElement(row_idx, t_val);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        //**********************************************************************
+        /// Implementation for 4.3.3 mxv: <m,r>(A * u)
+        //**********************************************************************
+        template<typename WVectorT,
+                 typename MaskT,
+                 typename SemiringT,
+                 typename AScalarT,
+                 typename UVectorT>
+        inline void mxv_dot_mask_noaccum_noalias(
+            WVectorT                        &w,
+            MaskT                     const &mask,
+            NoAccumulate              const &accum,
+            SemiringT                        op,
+            LilSparseMatrix<AScalarT> const &A,
+            UVectorT                  const &u,
+            OutputControlEnum                outp)
+        {
             // =================================================================
             // Do the basic dot-product work with the semi-ring.
             using TScalarType = typename SemiringT::result_type;
             std::vector<std::tuple<IndexType, TScalarType> > t;
 
+            if (outp == REPLACE)
+                w.clear();  // ERROR if either u or mask are same vector as w
+
             if ((A.nvals() > 0) && (u.nvals() > 0))
             {
-                auto u_contents(u.getContents());
                 for (IndexType row_idx = 0; row_idx < w.size(); ++row_idx)
                 {
-                    if (!A[row_idx].empty())
+                    bool element_set = false;
+                    if (check_mask_1D(mask, row_idx))
+                    {
+                        //w.removeElementNoCheck(row_idx);
+                        if (!A[row_idx].empty())
+                        {
+                            TScalarType t_val;
+                            if (dot_sparse_dense(t_val, A[row_idx], u, op))
+                            {
+                                w.setElementNoCheck(row_idx, t_val);
+                                element_set = true;
+                            }
+                            else if (outp == MERGE)
+                            {
+                                w.removeElementNoCheck(row_idx);
+                            }
+                        }
+                        else if (outp == MERGE)
+                        {
+                            w.removeElementNoCheck(row_idx);
+                        }
+                    }
+                }
+            }
+        }
+
+        //**********************************************************************
+        template<typename WVectorT,
+                 typename MaskT,
+                 typename SemiringT,
+                 typename AScalarT,
+                 typename UVectorT>
+        inline void mxv(WVectorT           &w,
+                        MaskT        const &mask,
+                        NoAccumulate const &accum,
+                        SemiringT           op,
+                        LilSparseMatrix<AScalarT>     const &A,
+                        UVectorT     const &u,
+                        OutputControlEnum   outp)
+        {
+            //mxv_dot_mask_noaccum(w, mask, op, A, u, outp);
+            GRB_LOG_VERBOSE("w<M,r> := (A +.* u)");
+
+            if (((void*)&u == (void*)&w) || ((void*)&mask == (void*)&w))
+            {
+                WVectorT w_tmp(w.size());
+                mxv_dot_mask_noaccum_noalias(w_tmp, mask, accum, op, A, u, outp);
+                w = w_tmp; // TODO move or swap
+            }
+            else
+            {
+                mxv_dot_mask_noaccum_noalias(w, mask, accum, op, A, u, outp);
+            }
+        }
+
+        //**********************************************************************
+        /// Implementation for 4.3.3 mxv: <m,r>(w + A * u)
+        //**********************************************************************
+        template<typename WVectorT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename SemiringT,
+                 typename AScalarT,
+                 typename UVectorT>
+        inline void mxv(WVectorT          &w,
+                        MaskT       const &mask,
+                        AccumT      const &accum,
+                        SemiringT          op,
+                        LilSparseMatrix<AScalarT>     const &A,
+                        UVectorT    const &u,
+                        OutputControlEnum  outp)
+        {
+            //mxv_dot_mask_accum(w, mask, accum, op, A, u, outp);
+            GRB_LOG_VERBOSE("w<M,r> := w + (A +.* u)");
+
+            // =================================================================
+            // Do the basic dot-product work with the semi-ring.
+            using TScalarType = typename SemiringT::result_type;
+
+            // =================================================================
+            // Accumulate into Z
+            using ZScalarType =
+                decltype(accum(std::declval<typename WVectorT::ScalarType>(),
+                               std::declval<TScalarType>()));
+            std::vector<std::tuple<IndexType, ZScalarType> > z;
+
+            if ((A.nvals() > 0) && (u.nvals() > 0))
+            {
+                for (IndexType row_idx = 0; row_idx < w.size(); ++row_idx)
+                {
+                    if (check_mask_1D(mask, row_idx) && !A[row_idx].empty())
                     {
                         TScalarType t_val;
-                        /// @note In mxv_timing_test, if I reverse u_contents and
-                        /// A[row_idx], the performance improves by a factor of 2.
-                        /// But I cannot reorder in case op is not commutative.
-                        ///
-                        /// I have added dot_rev() helper that reverses the two
-                        /// vectors but keeps the order correct for op.
-                        ///
-                        /// I suspect this is strictly data dependent performance
-                        if (dot_rev(t_val, A[row_idx], u_contents, op))
+                        if (dot_sparse_dense(t_val, A[row_idx], u, op))
                         {
-                            t.emplace_back(row_idx, t_val);
+                            if (std::is_same_v<AccumT, grb::NoAccumulate>)
+                            {
+                                z.emplace_back(row_idx, (ZScalarType)t_val);
+                            }
+                            else
+                            {
+                                if (w.get_bitmap()[row_idx])
+                                {
+                                    z.emplace_back(row_idx,
+                                                   accum(w.get_vals()[row_idx],
+                                                         t_val));
+                                }
+                                else
+                                {
+                                    z.emplace_back(row_idx,
+                                                   static_cast<ZScalarType>(t_val));
+                                }
+                            }
+                        }
+                        else if ((!std::is_same_v<AccumT, grb::NoAccumulate>) &&
+                                 (w.get_bitmap()[row_idx]))
+                        {
+                            z.emplace_back(
+                                row_idx,
+                                static_cast<ZScalarType>(w.get_vals()[row_idx]));
                         }
                     }
                 }
             }
 
             // =================================================================
-            // Accumulate into Z
-            using ZScalarType = typename std::conditional_t<
-                std::is_same_v<AccumT, NoAccumulate>,
-                TScalarType,
-                decltype(accum(std::declval<typename WVectorT::ScalarType>(),
-                               std::declval<TScalarType>()))>;
-
-            std::vector<std::tuple<IndexType, ZScalarType> > z;
-            ewise_or_opt_accum_1D(z, w, t, accum);
-
-            // =================================================================
             // Copy Z into the final output, w, considering mask and replace/merge
-            write_with_opt_mask_1D(w, z, mask, outp);
+            write_with_opt_mask_1D_sparse_dense(w, z, mask, outp);
         }
 
         //**********************************************************************
@@ -112,7 +320,7 @@ namespace grb
         //**********************************************************************
 
         //**********************************************************************
-        /// Implementation of 4.3.3 mxv: A' * u
+        /// Implementation of 4.3.3 mxv: w<m,r> = w + A' * u
         //**********************************************************************
         template<typename WVectorT,
                  typename MaskT,
@@ -128,39 +336,33 @@ namespace grb
                         UVectorT                const &u,
                         OutputControlEnum              outp)
         {
-            GRB_LOG_VERBOSE("w<M,z> := A' +.* u");
+            GRB_LOG_VERBOSE("w<M,r> := A' +.* u");
             auto const &A(AT.m_mat);
-
             // =================================================================
             // Use axpy approach with the semi-ring.
             using TScalarType = typename SemiringT::result_type;
-            std::vector<std::tuple<IndexType, TScalarType> > t;
+            BitmapSparseVector<TScalarType> t(w.size());
 
             if ((A.nvals() > 0) && (u.nvals() > 0))
             {
                 for (IndexType row_idx = 0; row_idx < u.size(); ++row_idx)
                 {
-                    if (u.hasElement(row_idx) && !A[row_idx].empty())
+                    if (u.hasElementNoCheck(row_idx) && !A[row_idx].empty())
                     {
-                        axpy(t, op, u.extractElement(row_idx), A[row_idx]);
+                        axpy(t, op, A[row_idx], u.extractElementNoCheck(row_idx));
                     }
                 }
             }
 
             // =================================================================
-            // Accumulate into Z
+            // Accumulate into final output, w, considering mask and replace/merge
             using ZScalarType = typename std::conditional_t<
                 std::is_same_v<AccumT, NoAccumulate>,
                 TScalarType,
                 decltype(accum(std::declval<typename WVectorT::ScalarType>(),
                                std::declval<TScalarType>()))>;
 
-            std::vector<std::tuple<IndexType, ZScalarType> > z;
-            ewise_or_opt_accum_1D(z, w, t, accum);
-
-            // =================================================================
-            // Copy Z into the final output, w, considering mask and replace/merge
-            write_with_opt_mask_1D(w, z, mask, outp);
+            opt_accum_with_opt_mask_1D(w, mask, accum, t, outp);
         }
     } // backend
 } // grb

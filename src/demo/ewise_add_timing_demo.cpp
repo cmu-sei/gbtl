@@ -137,10 +137,10 @@ int main(int argc, char **argv)
     Timer<std::chrono::steady_clock, std::chrono::microseconds> my_timer;
 
     // warm up
-    eWiseMult(C,
+    eWiseAdd (C,
               NoMask(),
               NoAccumulate(),
-              Times<double>(),
+              Plus<double>(),
               A, B);
 
     int const NUM_TRIALS=10;
@@ -150,9 +150,9 @@ int main(int argc, char **argv)
     //=====================================================
 
     //===================
-    // u.*v
+    // u.+v
     //===================
-    std::cerr << "IMPLEMENTATION: u.*v" << std::endl;
+    std::cerr << "IMPLEMENTATION: u.+v" << std::endl;
     std::cerr << "Function                      \tmin\tavg\tmax\tnvals\tchecksum\n";
 
     //----------
@@ -161,8 +161,8 @@ int main(int argc, char **argv)
     {
         w = wtmp;
         my_timer.start();
-        eWiseMult(w, NoMask(), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (w, NoMask(), NoAccumulate(),
+                  Plus<double>(),
                   u, v);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -172,7 +172,7 @@ int main(int argc, char **argv)
     }
     wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cerr << "w := u.*v                    \t"
+    std::cerr << "w := u.+v                    \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << w.nvals() << "\t" << count << std::endl;
 
@@ -182,8 +182,8 @@ int main(int argc, char **argv)
     {
         w = wtmp;
         my_timer.start();
-        eWiseMult(w, NoMask(), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (w, NoMask(), Plus<double>(),
+                  Plus<double>(),
                   u, v);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -193,7 +193,7 @@ int main(int argc, char **argv)
     }
     wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cerr << "w := w + u.*v                \t"
+    std::cerr << "w := w + u.+v                \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << w.nvals() << "\t" << count << std::endl;
 
@@ -203,8 +203,8 @@ int main(int argc, char **argv)
     {
         w = wtmp;
         my_timer.start();
-        eWiseMult(w, m, NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (w, m, NoAccumulate(),
+                  Plus<double>(),
                   u, v);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -214,7 +214,7 @@ int main(int argc, char **argv)
     }
     wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cerr << "w<m,merge> := u.*v           \t"
+    std::cerr << "w<m,merge> := u.+v           \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << w.nvals() << "\t" << count << std::endl;
 
@@ -224,8 +224,8 @@ int main(int argc, char **argv)
     {
         w = wtmp;
         my_timer.start();
-        eWiseMult(w, m, NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (w, m, NoAccumulate(),
+                  Plus<double>(),
                   u, v, REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -235,7 +235,7 @@ int main(int argc, char **argv)
     }
     wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cerr << "w<m,replace> := u.*v         \t"
+    std::cerr << "w<m,replace> := u.+v         \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << w.nvals() << "\t" << count << std::endl;
 
@@ -245,8 +245,8 @@ int main(int argc, char **argv)
     {
         w = wtmp;
         my_timer.start();
-        eWiseMult(w, m, Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (w, m, Plus<double>(),
+                  Plus<double>(),
                   u, v);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -256,7 +256,7 @@ int main(int argc, char **argv)
     }
     wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cerr << "w<m,merge> := w + u.*v       \t"
+    std::cerr << "w<m,merge> := w + u.+v       \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << w.nvals() << "\t" << count << std::endl;
 
@@ -266,8 +266,8 @@ int main(int argc, char **argv)
     {
         w = wtmp;
         my_timer.start();
-        eWiseMult(w, m, Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (w, m, Plus<double>(),
+                  Plus<double>(),
                   u, v, REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -277,7 +277,7 @@ int main(int argc, char **argv)
     }
     wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cerr << "w<m,replace> := w + u.*v     \t"
+    std::cerr << "w<m,replace> := w + u.+v     \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << w.nvals() << "\t" << count << std::endl;
 
@@ -287,8 +287,8 @@ int main(int argc, char **argv)
     {
         w = wtmp;
         my_timer.start();
-        eWiseMult(w, complement(m), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (w, complement(m), NoAccumulate(),
+                  Plus<double>(),
                   u, v);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -298,7 +298,7 @@ int main(int argc, char **argv)
     }
     wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cerr << "w<!m,merge> := u.*v          \t"
+    std::cerr << "w<!m,merge> := u.+v          \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << w.nvals() << "\t" << count << std::endl;
 
@@ -308,8 +308,8 @@ int main(int argc, char **argv)
     {
         w = wtmp;
         my_timer.start();
-        eWiseMult(w, complement(m), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (w, complement(m), NoAccumulate(),
+                  Plus<double>(),
                   u, v, REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -319,7 +319,7 @@ int main(int argc, char **argv)
     }
     wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cerr << "w<!m,replace> := u.*v        \t"
+    std::cerr << "w<!m,replace> := u.+v        \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << w.nvals() << "\t" << count << std::endl;
 
@@ -329,8 +329,8 @@ int main(int argc, char **argv)
     {
         w = wtmp;
         my_timer.start();
-        eWiseMult(w, complement(m), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (w, complement(m), Plus<double>(),
+                  Plus<double>(),
                   u, v);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -340,7 +340,7 @@ int main(int argc, char **argv)
     }
     wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cerr << "w<!m,merge> := w + u.*v      \t"
+    std::cerr << "w<!m,merge> := w + u.+v      \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << w.nvals() << "\t" << count << std::endl;
 
@@ -350,8 +350,8 @@ int main(int argc, char **argv)
     {
         w = wtmp;
         my_timer.start();
-        eWiseMult(w, complement(m), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (w, complement(m), Plus<double>(),
+                  Plus<double>(),
                   u, v, REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -361,7 +361,7 @@ int main(int argc, char **argv)
     }
     wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cerr << "w<!m,replace> := w + u.*v    \t"
+    std::cerr << "w<!m,replace> := w + u.+v    \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << w.nvals() << "\t" << count << std::endl;
 
@@ -372,8 +372,8 @@ int main(int argc, char **argv)
     {
         w = wtmp;
         my_timer.start();
-        eWiseMult(w, structure(m), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (w, structure(m), NoAccumulate(),
+                  Plus<double>(),
                   u, v);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -383,7 +383,7 @@ int main(int argc, char **argv)
     }
     wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cerr << "w<s(m),merge> := u.*v        \t"
+    std::cerr << "w<s(m),merge> := u.+v        \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << w.nvals() << "\t" << count << std::endl;
 
@@ -393,8 +393,8 @@ int main(int argc, char **argv)
     {
         w = wtmp;
         my_timer.start();
-        eWiseMult(w, structure(m), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (w, structure(m), NoAccumulate(),
+                  Plus<double>(),
                   u, v, REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -404,7 +404,7 @@ int main(int argc, char **argv)
     }
     wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cerr << "w<s(m),replace> := u.*v      \t"
+    std::cerr << "w<s(m),replace> := u.+v      \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << w.nvals() << "\t" << count << std::endl;
 
@@ -414,8 +414,8 @@ int main(int argc, char **argv)
     {
         w = wtmp;
         my_timer.start();
-        eWiseMult(w, structure(m), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (w, structure(m), Plus<double>(),
+                  Plus<double>(),
                   u, v);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -425,7 +425,7 @@ int main(int argc, char **argv)
     }
     wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cerr << "w<s(m),merge> := w + u.*v    \t"
+    std::cerr << "w<s(m),merge> := w + u.+v    \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << w.nvals() << "\t" << count << std::endl;
 
@@ -435,8 +435,8 @@ int main(int argc, char **argv)
     {
         w = wtmp;
         my_timer.start();
-        eWiseMult(w, structure(m), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (w, structure(m), Plus<double>(),
+                  Plus<double>(),
                   u, v, REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -446,7 +446,7 @@ int main(int argc, char **argv)
     }
     wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cerr << "w<s(m),replace> := w + u.*v  \t"
+    std::cerr << "w<s(m),replace> := w + u.+v  \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << w.nvals() << "\t" << count << std::endl;
 
@@ -456,8 +456,8 @@ int main(int argc, char **argv)
     {
         w = wtmp;
         my_timer.start();
-        eWiseMult(w, complement(structure(m)), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (w, complement(structure(m)), NoAccumulate(),
+                  Plus<double>(),
                   u, v);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -467,7 +467,7 @@ int main(int argc, char **argv)
     }
     wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cerr << "w<!s(m),merge> := u.*v       \t"
+    std::cerr << "w<!s(m),merge> := u.+v       \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << w.nvals() << "\t" << count << std::endl;
 
@@ -477,8 +477,8 @@ int main(int argc, char **argv)
     {
         w = wtmp;
         my_timer.start();
-        eWiseMult(w, complement(structure(m)), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (w, complement(structure(m)), NoAccumulate(),
+                  Plus<double>(),
                   u, v, REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -488,7 +488,7 @@ int main(int argc, char **argv)
     }
     wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cerr << "w<!s(m),replace> := u.*v     \t"
+    std::cerr << "w<!s(m),replace> := u.+v     \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << w.nvals() << "\t" << count << std::endl;
 
@@ -498,8 +498,8 @@ int main(int argc, char **argv)
     {
         w = wtmp;
         my_timer.start();
-        eWiseMult(w, complement(structure(m)), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (w, complement(structure(m)), Plus<double>(),
+                  Plus<double>(),
                   u, v);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -509,7 +509,7 @@ int main(int argc, char **argv)
     }
     wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cerr << "w<!s(m),merge> := w + u.*v   \t"
+    std::cerr << "w<!s(m),merge> := w + u.+v   \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << w.nvals() << "\t" << count << std::endl;
 
@@ -519,8 +519,8 @@ int main(int argc, char **argv)
     {
         w = wtmp;
         my_timer.start();
-        eWiseMult(w, complement(structure(m)), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (w, complement(structure(m)), Plus<double>(),
+                  Plus<double>(),
                   u, v, REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -530,14 +530,14 @@ int main(int argc, char **argv)
     }
     wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cerr << "w<!s(m),replace> := w + u.*v \t"
+    std::cerr << "w<!s(m),replace> := w + u.+v \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << w.nvals() << "\t" << count << std::endl;
 
     //===================
-    // A.*B
+    // A.+B
     //===================
-    std::cerr << "IMPLEMENTATION: A.*B" << std::endl;
+    std::cerr << "IMPLEMENTATION: A.+B" << std::endl;
     Ctmp.clear();
 
     //----------
@@ -546,8 +546,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, NoMask(), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, NoMask(), NoAccumulate(),
+                  Plus<double>(),
                   A, B);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -557,7 +557,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C := A.*B                     \t"
+    std::cerr << "C := A.+B                     \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -568,8 +568,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, NoMask(), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, NoMask(), Plus<double>(),
+                  Plus<double>(),
                   A, B);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -579,7 +579,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C := C + A.*B                 \t"
+    std::cerr << "C := C + A.+B                 \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -589,8 +589,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, M, NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, M, NoAccumulate(),
+                  Plus<double>(),
                   A, B);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -600,7 +600,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<M,merge> := A.*B            \t"
+    std::cerr << "C<M,merge> := A.+B            \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -610,8 +610,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, M, NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, M, NoAccumulate(),
+                  Plus<double>(),
                   A, B, REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -621,7 +621,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<M,replace> := A.*B          \t"
+    std::cerr << "C<M,replace> := A.+B          \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -631,8 +631,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, M, Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, M, Plus<double>(),
+                  Plus<double>(),
                   A, B);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -642,7 +642,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<M,merge> := C + A.*B        \t"
+    std::cerr << "C<M,merge> := C + A.+B        \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -652,8 +652,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, M, Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, M, Plus<double>(),
+                  Plus<double>(),
                   A, B, REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -663,7 +663,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<M,replace> := C + A.*B      \t"
+    std::cerr << "C<M,replace> := C + A.+B      \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -674,8 +674,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(M), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, complement(M), NoAccumulate(),
+                  Plus<double>(),
                   A, B);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -685,7 +685,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!M,merge> := A.*B           \t"
+    std::cerr << "C<!M,merge> := A.+B           \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -696,8 +696,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(M), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, complement(M), NoAccumulate(),
+                  Plus<double>(),
                   A, B, REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -707,7 +707,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!M,replace> := A.*B         \t"
+    std::cerr << "C<!M,replace> := A.+B         \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -718,8 +718,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(M), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, complement(M), Plus<double>(),
+                  Plus<double>(),
                   A, B);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -729,7 +729,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!M,merge> := C + A.*B       \t"
+    std::cerr << "C<!M,merge> := C + A.+B       \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -740,8 +740,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(M), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, complement(M), Plus<double>(),
+                  Plus<double>(),
                   A, B, REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -751,7 +751,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!M,replace> := C + A.*B     \t"
+    std::cerr << "C<!M,replace> := C + A.+B     \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -764,8 +764,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, structure(M), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, structure(M), NoAccumulate(),
+                  Plus<double>(),
                   A, B);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -775,7 +775,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<s(M),merge> := A.*B         \t"
+    std::cerr << "C<s(M),merge> := A.+B         \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -786,8 +786,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, structure(M), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, structure(M), NoAccumulate(),
+                  Plus<double>(),
                   A, B, REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -797,7 +797,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<s(M),replace> := A.*B       \t"
+    std::cerr << "C<s(M),replace> := A.+B       \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -808,8 +808,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, structure(M), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, structure(M), Plus<double>(),
+                  Plus<double>(),
                   A, B);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -819,7 +819,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<s(M),merge> := C + A.*B     \t"
+    std::cerr << "C<s(M),merge> := C + A.+B     \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -830,8 +830,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, structure(M), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, structure(M), Plus<double>(),
+                  Plus<double>(),
                   A, B, REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -841,7 +841,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<s(M),replace> := C + A.*B   \t"
+    std::cerr << "C<s(M),replace> := C + A.+B   \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -852,8 +852,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(structure(M)), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, complement(structure(M)), NoAccumulate(),
+                  Plus<double>(),
                   A, B);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -863,7 +863,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!s(M),merge> := A.*B        \t"
+    std::cerr << "C<!s(M),merge> := A.+B        \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -874,8 +874,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(structure(M)), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, complement(structure(M)), NoAccumulate(),
+                  Plus<double>(),
                   A, B, REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -885,7 +885,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!s(M),replace> := A.*B      \t"
+    std::cerr << "C<!s(M),replace> := A.+B      \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -896,8 +896,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(structure(M)), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, complement(structure(M)), Plus<double>(),
+                  Plus<double>(),
                   A, B);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -907,7 +907,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!s(M),merge> := C + A.*B    \t"
+    std::cerr << "C<!s(M),merge> := C + A.+B    \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -918,8 +918,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(structure(M)), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, complement(structure(M)), Plus<double>(),
+                  Plus<double>(),
                   A, B, REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -929,7 +929,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!s(M),replace> := C + A.*B  \t"
+    std::cerr << "C<!s(M),replace> := C + A.+B  \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -945,8 +945,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, NoMask(), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, NoMask(), NoAccumulate(),
+                  Plus<double>(),
                   transpose(AT), B);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -956,7 +956,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C := A'.*B                    \t"
+    std::cerr << "C := A'.+B                    \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -967,8 +967,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, NoMask(), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, NoMask(), Plus<double>(),
+                  Plus<double>(),
                   transpose(AT), B);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -978,7 +978,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C := C + A'.*B                \t"
+    std::cerr << "C := C + A'.+B                \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -989,8 +989,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, M, NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, M, NoAccumulate(),
+                  Plus<double>(),
                   transpose(AT), B);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1000,7 +1000,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<M,merge> := A'.*B           \t"
+    std::cerr << "C<M,merge> := A'.+B           \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1011,8 +1011,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, M, NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, M, NoAccumulate(),
+                  Plus<double>(),
                   transpose(AT), B, REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1022,7 +1022,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<M,replace> := A.*B          \t"
+    std::cerr << "C<M,replace> := A.+B          \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1033,8 +1033,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, M, Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, M, Plus<double>(),
+                  Plus<double>(),
                   transpose(AT), B);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1044,7 +1044,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<M,merge> := C + A'.*B       \t"
+    std::cerr << "C<M,merge> := C + A'.+B       \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1055,8 +1055,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, M, Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, M, Plus<double>(),
+                  Plus<double>(),
                   transpose(AT), B, REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1066,7 +1066,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<M,replace> := C + A'.*B     \t"
+    std::cerr << "C<M,replace> := C + A'.+B     \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1077,8 +1077,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(M), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, complement(M), NoAccumulate(),
+                  Plus<double>(),
                   transpose(AT), B);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1088,7 +1088,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!M,merge> := A'.*B          \t"
+    std::cerr << "C<!M,merge> := A'.+B          \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1099,8 +1099,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(M), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, complement(M), NoAccumulate(),
+                  Plus<double>(),
                   transpose(AT), B, REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1110,7 +1110,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!M,replace> := A'.*B        \t"
+    std::cerr << "C<!M,replace> := A'.+B        \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1121,8 +1121,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(M), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, complement(M), Plus<double>(),
+                  Plus<double>(),
                   transpose(AT), B);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1132,7 +1132,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!M,merge> := C + A'.*B      \t"
+    std::cerr << "C<!M,merge> := C + A'.+B      \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1143,8 +1143,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(M), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, complement(M), Plus<double>(),
+                  Plus<double>(),
                   transpose(AT), B, REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1154,7 +1154,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!M,replace> := C + A'.*B    \t"
+    std::cerr << "C<!M,replace> := C + A'.+B    \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1167,8 +1167,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, structure(M), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, structure(M), NoAccumulate(),
+                  Plus<double>(),
                   transpose(AT), B);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1178,7 +1178,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<s(M),merge> := A'.*B        \t"
+    std::cerr << "C<s(M),merge> := A'.+B        \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1189,8 +1189,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, structure(M), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, structure(M), NoAccumulate(),
+                  Plus<double>(),
                   transpose(AT), B, REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1200,7 +1200,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<s(M),replace> := A.*B       \t"
+    std::cerr << "C<s(M),replace> := A.+B       \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1211,8 +1211,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, structure(M), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, structure(M), Plus<double>(),
+                  Plus<double>(),
                   transpose(AT), B);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1222,7 +1222,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<s(M),merge> := C + A'.*B    \t"
+    std::cerr << "C<s(M),merge> := C + A'.+B    \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1233,8 +1233,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, structure(M), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, structure(M), Plus<double>(),
+                  Plus<double>(),
                   transpose(AT), B, REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1244,7 +1244,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<s(M),replace> := C + A'.*B  \t"
+    std::cerr << "C<s(M),replace> := C + A'.+B  \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1255,8 +1255,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(structure(M)), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, complement(structure(M)), NoAccumulate(),
+                  Plus<double>(),
                   transpose(AT), B);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1266,7 +1266,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!s(M),merge> := A'.*B       \t"
+    std::cerr << "C<!s(M),merge> := A'.+B       \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1277,8 +1277,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(structure(M)), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, complement(structure(M)), NoAccumulate(),
+                  Plus<double>(),
                   transpose(AT), B, REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1288,7 +1288,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!s(M),replace> := A'.*B     \t"
+    std::cerr << "C<!s(M),replace> := A'.+B     \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1299,8 +1299,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(structure(M)), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, complement(structure(M)), Plus<double>(),
+                  Plus<double>(),
                   transpose(AT), B);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1310,7 +1310,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!s(M),merge> := C + A'.*B   \t"
+    std::cerr << "C<!s(M),merge> := C + A'.+B   \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1321,8 +1321,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(structure(M)), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, complement(structure(M)), Plus<double>(),
+                  Plus<double>(),
                   transpose(AT), B, REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1332,7 +1332,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!s(M),replace> := C + A'.*B \t"
+    std::cerr << "C<!s(M),replace> := C + A'.+B \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1348,8 +1348,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, NoMask(), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, NoMask(), NoAccumulate(),
+                  Plus<double>(),
                   A, transpose(BT));
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1359,7 +1359,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C := A.*B'                    \t"
+    std::cerr << "C := A.+B'                    \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1370,8 +1370,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, NoMask(), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, NoMask(), Plus<double>(),
+                  Plus<double>(),
                   A, transpose(BT));
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1381,7 +1381,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C := C + A.*B'                \t"
+    std::cerr << "C := C + A.+B'                \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1392,8 +1392,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, M, NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, M, NoAccumulate(),
+                  Plus<double>(),
                   A, transpose(BT));
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1403,7 +1403,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<M,merge> := A.*B'           \t"
+    std::cerr << "C<M,merge> := A.+B'           \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1414,8 +1414,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, M, NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, M, NoAccumulate(),
+                  Plus<double>(),
                   A, transpose(BT), REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1425,7 +1425,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<M,replace> := A.*B'         \t"
+    std::cerr << "C<M,replace> := A.+B'         \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1436,8 +1436,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, M, Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, M, Plus<double>(),
+                  Plus<double>(),
                   A, transpose(BT));
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1447,7 +1447,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<M,merge> := C + A.*B'       \t"
+    std::cerr << "C<M,merge> := C + A.+B'       \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1458,8 +1458,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, M, Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, M, Plus<double>(),
+                  Plus<double>(),
                   A, transpose(BT), REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1469,7 +1469,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<M,replace> := C + A.*B'     \t"
+    std::cerr << "C<M,replace> := C + A.+B'     \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1480,8 +1480,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(M), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, complement(M), NoAccumulate(),
+                  Plus<double>(),
                   A, transpose(BT));
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1491,7 +1491,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!M,merge> := A.*B'          \t"
+    std::cerr << "C<!M,merge> := A.+B'          \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1502,8 +1502,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(M), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, complement(M), NoAccumulate(),
+                  Plus<double>(),
                   A, transpose(BT), REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1513,7 +1513,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!M,replace> := A.*B'        \t"
+    std::cerr << "C<!M,replace> := A.+B'        \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1524,8 +1524,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(M), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, complement(M), Plus<double>(),
+                  Plus<double>(),
                   A, transpose(BT));
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1535,7 +1535,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!M,merge> := C + A.*B'      \t"
+    std::cerr << "C<!M,merge> := C + A.+B'      \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1546,8 +1546,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(M), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, complement(M), Plus<double>(),
+                  Plus<double>(),
                   A, transpose(BT), REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1557,7 +1557,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!M,replace> := C + A.*B'    \t"
+    std::cerr << "C<!M,replace> := C + A.+B'    \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1570,8 +1570,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, structure(M), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, structure(M), NoAccumulate(),
+                  Plus<double>(),
                   A, transpose(BT));
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1581,7 +1581,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<s(M),merge> := A.*B'        \t"
+    std::cerr << "C<s(M),merge> := A.+B'        \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1592,8 +1592,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, structure(M), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, structure(M), NoAccumulate(),
+                  Plus<double>(),
                   A, transpose(BT), REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1603,7 +1603,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<s(M),replace> := A.*B'      \t"
+    std::cerr << "C<s(M),replace> := A.+B'      \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1614,8 +1614,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, structure(M), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, structure(M), Plus<double>(),
+                  Plus<double>(),
                   A, transpose(BT));
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1625,7 +1625,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<s(M),merge> := C + A.*B'    \t"
+    std::cerr << "C<s(M),merge> := C + A.+B'    \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1636,8 +1636,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, structure(M), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, structure(M), Plus<double>(),
+                  Plus<double>(),
                   A, transpose(BT), REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1647,7 +1647,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<s(M),replace> := C + A.*B'  \t"
+    std::cerr << "C<s(M),replace> := C + A.+B'  \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1658,8 +1658,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(structure(M)), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, complement(structure(M)), NoAccumulate(),
+                  Plus<double>(),
                   A, transpose(BT));
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1669,7 +1669,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!s(M),merge> := A.*B'       \t"
+    std::cerr << "C<!s(M),merge> := A.+B'       \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1680,8 +1680,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(structure(M)), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, complement(structure(M)), NoAccumulate(),
+                  Plus<double>(),
                   A, transpose(BT), REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1691,7 +1691,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!s(M),replace> := A.*B'     \t"
+    std::cerr << "C<!s(M),replace> := A.+B'     \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1702,8 +1702,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(structure(M)), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, complement(structure(M)), Plus<double>(),
+                  Plus<double>(),
                   A, transpose(BT));
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1713,7 +1713,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!s(M),merge> := C + A.*B'   \t"
+    std::cerr << "C<!s(M),merge> := C + A.+B'   \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1724,8 +1724,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(structure(M)), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, complement(structure(M)), Plus<double>(),
+                  Plus<double>(),
                   A, transpose(BT), REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1735,7 +1735,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!s(M),replace> := C + A.*B' \t"
+    std::cerr << "C<!s(M),replace> := C + A.+B' \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1751,8 +1751,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, NoMask(), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, NoMask(), NoAccumulate(),
+                  Plus<double>(),
                   transpose(AT), transpose(BT));
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1762,7 +1762,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C := A'.*B'                   \t"
+    std::cerr << "C := A'.+B'                   \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1773,8 +1773,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, NoMask(), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, NoMask(), Plus<double>(),
+                  Plus<double>(),
                   transpose(AT), transpose(BT));
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1784,7 +1784,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C := C + A'.*B'               \t"
+    std::cerr << "C := C + A'.+B'               \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1795,8 +1795,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, M, NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, M, NoAccumulate(),
+                  Plus<double>(),
                   transpose(AT), transpose(BT));
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1806,7 +1806,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<M,merge> := A'.*B'          \t"
+    std::cerr << "C<M,merge> := A'.+B'          \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1817,8 +1817,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, M, NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, M, NoAccumulate(),
+                  Plus<double>(),
                   transpose(AT), transpose(BT), REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1828,7 +1828,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<M,replace> := A'.*B'        \t"
+    std::cerr << "C<M,replace> := A'.+B'        \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1839,8 +1839,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, M, Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, M, Plus<double>(),
+                  Plus<double>(),
                   transpose(AT), transpose(BT));
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1850,7 +1850,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<M,merge> := C + A'.*B'      \t"
+    std::cerr << "C<M,merge> := C + A'.+B'      \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1861,8 +1861,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, M, Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, M, Plus<double>(),
+                  Plus<double>(),
                   transpose(AT), transpose(BT), REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1872,7 +1872,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<M,replace> := C + A'.*B'    \t"
+    std::cerr << "C<M,replace> := C + A'.+B'    \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1883,8 +1883,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(M), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, complement(M), NoAccumulate(),
+                  Plus<double>(),
                   transpose(AT), transpose(BT));
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1894,7 +1894,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!M,merge> := A'.*B'         \t"
+    std::cerr << "C<!M,merge> := A'.+B'         \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1905,8 +1905,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(M), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, complement(M), NoAccumulate(),
+                  Plus<double>(),
                   transpose(AT), transpose(BT), REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1916,7 +1916,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!M,replace> := A'.*B'       \t"
+    std::cerr << "C<!M,replace> := A'.+B'       \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1927,8 +1927,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(M), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, complement(M), Plus<double>(),
+                  Plus<double>(),
                   transpose(AT), transpose(BT));
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1938,7 +1938,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!M,merge> := C + A'.*B'     \t"
+    std::cerr << "C<!M,merge> := C + A'.+B'     \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1949,8 +1949,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(M), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, complement(M), Plus<double>(),
+                  Plus<double>(),
                   transpose(AT), transpose(BT), REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1960,7 +1960,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!M,replace> := C + A'.*B'   \t"
+    std::cerr << "C<!M,replace> := C + A'.+B'   \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1973,8 +1973,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, structure(M), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, structure(M), NoAccumulate(),
+                  Plus<double>(),
                   transpose(AT), transpose(BT));
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -1984,7 +1984,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<s(M),merge> := A'.*B'       \t"
+    std::cerr << "C<s(M),merge> := A'.+B'       \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -1995,8 +1995,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, structure(M), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, structure(M), NoAccumulate(),
+                  Plus<double>(),
                   transpose(AT), transpose(BT), REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -2006,7 +2006,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<s(M),replace> := A'.*B'     \t"
+    std::cerr << "C<s(M),replace> := A'.+B'     \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -2017,8 +2017,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, structure(M), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, structure(M), Plus<double>(),
+                  Plus<double>(),
                   transpose(AT), transpose(BT));
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -2028,7 +2028,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<s(M),merge> := C + A'.*B'   \t"
+    std::cerr << "C<s(M),merge> := C + A'.+B'   \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -2039,8 +2039,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, structure(M), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, structure(M), Plus<double>(),
+                  Plus<double>(),
                   transpose(AT), transpose(BT), REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -2050,7 +2050,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<s(M),replace> := C + A'.*B' \t"
+    std::cerr << "C<s(M),replace> := C + A'.+B' \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -2061,8 +2061,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(structure(M)), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, complement(structure(M)), NoAccumulate(),
+                  Plus<double>(),
                   transpose(AT), transpose(BT));
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -2072,7 +2072,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!s(M),merge> := A'.*B'      \t"
+    std::cerr << "C<!s(M),merge> := A'.+B'      \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -2083,8 +2083,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(structure(M)), NoAccumulate(),
-                  Times<double>(),
+        eWiseAdd (C, complement(structure(M)), NoAccumulate(),
+                  Plus<double>(),
                   transpose(AT), transpose(BT), REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -2094,7 +2094,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!s(M),replace> := A'.*B'    \t"
+    std::cerr << "C<!s(M),replace> := A'.+B'    \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -2105,8 +2105,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(structure(M)), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, complement(structure(M)), Plus<double>(),
+                  Plus<double>(),
                   transpose(AT), transpose(BT));
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -2116,7 +2116,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!s(M),merge> := C + A'.*B'  \t"
+    std::cerr << "C<!s(M),merge> := C + A'.+B'  \t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 
@@ -2127,8 +2127,8 @@ int main(int argc, char **argv)
     {
         C = Ctmp;
         my_timer.start();
-        eWiseMult(C, complement(structure(M)), Plus<double>(),
-                  Times<double>(),
+        eWiseAdd (C, complement(structure(M)), Plus<double>(),
+                  Plus<double>(),
                   transpose(AT), transpose(BT), REPLACE);
         my_timer.stop();
         double t = my_timer.elapsed();
@@ -2138,7 +2138,7 @@ int main(int argc, char **argv)
     }
     Ctmp = C;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), C);
-    std::cerr << "C<!s(M),replace> := C + A'.*B'\t"
+    std::cerr << "C<!s(M),replace> := C + A'.+B'\t"
               << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
               << "\t" << C.nvals() << "\t" << count << std::endl;
 

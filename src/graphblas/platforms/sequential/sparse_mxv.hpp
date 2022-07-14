@@ -36,7 +36,6 @@
 
 #include "sparse_helpers.hpp"
 
-
 //****************************************************************************
 
 namespace grb
@@ -60,7 +59,7 @@ namespace grb
                         UVectorT    const &u,
                         OutputControlEnum  outp)
         {
-            GRB_LOG_VERBOSE("w<M,z> := A +.* u");
+            GRB_LOG_VERBOSE("w<M,r> := A +.* u");
 
             // =================================================================
             // Do the basic dot-product work with the semi-ring.
@@ -75,15 +74,7 @@ namespace grb
                     if (!A[row_idx].empty())
                     {
                         TScalarType t_val;
-                        /// @note In mxv_timing_test, if I reverse u_contents and
-                        /// A[row_idx], the performance improves by a factor of 2.
-                        /// But I cannot reorder in case op is not commutative.
-                        ///
-                        /// I have added dot_rev() helper that reverses the two
-                        /// vectors but keeps the order correct for op.
-                        ///
-                        /// I suspect this is strictly data dependent performance
-                        if (dot_rev(t_val, A[row_idx], u_contents, op))
+                        if (dot(t_val, A[row_idx], u_contents, op))
                         {
                             t.emplace_back(row_idx, t_val);
                         }
@@ -112,7 +103,7 @@ namespace grb
         //**********************************************************************
 
         //**********************************************************************
-        /// Implementation of 4.3.3 mxv: A' * u
+        /// Implementation of 4.3.3 mxv: w<m,r> = w + A' * u
         //**********************************************************************
         template<typename WVectorT,
                  typename MaskT,
@@ -128,7 +119,7 @@ namespace grb
                         UVectorT                const &u,
                         OutputControlEnum              outp)
         {
-            GRB_LOG_VERBOSE("w<M,z> := A' +.* u");
+            GRB_LOG_VERBOSE("w<M,r> := A' +.* u");
             auto const &A(AT.m_mat);
 
             // =================================================================
@@ -142,7 +133,7 @@ namespace grb
                 {
                     if (u.hasElement(row_idx) && !A[row_idx].empty())
                     {
-                        axpy(t, op, u.extractElement(row_idx), A[row_idx]);
+                        axpy(t, op, A[row_idx], u.extractElement(row_idx));
                     }
                 }
             }

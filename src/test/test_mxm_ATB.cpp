@@ -4679,5 +4679,163 @@ BOOST_AUTO_TEST_CASE(test_mxm_CompStructMask_Accum_ATB_Merge_ABdup)
 }
 
 
+//****************************************************************************
+// Non-commutative multiply tests
+//****************************************************************************
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_mxm_NoMask_NoAccum_ATB_noncommutative_multiply)
+{
+    grb::Matrix<double> C(3, 4);
+    grb::Matrix<double> A(AT_sparse_3x3, 0.);
+    grb::Matrix<double> B(B_sparse_3x4, 0.);
+
+    std::vector<std::vector<double>> plus2nd_answer = {{5, -7,  3, -2},
+                                                       {0, -7,  3,  0},
+                                                       {4,  8,  0, -2}};
+    grb::Matrix<double> answer(plus2nd_answer, 0.);
+
+    grb::mxm(C,
+             grb::NoMask(),
+             grb::NoAccumulate(),
+             grb::MinSecondSemiring<double>(), transpose(A), B);
+    for (grb::IndexType ix = 0; ix < answer.nrows(); ++ix)
+    {
+        for (grb::IndexType iy = 0; iy < answer.ncols(); ++iy)
+        {
+            BOOST_CHECK_EQUAL(C.hasElement(ix, iy), answer.hasElement(ix, iy));
+            if (C.hasElement(ix, iy))
+            {
+                BOOST_CHECK_CLOSE(C.extractElement(ix,iy),
+                                  answer.extractElement(ix,iy), 0.0001);
+            }
+        }
+    }
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_mxm_Mask_NoAccum_ATB_noncommutative_multiply)
+{
+    grb::Matrix<double> C(3, 4);
+    grb::Matrix<double> A(AT_sparse_3x3, 0.);
+    grb::Matrix<double> B(B_sparse_3x4, 0.);
+    grb::Matrix<double> MNotLower(NotLower_3x4, 0.);
+
+    std::vector<std::vector<double>> plus2nd_answer = {{0, -7,  3, -2},
+                                                       {0,  0,  3,  0},
+                                                       {0,  0,  0, -2}};
+    grb::Matrix<double> answer(plus2nd_answer, 0.);
+
+    grb::mxm(C,
+             MNotLower,
+             grb::NoAccumulate(),
+             grb::MinSecondSemiring<double>(), transpose(A), B);
+    for (grb::IndexType ix = 0; ix < answer.nrows(); ++ix)
+    {
+        for (grb::IndexType iy = 0; iy < answer.ncols(); ++iy)
+        {
+            BOOST_CHECK_EQUAL(C.hasElement(ix, iy), answer.hasElement(ix, iy));
+            if (C.hasElement(ix, iy))
+            {
+                BOOST_CHECK_CLOSE(C.extractElement(ix,iy),
+                                  answer.extractElement(ix,iy), 0.0001);
+            }
+        }
+    }
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_mxm_Mask_Accum_ATB_noncommutative_multiply)
+{
+    grb::Matrix<double> C(NotLower_3x4, 0.);
+    grb::Matrix<double> A(AT_sparse_3x3, 0.);
+    grb::Matrix<double> B(B_sparse_3x4, 0.);
+    grb::Matrix<double> MNotLower(NotLower_3x4, 0.);
+
+    std::vector<std::vector<double>> plus2nd_answer = {{0, -6,  4, -1},
+                                                       {0,  0,  4,  1},
+                                                       {0,  0,  0, -1}};
+    grb::Matrix<double> answer(plus2nd_answer, 0.);
+
+    grb::mxm(C,
+             MNotLower,
+             grb::Plus<double>(),
+             grb::MinSecondSemiring<double>(), transpose(A), B);
+    for (grb::IndexType ix = 0; ix < answer.nrows(); ++ix)
+    {
+        for (grb::IndexType iy = 0; iy < answer.ncols(); ++iy)
+        {
+            BOOST_CHECK_EQUAL(C.hasElement(ix, iy), answer.hasElement(ix, iy));
+            if (C.hasElement(ix, iy))
+            {
+                BOOST_CHECK_CLOSE(C.extractElement(ix,iy),
+                                  answer.extractElement(ix,iy), 0.0001);
+            }
+        }
+    }
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_mxm_CompMask_NoAccum_ATB_noncommutative_multiply)
+{
+    grb::Matrix<double> C(3, 4);
+    grb::Matrix<double> A(AT_sparse_3x3, 0.);
+    grb::Matrix<double> B(B_sparse_3x4, 0.);
+    grb::Matrix<double> MNotLower(Lower_3x4, 0.);
+
+    std::vector<std::vector<double>> plus2nd_answer = {{0, -7,  3, -2},
+                                                       {0,  0,  3,  0},
+                                                       {0,  0,  0, -2}};
+    grb::Matrix<double> answer(plus2nd_answer, 0.);
+
+    grb::mxm(C,
+             grb::complement(MNotLower),
+             grb::NoAccumulate(),
+             grb::MinSecondSemiring<double>(), transpose(A), B);
+    for (grb::IndexType ix = 0; ix < answer.nrows(); ++ix)
+    {
+        for (grb::IndexType iy = 0; iy < answer.ncols(); ++iy)
+        {
+            BOOST_CHECK_EQUAL(C.hasElement(ix, iy), answer.hasElement(ix, iy));
+            if (C.hasElement(ix, iy))
+            {
+                BOOST_CHECK_CLOSE(C.extractElement(ix,iy),
+                                  answer.extractElement(ix,iy), 0.0001);
+            }
+        }
+    }
+}
+
+//****************************************************************************
+BOOST_AUTO_TEST_CASE(test_mxm_CompMask_Accum_ATB_noncommutative_multiply)
+{
+    grb::Matrix<double> C(NotLower_3x4, 0.);
+    grb::Matrix<double> A(AT_sparse_3x3, 0.);
+    grb::Matrix<double> B(B_sparse_3x4, 0.);
+    grb::Matrix<double> MNotLower(Lower_3x4, 0.);
+
+    std::vector<std::vector<double>> plus2nd_answer = {{0, -6,  4, -1},
+                                                       {0,  0,  4,  1},
+                                                       {0,  0,  0, -1}};
+    grb::Matrix<double> answer(plus2nd_answer, 0.);
+
+    grb::mxm(C,
+             grb::complement(MNotLower),
+             grb::Plus<double>(),
+             grb::MinSecondSemiring<double>(), transpose(A), B);
+    for (grb::IndexType ix = 0; ix < answer.nrows(); ++ix)
+    {
+        for (grb::IndexType iy = 0; iy < answer.ncols(); ++iy)
+        {
+            BOOST_CHECK_EQUAL(C.hasElement(ix, iy), answer.hasElement(ix, iy));
+            if (C.hasElement(ix, iy))
+            {
+                BOOST_CHECK_CLOSE(C.extractElement(ix,iy),
+                                  answer.extractElement(ix,iy), 0.0001);
+            }
+        }
+    }
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()

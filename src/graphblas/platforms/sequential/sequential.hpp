@@ -27,10 +27,8 @@
 
 #pragma once
 
-#include <graphblas/platforms/sequential/Matrix.hpp>
-#include <graphblas/platforms/sequential/Vector.hpp>
-
-#include <graphblas/platforms/sequential/operations.hpp>
-
 #include <graphblas/platforms/sequential/BitmapSparseVector.hpp>
 #include <graphblas/platforms/sequential/LilSparseMatrix.hpp>
+
+#include <graphblas/platforms/sequential/param_unpack.hpp>
+#include <graphblas/platforms/sequential/operations.hpp>

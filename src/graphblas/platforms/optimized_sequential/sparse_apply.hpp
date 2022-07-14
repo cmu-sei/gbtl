@@ -51,10 +51,9 @@ namespace grb
                  typename MaskT,
                  typename AccumT,
                  typename UnaryOpT,
-                 typename UVectorT,
-                 typename ...WTagsT>
+                 typename UVectorT>
         inline void apply(
-            grb::backend::Vector<WScalarT, WTagsT...>       &w,
+            grb::backend::BitmapSparseVector<WScalarT>      &w,
             MaskT                                     const &mask,
             AccumT                                    const &accum,
             UnaryOpT                                         op,
@@ -70,8 +69,13 @@ namespace grb
 
             if (u.nvals() > 0)
             {
-                for (auto&& [idx, val] : u.getContents()) {
-                    t_contents.emplace_back(idx, op(val));
+                for (grb::IndexType idx = 0; idx < u.size(); ++idx)
+                {
+                    if (u.hasElementNoCheck(idx))
+                    {
+                        t_contents.emplace_back(
+                            idx, op(u.extractElementNoCheck(idx)));
+                    }
                 }
             }
 
@@ -101,10 +105,9 @@ namespace grb
                  typename MaskT,
                  typename AccumT,
                  typename UnaryOpT,
-                 typename AMatrixT,
-                 typename ...CTagsT>
+                 typename AMatrixT>
         inline void apply(
-            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
+            grb::backend::LilSparseMatrix<CScalarT>         &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             UnaryOpT                                         op,
@@ -156,10 +159,9 @@ namespace grb
                  typename MaskT,
                  typename AccumT,
                  typename UnaryOpT,
-                 typename AMatrixT,
-                 typename ...CTagsT>
+                 typename AMatrixT>
         inline void apply(
-            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
+            grb::backend::LilSparseMatrix<CScalarT>         &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             UnaryOpT                                         op,
@@ -215,10 +217,9 @@ namespace grb
                  typename AccumT,
                  typename BinaryOpT,
                  typename ValueT,
-                 typename UVectorT,
-                 typename ...WTagsT>
+                 typename UVectorT>
         inline void apply_binop_1st(
-            grb::backend::Vector<WScalarT, WTagsT...>       &w,
+            grb::backend::BitmapSparseVector<WScalarT>      &w,
             MaskT                                     const &mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -236,8 +237,13 @@ namespace grb
 
             if (u.nvals() > 0)
             {
-                for (auto&& [idx, u_val] : u.getContents()) {
-                    t_contents.emplace_back(idx, op(val, u_val));
+                for (grb::IndexType idx = 0; idx < u.size(); ++idx)
+                {
+                    if (u.hasElementNoCheck(idx))
+                    {
+                        t_contents.emplace_back(
+                            idx, op(val, u.extractElementNoCheck(idx)));
+                    }
                 }
             }
 
@@ -270,10 +276,9 @@ namespace grb
                  typename AccumT,
                  typename BinaryOpT,
                  typename UVectorT,
-                 typename ValueT,
-                 typename ...WTagsT>
+                 typename ValueT>
         inline void apply_binop_2nd(
-            grb::backend::Vector<WScalarT, WTagsT...>       &w,
+            grb::backend::BitmapSparseVector<WScalarT>      &w,
             MaskT                                     const &mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -292,8 +297,13 @@ namespace grb
 
             if (u.nvals() > 0)
             {
-                for (auto&& [idx, u_val] : u.getContents()) {
-                    t_contents.emplace_back(idx, op(u_val, val));
+                for (grb::IndexType idx = 0; idx < u.size(); ++idx)
+                {
+                    if (u.hasElementNoCheck(idx))
+                    {
+                        t_contents.emplace_back(
+                            idx, op(u.extractElementNoCheck(idx), val));
+                    }
                 }
             }
 
@@ -328,10 +338,9 @@ namespace grb
                  typename AccumT,
                  typename BinaryOpT,
                  typename ValueT,
-                 typename AMatrixT,
-                 typename ...CTagsT>
+                 typename AMatrixT>
         inline void apply_binop_1st(
-            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
+            grb::backend::LilSparseMatrix<CScalarT>         &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -388,10 +397,9 @@ namespace grb
                  typename AccumT,
                  typename BinaryOpT,
                  typename ValueT,
-                 typename AMatrixT,
-                 typename ...CTagsT>
+                 typename AMatrixT>
         inline void apply_binop_1st(
-            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
+            grb::backend::LilSparseMatrix<CScalarT>         &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -450,10 +458,9 @@ namespace grb
                  typename AccumT,
                  typename BinaryOpT,
                  typename AMatrixT,
-                 typename ValueT,
-                 typename ...CTagsT>
+                 typename ValueT>
         inline void apply_binop_2nd(
-            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
+            grb::backend::LilSparseMatrix<CScalarT>         &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -512,10 +519,9 @@ namespace grb
                  typename AccumT,
                  typename BinaryOpT,
                  typename AMatrixT,
-                 typename ValueT,
-                 typename ...CTagsT>
+                 typename ValueT>
         inline void apply_binop_2nd(
-            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
+            grb::backend::LilSparseMatrix<CScalarT>         &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -541,6 +547,188 @@ namespace grb
                 for (auto&& [a_idx, a_val] : A[row_idx])
                 {
                     T[a_idx].emplace_back(row_idx, op(a_val, val)); // idx's swapped
+                }
+            }
+            T.recomputeNvals();
+
+            GRB_LOG_VERBOSE("T: " << T);
+
+            // =================================================================
+            // Accumulate T via C into Z
+            using ZScalarType = std::conditional_t<
+                std::is_same_v<AccumT, NoAccumulate>,
+                TScalarType,
+                decltype(accum(std::declval<CScalarT>(),
+                               std::declval<TScalarType>()))>;
+
+            LilSparseMatrix<ZScalarType> Z(ncols, nrows);
+            ewise_or_opt_accum(Z, C, T, accum);
+
+            GRB_LOG_VERBOSE("Z: " << Z);
+
+            // =================================================================
+            // Copy Z into the final output considering mask and replace/merge
+            write_with_opt_mask(C, Z, Mask, outp);
+        }
+
+        //**********************************************************************
+        // Implementation of 4.3.8.5 Vector index unary op variant of Apply
+        // w<m,z> := op(u, ind(u), val)
+        template<typename WScalarT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename BinaryOpT,
+                 typename UVectorT,
+                 typename ValueT>
+        inline void apply_index_unaryop(
+            grb::backend::BitmapSparseVector<WScalarT>      &w,
+            MaskT                                     const &mask,
+            AccumT                                    const &accum,
+            BinaryOpT                                        op,
+            UVectorT                                  const &u,
+            ValueT                                    const &val,
+            OutputControlEnum                                outp)
+        {
+            GRB_LOG_VERBOSE("w<m,z> := op(u, ind(u), val)");
+            // =================================================================
+            // Apply the unary operator from u into t.
+            using UScalarType = typename UVectorT::ScalarType;
+            using TScalarType = decltype(op(std::declval<UScalarType>(),
+                                            grb::IndexType(),
+                                            std::declval<ValueT>()));
+            std::vector<std::tuple<IndexType,TScalarType> > t_contents;
+
+            if (u.nvals() > 0)
+            {
+                for (grb::IndexType idx = 0; idx < u.size(); ++idx)
+                {
+                    if (u.hasElementNoCheck(idx))
+                    {
+                        t_contents.emplace_back(
+                            idx, op(u.extractElementNoCheck(idx), idx, val));
+                    }
+                }
+            }
+
+            GRB_LOG_VERBOSE("t: " << t_contents);
+
+            // =================================================================
+            // Accumulate into Z
+            using ZScalarType = std::conditional_t<
+                std::is_same_v<AccumT, NoAccumulate>,
+                TScalarType,
+                decltype(accum(std::declval<WScalarT>(),
+                               std::declval<TScalarType>()))>;
+
+            std::vector<std::tuple<IndexType,ZScalarType> > z_contents;
+            ewise_or_opt_accum_1D(z_contents, w, t_contents, accum);
+
+            GRB_LOG_VERBOSE("z: " << z_contents);
+
+            // =================================================================
+            // Copy Z into the final output considering mask and replace/merge
+            write_with_opt_mask_1D(w, z_contents, mask, outp);
+        }
+
+
+        //**********************************************************************
+        // Implementation of 4.3.8.6 Matrix variant of Apply w/ index unaryop
+        // C<M,z> := op(A, ind(A), val)
+        template<typename CScalarT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename BinaryOpT,
+                 typename AMatrixT,
+                 typename ValueT>
+        inline void apply_index_unaryop(
+            grb::backend::LilSparseMatrix<CScalarT>         &C,
+            MaskT                                     const &Mask,
+            AccumT                                    const &accum,
+            BinaryOpT                                        op,
+            AMatrixT                                  const &A,
+            ValueT                                    const &val,
+            OutputControlEnum                                outp)
+        {
+            GRB_LOG_VERBOSE("C<M,z> := op(A, ind(A), val)");
+            IndexType nrows(A.nrows());
+            IndexType ncols(A.ncols());
+
+            // =================================================================
+            // Apply the unary operator from A into T.
+            using AScalarType = typename AMatrixT::ScalarType;
+            using TScalarType = decltype(op(std::declval<AScalarType>(),
+                                            grb::IndexType(), grb::IndexType(),
+                                            std::declval<ValueT>()));
+            LilSparseMatrix<TScalarType> T(nrows, ncols);
+
+            for (IndexType row_idx = 0; row_idx < A.nrows(); ++row_idx)
+            {
+                for (auto&& [col_idx, a_val] : A[row_idx])
+                {
+                    T[row_idx].emplace_back(col_idx,
+                                            op(a_val, row_idx, col_idx, val));
+                }
+            }
+            T.recomputeNvals();
+
+            GRB_LOG_VERBOSE("T: " << T);
+
+            // =================================================================
+            // Accumulate T via C into Z
+            using ZScalarType = std::conditional_t<
+                std::is_same_v<AccumT, NoAccumulate>,
+                TScalarType,
+                decltype(accum(std::declval<CScalarT>(),
+                               std::declval<TScalarType>()))>;
+
+            LilSparseMatrix<ZScalarType> Z(nrows, ncols);
+            ewise_or_opt_accum(Z, C, T, accum);
+
+            GRB_LOG_VERBOSE("Z: " << Z);
+
+            // =================================================================
+            // Copy Z into the final output considering mask and replace/merge
+            write_with_opt_mask(C, Z, Mask, outp);
+        }
+
+        //**********************************************************************
+        // Implementation of 4.3.8.4 Matrix variant of Apply w/ index unaryop
+        // C<M,z> := op(A', ind(A'), val)
+        template<typename CScalarT,
+                 typename MaskT,
+                 typename AccumT,
+                 typename BinaryOpT,
+                 typename AMatrixT,
+                 typename ValueT>
+        inline void apply_index_unaryop(
+            grb::backend::LilSparseMatrix<CScalarT>         &C,
+            MaskT                                     const &Mask,
+            AccumT                                    const &accum,
+            BinaryOpT                                        op,
+            TransposeView<AMatrixT>                   const &AT,
+            ValueT                                    const &val,
+            OutputControlEnum                                outp)
+        {
+            GRB_LOG_VERBOSE("C<M,z> := op(A, ind(A), val)");
+            auto const &A(AT.m_mat);
+            IndexType nrows(A.nrows());
+            IndexType ncols(A.ncols());
+
+            // =================================================================
+            // Apply the unary operator from A into T.
+            using AScalarType = typename AMatrixT::ScalarType;
+            using TScalarType = decltype(op(std::declval<AScalarType>(),
+                                            grb::IndexType(), grb::IndexType(),
+                                            std::declval<ValueT>()));
+            LilSparseMatrix<TScalarType> T(ncols, nrows);
+
+            for (IndexType row_idx = 0; row_idx < A.nrows(); ++row_idx)
+            {
+                for (auto&& [col_idx, a_val] : A[row_idx])
+                {
+                    T[col_idx].emplace_back(
+                        row_idx,
+                        op(a_val, col_idx, row_idx, val)); // idx's swapped
                 }
             }
             T.recomputeNvals();
