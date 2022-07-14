@@ -113,6 +113,9 @@ namespace algorithms
      *                          root.
      * @param[out] parent_list  The list of parents for each traversal (row)
      *                          specified in the roots array.
+     *
+     * @todo Require integral types for wavefronts and parent_list. Consider
+     *       restricting to grb::IndexType explicitly.
      */
     template <typename MatrixT,
               typename WavefrontVectorT,
@@ -127,7 +130,7 @@ namespace algorithms
 
         grb::IndexType const N(graph.nrows());
 
-        // convert all stored values to their column index
+        // convert all stored values to their index
         grb::apply(parent_list,
                    grb::NoMask(),
                    grb::NoAccumulate(),
@@ -138,7 +141,7 @@ namespace algorithms
 
         while (wavefront.nvals() > 0)
         {
-            // convert all stored values to their column index
+            // convert all stored values to their index
             grb::apply(wavefront,
                        grb::NoMask(),
                        grb::NoAccumulate(),
@@ -182,6 +185,9 @@ namespace algorithms
      *                          root.
      * @param[out] parent_list  The list of parents for each traversal (row)
      *                          specified in the roots array.
+     *
+     * @todo Require integral types for wavefronts and parent_list. Consider
+     *       restricting to grb::IndexType explicitly.
      */
     template <typename MatrixT,
               typename WavefrontMatrixT,

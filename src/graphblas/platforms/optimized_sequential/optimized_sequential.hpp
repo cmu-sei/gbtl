@@ -31,5 +31,4 @@
 #include <graphblas/platforms/optimized_sequential/LilSparseMatrix.hpp>
 
 #include <graphblas/platforms/optimized_sequential/param_unpack.hpp>
-
 #include <graphblas/platforms/optimized_sequential/operations.hpp>

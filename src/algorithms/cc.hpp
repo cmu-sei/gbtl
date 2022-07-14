@@ -35,6 +35,18 @@
 //****************************************************************************
 namespace algorithms
 {
+    //************************************************************************
+    /**
+     * @brief Perform BFS traversal from specified frontier marking all
+     *        reachable vertices.
+     *
+     * @param[in]  graph        N x N adjacency matrix of the graph on which to
+     *                          perform BFS.  The value 1 (true) should
+     *                          indicate an edge.
+     * @param[in]  frontier     Set the vertices in the first frontier.
+     * @param[out] visited      Each vertex reach is set to 1 (true).
+     *
+     */
     template <typename MatrixT>
     void cc_bfs(MatrixT const     &graph,
                 grb::Vector<char> &frontier,

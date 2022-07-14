@@ -798,6 +798,10 @@ namespace grb
         GRB_LOG_VERBOSE("C out: " << get_internal_matrix(C));
         GRB_LOG_FN_END("apply - 4.3.8.2 - matrix variant");
     }
+
+    //************************************************************************
+    /// @todo The apply+binaryop conflicts with apply(i): remove or resolve with concepts?
+    //************************************************************************
 #if 0
     // 4.3.8.3: vector binaryop variants
     template<typename WScalarT,
@@ -948,7 +952,8 @@ namespace grb
         }
     }
 #endif
-//****************************************************************************
+
+    //************************************************************************
 
     // 4.3.8.5: vector index unaryop variant
     template<typename WScalarT,

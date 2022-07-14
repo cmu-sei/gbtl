@@ -73,6 +73,9 @@ namespace algorithms
      *                          specified in the roots array.  User can specify
      *                          smaller unsigned ints if number of vertices in
      *                          the graph is lower.
+     *
+     * @todo Tuning and optimization of this algorithm still needs to be performed.
+     *       It is running slower than other BFS algos.
      */
     template <typename MatrixT,
               typename ParentsVectorT>
