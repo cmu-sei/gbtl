@@ -269,6 +269,7 @@ namespace grb
 
         public:
             // METHODS
+
             void clear()
             {
                 m_nvals = 0;

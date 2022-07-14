@@ -75,9 +75,10 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_bad_dimension)
             (apply(C,
                    NoMask(),
                    NoAccumulate(),
-                   Times<double>(),
-                   A,
-                   2.0)),
+                   std::bind(Times<double>(),
+                             2.0,
+                             std::placeholders::_1),
+                   A)),
             DimensionException);
     }
     {
@@ -86,8 +87,9 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_bad_dimension)
             (apply(C,
                    NoMask(),
                    NoAccumulate(),
-                   Times<double>(),
-                   2.0,
+                   std::bind(Times<double>(),
+                             2.0,
+                             std::placeholders::_1),
                    A)),
             DimensionException);
     }
@@ -99,8 +101,9 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_bad_dimension)
             (apply(C,
                    M,
                    NoAccumulate(),
-                   Times<double>(),
-                   2.0,
+                   std::bind(Times<double>(),
+                             2.0,
+                             std::placeholders::_1),
                    A)),
             DimensionException);
     }
@@ -111,8 +114,9 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_bad_dimension)
             (apply(C,
                    M,
                    NoAccumulate(),
-                   Times<double>(),
-                   2.0,
+                   std::bind(Times<double>(),
+                             2.0,
+                             std::placeholders::_1),
                    A)),
             DimensionException);
     }
@@ -124,9 +128,10 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_bad_dimension)
             (apply(C,
                    NoMask(),
                    NoAccumulate(),
-                   Times<double>(),
-                   A,
-                   2.0)),
+                   std::bind(Times<double>(),
+                             std::placeholders::_1,
+                             2.0),
+                   A)),
             DimensionException);
     }
     {
@@ -135,9 +140,10 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_bad_dimension)
             (apply(C,
                    NoMask(),
                    NoAccumulate(),
-                   Times<double>(),
-                   A,
-                   2.0)),
+                   std::bind(Times<double>(),
+                             std::placeholders::_1,
+                             2.0),
+                   A)),
             DimensionException);
     }
 
@@ -148,9 +154,10 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_bad_dimension)
             (apply(C,
                    M,
                    NoAccumulate(),
-                   Times<double>(),
-                   A,
-                   2.0)),
+                   std::bind(Times<double>(),
+                             std::placeholders::_1,
+                             2.0),
+                   A)),
             DimensionException);
     }
     {
@@ -160,16 +167,16 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_bad_dimension)
             (apply(C,
                    M,
                    NoAccumulate(),
-                   Times<double>(),
-                   A,
-                   2.0)),
+                   std::bind(Times<double>(),
+                             std::placeholders::_1,
+                             2.0),
+                   A)),
             DimensionException);
     }
 
 }
 
 //****************************************************************************
-
 BOOST_AUTO_TEST_CASE(sparse_apply_matrix_nomask_noaccum)
 {
     std::vector<std::vector<double>> matA = {{8, 1, 6},
@@ -191,8 +198,9 @@ BOOST_AUTO_TEST_CASE(sparse_apply_matrix_nomask_noaccum)
     grb::apply(mC,
                grb::NoMask(),
                grb::NoAccumulate(),
-               grb::Times<double>(),
-               -1.0,
+               std::bind(Times<double>(),
+                         -1.0,
+                         std::placeholders::_1),
                mA);
 
     BOOST_CHECK_EQUAL(mC, answer);
@@ -200,9 +208,10 @@ BOOST_AUTO_TEST_CASE(sparse_apply_matrix_nomask_noaccum)
     grb::apply(mC,
                grb::NoMask(),
                grb::NoAccumulate(),
-               grb::Times<double>(),
-               mA,
-               -1.0);
+               std::bind(Times<double>(),
+                         std::placeholders::_1,
+                         -1.0),
+               mA);
 
     BOOST_CHECK_EQUAL(mC, answer);
 }
@@ -235,8 +244,9 @@ BOOST_AUTO_TEST_CASE(sparse_apply_matrix_mask_merge_noaccum)
         grb::apply(mC,
                    mask,
                    grb::NoAccumulate(),
-                   grb::Times<double>(),
-                   -1.0,
+                   std::bind(Times<double>(),
+                             -1.0,
+                             std::placeholders::_1),
                    mA);
 
         BOOST_CHECK_EQUAL(mC, answer);
@@ -247,9 +257,10 @@ BOOST_AUTO_TEST_CASE(sparse_apply_matrix_mask_merge_noaccum)
         grb::apply(mC,
                    mask,
                    grb::NoAccumulate(),
-                   grb::Times<double>(),
-                   mA,
-                   -1.0);
+                   std::bind(Times<double>(),
+                             std::placeholders::_1,
+                             -1.0),
+                   mA);
 
         BOOST_CHECK_EQUAL(mC, answer);
     }
@@ -283,8 +294,9 @@ BOOST_AUTO_TEST_CASE(sparse_apply_matrix_mask_replace_noaccum)
         grb::apply(mC,
                    mask,
                    grb::NoAccumulate(),
-                   grb::Times<double>(),
-                   -1.0,
+                   std::bind(Times<double>(),
+                             -1.0,
+                             std::placeholders::_1),
                    mA,
                    grb::REPLACE);
 
@@ -295,9 +307,10 @@ BOOST_AUTO_TEST_CASE(sparse_apply_matrix_mask_replace_noaccum)
         grb::apply(mC,
                    mask,
                    grb::NoAccumulate(),
-                   grb::Times<double>(),
+                   std::bind(Times<double>(),
+                             std::placeholders::_1,
+                             -1.0),
                    mA,
-                   -1.0,
                    grb::REPLACE);
 
         BOOST_CHECK_EQUAL(mC, answer);
@@ -336,8 +349,9 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_noaccum)
         apply(C,
               NoMask(),
               NoAccumulate(),
-              Plus<double>(),
-              0.5,
+              std::bind(Plus<double>(),
+                        0.5,
+                        std::placeholders::_1),
               A);
         BOOST_CHECK_EQUAL(C, answer);
 
@@ -345,9 +359,10 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_noaccum)
         apply(C2,
               NoMask(),
               NoAccumulate(),
-              Plus<double>(),
-              A,
-              0.5);
+              std::bind(Plus<double>(),
+                        std::placeholders::_1,
+                        0.5),
+              A);
         BOOST_CHECK_EQUAL(C2, answer);
     }
 
@@ -362,8 +377,9 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_noaccum)
         apply(C,
               M,
               NoAccumulate(),
-              Plus<double>(),
-              0.5,
+              std::bind(Plus<double>(),
+                        0.5,
+                        std::placeholders::_1),
               A,
               REPLACE);
         BOOST_CHECK_EQUAL(C, answer);
@@ -372,9 +388,10 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_noaccum)
         apply(C2,
               M,
               NoAccumulate(),
-              Plus<double>(),
+              std::bind(Plus<double>(),
+                        std::placeholders::_1,
+                        0.5),
               A,
-              0.5,
               REPLACE);
         BOOST_CHECK_EQUAL(C2, answer);
     }
@@ -390,8 +407,9 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_noaccum)
         apply(C,
               M,
               NoAccumulate(),
-              Plus<double>(),
-              0.5,
+              std::bind(Plus<double>(),
+                        0.5,
+                        std::placeholders::_1),
               A,
               MERGE);
         BOOST_CHECK_EQUAL(C, answer);
@@ -400,9 +418,10 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_noaccum)
         apply(C2,
               M,
               NoAccumulate(),
-              Plus<double>(),
+              std::bind(Plus<double>(),
+                        std::placeholders::_1,
+                        0.5),
               A,
-              0.5,
               MERGE);
         BOOST_CHECK_EQUAL(C2, answer);
     }
@@ -418,8 +437,9 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_noaccum)
         apply(C,
               complement(M),
               NoAccumulate(),
-              Plus<double>(),
-              0.5,
+              std::bind(Plus<double>(),
+                        0.5,
+                        std::placeholders::_1),
               A,
               REPLACE);
         BOOST_CHECK_EQUAL(C, answer);
@@ -428,9 +448,10 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_noaccum)
         apply(C2,
               complement(M),
               NoAccumulate(),
-              Plus<double>(),
+              std::bind(Plus<double>(),
+                        std::placeholders::_1,
+                        0.5),
               A,
-              0.5,
               REPLACE);
         BOOST_CHECK_EQUAL(C2, answer);
     }
@@ -445,8 +466,9 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_noaccum)
         apply(C,
               complement(M),
               NoAccumulate(),
-              Plus<double>(),
-              0.5,
+              std::bind(Plus<double>(),
+                        0.5,
+                        std::placeholders::_1),
               A,
               MERGE);
         BOOST_CHECK_EQUAL(C, answer);
@@ -455,9 +477,10 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_noaccum)
         apply(C2,
               complement(M),
               NoAccumulate(),
-              Plus<double>(),
+              std::bind(Plus<double>(),
+                        std::placeholders::_1,
+                        0.5),
               A,
-              0.5,
               MERGE);
         BOOST_CHECK_EQUAL(C2, answer);
     }
@@ -486,8 +509,9 @@ BOOST_AUTO_TEST_CASE(sparse_apply_matrix_nomask_plus_accum)
         grb::apply(mC,
                    grb::NoMask(),
                    grb::Plus<double>(),
-                   grb::Times<double>(),
-                   -1.0,
+                   std::bind(Times<double>(),
+                             -1.0,
+                             std::placeholders::_1),
                    mA);
 
         BOOST_CHECK_EQUAL(mC, answer);
@@ -497,9 +521,10 @@ BOOST_AUTO_TEST_CASE(sparse_apply_matrix_nomask_plus_accum)
         grb::apply(mC,
                    grb::NoMask(),
                    grb::Plus<double>(),
-                   grb::Times<double>(),
-                   mA,
-                   -1.0);
+                   std::bind(Times<double>(),
+                             std::placeholders::_1,
+                             -1.0),
+                   mA);
 
         BOOST_CHECK_EQUAL(mC, answer);
     }
@@ -537,8 +562,9 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_plus_accum)
         apply(C,
               NoMask(),
               Plus<double>(),
-              Times<double>(),
-              0.5,
+              std::bind(Times<double>(),
+                        0.5,
+                        std::placeholders::_1),
               A);
         BOOST_CHECK_EQUAL(C, answer);
 
@@ -546,9 +572,10 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_plus_accum)
         apply(C2,
               NoMask(),
               Plus<double>(),
-              Times<double>(),
-              A,
-              0.5);
+              std::bind(Times<double>(),
+                        std::placeholders::_1,
+                        0.5),
+              A);
         BOOST_CHECK_EQUAL(C2, answer);
     }
 
@@ -563,8 +590,9 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_plus_accum)
         apply(C,
               M,
               Plus<double>(),
-              Times<double>(),
-              0.5,
+              std::bind(Times<double>(),
+                        0.5,
+                        std::placeholders::_1),
               A,
               REPLACE);
         BOOST_CHECK_EQUAL(C, answer);
@@ -573,9 +601,10 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_plus_accum)
         apply(C2,
               M,
               Plus<double>(),
-              Times<double>(),
+              std::bind(Times<double>(),
+                        std::placeholders::_1,
+                        0.5),
               A,
-              0.5,
               REPLACE);
         BOOST_CHECK_EQUAL(C2, answer);
     }
@@ -590,8 +619,9 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_plus_accum)
         apply(C,
               M,
               Plus<double>(),
-              Times<double>(),
-              0.5,
+              std::bind(Times<double>(),
+                        0.5,
+                        std::placeholders::_1),
               A,
               MERGE);
         BOOST_CHECK_EQUAL(C, answer);
@@ -600,9 +630,10 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_plus_accum)
         apply(C2,
               M,
               Plus<double>(),
-              Times<double>(),
+              std::bind(Times<double>(),
+                        std::placeholders::_1,
+                        0.5),
               A,
-              0.5,
               MERGE);
         BOOST_CHECK_EQUAL(C2, answer);
     }
@@ -618,8 +649,9 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_plus_accum)
         apply(C,
               complement(M),
               Plus<double>(),
-              Times<double>(),
-              0.5,
+              std::bind(Times<double>(),
+                        0.5,
+                        std::placeholders::_1),
               A,
               REPLACE);
         BOOST_CHECK_EQUAL(C, answer);
@@ -628,9 +660,10 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_plus_accum)
         apply(C2,
               complement(M),
               Plus<double>(),
-              Times<double>(),
+              std::bind(Times<double>(),
+                        std::placeholders::_1,
+                        0.5),
               A,
-              0.5,
               REPLACE);
         BOOST_CHECK_EQUAL(C2, answer);
     }
@@ -645,8 +678,9 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_plus_accum)
         apply(C,
               complement(M),
               Plus<double>(),
-              Times<double>(),
-              0.5,
+              std::bind(Times<double>(),
+                        0.5,
+                        std::placeholders::_1),
               A,
               MERGE);
         BOOST_CHECK_EQUAL(C, answer);
@@ -655,9 +689,10 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_plus_accum)
         apply(C2,
               complement(M),
               Plus<double>(),
-              Times<double>(),
+              std::bind(Times<double>(),
+                        std::placeholders::_1,
+                        0.5),
               A,
-              0.5,
               MERGE);
         BOOST_CHECK_EQUAL(C2, answer);
     }
@@ -688,8 +723,9 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_second_accum)
     apply(C,
           NoMask(),
           Second<double>(),
-          Times<double>(),
-          0.5,
+          std::bind(Times<double>(),
+                    0.5,
+                    std::placeholders::_1),
           A);
     BOOST_CHECK_EQUAL(C, answer);
 
@@ -697,9 +733,10 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_second_accum)
     apply(C2,
           NoMask(),
           Second<double>(),
-          Times<double>(),
-          A,
-          0.5);
+          std::bind(Times<double>(),
+                    std::placeholders::_1,
+                    0.5),
+          A);
     BOOST_CHECK_EQUAL(C2, answer);
 }
 
@@ -736,18 +773,20 @@ BOOST_AUTO_TEST_CASE(apply_stdmat_test_noaccum_transpose)
         apply(C,
               NoMask(),
               NoAccumulate(),
-              Times<double>(),
-              transpose(A),
-              0.5);
+              std::bind(Times<double>(),
+                        0.5,
+                        std::placeholders::_1),
+              transpose(A));
         BOOST_CHECK_EQUAL(C, answer);
 
         Matrix<double, DirectedMatrixTag> C2(3, 4);
         apply(C2,
               NoMask(),
               NoAccumulate(),
-              Times<double>(),
-              transpose(A),
-              0.5);
+              std::bind(Times<double>(),
+                        std::placeholders::_1,
+                        0.5),
+              transpose(A));
         BOOST_CHECK_EQUAL(C2, answer);
     }
 }
@@ -771,8 +810,9 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_bad_dimension)
             (apply(w,
                    NoMask(),
                    NoAccumulate(),
-                   Times<double>(),
-                   0.5,
+                   std::bind(Times<double>(),
+                             0.5,
+                             std::placeholders::_1),
                    u)),
             DimensionException);
 
@@ -780,9 +820,10 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_bad_dimension)
             (apply(w,
                    NoMask(),
                    NoAccumulate(),
-                   Times<double>(),
-                   u,
-                   0.5)),
+                   std::bind(Times<double>(),
+                             std::placeholders::_1,
+                             0.5),
+                   u)),
             DimensionException);
     }
 
@@ -793,17 +834,19 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_bad_dimension)
             (apply(w,
                    m,
                    NoAccumulate(),
-                   Times<double>(),
-                   0.5,
+                   std::bind(Times<double>(),
+                             0.5,
+                             std::placeholders::_1),
                    u)),
             DimensionException);
         BOOST_CHECK_THROW(
             (apply(w,
                    m,
                    NoAccumulate(),
-                   Times<double>(),
-                   u,
-                   0.5)),
+                   std::bind(Times<double>(),
+                             std::placeholders::_1,
+                             0.5),
+                   u)),
             DimensionException);
     }
 }
@@ -825,8 +868,9 @@ BOOST_AUTO_TEST_CASE(sparse_apply_vector_nomask_noaccum)
         grb::apply(vC,
                    grb::NoMask(),
                    grb::NoAccumulate(),
-                   grb::Times<double>(),
-                   -1.0,
+                   std::bind(Times<double>(),
+                             -1.0,
+                             std::placeholders::_1),
                    vA);
 
         BOOST_CHECK_EQUAL(vC, answer);
@@ -836,9 +880,10 @@ BOOST_AUTO_TEST_CASE(sparse_apply_vector_nomask_noaccum)
         grb::apply(vC,
                    grb::NoMask(),
                    grb::NoAccumulate(),
-                   grb::Times<double>(),
-                   vA,
-                   -1.0);
+                   std::bind(Times<double>(),
+                             std::placeholders::_1,
+                             -1.0),
+                   vA);
 
         BOOST_CHECK_EQUAL(vC, answer);
     }
@@ -861,8 +906,9 @@ BOOST_AUTO_TEST_CASE(sparse_apply_vector_nomask_noaccum_bool)
         grb::apply(vC,
                    grb::NoMask(),
                    grb::NoAccumulate(),
-                   grb::LogicalXor<bool>(),
-                   false,
+                   std::bind(grb::LogicalXor<bool>(),
+                             false,
+                             std::placeholders::_1),
                    vA);
 
         BOOST_CHECK_EQUAL(vC, answer);
@@ -872,9 +918,10 @@ BOOST_AUTO_TEST_CASE(sparse_apply_vector_nomask_noaccum_bool)
         grb::apply(vC,
                    grb::NoMask(),
                    grb::NoAccumulate(),
-                   grb::LogicalXor<bool>(),
-                   vA,
-                   false);
+                   std::bind(grb::LogicalXor<bool>(),
+                             std::placeholders::_1,
+                             false),
+                   vA);
 
         BOOST_CHECK_EQUAL(vC, answer);
     }
@@ -897,8 +944,9 @@ BOOST_AUTO_TEST_CASE(sparse_apply_vector_nomask_noaccum_int)
         grb::apply(vC,
                    grb::NoMask(),
                    grb::NoAccumulate(),
-                   grb::Plus<int>(),
-                   1,
+                   std::bind(grb::Plus<int>(),
+                             1,
+                             std::placeholders::_1),
                    vA);
 
         BOOST_CHECK_EQUAL(vC, answer);
@@ -908,9 +956,10 @@ BOOST_AUTO_TEST_CASE(sparse_apply_vector_nomask_noaccum_int)
         grb::apply(vC,
                    grb::NoMask(),
                    grb::NoAccumulate(),
-                   grb::Plus<int>(),
-                   vA,
-                   1);
+                   std::bind(grb::Plus<int>(),
+                             std::placeholders::_1,
+                             1),
+                   vA);
 
         BOOST_CHECK_EQUAL(vC, answer);
     }
@@ -935,8 +984,9 @@ BOOST_AUTO_TEST_CASE(sparse_apply_vector_mask_merge_noaccum)
         grb::apply(vC,
                    mask,
                    grb::NoAccumulate(),
-                   grb::Times<double>(),
-                   -1.0,
+                   std::bind(Times<double>(),
+                             -1.0,
+                             std::placeholders::_1),
                    vA);
 
         BOOST_CHECK_EQUAL(vC, answer);
@@ -946,9 +996,10 @@ BOOST_AUTO_TEST_CASE(sparse_apply_vector_mask_merge_noaccum)
         grb::apply(vC,
                    mask,
                    grb::NoAccumulate(),
-                   grb::Times<double>(),
-                   vA,
-                   -1.0);
+                   std::bind(Times<double>(),
+                             std::placeholders::_1,
+                             -1.0),
+                   vA);
 
         BOOST_CHECK_EQUAL(vC, answer);
     }
@@ -973,8 +1024,9 @@ BOOST_AUTO_TEST_CASE(sparse_apply_vector_mask_replace_noaccum)
         grb::apply(vC,
                    mask,
                    grb::NoAccumulate(),
-                   grb::Times<double>(),
-                   -1.0,
+                   std::bind(Times<double>(),
+                             -1.0,
+                             std::placeholders::_1),
                    vA,
                    REPLACE);
 
@@ -986,9 +1038,10 @@ BOOST_AUTO_TEST_CASE(sparse_apply_vector_mask_replace_noaccum)
         grb::apply(vC,
                    mask,
                    grb::NoAccumulate(),
-                   grb::Times<double>(),
+                   std::bind(Times<double>(),
+                             std::placeholders::_1,
+                             -1.0),
                    vA,
-                   -1.0,
                    REPLACE);
 
         BOOST_CHECK_EQUAL(vC, answer);
@@ -1016,8 +1069,9 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_noaccum)
         apply(w,
               NoMask(),
               NoAccumulate(),
-              Times<double>(),
-              -1.,
+              std::bind(Times<double>(),
+                        -1.0,
+                        std::placeholders::_1),
               u);
         BOOST_CHECK_EQUAL(w, answer);
 
@@ -1025,9 +1079,10 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_noaccum)
         apply(w2,
               NoMask(),
               NoAccumulate(),
-              Times<double>(),
-              u,
-              -1.);
+              std::bind(Times<double>(),
+                        std::placeholders::_1,
+                        -1.0),
+              u);
         BOOST_CHECK_EQUAL(w2, answer);
     }
 
@@ -1040,8 +1095,9 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_noaccum)
         apply(w,
               m,
               NoAccumulate(),
-              Times<double>(),
-              -1.,
+              std::bind(Times<double>(),
+                        -1.0,
+                        std::placeholders::_1),
               u,
               REPLACE);
         BOOST_CHECK_EQUAL(w, answer);
@@ -1050,9 +1106,10 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_noaccum)
         apply(w2,
               m,
               NoAccumulate(),
-              Times<double>(),
+              std::bind(Times<double>(),
+                        std::placeholders::_1,
+                        -1.0),
               u,
-              -1.,
               REPLACE);
         BOOST_CHECK_EQUAL(w2, answer);
     }
@@ -1065,8 +1122,9 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_noaccum)
         apply(w,
               m,
               NoAccumulate(),
-              Times<double>(),
-              -1.,
+              std::bind(Times<double>(),
+                        -1.0,
+                        std::placeholders::_1),
               u,
               MERGE);
         BOOST_CHECK_EQUAL(w, answer);
@@ -1075,9 +1133,10 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_noaccum)
         apply(w2,
               m,
               NoAccumulate(),
-              Times<double>(),
+              std::bind(Times<double>(),
+                        std::placeholders::_1,
+                        -1.0),
               u,
-              -1.,
               MERGE);
         BOOST_CHECK_EQUAL(w2, answer);
     }
@@ -1091,8 +1150,9 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_noaccum)
         apply(w,
               complement(m),
               NoAccumulate(),
-              Times<double>(),
-              -1.,
+              std::bind(Times<double>(),
+                        -1.0,
+                        std::placeholders::_1),
               u,
               REPLACE);
         BOOST_CHECK_EQUAL(w, answer);
@@ -1101,9 +1161,10 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_noaccum)
         apply(w2,
               complement(m),
               NoAccumulate(),
-              Times<double>(),
+              std::bind(Times<double>(),
+                        std::placeholders::_1,
+                        -1.0),
               u,
-              -1.,
               REPLACE);
         BOOST_CHECK_EQUAL(w2, answer);
     }
@@ -1116,8 +1177,9 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_noaccum)
         apply(w,
               complement(m),
               NoAccumulate(),
-              Times<double>(),
-              -1.,
+              std::bind(Times<double>(),
+                        -1.0,
+                        std::placeholders::_1),
               u,
               MERGE);
         BOOST_CHECK_EQUAL(w, answer);
@@ -1126,14 +1188,14 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_noaccum)
         apply(w2,
               complement(m),
               NoAccumulate(),
-              Times<double>(),
+              std::bind(Times<double>(),
+                        std::placeholders::_1,
+                        -1.0),
               u,
-              -1.,
               MERGE);
         BOOST_CHECK_EQUAL(w2, answer);
     }
 }
-
 
 //****************************************************************************
 BOOST_AUTO_TEST_CASE(sparse_apply_vector_accum)
@@ -1152,8 +1214,9 @@ BOOST_AUTO_TEST_CASE(sparse_apply_vector_accum)
         grb::apply(vC,
                    grb::NoMask(),
                    grb::Plus<double>(),
-                   grb::Times<double>(),
-                   -1.,
+                   std::bind(Times<double>(),
+                             -1.0,
+                             std::placeholders::_1),
                    vA);
 
         BOOST_CHECK_EQUAL(vC, answer);
@@ -1164,9 +1227,10 @@ BOOST_AUTO_TEST_CASE(sparse_apply_vector_accum)
         grb::apply(vC,
                    grb::NoMask(),
                    grb::Plus<double>(),
-                   grb::Times<double>(),
-                   vA,
-                   -1.);
+                   std::bind(Times<double>(),
+                             std::placeholders::_1,
+                             -1.0),
+                   vA);
 
         BOOST_CHECK_EQUAL(vC, answer);
     }
@@ -1193,8 +1257,9 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_plus_accum)
         apply(w,
               NoMask(),
               Plus<double>(),
-              Times<double>(),
-              -1.,
+              std::bind(Times<double>(),
+                        -1.0,
+                        std::placeholders::_1),
               u);
         BOOST_CHECK_EQUAL(w, answer);
 
@@ -1202,9 +1267,10 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_plus_accum)
         apply(w2,
               NoMask(),
               Plus<double>(),
-              Times<double>(),
-              u,
-              -1.);
+              std::bind(Times<double>(),
+                        std::placeholders::_1,
+                        -1.0),
+              u);
         BOOST_CHECK_EQUAL(w2, answer);
     }
 
@@ -1217,8 +1283,9 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_plus_accum)
         apply(w,
               m,
               Plus<double>(),
-              Times<double>(),
-              -1.,
+              std::bind(Times<double>(),
+                        -1.0,
+                        std::placeholders::_1),
               u,
               REPLACE);
         BOOST_CHECK_EQUAL(w, answer);
@@ -1227,9 +1294,10 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_plus_accum)
         apply(w2,
               m,
               Plus<double>(),
-              Times<double>(),
+              std::bind(Times<double>(),
+                        std::placeholders::_1,
+                        -1.0),
               u,
-              -1.,
               REPLACE);
         BOOST_CHECK_EQUAL(w2, answer);
     }
@@ -1242,8 +1310,9 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_plus_accum)
         apply(w2,
               m,
               Plus<double>(),
-              Times<double>(),
-              -1.,
+              std::bind(Times<double>(),
+                        -1.0,
+                        std::placeholders::_1),
               u,
               MERGE);
         BOOST_CHECK_EQUAL(w2, answer);
@@ -1252,9 +1321,10 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_plus_accum)
         apply(w,
               m,
               Plus<double>(),
-              Times<double>(),
+              std::bind(Times<double>(),
+                        std::placeholders::_1,
+                        -1.0),
               u,
-              -1.,
               MERGE);
         BOOST_CHECK_EQUAL(w, answer);
     }
@@ -1268,8 +1338,9 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_plus_accum)
         apply(w,
               complement(m),
               Plus<double>(),
-              Times<double>(),
-              -1.,
+              std::bind(Times<double>(),
+                        -1.0,
+                        std::placeholders::_1),
               u,
               REPLACE);
         BOOST_CHECK_EQUAL(w, answer);
@@ -1278,9 +1349,10 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_plus_accum)
         apply(w2,
               complement(m),
               Plus<double>(),
-              Times<double>(),
+              std::bind(Times<double>(),
+                        std::placeholders::_1,
+                        -1.0),
               u,
-              -1.,
               REPLACE);
         BOOST_CHECK_EQUAL(w2, answer);
     }
@@ -1293,8 +1365,9 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_plus_accum)
         apply(w,
               complement(m),
               Plus<double>(),
-              Times<double>(),
-              -1.,
+              std::bind(Times<double>(),
+                        -1.0,
+                        std::placeholders::_1),
               u,
               MERGE);
         BOOST_CHECK_EQUAL(w, answer);
@@ -1303,13 +1376,13 @@ BOOST_AUTO_TEST_CASE(apply_stdvec_test_plus_accum)
         apply(w2,
               complement(m),
               Plus<double>(),
-              Times<double>(),
+              std::bind(Times<double>(),
+                        std::placeholders::_1,
+                        -1.0),
               u,
-              -1.,
               MERGE);
         BOOST_CHECK_EQUAL(w2, answer);
     }
 }
-
 
 BOOST_AUTO_TEST_SUITE_END()

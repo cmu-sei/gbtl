@@ -31,32 +31,36 @@
 #include <fstream>
 #include <graphblas/graphblas.hpp>
 
-using namespace grb;
-
 //****************************************************************************
-IndexType read_edge_list(std::string const &pathname,
-                         IndexArrayType    &row_indices,
-                         IndexArrayType    &col_indices)
+grb::IndexType read_edge_list(std::string      const &pathname,
+                              grb::IndexArrayType    &row_indices,
+                              grb::IndexArrayType    &col_indices,
+                              bool                    shift_min_id_to_zero = false)
 {
     std::ifstream infile(pathname);
-    IndexType max_id = 0;
-    IndexType min_id = 1; // Assuming 1 or 0 based indexing; nothing else
-    uint64_t num_rows = 0;
-    uint64_t src, dst;
+    grb::IndexType max_id = 0;
+    grb::IndexType min_id = 0; // Assuming 1 or 0 based indexing; nothing else
+    size_t num_rows = 0;
+    grb::IndexType src, dst;
 
     std::string line;
-    // First pass to get min ID
-    while (std::getline( infile, line) )
-    {
-        if (infile.eof()) break;
 
-        std::istringstream l(line);
-        l >> src >> dst; // And discard the rest (weights)
-        min_id = std::min(min_id, std::min(src, dst));
+    // First pass to get min ID
+    if (shift_min_id_to_zero)
+    {
+        min_id = std::numeric_limits<grb::IndexType>::max();
+        while (std::getline( infile, line) )
+        {
+            if (infile.eof()) break;
+
+            std::istringstream l(line);
+            l >> src >> dst; // And discard the rest (weights)
+            min_id = std::min(min_id, std::min(src, dst));
+        }
+        infile.clear(); // Reset EOF flag
+        infile.seekg(0, std::ios_base::beg); // Reset infile to start
+        // std::cout << "Min vertex ID: " << min_id << std::endl;
     }
-    infile.clear(); // Reset EOF flag
-    infile.seekg(0, std::ios_base::beg); // Reset infile to start
-    // std::cout << "Min vertex ID: " << min_id << std::endl;
 
     while (std::getline( infile, line) )
     {
@@ -83,4 +87,43 @@ IndexType read_edge_list(std::string const &pathname,
     std::cout << "#Nodes = " << (max_id + 1) << std::endl;
 
     return (max_id + 1);
+}
+
+//****************************************************************************
+template <typename T>
+grb::IndexType read_triples(std::string      const &pathname,
+                            grb::IndexArrayType    &row_indices,
+                            grb::IndexArrayType    &col_indices,
+                            std::vector<T>         &values,
+                            bool                    ignore_self_loops = true)
+{
+    size_t num_rows = 0;
+    grb::IndexType max_id = 0;
+
+    grb::IndexType src, dst;
+    T val;
+
+    std::ifstream infile(pathname);
+    while (true)
+    {
+        infile >> src >> dst >> val;
+        if (infile.eof()) break;
+
+        //std::cout << "Read: " << src << ", " << dst << ", " << val << std::endl;
+        if (!ignore_self_loops || src != dst)
+        {
+            if (src > max_id) max_id = src;
+            if (dst > max_id) max_id = dst;
+
+            row_indices.push_back(src);
+            col_indices.push_back(dst);
+            values.push_back(val);
+        }
+
+        ++num_rows;
+    }
+
+    std::cout << "Read " << num_rows << " rows." << std::endl;
+
+    return max_id+1;
 }

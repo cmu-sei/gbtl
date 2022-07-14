@@ -305,7 +305,6 @@ namespace grb
 
 
         //**********************************************************************
-        // for sparse_assign
         template < typename ZMatrixT,
                    typename CMatrixT,
                    typename TMatrixT,
@@ -334,7 +333,6 @@ namespace grb
         }
 
         //**********************************************************************
-        // for sparse_assign
         template < typename ZMatrixT,
                    typename CMatrixT,
                    typename TMatrixT,

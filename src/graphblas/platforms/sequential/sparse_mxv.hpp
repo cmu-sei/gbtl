@@ -36,7 +36,6 @@
 
 #include "sparse_helpers.hpp"
 
-
 //****************************************************************************
 
 namespace grb
@@ -60,7 +59,7 @@ namespace grb
                         UVectorT    const &u,
                         OutputControlEnum  outp)
         {
-            GRB_LOG_VERBOSE("w<M,z> := A +.* u");
+            GRB_LOG_VERBOSE("w<M,r> := A +.* u");
 
             // =================================================================
             // Do the basic dot-product work with the semi-ring.
@@ -104,7 +103,7 @@ namespace grb
         //**********************************************************************
 
         //**********************************************************************
-        /// Implementation of 4.3.3 mxv: A' * u
+        /// Implementation of 4.3.3 mxv: w<m,r> = w + A' * u
         //**********************************************************************
         template<typename WVectorT,
                  typename MaskT,
@@ -120,7 +119,7 @@ namespace grb
                         UVectorT                const &u,
                         OutputControlEnum              outp)
         {
-            GRB_LOG_VERBOSE("w<M,z> := A' +.* u");
+            GRB_LOG_VERBOSE("w<M,r> := A' +.* u");
             auto const &A(AT.m_mat);
 
             // =================================================================

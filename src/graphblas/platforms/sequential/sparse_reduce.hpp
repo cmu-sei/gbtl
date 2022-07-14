@@ -42,6 +42,71 @@ namespace grb
 {
     namespace backend
     {
+        //**********************************************************************
+        template <typename ZScalarT,
+                  typename WScalarT,
+                  typename TScalarT,
+                  typename BinaryOpT>
+        void opt_accum_scalar(ZScalarT       &z,
+                              WScalarT const &w,
+                              TScalarT const &t,
+                              BinaryOpT       accum)
+        {
+            z = static_cast<ZScalarT>(accum(w, t));
+        }
+
+        //**********************************************************************
+        // Specialized version that gets used when we don't have an accumulator
+        template <typename ZScalarT,
+                  typename WScalarT,
+                  typename TScalarT>
+        void opt_accum_scalar(ZScalarT                &z,
+                              WScalarT          const &w,
+                              TScalarT          const &t,
+                              grb::NoAccumulate        accum)
+        {
+            z = static_cast<ZScalarT>(t);
+        }
+
+        //************************************************************************
+        /// A reduction of a sparse vector (vector<tuple(index,value)>) using a
+        /// binary op or a monoid.
+        template <typename D1, typename D3, typename BinaryOpT>
+        bool reduction(
+            D3                                                &ans,
+            std::vector<std::tuple<grb::IndexType,D1> > const &vec,
+            BinaryOpT                                          op)
+        {
+            if (vec.empty())
+            {
+                return false;
+            }
+
+            using D3ScalarType =
+                decltype(op(std::declval<D1>(), std::declval<D1>()));
+            D3ScalarType tmp;
+
+            if (vec.size() == 1)
+            {
+                tmp = static_cast<D3ScalarType>(std::get<1>(vec[0]));
+            }
+            else
+            {
+                /// @note Since op is associative and commutative left to right
+                /// ordering is not strictly required.
+                tmp = op(std::get<1>(vec[0]), std::get<1>(vec[1]));
+
+                /// @todo replace with call to std::reduce?
+                for (size_t idx = 2; idx < vec.size(); ++idx)
+                {
+                    tmp = op(tmp, std::get<1>(vec[idx]));
+                }
+            }
+
+            ans = static_cast<D3>(tmp);
+            return true;
+        }
+
         //********************************************************************
         /// Implementation of 4.3.9.1 reduce: Standard Matrix to Vector variant:
         /// w<m,z> := op_j(A[:,j])

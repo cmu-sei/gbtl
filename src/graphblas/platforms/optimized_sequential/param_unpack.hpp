@@ -26,7 +26,7 @@
  */
 
 #pragma once
-// tags are API-defined (frontend)
+// Tags are API-defined (i.e., frontend)
 #include <graphblas/detail/matrix_tags.hpp>
 
 #include <graphblas/platforms/optimized_sequential/LilSparseMatrix.hpp>

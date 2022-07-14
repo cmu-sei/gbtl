@@ -34,6 +34,7 @@
 #include <graphblas/graphblas.hpp>
 #include <algorithms/cluster_louvain.hpp>
 #include "Timer.hpp"
+#include "read_edge_list.hpp"
 
 //****************************************************************************
 int main(int argc, char **argv)
@@ -45,41 +46,20 @@ int main(int argc, char **argv)
     }
 
     // Read the edgelist and create the tuple arrays
-    std::string pathname(argv[1]);
-    std::ifstream infile(pathname);
     grb::IndexArrayType iA;
     grb::IndexArrayType jA;
     std::vector<double> weights;
-    uint64_t num_rows = 0;
-    uint64_t max_id = 0;
-    uint64_t src, dst, weight;
-    while (infile)
-    {
-        infile >> src >> dst >> weight;
-        src -= 1;
-        dst -= 1;
-        //std::cout << "Read: " << src << ", " << dst << std::endl;
-        if (src > max_id) max_id = src;
-        if (dst > max_id) max_id = dst;
-
-        // if (src != dst)  // ignore self loops
-        iA.push_back(src);
-        jA.push_back(dst);
-        weights.push_back((double)weight);
-
-        ++num_rows;
-    }
-    std::cout << "Read " << num_rows << " rows." << std::endl;
-    std::cout << "#Nodes = " << (max_id + 1) << std::endl;
-
-    grb::IndexType NUM_NODES(max_id + 1);
+    grb::IndexType NUM_NODES(read_triples<double>(argv[1], iA, jA, weights));
 
     using MatType = grb::Matrix<double>;
 
     MatType A(NUM_NODES, NUM_NODES);
     A.build(iA.begin(), jA.begin(), weights.begin(), iA.size());
 
-    std::cout << "Running louvain clustering..." << std::endl;
+    std::cout << "#Nodes = " << NUM_NODES << std::endl;
+    std::cout << "#Edges = " << A.nvals() << std::endl;
+
+    std::cout << "Running louvain clustering (2 ways)..." << std::endl;
 
     Timer<std::chrono::steady_clock> my_timer;
 
