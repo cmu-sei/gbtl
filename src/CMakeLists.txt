@@ -33,12 +33,26 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../cmake)
 
 project(GRAPHBLAS_TEMPLATE_LIBRARY VERSION 3.0.1 DESCRIPTION "NWGraph platform")
 
+#-------------------------------------------------------------------------------
+# determine build type
+#-------------------------------------------------------------------------------
+
+# For development only, not for end-users:
+# set ( CMAKE_BUILD_TYPE Debug )
+
+# Could also be: RelWithDebInfo
+
+if ( NOT CMAKE_BUILD_TYPE )
+    set ( CMAKE_BUILD_TYPE Release )
+endif ( )
+
 # For debugging
-message("Project Name:     ${PROJECT_NAME}")
-message("Project Version:  ${PROJECT_VERSION}")
-message("Source Directory: ${CMAKE_SOURCE_DIR}")
-message("Bin Directory:    ${CMAKE_BINARY_DIR}")
-message("Module path:      ${CMAKE_MODULE_PATH}")
+message("CMake SRC: ${CMAKE_SOURCE_DIR}")
+message("Project Name: ${PROJECT_NAME}")
+message("Bin Directory: ${CMAKE_BINARY_DIR}")
+message("Project Name: ${CMAKE_SOURCE_DIR}")
+message("Project Bin Directory: ${PROJECT_BINARY_DIR}")
+message("Build type: ${CMAKE_BUILD_TYPE}")
 
 # Default platform is sequential
 if (NOT PLATFORM)
@@ -88,6 +102,8 @@ endif()
 message("Configured platform: ${PLATFORM}")
 
 #------------------------------------------------------------------------------
+find_package(Boost REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
 
 # Build a list of all the graphblas headers.
 file(GLOB GRAPHBLAS_HEADERS graphblas/*.hpp)

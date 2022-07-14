@@ -32,41 +32,11 @@
 
 #define GRAPHBLAS_DEBUG 1
 
-#include <graphblas/graphblas.hpp>
 #include "Timer.hpp"
+#include <graphblas/graphblas.hpp>
+#include "read_edge_list.hpp"
 
 using namespace grb;
-
-//****************************************************************************
-IndexType read_edge_list(std::string const &pathname,
-                         IndexArrayType    &row_indices,
-                         IndexArrayType    &col_indices)
-{
-    std::ifstream infile(pathname);
-    IndexType max_id = 0;
-    uint64_t num_rows = 0;
-    uint64_t src, dst;
-
-    while (infile)
-    {
-        infile >> src >> dst;
-        //std::cout << "Read: " << src << ", " << dst << std::endl;
-        max_id = std::max(max_id, src);
-        max_id = std::max(max_id, dst);
-
-        //if (src > max_id) max_id = src;
-        //if (dst > max_id) max_id = dst;
-
-        row_indices.push_back(src);
-        col_indices.push_back(dst);
-
-        ++num_rows;
-    }
-    std::cout << "Read " << num_rows << " rows." << std::endl;
-    std::cout << "#Nodes = " << (max_id + 1) << std::endl;
-
-    return (max_id + 1);
-}
 
 
 //****************************************************************************
@@ -96,6 +66,7 @@ int main(int argc, char **argv)
     VecType u(NUM_NODES);
     VecType w(NUM_NODES);
     VecType w1(NUM_NODES);
+    VecType wtmp(NUM_NODES);
     BoolVecType M(NUM_NODES);
 
     A.build(iA.begin(), jA.begin(), v.begin(), iA.size());
@@ -118,384 +89,784 @@ int main(int argc, char **argv)
     Timer<std::chrono::steady_clock, std::chrono::microseconds> my_timer;
 
     // warm up
-    vxm(w, NoMask(), NoAccumulate(), ArithmeticSemiring<double>(), u, A);
+    vxm(w, NoMask(), NoAccumulate(), ArithmeticSemiring<double>(), u, AT);
 
+    int const NUM_TRIALS=20;
+    double accum_time, min_time, max_time;
     //=====================================================
-    // Perform matrix vector multiplies
+    // Perform vector matrix multiplies
     //=====================================================
 
     //===================
     // u'*A
     //===================
-    std::cout << "IMPLEMENTATION: u'*A" << std::endl;
-    w.clear();
-    my_timer.start();
-    vxm(w, NoMask(), NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        u, AT);
-    my_timer.stop();
-    reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w' := u'+.*A                : " << my_timer.elapsed()
-              << " usec, w.nvals = " << w.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "OPTIMIZED IMPLEMENTATION: u'*A" << std::endl;
+    std::cout << "Function                      \tmin\tavg\tmax\tw.nvals\tchecksum\n";
 
-    my_timer.start();
-    vxm(w, NoMask(), Plus<double>(),
-        ArithmeticSemiring<double>(),
-        u, AT);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w = wtmp;
+        my_timer.start();
+        vxm(w, NoMask(), NoAccumulate(),
+            ArithmeticSemiring<double>(),
+            u, AT);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w' := w' + u'+.*A            : " << my_timer.elapsed()
-              << " usec, w.nvals = " << w.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w' := u'+.*A                    \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w, M, NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        u, AT);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w = wtmp;
+        my_timer.start();
+        vxm(w, NoMask(), Plus<double>(),
+            ArithmeticSemiring<double>(),
+            u, AT);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w'<m',merge> := u'+.*A       : " << my_timer.elapsed()
-              << " usec, w.nvals = " << w.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w' := w' + u'+.*A                \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w, M, NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        u, AT, REPLACE);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w = wtmp;
+        my_timer.start();
+        vxm(w, M, NoAccumulate(),
+            ArithmeticSemiring<double>(),
+            u, AT);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w'<m',replace> := u'+.*A     : " << my_timer.elapsed()
-              << " usec, w.nvals = " << w.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<m,merge> := u'+.*A           \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w, M, Plus<double>(),
-        ArithmeticSemiring<double>(),
-        u, AT);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w = wtmp;
+        my_timer.start();
+        vxm(w, M, NoAccumulate(),
+            ArithmeticSemiring<double>(),
+            u, AT, REPLACE);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w'<m',merge> := w' + u'+.*A   : " << my_timer.elapsed()
-              << " usec, w.nvals = " << w.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<m,replace> := u'+.*A         \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w, M, Plus<double>(),
-        ArithmeticSemiring<double>(),
-        u, AT, REPLACE);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w = wtmp;
+        my_timer.start();
+        vxm(w, M, Plus<double>(),
+            ArithmeticSemiring<double>(),
+            u, AT);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w'<m',replace> := w' + u'+.*A : " << my_timer.elapsed()
-              << " usec, w.nvals = " << w.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<m,merge> := w' + u'+.*A       \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w, complement(M), NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        u, AT);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w = wtmp;
+        my_timer.start();
+        vxm(w, M, Plus<double>(),
+            ArithmeticSemiring<double>(),
+            u, AT, REPLACE);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w'<!m',merge> := u'+.*A      : " << my_timer.elapsed()
-              << " usec, w.nvals = " << w.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<m,replace> := w' + u'+.*A     \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w, complement(M), NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        u, AT, REPLACE);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w = wtmp;
+        my_timer.start();
+        vxm(w, complement(M), NoAccumulate(),
+            ArithmeticSemiring<double>(),
+            u, AT);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w'<!m',replace> := u'+.*A    : " << my_timer.elapsed()
-              << " usec, w.nvals = " << w.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<!m,merge> := u'+.*A          \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w, complement(M), Plus<double>(),
-        ArithmeticSemiring<double>(),
-        u, AT);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w = wtmp;
+        my_timer.start();
+        vxm(w, complement(M), NoAccumulate(),
+            ArithmeticSemiring<double>(),
+            u, AT, REPLACE);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w'<!m',merge> := w' + u'+.*A  : " << my_timer.elapsed()
-              << " usec, w.nvals = " << w.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<!m,replace> := u'+.*A        \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w, complement(M), Plus<double>(),
-        ArithmeticSemiring<double>(),
-        u, AT, REPLACE);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w = wtmp;
+        my_timer.start();
+        vxm(w, complement(M), Plus<double>(),
+            ArithmeticSemiring<double>(),
+            u, AT);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w'<!m',replace> := w' + u'+.*A: " << my_timer.elapsed()
-              << " usec, w.nvals = " << w.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<!m,merge> := w' + u'+.*A      \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w.nvals() << "\t" << count << std::endl;
+
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w = wtmp;
+        my_timer.start();
+        vxm(w, complement(M), Plus<double>(),
+            ArithmeticSemiring<double>(),
+            u, AT, REPLACE);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w;
+    reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
+    std::cout << "w'<!m,replace> := w' + u'+.*A    \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w.nvals() << "\t" << count << std::endl;
 
     //----
-    my_timer.start();
-    vxm(w, structure(M), NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        u, AT);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w = wtmp;
+        my_timer.start();
+        vxm(w, structure(M), NoAccumulate(),
+            ArithmeticSemiring<double>(),
+            u, AT);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w'<s(m'),merge> := u'+.*A    : " << my_timer.elapsed()
-              << " usec, w.nvals = " << w.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<s(m),merge> := u'+.*A        \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w, structure(M), NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        u, AT, REPLACE);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w = wtmp;
+        my_timer.start();
+        vxm(w, structure(M), NoAccumulate(),
+            ArithmeticSemiring<double>(),
+            u, AT, REPLACE);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w'<s(m'),replace> := u'+.*A  : " << my_timer.elapsed()
-              << " usec, w.nvals = " << w.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<s(m),replace> := u'+.*A      \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w, structure(M), Plus<double>(),
-        ArithmeticSemiring<double>(),
-        u, AT);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w = wtmp;
+        my_timer.start();
+        vxm(w, structure(M), Plus<double>(),
+            ArithmeticSemiring<double>(),
+            u, AT);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w'<s(m'),merge> := w' + u'+.*A   : " << my_timer.elapsed()
-              << " usec, w.nvals = " << w.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<s(m),merge> := w' + u'+.*A    \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w, structure(M), Plus<double>(),
-        ArithmeticSemiring<double>(),
-        u, AT, REPLACE);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w = wtmp;
+        my_timer.start();
+        vxm(w, structure(M), Plus<double>(),
+            ArithmeticSemiring<double>(),
+            u, AT, REPLACE);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w'<s(m'),replace> := w' + u'+.*A : " << my_timer.elapsed()
-              << " usec, w.nvals = " << w.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<s(m),replace> := w' + u'+.*A  \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w, complement(structure(M)), NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        u, AT);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w = wtmp;
+        my_timer.start();
+        vxm(w, complement(structure(M)), NoAccumulate(),
+            ArithmeticSemiring<double>(),
+            u, AT);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w'<!s(m'),merge> := u'+.*A      : " << my_timer.elapsed()
-              << " usec, w.nvals = " << w.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<!s(m),merge> := u'+.*A       \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w, complement(structure(M)), NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        u, AT, REPLACE);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w = wtmp;
+        my_timer.start();
+        vxm(w, complement(structure(M)), NoAccumulate(),
+            ArithmeticSemiring<double>(),
+            u, AT, REPLACE);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w'<!s(m'),replace> := u'+.*A    : " << my_timer.elapsed()
-              << " usec, w.nvals = " << w.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<!s(m),replace> := u'+.*A     \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w, complement(structure(M)), Plus<double>(),
-        ArithmeticSemiring<double>(),
-        u, AT);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w = wtmp;
+        my_timer.start();
+        vxm(w, complement(structure(M)), Plus<double>(),
+            ArithmeticSemiring<double>(),
+            u, AT);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w'<!s(m'),merge> := w' + u'+.*A  : " << my_timer.elapsed()
-              << " usec, w.nvals = " << w.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<!s(m),merge> := w' + u'+.*A   \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w, complement(structure(M)), Plus<double>(),
-        ArithmeticSemiring<double>(),
-        u, AT, REPLACE);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w = wtmp;
+        my_timer.start();
+        vxm(w, complement(structure(M)), Plus<double>(),
+            ArithmeticSemiring<double>(),
+            u, AT, REPLACE);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w);
-    std::cout << "w'<!s(m'),replace> := w' + u'+.*A: " << my_timer.elapsed()
-              << " usec, w.nvals = " << w.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<!s(m),replace> := w' + u'+.*A \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w.nvals() << "\t" << count << std::endl;
 
     //===================
     // u'*A'
     //===================
-    std::cout << "IMPLEMENTATION: u'*A'" << std::endl;
-    w1.clear();
-    my_timer.start();
-    vxm(w1, NoMask(), NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        u, transpose(A));
-    my_timer.stop();
-    reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w' := u'+.*A'                : " << my_timer.elapsed()
-              << " usec, w1.nvals = " << w1.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "OPTIMIZED IMPLEMENTATION: A'*u" << std::endl;
+    w1.clear(); wtmp.clear();
 
-    my_timer.start();
-    vxm(w1, NoMask(), Plus<double>(),
-        ArithmeticSemiring<double>(),
-        u, transpose(A));
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w1 = wtmp;
+        my_timer.start();
+        vxm(w1, NoMask(), NoAccumulate(),
+            ArithmeticSemiring<double>(),
+            u, transpose(A));
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w1;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w' := w' + u'+.*A'            : " << my_timer.elapsed()
-              << " usec, w1.nvals = " << w1.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w' := u'+.*A'                   \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w1.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w1, M, NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        u, transpose(A));
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w1 = wtmp;
+        my_timer.start();
+        vxm(w1, NoMask(), Plus<double>(),
+            ArithmeticSemiring<double>(),
+            u, transpose(A));
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w1;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w'<m',merge> := u'+.*A'       : " << my_timer.elapsed()
-              << " usec, w1.nvals = " << w1.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w' := w' + u'+.*A'               \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w1.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w1, M, NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        u, transpose(A), REPLACE);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w1 = wtmp;
+        my_timer.start();
+        vxm(w1, M, NoAccumulate(),
+            ArithmeticSemiring<double>(),
+            u, transpose(A));
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w1;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w'<m',replace> := u'+.*A      : " << my_timer.elapsed()
-              << " usec, w1.nvals = " << w1.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<m,merge> := u'+.*A'          \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w1.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w1, M, Plus<double>(),
-        ArithmeticSemiring<double>(),
-        u, transpose(A));
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w1 = wtmp;
+        my_timer.start();
+        vxm(w1, M, NoAccumulate(),
+            ArithmeticSemiring<double>(),
+            u, transpose(A), REPLACE);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w1;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w'<m',merge> := w' + u'+.*A'   : " << my_timer.elapsed()
-              << " usec, w1.nvals = " << w1.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<m,replace> := u'+.*A'        \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w1.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w1, M, Plus<double>(),
-        ArithmeticSemiring<double>(),
-        u, transpose(A), REPLACE);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w1 = wtmp;
+        my_timer.start();
+        vxm(w1, M, Plus<double>(),
+            ArithmeticSemiring<double>(),
+            u, transpose(A));
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w1;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w'<m',replace> := w' + u'+.*A' : " << my_timer.elapsed()
-              << " usec, w1.nvals = " << w1.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<m,merge> := w' + u'+.*A'      \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w1.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w1, complement(M), NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        u, transpose(A));
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w1 = wtmp;
+        my_timer.start();
+        vxm(w1, M, Plus<double>(),
+            ArithmeticSemiring<double>(),
+            u, transpose(A), REPLACE);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w1;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w'<!m',merge> := u'+.*A'      : " << my_timer.elapsed()
-              << " usec, w1.nvals = " << w1.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<m,replace> := w' + u'+.*A'    \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w1.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w1, complement(M), NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        u, transpose(A), REPLACE);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w1 = wtmp;
+        my_timer.start();
+        vxm(w1, complement(M), NoAccumulate(),
+            ArithmeticSemiring<double>(),
+            u, transpose(A));
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w1;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w'<!m',replace> := u'+.*A'    : " << my_timer.elapsed()
-              << " usec, w1.nvals = " << w1.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<!m,merge> := u'+.*A'         \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w1.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w1, complement(M), Plus<double>(),
-        ArithmeticSemiring<double>(),
-        u, transpose(A));
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w1 = wtmp;
+        my_timer.start();
+        vxm(w1, complement(M), NoAccumulate(),
+            ArithmeticSemiring<double>(),
+            u, transpose(A), REPLACE);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w1;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w'<!m',merge> := w' + u'+.*A'  : " << my_timer.elapsed()
-              << " usec, w1.nvals = " << w1.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<!m,replace> := u'+.*A'       \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w1.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w1, complement(M), Plus<double>(),
-        ArithmeticSemiring<double>(),
-        u, transpose(A), REPLACE);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w1 = wtmp;
+        my_timer.start();
+        vxm(w1, complement(M), Plus<double>(),
+            ArithmeticSemiring<double>(),
+            u, transpose(A));
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w1;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w'<!m',replace> := w' + u'+.*A': " << my_timer.elapsed()
-              << " usec, w1.nvals = " << w1.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<!m,merge> := w' + u'+.*A'     \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w1.nvals() << "\t" << count << std::endl;
+
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w1 = wtmp;
+        my_timer.start();
+        vxm(w1, complement(M), Plus<double>(),
+            ArithmeticSemiring<double>(),
+            u, transpose(A), REPLACE);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w1;
+    reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
+    std::cout << "w'<!m,replace> := w' + u'+.*A'   \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w1.nvals() << "\t" << count << std::endl;
 
     //-----
 
-    my_timer.start();
-    vxm(w1, structure(M), NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        u, transpose(A));
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w1 = wtmp;
+        my_timer.start();
+        vxm(w1, structure(M), NoAccumulate(),
+            ArithmeticSemiring<double>(),
+            u, transpose(A));
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w1;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w'<s(m'),merge> := u'+.*A'       : " << my_timer.elapsed()
-              << " usec, w1.nvals = " << w1.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<s(m),merge> := u'+.*A'       \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w1.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w1, structure(M), NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        u, transpose(A), REPLACE);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w1 = wtmp;
+        my_timer.start();
+        vxm(w1, structure(M), NoAccumulate(),
+            ArithmeticSemiring<double>(),
+            u, transpose(A), REPLACE);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w1;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w'<s(m'),replace> := u'+.*A'      : " << my_timer.elapsed()
-              << " usec, w1.nvals = " << w1.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<s(m),replace> := u'+.*A'      \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w1.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w1, structure(M), Plus<double>(),
-        ArithmeticSemiring<double>(),
-        u, transpose(A));
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w1 = wtmp;
+        my_timer.start();
+        vxm(w1, structure(M), Plus<double>(),
+            ArithmeticSemiring<double>(),
+            u, transpose(A));
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w1;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w'<s(m'),merge> := w' + u'+.*A'   : " << my_timer.elapsed()
-              << " usec, w1.nvals = " << w1.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<s(m),merge> := w' + u'+.*A'   \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w1.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w1, structure(M), Plus<double>(),
-        ArithmeticSemiring<double>(),
-        u, transpose(A), REPLACE);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w1 = wtmp;
+        my_timer.start();
+        vxm(w1, structure(M), Plus<double>(),
+            ArithmeticSemiring<double>(),
+            u, transpose(A), REPLACE);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w1;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w'<s(m'),replace> := w' + u'+.*A' : " << my_timer.elapsed()
-              << " usec, w1.nvals = " << w1.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<s(m),replace> := w' + u'+.*A' \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w1.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w1, complement(structure(M)), NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        u, transpose(A));
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w1 = wtmp;
+        my_timer.start();
+        vxm(w1, complement(structure(M)), NoAccumulate(),
+            ArithmeticSemiring<double>(),
+            u, transpose(A));
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w1;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w'<!s(m'),merge> := u'+.*A'      : " << my_timer.elapsed()
-              << " usec, w1.nvals = " << w1.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<!s(m),merge> := u'+.*A'      \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w1.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w1, complement(structure(M)), NoAccumulate(),
-        ArithmeticSemiring<double>(),
-        u, transpose(A), REPLACE);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w1 = wtmp;
+        my_timer.start();
+        vxm(w1, complement(structure(M)), NoAccumulate(),
+            ArithmeticSemiring<double>(),
+            u, transpose(A), REPLACE);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w1;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w'<!s(m'),replace> := u'+.*A'    : " << my_timer.elapsed()
-              << " usec, w1.nvals = " << w1.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<!s(m),replace> := u'+.*A'    \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w1.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w1, complement(structure(M)), Plus<double>(),
-        ArithmeticSemiring<double>(),
-        u, transpose(A));
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w1 = wtmp;
+        my_timer.start();
+        vxm(w1, complement(structure(M)), Plus<double>(),
+            ArithmeticSemiring<double>(),
+            u, transpose(A));
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w1;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w'<!s(m'),merge> := w' + u'+.*A'  : " << my_timer.elapsed()
-              << " usec, w1.nvals = " << w1.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<!s(m),merge> := w' + u'+.*A'  \t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w1.nvals() << "\t" << count << std::endl;
 
-    my_timer.start();
-    vxm(w1, complement(structure(M)), Plus<double>(),
-        ArithmeticSemiring<double>(),
-        u, transpose(A), REPLACE);
-    my_timer.stop();
+    //----------
+    accum_time=0.; min_time=1.0e38; max_time=0.;
+    for (int ix=0; ix<NUM_TRIALS; ++ix)
+    {
+        w1 = wtmp;
+        my_timer.start();
+        vxm(w1, complement(structure(M)), Plus<double>(),
+            ArithmeticSemiring<double>(),
+            u, transpose(A), REPLACE);
+        my_timer.stop();
+        double t = my_timer.elapsed();
+        accum_time += t;
+        min_time = std::min(t, min_time);
+        max_time = std::max(t, max_time);
+    }
+    wtmp = w1;
     reduce(count, NoAccumulate(), PlusMonoid<int32_t>(), w1);
-    std::cout << "w'<!s(m'),replace> := w' + u'+.*A': " << my_timer.elapsed()
-              << " usec, w1.nvals = " << w1.nvals()
-              << " reduce = " << count << std::endl;
+    std::cout << "w'<!s(m),replace> := w' + u'+.*A'\t"
+              << min_time << "\t" << accum_time/NUM_TRIALS << "\t" << max_time
+              << "\t" << w1.nvals() << "\t" << count << std::endl;
 
     bool passed = (w == w1);
     std::cout << "Results " << (passed ? "PASSED" : "FAILED") << std::endl;
