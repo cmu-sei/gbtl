@@ -70,21 +70,20 @@ namespace grb
             for (IndexType i = 0; i < A.nrows(); ++i)
             {
                 C_row.clear();
-                if (!A[i].empty())
+                if (A[i].empty()) continue;
+
+                // fill row i of T
+                for (IndexType j = 0; j < B.nrows(); ++j)
                 {
-                    // fill row i of T
-                    for (IndexType j = 0; j < B.nrows(); ++j)
+                    if (B[j].empty()) continue;
+
+                    TScalarType t_ij;
+
+                    // Perform the dot product
+                    // C[i][j] = T_ij = (CScalarT) (A[i] . B[j])
+                    if (dot(t_ij, A[i], B[j], semiring))
                     {
-                        if (B[j].empty()) continue;
-
-                        TScalarType t_ij;
-
-                        // Perform the dot product
-                        // C[i][j] = T_ij = (CScalarT) (A[i] . B[j])
-                        if (dot(t_ij, A[i], B[j], semiring))
-                        {
-                            C_row.emplace_back(j, static_cast<CScalarT>(t_ij));
-                        }
+                        C_row.emplace_back(j, static_cast<CScalarT>(t_ij));
                     }
                 }
 
@@ -159,11 +158,9 @@ namespace grb
             typename LilSparseMatrix<TScalarType>::RowType T_row;
             typename LilSparseMatrix<CScalarT>::RowType C_row;
 
-            bool const complement_flag = false;  // constexpr?
-            bool empty_output(0 == C.nvals());
-
             for (IndexType i = 0; i < A.nrows(); ++i)
             {
+                bool const complement_flag = false;
                 T_row.clear();
 
                 // T[i] = M[i] .* (A[i] dot B[j])
@@ -173,7 +170,7 @@ namespace grb
                     for (IndexType j = 0; j < B.nrows(); ++j)
                     {
                         if (B[j].empty() ||
-                            complement_flag == advance_and_check_mask_iterator(
+                            !advance_and_check_mask_iterator(
                                 M_iter, M[i].end(), structure_flag, j))
                             continue;
 
@@ -186,7 +183,7 @@ namespace grb
                     }
                 }
 
-                if (outp == REPLACE || empty_output)
+                if (outp == REPLACE)
                 {
                     // C[i] = T[i], z = "replace"
                     C.setRow(i, T_row);
@@ -228,10 +225,9 @@ namespace grb
             typename LilSparseMatrix<ZScalarType>::RowType  Z_row;
             typename LilSparseMatrix<CScalarT>::RowType     C_row;
 
-            bool const complement_flag = false;  /// @todo constexpr?
-
             for (IndexType i = 0; i < A.nrows(); ++i)
             {
+                bool const complement_flag = false;  /// @todo constexpr?
                 T_row.clear();
 
                 if (!A[i].empty() && !M[i].empty())
@@ -243,7 +239,7 @@ namespace grb
                     {
                         // See if B[j] has data and M[i] allows write.
                         if (B[j].empty() ||
-                            complement_flag == advance_and_check_mask_iterator(
+                            !advance_and_check_mask_iterator(
                                 m_it, M[i].end(), structure_flag, j))
                         {
                             continue;
@@ -258,7 +254,7 @@ namespace grb
                     }
                 }
 
-                // Z[i] = (M[i] .* C[i]) + T[i]
+                // Z[i] = (M .* C) + T[i]
                 Z_row.clear();
                 masked_accum(Z_row,
                              M[i], structure_flag, complement_flag,
@@ -300,11 +296,10 @@ namespace grb
             typename LilSparseMatrix<TScalarType>::RowType T_row;
             typename LilSparseMatrix<CScalarT>::RowType    C_row;
 
-            bool const complement_flag = true;  // const_expr
-            bool empty_output(0 == C.nvals());
-
             for (IndexType i = 0; i < A.nrows(); ++i)
             {
+                bool const complement_flag = true;
+
                 T_row.clear();
 
                 // T[i] = !M[i] .* (A[i] dot B[j])
@@ -314,7 +309,7 @@ namespace grb
                     for (IndexType j = 0; j < B.nrows(); ++j)
                     {
                         if (B[j].empty() ||
-                            complement_flag == advance_and_check_mask_iterator(
+                            advance_and_check_mask_iterator(
                                 M_iter, M[i].end(), structure_flag, j))
                             continue;
 
@@ -327,14 +322,14 @@ namespace grb
                     }
                 }
 
-                if ((outp == REPLACE) || empty_output)
+                if (outp == REPLACE)
                 {
                     // C[i] = T[i], z = "replace"
                     C.setRow(i, T_row);
                 }
                 else /* merge */
                 {
-                    // C[i] = [M[i] .* C[i]]  U  T[i], z = "merge"
+                    // C[i] = [M .* C]  U  T[i], z = "merge"
                     C_row.clear();
                     masked_merge(C_row,
                                  M[i], structure_flag, complement_flag,
@@ -369,23 +364,22 @@ namespace grb
             typename LilSparseMatrix<ZScalarType>::RowType Z_row;
             typename LilSparseMatrix<CScalarT>::RowType    C_row;
 
-            bool const complement_flag = true;
-            bool empty_output(0 == C.nvals());
-
             for (IndexType i = 0; i < A.nrows(); ++i)
             {
+                bool const complement_flag = true;
+
                 T_row.clear();
 
                 if (!A[i].empty()) // && !M[i].empty()) cannot do mask shortcut
                 {
                     auto m_it(M[i].begin());
 
-                    // Compute: T[i] = !M[i] .* {C[i] + (A +.* B')[i]}
+                    // Compute: T[i] = M[i] .* {C[i] + (A +.* B')[i]}
                     for (IndexType j = 0; j < B.nrows(); ++j)
                     {
                         // See if B[j] has data and M[i] allows write.
                         if (B[j].empty() ||
-                            complement_flag == advance_and_check_mask_iterator(
+                            advance_and_check_mask_iterator(
                                 m_it, M[i].end(), structure_flag, j))
                         {
                             continue;
@@ -400,21 +394,20 @@ namespace grb
                     }
                 }
 
-                // Z[i] = (!M[i] .* C[i]) + T[i]
+                // Z[i] = (M .* C) + T[i]
                 Z_row.clear();
                 masked_accum(Z_row,
                              M[i], structure_flag, complement_flag,
                              accum, C[i], T_row);
 
 
-                if ((outp == REPLACE) || empty_output)
+                if (outp == REPLACE)
                 {
-                    // C[i] = Z[i]
                     C.setRow(i, Z_row);
                 }
                 else /* merge */
                 {
-                    // C[i] := (M[i] .* C[i])  U  Z[i]
+                    // T[i] := (M[i] .* C[i])  U  Z[i]
                     C_row.clear();
                     masked_merge(C_row,
                                  M[i], structure_flag, complement_flag,
@@ -455,7 +448,6 @@ namespace grb
             {
                 //std::cout << "ABT USING CTMP\n";
                 // create temporary to prevent overwrite of inputs
-                /// @todo type problem? Should it be TScalarType?
                 LilSparseMatrix<CScalarT> Ctmp(C.nrows(), C.ncols());
                 ABT_NoMask_NoAccum_kernel(Ctmp, semiring, A, B);
                 C.swap(Ctmp);
@@ -493,13 +485,11 @@ namespace grb
             if ((void*)&C == (void*)&B)
             {
                 // create temporary to prevent overwrite of inputs
-                /// @todo type problem? Should it be TScalarType?
-                using TScalarType = typename SemiringT::result_type;
-                LilSparseMatrix<TScalarType> Ttmp(C.nrows(), C.ncols());
-                ABT_NoMask_NoAccum_kernel(Ttmp, semiring, A, B);
+                LilSparseMatrix<CScalarT> Ctmp(C.nrows(), C.ncols());
+                ABT_NoMask_NoAccum_kernel(Ctmp, semiring, A, B);
                 for (IndexType i = 0; i < C.nrows(); ++i)
                 {
-                    C.mergeRow(i, Ttmp[i], accum);
+                    C.mergeRow(i, Ctmp[i], accum);
                 }
             }
             else
@@ -549,7 +539,6 @@ namespace grb
                 bool const complement_flag = false;
 
                 // create temporary to prevent overwrite of inputs
-                /// @todo type problem?  Should it be TScalarType?
                 LilSparseMatrix<CScalarT> Ctmp(C.nrows(), C.ncols());
                 ABT_Mask_NoAccum_kernel(Ctmp,
                                         M, structure_flag,
@@ -627,8 +616,8 @@ namespace grb
                                                    std::declval<TScalarType>()));
 
                 // create temporary to prevent overwrite of inputs
-                LilSparseMatrix<TScalarType> Ttmp(C.nrows(), C.ncols());
-                ABT_Mask_NoAccum_kernel(Ttmp,
+                LilSparseMatrix<TScalarType> Ctmp(C.nrows(), C.ncols());
+                ABT_Mask_NoAccum_kernel(Ctmp,
                                         M, structure_flag,
                                         semiring, A, B, REPLACE);
 
@@ -640,7 +629,7 @@ namespace grb
                     // Z[i] = (M .* C) + Ctmp[i]
                     masked_accum(Z_row,
                                  M[i], structure_flag, complement_flag,
-                                 accum, C[i], Ttmp[i]);
+                                 accum, C[i], Ctmp[i]);
 
                     if (outp == REPLACE)
                     {
@@ -771,8 +760,8 @@ namespace grb
                                                    std::declval<TScalarType>()));
 
                 // create temporary to prevent overwrite of inputs
-                LilSparseMatrix<TScalarType> Ttmp(C.nrows(), C.ncols());
-                ABT_CompMask_NoAccum_kernel(Ttmp,
+                LilSparseMatrix<TScalarType> Ctmp(C.nrows(), C.ncols());
+                ABT_CompMask_NoAccum_kernel(Ctmp,
                                             M, structure_flag,
                                             semiring, A, B, REPLACE);
 
@@ -781,20 +770,19 @@ namespace grb
                 for (IndexType i = 0; i < C.nrows(); ++i)
                 {
                     Z_row.clear();
-                    // Z[i] = (!M[i] .* C[i]) + Ttmp[i]
+                    // Z[i] = (M .* C) + Ctmp[i]
                     masked_accum(Z_row,
                                  M[i], structure_flag, complement_flag,
-                                 accum, C[i], Ttmp[i]);
+                                 accum, C[i], Ctmp[i]);
 
                     if (outp == REPLACE)
                     {
-                        // C[i] = Z[i]
                         C.setRow(i, Z_row);
                     }
                     else
                     {
                         typename LilSparseMatrix<CScalarT>::RowType C_row;
-                        // C[i] = [M[i] .* C[i]]  U  Z[i], z = "merge"
+                        // C[i] = [!M .* C]  U  Ctmp[i], z = "merge"
                         C_row.clear();
                         masked_merge(C_row,
                                      M[i], structure_flag, complement_flag,

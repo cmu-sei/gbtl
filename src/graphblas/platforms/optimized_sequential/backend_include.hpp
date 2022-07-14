@@ -35,12 +35,12 @@
 #endif
 
 #if(GB_INCLUDE_BACKEND_MATRIX)
-#include <graphblas/platforms/optimized_sequential/param_unpack.hpp>
+#include <graphblas/platforms/optimized_sequential/Matrix.hpp>
 #undef GB_INCLUDE_BACKEND_MATRIX
 #endif
 
 #if(GB_INCLUDE_BACKEND_VECTOR)
-#include <graphblas/platforms/optimized_sequential/param_unpack.hpp>
+#include <graphblas/platforms/optimized_sequential/Vector.hpp>
 #undef GB_INCLUDE_BACKEND_VECTOR
 #endif
 

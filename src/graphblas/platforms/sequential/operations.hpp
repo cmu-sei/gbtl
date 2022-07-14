@@ -48,7 +48,6 @@
 #include <graphblas/platforms/sequential/sparse_extract.hpp>
 #include <graphblas/platforms/sequential/sparse_assign.hpp>
 #include <graphblas/platforms/sequential/sparse_apply.hpp>
-#include <graphblas/platforms/sequential/sparse_select.hpp>
 #include <graphblas/platforms/sequential/sparse_reduce.hpp>
 #include <graphblas/platforms/sequential/sparse_transpose.hpp>
 #include <graphblas/platforms/sequential/sparse_kronecker.hpp>

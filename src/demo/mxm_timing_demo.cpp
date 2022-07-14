@@ -31,11 +31,42 @@
 
 #define GRAPHBLAS_DEBUG 1
 
-#include "Timer.hpp"
 #include <graphblas/graphblas.hpp>
-#include "read_edge_list.hpp"
+#include <algorithms/triangle_count.hpp>
+#include "Timer.hpp"
 
 using namespace grb;
+
+//****************************************************************************
+IndexType read_edge_list(std::string const &pathname,
+                         IndexArrayType &row_indices,
+                         IndexArrayType &col_indices)
+{
+    std::ifstream infile(pathname);
+    IndexType max_id = 0;
+    uint64_t num_rows = 0;
+    uint64_t src, dst;
+
+    while (infile)
+    {
+        infile >> src >> dst;
+        //std::cout << "Read: " << src << ", " << dst << std::endl;
+        max_id = std::max(max_id, src);
+        max_id = std::max(max_id, dst);
+
+        //if (src > max_id) max_id = src;
+        //if (dst > max_id) max_id = dst;
+
+        row_indices.push_back(src);
+        col_indices.push_back(dst);
+
+        ++num_rows;
+    }
+    std::cout << "Read " << num_rows << " rows." << std::endl;
+    std::cout << "#Nodes = " << (max_id + 1) << std::endl;
+
+    return (max_id + 1);
+}
 
 
 //****************************************************************************

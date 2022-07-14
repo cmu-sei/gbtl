@@ -27,26 +27,12 @@ cmake_minimum_required(VERSION 2.8)
 
 project(GRAPHBLAS_TEMPLATE_LIBRARY_3)
 
-#-------------------------------------------------------------------------------
-# determine build type
-#-------------------------------------------------------------------------------
-
-# For development only, not for end-users:
-# set ( CMAKE_BUILD_TYPE Debug )
-
-# Could also be: RelWithDebInfo
-
-if ( NOT CMAKE_BUILD_TYPE )
-    set ( CMAKE_BUILD_TYPE Release )
-endif ( )
-
 # For debugging
 message("CMake SRC: ${CMAKE_SOURCE_DIR}")
 message("Project Name: ${PROJECT_NAME}")
 message("Bin Directory: ${CMAKE_BINARY_DIR}")
 message("Project Name: ${CMAKE_SOURCE_DIR}")
 message("Project Bin Directory: ${PROJECT_BINARY_DIR}")
-message("Build type: ${CMAKE_BUILD_TYPE}")
 
 # Default platform is sequential
 if (NOT PLATFORM)
@@ -72,9 +58,6 @@ include_directories(${CMAKE_SOURCE_DIR} ${PLATFORM_SOURCE_DIR})
 # Compiler flags
 set(CMAKE_CXX_STANDARD 17)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-
-find_package(Boost REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
 
 # Build a list of all the graphblas headers.
 file(GLOB GRAPHBLAS_HEADERS graphblas/*.hpp)

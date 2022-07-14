@@ -30,6 +30,9 @@
 #include <cstddef>
 #include <graphblas/Matrix.hpp>
 
+#define GB_INCLUDE_BACKEND_TRANSPOSE_VIEW 1
+#include <backend_include.hpp>
+
 //****************************************************************************
 //****************************************************************************
 

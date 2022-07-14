@@ -331,7 +331,8 @@ namespace grb
             using UScalarType =typename UVectorT::ScalarType;
             std::vector<std::tuple<IndexType, UScalarType> > t;
             vectorExtract(t, u.getContents(),
-                          setupIndices(indices, std::min(w.size(), u.size())));
+                          setupIndices(indices,
+                                       std::min(w.size(), u.size())));
 
             GRB_LOG_VERBOSE("t: " << t);
 

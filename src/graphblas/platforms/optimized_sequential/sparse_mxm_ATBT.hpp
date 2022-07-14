@@ -49,8 +49,7 @@ namespace grb
     namespace backend
     {
         //**********************************************************************
-        // Compute C' = (A'*B')' = B*A, assuming C, B, and A are unique except
-        //                              that multiply is not commutative.
+        // Compute C' = (A'*B')' = B*A, assuming C, B, and A are unique
         template<typename CScalarT,
                  typename SemiringT,
                  typename AScalarT,
@@ -77,8 +76,8 @@ namespace grb
 
                     if (A[k].empty()) continue;
 
-                    // T[i] += (A[k]*b_ik)  // must reduce in D3
-                    axpy(T_row, semiring, A[k], b_ik);
+                    // T[i] += (b_ik*A[k])  // must reduce in D3
+                    axpy(T_row, semiring, b_ik, A[k]);
                 }
 
                 //C.setCol(i, T_row); // this is a push_back form of setCol
@@ -238,7 +237,7 @@ namespace grb
                     if (A[k].empty()) continue;
 
                     // T[i] += (b_ik*A[k])  // must reduce in D3
-                    axpy(T_row, semiring, A[k], b_ik);
+                    axpy(T_row, semiring, b_ik, A[k]);
                 }
 
                 // Transpose the result
@@ -337,7 +336,7 @@ namespace grb
                     if (A[k].empty()) continue;
 
                     // T[i] += (b_ik*A[k])  // must reduce in D3
-                    axpy(T_row, semiring, A[k], b_ik);
+                    axpy(T_row, semiring, b_ik, A[k]);
                 }
 
                 // Transpose the result
@@ -434,7 +433,7 @@ namespace grb
                     if (A[k].empty()) continue;
 
                     // T[i] += (b_ik*A[k])  // must reduce in D3
-                    axpy(T_row, semiring, A[k], b_ik);
+                    axpy(T_row, semiring, b_ik, A[k]);
                 }
 
                 // Transpose the result
@@ -532,7 +531,7 @@ namespace grb
                     if (A[k].empty()) continue;
 
                     // T[i] += (b_ik*A[k])  // must reduce in D3
-                    axpy(T_row, semiring, A[k], b_ik);
+                    axpy(T_row, semiring, b_ik, A[k]);
                 }
 
                 // Transpose the result

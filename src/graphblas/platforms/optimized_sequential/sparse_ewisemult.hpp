@@ -55,9 +55,10 @@ namespace grb
                  typename AccumT,
                  typename BinaryOpT,  //can be BinaryOp, Monoid (not Semiring)
                  typename UVectorT,
-                 typename VVectorT>
+                 typename VVectorT,
+                 typename... WTagsT>
         inline void eWiseMult(
-            grb::backend::BitmapSparseVector<WScalarT>      &w,
+            grb::backend::Vector<WScalarT, WTagsT...>       &w,
             MaskT                                     const &mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -74,7 +75,7 @@ namespace grb
 
             if ((u.nvals() > 0) && (v.nvals() > 0))
             {
-                ewise_and_dense_dense_v2(t_contents, u, v, op);
+                ewise_and(t_contents, u.getContents(), v.getContents(), op);
             }
 
             // =================================================================
@@ -100,9 +101,10 @@ namespace grb
                  typename AccumT,
                  typename BinaryOpT,  //can be BinaryOp, Monoid (not Semiring)
                  typename AMatrixT,
-                 typename BMatrixT>
+                 typename BMatrixT,
+                 typename... CTagsT>
         inline void eWiseMult(
-            grb::backend::LilSparseMatrix<CScalarT>         &C,
+            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -165,9 +167,10 @@ namespace grb
                  typename AccumT,
                  typename BinaryOpT,  //can be BinaryOp, Monoid (not Semiring)
                  typename AMatrixT,
-                 typename BMatrixT>
+                 typename BMatrixT,
+                 typename... CTagsT>
         inline void eWiseMult(
-            grb::backend::LilSparseMatrix<CScalarT>         &C,
+            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -191,9 +194,10 @@ namespace grb
                  typename AccumT,
                  typename BinaryOpT,  //can be BinaryOp, Monoid (not Semiring)
                  typename AMatrixT,
-                 typename BMatrixT>
+                 typename BMatrixT,
+                 typename... CTagsT>
         inline void eWiseMult(
-            grb::backend::LilSparseMatrix<CScalarT>         &C,
+            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,
@@ -217,9 +221,10 @@ namespace grb
                  typename AccumT,
                  typename BinaryOpT,  //can be BinaryOp, Monoid (not Semiring)
                  typename AMatrixT,
-                 typename BMatrixT>
+                 typename BMatrixT,
+                 typename... CTagsT>
         inline void eWiseMult(
-            grb::backend::LilSparseMatrix<CScalarT>         &C,
+            grb::backend::Matrix<CScalarT, CTagsT...>       &C,
             MaskT                                     const &Mask,
             AccumT                                    const &accum,
             BinaryOpT                                        op,

@@ -29,11 +29,6 @@
 
 #include <graphblas/graphblas.hpp>
 
-namespace
-{
-    GEN_GRAPHBLAS_SEMIRING(PlusSecondSemiring, grb::PlusMonoid, grb::Second)
-}
-
 //****************************************************************************
 namespace algorithms
 {
@@ -60,7 +55,7 @@ namespace algorithms
      *                              in case threshold is not met prior.
      *
      */
-    template<typename MatrixT, typename RealT>
+    template<typename MatrixT, typename RealT = double>
     void page_rank(
         MatrixT const       &graph,
         grb::Vector<RealT>  &page_rank,
@@ -116,7 +111,8 @@ namespace algorithms
         grb::Vector<RealT> delta(rows);
         for (grb::IndexType i = 0; i < max_iters; ++i)
         {
-            //std::cout << "============= ITERATION " << i << " ============\n";
+            //std::cout << "============= ITERATION " << i << " ============"
+            //          << std::endl;
             //print_vector(std::cout, page_rank, "rank");
 
             // Compute the new rank: [1 x M][M x N] = [1 x N]
@@ -139,7 +135,6 @@ namespace algorithms
 
             // Test for convergence - compute squared error
             /// @todo should be mean squared error. (divide r2/N)
-            /// @todo parameterize the algorithm on the convergence test.
             RealT squared_error(0);
             grb::eWiseAdd(delta,
                           grb::NoMask(),
@@ -179,142 +174,5 @@ namespace algorithms
                       grb::Plus<RealT>(),
                       page_rank,
                       new_rank);
-    }
-
-    //************************************************************************
-    // Translated/adapted from LAGraph: LAGr_PageRankGAP.c
-    //
-    template<typename MatrixT,
-             typename RealT,
-             std::enable_if_t<std::is_floating_point<RealT>::value, bool> = true>
-    void pagerank_gap(
-        MatrixT const       &graph,
-        grb::Vector<RealT>  &page_rank,
-        unsigned int        &num_iters,
-        RealT                damping = 0.85,
-        RealT                tolerance = 1.e-5,
-        unsigned int         max_iters = std::numeric_limits<unsigned int>::max())
-    {
-        //using T = typename MatrixT::ScalarType;
-
-        grb::IndexType n(graph.nrows());
-
-        if ((n != graph.ncols()) || (page_rank.size() != n))
-        {
-            throw grb::DimensionException();
-        }
-
-        // Compute row (out) degrees
-        grb::Vector<RealT> d_out(n);
-        grb::reduce(d_out,
-                    grb::NoMask(), grb::NoAccumulate(),
-                    grb::Plus<RealT>(),
-                    graph);
-
-        // RealT const scaled_damping = (1 - damping)/n;
-        RealT const teleport = (1. - damping)/(RealT)n;
-        RealT rdiff = 1 + tolerance;  // make sure it iterates at least once
-
-        grb::Vector<RealT> t(n);
-        grb::Vector<RealT> temp(n);
-        grb::Vector<RealT> r(n);
-        grb::Vector<RealT> w(n);
-
-        // r = 1 / n
-        grb::assign(r,
-                    grb::NoMask(),
-                    grb::NoAccumulate(),
-                    1.0 / static_cast<RealT>(n),
-                    grb::AllIndices());
-
-        // prescale with damping factor so it is not done every iteration
-        // d = d_out / damping ;
-        grb::Vector<RealT> d(n);
-        grb::apply(d,
-                   grb::NoMask(),
-                   grb::NoAccumulate(),
-                   std::bind(grb::Times<RealT>(),   /// @todo Replace with lambda
-                             std::placeholders::_1,
-                             1./damping),
-                   d_out);
-
-        {
-            // Temporary
-            grb::Vector<RealT> d1(n);
-
-            // d1 = 1 / damping
-            grb::assign(d1,
-                        grb::NoMask(),
-                        grb::NoAccumulate(),
-                        (1./damping),
-                        grb::AllIndices());
-
-            // d = max(d1, d)
-            grb::eWiseAdd(d,
-                          grb::NoMask(),
-                          grb::NoAccumulate(),
-                          grb::Max<RealT>(),
-                          d1,
-                          d);
-        }
-
-        //--------------------------------------------------------------------
-        // pagerank iterations
-        //--------------------------------------------------------------------
-
-        for (num_iters = 0; num_iters < max_iters && rdiff > tolerance; ++num_iters)
-        {
-            //std::cout << "============= ITERATION " << num_iters << " ============\n";
-            //print_vector(std::cout, page_rank, "rank");
-
-            // swap t and r ; now t is the old pagerank score
-            /// @todo make this cheap (use move? add *::swap?)
-            temp = t;
-            t = r;
-            r = temp;
-
-            // w = t ./ d
-            grb::eWiseMult(w,
-                           grb::NoMask(),
-                           grb::NoAccumulate(),
-                           grb::Div<RealT>(),
-                           t, d);
-
-            // r = ones()*teleport
-            grb::assign(r,
-                        grb::NoMask(),
-                        grb::NoAccumulate(),
-                        teleport,
-                        grb::AllIndices());
-
-            // r += A'*w
-            grb::mxv(r,
-                     grb::NoMask(),
-                     grb::Plus<RealT>(),
-                     PlusSecondSemiring<RealT>(),
-                     grb::transpose(graph),  /// @todo precompute row-major transpose
-                     w);
-
-            // Test for convergence - compute absolute difference
-            // t -= r
-            grb::assign(t,
-                        grb::NoMask(),
-                        grb::Minus<RealT>(),
-                        r,
-                        grb::AllIndices());
-            // t = abs (t)
-            grb::apply(t,
-                       grb::NoMask(),
-                       grb::NoAccumulate(),
-                       grb::Abs<RealT>(),
-                       t);
-            // rdiff = sum (t)
-            grb::reduce(rdiff,
-                        grb::NoAccumulate(),
-                        grb::PlusMonoid<RealT>(),
-                        t);
-        }
-
-        page_rank = r;  /// @todo std::move(r)
     }
 } // algorithms

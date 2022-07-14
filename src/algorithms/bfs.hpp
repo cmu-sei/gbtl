@@ -54,30 +54,34 @@ namespace algorithms
              grb::IndexType     source,
              ParentListVectorT &parent_list)
     {
+        grb::IndexType const N(graph.nrows());
+
         // assert parent_list is N-vector
         // assert source is in proper range
         // assert parent_list ScalarType is grb::IndexType
 
-        grb::IndexType const N(graph.nrows());
-
-        // set root parent to self;
-        parent_list.clear();
-        parent_list.setElement(source, source);
+        // create index ramp for index_of() functionality
+        grb::Vector<grb::IndexType> index_ramp(N);
+        for (grb::IndexType i = 0; i < N; ++i)
+        {
+            index_ramp.setElement(i, i);
+        }
 
         // initialize wavefront to source node.
         grb::Vector<grb::IndexType> wavefront(N);
         wavefront.setElement(source, 1UL);
 
+        // set root parent to self;
+        parent_list.clear();
+        parent_list.setElement(source, source);
+
         while (wavefront.nvals() > 0)
         {
-            // convert all stored values to their row index
-            grb::apply(wavefront,
-                       grb::NoMask(),
-                       grb::NoAccumulate(),
-                       grb::RowIndex<typename MatrixT::ScalarType,
-                                     grb::IndexType>(),
-                       wavefront,
-                       0UL);
+            // convert all stored values to their column index
+            grb::eWiseMult(wavefront,
+                           grb::NoMask(), grb::NoAccumulate(),
+                           grb::First<grb::IndexType>(),
+                           index_ramp, wavefront);
 
             // First because we are left multiplying wavefront rows
             // Masking out the parent list ensures wavefront values do not
@@ -95,14 +99,15 @@ namespace algorithms
                        grb::NoMask(),
                        grb::Plus<grb::IndexType>(),
                        grb::Identity<grb::IndexType>(),
-                       wavefront);
+                       wavefront,
+                       grb::MERGE);
         }
     }
 
     //************************************************************************
     /**
-     * @brief Perform a "parent" breadth first search (BFS) traversal
-     *        on the given graph from a wavefront
+     * @brief Perform a single "parent" breadth first search (BFS) traversal
+     *        on the given graph.
      *
      * @param[in]  graph        N x N adjacency matrix of the graph on which to
      *                          perform a BFS. (NOT the transpose).  The value
@@ -113,9 +118,6 @@ namespace algorithms
      *                          root.
      * @param[out] parent_list  The list of parents for each traversal (row)
      *                          specified in the roots array.
-     *
-     * @todo Require integral types for wavefronts and parent_list. Consider
-     *       restricting to grb::IndexType explicitly.
      */
     template <typename MatrixT,
               typename WavefrontVectorT,
@@ -124,31 +126,39 @@ namespace algorithms
              WavefrontVectorT        wavefront,   // copy is intentional
              ParentListVectorT      &parent_list)
     {
+        using T = typename MatrixT::ScalarType;
+        grb::IndexType const N(graph.nrows());
+
         // assert parent_list is N-vector
         // assert wavefront is N-vector
         // assert parent_list ScalarType is grb::IndexType
 
-        grb::IndexType const N(graph.nrows());
+        // create index ramp for index_of() functionality
+        grb::Vector<grb::IndexType> index_ramp(N);
+        for (grb::IndexType i = 0; i < N; ++i)
+        {
+            index_ramp.setElement(i, i);
+        }
 
-        // convert all stored values to their index
-        grb::apply(parent_list,
-                   grb::NoMask(),
-                   grb::NoAccumulate(),
-                   grb::RowIndex<typename MatrixT::ScalarType,
-                                 grb::IndexType>(),
-                   wavefront,
-                   0UL);
+        // Set the roots parents to themselves using indices
+        grb::eWiseMult(parent_list,
+                       grb::NoMask(), grb::NoAccumulate(),
+                       grb::First<grb::IndexType>(),
+                       index_ramp, wavefront);
+
+        // convert all stored values to their column index
+        grb::eWiseMult(parent_list,
+                       grb::NoMask(), grb::NoAccumulate(),
+                       grb::First<grb::IndexType>(),
+                       index_ramp, parent_list);
 
         while (wavefront.nvals() > 0)
         {
-            // convert all stored values to their index
-            grb::apply(wavefront,
-                       grb::NoMask(),
-                       grb::NoAccumulate(),
-                       grb::RowIndex<typename MatrixT::ScalarType,
-                                     grb::IndexType>(),
-                       wavefront,
-                       0UL);
+            // convert all stored values to their column index
+            grb::eWiseMult(wavefront,
+                           grb::NoMask(), grb::NoAccumulate(),
+                           grb::First<grb::IndexType>(),
+                           index_ramp, wavefront);
 
             // First because we are left multiplying wavefront rows
             // Masking out the parent list ensures wavefront values do not
@@ -156,7 +166,7 @@ namespace algorithms
             grb::vxm(wavefront,
                      grb::complement(grb::structure(parent_list)),
                      grb::NoAccumulate(),
-                     grb::MinFirstSemiring<grb::IndexType>(),
+                     grb::MinFirstSemiring<T>(),
                      wavefront, graph, grb::REPLACE);
 
             // We don't need to mask here since we did it in mxm.
@@ -164,9 +174,10 @@ namespace algorithms
             // parent_list<!parent_list,merge> += wavefront
             grb::apply(parent_list,
                        grb::NoMask(),
-                       grb::Plus<grb::IndexType>(),
-                       grb::Identity<grb::IndexType>(),
-                       wavefront);
+                       grb::Plus<T>(),
+                       grb::Identity<T>(),
+                       wavefront,
+                       grb::MERGE);
         }
     }
 
@@ -185,9 +196,6 @@ namespace algorithms
      *                          root.
      * @param[out] parent_list  The list of parents for each traversal (row)
      *                          specified in the roots array.
-     *
-     * @todo Require integral types for wavefronts and parent_list. Consider
-     *       restricting to grb::IndexType explicitly.
      */
     template <typename MatrixT,
               typename WavefrontMatrixT,
@@ -196,30 +204,33 @@ namespace algorithms
                    WavefrontMatrixT        wavefronts,   // copy is intentional
                    ParentListMatrixT      &parent_list)
     {
+        using T = typename MatrixT::ScalarType;
+        grb::IndexType const N(graph.nrows());
+
         // assert parent_list is RxN
         // assert wavefront is RxN
         // assert parent_list ScalarType is grb::IndexType
 
-        grb::IndexType const N(graph.nrows());
+        // create index ramp for index_of() functionality
+        grb::Matrix<grb::IndexType> index_ramp(N, N);
+        for (grb::IndexType idx = 0; idx < N; ++idx)
+        {
+            index_ramp.setElement(idx, idx, idx);
+        }
 
-        grb::apply(parent_list,
-                   grb::NoMask(),
-                   grb::NoAccumulate(),
-                   grb::ColIndex<typename MatrixT::ScalarType,
-                                 grb::IndexType>(),
-                   wavefronts,
-                   0UL);
+        // Set the roots parents to themselves.
+        grb::mxm(parent_list,
+                 grb::NoMask(), grb::NoAccumulate(),
+                 grb::MinSecondSemiring<T>(),
+                 wavefronts, index_ramp);
 
         while (wavefronts.nvals() > 0)
         {
             // convert all stored values to their column index
-            grb::apply(wavefronts,
-                       grb::NoMask(),
-                       grb::NoAccumulate(),
-                       grb::ColIndex<typename MatrixT::ScalarType,
-                                     grb::IndexType>(),
-                       wavefronts,
-                       0UL);
+            grb::mxm(wavefronts,
+                     grb::NoMask(), grb::NoAccumulate(),
+                     grb::MinSecondSemiring<T>(),
+                     wavefronts, index_ramp);
 
             // First because we are left multiplying wavefront rows
             // Masking out the parent list ensures wavefronts values do not
@@ -227,7 +238,7 @@ namespace algorithms
             grb::mxm(wavefronts,
                      grb::complement(grb::structure(parent_list)),
                      grb::NoAccumulate(),
-                     grb::MinFirstSemiring<grb::IndexType>(),
+                     grb::MinFirstSemiring<T>(),
                      wavefronts, graph, grb::REPLACE);
 
             // We don't need to mask here since we did it in mxm.
@@ -235,8 +246,8 @@ namespace algorithms
             // parent_list<!parent_list,merge> += wavefronts
             grb::apply(parent_list,
                        grb::NoMask(),
-                       grb::Plus<grb::IndexType>(),
-                       grb::Identity<grb::IndexType>(),
+                       grb::Plus<T>(),
+                       grb::Identity<T>(),
                        wavefronts,
                        grb::MERGE);
         }

@@ -27,8 +27,10 @@
 
 #pragma once
 
+#include <graphblas/platforms/optimized_sequential/Matrix.hpp>
+#include <graphblas/platforms/optimized_sequential/Vector.hpp>
+
+#include <graphblas/platforms/optimized_sequential/operations.hpp>
+
 #include <graphblas/platforms/optimized_sequential/BitmapSparseVector.hpp>
 #include <graphblas/platforms/optimized_sequential/LilSparseMatrix.hpp>
-
-#include <graphblas/platforms/optimized_sequential/param_unpack.hpp>
-#include <graphblas/platforms/optimized_sequential/operations.hpp>

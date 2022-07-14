@@ -267,7 +267,6 @@ namespace grb
                 return !(*this == rhs);
             }
 
-        public:
             // METHODS
 
             void clear()
@@ -457,7 +456,6 @@ namespace grb
             // output specific to the storage layout of this type of matrix
             void printInfo(std::ostream &os) const
             {
-                os << "Sequential Backend: ";
                 os << "backend::BitmapSparseVector<" << typeid(ScalarT).name() << ">";
                 os << ", size  = " << m_size;
                 os << ", nvals = " << m_nvals << std::endl;
