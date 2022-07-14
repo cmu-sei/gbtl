@@ -64,8 +64,8 @@ if (PLATFORM STREQUAL "nwgraph")
 
   # TODO find_package(nwgraph) HARDCODED FOR NOW
   set(NWGRAPH_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/../../NWgr/include" )
-  
-  set(ENV{TBB_ROOT} "/opt/intel/onapi/tbb/latest/")
+  #find_package(NWGRAPH REQUIRED)
+
   find_package(TBB REQUIRED)
   if (TBB_FOUND)
     message("TBB FOUND")
