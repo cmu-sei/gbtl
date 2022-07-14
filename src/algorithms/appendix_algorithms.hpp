@@ -49,14 +49,13 @@ namespace algorithms
      *                  calculation.
      */
     template <typename LevelsVectorT, typename MatrixT>
-    void bfs_level_appendixB1(LevelsVectorT   &v,
+    void bfs_level_appendixC1(LevelsVectorT   &v,
                               MatrixT const   &A,
                               grb::IndexType   src)
     {
+        /// @todo Assert dimensions and throw DimensionException
 
         grb::IndexType const n(A.nrows());
-
-        /// @todo Assert dimensions and throw DimensionException
 
         grb::Vector<bool> q(n);      // wavefront
         q.setElement(src, true);
@@ -89,13 +88,13 @@ namespace algorithms
      *                  calculation.
      */
     template <typename LevelsVectorT, typename MatrixT>
-    void bfs_level_appendixB2(LevelsVectorT  &v,
+    void bfs_level_appendixC2(LevelsVectorT  &v,
                               MatrixT const  &A,
                               grb::IndexType  src)
     {
-        grb::IndexType const n(A.nrows());
-
         /// @todo Assert dimensions and throw DimensionException
+
+        grb::IndexType const n(A.nrows());
 
         grb::Vector<bool> q(n);  //wavefront
         q.setElement(src, true);
@@ -105,7 +104,10 @@ namespace algorithms
         do {
             ++level;
             grb::apply(v, grb::NoMask(), grb::Plus<grb::IndexType>(),
-                       grb::Times<grb::IndexType>(), q, level, grb::REPLACE);
+                       std::bind(grb::Second<grb::IndexType>(),
+                                 std::placeholders::_1,
+                                 level),
+                       q, grb::REPLACE);
             grb::vxm(q, grb::complement(v), grb::NoAccumulate(),
                      grb::LogicalSemiring<bool>(), q, A,
                      grb::REPLACE);
@@ -130,35 +132,32 @@ namespace algorithms
      */
     template <typename MatrixT,
               typename ParentsVectorT>
-    void bfs_parent_appendixB3(ParentsVectorT &parents,
+    void bfs_parent_appendixC3(ParentsVectorT &parents,
                                MatrixT const  &A,
                                grb::IndexType  src)
     {
         grb::IndexType const N(A.nrows());
 
-        // create index ramp for index_of() functionality
-        grb::Vector<grb::IndexType> index_ramp(N);
-        for (grb::IndexType i = 0; i < N; ++i)
-            index_ramp.setElement(i, i);
-
         parents.clear();
         parents.setElement(src, src);
 
-        grb::Vector<grb::IndexType> q(N);
-        q.setElement(src, 1UL);
+        grb::Vector<grb::IndexType> wavefront(N);
+        wavefront.setElement(src, 1UL);
 
         // BFS traversal and label the vertices.
-        while (q.nvals() > 0) {
-            grb::eWiseMult(q, grb::NoMask(), grb::NoAccumulate(),
-                           grb::First<grb::IndexType>(), index_ramp, q);
-            grb::vxm(q,
+        while (wavefront.nvals() > 0)
+        {
+            grb::apply(wavefront, grb::NoMask(), grb::NoAccumulate(),
+                       grb::RowIndex<grb::IndexType, grb::IndexType>(),
+                       wavefront, 0UL);
+            grb::vxm(wavefront,
                      grb::complement(grb::structure(parents)),
                      grb::NoAccumulate(),
                      grb::MinFirstSemiring<grb::IndexType>(),
-                     q, A,
+                     wavefront, A,
                      grb::REPLACE);
             grb::apply(parents, grb::NoMask(), grb::Plus<grb::IndexType>(),
-                       grb::Identity<grb::IndexType>(), q);
+                       grb::Identity<grb::IndexType>(), wavefront);
         }
     }
 
@@ -175,7 +174,7 @@ namespace algorithms
      * @return The betweenness centrality of all vertices in the graph.
      */
     template<typename BCVectorT, typename MatrixT>
-    void BC_appendixB4(BCVectorT      &delta,
+    void BC_appendixC4(BCVectorT      &delta,
                        MatrixT const  &A,
                        grb::IndexType  src)
     {
@@ -242,15 +241,15 @@ namespace algorithms
      */
     // vertex_betweenness_centrality_batch_alt() from bc.hpp
     template<typename BCVectorT, typename MatrixT>
-    void BC_update_appendixB5(
+    void BC_update_appendixC5(
         BCVectorT                         &delta,
         MatrixT const                     &A,
         std::vector<grb::IndexType> const &src)  // aka grb::IndexArrayType
     {
+        /// @todo assert proper dimensions and nsver > 0
 
         grb::IndexType nsver(src.size());
         grb::IndexType n(A.nrows());
-        /// @todo assert proper dimensions and nsver > 0
 
         // index and value arrays needed to build NumSP
         grb::IndexArrayType GrB_ALL_nsver;     // fill with sequence
@@ -265,15 +264,11 @@ namespace algorithms
         grb::Matrix<int32_t> NumSP(n, nsver);
         NumSP.build(src, GrB_ALL_nsver, std::vector<int32_t>(nsver, 1));
 
-
         // The current frontier for all BFS's (from all roots)
         // Initialized to out neighbors of each source node in src
         grb::Matrix<int32_t> Frontier(n, nsver);
-
         grb::extract(Frontier, grb::complement(NumSP), grb::NoAccumulate(),
                      grb::transpose(A), grb::AllIndices(), src, grb::REPLACE);
-        //grb::extract(Frontier, grb::NoMask(), grb::NoAccumulate(),
-        //        grb::transpose(A), grb::AllIndices(), src);
 
         // std::vector manages allocation
         std::vector<std::unique_ptr<grb::Matrix<bool>>> Sigmas;
@@ -281,8 +276,9 @@ namespace algorithms
         int32_t d = 0;
 
         // ==================== BFS phase ====================
-        while (Frontier.nvals() > 0) {
-            Sigmas.emplace_back(std::make_unique<grb::Matrix<bool>>(nsver, n));
+        while (Frontier.nvals() > 0)
+        {
+            Sigmas.emplace_back(std::make_unique<grb::Matrix<bool>>(n, nsver));
             grb::apply(*(Sigmas[d]), grb::NoMask(), grb::NoAccumulate(),
                        grb::Identity<int32_t, bool>(), Frontier);
 
@@ -306,7 +302,8 @@ namespace algorithms
         grb::Matrix<float> W(n, nsver);
 
         // ================== backprop phase ==================
-        for (int32_t i = d-1; i > 0; --i) {
+        for (int32_t i = d-1; i > 0; --i)
+        {
             grb::eWiseMult(W, *Sigmas[i], grb::NoAccumulate(),
                            grb::Times<float>(), BCu, NspInv, grb::REPLACE);
 
@@ -351,13 +348,9 @@ namespace algorithms
      *
      */
     template <typename MatrixT>
-    void mis_appendixB6(grb::Vector<bool> &iset, MatrixT const &A,
+    void mis_appendixC6(grb::Vector<bool> &iset, MatrixT const &A,
                         double seed = 0.)
     {
-        std::default_random_engine             generator;
-        std::uniform_real_distribution<double> distribution;
-        generator.seed(seed);
-
         grb::IndexType n(A.nrows());
 
         grb::Vector<float> prob(n);
@@ -366,23 +359,35 @@ namespace algorithms
         grb::Vector<bool>  new_neighbors(n);
         grb::Vector<bool>  candidates(n);
 
+        std::default_random_engine             generator;
+        std::uniform_real_distribution<double> distribution;
+        generator.seed(seed);
+
         grb::Vector<double> degrees(n);
-        grb::reduce(degrees, grb::NoMask(), grb::NoAccumulate(), grb::Plus<double>(), A);
+        grb::reduce(degrees, grb::NoMask(), grb::NoAccumulate(),
+                    grb::Plus<double>(), A);
 
         // Remove isolated vertices
-        grb::assign(candidates, degrees, grb::NoAccumulate(), true, grb::AllIndices());
+        grb::assign(candidates, degrees, grb::NoAccumulate(),
+                    true, grb::AllIndices());
 
         // Add all singletons to iset
         grb::assign(iset, grb::complement(degrees), grb::NoAccumulate(),
-                    true, grb::AllIndices(), grb::REPLACE);
+                    true, grb::AllIndices());
 
-        while (candidates.nvals() > 0) {
-            // compute a random probability of each candidate scaled by inverse of degree.
-            grb::eWiseMult(prob, grb::NoMask(), grb::NoAccumulate(),
-                           [&](bool candidate, float const &degree)
-                           { return static_cast<float>(
-                                   0.0001 + distribution(generator)/(1. + 2.*degree)); },
-                           candidates, degrees);
+        while (candidates.nvals() > 0)
+        {
+            // compute a random probability of each candidate scaled
+            // by inverse of degree.
+            grb::apply(prob, candidates, grb::NoAccumulate(),
+                       [&](double const &degree)
+                       {
+                           return static_cast<float>(
+                               0.0001 +
+                               distribution(generator)/(1. + 2.*degree));
+                       },
+                       degrees,
+                       grb::REPLACE);
 
             // find the max probability of all neighbors
             grb::mxv(neighbor_max, candidates, grb::NoAccumulate(),
@@ -399,17 +404,20 @@ namespace algorithms
                           grb::LogicalOr<bool>(), iset, new_members);
 
             // Remove new_members from set of candidates
-            grb::eWiseMult(candidates, grb::complement(new_members), grb::NoAccumulate(),
-                           grb::LogicalAnd<bool>(), candidates, candidates, grb::REPLACE);
-
+            grb::eWiseMult(candidates,
+                           grb::complement(new_members), grb::NoAccumulate(),
+                           grb::LogicalAnd<bool>(), candidates, candidates,
+                           grb::REPLACE);
 
             if (candidates.nvals() == 0) break;
 
             // Neighbors of new members can also be removed
             grb::mxv(new_neighbors, candidates, grb::NoAccumulate(),
                      grb::LogicalSemiring<bool>(), A, new_members);
-            grb::eWiseMult(candidates, grb::complement(new_neighbors), grb::NoAccumulate(),
-                           grb::LogicalAnd<bool>(), candidates, candidates, grb::REPLACE);
+            grb::eWiseMult(candidates,
+                           grb::complement(new_neighbors), grb::NoAccumulate(),
+                           grb::LogicalAnd<bool>(), candidates, candidates,
+                           grb::REPLACE);
         }
     }
 
@@ -422,13 +430,17 @@ namespace algorithms
      *               unweighted.
      */
     template<typename MatrixT>
-    uint64_t triangle_count_appendixB7(MatrixT const &L)
+    uint64_t triangle_count_appendixC7(MatrixT const &A)
     {
-        grb::IndexType n(L.nrows());
-        grb::Matrix<uint64_t> C(n, n);
+        grb::IndexType n(A.nrows());
+        grb::Matrix<bool> L(n, n);
+        grb::select(L, grb::NoMask(), grb::NoAccumulate(),
+                    grb::Tril<typename MatrixT::ScalarType, grb::IndexType>(),
+                    A, 0UL);
 
+        grb::Matrix<uint64_t> C(n, n);
         grb::mxm(C, L, grb::NoAccumulate(),
-                 grb::ArithmeticSemiring<uint64_t>(), L, grb::transpose(L));
+                 grb::ArithmeticSemiring<uint64_t>(), L, L);
 
         uint64_t count(0);
         grb::reduce(count, grb::NoAccumulate(), grb::PlusMonoid<uint64_t>(), C);

@@ -29,6 +29,6 @@
 
 #include <graphblas/platforms/sequential/BitmapSparseVector.hpp>
 #include <graphblas/platforms/sequential/LilSparseMatrix.hpp>
-#include <graphblas/platforms/sequential/param_unpack.hpp>
 
+#include <graphblas/platforms/sequential/param_unpack.hpp>
 #include <graphblas/platforms/sequential/operations.hpp>

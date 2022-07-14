@@ -184,59 +184,8 @@ namespace grb
 
             return value_set;
         }
-
-        //************************************************************************
-        /// A dot product of two sparse vectors (vectors<tuple(index,value)>)
-        template <typename D1, typename D2, typename D3, typename SemiringT>
-        bool dot_rev(D3                                                &ans,
-                     std::vector<std::tuple<grb::IndexType,D1> > const &vec2,
-                     std::vector<std::tuple<grb::IndexType,D2> > const &vec1,
-                     SemiringT                                          op)
-        {
-            bool value_set(false);
-
-            if (vec2.empty() || vec1.empty())
-            {
-                return value_set;
-            }
-
-            // point to first entries of the vectors
-            auto v1_it = vec1.begin();
-            auto v2_it = vec2.begin();
-
-            // loop through both ordered sets to compute sparse dot prod
-            while ((v1_it != vec1.end()) && (v2_it != vec2.end()))
-            {
-                if (std::get<0>(*v2_it) == std::get<0>(*v1_it))
-                {
-                    if (value_set)
-                    {
-                        ans = op.add(ans, op.mult(std::get<1>(*v2_it),
-                                                  std::get<1>(*v1_it)));
-                    }
-                    else
-                    {
-                        ans = op.mult(std::get<1>(*v2_it),
-                                      std::get<1>(*v1_it));
-                        value_set = true;
-                    }
-
-                    ++v2_it;
-                    ++v1_it;
-                }
-                else if (std::get<0>(*v2_it) > std::get<0>(*v1_it))
-                {
-                    ++v1_it;
-                }
-                else
-                {
-                    ++v2_it;
-                }
-            }
-
-            return value_set;
-        }
 #endif
+
         //************************************************************************
         /// A dot product of two sparse vectors (vectors<tuple(index,value)>)
         template <typename D1, typename D2, typename D3, typename SemiringT>
@@ -1263,7 +1212,6 @@ namespace grb
             w.setContents(tmp_row);
         }
 
-
         //**********************************************************************
         // Vector version specialized for no mask
         template <typename WVectorT,
@@ -1967,8 +1915,8 @@ namespace grb
         //********************************************************************
 
         //********************************************************************
-        // Index-out-of-bounds is an execution error maybe a responsibility of
-        // the backend, but maybe it belongs in graphblas/detail
+        // Index-out-of-bounds is an execution error and a responsibility of
+        // the backend, but maybe it belongs in graphblas/detail.
         template <typename SequenceT>
         void check_index_array_content(SequenceT   const &array,
                                        IndexType          dim,

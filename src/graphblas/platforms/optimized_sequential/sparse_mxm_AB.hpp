@@ -230,7 +230,7 @@ namespace grb
                     }
                 }
 
-                // Z[i] = (M .* C) + T[i]
+                // Z[i] = (M[i] .* C[i]) + T[i]
                 Z_row.clear();
                 masked_accum(Z_row,
                              M[i], structure_flag, complement_flag,
@@ -238,7 +238,7 @@ namespace grb
 
                 if (outp == MERGE)
                 {
-                    // C[i]  = [!M .* C]  U  Z[i]
+                    // C[i]  = [!M[i] .* C[i]]  U  Z[i]
                     C_row.clear();
                     masked_merge(C_row,
                                  M[i], structure_flag, complement_flag,
