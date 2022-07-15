@@ -89,6 +89,12 @@ successfully built using the GNU g++ compiler version 9.2.1 with the
 3. Building the unit tests also requires the "Boost Test Library: The
 Unit Test Framework."
 
+4. NWGraph and TBB are included as submodules.  To install them,
+from the top-level directory, use the command:
+```
+$ git submodule update --init --recursive
+``
+
 ### Compilation
 
 This project is designed to use cmake to build and use an "out of
