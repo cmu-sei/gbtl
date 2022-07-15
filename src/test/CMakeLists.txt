@@ -8,7 +8,6 @@ foreach( testsourcefile ${TEST_SOURCES} )
     message(STATUS "Adding: ${testname}")
     add_executable( ${testname} ${testsourcefile} )# ${GRAPHBLAS_HEADERS})
 
-#  message(STATUS "+++ GRAPHBLAS_HEADERS=${GRAPHBLAS_HEADERS}")
 
     target_include_directories(
       ${testname}
@@ -17,11 +16,6 @@ foreach( testsourcefile ${TEST_SOURCES} )
       )
 
     target_link_libraries( ${testname} graphblas ${TBB_LIBRARIES} )
-
-get_target_property(dirs ${testname} INTERFACE_INCLUDE_DIRECTORIES)
-foreach(dir ${dirs})
-  message(STATUS "+++ dir='${dir}'")
-endforeach()
 
     if (PLATFORM STREQUAL "nwgraph")
       target_include_directories(
