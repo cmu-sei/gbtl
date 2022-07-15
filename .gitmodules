@@ -1,0 +1,6 @@
+[submodule "external/NWGraph"]
+	path = external/NWGraph
+	url = https://github.com/pnnl/NWGraph.git
+[submodule "external/oneTBB"]
+	path = external/oneTBB
+	url = https://github.com/oneapi-src/oneTBB.git
