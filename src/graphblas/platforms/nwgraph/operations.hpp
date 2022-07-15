@@ -48,6 +48,7 @@
 #include <graphblas/platforms/nwgraph/sparse_extract.hpp>
 #include <graphblas/platforms/nwgraph/sparse_assign.hpp>
 #include <graphblas/platforms/nwgraph/sparse_apply.hpp>
+#include <graphblas/platforms/nwgraph/sparse_select.hpp>
 #include <graphblas/platforms/nwgraph/sparse_reduce.hpp>
 #include <graphblas/platforms/nwgraph/sparse_transpose.hpp>
 #include <graphblas/platforms/nwgraph/sparse_kronecker.hpp>

@@ -29,6 +29,6 @@
 
 #include <graphblas/platforms/nwgraph/BitmapSparseVector.hpp>
 #include <graphblas/platforms/nwgraph/LilSparseMatrix.hpp>
-#include <graphblas/platforms/nwgraph/param_unpack.hpp>
 
+#include <graphblas/platforms/nwgraph/param_unpack.hpp>
 #include <graphblas/platforms/nwgraph/operations.hpp>

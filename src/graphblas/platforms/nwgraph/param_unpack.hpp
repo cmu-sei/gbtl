@@ -26,15 +26,12 @@
  */
 
 #pragma once
-// Should matrix tags be implementation-defined (backend) or API-defined (frontend)?
+// Tags are API-defined (i.e., frontend)
 #include <graphblas/detail/matrix_tags.hpp>
 
 #include <graphblas/platforms/nwgraph/LilSparseMatrix.hpp>
 #include <graphblas/platforms/nwgraph/NWGraphMatrix.hpp>
 #include <graphblas/platforms/nwgraph/BitmapSparseVector.hpp>
-
-//#include <graphblas/platforms/GKC/GKCMatrix.hpp>
-//#include <graphblas/platforms/GKC/GKCSparseVector.hpp>
 
 //this file contains the variadic template parameters unpacking utility.
 

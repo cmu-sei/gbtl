@@ -267,6 +267,7 @@ namespace grb
                 return !(*this == rhs);
             }
 
+        public:
             // METHODS
 
             void clear()

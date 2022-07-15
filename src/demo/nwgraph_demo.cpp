@@ -34,40 +34,9 @@
 #include <graphblas/graphblas.hpp>
 #include <algorithms/triangle_count.hpp>
 #include "Timer.hpp"
+#include "read_edge_list.hpp"
 
 using namespace grb;
-
-//****************************************************************************
-IndexType read_edge_list(std::string const &pathname,
-                         IndexArrayType &row_indices,
-                         IndexArrayType &col_indices)
-{
-    std::ifstream infile(pathname);
-    IndexType max_id = 0;
-    uint64_t num_rows = 0;
-    uint64_t src, dst;
-
-    while (true)
-    {
-        infile >> src >> dst;
-        if (infile.eof()) break;
-        //std::cout << "Read: " << src << ", " << dst << std::endl;
-        max_id = std::max(max_id, src);
-        max_id = std::max(max_id, dst);
-
-        //if (src > max_id) max_id = src;
-        //if (dst > max_id) max_id = dst;
-
-        row_indices.push_back(src);
-        col_indices.push_back(dst);
-
-        ++num_rows;
-    }
-    std::cout << "Read " << num_rows << " rows." << std::endl;
-    std::cout << "#Nodes = " << (max_id + 1) << std::endl;
-
-    return (max_id + 1);
-}
 
 //****************************************************************************
 int test_lil()
@@ -168,11 +137,14 @@ int test_nwgraph()
     IndexArrayType    Mi = {0, 1, 1, 2};
     IndexArrayType    Mj = {1, 0, 2, 1};
     std::vector<bool> Mv = {true, true, true, true};
-
+std::cerr << "A\n";
     A.build(Ai.begin(), Aj.begin(), Av.begin(), Ai.size());
+std::cerr << "A\n";
     B.build(Bi.begin(), Bj.begin(), Bv.begin(), Bi.size());
+std::cerr << "A\n";
     M.build(Mi.begin(), Mj.begin(), Mv.begin(), Mi.size());
 
+std::cerr << "B\n";
     print_matrix(std::cout, A, "Matrix A");
     print_matrix(std::cout, B, "Matrix B");
     print_matrix(std::cout, M, "Matrix M");
