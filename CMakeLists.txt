@@ -45,7 +45,7 @@ project(GRAPHBLAS_TEMPLATE_LIBRARY VERSION 3.0.1 DESCRIPTION "NWGraph platform")
 # determine build type
 #-------------------------------------------------------------------------------
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 # For development only, not for end-users:
 # set ( CMAKE_BUILD_TYPE Debug )
@@ -87,7 +87,7 @@ if (PLATFORM STREQUAL "nwgraph")
   set(CMAKE_CXX_STANDARD 20)
 
   # Use nwgraph submodule
-  set(NWGRAPH_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/external/NWgr/include" )
+  set(NWGRAPH_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/external/NWGraph/include" )
 
   # Use tbb submodule
   add_subdirectory(external/oneTBB)
