@@ -49,8 +49,6 @@ namespace grb
         template<typename D2>
         inline D2 MyAbs(int64_t input)       { return labs(input); } // llabs?
 
-        template<typename D2>
-        inline D2 MyAbs(long input)       { return labs(input); } // llabs?
 
         template<typename D2>
         inline D2 MyAbs(float input)         { return fabsf(input); }
@@ -70,9 +68,13 @@ namespace grb
         template<typename D2>
         inline D2 MyAbs(uint64_t input)      { return input; }
 
+    // Needed for some compilers
+#ifdef __APPLE__
         template<typename D2>
         inline D2 MyAbs(long unsigned input)       { return input; }
-
+        template<typename D2>
+        inline D2 MyAbs(long input)       { return labs(input); } // llabs?
+#endif
 
     } // namespace detail (within grb namespace
 
