@@ -1,22 +1,16 @@
 
+
 ## Make demos
-# file( GLOB TEST_SOURCES LIST_DIRECTORIES false *.cpp )
-# foreach( testsourcefile ${TEST_SOURCES} )
-#     get_filename_component(justname ${testsourcefile} NAME)
-#     string( REPLACE ".cpp" "" testname ${justname} )
-#     message("Adding: ${testname}")
-#     add_executable( ${testname} ${testsourcefile} ${GRAPHBLAS_HEADERS})
-#     target_link_libraries( ${testname} ${TBB_LIBRARIES} )
-#     target_include_directories(
-#       ${testname}
-#       PUBLIC ${CMAKE_SOURCE_DIR}/src
-#       PRIVATE ${PLATFORM_SOURCE_DIR}
-#       )
-#     if (PLATFORM STREQUAL "nwgraph")
-#       target_include_directories(
-#         ${testname}
-#         PUBLIC ${TBB_INCLUDE_DIRS}/src
-#         PUBLIC ${NWGRAPH_INCLUDE_DIRECTORIES}
-#         )
-#     endif()
-# endforeach( testsourcefile ${TEST_SOURCES} )
+file( GLOB TEST_SOURCES LIST_DIRECTORIES false *.cpp )
+foreach( testsourcefile ${TEST_SOURCES} )
+    get_filename_component(justname ${testsourcefile} NAME)
+    string( REPLACE ".cpp" "" testname ${justname} )
+    message(STATUS "Adding: ${testname}_${PLATFORM} ")
+    add_executable( ${testname}_${PLATFORM} ${testsourcefile} )
+    target_link_libraries(${testname}_${PLATFORM} graphblas)
+    if (PLATFORM STREQUAL "nwgraph")
+      target_link_libraries(${testname}_${PLATFORM} nwgraph)
+      target_link_libraries(${testname}_${PLATFORM} TBB::tbb)
+    endif()
+endforeach( testsourcefile ${TEST_SOURCES} )
+

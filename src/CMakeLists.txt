@@ -9,6 +9,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 add_library(graphblas INTERFACE)
 target_include_directories(graphblas INTERFACE ${CMAKE_SOURCE_DIR}/src)
+target_include_directories(graphblas INTERFACE ${PLATFORM_SOURCE_DIR})
 
 add_subdirectory(test)
 add_subdirectory(demo)
