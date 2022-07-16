@@ -86,8 +86,13 @@ list(APPEND EXTRA_LIB_DIRS "")
 if (PLATFORM STREQUAL "nwgraph")
   set(CMAKE_CXX_STANDARD 20)
 
+  add_library(nwgraph INTERFACE)
+  target_include_directories(nwgraph INTERFACE ${CMAKE_SOURCE_DIR}/external/NWGraph/include)
+
   # Use nwgraph submodule
-  set(NWGRAPH_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/external/NWGraph/include" )
+  # set(NWGRAPH_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/external/NWGraph/include" )
+
+  option(TBB_TEST "" OFF)
 
   # Use tbb submodule
   add_subdirectory(external/oneTBB)

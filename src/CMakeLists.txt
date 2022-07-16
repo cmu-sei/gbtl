@@ -8,7 +8,7 @@ file(GLOB GRAPHBLAS_HEADERS graphblas/*.hpp)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 add_library(graphblas INTERFACE)
-target_include_directories(graphblas INTERFACE src)
+target_include_directories(graphblas INTERFACE ${CMAKE_SOURCE_DIR}/src)
 
 add_subdirectory(test)
 add_subdirectory(demo)
