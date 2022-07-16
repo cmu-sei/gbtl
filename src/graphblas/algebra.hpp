@@ -50,6 +50,9 @@ namespace grb
         inline D2 MyAbs(int64_t input)       { return labs(input); } // llabs?
 
         template<typename D2>
+        inline D2 MyAbs(long input)       { return labs(input); } // llabs?
+
+        template<typename D2>
         inline D2 MyAbs(float input)         { return fabsf(input); }
 
         template<typename D2>
@@ -66,6 +69,10 @@ namespace grb
         inline D2 MyAbs(uint32_t input)      { return input; }
         template<typename D2>
         inline D2 MyAbs(uint64_t input)      { return input; }
+
+        template<typename D2>
+        inline D2 MyAbs(long unsigned input)       { return input; }
+
 
     } // namespace detail (within grb namespace
 

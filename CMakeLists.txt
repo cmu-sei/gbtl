@@ -69,6 +69,14 @@ if (NOT PLATFORM)
     set(PLATFORM sequential)
 endif()
 
+
+#------------------------------------------------------------------------------
+
+
+option(GBTL_USE_TBBMALLOC "Link to tbbmalloc" OFF)
+option(TBB_TEST "" OFF)
+
+
 #------------------------------------------------------------------------------
 
 message(STATUS "Configuring platform: ${PLATFORM}")
@@ -93,6 +101,22 @@ if (PLATFORM STREQUAL "nwgraph")
   # set(NWGRAPH_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/external/NWGraph/include" )
 
   option(TBB_TEST "" OFF)
+
+  message("++++ ${GBTL_USE_TBBMALLOC}")
+
+
+  if (GBTL_USE_TBBMALLOC AND APPLE AND ${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "arm64")
+    message(WARNING "TBB malloc will probably not work on Apple arm64.
+    You should probably disable it with -DGBTL_USE_TBBMALLOC=OFF (which is the default)")
+  endif()
+
+
+  if (NOT GBTL_USE_TBBMALLOC)
+    option(TBBMALLOC_BUILD "Enable tbbmalloc build" OFF)
+  else()
+    option(TBBMALLOC_BUILD "Enable tbbmalloc build" OFF)
+  endif()
+
 
   # Use tbb submodule
   add_subdirectory(external/oneTBB)
