@@ -121,13 +121,14 @@ namespace grb
                        IndexType    n,
                        DupT         dup)
             {
+                auto ii = std::ranges::subrange(i_it, i_it+n);
+                auto jj = std::ranges::subrange(j_it, j_it+n);
+                auto vv = std::ranges::subrange(v_it, v_it+n);
                 // I need to turn the iterator+size back into a container
                 /// @todo Assumes sorted in the dimension chosen by the index_adjacency<0,..> param
                 /// @todo If duplicate edges end up with multigraph (violates contract)
-                auto zz =
-                    nw::graph::make_zipped(std::ranges::subrange(i_it, i_it+n),
-                                           std::ranges::subrange(j_it, j_it+n),
-                                           std::ranges::subrange(v_it, v_it+n));
+                auto zz =  nw::graph::make_zipped(ii, jj, vv);
+                std::cerr << zz.size() << std::endl;
                 nw::graph::push_back_fill(
                     zz,
                     *this);

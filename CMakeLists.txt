@@ -123,10 +123,12 @@ if (PLATFORM STREQUAL "nwgraph")
 
   #find_package(NWGRAPH REQUIRED)
   # Use fetch content rather than as a submodule
+  # include(FetchContent)
+  
   # FetchContent_Declare(
   #   nwgraph
   #   GIT_REPOSITORY https://github.com/pnnl/NWGraph.git
-  #   GIT_TAG master
+  #   GIT_TAG master)
   #   message(STATUS "Fetching nwgraph")
   # FetchContent_MakeAvailable(nwgraph)
 
