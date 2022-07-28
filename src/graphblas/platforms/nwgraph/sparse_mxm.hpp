@@ -75,9 +75,9 @@ namespace grb
             // Code from nw::graph::spMatspMat
             using TScalarType = typename SemiringT::result_type;
             nw::graph::index_edge_list<grb::IndexType,
-                                       nw::graph::unipartite_graph_base,
+                                       nw::graph::bipartite_graph_base,
                                        nw::graph::directedness::directed,
-                                       CScalarType> edges(0);
+                                       CScalarType> edges(A.nrows(), B.ncols());
             edges.open_for_push_back();
 
             using vertex_id_type = nw::graph::vertex_id_t<NWGraphMatrix<AScalarT>>;
@@ -141,9 +141,9 @@ namespace grb
             // Code from nw::graph::spMatspMat
             using TScalarType = typename SemiringT::result_type;
             nw::graph::index_edge_list<grb::IndexType,
-                                       nw::graph::unipartite_graph_base,
+                                       nw::graph::bipartite_graph_base,
                                        nw::graph::directedness::directed,
-                                       CScalarType> edges(0);
+                                       CScalarType> edges(A.nrows(), B.ncols());
             edges.open_for_push_back();
 
             using vertex_id_type = nw::graph::vertex_id_t<NWGraphMatrix<AScalarT>>;

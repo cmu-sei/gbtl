@@ -51,10 +51,10 @@ namespace grb
 
         template<typename ScalarT>
         class NWGraphMatrix :
-            public nw::graph::index_adjacency<0, size_t, grb::IndexType, ScalarT>
+            public nw::graph::index_biadjacency<0, size_t, grb::IndexType, ScalarT>
         {
         public:
-            using base = nw::graph::index_adjacency<0, size_t, grb::IndexType, ScalarT>;
+            using base = nw::graph::index_biadjacency<0, size_t, grb::IndexType, ScalarT>;
 
         public:
             using ScalarType = ScalarT;
@@ -62,7 +62,7 @@ namespace grb
             // Constructor
             NWGraphMatrix(IndexType num_rows = 0,  // for semiregular
                           IndexType num_cols = 0)  // for semiregular
-                : base(num_rows, 0),  // nrows, nvals
+                : base(num_rows, num_cols, 0),  // nrows, nvals
                   m_num_rows(num_rows),
                   m_num_cols(num_cols),
                   m_nvals(0)
@@ -77,8 +77,8 @@ namespace grb
             ~NWGraphMatrix()
             {}
 
-            IndexType nrows() const { return nw::graph::num_vertices(*this); } // CPO
-            IndexType ncols() const { return m_num_cols; }
+            IndexType nrows() const { return nw::graph::num_vertices(*this, 0); } // CPO
+            IndexType ncols() const { return nw::graph::num_vertices(*this, 1); } //m_num_cols; }
             IndexType nvals() const { return base::num_edges(); } //m_nvals; }
 
             NWGraphMatrix &operator=(base const &rhs) {
@@ -117,17 +117,21 @@ namespace grb
                      typename DupT>
             void build(RAIteratorI  i_it,
                        RAIteratorJ  j_it,
-                       RAIteratorV  v_it,
+                       RAIteratorV  v_it,   // std::vector<bool>::begin()
                        IndexType    n,
                        DupT         dup)
             {
                 auto ii = std::ranges::subrange(i_it, i_it+n);
                 auto jj = std::ranges::subrange(j_it, j_it+n);
                 auto vv = std::ranges::subrange(v_it, v_it+n);
+                std::cout << "**: " << vv.size() << std::endl;
+                std::cout << "**: " << vv[0] << std::endl;
+                for (auto a : vv) std::cout<< a << std::endl;
                 // I need to turn the iterator+size back into a container
                 /// @todo Assumes sorted in the dimension chosen by the index_adjacency<0,..> param
                 /// @todo If duplicate edges end up with multigraph (violates contract)
                 auto zz =  nw::graph::make_zipped(ii, jj, vv);
+                for (auto z : zz) std::cout<< std::get<2>(z) << std::endl;
                 std::cerr << zz.size() << std::endl;
                 nw::graph::push_back_fill(
                     zz,

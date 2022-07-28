@@ -121,7 +121,7 @@ int test_nwgraph()
     // Note: size of dimensions require at ccnstruction
     Matrix<T, grb::NWGraphTag> A(NUM_ROWS, NUM_COLS);
     Matrix<T, grb::NWGraphTag> B(NUM_ROWS, NUM_COLS);
-    Matrix<char, grb::NWGraphTag> M(NUM_ROWS, NUM_COLS);
+    Matrix<bool, grb::NWGraphTag> M(NUM_ROWS, NUM_COLS);
 
     // initialize matrices
     IndexArrayType Ai = {0, 0, 0, 1, 1, 1, 2, 2, 2};
