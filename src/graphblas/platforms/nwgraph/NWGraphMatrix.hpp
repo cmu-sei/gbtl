@@ -166,7 +166,10 @@ namespace grb
                     ScalarType     val;
                     if (row_it != (*this)[i].end())
                     {
-                        std::tie(j_idx, val) = *row_it;
+                        auto [tji, tv] = *row_it;
+                        //std::tie(j_idx, val) = *row_it;
+                        j_idx = tji; // = std::get<0>(*row_it);
+                        val = tv; // = std::get<1>(*row_it);
                     }
 
                     while (j < ncols())
@@ -183,7 +186,10 @@ namespace grb
                             ++row_it;
                             if (row_it != (*this)[i].end())
                             {
-                                std::tie(j_idx, val) = *row_it;
+                                auto [tji, tv] = *row_it;
+                                //std::tie(j_idx, val) = *row_it;
+                                j_idx = tji; //std::get<0>(*row_it);
+                                val = tv; //std::get<1>(*row_it);
                             }
                             else
                             {
