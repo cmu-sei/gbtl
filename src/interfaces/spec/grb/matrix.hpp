@@ -9,6 +9,7 @@
 
 #include <concepts>
 #include <memory>
+#include <limits>
 
 namespace GRB_SPEC_NAMESPACE {
 
@@ -63,6 +64,14 @@ public:
     return backend_.nvals();
   }
 
+  bool empty() const {
+    return size() == 0;
+  }
+
+  std::size_t max_size() const {
+    return std::numeric_limits<I>::max() - 1;
+  }
+
   template <class M>
   void insert_or_assign(key_type k, M&& obj) {
     backend_.setElement(k[0], k[1], std::forward<M>(obj));
@@ -99,9 +108,32 @@ public:
     return scalar_reference(index, &backend_);
   }
 
+  std::size_t erase(key_type index) {
+    std::size_t num_deleted = backend_.hasElement(index[0], index[1]);
+
+    if (num_deleted) {
+      backend_.removeElement(index[0], index[1]);
+    }
+    return num_deleted;
+  }
+
   void clear() {
     backend_.clear();
   }
+
+  // Missing
+
+  // at()
+
+  // Iteration
+  // begin()
+  // end()
+  // cbegin()
+  // cend()
+
+  // find()
+
+  // insert variants need to return iterators
 
   matrix() = default;
   matrix(const Allocator& allocator) {}
