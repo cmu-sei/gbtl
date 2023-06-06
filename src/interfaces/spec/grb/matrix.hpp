@@ -143,6 +143,15 @@ public:
   matrix& operator=(const matrix&) = default;
   matrix& operator=(matrix&&) = default;
 
+template <typename A,
+          typename B,
+          typename Combine,
+          typename C,
+          typename M,
+          typename Accumulate
+          >
+friend void ewise_intersection(C&& c, A&& a, B&& b, Combine&& combine, M&& mask, Accumulate&& acc, bool merge);
+
 private:
   backend_type backend_;
 };
