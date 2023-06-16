@@ -143,6 +143,14 @@ public:
   matrix& operator=(const matrix&) = default;
   matrix& operator=(matrix&&) = default;
 
+  // temporary
+  void printInfo(std::ostream &ostr) const {
+    ostr << "shape: " << shape()[0] << "x" << shape()[1] << std::endl;
+    ostr << "size:  " << size() << std::endl;
+    backend_.printInfo(ostr);
+    ostr << std::endl;
+  }
+
 template <typename A,
           typename B,
           typename Combine,
@@ -150,7 +158,20 @@ template <typename A,
           typename M,
           typename Accumulate
           >
-friend void ewise_intersection(C&& c, A&& a, B&& b, Combine&& combine, M&& mask, Accumulate&& acc, bool merge);
+friend void ewise_intersection(C&& c, A&& a, B&& b,
+                               Combine&& combine, M&& mask,
+                               Accumulate&& acc, bool merge);
+
+template <typename A,
+          typename B,
+          typename Combine,
+          typename C,
+          typename M,
+          typename Accumulate
+          >
+friend void ewise_union(C&& c, A&& a, B&& b,
+                        Combine&& combine, M&& mask,
+                        Accumulate&& acc, bool merge);
 
 private:
   backend_type backend_;
